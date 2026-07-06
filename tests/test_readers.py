@@ -1,3 +1,5 @@
+import pytest
+
 from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
 
 
@@ -22,6 +24,14 @@ def test_read_mapping_set_returns_parent_child_pairs(tmp_path):
         ("E1", "P2"),
         ("E2", "P3"),
     ]
+
+
+def test_read_mapping_set_raises_on_malformed_line(tmp_path):
+    set_file = tmp_path / "EXPL_PARC_2017.set"
+    set_file.write_text("E1.P1\nE1P2\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="E1P2"):
+        read_mapping_set(set_file, parent_name="farm", child_name="plot")
 
 
 def test_read_wide_table_indexes_rows_by_ident(tmp_path):

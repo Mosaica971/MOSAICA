@@ -9,8 +9,17 @@ def read_flat_set(path: Path) -> list[str]:
 
 
 def read_mapping_set(path: Path, parent_name: str, child_name: str) -> pd.DataFrame:
-    lines = Path(path).read_text(encoding="utf-8").splitlines()
-    pairs = [line.strip().split(".", 1) for line in lines if line.strip()]
+    path = Path(path)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    pairs = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        parts = stripped.split(".", 1)
+        if len(parts) != 2:
+            raise ValueError(f"Malformed mapping line in {path}: {stripped!r}")
+        pairs.append(parts)
     return pd.DataFrame(pairs, columns=[parent_name, child_name])
 
 

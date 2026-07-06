@@ -36,3 +36,10 @@ def test_build_dataset_computes_farm_surface_ha_matching_gams_init_logic():
 
     assert farm_surface_ha["E1"] == pytest.approx(3.68 + 3.3 + 1.36)
     assert farm_surface_ha["E2"] == pytest.approx(1.24)
+
+
+def test_build_dataset_selects_2017_column_for_price_and_yield():
+    dataset = build_dataset()
+
+    assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
+    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(20)
