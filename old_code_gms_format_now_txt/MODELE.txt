@@ -1,0 +1,699 @@
+
+
+SEMICONT VARIABLE
+*Positive variable
+X(P,C)                    Surface optimisée par parcelle et par culture;
+*Borne inférieure de la surface optimisée par parcelle et par culture fixée à la surface initiale de la parcelle
+X.lo(P,C)=Data_Parc_Gwad(P,"SURF_HA");
+
+VARIABLE
+REV                       Revenu comme somme des marges brutes par hectare de la Guadeloupe
+REV_MARKOVITZ(E)          Revenu comme somme des marges brutes par hectare(avec coefficient d'aversion au risque des cultures) par exploitation
+REV_MARKOVITZ_GWAD        Revenu comme somme des marges brutes par hectare(avec coefficient d'aversion au risque des cultures par exploitation) de la Guadeloupe
+
+
+EQUATIONS
+*oooooooooooooooooooooooooo Equations parcelles oooooooooooooooooooooooooooooooo
+
+Eq_SURF_MAX_Parc(P)       Limitation de la surface cultivée par parcelle à la surface initiale de la parcelle
+Eq_SURF_INIT_Parc(P,C)
+Eq_NOCULT_NC(P,C)
+
+*oooooooooooooooooooooooooo Equations cultures ooooooooooooooooooooooooooooooooo
+
+Eq_AN_SOL_Parc(P,C)       ITK ananas uniquement sur sol non calcaires
+*                           (exclus: Calcisols=5,Sols vertiques=6,Vertisols=7,MG et dependances=8)
+Eq_ME_SOL_Parc(P,C)       ITK melon uniquement sur sols calcaires en Grande-Terre
+*                           (exclus: Nitisols=1, Andosols=2, Sols ferralitiques=3, et Basse-Terre)
+
+Eq_SURF_MIN_Parc(P,C)     Surface de parcelle minimum pour l'implantation d'une culture
+
+Eq_ALTIMIN_Parc(P,C)      Altitude minimum pour l'implantation d'une culture
+Eq_ALTIMAX_Parc(P,C)      Altitude maximum pour l'implantation d'une culture
+
+Eq_PENTEMIN_Parc(P,C)     Pente minimum pour l'implantation d'une culture
+Eq_PENTEMAX_Parc(P,C)     Pente maximum pour l'implantation d'une culture
+
+Eq_PLUVIOMIN_Parc(P,C)    Pluviométrie minimum ou accès à l'irrigation pour l'implantation d'une culture
+Eq_PLUVIOMAX_Parc(P,C)    Pluviométrie maximum pour l'implantation d'une culture
+
+
+*oooooooooooooooooooooooooo Equations systèmes ooooooooooooooooooooooooooooooooo
+*****ANANAS
+Eq_AN_PA                  Interdiction de l'ITK ananas paillé dans les petites exploitations
+
+*****MARAICHAGE
+Eq_MA_ROTA_IRR(P,C)       Interdiction de l'ITK maraichage en roation MA_ROTA hors périmètre d'irrigation en Grande-Terre
+Eq_MA_TO_CHOU_JA_LOC(P,C) Interdiction de l'ITK maraichage-tomates-chou-jachère hors Basse-Terre
+
+*****MELON
+Eq_ME_IRR(P,C)            Interdiction de l'ITK melon sur les parcelles non-irriguées
+Eq_ME_MG(P,C)             Interdiction de l'ITK melon à Marie-galante
+
+*****IGNAME
+Eq_IG_PLA_ILE(P,C)        Interdiction de l'ITK igname à plat en Basse-Terre
+Eq_IG_TUT_ILE(P,C)        Interdiction de l'ITK igname tuteurée hors Basse-terre
+Eq_IG_CLD(P,C)            Interdiction de l'ITK igname sur des sols dont le risque de pollution par la CLD<=3 (Moyen-Fort-Très fort)
+
+*****CANNE
+Eq_CS_IRR(P,C)            Interdiction des ITK de canne à sucre irriguée sur les parcelles sans irriguation +++++++++++++++++++++++++++++++++++++++++++++++ mais également sur parcelles avec irrigation
+Eq_CS_SOL_SQUE(P,C)       Interdiction des ITK de canne à sucre mécanisées sur les sols squelettique (SOL_COURT = 1)
+Eq_CS_CONFORM(P,C)        Interdiction des ITK de canne à sucre mécanisées sur parcelles trop biscornues (CONFORM > 1500)
+
+Eq_CS_BT(P,C)             Interdiction des ITK de canne à sucre de Basse-Terre hors Nord Basse-Terre et Sud-Ouest Basse-Terre
+Eq_CS_SBT(P,C)            Interdiction des ITK de canne à sucre de Sud Basse-Terre hors Sud Basse-Terre
+Eq_CS_NGT(P,C)            Interdiction des ITK de canne à sucre de Nord Grande-Terre hors Nord Grande-Terre
+Eq_CS_CGT(P,C)            Interdiction des ITK de canne à sucre de Centre Grande-Terre hors Centre Grande-Terre
+Eq_CS_EGT(P,C)            Interdiction des ITK de canne à sucre de Est Grande-Terre hors Est Grande-Terre
+Eq_CS_MG(P,C)             Interdiction des ITK de canne à sucre de Marie-Galante hors Marie-Galante
+
+**** CANNE FIBRE
+Eq_CF_SOL_SQUE(P,C)       Interdiction des ITK de canne fibre mécanisées sur les sols squelettique (SOL_COURT = 1)
+Eq_CF_CONFORM(P,C)        Interdiction des ITK de canne fibre mécanisées sur parcelles trop biscornues (CONFORM > 1500)
+
+Eq_CF_BT(P,C)             Interdiction des ITK de canne fibre de Basse-Terre hors Nord Basse-Terre et Sud-Ouest Basse-Terre
+Eq_CF_SBT(P,C)            Interdiction des ITK de canne fibre de Sud Basse-Terre hors Sud Basse-Terre
+Eq_CF_NGT(P,C)            Interdiction des ITK de canne fibre de Nord Grande-Terre hors Nord Grande-Terre
+Eq_CF_CGT(P,C)            Interdiction des ITK de canne fibre de Centre Grande-Terre hors Centre Grande-Terre
+Eq_CF_EGT(P,C)            Interdiction des ITK de canne fibre de Est Grande-Terre hors Est Grande-Terre
+Eq_CF_MG(P,C)             Interdiction des ITK de canne fibre à Marie-Galante
+
+*****BANANE
+Eq_BA_IRR(P,C)            Interdiction de la culture de la banane irriguée sur les parcelles sans irriguation
+Eq_BA_IRR_BT(P,C)         Interdiction de la culture de la banane irriguée en BT (seulement autorisée en GT)
+Eq_BA_JA(E,C)             Surface en jachère superieure ou égale à 20% de la surface en banane (jachère obligatoire une année sur 5 sur les parcelles en banane)
+Eq_BA_ROTA(E,C)
+
+*****PLANTAIN
+Eq_BC_IRR_BT(P,C)         Interdiction de la culture de la banane plantain sans irrigation en Basse-Terre
+Eq_BC_IRR_GTMG(P,C)       Interdiction de la culture de la banane plantain sans irrigation en Grande-Terre et à Marie-Galante
+Eq_BC_BT(P,C)             Interdiction de la culture de la banane plantain de Basse-Terre ailleurs hors Basse-Terre
+Eq_BC_GTMG(P,C)           Interdiction de la culture de la banane plantain de Grande-Terre et de Marie-Galante ailleurs qu'en Grande-Terre et à Marie-Galante
+
+
+*****PN_PIQ
+Eq_PN_PIQ_CLD(P,C)            Interdiction de l'ITK igname sur des sols dont le risque de pollution par la CLD<=3 (Moyen-Fort-Très fort)
+
+
+***** FRICHES
+Eq_FRICHE(P,C)            Parcelles en non-cultivés ou en jachère depuis 2008 considérées comme en friche
+
+***** AGRUMES
+Eq_AG_IRR(P,C)            Interdiction de la culture d'agrumes sans irrigation
+Eq_AG_BT(P,C)
+
+***** VERGERS
+Eq_VE_IRR(P,C)            Interdiction de la culture de vergers sans irrigation si la pluviométrie annuelle est inferieure à 2700mm
+Eq_VE_BTGT(P,C)           Interdiction de la culture VE_BTGT en Nord Basse-Terre et Sud-Est Basse-Terre
+Eq_VE_PLUIE(P,C)          Interdiction de la culture VE_PLUIE hors de la Basse-Terre et hors du Sud-Ouest de la Basse-Terre
+
+*****GENERAL
+Eq_AN_SUPP(P,C)           Interdiction de la culture de l'ananas uniquement utilisée dans la base initiale
+Eq_BA_SUPP(P,C)           Interdiction de la culture de la banane export uniquement utilisée dans la base initiale
+Eq_BC_SUPP(P,C)           Interdiction de la culture de la banane plantain uniquement utilisée dans la base initiale
+Eq_CS_SUPP(P,C)           Interdiction de la culture de la canne à sucre uniquement utilisée dans la base initiale
+Eq_IG_SUPP(P,C)           Interdiction de la culture de l'igname uniquement utilisée dans la base initiale
+Eq_MA_SUPP(P,C)           Interdiction de la culture maraichaire uniquement utilisée dans la base initiale
+Eq_PN_SUPP(P,C)           Interdiction de la culture de prairie naturelle uniquement utilisée dans la base initiale
+Eq_VE_SUPP(P,C)           Interdiction de la culture de vergers uniquement utilisée dans la base initiale
+
+Eq_MA_EXP_SUPP(P,C)       Interdiction de faire les activités experimentales de maraichage Karusmart
+
+Eq_CF_SUPP(P,C)           Interdiction de la culture de canne fibre en scénario classique
+Eq_PN_TOUR_SUPP(P,C)      Interdiction de la culture de paturages tournant mal renseignée
+Eq_TH_SUPP(P,C)           Interdiction de la culture de tomates d'hivernage mal renseignée
+
+Eq_CS_SBT_NISM_SUPP       Interdiction de l'ITK Canne à sucre non irriguée semi-mécanisée en Sud Basse-Terre
+Eq_CS_MG_NIM_SUPP         Interdiction de l'ITK Canne à sucre non irriguée mécanisée à Marie-Galante
+
+
+*oooooooooooooooooooooooooo Equations exploitations oooooooooooooooooooooooooooo
+
+Eq_CS_GFA(E)              Part minimum de SAU initiale en canne à sucre dans les exploitations en GFA
+
+Eq_IG_AGRO_MAX_Expl(E)    Proportion maximum de la surface de l'exploitation en ignames
+Eq_AN_AGRO_MAX_Expl(E)    Proportion maximum de la surface de l'exploitation en ananas
+Eq_BA_QUOTA_Expl(E)       Quota de production de banane export fixé à la production initiale
+
+Eq_MO_MAX_Expl(E)         Main d'oeuvre par exploitation inférieure ou égale à la main d'oeuvre initialement évaluée
+
+Eq_BC_PROD_MIN           Volume minimum de banane plantain à produire = production 2017 BC_BT+BC_GTMG
+Eq_IG_PROD_MIN           Volume minimum d'ignames à produire = production 2017 IG_PLA+IG_TUT
+Eq_MA_PROD_MIN           Volume minimum de maraichage à produire = production 2017 MA_ROTA+MA_TO_CO_JA
+Eq_AN_PROD_MIN           Volume minimum d'ananas à produire = production 2017 AN_NU+AN_PA
+Eq_PLU_PROD_MIN          Volume minimum d'arboriculture à produire = production 2017 VE_BTGT+VE_PLUIE+AG
+Eq_ME_PROD_MIN           Volume minimum de melon à produire = production 2017 ME (2000t export + reste autoconsommé)
+Eq_PN_PROD_MIN           Surface minimum de paturage naturel à utiliser = surface 2017 PN_PIQ
+
+
+Eq_LEG_PROD_OBJ           Volume minimum de maraichage à produire = production 2017 MA_ROTA+MA_TO_CO_JA
+Eq_TUB_PROD_OBJ           Volume minimum de tubercules à produire = production 2017 IG_PLA+IG_TUT
+Eq_FRU_PROD_OBJ           Volume minimum de fruits à produire = production 2017 BC_BT+BC_GTMG+AN_NU+AN_PA+VE_BTGT+VE_PLUIE+AG+ME
+Eq_PAT_SURF_OBJ           Surface minimum de paturage naturel à utiliser = production 2017 PN_PIQ
+
+
+
+*oooooooooooooooooooooooooo Equations Petites Regions oooooooooooooooooooooooooo
+
+Eq_ME_Reg(R,P)            Interdiction de la culture du melon dans les communes non melonnières
+
+
+*oooooooooooooooooooooooooo Equations guadeloupe ooooooooooooooooooooooooooooooo
+
+Eq_BA_QUOTA_MAX           Volume maximum de banane export à exporter
+Eq_ME_QUOTA_MAX           Volume maximum de melon à exporter
+Eq_AN_QUOTA_MAX           Volume maximum d'ananas à produire
+Eq_IG_QUOTA_MAX           Volume maximum d'ignames à produire
+Eq_BC_QUOTA_MAX           Volume maximum de banane plantain à produire
+
+Eq_CS_QUOTA_MAX           Volume maximum de canne à sucre à produire
+
+**** EQUATIONS AUTRES
+Eq_REV                    Calcul du revenu total à l'echelle du territoire
+
+Eq_REV_MARKOVITZ          Calcul du revenu de Markovitz à l'echelle de l'exploitation (coeff avers diminue la MB tot de l'expl = rev_markovitz)
+Eq_REV_MARKOVITZ_GWAD     Calcul du revenu de Markovitz à l'échelle de la Guadeloupe -  Variable à maximiser
+
+
+
+
+*oooooooooooooooooooooooooo Scénarios Canne Energie oooooooooooooooooooooooooooo
+Eq_CF_MIN
+Eq_CF_CS_NBT_NISM
+Eq_CF_CS_SEBT_NISM
+Eq_CF_CS_NGT_NISM
+Eq_CF_CS_CGT_NISM
+Eq_CF_CS_EGT_NISM
+Eq_CF_NC             Equation qui interdit de cultiver sur les terres initialement non cultivées
+
+Eq_CF_T0(E)
+Eq_CF_T1(E)
+Eq_CF_T2(E)
+Eq_CF_T3(E)
+Eq_CF_T4(E)
+Eq_CF_T5(E)
+Eq_CF_T6(E)
+Eq_CF_T7(E)
+Eq_CF_T8(E)
+;
+
+Eq_CF_T0(SE)$( MATRICE_TYPE_EXPL("T0", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T1(SE)$( MATRICE_TYPE_EXPL("T1", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T2(SE)$( MATRICE_TYPE_EXPL("T2", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T3(SE)$( MATRICE_TYPE_EXPL("T3", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T4(SE)$( MATRICE_TYPE_EXPL("T4", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T5(SE)$( MATRICE_TYPE_EXPL("T5", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T6(SE)$( MATRICE_TYPE_EXPL("T6", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T7(SE)$( MATRICE_TYPE_EXPL("T7", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+Eq_CF_T8(SE)$( MATRICE_TYPE_EXPL("T8", SE)=1 )..  SUM((SP,SC_CF)$Expl_Parc(SE,SP), X(SP,SC_CF))=e=0;
+
+
+*oooooooooooooooooooooooooo Equations parcelles oooooooooooooooooooooooooooooooo
+
+Eq_SURF_MAX_Parc(SP)..    SUM(SC, X(SP,SC))=l=Data_Parc_Gwad(SP,"SURF_HA");
+Eq_SURF_INIT_Parc(SP,SC)..   X(SP,SC)=e=MATRICE_Parc_Cult(SP,SC)*Data_Parc_Gwad(SP,"SURF_HA");
+Eq_NOCULT_NC(SP,SC_CULT_NON_NC)$MATRICE_Parc_Cult(SP,"NC") .. X(SP,SC_CULT_NON_NC)=e=0;
+
+
+
+*oooooooooooooooooooooooooo Equations cultures ooooooooooooooooooooooooooooooooo
+
+Eq_AN_SOL_Parc(SP,SC_AN)$ (Data_Parc_Gwad(SP,"TYPE_SOL") <> 2) .. X(SP,SC_AN)=l=0;
+
+Eq_ME_SOL_Parc(SP,"ME") $  ( Data_Parc_Gwad(SP,"TYPE_SOL") = 2
+                        OR   Data_Parc_Gwad(SP,"TYPE_SOL") = 3
+                        OR   Data_Parc_Gwad(SP,"TYPE_SOL") = 4
+                        OR   Data_Parc_Gwad(SP,"ILE") = 1) .. X(SP,"ME")=l=0;
+
+Eq_SURF_MIN_Parc(SP,SC)$( SURF_Parc_init(SP)<Data_Cult("SURF_PARC_MIN",SC)).. X(SP,SC)=l=0;
+
+Eq_ALTIMIN_Parc(SP,SC)$( Data_Parc_Gwad(SP,"ALTITUDE")<Data_Cult("ALTI_MIN",SC)).. X(SP,SC)=l=0;
+Eq_ALTIMAX_Parc(SP,SC)$( Data_Parc_Gwad(SP,"ALTITUDE")>Data_Cult("ALTI_MAX",SC)).. X(SP,SC)=l=0;
+
+Eq_PENTEMIN_Parc(SP,SC)$( Data_Parc_Gwad(SP,"PENTE")<Data_Cult("PENTE_MIN",SC)).. X(SP,SC)=l=0;
+Eq_PENTEMAX_Parc(SP,SC)$( Data_Parc_Gwad(SP,"PENTE")>Data_Cult("PENTE_MAX",SC)).. X(SP,SC)=l=0;
+
+Eq_PLUVIOMIN_PARC(SP,SC)$( Data_Parc_Gwad(SP,"PLUVIO_PARC")<Data_Cult("PLUVIO_MIN",SC) AND Data_Parc_Gwad(SP,"IRRIG_PARC")=0).. X(SP,SC)=l=0;
+Eq_PLUVIOMAX_Parc(SP,SC)$( Data_Parc_Gwad(SP,"PLUVIO_PARC")>Data_Cult("PLUVIO_MAX",SC)).. X(SP,SC)=l=0;
+
+
+*oooooooooooooooooooooooooo Equations systèmes ooooooooooooooooooooooooooooooooo
+
+*****ANANAS
+Eq_AN_PA(SP,"AN_PA")$( Surf_Expl_Parc_init(SP) < AN_SURF_EXPL_MIN ).. X(SP,"AN_PA")=l=0;
+
+*****MARAICHAGE
+Eq_MA_ROTA_IRR(SP,"MA_ROTA")$( Data_Parc_Gwad(SP,"IRRIG_PARC") = 0).. X(SP,"MA_ROTA")=l=0;
+Eq_MA_TO_CHOU_JA_LOC(SP,"MA_TO_CHOU_JA")$( Data_Parc_Gwad(SP,"ILE") <> 1 AND  Data_Parc_Gwad(SP,"IRRIG_PARC") = 0).. X(SP,"MA_TO_CHOU_JA")=l=0;
+
+*****MELON
+Eq_ME_IRR(SP,"ME")$( Data_Parc_Gwad(SP,"IRRIG_PARC") = 0).. X(SP,"ME")=l=0;
+Eq_ME_MG(SP,"ME")$( Data_Parc_Gwad(SP,"REGION") = 7).. X(SP,"ME")=l=0;
+
+*****IGNAME
+Eq_IG_PLA_ILE(SP,"IG_PLA") $( Data_Parc_Gwad(SP,"ILE") = 1).. X(SP,"IG_PLA")=l=0;
+Eq_IG_TUT_ILE(SP,"IG_TUT") $( Data_Parc_Gwad(SP,"ILE")<> 1).. X(SP,"IG_TUT")=l=0;
+Eq_IG_CLD(SP,"IG_TUT")     $( Data_Parc_Gwad(SP,"RISQUE_CLD") <= 3).. X(SP,"IG_TUT") =l=0 ;
+
+*****CANNE A SUCRE
+Eq_CS_IRR(SP,SC_CS_IRRIG)$( Data_Parc_Gwad(SP,"IRRIG_PARC")= 0 OR Data_Parc_Gwad(SP,"IRRIG_PARC")= 1)..  X(SP,SC_CS_IRRIG)=l=0;
+Eq_CS_SOL_SQUE(SP,SC_CS_MECA) $( Data_Parc_Gwad(SP,"SOL_COURT")=1).. X(SP,SC_CS_MECA)=l=0 ;
+Eq_CS_CONFORM(SP,SC_CS_MECA)$( Data_Parc_Gwad(SP,"CONFORM")>1500).. X(SP,SC_CS_MECA)=l=0;
+
+Eq_CS_MG(SP,SC_CS_MG)  $( Data_Parc_Gwad(SP,"ILE") <> 3) .. X(SP,SC_CS_MG)=l=0;
+
+Eq_CS_NGT(SP,SC_CS_NGT)$( Data_Parc_Gwad(SP,"COMMUNE") <> 97102 AND Data_Parc_Gwad(SP,"COMMUNE") <> 97119 AND Data_Parc_Gwad(SP,"COMMUNE") <> 97122) .. X(SP,SC_CS_NGT)=l=0;
+Eq_CS_CGT(SP,SC_CS_CGT)$( Data_Parc_Gwad(SP,"COMMUNE") <> 97116 AND Data_Parc_Gwad(SP,"COMMUNE") <> 97113 AND Data_Parc_Gwad(SP,"COMMUNE") <> 97101) .. X(SP,SC_CS_CGT)=l=0;
+Eq_CS_EGT(SP,SC_CS_EGT)$( Data_Parc_Gwad(SP,"COMMUNE") <> 97117 AND Data_Parc_Gwad(SP,"COMMUNE") <> 97128 AND Data_Parc_Gwad(SP,"COMMUNE") <> 97125) .. X(SP,SC_CS_EGT)=l=0;
+
+
+Eq_CS_BT(SP,SC_CS_BT)  $( Data_Parc_Gwad(SP,"ILE") <> 1 AND Data_Parc_Gwad(SP,"REGION") <> 5).. X(SP,SC_CS_BT)=l=0;
+Eq_CS_SBT(SP,SC_CS_SBT)$( Data_Parc_Gwad(SP,"REGION") <> 5) .. X(SP,SC_CS_SBT)=l=0;
+
+*****CANNE FIBRE
+Eq_CF_SOL_SQUE(SP,SC_CF_MECA) $( Data_Parc_Gwad(SP,"SOL_COURT")=1).. X(SP,SC_CF_MECA)=l=0 ;
+Eq_CF_CONFORM(SP,SC_CF_MECA)$( Data_Parc_Gwad(SP,"CONFORM")>1500).. X(SP,SC_CF_MECA)=l=0;
+
+Eq_CF_BT(SP,SC_CF_BT)  $( Data_Parc_Gwad(SP,"REGION")<>6 AND Data_Parc_Gwad(SP,"REGION")<>4)..  X(SP,SC_CF_BT) =l= 0;
+Eq_CF_SBT(SP,SC_CF_SBT)$( Data_Parc_Gwad(SP,"REGION")<>5)..  X(SP, SC_CF_SBT) =l= 0;
+Eq_CF_NGT(SP,SC_CF_NGT)$( Data_Parc_Gwad(SP,"REGION")<>3)..  X(SP,SC_CF_NGT) =l= 0;
+Eq_CF_CGT(SP,SC_CF_CGT)$( Data_Parc_Gwad(SP,"REGION")<>1)..  X(SP,SC_CF_CGT) =l= 0;
+Eq_CF_EGT(SP,SC_CF_EGT)$( Data_Parc_Gwad(SP,"REGION")<>2)..  X(SP,SC_CF_EGT) =l= 0;
+Eq_CF_MG(SP,SC_CF)     $( Data_Parc_Gwad(SP,"ILE")=3)    ..  X(SP,SC_CF)=l=0;
+
+
+*****BANANE
+Eq_BA_IRR(SP,"BA_IRR")$ ( Data_Parc_Gwad(SP,"IRRIG_PARC") = 0).. X(SP,"BA_IRR")=l= 0 ;
+Eq_BA_IRR_BT(SP,"BA_IRR")$ ( Data_Parc_Gwad(SP,"ILE")=1).. X(SP,"BA_IRR")=l= 0 ;
+Eq_BA_JA(SE,SC_BA_JA)..  sum(SP$Expl_Parc(SE,SP), X(SP,"JA")) =g=  PROP_BA_JA * sum (SP$Expl_Parc(SE,SP), X(SP,SC_BA_JA)) ;
+Eq_BA_ROTA(SE,SC_BA_JA)..  sum(SP$Expl_Parc(SE,SP), X(SP,"JA") + sum(SC_CS, X(SP,SC_CS) )  + sum(SC_CF, X(SP,SC_CF))) =g=  PROP_BA_JA * sum (SP$Expl_Parc(SE,SP), X(SP,SC_BA_JA)) ;
+
+*****PLANTAIN
+
+Eq_BC_BT(SP,"BC_BT")         $( Data_Parc_Gwad(SP,"ILE")<>1) .. X(SP,"BC_BT")=l=0;
+Eq_BC_GTMG(SP,"BC_GTMG")     $( Data_Parc_Gwad(SP,"ILE")=1).. X(SP,"BC_GTMG")=l=0;
+
+Eq_BC_IRR_BT(SP,"BC_BT")     $( Data_Parc_Gwad(SP,"PLUVIO_PARC") < 2300 AND Data_Parc_Gwad(SP,"IRRIG_PARC") = 0).. X(SP,"BC_BT")=l= 0 ;
+Eq_BC_IRR_GTMG(SP,"BC_GTMG") $( Data_Parc_Gwad(SP,"ILE") <> 1 AND  Data_Parc_Gwad(SP,"IRRIG_PARC")= 0) .. X(SP,"BC_GTMG")=l=0;
+
+
+*****PN_PIQ
+Eq_PN_PIQ_CLD(SP,"PN_PIQ")     $( Data_Parc_Gwad(SP,"RISQUE_CLD") = 1).. X(SP,"PN_PIQ") =l=0 ;
+
+***** FRICHE
+Eq_FRICHE(SP,SC_CULT_NON_NC)$(( Data_RPG_Gwad(SP,"cult_2015") =14 OR Data_RPG_Gwad(SP,"cult_2015") =0 OR Data_RPG_Gwad(SP,"cult_2015") =10)
+                     AND ( Data_RPG_Gwad(SP,"cult_2016") =14 OR Data_RPG_Gwad(SP,"cult_2016") =0 OR Data_RPG_Gwad(SP,"cult_2016") =10)
+                     AND ( Data_RPG_Gwad(SP,"cult_2017") =14 OR Data_RPG_Gwad(SP,"cult_2017") =0 OR Data_RPG_Gwad(SP,"cult_2017") =10))
+                         ..X(SP,SC_CULT_NON_NC) =l= 0;
+
+*****AGRUMES
+Eq_AG_IRR(SP,"AG")$(Data_Parc_Gwad(SP,"IRRIG_PARC")=0 AND Data_Parc_Gwad(SP,"ALTITUDE")<400).. X(SP,"AG") =l= 0;
+
+Eq_AG_BT(SP,"AG")$(Data_Parc_Gwad(SP,"ILE")>1).. X(SP,"AG") =l= 0;
+
+*****VERGERS
+Eq_VE_IRR(SP,"VE_BTGT")$(Data_Parc_Gwad(SP,"PLUVIO_PARC") < 2700 AND Data_Parc_Gwad(SP,"IRRIG_PARC")=0) .. X(SP,"VE_BTGT") =l= 0;
+
+Eq_VE_BTGT(SP,"VE_BTGT")$( Data_Parc_Gwad(SP,"REGION")=4 OR Data_RPG_Gwad(SP,"REGION")=5).. X(SP,"VE_BTGT") =l= 0;
+
+Eq_VE_PLUIE(SP,"VE_PLUIE")$( Data_RPG_Gwad(SP,"REGION")= 6 OR Data_RPG_Gwad(SP,"ILE")<> 1).. X(SP,"VE_PLUIE") =l= 0;
+
+
+*****************   GENERAL   **************************************************
+
+Eq_AN_SUPP(SP,"AN").. X(SP,"AN")=l=0;
+Eq_BA_SUPP(SP,"BA").. X(SP,"BA")=l=0;
+Eq_BC_SUPP(SP,"BC").. X(SP,"BC")=l=0;
+Eq_CS_SUPP(SP,"CS").. X(SP,"CS")=l=0;
+Eq_IG_SUPP(SP,"IG").. X(SP,"IG")=l=0;
+Eq_MA_SUPP(SP,"MA").. X(SP,"MA")=l=0;
+Eq_PN_SUPP(SP,"PN").. X(SP,"PN")=l=0;
+Eq_VE_SUPP(SP,"VE").. X(SP,"VE")=l=0;
+Eq_MA_EXP_SUPP(SP,SC_MAR_ESSAI_KS).. X(SP,SC_MAR_ESSAI_KS)=l=0;
+
+
+Eq_CF_SUPP(SP,SC_CF).. X(SP,SC_CF)=l=0;
+
+Eq_PN_TOUR_SUPP(SP,"PN_TOUR").. X(SP,"PN_TOUR")=l=0;
+Eq_TH_SUPP(SP,"TH").. X(SP,"TH")=l=0;
+Eq_CS_SBT_NISM_supp(SP,"CS_SBT_NISM").. X(SP,"CS_SBT_NISM")=l=0;
+Eq_CS_MG_NIM_supp(SP,"CS_MG_NIM").. X(SP,"CS_MG_NIM")=l=0;
+
+*oooooooooooooooooooooooooo Equations exploitations oooooooooooo ooooooooooooooo
+
+*Eq_CS_GFA(SE)$(sum(SP$Expl_Parc(SE,SP), Data_RPG_Gwad(SP,"GFA_EXPL")) >0)..
+*         sum((SP,SC_CS)$Expl_Parc(SE,SP), X(SP,SC_CS)) =g= MIN_CS_GFA* sum(SP$Expl_Parc(SE,SP), SURF_Parc_init(SP) );
+
+
+Eq_CS_GFA(SE)$(sum(SP$Expl_Parc(SE,SP), Data_RPG_Gwad(SP,"GFA_PARC")) >0)..
+          sum((SP,SC_CS)$Expl_Parc(SE,SP), X(SP,SC_CS)) =g= sum(SP$Expl_Parc(SE,SP), SURF_Parc_init(SP)*Data_Parc_Gwad(SP,"GFA_PARC"))*MIN_CS_GFA  ;
+
+
+*MIN_CS_GFA* sum(SP$Expl_Parc(SE,SP), SURF_Parc_init(SP)*Data_Parc_Gwad(SP,"GFA_PARC"));
+
+
+
+
+Eq_AN_AGRO_MAX_Expl(SE).. sum((SP, SC_AN)$Expl_Parc(SE,SP),X(SP,SC_AN)) =l= MAX_AGRO_AN * SURF_Expl_init(SE);
+
+Eq_IG_AGRO_MAX_Expl(SE).. sum((SP, SC_IG)$Expl_Parc(SE,SP),X(SP,SC_IG)) =l= MAX_AGRO_IG * SURF_Expl_init(SE);
+
+Eq_BA_QUOTA_Expl(SE).. sum(SP$Expl_Parc(SE,SP), (
+                                 X(SP,"BA_INT") *Rdt_Cult_Init("BA_INT")
+                               + X(SP,"BA_SINT")*Rdt_Cult_Init("BA_SINT")
+                               + X(SP,"BA_PER") *Rdt_Cult_Init("BA_PER")
+                               + X(SP,"BA_IRR") *Rdt_Cult_Init("BA_IRR")))
+                       =l= REF_BAN_EXPL_init(SE);
+
+Eq_MO_MAX_Expl(SE).. sum(SP$Expl_Parc(SE,SP),sum(SC,X(SP,SC) * MO_Ha_Cult_init(SC)))=l= MO_Expl_init(SE);
+
+
+*oooooooooooooooooooooooooo Equations Petites Regions oooooooooooooooooooooooooo
+
+Eq_ME_Reg(SRM,SP)$Reg_Parc(SRM,SP).. X(SP,"ME")=l=0;
+
+*oooooooooooooooooooooooooo Equations Guadeloupe ooooooooooooooooooooooooooooooo
+
+Eq_BA_QUOTA_MAX.. sum((SP,SC_BAN_EX), X(SP,SC_BAN_EX)*RDT_Cult_BA(SC_BAN_EX))=l=QUOTA_BA_MAX;
+
+Eq_ME_QUOTA_MAX.. sum( SP,            X(SP,"ME")     *RDT_Cult_ME("ME")     )=l=QUOTA_ME_MAX;
+
+Eq_AN_QUOTA_MAX.. sum((SP,SC_AN),     X(SP,SC_AN)    *RDT_Cult_AN(SC_AN)/18*12    )=l=QUOTA_AN_MAX;
+
+Eq_IG_QUOTA_MAX.. sum((SP,SC_IG),     X(SP,SC_IG)    *RDT_Cult_IG(SC_IG)    )=l=QUOTA_IG_MAX;
+
+Eq_BC_QUOTA_MAX.. sum((SP,SC_BC),     X(SP,SC_BC)    *RDT_Cult_BC(SC_BC)    )=l=QUOTA_BC_MAX;
+
+Eq_CS_QUOTA_MAX.. sum((SP,SC_CS),     X(SP,SC_CS)    *RDT_Cult_CS(SC_CS)*(8/100) * 0.9)=l=QUOTA_SUCRE_MAX;
+
+
+
+Eq_BC_PROD_MIN..  sum((SP,SC_BC),     X(SP,SC_BC)    *RDT_Cult_BC(SC_BC)       )=g=QUOTA_BC_MIN;
+
+Eq_IG_PROD_MIN..  sum((SP,SC_IG),     X(SP,SC_IG)    *RDT_Cult_IG(SC_IG)       )=g=QUOTA_IG_MIN;
+
+Eq_MA_PROD_MIN..  sum((SP,SC_MA),     X(SP,SC_MA)    *RDT_Cult_MA(SC_MA)       )=g=QUOTA_MA_MIN;
+
+Eq_AN_PROD_MIN..  sum((SP,SC_AN),     X(SP,SC_AN)    *RDT_Cult_AN(SC_AN)/18*12 )=g=QUOTA_AN_MIN;
+
+Eq_PLU_PROD_MIN.. sum((SP,SC_PLU),    X(SP,SC_PLU)   *RDT_Cult_PLU(SC_PLU)     )=g=QUOTA_PLU_MIN;
+
+Eq_ME_PROD_MIN..  sum( SP,            X(SP,"ME")     *RDT_Cult_ME("ME")        )=g=QUOTA_ME_MIN;
+
+Eq_PN_PROD_MIN..  sum( SP,            X(SP,"PN_PIQ")                           )=g=QUOTA_PN_PIQ_MIN;
+
+
+Eq_LEG_PROD_OBJ..    sum((SP,SC_MA), X(SP,SC_MA)*RDT_Cult_MA(SC_MA))
+*                      + sum((SP,SC_IG), X(SP,SC_IG)*RDT_Cult_IG(SC_IG))
+                      =g= QUOTA_LEG ;
+
+Eq_TUB_PROD_OBJ..    sum((SP,SC_IG), X(SP,SC_IG)*RDT_Cult_IG(SC_IG))
+                      =g= QUOTA_TUB ;
+
+Eq_FRU_PROD_OBJ..    sum((SP,SC_BC), X(SP,SC_BC) *RDT_Cult_BC(SC_BC))
+                      + sum((SP,SC_AN), X(SP,SC_AN) *RDT_Cult_AN(SC_AN)/18*12)
+                      + sum((SP,SC_PLU),X(SP,SC_PLU)*RDT_Cult_PLU(SC_PLU))
+                      + sum( SP,        X(SP,"ME")  *RDT_Cult_ME("ME"))
+                      =g= QUOTA_FRU;
+*
+Eq_PAT_SURF_OBJ..    sum( SP,        X(SP,"PN_PIQ"))
+                      =g= QUOTA_PAT;
+
+
+
+Eq_REV..                 sum((SP,SC),X(SP,SC)*MB_HA_Cult(SC))=e=REV;
+
+Eq_REV_MARKOVITZ(SE)..   sum(SP$Expl_Parc(SE,SP), sum(SC, X(SP,SC)*MB_Ha_Cult(SC)                         ))
+                       - sum(SP$Expl_Parc(SE,SP), sum(SC, X(SP,SC)*MB_Ha_Cult(SC)*Var_Rdt_Cult(SC,"init") )) * AVERS(SE)
+                       =e= REV_MARKOVITZ(SE);
+
+Eq_REV_MARKOVITZ_GWAD.. sum(SE,REV_MARKOVITZ(SE)) =e= REV_MARKOVITZ_GWAD;
+
+
+*oooooooooooooooooooooooooo Scénarios Canne Energie oooooooooooooooooooooooooooo
+Eq_CF_MIN.. SUM((SP, SC_CF), X(SP,SC_CF)*RDT_Cult_CF(SC_CF)) =g= Q_CF_MIN;
+
+Eq_CF_CS_NBT_NISM(SP,SC_CF)$MATRICE_Parc_Cult(SP,"CS_BT_NISM").. X(SP,SC_CF)=l=0;
+Eq_CF_CS_SEBT_NISM(SP,SC_CF)$MATRICE_Parc_Cult(SP,"CS_SBT_NISM") .. X(SP,SC_CF)=l=0;
+Eq_CF_CS_NGT_NISM(SP,SC_CF)$MATRICE_Parc_Cult(SP,"CS_NGT_NISM") .. X(SP,SC_CF)=l=0;
+Eq_CF_CS_CGT_NISM(SP,SC_CF)$MATRICE_Parc_Cult(SP,"CS_CGT_NISM") .. X(SP,SC_CF)=l=0;
+Eq_CF_CS_EGT_NISM(SP,SC_CF)$MATRICE_Parc_Cult(SP,"CS_EGT_NISM") .. X(SP,SC_CF)=l=0;
+
+
+MODEL
+
+INIT /
+Eq_SURF_INIT_Parc
+Eq_REV
+/
+
+CALIB /
+Eq_CS_NGT
+
+
+Eq_SURF_MAX_Parc
+Eq_SURF_MIN_Parc
+
+Eq_NOCULT_NC
+
+Eq_ALTIMIN_Parc
+Eq_ALTIMAX_Parc
+Eq_PENTEMIN_Parc
+Eq_PENTEMAX_Parc
+Eq_PLUVIOMIN_Parc
+Eq_PLUVIOMAX_Parc
+
+Eq_AN_SOL_Parc
+Eq_ME_SOL_Parc
+
+Eq_AN_PA
+
+Eq_MA_ROTA_IRR
+Eq_MA_TO_CHOU_JA_LOC
+
+Eq_ME_IRR
+Eq_ME_MG
+
+Eq_IG_PLA_ILE
+Eq_IG_TUT_ILE
+Eq_IG_CLD
+
+Eq_CS_IRR
+
+Eq_CS_SOL_SQUE
+
+Eq_CS_CONFORM
+
+
+Eq_CF_SOL_SQUE
+Eq_CF_CONFORM
+
+Eq_CF_BT
+Eq_CF_SBT
+Eq_CF_NGT
+Eq_CF_CGT
+Eq_CF_EGT
+Eq_CF_MG
+
+Eq_BA_IRR
+Eq_BA_IRR_BT
+Eq_BA_JA
+Eq_BA_ROTA
+
+Eq_BC_IRR_BT
+Eq_BC_IRR_GTMG
+Eq_BC_BT
+Eq_BC_GTMG
+
+Eq_FRICHE
+
+Eq_AG_IRR
+Eq_AG_BT
+
+Eq_VE_IRR
+Eq_VE_BTGT
+Eq_VE_PLUIE
+
+Eq_AN_SUPP
+Eq_BA_SUPP
+Eq_BC_SUPP
+Eq_CS_SUPP
+Eq_IG_SUPP
+Eq_MA_SUPP
+Eq_PN_SUPP
+Eq_VE_SUPP
+Eq_CF_SUPP
+
+Eq_MA_EXP_SUPP
+
+Eq_PN_TOUR_SUPP
+Eq_TH_supp
+Eq_CS_SBT_NISM_supp
+Eq_CS_MG_NIM_supp
+
+Eq_CS_GFA
+
+Eq_CS_CGT
+Eq_CS_EGT
+Eq_CS_MG
+
+
+Eq_CS_BT
+Eq_CS_SBT
+
+
+Eq_MO_MAX_Expl
+
+Eq_BA_QUOTA_MAX
+*Eq_ME_QUOTA_MAX
+*Eq_AN_QUOTA_MAX
+*Eq_IG_QUOTA_MAX
+*Eq_BC_QUOTA_MAX
+
+Eq_CS_QUOTA_MAX
+
+Eq_AN_AGRO_MAX_Expl
+Eq_IG_AGRO_MAX_Expl
+Eq_BA_QUOTA_Expl
+
+Eq_ME_Reg
+
+Eq_REV
+Eq_REV_MARKOVITZ
+Eq_REV_MARKOVITZ_GWAD
+
+/
+
+SCENARIO /
+Eq_CS_NGT
+
+
+Eq_SURF_MAX_Parc
+Eq_SURF_MIN_Parc
+
+Eq_NOCULT_NC
+
+Eq_ALTIMIN_Parc
+Eq_ALTIMAX_Parc
+Eq_PENTEMIN_Parc
+Eq_PENTEMAX_Parc
+Eq_PLUVIOMIN_Parc
+Eq_PLUVIOMAX_Parc
+
+Eq_AN_SOL_Parc
+Eq_ME_SOL_Parc
+
+Eq_AN_PA
+
+Eq_MA_ROTA_IRR
+Eq_MA_TO_CHOU_JA_LOC
+
+Eq_ME_IRR
+Eq_ME_MG
+
+Eq_IG_PLA_ILE
+Eq_IG_TUT_ILE
+Eq_IG_CLD
+
+Eq_CS_IRR
+
+Eq_CS_SOL_SQUE
+
+Eq_CS_CONFORM
+
+
+Eq_CF_SOL_SQUE
+Eq_CF_CONFORM
+
+Eq_CF_BT
+Eq_CF_SBT
+Eq_CF_NGT
+Eq_CF_CGT
+Eq_CF_EGT
+Eq_CF_MG
+
+Eq_BA_IRR
+Eq_BA_IRR_BT
+Eq_BA_JA
+Eq_BA_ROTA
+
+Eq_BC_IRR_BT
+Eq_BC_IRR_GTMG
+Eq_BC_BT
+Eq_BC_GTMG
+
+Eq_FRICHE
+*Eq_PN_PIQ_CLD
+Eq_AG_IRR
+Eq_AG_BT
+
+Eq_VE_IRR
+Eq_VE_BTGT
+Eq_VE_PLUIE
+
+Eq_AN_SUPP
+Eq_BA_SUPP
+Eq_BC_SUPP
+Eq_CS_SUPP
+Eq_IG_SUPP
+Eq_MA_SUPP
+Eq_PN_SUPP
+Eq_VE_SUPP
+Eq_CF_SUPP
+
+Eq_MA_EXP_SUPP
+
+Eq_PN_TOUR_SUPP
+Eq_TH_supp
+Eq_CS_SBT_NISM_supp
+Eq_CS_MG_NIM_supp
+
+Eq_CS_GFA
+
+Eq_CS_CGT
+Eq_CS_EGT
+Eq_CS_MG
+
+
+Eq_CS_BT
+Eq_CS_SBT
+
+
+Eq_MO_MAX_Expl
+
+Eq_BA_QUOTA_MAX
+*Eq_ME_QUOTA_MAX
+*Eq_AN_QUOTA_MAX
+*Eq_IG_QUOTA_MAX
+*Eq_BC_QUOTA_MAX
+
+Eq_CS_QUOTA_MAX
+
+Eq_AN_AGRO_MAX_Expl
+Eq_IG_AGRO_MAX_Expl
+Eq_BA_QUOTA_Expl
+
+Eq_ME_Reg
+
+Eq_REV
+Eq_REV_MARKOVITZ
+Eq_REV_MARKOVITZ_GWAD
+
+Eq_BC_PROD_MIN
+Eq_IG_PROD_MIN
+Eq_MA_PROD_MIN
+Eq_AN_PROD_MIN
+Eq_PLU_PROD_MIN
+Eq_ME_PROD_MIN
+Eq_PN_PROD_MIN
+
+
+Eq_LEG_PROD_OBJ
+Eq_FRU_PROD_OBJ
+Eq_PAT_SURF_OBJ
+*$offtext $ontext
+/
+
+;
+
+

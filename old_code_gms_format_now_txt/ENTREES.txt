@@ -1,0 +1,491 @@
+
+PARAMETER
+
+MATRICE_Parc_Cult(P,C)                 Matrice de présence - absence des cultures sur les parcelles (0=absence - 1=présence)
+*PART_C_INIT(P)
+PLUVIO_01_PARC(P)
+PLUVIO_02_PARC(P)
+PLUVIO_03_PARC(P)
+PLUVIO_04_PARC(P)
+PLUVIO_05_PARC(P)
+PLUVIO_06_PARC(P)
+PLUVIO_07_PARC(P)
+PLUVIO_08_PARC(P)
+PLUVIO_09_PARC(P)
+PLUVIO_10_PARC(P)
+PLUVIO_11_PARC(P)
+PLUVIO_12_PARC(P)
+
+PRES_SOL_SQUE(P,C)                     Présence d'un sol squeletique
+NON_INDIV_Cult(P)                      Indicateur de non-indivision réelle d'une parcelle en indivision si présence d'une culture perenne (VE-AG-BC-BA-CS)
+AVERS(E)
+
+SURF_Expl_Parc_init(P)                 Surface initiale de l'exploitation à laquelle appartient la parcelle
+SURF_Expl_init(E)                      Surface initiale par exploitation
+SURF_Parc_init(P)                      Surface initiale par parcelle
+REV_Parc_init(P)                       Revenu initial par parcelle
+REF_BAN_EXPL_init(E)                   Référence initiale du quota banane par exploitation calculé sur la production initiale de 2010 et conservée les années suivantes
+MO_ha_OTK_Cult_init(C,K)               Main d'oeuvre initiale de la culture par OTK (heures par ha)
+MO_Ha_Cult_init(C)                     Main d'oeuvre initiale de la culture (en heures par ha)
+MO_Parc_init(P)                        Main d'oeuvre initiale par parcelle
+MO_Expl_init(E)                        Main d'oeuvre initiale par exploitation
+RDT_Cult_init(C)                       Rendement initiale par culture
+NBRE_EXPL_init                         Nombre initial d'exploitations agricoles
+NBRE_PARC_init                         Nombre initial de parcelles agricoles
+RCLD_parc_init(P)                      Niveau initial du risque de contamination à la chlordécone par parcelle
+RCLD_gwad_init                         Niveau initial du risque de contamination à la chlordécone de la Guadeloupe
+NV_CLD_parc_init(P)                    Niveau initial de la contamination à la chlordécone par parcelle
+
+Borne_CS_GFA(E)
+;
+
+
+
+*SSSSSSSSSSSSSSSSSSSSSSSSSS CALCULS DES PARAMETRES INITIAUX SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+
+* ooooooo Regroupement des activitées initiales en groupes de cultures oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+
+* si Non cultivé ou Jachère en 2015, 2016 et 2017, alors considéré comme Non cultivé en 2017
+LOOP(SP,
+         IF(
+*                ( Data_RPG_Gwad(SP,"cult_2015") =14 OR Data_RPG_Gwad(SP,"cult_2015") =10 OR Data_RPG_Gwad(SP,"cult_2015") =0) AND
+                ( Data_RPG_Gwad(SP,"cult_2016") =14 OR Data_RPG_Gwad(SP,"cult_2016") =10 OR Data_RPG_Gwad(SP,"cult_2016") =0) AND
+                ( Data_RPG_Gwad(SP,"cult_2017") =14 OR Data_RPG_Gwad(SP,"cult_2017") =10 OR Data_RPG_Gwad(SP,"cult_2017") =0),
+         Data_RPG_Gwad(SP,"cult_2017")= 14;
+         );
+);
+
+
+
+
+Loop(SP,
+*  1= Agrumes
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  1, Matrice_Parc_Cult(SP,"AG") = 1)
+*  2= Ananas
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  2, Matrice_Parc_Cult(SP,"AN") = 1)
+*  3= Banane créole
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  3, Matrice_Parc_Cult(SP,"BC") = 1)
+*  4= Banane export
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  4, Matrice_Parc_Cult(SP,"BA") = 1)
+*  5= Café/Cacao
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  5, Matrice_Parc_Cult(SP,"VE") = 1)
+*  6= Canne à sucre
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  6, Matrice_Parc_Cult(SP,"CS") = 1)
+*  7= Cultures fourragères
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  7, Matrice_Parc_Cult(SP,"PN") = 1)
+*  8= Horticulture ornementale de plein champ
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  8, Matrice_Parc_Cult(SP,"MA") = 1)
+*  9= Horticulture ornementale sous abri
+         IF (Data_RPG_Gwad(SP,"cult_2017") =  9, Matrice_Parc_Cult(SP,"MA") = 1)
+* 10= Jachère
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 10, Matrice_Parc_Cult(SP,"JA") = 1)
+* 11= Maraichage de plein champ
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 11, Matrice_Parc_Cult(SP,"MA") = 1)
+* 12= Maraichage sous abri
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 12, Matrice_Parc_Cult(SP,"MA") = 1)
+* 13= Melon
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 13, Matrice_Parc_Cult(SP,"ME") = 1)
+* 14= Non cultivé
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 14, Matrice_Parc_Cult(SP,"NC") = 1)
+* 15= Pastèque
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 15, Matrice_Parc_Cult(SP,"MA") = 1)
+* 16= Prairie permanente
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 16, Matrice_Parc_Cult(SP,"PN") = 1)
+* 17= Prairie temporaire
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 17, Matrice_Parc_Cult(SP,"PN") = 1)
+* 18= Tubercules tropicaux
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 18, Matrice_Parc_Cult(SP,"IG") = 1)
+* 19= Vanille et Plantes à parfums, arômatiques et médicinales PPAM
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 19, Matrice_Parc_Cult(SP,"VE") = 1)
+* 20= Vergers
+         IF (Data_RPG_Gwad(SP,"cult_2017") = 20, Matrice_Parc_Cult(SP,"VE") = 1)
+);
+
+
+
+NBRE_EXPL_init=CARD(SE);
+NBRE_PARC_init=CARD(SP);
+
+
+* ooooooo Calcul de la surface cultivable par exploitation et attribution par parcelle oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+SURF_Parc_init(SP) = Data_Parc_Gwad(SP,"SURF_HA");
+
+SURF_Expl_init(SE) = sum(SP$Expl_Parc(SE,SP), SURF_Parc_init(SP) );
+
+LOOP((SP,SE)$Expl_Parc(SE,SP),
+        Surf_Expl_Parc_init(SP)= Surf_Expl_init(SE);
+);
+
+
+* ooooooo Calcul du rendement par culture pour l'année initiale ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+RDT_Cult_Init(SC)=RDT_Cult(SC,"INIT");
+
+* ooooooo Autorisation culture sur sol squelettique ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+Loop(SP,
+         IF (Matrice_Parc_Cult(SP,"CS") = 1 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1, PRES_SOL_SQUE(SP,"CS") = 1);
+         IF (Matrice_Parc_Cult(SP,"AG") = 1 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1, PRES_SOL_SQUE(SP,"AG") = 1);
+         IF (Matrice_Parc_Cult(SP,"VE") = 1 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1, PRES_SOL_SQUE(SP,"VE") = 1);
+         IF (Matrice_Parc_Cult(SP,"BA") = 1 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1, PRES_SOL_SQUE(SP,"BA") = 1);
+);
+
+
+* ooooooo Affectation de l'irrigation sur les parcelles initialement en melon, maraichage.... ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF( (Matrice_Parc_Cult(SP,"BC") = 1   OR Matrice_Parc_Cult(SP,"MA") = 1   OR Matrice_Parc_Cult(SP,"BA") = 1
+           OR Matrice_Parc_Cult(SP,"AG") = 1   OR Matrice_Parc_Cult(SP,"ME") = 1   OR Matrice_Parc_Cult(SP,"IG") = 1 )
+           AND ( Data_Parc_Gwad(SP,"ILE") > 1),
+         Data_Parc_Gwad(SP,"IRRIG_PARC") = 1;
+         );
+);
+
+
+LOOP(SP,
+         IF( (Matrice_Parc_Cult(SP,"AG") = 1),
+         Data_Parc_Gwad(SP,"IRRIG_PARC") = 1;
+         );
+);
+
+
+
+LOOP(SP,
+         IF ( (Matrice_Parc_Cult(SP,"VE") = 1 AND (SURF_Parc_init(SP) > 0.5 )),
+                 Data_Parc_Gwad(SP,"IRRIG_PARC") = 1;
+         );
+);
+
+
+
+* ooooooo Affectation des données de pluviométrie mensuelle aux parcelles ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+LOOP(SP,
+         PLUVIO_01_PARC(SP)= PART_PLUVIO_01 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_02_PARC(SP)= PART_PLUVIO_02 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_03_PARC(SP)= PART_PLUVIO_03 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_04_PARC(SP)= PART_PLUVIO_04 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_05_PARC(SP)= PART_PLUVIO_05 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_06_PARC(SP)= PART_PLUVIO_06 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_07_PARC(SP)= PART_PLUVIO_07 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_08_PARC(SP)= PART_PLUVIO_08 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_09_PARC(SP)= PART_PLUVIO_09 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_10_PARC(SP)= PART_PLUVIO_10 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_11_PARC(SP)= PART_PLUVIO_11 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         PLUVIO_12_PARC(SP)= PART_PLUVIO_12 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+);
+
+
+
+
+$ontext;
+
+* ooooooo Affectation des catégories de sol agrégées et de profondeur aux parcelles ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+LOOP(SP,
+         IF ( (Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 16 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 16 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 18
+            OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  8 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  9),  Data_Parc_Gwad(SP,"TYPE_SOL")= 1;
+         );
+         IF ( (Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  2 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  3 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 12),
+            Data_Parc_Gwad(SP,"TYPE_SOL")= 2;
+         );
+         IF ( (Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 13 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 14),
+            Data_Parc_Gwad(SP,"TYPE_SOL")= 3;
+         );
+         IF ( (Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 17 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  6),
+            Data_Parc_Gwad(SP,"TYPE_SOL")= 4;
+         );
+         IF ( (Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  5 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  7 OR Data_Parc_Gwad(SP,"TYPE_SOL_INIT")= 15),
+            Data_Parc_Gwad(SP,"TYPE_SOL")= 5;
+         );
+         IF ( (Data_Parc_Gwad(SP,"TYPE_SOL_INIT")=  9),
+            Data_Parc_Gwad(SP,"SOL_COURT")= 1;
+         );
+);
+
+
+
+* ooooooo Affectation des codes ILE aux parcelles ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+LOOP(SP,
+*        Affectation du code ILE=1 à toutes les parcelles des communes de la BASSE TERRE
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97103 OR Data_Parc_Gwad(SP,"COMMUNE")=97104 OR Data_Parc_Gwad(SP,"COMMUNE")=97105
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97106 OR Data_Parc_Gwad(SP,"COMMUNE")=97107 OR Data_Parc_Gwad(SP,"COMMUNE")=97109
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97111 OR Data_Parc_Gwad(SP,"COMMUNE")=97114 OR Data_Parc_Gwad(SP,"COMMUNE")=97115
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97118 OR Data_Parc_Gwad(SP,"COMMUNE")=97121 OR Data_Parc_Gwad(SP,"COMMUNE")=97124
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97129 OR Data_Parc_Gwad(SP,"COMMUNE")=97132 OR Data_Parc_Gwad(SP,"COMMUNE")=97134,
+                 Data_Parc_Gwad(SP,"ILE")=1;
+         );
+
+*        Affectation du code ILE=2 à toutes les parcelles des communes de la GRANDE TERRE
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97101 OR Data_Parc_Gwad(SP,"COMMUNE")=97102 OR Data_Parc_Gwad(SP,"COMMUNE")=97113
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97116 OR Data_Parc_Gwad(SP,"COMMUNE")=97117 OR Data_Parc_Gwad(SP,"COMMUNE")=97119
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97122 OR Data_Parc_Gwad(SP,"COMMUNE")=97125 OR Data_Parc_Gwad(SP,"COMMUNE")=97128,
+                 Data_Parc_Gwad(SP,"ILE")=2;
+         );
+
+*        Affectation du code ILE=3 à toutes les parcelles des communes de MARIE GALANTE
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97108 OR Data_Parc_Gwad(SP,"COMMUNE")=97112 OR Data_Parc_Gwad(SP,"COMMUNE")=97126,
+                 Data_Parc_Gwad(SP,"ILE")=3;
+         );
+);
+
+
+* ooooooo Affectation des codes REGION aux parcelles ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+*        Affectation du code REGION=1 à toutes les parcelles des communes du Centre Grande Terre (Les Abymes, Le Gosier, Morne-à-l'Eau)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97101 OR Data_Parc_Gwad(SP,"COMMUNE")=97113 OR Data_Parc_Gwad(SP,"COMMUNE")=97116,
+                 Data_Parc_Gwad(SP,"REGION")=1;
+         );
+
+*        Affectation du code REGION=2 à toutes les parcelles des communes de l' Est Grande Terre (Le Moule, Saint-François, Sainte-Anne)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97117 OR Data_Parc_Gwad(SP,"COMMUNE")=97125 OR Data_Parc_Gwad(SP,"COMMUNE")=97128,
+                 Data_Parc_Gwad(SP,"REGION")=2;
+         );
+
+*        Affectation du code REGION=3 à toutes les parcelles des communes du Nord Grande Terre (Anse-Bertrand, Petit-Canal, Port-Louis)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97102 OR Data_Parc_Gwad(SP,"COMMUNE")=97119 OR Data_Parc_Gwad(SP,"COMMUNE")=97122,
+                 Data_Parc_Gwad(SP,"REGION")=3;
+         );
+
+*        Affectation du code REGION=4 à toutes les parcelles des communes du Nord Basse Terre (Baie-Mahault, Lamentin, Petit-Bourg, Sainte-Rose)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97103 OR Data_Parc_Gwad(SP,"COMMUNE")=97115 OR Data_Parc_Gwad(SP,"COMMUNE")=97118
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97129,
+                 Data_Parc_Gwad(SP,"REGION")=4;
+         );
+
+*        Affectation du code REGION=5 à toutes les parcelles des communes du Sud Est Basse Terre (Capesterre-B-E, Goyave, Trois-Rivières)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97107 OR Data_Parc_Gwad(SP,"COMMUNE")=97114 OR Data_Parc_Gwad(SP,"COMMUNE")=97132,
+                 Data_Parc_Gwad(SP,"REGION")=5;
+         );
+
+*        Affectation du code REGION=6 à toutes les parcelles des communes du Sud Ouest Basse Terre (Baillif, Basse-Terre, Bouillante, Gourbeyre
+*        Deshaies, Pointe-Noire, Saint-Claude, Vieux-Habitants)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97104 OR Data_Parc_Gwad(SP,"COMMUNE")=97105 OR Data_Parc_Gwad(SP,"COMMUNE")=97106
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97109 OR Data_Parc_Gwad(SP,"COMMUNE")=97111 OR Data_Parc_Gwad(SP,"COMMUNE")=97121
+              OR Data_Parc_Gwad(SP,"COMMUNE")=97124 OR Data_Parc_Gwad(SP,"COMMUNE")=97134,
+                 Data_Parc_Gwad(SP,"REGION")=6;
+         );
+
+*        Affectation du code REGION=7 à toutes les parcelles des communes de Marie Galante (Capesterre-de-M-G, Grand-Bourg, Saint-Louis)
+         IF(     Data_Parc_Gwad(SP,"COMMUNE")=97108 OR Data_Parc_Gwad(SP,"COMMUNE")=97112 OR Data_Parc_Gwad(SP,"COMMUNE")=97126,
+                 Data_Parc_Gwad(SP,"REGION")=7;
+         );
+
+);
+
+* ooooooo Calcul de l'indicateur de conformation de la parcelle (rapport du périmètre sur la surface ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+LOOP(SP,
+                Data_Parc_Gwad(SP,"CONFORM")= Data_Parc_Gwad(SP,"PERIMETRE") / Data_Parc_Gwad(SP,"SURF_HA");
+);
+
+PART_C_INIT(SP)=Data_Parc_Gwad(SP,"PART_C_INIT");
+
+LOOP(SP,
+         IF(Data_Parc_Gwad(SP,"TYPE_SOL")=1, Data_Parc_Gwad(SP,"PART_C_INIT")=2.70 AND Data_Parc_Gwad(SP,"DRAI_PARC")=0.5 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         );
+         IF(Data_Parc_Gwad(SP,"TYPE_SOL")=2, Data_Parc_Gwad(SP,"PART_C_INIT")=2.08 AND Data_Parc_Gwad(SP,"DRAI_PARC")=0.5 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         );
+         IF(Data_Parc_Gwad(SP,"TYPE_SOL")=3, Data_Parc_Gwad(SP,"PART_C_INIT")=4.37 AND Data_Parc_Gwad(SP,"DRAI_PARC")=0.5 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         );
+         IF(Data_Parc_Gwad(SP,"TYPE_SOL")=4, Data_Parc_Gwad(SP,"PART_C_INIT")=2.04 AND Data_Parc_Gwad(SP,"DRAI_PARC")=0.5 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         );
+         IF(Data_Parc_Gwad(SP,"TYPE_SOL")=5, Data_Parc_Gwad(SP,"PART_C_INIT")=2.00 AND Data_Parc_Gwad(SP,"DRAI_PARC")=0.1 * Data_Parc_Gwad(SP,"PLUVIO_PARC");
+         );
+);
+
+$offtext;
+
+* SSSSSSSSSSSSSSSSSSSSSSSSSS AFFECTATION DES ITKs SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+
+
+* ooooooo Affectation des ITK vergers sur les parcelles initialement en vergers ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF( Data_Parc_Gwad(SP,"REGION") = 5,
+                 Matrice_Parc_Cult(SP,"VE_PLUIE")=Matrice_Parc_Cult(SP,"VE");
+         );
+
+         IF( Data_Parc_Gwad(SP,"REGION") <> 5,
+                 Matrice_Parc_Cult(SP,"VE_BTGT")=Matrice_Parc_Cult(SP,"VE");
+         );
+);
+Matrice_Parc_Cult(SP,"VE") = 0;
+
+
+* ooooooo Affectation des ITK ananas sur les parcelles initialement en ananas ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF( Surf_Expl_Parc_init(SP) >= AN_SURF_EXPL_MIN,
+                 Matrice_Parc_Cult(SP,"AN_PA")=Matrice_Parc_Cult(SP,"AN");
+         );
+
+         IF( Surf_Expl_Parc_init(SP) < AN_SURF_EXPL_MIN,
+                 Matrice_Parc_Cult(SP,"AN_NU")=Matrice_Parc_Cult(SP,"AN");
+         );
+);
+Matrice_Parc_Cult(SP,"AN") = 0;
+
+
+* ooooooo Affectation des ITK banane sur les parcelles initialement en banane ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF( Surf_Expl_Parc_init(SP) >= 10 AND Data_Parc_Gwad(SP,"PENTE") <= 25 AND Data_Parc_Gwad(SP,"ILE" )= 1,
+                 Matrice_Parc_Cult(SP,"BA_INT") = Matrice_Parc_Cult(SP,"BA");
+         );
+         IF( Surf_Expl_Parc_init(SP) < 10  AND Data_Parc_Gwad(SP,"PENTE") <= 25 AND Data_Parc_Gwad(SP,"ILE") = 1,
+                 Matrice_Parc_Cult(SP,"BA_SINT") = Matrice_Parc_Cult(SP,"BA");
+         );
+         IF( Data_Parc_Gwad(SP,"PENTE") > 25 AND Data_Parc_Gwad(SP,"ILE") = 1,
+                 Matrice_Parc_Cult(SP,"BA_PER") = Matrice_Parc_Cult(SP,"BA");
+         );
+         IF( Data_Parc_Gwad(SP,"ILE") <> 1,
+                 Matrice_Parc_Cult(SP,"BA_IRR") = Matrice_Parc_Cult(SP,"BA");
+         );
+);
+Matrice_Parc_Cult(SP,"BA") = 0;
+
+
+* ooooooo Affectation des ITKs Plantain ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF(Data_Parc_Gwad(SP,"ILE") > 1,
+                 Matrice_Parc_Cult(SP,"BC_GTMG")=Matrice_Parc_Cult(SP,"BC");
+         );
+         IF( Data_Parc_Gwad(SP,"ILE") = 1,
+                 Matrice_Parc_Cult(SP,"BC_BT")=Matrice_Parc_Cult(SP,"BC");
+         );
+);
+Matrice_Parc_Cult(SP,"BC")=0;
+
+
+* ooooooo Affectation des ITKs Igname ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF(Data_Parc_Gwad(SP,"ILE") > 1,
+                 Matrice_Parc_Cult(SP,"IG_PLA")=Matrice_Parc_Cult(SP,"IG");
+         );
+         IF( Data_Parc_Gwad(SP,"ILE") = 1,
+                 Matrice_Parc_Cult(SP,"IG_TUT")=Matrice_Parc_Cult(SP,"IG");
+         );
+);
+Matrice_Parc_Cult(SP,"IG")=0;
+
+
+* ooooooo Affectation des ITKs Maraichage ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+
+         IF( Data_Parc_Gwad(SP,"ILE") = 1 AND Data_Parc_Gwad(SP,"IRRIG_PARC") = 0,
+                 Matrice_Parc_Cult(SP,"MA_TO_CO_JA")=Matrice_Parc_Cult(SP,"MA");
+         );
+
+         IF( Data_Parc_Gwad(SP,"ILE") = 1 AND Data_Parc_Gwad(SP,"IRRIG_PARC") = 1,
+                 Matrice_Parc_Cult(SP,"MA_ROTA")=Matrice_Parc_Cult(SP,"MA");
+         );
+
+         IF( Data_Parc_Gwad(SP,"ILE") <> 1,
+                 Matrice_Parc_Cult(SP,"MA_ROTA")=Matrice_Parc_Cult(SP,"MA");
+         );
+
+Matrice_Parc_Cult(SP,"MA")=0;
+
+Matrice_Parc_Cult(SP,SC_MAR_ESSAI_KS)=0;
+
+);
+
+
+* ooooooo Affectation des ITKs Prairie oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+         IF(SURF_Parc_init(SP) >= 0,
+                 Matrice_Parc_Cult(SP,"PN_PIQ")=Matrice_Parc_Cult(SP,"PN");
+         );
+);
+Matrice_Parc_Cult(SP,"PN")=0;
+
+
+* ooooooo Affectation des ITKs Canne oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SP,
+* NBT & SOBT   si parcelle en Nord Basse-Terre ou en Sud Ouest Basse-Terre, et surface de la parcelle < à 0.2ha, alors récolte semi mécanisée
+         IF((Data_Parc_Gwad(SP,"REGION") = 4 OR Data_Parc_Gwad(SP,"REGION") = 6 )  AND SURF_Parc_init(SP)< 0.2,
+                 Matrice_Parc_Cult(SP,"CS_BT_NISM")=Matrice_Parc_Cult(SP,"CS");
+         );
+* NBT & SOBT   si parcelle en Nord Basse-Terre ou en Sud Ouest Basse-Terre, et surface de la parcelle >= à 0.2ha, alors récolte mécanisée
+         IF((Data_Parc_Gwad(SP,"REGION") = 4 OR Data_Parc_Gwad(SP,"REGION") = 6 )  AND SURF_Parc_init(SP)>=0.2,
+                 Matrice_Parc_Cult(SP,"CS_BT_NIM")=Matrice_Parc_Cult(SP,"CS");
+         );
+
+* SEBT         si parcelle en Sud Est Basse-Terre, alors récolte mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 5,
+                 Matrice_Parc_Cult(SP,"CS_SBT_NIM")=Matrice_Parc_Cult(SP,"CS");
+         );
+
+* NGT          si parcelle en Nord Grande-Terre et sol non squeletique érodé (=0), alors récolte mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 3 AND Data_Parc_Gwad(SP,"SOL_COURT") = 0,
+                 Matrice_Parc_Cult(SP,"CS_NGT_NIM")=Matrice_Parc_Cult(SP,"CS");
+         );
+* NGT          si parcelle en Nord Grande-Terre et sol squeletique érodé (=1), alors récolte semi mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 3 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1,
+                 Matrice_Parc_Cult(SP,"CS_NGT_NISM")=Matrice_Parc_Cult(SP,"CS");
+         );
+
+* EGT          si parcelle en Est Grande-Terre et sol non squeletique érodé (=0), alors récolte mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 2 AND Data_Parc_Gwad(SP,"SOL_COURT") = 0,
+                 Matrice_Parc_Cult(SP,"CS_EGT_NIM")=Matrice_Parc_Cult(SP,"CS");
+         );
+* EGT          si parcelle en Est Grande-Terre et sol squeletique érodé (=1), alors récolte semi mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 2 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1,
+                 Matrice_Parc_Cult(SP,"CS_EGT_NISM")=Matrice_Parc_Cult(SP,"CS");
+         );
+
+* CGT          si parcelle en Centre Grande-Terre et sol non squeletique érodé (=0), alors récolte mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 1 AND Data_Parc_Gwad(SP,"SOL_COURT") = 0,
+                 Matrice_Parc_Cult(SP,"CS_CGT_NIM")=Matrice_Parc_Cult(SP,"CS");
+         );
+* CGT          si parcelle en Centre Grande-Terre et sol squeletique érodé (=1), alors récolte semi mécanisée
+         IF( Data_Parc_Gwad(SP,"REGION") = 1 AND Data_Parc_Gwad(SP,"SOL_COURT") = 1,
+                 Matrice_Parc_Cult(SP,"CS_CGT_NISM")=Matrice_Parc_Cult(SP,"CS");
+         );
+
+* MG           si parcelle à Marie-Galante, alors récolte semi mécanisé
+         IF( Data_Parc_Gwad(SP,"REGION") = 7,
+                 Matrice_Parc_Cult(SP,"CS_MG_NISM")=Matrice_Parc_Cult(SP,"CS");
+         );
+
+Matrice_Parc_Cult(SP,"CS")=0;
+);
+
+
+* ooooooo Calcul de la main d'oeuvre par exploitation ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+MO_ha_OTK_Cult_init(SC,SK)= (   Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"MO_EXPL")
+                            + ( Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"MO_EXPL") )/Duree_Plant_Cult(SC,"init")
+                            )/  Duree_Cycle_Cult(SC,"init")*12;
+MO_Ha_Cult_init(SC)= sum(SK, MO_ha_OTK_Cult_init(SC,SK));
+
+MO_Parc_init(SP) = sum(SC, SURF_Parc_init(SP)*Matrice_Parc_Cult(SP,SC)*MO_Ha_Cult_init(SC) );
+MO_Expl_init(SE) = sum(SP$Expl_Parc(SE,SP), MO_Parc_init(SP));
+* x 1.7 pour S1
+* x 1.3 pour S2
+* x 10 pour S3 ça passe
+*MO_Expl_init("E1")=5000;
+
+* ooooooo Calcul de la référence banane par exploitation pour l'année initiale oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+LOOP(SE,
+REF_BAN_EXPL_init(SE)= sum(SP$Expl_Parc(SE,SP), (
+                    SURF_Parc_init(SP)*Matrice_Parc_Cult(SP,"BA_INT") * Rdt_Cult("BA_INT","INIT")
+                  + SURF_Parc_init(SP)*Matrice_Parc_Cult(SP,"BA_SINT")* Rdt_Cult("BA_SINT","INIT")
+                  + SURF_Parc_init(SP)*Matrice_Parc_Cult(SP,"BA_PER") * Rdt_Cult("BA_PER","INIT")
+                  + SURF_Parc_init(SP)*Matrice_Parc_Cult(SP,"BA_IRR") * Rdt_Cult("BA_IRR","INIT")));
+);
+
+Data_Parc_Gwad(SP,"SENS_W_ECOU")= 45 ;
+
+AVERS(SE)=0;
+
+* SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+
+

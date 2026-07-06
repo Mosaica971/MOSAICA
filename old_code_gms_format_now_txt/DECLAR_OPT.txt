@@ -1,0 +1,2465 @@
+
+PARAMETER
+TOTOS
+      NB_BOUCLE                                  Comptage du nombre de boucles d'optimisation  0=INIT 1=CALIB 2=2010 3=2011 4=2012 5=2013 6=2014 7=2015
+STOCK_NB_BOUCLE(H)                               Stockage du comptage du nombre de boucles d'optimisation
+
+      AVERS(E)                                   Coefficient d'aversion au risque des exploitants par type
+STOCK_AVERS(H,E)                                 Stockage du coefficient d'aversion au risque des exploitants par type
+
+      CV_ha_OTK_Cult(C,K)                        Charges variables de la culture par OTK (en euros par ha)
+STOCK_CV_Ha_OTK_Cult(H,C,K)                      Stockage Charges variables de la culture par OTK (en euros par ha)
+
+      CV_Ha_Cult(C)                              Charges variables de culture (en euros par ha)
+STOCK_CV_Ha_Cult(H,C)                            Stockage Charges variables de culture (en euros par ha)
+
+      PB_Ha_Cult(C)                              Produit brut de culture (en euros par ha)
+STOCK_PB_Ha_Cult(H,C)                            Stockage Marge brute inférieure espérée de culture (en euros par ha)
+
+      MB_Ha_Cult(C)                              Marge brute de culture (en euros par ha)
+STOCK_MB_Ha_Cult(H,C)                            Stockage de la marge brute par culture par an (en euros par ha)
+
+
+      MB_Ha_Cult_Pond(C)
+STOCK_MB_Ha_Cult_Pond(H,C)
+
+      Matrice_Parc_Cult_Init(P,C)
+      Matrice_Parc_Cult_Calib(P,C)
+      Matrice_Parc_Cult_PAD(P,C)
+
+EFF_PARC_CULT_INIT(C)
+EFF_PARC_CULT_CALIB(C)
+PAD_PARC_CULT(C)
+
+Matrice_Parc_PAD(P)
+PAD_Parc
+NB_PARC_INIT
+
+
+      MB_Ha_Cult_Marko_ARBORICULTEUR(C)
+      MB_Ha_Cult_Marko_BANANIER(C)
+      MB_Ha_Cult_Marko_CANNIER(C)
+      MB_Ha_Cult_Marko_CANDIVMAR(C)
+      MB_Ha_Cult_Marko_CANDIVNOMAR(C)
+      MB_Ha_Cult_Marko_DIVERSIFIE(C)
+      MB_Ha_Cult_Marko_ELEVEUR(C)
+      MB_Ha_Cult_Marko_MARAICHER(C)
+      MB_Ha_Cult_Marko_MIXTE(C)
+
+
+
+      MBHORAIRE_Ha_Cult(C)                       Marge brute par heure de travail sur la culture  (€ par heure)
+STOCK_MBHORAIRE_Ha_Cult(H,C)                     Stockage Marge brute par heure de travail sur la culture  (€ par heure)
+
+      CV_Inf_Ha_OTK_Cult(C,K)                    Charges variables de la culture par OTK (en euros par ha)
+STOCK_CV_Inf_Ha_OTK_Cult(H,C,K)                  Stockage Charges variables de la culture par OTK (en euros par ha)
+
+      CV_Inf_Ha_Cult(C)                          Charges variables de culture (en euros par ha)
+STOCK_CV_Inf_Ha_Cult(H,C)                        Stockage Charges variables de culture (en euros par ha)
+
+      SUB_POSEI_Ha_Cult(C)                       Montant des subventions POSEI par culture
+STOCK_SUB_POSEI_Ha_Cult(H,C)                     Stockage Montant des subventions POSEI par culture
+
+      SUB_NAT_Ha_Cult(C)                         Montant des subventions nationales par culture
+STOCK_SUB_NAT_Ha_Cult(H,C)                       Stockage Montant des subventions nationales par culture
+
+      SUB_PDRG_Ha_Cult(C)                        Montant des subventions PDRG par culture
+STOCK_SUB_PDRG_Ha_Cult(H,C)                      Stockage Montant des subventions PDRG par culture
+
+      SUB_TOT_Ha_Cult(C)                         Montant des subventions totales par culture
+STOCK_SUB_TOT_Ha_Cult(H,C)                       Stockage Montant des subventions totales par culture
+
+      PB_Inf_Ha_Cult(C)                          Produit brut inférieur espéré de culture (en euros par ha)
+STOCK_PB_Inf_Ha_Cult(H,C)                        Stockage Produit brut inférieur espéré de culture (en euros par ha)
+
+      MB_Inf_Ha_Cult(C)                          Marge brute inférieure espérée de culture (en euros par ha)
+STOCK_MB_Inf_Ha_Cult(H,C)                        Stockage Marge brute inférieure espérée de culture (en euros par ha)
+
+      RDT_Cult_BA(C)                             Rendements des ITK banane export pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_BA(H,C)                           Stockage Rendements des ITK banane export pour le calcul du quota maximum régional de production
+
+      RDT_Cult_ME(C)                             Rendements de l'ITK melon pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_ME(H,C)                           Stockage Rendements de l'ITK melon pour le calcul du quota maximum régional de production
+
+      RDT_Cult_AN(C)                             Rendements des ITK ananas pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_AN(H,C)                           Stockage Rendements des ITK ananas pour le calcul du quota maximum régional de production
+
+      RDT_Cult_CS(C)                             Rendements des ITK canne à sucre pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_CS(H,C)                           Stockage Rendements des ITK canne à sucre pour le calcul du quota maximum régional de production
+
+      RDT_Cult_IG(C)                             Rendements des ITK igname export pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_IG(H,C)                           Stockage Rendements des ITK igname export pour le calcul du quota maximum régional de production
+
+      RDT_Cult_BC(C)                             Rendements des ITK banane plantain pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_BC(H,C)                           Stockage Rendements des ITK banane plantain pour le calcul du quota maximum régional de production
+
+      RDT_Cult_MA(C)                             Rendements des ITK maraichage pour le calcul du quota maximum-minimum régional de production
+STOCK_RDT_Cult_MA(H,C)                           Stockage Rendements des ITK maraichage pour le calcul du quota maximum-minimum régional de production
+
+      RDT_Cult_PLU(C)                             Rendements des ITK pluriannuel-arboriculture pour le calcul du quota maximum-minimum régional de production
+STOCK_RDT_Cult_PLU(H,C)                           Stockage Rendements des ITK pluriannuel-arboriculture pour le calcul du quota maximum-minimum régional de production
+
+
+
+      RDT_Cult_CF(C)                             Rendements des ITK canne fibre pour le calcul du quota maximum régional de production
+STOCK_RDT_Cult_CF(H,C)                           Stockage Rendements des ITK canne fibre pour le calcul du quota maximum régional de production
+
+      RDT_Inf_Cult(C)                            Rendement espéré par les agriculteurs sur une mauvaise année
+STOCK_RDT_Inf_Cult(H,C)                          Stockage Rendement espéré par les agriculteurs sur une mauvaise année
+
+      AZOTE_ha_OTK_Cult(C,K)                     Quantité d'azote pour chaque culture par OTK (en unités fertilisantes par ha)
+STOCK_AZOTE_ha_OTK_Cult(H,C,K)                   Stockage Quantité d'azote pour chaque culture par OTK (en unités fertilisantes par ha)
+
+      AZOTE_Ha_Cult(C)                           Quantité d'azote par hectare de culture (en unités fertilisantes par ha)
+STOCK_AZOTE_Ha_Cult(H,C)                         Stockage Quantité d'azote par hectare de culture (en unités fertilisantes par ha)
+
+      AZOTE_Parc(P)                              Quantité d'azote par parcelle (en unités fertilisantes)
+STOCK_AZOTE_Parc(H,P)                            Stockage Quantité d'azote par parcelle (en unités fertilisantes)
+
+      AZOTE_Cult(C)                              Quantité d'azote par culture (en unités fertilisantes)
+STOCK_AZOTE_Cult(H,C)                            Stockage Quantité d'azote par culture (en unités fertilisantes)
+
+      AZOTE_Expl(E)                              Quantité d'azote par exploitation (en unités fertilisantes)
+STOCK_AZOTE_Expl(H,E)                            Stockage Quantité d'azote par exploitation (en unités fertilisantes)
+
+      AZOTE_Reg(R)                               Quantité d'azote par commune (en unités fertilisantes)
+STOCK_AZOTE_Reg(H,R)                             Stockage Quantité d'azote par commune (en unités fertilisantes)
+
+      AZOTE_Gwad                                 Quantité d'azote en Guadeloupe (en unités fertilisantes)
+STOCK_AZOTE_Gwad(H)                              Stockage Quantité d'azote en Guadeloupe (en unités fertilisantes)
+
+      AZOTE_Moy_ha_Gwad
+
+
+      IFT_ha_OTK_Cult(C,K)                       Nombre de doses homologués de traitements pleins pour chaque culture par OTK (en nbre par ha)
+STOCK_IFT_ha_OTK_Cult(H,C,K)                     Stockage Nombre de doses homologués de traitements pleins pour chaque culture par OTK (en nbre par ha)
+
+      IFT_Ha_Cult(C)                             Nombre de doses homologués de traitements pleins par hectare de culture (en nbre par ha)
+STOCK_IFT_Ha_Cult(H,C)                           Stockage Nombre de doses homologués de traitements pleins par hectare de culture (en nbre par ha)
+
+      IFT_Parc(P)                                Nombre de doses homologués de traitements pleins par parcelle (en nbre)
+STOCK_IFT_Parc(H,P)                              Stockage Nombre de doses homologués de traitements pleins par parcelle (en nbre)
+
+      IFT_Cult(C)                                Nombre de doses homologués de traitements pleins par culture (en nbre)
+STOCK_IFT_Cult(H,C)                              Stockage Nombre de doses homologués de traitements pleins par culture (en nbre)
+
+      IFT_Expl(E)                                Nombre de doses homologués de traitements pleins par exploitation (en nbre)
+STOCK_IFT_Expl(H,E)                              Stockage Nombre de doses homologués de traitements pleins par exploitation (en nbre)
+
+      IFT_Reg(R)                                 Nombre de doses homologués de traitements pleins par commune (en nbre)
+STOCK_IFT_Reg(H,R)                               Stockage Nombre de doses homologués de traitements pleins par commune (en nbre)
+
+      IFT_Gwad                                   Nombre de doses homologués de traitements pleins en Guadeloupe (en nbre)
+STOCK_IFT_Gwad(H)                                Stockage Nombre de doses homologués de traitements pleins en Guadeloupe (en nbre)
+
+      IFT_Moy_ha_Gwad
+**************************************** MORGWANIK *****************************
+C_ORG_ha_Parc_init(P)                            Quantité initiale de carbone organique sur les parcelles (en tonne par hectare)
+STOCK_C_ORG_ha_Parc_init(H,P)                    Stockage Quantité initiale de carbone organique sur les parcelles (en tonne par hectare)
+C_ORG_Parc_init(P)                               Quantité initiale de carbone organique par parcelle (en tonnes)
+STOCK_C_ORG_Parc_init(H,P)                       Stockage Quantité initiale de carbone organique par parcelle (en tonnes)
+
+BIOM_AER_Cult(C)                                 Quantité de résidus issus de la biomasse aérienne
+BIOM_RAC_Cult(C)                                 Quantité de résidus issus de la biomasse racinaire
+Q_RES_Cult(C)                                    Quantité de résidus par systèmes de culture
+
+C_ENTREE_CULTURE_ha_Parc(P)
+STOCK_C_ENTREE_CULTURE_ha_Parc(H,P)
+
+APP_AMDT_OTK_Cult(C,K)                           Quantité de carbone organique par amendement et par culture (en tonne par hectare)
+APP_AMDT_Cult(C)                                 Quantité de carbone organique par culture (en tonne par hectare)
+
+C_ENTREE_AMDT_ha_Parc(P)
+STOCK_C_ENTREE_AMDT_ha_Parc(H,P)
+
+C_ENTREE_TOT_ha_Parc(P)
+STOCK_C_ENTREE_TOT_ha_Parc(H,P)
+
+C_ENTREE_TOT_Parc(P)
+STOCK_C_ENTREE_TOT_Parc(H,P)
+
+C_SORTIE_ha_Parc(P)
+STOCK_C_SORTIE_ha_Parc(H,P)
+
+C_SORTIE_Parc(P)
+STOCK_C_SORTIE_Parc(H,P)
+
+C_ORG_ha_Parc(P)
+STOCK_C_ORG_ha_Parc(H,P)
+
+C_ORG_Parc(P)
+STOCK_C_ORG_Parc(H,P)
+
+MAT_ORG_Parc(P)
+STOCK_MAT_ORG_Parc(H,P)
+
+DRAI_Parc(P)
+STOCK_DRAI_Parc(H,P)
+
+CLD_ha_Parc_init(P)
+STOCK_CLD_ha_Parc_init(H,P)
+
+CLD_Parc_init(P)
+STOCK_CLD_Parc_init(H,P)
+
+CLD_Cont_ha_Parc(P)
+STOCK_CLD_Cont_ha_Parc(H,P)
+
+CLD_Cont_Parc(P)
+STOCK_CLD_Cont_Parc(H,P)
+
+DIFF_CLD(H,P)
+
+
+      ASSOL_Parc(P,C)                            Assolement par parcelle
+STOCK_ASSOL_Parc(H,P,C)                          Stockage Assolement par parcelle
+
+      ASSOL_Expl(E,C)                            Assolement par exploitation
+STOCK_ASSOL_Expl(H,E,C)                          Stockage Assolement par exploitation
+
+      ASSOL_Reg(R,C)                             Assolement par commune
+STOCK_ASSOL_Reg(H,R,C)                           Stockage Assolement par petite région
+
+      ASSOL_Gwad(C)                              Assolement de Guadeloupe
+STOCK_ASSOL_Gwad(H,C)                            Stockage Assolement de Guadeloupe
+
+      ASSOL_BV(BV,C)                             Assolement par bassin versant
+STOCK_ASSOL_BV(H,BV,C)                           Stockage Assolement par bassin versant
+
+*      ASSOL_RIV(RIV,C)                           Assolement par bordure de rivière
+*STOCK_ASSOL_RIV(H,RIV,C)                         Stockage Assolement par bordure de rivière
+
+      ASSOL_CPT(CPT,C)                           Assolement par bassin de captage
+STOCK_ASSOL_CPT(H,CPT,C)                         Stockage Assolement par bassin de captage
+
+      ASSOL_SOBT(SRSOBT,C)                       Assolement par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT(H,SRSOBT,C)                     Stockage Assolement par commune du Sud-Ouest Basse-Terre
+
+
+      ASSOL_SEBT(SRSEBT,C)                       Assolement par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT(H,SRSEBT,C)                     Stockage Assolement par commune du Sud-Est Basse-Terre
+
+      ASSOL_NBT(SRNBT,C)                         Assolement par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT(H,SRNBT,C)                       Stockage Assolement par commune du Nord Basse-Terre
+
+      ASSOL_NGT(SRNGT,C)                         Assolement par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT(H,SRNGT,C)                       Stockage Assolement par commune du Nord Grande-Terre
+
+      ASSOL_CGT(SRCGT,C)                         Assolement par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT(H,SRCGT,C)                       Stockage Assolement par commune du Centre Grande-Terre
+
+      ASSOL_EGT(SREGT,C)                         Assolement par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT(H,SREGT,C)                       Stockage Assolement par commune de l'Est Grande-Terre
+
+      ASSOL_MG(SRMG,C)                           Assolement par commune de Marie-Galante
+STOCK_ASSOL_MG(H,SRMG,C)                         Stockage Assolement par commune de Marie-Galante
+
+
+      ASSOL_SOBT_tot(C)                          Assolement du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot(H,C)                        Stockage Assolement du Sud-Ouest Basse-Terre
+
+      ASSOL_SEBT_tot(C)                          Assolement du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot(H,C)                        Stockage Assolement du Sud-Est Basse-Terre
+
+      ASSOL_NBT_tot(C)                           Assolement du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot(H,C)                         Stockage Assolement du Nord Basse-Terre
+
+      ASSOL_NGT_tot(C)                           Assolement du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot(H,C)                         Stockage Assolement du Nord Grande-Terre
+
+      ASSOL_CGT_tot(C)                           Assolement du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot(H,C)                         Stockage Assolement du Centre Grande-Terre
+
+      ASSOL_EGT_tot(C)                           Assolement de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot(H,C)                         Stockage Assolement de l'Est Grande-Terre
+
+      ASSOL_MG_tot(C)                            Assolement de Marie-Galante
+STOCK_ASSOL_MG_tot(H,C)                          Stockage Assolement de Marie-Galante
+
+      ASSOL_GWAD_tot(C)                          Assolement de Guadeloupe
+STOCK_ASSOL_GWAD_tot(H,C)                        Stockage Assolement de Guadeloupe
+
+
+      ASSOL_SOBT_ANA(SRSOBT, SC_AN)              Assolement en Ananas par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_ANA(H,SRSOBT, SC_AN)            Stockage Assolement en Ananas par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BAN(SRSOBT, SC_BAN)             Assolement en Bananes (banane export et banane plantain) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BAN(H,SRSOBT, SC_BAN)           Stockage Assolement en Bananes (banane export et banane plantain) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BAN_EX(SRSOBT, SC_BAN_EX)       Assolement en Bananes export par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BAN_EX(H,SRSOBT, SC_BAN_EX)     Stockage Assolement en Bananes export par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BAN_INT(SRSOBT, SC_BAN_INT)     Assolement en Bananes export intensive par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BAN_INT(H,SRSOBT, SC_BAN_INT)   Stockage Assolement en Bananes export intensive par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BAN_SINT(SRSOBT, SC_BAN_SINT)   Assolement en Bananes export semi-intensive par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BAN_SINT(H,SRSOBT, SC_BAN_SINT) Stockage Assolement en Bananes export semi-intensive par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BAN_PER(SRSOBT, SC_BAN_PER)     Assolement en Bananes export perenne par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BAN_PER(H,SRSOBT, SC_BAN_PER)   Stockage Assolement en Bananes export perenne par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BAN_IRR(SRSOBT, SC_BAN_IRR)     Assolement en Bananes export irriguée par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BAN_IRR(H,SRSOBT, SC_BAN_IRR)   Stockage Assolement en Bananes export irriguée par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_BC(SRSOBT, SC_BC)               Assolement en Bananes plantain par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_BC(H,SRSOBT, SC_BC)             Stockage Assolement en Bananes plantain par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_CAN(SRSOBT, SC_CAN)             Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_CAN(H,SRSOBT, SC_CAN)           Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_CS(SRSOBT, SC_CS)             Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_CS(H,SRSOBT, SC_CS)           Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_CF(SRSOBT, SC_CF)             Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_CF(H,SRSOBT, SC_CF)           Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_MAR(SRSOBT, SC_MAR)             Assolement en Maraichage & Tubercules par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_MAR(H,SRSOBT, SC_MAR)           Stockage Assolement en Maraichage & Tubercules par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_MA(SRSOBT, SC_MA)               Assolement en Maraichage par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_MA(H,SRSOBT, SC_MA)             Stockage Assolement en Maraichage par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_ME(SRSOBT, SC_ME)               Assolement en Melon par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_ME(H,SRSOBT, SC_ME)             Stockage Assolement en Melon par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_IG(SRSOBT, SC_IG)               Assolement en Tubercules par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_IG(H,SRSOBT, SC_IG)             Stockage Assolement en Tubercules par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_NON(SRSOBT, SC_NON)             Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_NON(H,SRSOBT, SC_NON)           Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_FRICHES(SRSOBT, SC_FRICHES)             Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_FRICHES(H,SRSOBT, SC_FRICHES)           Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_JA(SRSOBT, SC_JA)             Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_JA(H,SRSOBT, SC_JA)           Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_PAT(SRSOBT, SC_PAT)             Assolement en Pâturages par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_PAT(H,SRSOBT, SC_PAT)           Stockage Assolement en Pâturages par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_PLU(SRSOBT, SC_PLU)             Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_PLU(H,SRSOBT, SC_PLU)           Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_TOTAL(SRSOBT, SC_TOT)           Assolement toutes cultures par commune du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_TOTAL(H,SRSOBT, SC_TOT)         Stockage Assolement toutes cultures par commune du Sud-Ouest Basse-Terre
+
+
+
+      ASSOL_SEBT_ANA(SRSEBT, SC_AN)              Assolement en Ananas par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_ANA(H,SRSEBT, SC_AN)            Stockage Assolement en Ananas par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BAN(SRSEBT, SC_BAN)             Assolement en Bananes (banane export et banane plantain) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BAN(H,SRSEBT, SC_BAN)           Stockage Assolement en Bananes (banane export et banane plantain) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BAN_EX(SRSEBT, SC_BAN_EX)       Assolement en Bananes export par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BAN_EX(H,SRSEBT, SC_BAN_EX)     Stockage Assolement en Bananes export par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BAN_INT(SRSEBT, SC_BAN_INT)     Assolement en Bananes export intensive par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BAN_INT(H,SRSEBT, SC_BAN_INT)   Stockage Assolement en Bananes export intensive par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BAN_SINT(SRSEBT, SC_BAN_SINT)   Assolement en Bananes export semi-intensive par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BAN_SINT(H,SRSEBT, SC_BAN_SINT) Stockage Assolement en Bananes export semi-intensive par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BAN_PER(SRSEBT, SC_BAN_PER)     Assolement en Bananes export perenne par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BAN_PER(H,SRSEBT, SC_BAN_PER)   Stockage Assolement en Bananes export perenne par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BAN_IRR(SRSEBT, SC_BAN_IRR)     Assolement en Bananes export irriguée par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BAN_IRR(H,SRSEBT, SC_BAN_IRR)   Stockage Assolement en Bananes export irriguée par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_BC(SRSEBT, SC_BC)               Assolement en Bananes (banane export et banane plantain) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_BC(H,SRSEBT, SC_BC)             Stockage Assolement en Bananes (banane export et banane plantain) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_CAN(SRSEBT, SC_CAN)             Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_CAN(H,SRSEBT, SC_CAN)           Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_CS(SRSEBT, SC_CS)             Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_CS(H,SRSEBT, SC_CS)           Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_CF(SRSEBT, SC_CF)             Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_CF(H,SRSEBT, SC_CF)           Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_MAR(SRSEBT, SC_MAR)             Assolement en Maraichage & Tubercules par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_MAR(H,SRSEBT, SC_MAR)           Stockage Assolement en Maraichage & Tubercules par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_MA(SRSEBT, SC_MA)               Assolement en Maraichage par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_MA(H,SRSEBT, SC_MA)             Stockage Assolement en Maraichage par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_ME(SRSEBT, SC_ME)               Assolement en Melon par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_ME(H,SRSEBT, SC_ME)             Stockage Assolement en Melon par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_IG(SRSEBT, SC_IG)               Assolement en Tubercules par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_IG(H,SRSEBT, SC_IG)             Stockage Assolement en Tubercules par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_NON(SRSEBT, SC_NON)             Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_NON(H,SRSEBT, SC_NON)           Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_FRICHES(SRSEBT, SC_FRICHES)             Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_FRICHES(H,SRSEBT, SC_FRICHES)           Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_JA(SRSEBT, SC_JA)             Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_JA(H,SRSEBT, SC_JA)           Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Sud-Est Basse-Terre
+
+
+      ASSOL_SEBT_PAT(SRSEBT, SC_PAT)             Assolement en Pâturages par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_PAT(H,SRSEBT, SC_PAT)           Stockage Assolement en Pâturages par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_PLU(SRSEBT, SC_PLU)             Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_PLU(H,SRSEBT, SC_PLU)           Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_TOTAL(SRSEBT, SC_TOT)           Assolement toutes cultures par commune du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_TOTAL(H,SRSEBT, SC_TOT)         Stockage Assolement toutes cultures par commune du Sud-Est Basse-Terre
+
+
+      ASSOL_NBT_ANA(SRNBT, SC_AN)                Assolement en Ananas par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_ANA(H,SRNBT, SC_AN)              Stockage Assolement en Ananas par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BAN(SRNBT, SC_BAN)               Assolement en Bananes (banane export et banane plantain) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BAN(H,SRNBT, SC_BAN)             Stockage Assolement en Bananes (banane export et banane plantain) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BAN_EX(SRNBT, SC_BAN_EX)         Assolement en Bananes export par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BAN_EX(H,SRNBT, SC_BAN_EX)       Stockage Assolement en Bananes export par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BAN_INT(SRNBT, SC_BAN_INT)       Assolement en Bananes export intensive par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BAN_INT(H,SRNBT, SC_BAN_INT)     Stockage Assolement en Bananes export intensive par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BAN_SINT(SRNBT, SC_BAN_SINT)     Assolement en Bananes export semi-intensive par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BAN_SINT(H,SRNBT, SC_BAN_SINT)   Stockage Assolement en Bananes export semi-intensive par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BAN_PER(SRNBT, SC_BAN_PER)       Assolement en Bananes export perenne par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BAN_PER(H,SRNBT, SC_BAN_PER)     Stockage Assolement en Bananes export perenne par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BAN_IRR(SRNBT, SC_BAN_IRR)       Assolement en Bananes export irriguée par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BAN_IRR(H,SRNBT, SC_BAN_IRR)     Stockage Assolement en Bananes export irriguée par commune du Nord Basse-Terre
+
+      ASSOL_NBT_BC(SRNBT, SC_BC)                 Assolement en Bananes (banane export et banane plantain) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_BC(H,SRNBT, SC_BC)               Stockage Assolement en Bananes (banane export et banane plantain) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_CAN(SRNBT, SC_CAN)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_CAN(H,SRNBT, SC_CAN)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_CS(SRNBT, SC_CS)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_CS(H,SRNBT, SC_CS)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_CF(SRNBT, SC_CF)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_CF(H,SRNBT, SC_CF)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_MAR(SRNBT, SC_MAR)               Assolement en Maraichage & Tubercules par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_MAR(H,SRNBT, SC_MAR)             Stockage Assolement en Maraichage & Tubercules par commune du Nord Basse-Terre
+
+      ASSOL_NBT_MA(SRNBT, SC_MA)                 Assolement en Maraichage par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_MA(H,SRNBT, SC_MA)               Stockage Assolement en Maraichage par commune du Nord Basse-Terre
+
+      ASSOL_NBT_ME(SRNBT, SC_ME)                 Assolement en Melon par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_ME(H,SRNBT, SC_ME)               Stockage Assolement en Melon par commune du Nord Basse-Terre
+
+      ASSOL_NBT_IG(SRNBT, SC_IG)                 Assolement en Tubercules par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_IG(H,SRNBT, SC_IG)               Stockage Assolement en Tubercules par commune du Nord Basse-Terre
+
+      ASSOL_NBT_NON(SRNBT, SC_NON)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_NON(H,SRNBT, SC_NON)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_FRICHES(SRNBT, SC_FRICHES)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_FRICHES(H,SRNBT, SC_FRICHES)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_JA(SRNBT, SC_JA)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_JA(H,SRNBT, SC_JA)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_PAT(SRNBT, SC_PAT)               Assolement en Pâturages par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_PAT(H,SRNBT, SC_PAT)             Stockage Assolement en Pâturages par commune du Nord Basse-Terre
+
+      ASSOL_NBT_PLU(SRNBT, SC_PLU)               Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_PLU(H,SRNBT, SC_PLU)             Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Nord Basse-Terre
+
+      ASSOL_NBT_TOTAL(SRNBT, SC_TOT)             Assolement toutes cultures par commune du Nord Basse-Terre
+STOCK_ASSOL_NBT_TOTAL(H,SRNBT, SC_TOT)           Stockage Assolement toutes cultures par commune du Nord Basse-Terre
+
+
+      ASSOL_NGT_ANA(SRNGT, SC_AN)                Assolement en Ananas par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_ANA(H,SRNGT, SC_AN)              Stockage Assolement en Ananas par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BAN(SRNGT, SC_BAN)               Assolement en Bananes (banane export et banane plantain) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BAN(H,SRNGT, SC_BAN)             Stockage Assolement en Bananes (banane export et banane plantain) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BAN_EX(SRNGT, SC_BAN_EX)         Assolement en Bananes export par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BAN_EX(H,SRNGT, SC_BAN_EX)       Stockage Assolement en Bananes export par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BAN_INT(SRNGT, SC_BAN_INT)       Assolement en Bananes export intensive par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BAN_INT(H,SRNGT, SC_BAN_INT)     Stockage Assolement en Bananes export intensive par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BAN_SINT(SRNGT, SC_BAN_SINT)     Assolement en Bananes export semi-intensive par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BAN_SINT(H,SRNGT, SC_BAN_SINT)   Stockage Assolement en Bananes export semi-intensive par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BAN_PER(SRNGT, SC_BAN_PER)       Assolement en Bananes export perenne par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BAN_PER(H,SRNGT, SC_BAN_PER)     Stockage Assolement en Bananes export perenne par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BAN_IRR(SRNGT, SC_BAN_IRR)       Assolement en Bananes export irriguée par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BAN_IRR(H,SRNGT, SC_BAN_IRR)     Stockage Assolement en Bananes export irriguée par commune du Nord Grande-Terre
+
+      ASSOL_NGT_BC(SRNGT, SC_BC)                 Assolement en Bananes plantain par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_BC(H,SRNGT, SC_BC)               Stockage Assolement en Bananes plantain par commune du Nord Grande-Terre
+
+      ASSOL_NGT_CAN(SRNGT, SC_CAN)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_CAN(H,SRNGT, SC_CAN)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_CS(SRNGT, SC_CS)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_CS(H,SRNGT, SC_CS)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_CF(SRNGT, SC_CF)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_CF(H,SRNGT, SC_CF)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_MAR(SRNGT, SC_MAR)               Assolement en Maraichage & Tubercules par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_MAR(H,SRNGT, SC_MAR)             Stockage Assolement en Maraichage & Tubercules par commune du Nord Grande-Terre
+
+      ASSOL_NGT_MA(SRNGT, SC_MA)                 Assolement en Maraichage par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_MA(H,SRNGT, SC_MA)               Stockage Assolement en Maraichage par commune du Nord Grande-Terre
+
+      ASSOL_NGT_ME(SRNGT, SC_ME)                 Assolement en Melon par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_ME(H,SRNGT, SC_ME)               Stockage Assolement en Melon & Tubercules par commune du Nord Grande-Terre
+
+      ASSOL_NGT_IG(SRNGT, SC_IG)                 Assolement en Tubercules par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_IG(H,SRNGT, SC_IG)               Stockage Assolement en Tubercules par commune du Nord Grande-Terre
+
+      ASSOL_NGT_NON(SRNGT, SC_NON)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_NON(H,SRNGT, SC_NON)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_FRICHES(SRNGT, SC_FRICHES)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_FRICHES(H,SRNGT, SC_FRICHES)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_JA(SRNGT, SC_JA)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_JA(H,SRNGT, SC_JA)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_PAT(SRNGT, SC_PAT)               Assolement en Pâturages par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_PAT(H,SRNGT, SC_PAT)             Stockage Assolement en Pâturages par commune du Nord Grande-Terre
+
+      ASSOL_NGT_PLU(SRNGT, SC_PLU)               Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_PLU(H,SRNGT, SC_PLU)             Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Nord Grande-Terre
+
+      ASSOL_NGT_TOTAL(SRNGT, SC_TOT)             Assolement toutes cultures par commune du Nord Grande-Terre
+STOCK_ASSOL_NGT_TOTAL(H,SRNGT, SC_TOT)           Stockage Assolement toutes cultures par commune du Nord Grande-Terre
+
+
+      ASSOL_CGT_ANA(SRCGT, SC_AN)                Assolement en Ananas par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_ANA(H,SRCGT, SC_AN)              Stockage Assolement en Ananas par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BAN(SRCGT, SC_BAN)               Assolement en Bananes (banane export et banane plantain) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BAN(H,SRCGT, SC_BAN)             Stockage Assolement en Bananes (banane export et banane plantain) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BAN_EX(SRCGT, SC_BAN_EX)         Assolement en Bananes export par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BAN_EX(H,SRCGT, SC_BAN_EX)       Stockage Assolement en Bananes export par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BAN_INT(SRCGT, SC_BAN_INT)       Assolement en Bananes export intensive par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BAN_INT(H,SRCGT, SC_BAN_INT)     Stockage Assolement en Bananes export intensive par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BAN_SINT(SRCGT, SC_BAN_SINT)     Assolement en Bananes export semi-intensive par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BAN_SINT(H,SRCGT, SC_BAN_SINT)   Stockage Assolement en Bananes export semi-intensive par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BAN_PER(SRCGT, SC_BAN_PER)       Assolement en Bananes export perenne par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BAN_PER(H,SRCGT, SC_BAN_PER)     Stockage Assolement en Bananes export perenne par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BAN_IRR(SRCGT, SC_BAN_IRR)       Assolement en Bananes export irriguée par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BAN_IRR(H,SRCGT, SC_BAN_IRR)     Stockage Assolement en Bananes export irriguée par commune du Centre Grande-Terre
+
+      ASSOL_CGT_BC(SRCGT, SC_BC)                 Assolement en Bananes plantain par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_BC(H,SRCGT, SC_BC)               Stockage Assolement en Bananes plantain par commune du Centre Grande-Terre
+
+      ASSOL_CGT_CAN(SRCGT, SC_CAN)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_CAN(H,SRCGT, SC_CAN)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_CS(SRCGT, SC_CS)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_CS(H,SRCGT, SC_CS)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_CF(SRCGT, SC_CF)               Assolement en Cannes (canne à sucre et canne fibre) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_CF(H,SRCGT, SC_CF)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_MAR(SRCGT, SC_MAR)               Assolement en Maraichage & Tubercules par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_MAR(H,SRCGT, SC_MAR)             Stockage Assolement en Maraichage & Tubercules par commune du Centre Grande-Terre
+
+      ASSOL_CGT_MA(SRCGT, SC_MA)                 Assolement en Maraichage par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_MA(H,SRCGT, SC_MA)               Stockage Assolement en Maraichage par commune du Centre Grande-Terre
+
+      ASSOL_CGT_ME(SRCGT, SC_ME)                 Assolement en Melon par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_ME(H,SRCGT, SC_ME)               Stockage Assolement en Melon par commune du Centre Grande-Terre
+
+      ASSOL_CGT_IG(SRCGT, SC_IG)                 Assolement en Tubercules par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_IG(H,SRCGT, SC_IG)               Stockage Assolement en Tubercules par commune du Centre Grande-Terre
+
+      ASSOL_CGT_NON(SRCGT, SC_NON)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_NON(H,SRCGT, SC_NON)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_FRICHES(SRCGT, SC_FRICHES)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_FRICHES(H,SRCGT, SC_FRICHES)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_JA(SRCGT, SC_JA)               Assolement en non cultivées (Jachères - Friches - Bois) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_JA(H,SRCGT, SC_JA)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune du Centre Grande-Terre
+
+
+      ASSOL_CGT_PAT(SRCGT, SC_PAT)               Assolement en Pâturages par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_PAT(H,SRCGT, SC_PAT)             Stockage Assolement en Pâturages par commune du Centre Grande-Terre
+
+      ASSOL_CGT_PLU(SRCGT, SC_PLU)               Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_PLU(H,SRCGT, SC_PLU)             Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune du Centre Grande-Terre
+
+      ASSOL_CGT_TOTAL(SRCGT, SC_TOT)             Assolement toutes cultures par commune du Centre Grande-Terre
+STOCK_ASSOL_CGT_TOTAL(H,SRCGT, SC_TOT)           Stockage Assolement toutes cultures par commune du Centre Grande-Terre
+
+
+      ASSOL_EGT_ANA(SREGT, SC_AN)                Assolement en Ananas par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_ANA(H,SREGT, SC_AN)              Stockage Assolement en Ananas par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BAN(SREGT, SC_BAN)               Assolement en Bananes (banane export et banane plantain) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BAN(H,SREGT, SC_BAN)             Stockage Assolement en Bananes (banane export et banane plantain) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BAN_EX(SREGT, SC_BAN_EX)         Assolement en Bananes export par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BAN_EX(H,SREGT, SC_BAN_EX)       Stockage Assolement en Bananes export par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BAN_INT(SREGT, SC_BAN_INT)       Assolement en Bananes export intensive par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BAN_INT(H,SREGT, SC_BAN_INT)     Stockage Assolement en Bananes export intensive par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BAN_SINT(SREGT, SC_BAN_SINT)     Assolement en Bananes export semi-intensive par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BAN_SINT(H,SREGT, SC_BAN_SINT)   Stockage Assolement en Bananes export semi-intensive par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BAN_PER(SREGT, SC_BAN_PER)       Assolement en Bananes export perenne par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BAN_PER(H,SREGT, SC_BAN_PER)     Stockage Assolement en Bananes export perenne par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BAN_IRR(SREGT, SC_BAN_IRR)       Assolement en Bananes export irriguée par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BAN_IRR(H,SREGT, SC_BAN_IRR)     Stockage Assolement en Bananes export irriguée par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_BC(SREGT, SC_BC)                 Assolement en Bananes (banane export et banane plantain) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_BC(H,SREGT, SC_BC)               Stockage Assolement en Bananes (banane export et banane plantain) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_CAN(SREGT, SC_CAN)               Assolement en Cannes (canne à sucre et canne fibre) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_CAN(H,SREGT, SC_CAN)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_CS(SREGT, SC_CS)               Assolement en Cannes (canne à sucre et canne fibre) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_CS(H,SREGT, SC_CS)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_CF(SREGT, SC_CF)               Assolement en Cannes (canne à sucre et canne fibre) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_CF(H,SREGT, SC_CF)             Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_MAR(SREGT, SC_MAR)               Assolement en Maraichage & Tubercules par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_MAR(H,SREGT, SC_MAR)             Stockage Assolement en Maraichage & Tubercules par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_MA(SREGT, SC_MA)                 Assolement en Maraichage par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_MA(H,SREGT, SC_MA)               Stockage Assolement en Maraichage par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_ME(SREGT, SC_ME)                 Assolement en Melon par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_ME(H,SREGT, SC_ME)               Stockage Assolement en Melon par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_IG(SREGT, SC_IG)                 Assolement en Tubercules par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_IG(H,SREGT, SC_IG)               Stockage Assolement en Tubercules par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_NON(SREGT, SC_NON)               Assolement en non cultivées (Jachères - Friches - Bois) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_NON(H,SREGT, SC_NON)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_FRICHES(SREGT, SC_FRICHES)               Assolement en non cultivées (Jachères - Friches - Bois) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_FRICHES(H,SREGT, SC_FRICHES)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_JA(SREGT, SC_JA)               Assolement en non cultivées (Jachères - Friches - Bois) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_JA(H,SREGT, SC_JA)             Stockage Assolement en non cultivées (Jachères - Friches - Bois) par commune de l'Est Grande-Terre
+
+
+      ASSOL_EGT_PAT(SREGT, SC_PAT)               Assolement en Pâturages par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_PAT(H,SREGT, SC_PAT)             Stockage Assolement en Pâturages par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_PLU(SREGT, SC_PLU)               Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_PLU(H,SREGT, SC_PLU)             Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune de l'Est Grande-Terre
+
+      ASSOL_EGT_TOTAL(SREGT, SC_TOT)             Assolement toutes cultures par commune de l'Est Grande-Terre
+STOCK_ASSOL_EGT_TOTAL(H,SREGT, SC_TOT)           Stockage Assolement toutes cultures par commune de l'Est Grande-Terre
+
+
+      ASSOL_MG_ANA(SRMG, SC_AN)                  Assolement en Ananas par commune de Marie-Galante
+STOCK_ASSOL_MG_ANA(H,SRMG, SC_AN)                Stockage Assolement en Ananas par commune de Marie-Galante
+
+      ASSOL_MG_BAN(SRMG, SC_BAN)                 Assolement en Bananes (banane export et banane plantain) par commune de Marie-Galante
+STOCK_ASSOL_MG_BAN(H,SRMG, SC_BAN)               Stockage Assolement en Bananes (banane export et banane plantain) par commune de Marie-Galante
+
+      ASSOL_MG_BAN_EX(SRMG, SC_BAN_EX)           Assolement en Bananes export par commune de Marie-Galante
+STOCK_ASSOL_MG_BAN_EX(H,SRMG, SC_BAN_EX)         Stockage Assolement en Bananes export par commune de Marie-Galante
+
+      ASSOL_MG_BAN_INT(SRMG, SC_BAN_INT)         Assolement en Bananes export intensive par commune de Marie-Galante
+STOCK_ASSOL_MG_BAN_INT(H,SRMG, SC_BAN_INT)       Stockage Assolement en Bananes export intensive par commune de Marie-Galante
+
+      ASSOL_MG_BAN_SINT(SRMG, SC_BAN_SINT)       Assolement en Bananes export semi-intensive par commune de Marie-Galante
+STOCK_ASSOL_MG_BAN_SINT(H,SRMG, SC_BAN_SINT)     Stockage Assolement en Bananes export semi-intensive par commune de Marie-Galante
+
+      ASSOL_MG_BAN_PER(SRMG, SC_BAN_PER)         Assolement en Bananes export perenne par commune de Marie-Galante
+STOCK_ASSOL_MG_BAN_PER(H,SRMG, SC_BAN_PER)       Stockage Assolement en Bananes export perenne par commune de Marie-Galante
+
+      ASSOL_MG_BAN_IRR(SRMG, SC_BAN_IRR)         Assolement en Bananes export irriguée par commune de Marie-Galante
+STOCK_ASSOL_MG_BAN_IRR(H,SRMG, SC_BAN_IRR)       Stockage Assolement en Bananes export irriguée par commune de Marie-Galante
+
+      ASSOL_MG_BC(SRMG, SC_BC)                   Assolement en Bananes (banane export et banane plantain) par commune de Marie-Galante
+STOCK_ASSOL_MG_BC(H,SRMG, SC_BC)                 Stockage Assolement en Bananes (banane export et banane plantain) par commune de Marie-Galante
+
+      ASSOL_MG_CAN(SRMG, SC_CAN)                 Assolement en Cannes (canne à sucre et canne fibre) par commune de Marie-Galante
+STOCK_ASSOL_MG_CAN(H,SRMG, SC_CAN)               Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de Marie-Galante
+
+      ASSOL_MG_CS(SRMG, SC_CS)                 Assolement en Cannes (canne à sucre et canne fibre) par commune de Marie-Galante
+STOCK_ASSOL_MG_CS(H,SRMG, SC_CS)               Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de Marie-Galante
+
+      ASSOL_MG_CF(SRMG, SC_CF)                 Assolement en Cannes (canne à sucre et canne fibre) par commune de Marie-Galante
+STOCK_ASSOL_MG_CF(H,SRMG, SC_CF)               Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de Marie-Galante
+
+      ASSOL_MG_MAR(SRMG, SC_MAR)                 Assolement en Maraichage & Tubercules par commune de Marie-Galante
+STOCK_ASSOL_MG_MAR(H,SRMG, SC_MAR)               Stockage Assolement en Maraichage & Tubercules par commune de Marie-Galante
+
+      ASSOL_MG_MA(SRMG, SC_MA)                   Assolement en Maraichage par commune de Marie-Galante
+STOCK_ASSOL_MG_MA(H,SRMG, SC_MA)                 Stockage Assolement en Maraichage par commune de Marie-Galante
+
+      ASSOL_MG_ME(SRMG, SC_ME)                   Assolement en Melon par commune de Marie-Galante
+STOCK_ASSOL_MG_ME(H,SRMG, SC_ME)                 Stockage Assolement en Melon par commune de Marie-Galante
+
+      ASSOL_MG_IG(SRMG, SC_IG)                   Assolement en Tubercules par commune de Marie-Galante
+STOCK_ASSOL_MG_IG(H,SRMG, SC_IG)                 Stockage Assolement en Tubercules par commune de Marie-Galante
+
+      ASSOL_MG_NON(SRMG, SC_NON)                 Assolement en non cultivées (Jachères - Friches - Bois) par commune de Marie-Galante
+STOCK_ASSOL_MG_NON(H,SRMG, SC_NON)               Stockage Assolement en non cultivées (Jachères - Friches - Bois)  par commune de Marie-Galante
+
+      ASSOL_MG_FRICHES(SRMG, SC_FRICHES)                 Assolement en non cultivées (Jachères - Friches - Bois) par commune de Marie-Galante
+STOCK_ASSOL_MG_FRICHES(H,SRMG, SC_FRICHES)               Stockage Assolement en non cultivées (Jachères - Friches - Bois)  par commune de Marie-Galante
+
+      ASSOL_MG_JA(SRMG, SC_JA)                 Assolement en non cultivées (Jachères - Friches - Bois) par commune de Marie-Galante
+STOCK_ASSOL_MG_JA(H,SRMG, SC_JA)               Stockage Assolement en non cultivées (Jachères - Friches - Bois)  par commune de Marie-Galante
+
+      ASSOL_MG_PAT(SRMG, SC_PAT)                 Assolement en Pâturages par commune de Marie-Galante
+STOCK_ASSOL_MG_PAT(H,SRMG, SC_PAT)               Stockage Assolement en Pâturages par commune de Marie-Galante
+
+      ASSOL_MG_PLU(SRMG, SC_PLU)                 Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune de Marie-Galante
+STOCK_ASSOL_MG_PLU(H,SRMG, SC_PLU)               Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune de Marie-Galante
+
+      ASSOL_MG_TOTAL(SRMG, SC_TOT)               Assolement toutes cultures par commune de Marie-Galante
+STOCK_ASSOL_MG_TOTAL(H,SRMG, SC_TOT)             Stockage Assolement toutes cultures par commune de Marie-Galante
+
+
+      ASSOL_GWAD_ANA(SR, SC_AN)                  Assolement en Ananas par commune de Guadeloupe
+STOCK_ASSOL_GWAD_ANA(H,SR, SC_AN)                Stockage Assolement en Ananas par commune de Guadeloupe
+
+      ASSOL_GWAD_BAN(SR, SC_BAN)                 Assolement en Bananes (banane export et banane plantain) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BAN(H,SR, SC_BAN)               Stockage Assolement en Bananes (banane export et banane plantain) par commune de Guadeloupe
+
+      ASSOL_GWAD_BAN_EX(SR, SC_BAN_EX)           Assolement en Bananes export par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BAN_EX(H,SR, SC_BAN_EX)         Stockage Assolement en Bananes export par commune de Guadeloupe
+
+      ASSOL_GWAD_BAN_INT(SR, SC_BAN_INT)         Assolement en Bananes export intensive par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BAN_INT(H,SR, SC_BAN_INT)       Stockage Assolement en Bananes export intensive par commune de Guadeloupe
+
+      ASSOL_GWAD_BAN_SINT(SR, SC_BAN_SINT)       Assolement en Bananes export semi-intensive par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BAN_SINT(H,SR, SC_BAN_SINT)     Stockage Assolement en Bananes export semi-intensive par commune de Guadeloupe
+
+      ASSOL_GWAD_BAN_PER(SR, SC_BAN_PER)         Assolement en Bananes export perenne par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BAN_PER(H,SR, SC_BAN_PER)       Stockage Assolement en Bananes export perenne par commune de Guadeloupe
+
+      ASSOL_GWAD_BAN_IRR(SR, SC_BAN_IRR)         Assolement en Bananes export irriguée par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BAN_IRR(H,SR, SC_BAN_IRR)       Stockage Assolement en Bananes export irriguée par commune de Guadeloupe
+
+      ASSOL_GWAD_BC(SR, SC_BC)                   Assolement en Bananes (banane export et banane plantain) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_BC(H,SR, SC_BC)                 Stockage Assolement en Bananes (banane export et banane plantain) par commune de Guadeloupe
+
+      ASSOL_GWAD_CAN(SR, SC_CAN)                 Assolement en Cannes (canne à sucre et canne fibre) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_CAN(H,SR, SC_CAN)               Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de Guadeloupe
+
+      ASSOL_GWAD_CS(SR, SC_CS)                   Assolement en Cannes (canne à sucre et canne fibre) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_CS(H,SR, SC_CS)                 Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de Guadeloupe
+
+      ASSOL_GWAD_CF(SR, SC_CF)                   Assolement en Cannes (canne à sucre et canne fibre) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_CF(H,SR, SC_CF)                 Stockage Assolement en Cannes (canne à sucre et canne fibre) par commune de Guadeloupe
+
+      ASSOL_GWAD_MAR(SR, SC_MAR)                 Assolement en Maraichage & Tubercules par commune de Guadeloupe
+STOCK_ASSOL_GWAD_MAR(H,SR, SC_MAR)               Stockage Assolement en Maraichage & Tubercules par commune de Guadeloupe
+
+      ASSOL_GWAD_MA(SR, SC_MA)                   Assolement en Maraichage par commune de Guadeloupe
+STOCK_ASSOL_GWAD_MA(H,SR, SC_MA)                 Stockage Assolement en Maraichage par commune de Guadeloupe
+
+      ASSOL_GWAD_ME(SR, SC_ME)                   Assolement en Melon par commune de Guadeloupe
+STOCK_ASSOL_GWAD_ME(H,SR, SC_ME)                 Stockage Assolement en Melon par commune de Guadeloupe
+
+      ASSOL_GWAD_IG(SR, SC_IG)                   Assolement en Tubercules par commune de Guadeloupe
+STOCK_ASSOL_GWAD_IG(H,SR, SC_IG)                 Stockage Assolement en Tubercules par commune de Guadeloupe
+
+      ASSOL_GWAD_NON(SR, SC_NON)                 Assolement en non cultivées (Jachères - Friches - Bois) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_NON(H,SR, SC_NON)               Stockage Assolement en non cultivées (Jachères - Friches - Bois)  par commune de Guadeloupe
+
+      ASSOL_GWAD_FRICHES(SR, SC_FRICHES)                 Assolement en non cultivées (Jachères - Friches - Bois) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_FRICHES(H,SR, SC_FRICHES)               Stockage Assolement en non cultivées (Jachères - Friches - Bois)  par commune de Guadeloupe
+
+      ASSOL_GWAD_JA(SR, SC_JA)                 Assolement en non cultivées (Jachères - Friches - Bois) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_JA(H,SR, SC_JA)               Stockage Assolement en non cultivées (Jachères - Friches - Bois)  par commune de Guadeloupe
+
+
+      ASSOL_GWAD_PAT(SR, SC_PAT)                 Assolement en Pâturages par commune de Guadeloupe
+STOCK_ASSOL_GWAD_PAT(H,SR, SC_PAT)               Stockage Assolement en Pâturages par commune de Guadeloupe
+
+      ASSOL_GWAD_PLU(SR, SC_PLU)                 Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune de Guadeloupe
+STOCK_ASSOL_GWAD_PLU(H,SR, SC_PLU)               Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) par commune de Guadeloupe
+
+      ASSOL_GWAD_TOTAL(SR, SC_TOT)               Assolement toutes cultures par commune de Guadeloupe
+STOCK_ASSOL_GWAD_TOTAL(H,SR, SC_TOT)             Stockage Assolement toutes cultures par commune de Guadeloupe
+
+
+      ASSOL_SOBT_tot_ANA                         Assolement en Ananas du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_ANA(H)                      Stockage Assolement en Ananas du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BAN                         Assolement en Bananes (banane export et banane plantain) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BAN(H)                      Stockage Assolement en Bananes (banane export et banane plantain) du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BAN_EX                      Assolement en Bananes export du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BAN_EX(H)                   Stockage Assolement en Bananes export du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BAN_INT                     Assolement en Bananes export intensive du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BAN_INT(H)                  Stockage Assolement en Bananes export intensive du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BAN_SINT                    Assolement en Bananes export semi-intensive du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BAN_SINT(H)                 Stockage Assolement en Bananes export  semi-intensive du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BAN_PER                     Assolement en Bananes export perenne du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BAN_PER(H)                  Stockage Assolement en Bananes export perenne du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BAN_IRR                     Assolement en Bananes export irriguée du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BAN_IRR(H)                  Stockage Assolement en Bananes export irriguée du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_BC                          Assolement en Bananes plantain du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_BC(H)                       Stockage Assolement en Bananes plantain du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_CAN                         Assolement en Cannes (canne à sucre et canne fibre) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_CAN(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_CS                          Assolement en Cannes (canne à sucre et canne fibre) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_CS(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_CF                          Assolement en Cannes (canne à sucre et canne fibre) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_CF(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_MAR                         Assolement en Maraichage & Tubercules du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_MAR(H)                      Stockage Assolement en Maraichage & Tubercules du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_MA                          Assolement en Maraichage du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_MA(H)                       Stockage Assolement en Maraichag du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_ME                          Assolement en Melon du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_ME(H)                       Stockage Assolement en Melon du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_IG                          Assolement en Tubercules du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_IG(H)                       Stockage Assolement en Tubercules du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_NON                         Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_NON(H)                      Stockage Assolement en non cultivées du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_FRICHES                         Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_FRICHES(H)                      Stockage Assolement en non cultivées du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_JA                         Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_JA(H)                      Stockage Assolement en non cultivées du Sud-Ouest Basse-Terre
+
+
+      ASSOL_SOBT_tot_PAT                         Assolement en Pâturages du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_PAT(H)                      Stockage Assolement en Pâturages du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_PLU                         Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_PLU(H)                      Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Sud-Ouest Basse-Terre
+
+      ASSOL_SOBT_tot_TOTAL                       Assolement toutes cultures du Sud-Ouest Basse-Terre
+STOCK_ASSOL_SOBT_tot_TOTAL(H)                    Stockage Assolement toutes cultures du Sud-Ouest Basse-Terre
+
+
+      ASSOL_SEBT_tot_ANA                         Assolement en Ananas du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_ANA(H)                      Stockage Assolement en Ananas du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BAN                         Assolement en Bananes (banane export et banane plantain) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BAN(H)                      Stockage Assolement en Bananes (banane export et banane plantain) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BAN_EX                      Assolement en Bananes export du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BAN_EX(H)                   Stockage Assolement en Bananes export du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BAN_INT                     Assolement en Bananes export intensive du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BAN_INT(H)                  Stockage Assolement en Bananes export intensive du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BAN_SINT                    Assolement en Bananes export semi-intensive du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BAN_SINT(H)                 Stockage Assolement en Bananes export semi-intensive du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BAN_PER                     Assolement en Bananes export perenne du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BAN_PER(H)                  Stockage Assolement en Bananes export perenne du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BAN_IRR                     Assolement en Bananes export irriguée du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BAN_IRR(H)                  Stockage Assolement en Bananes export irriguée du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_BC                          Assolement en Bananes plantain du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_BC(H)                       Stockage Assolement en Bananes plantain du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_CAN                         Assolement en Cannes (canne à sucre et canne fibre) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_CAN(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_CS                         Assolement en Cannes (canne à sucre et canne fibre) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_CS(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_CF                         Assolement en Cannes (canne à sucre et canne fibre) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_CF(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_MAR                         Assolement en Maraichage & Tubercules du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_MAR(H)                      Stockage Assolement en Maraichage & Tubercules du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_MA                          Assolement en Maraichage du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_MA(H)                       Stockage Assolement en Maraichage du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_ME                          Assolement en Melon du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_ME(H)                       Stockage Assolement en Melon du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_IG                          Assolement en Tubercules du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_IG(H)                       Stockage Assolement en Tubercules du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_NON                         Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_NON(H)                      Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_FRICHES                         Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_FRICHES(H)                      Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_JA                         Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_JA(H)                      Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_PAT                         Assolement en Pâturages du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_PAT(H)                      Stockage Assolement en Pâturages du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_PLU                         Assolement toutes cultures du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_PLU(H)                      Stockage Assolement toutes cultures du Sud-Est Basse-Terre
+
+      ASSOL_SEBT_tot_TOTAL                       Assolement toutes cultures du Sud-Est Basse-Terre
+STOCK_ASSOL_SEBT_tot_TOTAL(H)                    Stockage Assolement toutes cultures du Sud-Est Basse-Terre
+
+
+      ASSOL_NBT_tot_ANA                          Assolement en Ananas du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_ANA(H)                       Stockage Assolement en Ananas du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BAN                          Assolement en Bananes (banane export et banane plantain) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BAN(H)                       Stockage Assolement en Bananes (banane export et banane plantain) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BAN_EX                       Assolement en Bananes export du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BAN_EX(H)                    Stockage Assolement en Bananes export du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BAN_INT                      Assolement en Bananes export intensive du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BAN_INT(H)                   Stockage Assolement en Bananes export intensive du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BAN_SINT                     Assolement en Bananes export semi-intensive du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BAN_SINT(H)                  Stockage Assolement en Bananes export semi-intensive du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BAN_PER                      Assolement en Bananes export perenne du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BAN_PER(H)                   Stockage Assolement en Bananes perenne export du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BAN_IRR                      Assolement en Bananes export irriguée du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BAN_IRR(H)                   Stockage Assolement en Bananes export irriguée du Nord Basse-Terre
+
+      ASSOL_NBT_tot_BC                           Assolement en Bananes plantain du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_BC(H)                        Stockage Assolement en Bananes plantain du Nord Basse-Terre
+
+      ASSOL_NBT_tot_CAN                          Assolement en Cannes (canne à sucre et canne fibre) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_CAN(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_CS                          Assolement en Cannes (canne à sucre et canne fibre) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_CS(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_CF                          Assolement en Cannes (canne à sucre et canne fibre) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_CF(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_MAR                          Assolement en Maraichage & Tubercules du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_MAR(H)                       Stockage Assolement en Maraichage & Tubercules du Nord Basse-Terre
+
+      ASSOL_NBT_tot_MA                           Assolement en Maraichage du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_MA(H)                        Stockage Assolement en Maraichage du Nord Basse-Terre
+
+      ASSOL_NBT_tot_ME                           Assolement en Melon du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_ME(H)                        Stockage Assolement en Melon du Nord Basse-Terre
+
+      ASSOL_NBT_tot_IG                           Assolement en Tubercules du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_IG(H)                        Stockage Assolement Tubercules du Nord Basse-Terre
+
+      ASSOL_NBT_tot_NON                          Assolement en non cultivées (Jachères - Friches - Bois) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_NON(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_FRICHES                          Assolement en non cultivées (Jachères - Friches - Bois) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_FRICHES(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_JA                          Assolement en non cultivées (Jachères - Friches - Bois) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_JA(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Nord Basse-Terre
+
+      ASSOL_NBT_tot_PAT                          Assolement en Pâturages du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_PAT(H)                       Stockage Assolement en Pâturages du Nord Basse-Terre
+
+      ASSOL_NBT_tot_PLU                          Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_PLU(H)                       Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers)du Nord Basse-Terre
+
+      ASSOL_NBT_tot_TOTAL                        Assolement toutes cultures du Nord Basse-Terre
+STOCK_ASSOL_NBT_tot_TOTAL(H)                     Stockage Assolement toutes cultures du Nord Basse-Terre
+
+
+      ASSOL_NGT_tot_ANA                          Assolement en Ananas du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_ANA(H)                       Stockage Assolement en Ananas du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BAN                          Assolement en Bananes (banane export et banane plantain) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BAN(H)                       Stockage Assolement en Bananes (banane export et banane plantain) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BAN_EX                       Assolement en Bananes export du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BAN_EX(H)                    Stockage Assolement en Bananes export du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BAN_INT                      Assolement en Bananes export intensive du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BAN_INT(H)                   Stockage Assolement en Bananes export intensive du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BAN_SINT                     Assolement en Bananes export semi-intensive du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BAN_SINT(H)                  Stockage Assolement en Bananes export semi-intensive du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BAN_PER                      Assolement en Bananes export perenne du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BAN_PER(H)                   Stockage Assolement en Bananes export perenne du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BAN_IRR                      Assolement en Bananes export irriguée du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BAN_IRR(H)                   Stockage Assolement en Bananes export irriguée du Nord Grande-Terre
+
+      ASSOL_NGT_tot_BC                           Assolement en Bananes plantain du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_BC(H)                        Stockage Assolement en Bananes plantain du Nord Grande-Terre
+
+      ASSOL_NGT_tot_CAN                          Assolement en Cannes (canne à sucre et canne fibre) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_CAN(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_CS                          Assolement en Cannes (canne à sucre et canne fibre) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_CS(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_CF                          Assolement en Cannes (canne à sucre et canne fibre) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_CF(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_MAR                          Assolement en Maraichage & Tubercules du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_MAR(H)                       Stockage Assolement en Maraichage & Tubercules du Nord Grande-Terre
+
+      ASSOL_NGT_tot_MA                           Assolement en Maraichage du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_MA(H)                        Stockage Assolement en Maraichage du Nord Grande-Terre
+
+      ASSOL_NGT_tot_ME                           Assolement en Melon du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_ME(H)                        Stockage Assolement en Melon du Nord Grande-Terre
+
+      ASSOL_NGT_tot_IG                           Assolement en Tubercules du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_IG(H)                        Stockage Assolement en Tubercules du Nord Grande-Terre
+
+      ASSOL_NGT_tot_NON                          Assolement en non cultivées (Jachères - Friches - Bois) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_NON(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_FRICHES                          Assolement en non cultivées (Jachères - Friches - Bois) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_FRICHES(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_JA                          Assolement en non cultivées (Jachères - Friches - Bois) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_JA(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_PAT                          Assolement en Pâturages du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_PAT(H)                       Stockage Assolement en Pâturages du Nord Grande-Terre
+
+      ASSOL_NGT_tot_PLU                          Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_PLU(H)                       Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Nord Grande-Terre
+
+      ASSOL_NGT_tot_TOTAL                        Assolement toutes cultures du Nord Grande-Terre
+STOCK_ASSOL_NGT_tot_TOTAL(H)                     Stockage Assolement toutes cultures du Nord Grande-Terre
+
+
+      ASSOL_CGT_tot_ANA                          Assolement en Ananas du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_ANA(H)                       Stockage Assolement en Ananas du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BAN                          Assolement en Bananes (banane export et banane plantain) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BAN(H)                       Stockage Assolement en Bananes (banane export et banane plantain) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BAN_EX                       Assolement en Bananes export du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BAN_EX(H)                    Stockage Assolement en Bananes export du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BAN_INT                      Assolement en Bananes export intensive du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BAN_INT(H)                   Stockage Assolement en Bananes export intensive du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BAN_SINT                     Assolement en Bananes export semi-intensive du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BAN_SINT(H)                  Stockage Assolement en Bananes export semi-intensive du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BAN_PER                      Assolement en Bananes export perenne du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BAN_PER(H)                   Stockage Assolement en Bananes export perenne du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BAN_IRR                      Assolement en Bananes export irriguée du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BAN_IRR(H)                   Stockage Assolement en Bananes export irriguée du Centre Grande-Terre
+
+      ASSOL_CGT_tot_BC                           Assolement en Bananes plantain du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_BC(H)                        Stockage Assolement en Bananes plantain du Centre Grande-Terre
+
+      ASSOL_CGT_tot_CAN                          Assolement en Cannes (canne à sucre et canne fibre) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_CAN(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_CS                          Assolement en Cannes (canne à sucre et canne fibre) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_CS(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_CF                          Assolement en Cannes (canne à sucre et canne fibre) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_CF(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_MAR                          Assolement en Maraichage & Tubercules du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_MAR(H)                       Stockage Assolement en Maraichage & Tubercules du Centre Grande-Terre
+
+      ASSOL_CGT_tot_MA                           Assolement en Maraichage du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_MA(H)                        Stockage Assolement en Maraichage du Centre Grande-Terre
+
+      ASSOL_CGT_tot_ME                           Assolement en Melon du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_ME(H)                        Stockage Assolement en Melon du Centre Grande-Terre
+
+      ASSOL_CGT_tot_IG                           Assolement en Tubercules du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_IG(H)                        Stockage Assolement en Tubercules du Centre Grande-Terre
+
+      ASSOL_CGT_tot_NON                          Assolement en non cultivées (Jachères - Friches - Bois) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_NON(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_FRICHES                          Assolement en non cultivées (Jachères - Friches - Bois) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_FRICHES(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_JA                          Assolement en non cultivées (Jachères - Friches - Bois) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_JA(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) du Centre Grande-Terre
+
+      ASSOL_CGT_tot_PAT                          Assolement en Pâturages du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_PAT(H)                       Stockage Assolement en Pâturages du Centre Grande-Terre
+
+      ASSOL_CGT_tot_PLU                          Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Centre Grande-Terre
+STOCK_ASSOL_CGT_tot_PLU(H)                       Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) du Centre Grande-Terre
+
+      ASSOL_CGT_TOT_TOTAL                        Assolement toutes cultures du Centre Grande-Terre
+STOCK_ASSOL_CGT_TOT_TOTAL(H)                     Stockage Assolement toutes cultures du Centre Grande-Terre
+
+
+      ASSOL_EGT_tot_ANA                          Assolement en Ananas de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_ANA(H)                       Stockage Assolement en Ananas de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BAN                          Assolement en Bananes (banane export et banane plantain) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BAN(H)                       Stockage Assolement en Bananes (banane export et banane plantain) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BAN_EX                       Assolement en Bananes export de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BAN_EX(H)                    Stockage Assolement en Bananes export de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BAN_INT                      Assolement en Bananes export intensive de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BAN_INT(H)                   Stockage Assolement en Bananes export intensive de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BAN_SINT                     Assolement en Bananes export semi-intensive de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BAN_SINT(H)                  Stockage Assolement en Bananes export semi-intensive de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BAN_PER                      Assolement en Bananes export perenne de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BAN_PER(H)                   Stockage Assolement en Bananes export perenne de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BAN_IRR                      Assolement en Bananes export irriguée de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BAN_IRR(H)                   Stockage Assolement en Bananes export irriguée de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_BC                           Assolement en Bananes plantain de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_BC(H)                        Stockage Assolement en Bananes plantain de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_CAN                          Assolement en Cannes (canne à sucre et canne fibre) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_CAN(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_CS                          Assolement en Cannes (canne à sucre et canne fibre) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_CS(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_CF                          Assolement en Cannes (canne à sucre et canne fibre) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_CF(H)                       Stockage Assolement en Cannes (canne à sucre et canne fibre) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_MAR                          Assolement en Maraichage & Tubercules de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_MAR(H)                       Stockage Assolement en Maraichage & Tubercules de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_MA                           Assolement en Maraichage de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_MA(H)                        Stockage Assolement en Maraichage de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_ME                           Assolement en Melon de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_ME(H)                        Stockage Assolement en Melon de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_IG                           Assolement en Tubercules de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_IG(H)                        Stockage Assolement en Tubercules de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_NON                          Assolement en non cultivées (Jachères - Friches - Bois) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_NON(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_FRICHES                          Assolement en non cultivées (Jachères - Friches - Bois) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_FRICHES(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_JA                          Assolement en non cultivées (Jachères - Friches - Bois) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_JA(H)                       Stockage Assolement en non cultivées (Jachères - Friches - Bois) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_PAT                          Assolement en Pâturages de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_PAT(H)                       Stockage Assolement en Pâturages de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_PLU                          Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_PLU(H)                       Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) de l'Est Grande-Terre
+
+      ASSOL_EGT_tot_TOTAL                        Assolement toutes cultures de l'Est Grande-Terre
+STOCK_ASSOL_EGT_tot_TOTAL(H)                     Stockage Assolement toutes cultures de l'Est Grande-Terre
+
+
+      ASSOL_MG_tot_ANA                           Assolement en Ananas de Marie-Galante
+STOCK_ASSOL_MG_tot_ANA(H)                        Stockage Assolement en Ananas de Marie-Galante
+
+      ASSOL_MG_tot_BAN                           Assolement en Bananes (banane export et banane plantain) de Marie-Galante
+STOCK_ASSOL_MG_tot_BAN(H)                        Stockage Assolement en Bananes (banane export et banane plantain) de Marie-Galante
+
+      ASSOL_MG_tot_BAN_EX                        Assolement en Bananes export de Marie-Galante
+STOCK_ASSOL_MG_tot_BAN_EX(H)                     Stockage Assolement en Bananes export de Marie-Galante
+
+      ASSOL_MG_tot_BAN_INT                       Assolement en Bananes export intensive de Marie-Galante
+STOCK_ASSOL_MG_tot_BAN_INT(H)                    Stockage Assolement en Bananes export intensive de Marie-Galante
+
+      ASSOL_MG_tot_BAN_SINT                      Assolement en Bananes export semi-intensive de Marie-Galante
+STOCK_ASSOL_MG_tot_BAN_SINT(H)                   Stockage Assolement en Bananes export semi-intensive de Marie-Galante
+
+      ASSOL_MG_tot_BAN_PER                       Assolement en Bananes export perenne de Marie-Galante
+STOCK_ASSOL_MG_tot_BAN_PER(H)                    Stockage Assolement en Bananes export perenne de Marie-Galante
+
+      ASSOL_MG_tot_BAN_IRR                       Assolement en Bananes export irriguée de Marie-Galante
+STOCK_ASSOL_MG_tot_BAN_IRR(H)                    Stockage Assolement en Bananes export irriguée de Marie-Galante
+
+      ASSOL_MG_tot_BC                            Assolement en Bananes plantain de Marie-Galante
+STOCK_ASSOL_MG_tot_BC(H)                         Stockage Assolement en Bananes plantain de Marie-Galante
+
+      ASSOL_MG_tot_CAN                           Assolement en Cannes (canne à sucre et canne fibre) de Marie-Galante
+STOCK_ASSOL_MG_tot_CAN(H)                        Stockage Assolement en Cannes (canne à sucre et canne fibre) de Marie-Galante
+
+      ASSOL_MG_tot_CS                           Assolement en Cannes (canne à sucre et canne fibre) de Marie-Galante
+STOCK_ASSOL_MG_tot_CS(H)                        Stockage Assolement en Cannes (canne à sucre et canne fibre) de Marie-Galante
+
+      ASSOL_MG_tot_CF                           Assolement en Cannes (canne à sucre et canne fibre) de Marie-Galante
+STOCK_ASSOL_MG_tot_CF(H)                        Stockage Assolement en Cannes (canne à sucre et canne fibre) de Marie-Galante
+
+      ASSOL_MG_tot_MAR                           Assolement en Maraichage & Tubercules de Marie-Galante
+STOCK_ASSOL_MG_tot_MAR(H)                        Stockage Assolement en Maraichage & Tubercules de Marie-Galante
+
+      ASSOL_MG_tot_MA                            Assolement en Maraichage de Marie-Galante
+STOCK_ASSOL_MG_tot_MA(H)                         Stockage Assolement en Maraichage de Marie-Galante
+
+      ASSOL_MG_tot_ME                            Assolement en Melon de Marie-Galante
+STOCK_ASSOL_MG_tot_ME(H)                         Stockage Assolement en Melon de Marie-Galante
+
+      ASSOL_MG_tot_IG                            Assolement en Tubercules de Marie-Galante
+STOCK_ASSOL_MG_tot_IG(H)                         Stockage Assolement en Tubercules de Marie-Galante
+
+      ASSOL_MG_tot_NON                           Assolement en non cultivées (Jachères - Friches - Bois) de Marie-Galante
+STOCK_ASSOL_MG_tot_NON(H)                        Stockage Assolement en en non cultivées (Jachères - Friches - Bois) de Marie-Galante
+
+      ASSOL_MG_tot_FRICHES                           Assolement en non cultivées (Jachères - Friches - Bois) de Marie-Galante
+STOCK_ASSOL_MG_tot_FRICHES(H)                        Stockage Assolement en en non cultivées (Jachères - Friches - Bois) de Marie-Galante
+
+      ASSOL_MG_tot_JA                           Assolement en non cultivées (Jachères - Friches - Bois) de Marie-Galante
+STOCK_ASSOL_MG_tot_JA(H)                        Stockage Assolement en en non cultivées (Jachères - Friches - Bois) de Marie-Galante
+
+      ASSOL_MG_tot_PAT                           Assolement en Pâturages de Marie-Galante
+STOCK_ASSOL_MG_tot_PAT(H)                        Stockage Assolement en Pâturages de Marie-Galante
+
+      ASSOL_MG_tot_PLU                           Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) de Marie-Galante
+STOCK_ASSOL_MG_tot_PLU(H)                        Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) de Marie-Galante
+
+      ASSOL_MG_tot_TOTAL                         Assolement toutes cultures de Marie-Galante
+STOCK_ASSOL_MG_tot_TOTAL(H)                      Stockage Assolement toutes cultures de Marie-Galante
+
+
+      ASSOL_GWAD_tot_ANA                         Assolement en Ananas de Guadeloupe
+STOCK_ASSOL_GWAD_tot_ANA(H)                      Stockage Assolement en Ananas de Guadeloupe
+
+      ASSOL_GWAD_tot_BAN                         Assolement en Bananes (banane export et banane plantain) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BAN(H)                      Stockage Assolement en Bananes (banane export et banane plantain) de Guadeloupe
+
+      ASSOL_GWAD_tot_BAN_EX                      Assolement en Bananes export de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BAN_EX(H)                   Stockage Assolement en Bananes export de Guadeloupe
+
+      ASSOL_GWAD_tot_BAN_INT                     Assolement en Bananes export intensive de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BAN_INT(H)                  Stockage Assolement en Bananes export intensive de Guadeloupe
+
+      ASSOL_GWAD_tot_BAN_SINT                    Assolement en Bananes export semi-intensive de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BAN_SINT(H)                 Stockage Assolement en Bananes export semi-intensive de Guadeloupe
+
+      ASSOL_GWAD_tot_BAN_PER                     Assolement en Bananes export perenne de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BAN_PER(H)                  Stockage Assolement en Bananes export perenne de Guadeloupe
+
+      ASSOL_GWAD_tot_BAN_IRR                     Assolement en Bananes export irriguée de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BAN_IRR(H)                  Stockage Assolement en Bananes export irriguée de Guadeloupe
+
+      ASSOL_GWAD_tot_BC                          Assolement en Bananes plantain de Guadeloupe
+STOCK_ASSOL_GWAD_tot_BC(H)                       Stockage Assolement en Bananes plantain de Guadeloupe
+
+      ASSOL_GWAD_tot_CAN                         Assolement en Cannes (canne à sucre et canne fibre) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_CAN(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) de Guadeloupe
+
+      ASSOL_GWAD_tot_CS                         Assolement en Cannes (canne à sucre et canne fibre) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_CS(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) de Guadeloupe
+
+      ASSOL_GWAD_tot_CF                         Assolement en Cannes (canne à sucre et canne fibre) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_CF(H)                      Stockage Assolement en Cannes (canne à sucre et canne fibre) de Guadeloupe
+
+      ASSOL_GWAD_tot_MAR                         Assolement en Maraichage & Tubercules de Guadeloupe
+STOCK_ASSOL_GWAD_tot_MAR(H)                      Stockage Assolement en Maraichage & Tubercules de Guadeloupe
+
+      ASSOL_GWAD_tot_MA                          Assolement en Maraichage de Guadeloupe
+STOCK_ASSOL_GWAD_tot_MA(H)                       Stockage Assolement en Maraichage de Guadeloupe
+
+      ASSOL_GWAD_tot_ME                          Assolement en Melon de Guadeloupe
+STOCK_ASSOL_GWAD_tot_ME(H)                       Stockage Assolement en Melon de Guadeloupe
+
+      ASSOL_GWAD_tot_IG                          Assolement en Tubercules de Guadeloupe
+STOCK_ASSOL_GWAD_tot_IG(H)                       Stockage Assolement en Tubercules de Guadeloupe
+
+      ASSOL_GWAD_tot_NON                         Assolement en non cultivées (Jachères - Friches - Bois) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_NON(H)                      Stockage Assolement en en non cultivées (Jachères - Friches - Bois) de Guadeloupe
+
+      ASSOL_GWAD_tot_FRICHES                         Assolement en non cultivées (Jachères - Friches - Bois) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_FRICHES(H)                      Stockage Assolement en en non cultivées (Jachères - Friches - Bois) de Guadeloupe
+
+      ASSOL_GWAD_tot_JA                         Assolement en non cultivées (Jachères - Friches - Bois) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_JA(H)                      Stockage Assolement en en non cultivées (Jachères - Friches - Bois) de Guadeloupe
+
+      ASSOL_GWAD_tot_PAT                         Assolement en Pâturages de Guadeloupe
+STOCK_ASSOL_GWAD_tot_PAT(H)                      Stockage Assolement en Pâturages de Guadeloupe
+
+      ASSOL_GWAD_tot_PLU                         Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) de Guadeloupe
+STOCK_ASSOL_GWAD_tot_PLU(H)                      Stockage Assolement en pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers) de Guadeloupe
+
+      ASSOL_GWAD_tot_TOTAL                       Assolement toutes cultures de Guadeloupe
+STOCK_ASSOL_GWAD_tot_TOTAL(H)                    Stockage Assolement toutes cultures de Guadeloupe
+
+
+      SURF_Parc(P)                               Surface agricole par parcelle
+STOCK_SURF_Parc(H,P)                             Stockage Surface agricole par parcelle
+
+      SURF_Cult(C)                               Surface agricole par culture
+STOCK_SURF_Cult(H,C)                             Stockage Surface agricole par culture
+
+      SURF_Expl(E)                               Surface agricole par exploitation
+STOCK_SURF_Expl(H,E)                             Stockage Surface agricole par exploitation
+
+      SURF_Reg(R)                                Surface agricole par commune
+STOCK_SURF_Reg(H,R)                              Stockage Surface agricole par commune
+
+      SURF_Gwad                                  Surface agricole de Guadeloupe
+STOCK_SURF_Gwad(H)                               Stockage Surface agricole de Guadeloupe
+
+      SURF_BV(BV)                                Surface agricole par bassin versant
+STOCK_SURF_BV(H,BV)                              Stockage Surface agricole par bassin versant
+
+*      SURF_RIV(RIV)                              Surface agricole par bordure de rivière
+*STOCK_SURF_RIV(H,RIV)                            Stockage Surface agricole par bordure de rivière
+
+      SURF_CPT(CPT)                              Surface agricole par bassin de captage
+STOCK_SURF_CPT(H,CPT)                            Stockage Surface agricole par bassin de captage
+
+
+      SURF_SOBT(SRSOBT)                          Surface agricole par commune du Sud-Ouest Basse-Terre
+STOCK_SURF_SOBT(H,SRSOBT)                        Stockage Surface agricole par commune du Sud-Ouest Basse-Terre
+
+      SURF_SEBT(SRSEBT)                          Surface agricole par commune du Sud-Est Basse-Terre
+STOCK_SURF_SEBT(H,SRSEBT)                        Stockage Surface agricole par commune du Sud-Est Basse-Terre
+
+      SURF_NBT(SRNBT)                            Surface agricole par commune du Nord Basse-Terre
+STOCK_SURF_NBT(H,SRNBT)                          Stockage Surface agricole par commune du Nord Basse-Terre
+
+      SURF_NGT(SRNGT)                            Surface agricole par commune du Nord Grande-Terre
+STOCK_SURF_NGT(H,SRNGT)                          Stockage Surface agricole par commune du Nord Grande-Terre
+
+      SURF_CGT(SRCGT)                            Surface agricole par commune du Centre Grande-Terre
+STOCK_SURF_CGT(H,SRCGT)                          Stockage Surface agricole par commune du Centre Grande-Terre
+
+      SURF_EGT(SREGT)                            Surface agricole par commune de l'Est Grande-Terre
+STOCK_SURF_EGT(H,SREGT)                          Stockage Surface agricole par commune de l'Est Grande-Terre
+
+      SURF_MG(SRMG)                              Surface agricole par commune de Marie-Galante
+STOCK_SURF_MG(H,SRMG)                            Stockage Surface agricole par commune de Marie-Galante
+
+
+      SURF_SOBT_tot                              Surface agricole du Sud-Ouest Basse-Terre
+STOCK_SURF_SOBT_tot(H)                           Stockage Surface agricole du Sud-Ouest Basse-Terre
+
+      SURF_SEBT_tot                              Surface agricole du Sud-Est Basse-Terre
+STOCK_SURF_SEBT_tot(H)                           Stockage Surface agricole du Sud-Est Basse-Terre
+
+      SURF_NBT_tot                               Surface agricole du Nord Basse-Terre
+STOCK_SURF_NBT_tot(H)                            Stockage Surface agricole du Nord Grande-Terre
+
+      SURF_NGT_tot                               Surface agricole du Nord Grande-Terre
+STOCK_SURF_NGT_tot(H)                            Stockage Surface agricole du Nord Grande-Terre
+
+      SURF_CGT_tot                               Surface agricole du Centre Grande-Terre
+STOCK_SURF_CGT_tot(H)                            Stockage Surface agricole du Centre Grande-Terre
+
+      SURF_EGT_tot                               Surface agricole de l'Est Grande-Terre
+STOCK_SURF_EGT_tot(H)                            Stockage Surface agricole de l'Est Grande-Terre
+
+      SURF_MG_tot                                Surface agricole de Marie-Galante
+STOCK_SURF_MG_tot(H)                             Stockage Surface agricole de Marie-Galante
+
+
+
+* ooooooo déclaration des paramètres pour les types d'exploitations ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      SURF_CUL(E)                                Surface en culture par exploitation
+STOCK_SURF_CUL(H,E)                              Stockage Surface en culture par exploitation
+
+      SURF_CAN(E)                                Surface en canne sucre rhum fibre par exploitation
+STOCK_SURF_CAN(H,E)                              Stockage Surface en canne sucre rhum fibre par exploitation
+
+      SURF_CS(E)                                Surface en canne sucre rhum fibre par exploitation
+STOCK_SURF_CS(H,E)                              Stockage Surface en canne sucre rhum fibre par exploitation
+
+      SURF_CF(E)                                Surface en canne sucre rhum fibre par exploitation
+STOCK_SURF_CF(H,E)                              Stockage Surface en canne sucre rhum fibre par exploitation
+
+      SURF_BAN(E)                                Surface en banane export par exploitation
+STOCK_SURF_BAN(H,E)                              Stockage Surface en banane export par exploitation
+
+      SURF_PAT(E)                                Surface en paturage par exploitation
+STOCK_SURF_PAT(H,E)                              Stockage Surface en paturage par exploitation
+
+      SURF_NON(E)                                Surface en non cultivée par exploitation
+STOCK_SURF_NON(H,E)                              Stockage Surface en non cultivée par exploitation
+
+      SURF_FRICHES(E)                                Surface en non cultivée par exploitation
+STOCK_SURF_FRICHES(H,E)                              Stockage Surface en non cultivée par exploitation
+
+      SURF_JA(E)                                Surface en non cultivée par exploitation
+STOCK_SURF_JA(H,E)                              Stockage Surface en non cultivée par exploitation
+
+      SURF_ANA(E)                                Surface en ananas par exploitation
+STOCK_SURF_ANA(H,E)                              Stockage Surface en ananas par exploitation
+
+      SURF_PLU(E)                                Surface en cultures pluriannuelles autres par exploitation
+STOCK_SURF_PLU(H,E)                              Stockage Surface en cultures pluriannuelles autres par exploitation
+
+      SURF_MAR(E)                                Surface en maraichage par exploitation
+STOCK_SURF_MAR(H,E)                              Stockage Surface en maraichage par exploitation
+
+      SURF_BC(E)                                 Surface en banane plantain par exploitation
+STOCK_SURF_BC(H,E)                               Stockage Surface en banane plantain par exploitation
+
+      SURF_TT(E)                                 Surface en tubercules tropicaux sur l'exploitation
+STOCK_SURF_TT(H,E)                               Stockage Surface en tubercules tropicaux sur l'exploitation
+
+
+      PART_CAN(E)                                Part de la canne par exploitation
+STOCK_PART_CAN(H,E)                              Stockage Part de la canne par exploitation
+
+      PART_BAN(E)                                Part de la banane par exploitation
+STOCK_PART_BAN(H,E)                              Stockage Part de la banane par exploitation
+
+      PART_PAT(E)                                Part de la paturage par exploitation
+STOCK_PART_PAT(H,E)                              Stockage Part de la paturage par exploitation
+
+      PART_NON(E)                                Part de la non cultivée par exploitation
+STOCK_PART_NON(H,E)                              Stockage Part de la non cultivée par exploitation
+
+      PART_ANA(E)                                Part de l'ananas par exploitation
+STOCK_PART_ANA(H,E)                              Stockage Part de l'ananas par exploitation
+
+      PART_PLU(E)                                Part des cultures pluriannuelles autres par exploitation
+STOCK_PART_PLU(H,E)                              Stockage Part des cultures pluriannuelles autres par exploitation
+
+      PART_MAR(E)                                Part du maraichage par exploitation
+STOCK_PART_MAR(H,E)                              Stockage Part du maraichage par exploitation
+
+      PART_BC(E)                                 Part de la banane plantain par exploitation
+STOCK_PART_BC(H,E)                               Stockage Part de la banane plantain par exploitation
+
+      PART_TT(E)                                 Part des tubercules tropicaux sur l'exploitation
+STOCK_PART_TT(H,E)                               Stockage Part des tubercules tropicaux sur l'exploitation
+
+
+      EFF_TYPE_0_SOBT(R)                         Effectif d'exploitations du type 0=Frichiers en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_0_SOBT(H)                         Stockage Effectif d'exploitations du type 0=Frichiers en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_1_SOBT                            Effectif d'exploitations du type 1=Arboriculteurs en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_1_SOBT(H)                         Stockage Effectif d'exploitations du type 1=Arboriculteurs en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_2_SOBT                            Effectif d'exploitations du type 2=Bananiers en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_2_SOBT(H)                         Stockage Effectif d'exploitations du type 2=Bananiers en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_3_SOBT                            Effectif d'exploitations du type 3=Canniers en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_3_SOBT(H)                         Stockage Effectif d'exploitations du type 3=Canniers en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_4_SOBT                            Effectif d'exploitations du type 4=Canniers diversifiés en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_4_SOBT(H)                         Stockage Effectif d'exploitations du type 4=Canniers diversifiés en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_5_SOBT                            Effectif d'exploitations du type 5=Diversifiés en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_5_SOBT(H)                         Stockage Effectif d'exploitations du type 5=Diversifiés en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_6_SOBT                            Effectif d'exploitations du type 6=Eleveurs en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_6_SOBT(H)                         Stockage Effectif d'exploitations du type 6=Eleveurs en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_7_SOBT                            Effectif d'exploitations du type 7=Maraîchers en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_7_SOBT(H)                         Stockage Effectif d'exploitations du type 7=Maraîchers en Sud-Ouest Basse-Terre
+
+      EFF_TYPE_8_SOBT                            Effectif d'exploitations du type 8=Mixtes canniers-éleveurs en Sud-Ouest Basse-Terre
+STOCK_EFF_TYPE_8_SOBT(H)                         Stockage Effectif d'exploitations du type 8=Mixtes canniers-éleveurs en Sud-Ouest Basse-Terre
+
+
+      EFF_TYPE_0_Gwad                            Effectif d'exploitations du type 0=Frichiers
+STOCK_EFF_TYPE_0_Gwad(H)                         Stockage Effectif d'exploitations du type 0=Frichiers
+
+      EFF_TYPE_1_Gwad                            Effectif d'exploitations du type 1=Arboriculteurs
+STOCK_EFF_TYPE_1_Gwad(H)                         Stockage Effectif d'exploitations du type 1=Arboriculteurs
+
+      EFF_TYPE_2_Gwad                            Effectif d'exploitations du type 2=Bananiers
+STOCK_EFF_TYPE_2_Gwad(H)                         Stockage Effectif d'exploitations du type 2=Bananiers
+
+      EFF_TYPE_3_Gwad                            Effectif d'exploitations du type 3=Canniers
+STOCK_EFF_TYPE_3_Gwad(H)                         Stockage Effectif d'exploitations du type 3=Canniers
+
+      EFF_TYPE_4_Gwad                            Effectif d'exploitations du type 4=Canniers diversifiés
+STOCK_EFF_TYPE_4_Gwad(H)                         Stockage Effectif d'exploitations du type 4=Canniers diversifiés
+
+      EFF_TYPE_5_Gwad                            Effectif d'exploitations du type 5=Diversifiés
+STOCK_EFF_TYPE_5_Gwad(H)                         Stockage Effectif d'exploitations du type 5=Diversifiés
+
+      EFF_TYPE_6_Gwad                            Effectif d'exploitations du type 6=Eleveurs
+STOCK_EFF_TYPE_6_Gwad(H)                         Stockage Effectif d'exploitations du type 6=Eleveurs
+
+      EFF_TYPE_7_Gwad                            Effectif d'exploitations du type 7=Maraîchers
+STOCK_EFF_TYPE_7_Gwad(H)                         Stockage Effectif d'exploitations du type 7=Maraîchers
+
+      EFF_TYPE_8_Gwad                            Effectif d'exploitations du type 8=Mixtes canniers-éleveurs
+STOCK_EFF_TYPE_8_Gwad(H)                         Stockage Effectif d'exploitations du type 8=Mixtes canniers-éleveurs
+
+
+      PART_TYPE_1_Gwad                           Part de l'effectif d'exploitations du type 1=Arboriculteurs
+      PART_TYPE_2_Gwad                           Part de l'effectif d'exploitations du type 2=Bananiers
+      PART_TYPE_3_Gwad                           Part de l'effectif d'exploitations du type 3=Canniers
+      PART_TYPE_4_Gwad                           Part de l'effectif d'exploitations du type 4=Canniers diversifiés
+      PART_TYPE_5_Gwad                           Part de l'effectif d'exploitations du type 5=Diversifiés
+      PART_TYPE_6_Gwad                           Part de l'effectif d'exploitations du type 6=Eleveurs
+      PART_TYPE_7_Gwad                           Part de l'effectif d'exploitations du type 7=Maraîchers
+      PART_TYPE_8_Gwad                           Part de l'effectif d'exploitations du type 8=Mixtes canniers-éleveurs
+      PART_TYPE_0_Gwad                           Part de l'effectif d'exploitations du type 0=Frichiers
+
+
+
+
+      MATRICE_TYPE_EXPL(T,E)                     Matrice d'appartenance de chaque exploitation à un type
+STOCK_MATRICE_TYPE_EXPL(H,T,E)                   Stockage Matrice d'appartenance de chaque exploitation à un type
+
+      TYPE_EXPL(E)                               Type d'exploitation par exploitation
+STOCK_TYPE_EXPL(H,E)                             Stockage Type d'exploitation par exploitation
+
+      TYPE_EXPL_Bis(E)                           Type d'exploitation 4 subdivisé en 2 types 41 et 42
+STOCK_TYPE_EXPL_Bis(H,E)                         Stockage Type d'exploitation 4 subdivisé en 2 types 41 et 42
+
+
+      ALTITUDE_EXPL(E)                           Altitude moyenne de l'exploitation
+STOCK_ALTITUDE_EXPL(H,E)                         Stockage Altitude moyenne d l'exploitation
+
+      PENTE_EXPL(E)                              Pente moyenne de l'exploitation
+STOCK_PENTE_EXPL(H,E)                            Stockage Pente moyenne d l'exploitation
+
+      PLUIE_EXPL(E)                              Pluviométrie moyenne de l'exploitation
+STOCK_PLUIE_EXPL(H,E)                            Stockage Pluviométrie moyenne de l'exploitation
+
+      NB_PARC_EXPL(SE)                           Nombre de parcelles de l'exploitation
+STOCK_NB_PARC_EXPL(H,E)                          Stockage Nombre de parcelles de l'exploitation
+
+      SOUS_TYPE_EXPL(E)                          Sous Type par exploitation
+STOCK_SOUS_TYPE_EXPL(H,E)                        Stockage Sous Type par exploitation
+
+
+      EVAL_TYPE_Expl(E)                          Indicateur du changement entre 2 optimisations consécutives de type d'exploitation (0=changement de TYPE - 1=pas de changement)
+STOCK_EVAL_TYPE_Expl(H,E)                        Stockage Indicateur du changement de type d'exploitation (0=changement de TYPE - 1=pas de changement)
+
+      EVAL_TYPE_1_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Arboriculteurs (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_1_Expl(H,E)                      Stockage Indicateur du changement de type Arboriculteurs (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_2_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Bananiers (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_2_Expl(H,E)                      Stockage Indicateur du changement de type Bananiers (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_3_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Canniers (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_3_Expl(H,E)                      Stockage Indicateur du changement de type Canniers (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_4_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Canniers (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_4_Expl(H,E)                      Stockage Indicateur du changement de type Canniers (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_5_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Diversifiés (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_5_Expl(H,E)                      Stockage Indicateur du changement de type Diversifiés (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_6_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Eleveurs (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_6_Expl(H,E)                      Stockage Indicateur du changement de type Eleveurs (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_7_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Maraichers (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_7_Expl(H,E)                      Stockage Indicateur du changement de type Maraichers (0=changement de type - 1=pas de changement)
+
+      EVAL_TYPE_8_Expl(E)                        Indicateur du changement entre 2 optimisations consécutives de type Mixtes canniers eleveurs (0=changement de type - 1=pas de changement)
+STOCK_EVAL_TYPE_8_Expl(H,E)                      Stockage Indicateur du changement de type Mixtes canniers eleveurs (0=changement de type - 1=pas de changement)
+
+
+      EVAL_EFF_TYPE_Expl_Gwad                    Rapport entre le nombre d'exploitation conservant leur type entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_Expl_Gwad(H)                 Stockage Rapport entre le nombre d'exploitation conservant leur type entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_1_Gwad                       Rapport entre le nombre d'exploitation conservant le type Arboriculteurs entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_1_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Arboriculteurs entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_2_Gwad                       Rapport entre le nombre d'exploitation conservant le type Bananiers entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_2_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Bananiers entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_3_Gwad                       Rapport entre le nombre d'exploitation conservant le type Canniers entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_3_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Canniers entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_4_Gwad                       Rapport entre le nombre d'exploitation conservant le type Canniers diversifiés entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_4_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Canniers diversifiés entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_5_Gwad                       Rapport entre le nombre d'exploitation conservant le type Diversifiés entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_5_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Diversifiés entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_6_Gwad                       Rapport entre le nombre d'exploitation conservant le type Eleveurs entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_6_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Eleveurs entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_7_Gwad                       Rapport entre le nombre d'exploitation conservant le type Maraichers entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_7_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Maraichers entre 2 optimisations consécutives pour la Guadeloupe
+
+      EVAL_EFF_TYPE_8_Gwad                       Rapport entre le nombre d'exploitation conservant le type Mixtes canniers eleveurs entre 2 optimisations consécutives pour la Guadeloupe
+STOCK_EVAL_EFF_TYPE_8_Gwad(H)                    Stockage Rapport entre le nombre d'exploitation conservant le type Mixtes canniers eleveurs entre 2 optimisations consécutives pour la Guadeloupe
+
+* ooooooo fin déclaration des paramètres pour les types d'exploitations ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+
+      PROD_CS_MG                                 Volume de production de canne à sucre à Marie-Galante
+STOCK_PROD_CS_MG(H)                              Stockage Volume de production de canne à sucre à Marie-Galante
+
+      PROD_CS_GWAD_CONT                          Volume de production de canne à sucre en Guadeloupe continentale
+STOCK_PROD_CS_GWAD_TOT(H)                        Stockage Volume de production de canne à sucre en Guadeloupe continentale
+
+      PROD_CS_GWAD_TOT                           Volume de production de canne à sucre en Guadeloupe
+STOCK_PROD_CS_GWAD_CONT(H)                       Stockage Volume de production de canne à sucre en Guadeloupe
+
+      TONNE_SUCRE                                Volume de production de sucre en Guadeloupe
+STOCK_TONNE_SUCRE(H)                             Stockage Volume de production de sucre en Guadeloupe
+
+      TONNE_BANANE                               Volume de production de banane en Guadeloupe
+STOCK_TONNE_BANANE(H)                            Stockage Volume de production de banane en Guadeloupe
+
+
+      EVAL_ASSOL_Parc(P)                         Variation de l'usage de la parcelle entre une année et l'année précédente (1 si usage identique - 0 sinon)
+STOCK_EVAL_ASSOL_Parc(H,P)                       Stockage Variation de l'usage de la parcelle entre une année et l'année précédente (1 si usage identique - 0 sinon)
+
+      EVAL_EFF_Usage_Gwad                        Part des parcelles conservant le même usage entre une année et l'année précédente
+STOCK_EVAL_EFF_Usage_Gwad(H)                     Stockage Part des parcelles conservant le même usage entre une année et l'année précédente
+
+      EVAL_EFF_Type_Gwad                        Part des exploitations conservant le même type entre une année et l'année précédente
+STOCK_EVAL_EFF_Type_Gwad(H)                     StockagePart des exploitations conservant le même type entre une année et l'année précédente
+
+
+      EVAL_ASSOL_Reg(R,C)                        Rapport entre la surface cultivée d'une année et de la précédente par culture et par commune
+STOCK_EVAL_ASSOL_Reg(H,R,C)                      Stockage Rapport entre la surface cultivée d'une année et de la précédente par culture et par commune
+
+      EVAL_ASSOL_Gwad(C)                         Rapport entre la surface cultivée d'une année et de la précédente par culture pour la Guadeloupe
+STOCK_EVAL_ASSOL_Gwad(H,C)                       Stockage Rapport entre la surface cultivée d'une année et de la précédente par culture pour la Guadeloupe
+
+      EVAL_ELEC_Gwad                             Rapport entre la production d'electricité d'une année et de la précédente pour la Guadeloupe
+STOCK_EVAL_ELEC_Gwad(H)                          Stockage Rapport entre la production d'electricité d'une année et de la précédente pour la Guadeloupe
+
+      EVAL_REV_Gwad                              Rapport entre le revenu d'une année et de la précédente pour la Guadeloupe
+STOCK_EVAL_REV_Gwad(H)                           Stockage Rapport entre le revenu d'une année et de la précédente pour la Guadeloupe
+
+      EVAL_IFT_Gwad                              Rapport entre l'IFT d'une année et de la précédente pour la Guadeloupe
+STOCK_EVAL_IFT_Gwad(H)                           Stockage Rapport entre l'IFT d'une année et de la précédente pour la Guadeloupe
+
+      EVAL_MO_Gwad                               Rapport entre la main d'oeuvre utilisée d'une année et de la précédente pour la Guadeloupe
+STOCK_EVAL_MO_Gwad(H)                            Stockage Rapport entre la main d'oeuvre utilisée d'une année et de la précédente pour la Guadeloupe
+
+      EVAL_GES_Gwad                              Rapport entre la quantité de GES produite d'une année et de la précédente pour la Guadeloupe
+STOCK_EVAL_GES_Gwad(H)                           Stockage Rapport entre la quantité de GES produite d'une année et de la précédente pour la Guadeloupe
+
+      EVAL_AZOTE_Gwad                            Rapport entre la quantité d'azote utilisée d'une année et de la précédente pour la Guadeloupe
+STOCK_EVAL_AZOTE_Gwad(H)                         Stockage Rapport entre la quantité d'azote utilisée d'une année et de la précédente pour la Guadeloupe
+
+
+
+*1°) ooooooo Déclaration des paramètres pour Agricultural added value ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      REV_Parc(P)                                Revenu par parcelle
+STOCK_REV_Parc(H,P)                              Stockage Revenu par parcelle
+
+      REV_Cult(C)                                Revenu par culture
+STOCK_REV_Cult(H,C)                              Stockage Revenu par culture
+
+      REV_Expl(E)                                Revenu par exploitation
+STOCK_REV_Expl(H,E)                              Stockage Revenu par exploitation
+
+      REV_Reg(R)                                 Revenu par petite région
+STOCK_REV_Reg(H,R)                               Stockage Revenu par petite région
+
+      REV_Gwad                                   Revenu de la Guadeloupe
+STOCK_REV_Gwad(H)                                Stockage Revenu de la Guadeloupe
+
+      REV_Moy_ha_Gwad                          Moyenne du revenu des parcelles de la Guadeloupe
+STOCK_REV_Moy_ha_Gwad                          Stockage Moyenne du revenu des parcelles de la Guadeloupe
+
+      REV_Expl_Moy_Gwad                          Moyenne du revenu des exploitations de la Guadeloupe
+STOCK_REV_Expl_Moy_Gwad(H)                       Stockage Moyenne du revenu des exploitations de la Guadeloupe
+
+
+*2°) ooooooo Déclaration des paramètres pour Repartition of revenue among the farm population ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+
+*ra(se) attention car r ce sont les régions
+*sor(k,SE)
+*GINI_init
+*GINI2_init
+
+
+
+*3°) ooooooo Déclaration des paramètres pour Total amount of subsidies oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      SUB_POSEI_Parc(P)                          Montant des subventions POSEI par parcelle (en euros)
+STOCK_SUB_POSEI_Parc(H,P)                        Stockage Montant des subventions POSEI par parcelle (en euros)
+
+      SUB_POSEI_Cult(C)                          Montant des subventions POSEI par culture (en euros)
+STOCK_SUB_POSEI_Cult(H,C)                        Stockage Montant des subventions POSEI par culture (en euros)
+
+      SUB_POSEI_Expl(E)                          Montant des subventions POSEI par exploitation (en euros)
+STOCK_SUB_POSEI_Expl(H,E)                        Stockage Montant des subventions POSEI par exploitation (en euros)
+
+      SUB_POSEI_Reg(R)                           Montant des subventions POSEI par région (en euros)
+STOCK_SUB_POSEI_Reg(H,R)                         Stockage Montant des subventions POSEI par région (en euros)
+
+      SUB_POSEI_Gwad                             Montant des subventions POSEI pour la Guadeloupe (en euros)
+STOCK_SUB_POSEI_Gwad(H)                          Stockage Montant des subventions POSEI pour la Guadeloupe (en euros)
+
+
+      SUB_PDRG_Parc(P)                           Montant des subventions PDRG par parcelle (en euros)
+STOCK_SUB_PDRG_Parc(H,P)                         Stockage Montant des subventions PDRG par parcelle (en euros)
+
+      SUB_PDRG_Cult(C)                           Montant des subventions PDRG par culture (en euros)
+STOCK_SUB_PDRG_Cult(H,C)                         Stockage Montant des subventions PDRG par culture (en euros)
+
+      SUB_PDRG_Expl(E)                           Montant des subventions PDRG par exploitation (en euros)
+STOCK_SUB_PDRG_Expl(H,E)                         Stockage Montant des subventions PDRG par exploitation (en euros)
+
+      SUB_PDRG_Reg(R)                            Montant des subventions PDRG par région (en euros)
+STOCK_SUB_PDRG_Reg(H,R)                          Stockage Montant des subventions PDRG par région (en euros)
+
+      SUB_PDRG_Gwad                              Montant des subventions PDRG pour la Guadeloupe (en euros)
+STOCK_SUB_PDRG_Gwad(H)                           Stockage Montant des subventions PDRG pour la Guadeloupe (en euros)
+
+
+      SUB_NAT_Parc(P)                            Montant des subventions nationales par parcelle (en euros)
+STOCK_SUB_NAT_Parc(H,P)                          Stockage Montant des subventions nationales par parcelle (en euros)
+
+      SUB_NAT_Cult(C)                            Montant des subventions nationales par culture (en euros)
+STOCK_SUB_NAT_Cult(H,C)                          Stockage Montant des subventions nationales par culture (en euros)
+
+      SUB_NAT_Expl(E)                            Montant des subventions nationales par exploitation (en euros)
+STOCK_SUB_NAT_Expl(H,E)                          Stockage Montant des subventions nationales par exploitation (en euros)
+
+      SUB_NAT_Reg(R)                             Montant des subventions nationales par région (en euros)
+STOCK_SUB_NAT_Reg(H,R)                           Stockage Montant des subventions nationales par région (en euros)
+
+      SUB_NAT_Gwad                               Montant des subventions nationales pour la Guadeloupe (en euros)
+STOCK_SUB_NAT_Gwad(H)                            Stockage Montant des subventions nationales pour la Guadeloupe (en euros)
+
+
+      SUB_TOT_Parc(P)                            Montant des subventions totales par parcelle (en euros)
+STOCK_SUB_TOT_Parc(H,P)                          Stockage Montant des subventions totales par parcelle (en euros)
+
+      SUB_TOT_Cult(C)                            Montant des subventions totales par culture (en euros)
+STOCK_SUB_TOT_Cult(H,C)                          Stockage Montant des subventions totales par culture (en euros)
+
+      SUB_TOT_Expl(E)                            Montant des subventions totales par exploitation (en euros)
+STOCK_SUB_TOT_Expl(H,E)                          Stockage Montant des subventions totales par exploitation (en euros)
+
+      SUB_TOT_Reg(R)                             Montant des subventions totales par région (en euros)
+STOCK_SUB_TOT_Reg(H,R)                           Stockage Montant des subventions totales par région (en euros)
+
+      SUB_TOT_Gwad                               Montant des subventions totales pour la Guadeloupe (en euros)
+STOCK_SUB_TOT_Gwad(H)                            Stockage Montant des subventions totales pour la Guadeloupe (en euros)
+
+      SUB_TOT_Moy_ha                             Montant moyen par hectare des subventions totales pour la Guadeloupe (en euros par hectare)
+STOCK_SUB_TOT_Moy_ha(SH)                         Stockage Montant moyen par hectare des subventions totales pour la Guadeloupe (en euros par hectare)
+
+
+
+
+*4°) ooooooo Déclaration des paramètres pour Mean efficiency of farmers  oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      EFFI_Ha_Cult(C)                            Rapport entre les charges et la marge par culture
+STOCK_EFFI_Ha_Cult(H,C)                          Stockage Rapport entre les charges et la marge par culture
+
+      EFFI_Ha_Parc(P)                            Rapport entre les charges et la marge par parcelle
+STOCK_EFFI_Ha_Parc(H,P)                          Stockage Rapport entre les charges et la marge par parcelle
+
+      EFFI_Expl(E)                               Rapport entre les charges et la marge par exploitation
+STOCK_EFFI_Expl(H,E)                             Stockage Rapport entre les charges et la marge par exploitation
+
+      EFFI_Gwad                                  Rapport entre les charges et la marge pour la Guadeloupe
+STOCK_EFFI_Gwad(H)                               Stockage Rapport entre les charges et la marge pour la Guadeloupe
+
+
+*5-6-7°) ooooooo Déclaration des paramètres pour Ration of carbohydrates/fat/proteins produced over needs ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      NUTRI_Parc(SVAR_NUT,SP)                    Quantité de nutriments produite par type de nutriments et par parcelle
+STOCK_NUTRI_Parc(H,SVAR_NUT,P)                   Stockage Quantité de nutriments produite par type de nutriments et par parcelle
+
+      NUTRI_Gwad(SVAR_NUT)                       Quantité de nutriments initialement produite par type de nutriment
+STOCK_NUTRI_Gwad(H,SVAR_NUT)                     Stockage Quantité de nutriments initialement produite par type de nutriment
+
+
+      Q_IND_MOY_ALIM(SVAR_NUT)                   Nombre d'individus moyens que l'on peut initialement alimenter avec le volume total de chaque nutriment produit
+STOCK_Q_IND_MOY_Alim(H,SVAR_NUT)                 Stockage Nombre d'individus moyens que l'on peut initialement alimenter avec le volume total de chaque nutriment produit
+
+      Q_IND_MOY_ALIM_MIN                         Nombre d'individus moyens que l'on peut initialement alimenter en tenant compte du nutriment limitant
+STOCK_Q_IND_MOY_Alim_Min(H)                      Stockage Nombre d'individus moyens que l'on peut initialement alimenter en tenant compte du nutriment limitant
+
+
+      BESOIN_ALIM_Gwad(SVAR_NUT)                 Quantité de nutriments necessaire pour alimenter la population d'individus moyens guadeloupéens
+STOCK_BESOIN_Alim_Gwad(H,SVAR_NUT)               Stockage Quantité de nutriments necessaire pour alimenter la population d'individus moyens guadeloupéens
+
+      RATIO_PROD_BESOIN(SVAR_NUT)                Part des individus alimentés sur l'ensemble des individus
+STOCK_RATIO_PROD_BESOIN(H,SVAR_NUT)              Stockage Part des individus alimentés sur l'ensemble des individus
+
+
+*8°) ooooooo Déclaration des paramètres pour le calcul de la Potential of energy produced by crops oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      ELEC_Ha_cult(C)                            Quantité d'électricité produite par hzectare de culture
+STOCK_ELEC_Ha_cult(H,C)                          Stockage de la quantité d'électricité produite par hectare de culture
+
+      ELEC_Parc(P)                               Quantité d'électricité produite par parcelle
+STOCK_ELEC_Parc(H,P)                             Stockage de la quantité d'électricité produite par parcelle
+
+      ELEC_Cult(C)                               Quantité d'électricité produite par culture
+STOCK_ELEC_Cult(H,C)                             Stockage de la quantité d'électricité produite par culture
+
+      ELEC_Expl(E)                               Quantité d'électricité produite par exploitation
+STOCK_ELEC_Expl(H,E)                             Stockage de la quantité d'électricité produite par exploitation
+
+      ELEC_Reg(R)                                Quantité d'électricité produite par petite région
+STOCK_ELEC_Reg(H,R)                              Stockage de la quantité d'électricité produite par petite région
+
+      ELEC_Gwad                                  Quantité d'électricité produite en Guadeloupe
+STOCK_ELEC_Gwad(H)                               Stockage de la quantité d'électricité produite en Guadeloupe
+
+
+*9°) ooooooo Déclaration des paramètres pour le calcul de Total needs of workforce oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      MO_ha_OTK_Cult(C,K)                        Main d'oeuvre de la culture par OTK (en heures par ha)
+STOCK_MO_ha_OTK_Cult(H,C,K)                      Stockage Besoin en main d'oeuvre de la culture par OTK (en heures par ha)
+
+      MO_Ha_Cult(C)                              Main d'oeuvre de la culture (en heures par hectare)
+STOCK_MO_Ha_Cult(H,C)                            Stockage Besoin en main d'oeuvre de la culture (en heures par hectare)
+
+      MO_Parc(P)                                 Main d'oeuvre par parcelle (en heures)
+STOCK_MO_Parc(H,P)                               Stockage Besoin en main d'oeuvre par parcelle (en heures)
+
+      MO_Cult(C)                                 Main d'oeuvre de la culture (en heures)
+STOCK_MO_Cult(H,C)                               Stockage Besoin en main d'oeuvre de la culture (en heures)
+
+      MO_Expl(E)                                 Main d'oeuvre par exploitation (en heures)
+STOCK_MO_Expl(H,E)                               Stockage Besoin en main d'oeuvre par exploitation (en heures)
+
+      MO_Reg(R)                                  Main d'oeuvre par commune (en heures)
+STOCK_MO_Reg(H,R)                                Stockage Besoin en main d'oeuvre par commune (en heures)
+
+      MO_Gwad                                    Main d'oeuvre de Guadeloupe (en heures)
+STOCK_MO_Gwad(H)                                 Stockage Besoin en main d'oeuvre de Guadeloupe (en heures)
+
+      MO_Gwad_Moy_ha                             Main d'oeuvre moyenne par hectare (en heures par hectare)
+STOCK_MO_Gwad_Moy_ha(H)                         Stockage Main d'oeuvre moyenne par hectare (en heures par hectare)
+
+
+
+
+*10°) ooooooo Déclaration des paramètres pour Area of risk of contamination of food crops   ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      NV_CLD_Parc(P)                             Niveau de contamination par la chlordécone (0= non contaminé - 1= contaminé)
+STOCK_NV_CLD_Parc(H,P)                           Stockage Niveau de contamination par la chlordécone (0= non contaminé - 1= contaminé)
+
+      RCLD_parc(P)                               Risque de contamination à la chlordécone par parcelle
+STOCK_RCLD_parc(H,P)                             Stockage Risque de contamination à la chlordécone par parcelle
+
+      RCLD_gwad                                  Risque de contamination à la chlordécone de la Gudeloupe
+STOCK_RCLD_gwad(H)                               Stockage Risque de contamination à la chlordécone de la Guadeloupe
+
+
+
+
+*11°) ooooooo Déclaration des paramètres pour le calcul la pression moyenne des phyto dans les ZNIEFFS oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      PRES_ZNIEFFS(P)                            Indicateur de présence de parcelles dans les znieffs (0= non présente - 1= présente)
+STOCK_PRES_ZNIEFFS(H,P)                          Stockage Indicateur de présence de parcelles dans les znieffs (0= non présente - 1= présente)
+
+      SURF_ZNIEFF                                Surfaces de parcelles dans le znieffs
+STOCK_SURF_ZNIEFF(H)                             Stockage Surfaces de parcelles dans le znieffs
+
+
+      LOAD_INDEX_OTK_cult(C,K)                   Calcul du LOAD INDEX par opération technique et par culture
+STOCK_LOAD_INDEX_OTK_Cult(H,C,K)                 Stockage Calcul du LOAD INDEX par opération technique et par culture
+
+      LOAD_INDEX_Parc(P)                         Calcul du LOAD INDEX par parcelle
+STOCK_LOAD_INDEX_Parc(H,P)                       Stockage Calcul du LOAD INDEX par parcelle
+
+      LOAD_INDEX_Cult(C)                         Calcul du LOAD INDEX par culture
+STOCK_LOAD_INDEX_Cult(H,C)                       Stockage Calcul du LOAD INDEX par culture
+
+      LOAD_INDEX_Expl(E)                         Calcul du LOAD INDEX par exploitation
+STOCK_LOAD_INDEX_Expl(H,E)                       Stockage Calcul du LOAD INDEX par exploitation
+
+      LOAD_INDEX_Reg(R)                          Calcul du LOAD INDEX par region
+STOCK_LOAD_INDEX_Reg(H,R)                        Stockage Calcul du LOAD INDEX par region
+
+      LOAD_INDEX_Gwad                            Calcul du LOAD INDEX pour la Guadeloupe
+STOCK_LOAD_INDEX_Gwad(H)                         Stockage Calcul du LOAD INDEX pour la Guadeloupe
+
+      LOAD_INDEX_ZNIEFF                          Calcul du LOAD INDEX pour les znieffs
+STOCK_LOAD_INDEX_ZNIEFF(H)                       Stockage Calcul du LOAD INDEX pour les znieffs
+
+
+* ooooooo Déclaration des paramètres pour le calcul du RPEST oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      QMA_ha_OTK_cult(C,K)                       Quantité de matière active utilisée par opération technique
+STOCK_QMA_ha_OTK_cult(H,C,K)                     Stockage Quantité de matière active utilisée par opération technique
+
+      QMA_Ha_Cult(C)                             Quantité de matière active utilisée par culture
+STOCK_QMA_Ha_Cult(H,C)                           Stockage Quantité de matière active utilisée par culture
+
+
+      DT50_OTK_Cult(C,K)                         Durée de demi vie des produits phytosanitaires par opération technique (en jours)
+STOCK_DT50_OTK_Cult(H,C,K)                       Stockage Durée de demi vie des produits phytosanitaires par opération technique (en jours)
+
+      DT50_Cult(C)                               Durée de demi vie moyenne des produits phytosanitaires par culture (en jours) pondérée par les quantitées de produits phytosanitaires utilisés
+STOCK_DT50_Cult(H,C)                             Stockage Durée de demi vie moyenne des produits phytosanitaires par culture (en jours) pondérée par les quantitées de produits phytosanitaires utilisés
+
+
+      ADI_OTK_cult(C,K)                          Dose maximum admise par un humain de produits phytosanitaires par opération technique (en jours)
+STOCK_ADI_OTK_cult(H,C,K)                        Stockage Dose maximum admise par un humain de produits phytosanitaires par opération technique (en jours)
+
+      ADI_Cult(C)                                Dose maximum admise par un humain de produits phytosanitaires par culture (en jours) pondérée par les quantitées de produits phytosanitaires utilisés
+STOCK_ADI_Cult(H,C)                              Stockage Dose maximum admise par un humain de produits phytosanitaires par culture (en jours) pondérée par les quantitées de produits phytosanitaires utilisés
+
+      AQUATOX_OTK_cult(C,K)                      Dose maximum admise par un poisson de produits phytosanitaires par opération technique (en jours)
+STOCK_AQUATOX_OTK_cult(H,C,K)                    Stockage Dose maximum admise par un poisson de produits phytosanitaires par opération technique (en jours)
+
+      AQUATOX_Cult(C)                            Dose maximum admise par un poisson de produits phytosanitaires par culture (en jours) pondérée par les quantitées de produits phytosanitaires utilisés
+STOCK_AQUATOX_Cult(H,C)                          Stockage Dose maximum admise par un poisson de produits phytosanitaires par culture (en jours) pondérée par les quantitées de produits phytosanitaires utilisés
+
+      GUS_OTK_cult(C,K)                          Coefficient de dégradabilité du produit par opération technique: plus GUS fort plus dégradabilité faible
+STOCK_GUS_OTK_cult(H,C,K)                        Stockage Coefficient de dégradabilité du produit par opération technique: plus GUS fort plus dégradabilité faible
+
+      GUS_Cult(C)                                Coefficient de dégradabilité du produit par culture pondérée par les quantitées de produits phytosanitaires utilisés : plus GUS fort plus dégradabilité faible
+STOCK_GUS_Cult(H,C)                              Stockage Coefficient de dégradabilité du produit par culture pondérée par les quantitées de produits phytosanitaires utilisés : plus GUS fort plus dégradabilité faible
+
+      DOSE_fav(C)                                Borne favorable de la quantité moyenne pondérée par produit  de matière active utilisée par ha de culture
+STOCK_DOSE_fav(H,C)                              Stockage Borne favorable de la quantité moyenne pondérée par produit  de matière active utilisée par ha de culture
+
+      DOSE_defav(C)                              Borne defavorable de la quantité moyenne pondérée par produit  de matière active utilisée par ha de culture
+STOCK_DOSE_defav(H,C)                            Stockage Borne defavorable de la quantité moyenne pondérée par produit  de matière active utilisée par ha de culture
+
+      RUI_fav(P)                                 Borne favorable de la quantité d'eau de ruissellement par ha de culture
+STOCK_RUI_fav(H,P)                               Stockage Borne favorable de la quantité d'eau de ruissellement par ha de culture
+
+      RUI_defav(P)                               Borne defavorable de la quantité d'eau de ruissellement par ha de culture
+STOCK_RUI_defav(H,P)                             Stockage Borne defavorable de la quantité d'eau de ruissellement par ha de culture
+
+      E_SURF(P,C)                                Sous indicateur de R_PEST - concerne la dégradabilité des produits phytosanitaires utilisés en surface (ruissellement)
+STOCK_E_SURF(H,P,C)                              Stockage Sous indicateur de R_PEST - concerne la dégradabilité des produits phytosanitaires utilisés en surface (ruissellement)
+
+      DT50_fav(C)                                Borne favorable de la durée de demi vie moyenne pondérée par produit  des matières actives pour une culture (en jours)
+STOCK_DT50_fav(H,C)                              Stockage Borne favorable de la durée de demi vie moyenne pondérée par produit  des matières actives pour une culture (en jours)
+
+      DT50_defav(C)                              Borne defavorable de la durée de demi vie moyenne pondérée par produit des matières actives pour une culture (en jours)
+STOCK_DT50_defav(H,C)                            Stockage Borne defavorable de la durée de demi vie moyenne pondérée par produit des matières actives pour une culture (en jours)
+
+      MIN_ADIAQUATOX_fav(C)                      Borne favorable du minimum entre la dose ADI (toxicité humaine) et la dose AQUATOX (toxicité poisson)
+STOCK_MIN_ADIAQUATOX_fav(H,C)                    Stockage Borne favorable du minimum entre la dose ADI (toxicité humaine) et la dose AQUATOX (toxicité poisson)
+
+      MIN_ADIAQUATOX_defav(C)                    Borne defavorable du minimum entre la dose ADI (toxicité humaine) et la dose AQUATOX (toxicité poisson)
+STOCK_MIN_ADIAQUATOX_defav(H,C)                  Stockage Borne defavorable du minimum entre la dose ADI (toxicité humaine) et la dose AQUATOX (toxicité poisson)
+
+      T_SURF(P,C)                                Sous indicateur de R_PEST - concerne la toxicité des produits phytosanitaires utilisés en surface (ruissellement)
+STOCK_T_SURF(H,P,C)                              Stockage Sous indicateur de R_PEST - concerne la toxicité des produits phytosanitaires utilisés en surface (ruissellement)
+
+      GUS_fav(C)                                 Borne favorable du GUS indicateur de dégaradabilité des produits phytosanitaires dans le sol
+STOCK_GUS_fav(H,C)                               Stockage Borne favorable du GUS indicateur de dégaradabilité des produits phytosanitaires dans le sol
+
+      GUS_defav(C)                               Borne defavorable du GUS indicateur de dégaradabilité des produits phytosanitaires dans le sol
+STOCK_GUS_defav(H,C)                             Stockage Borne defavorable du GUS indicateur de dégaradabilité des produits phytosanitaires dans le sol
+
+      DRAI_fav(P)                                Borne favorable de la quantité d'eau de drainage par ha de culture
+STOCK_DRAI_fav(H,P)                              Stockage Borne favorable de la quantité d'eau de drainage par ha de culture
+
+      DRAI_defav(P)                              Borne defavorable de la quantité d'eau de drainage par ha de culture
+STOCK_DRAI_defav(H,P)                            Stockage Borne defavorable de la quantité d'eau de drainage par ha de culture
+
+      E_PROF(P,C)                                Sous indicateur de R_PEST - concerne la dégradabilité des produits phytosanitaires utilisés en profondeur (drainage)
+STOCK_E_PROF(H,P,C)                              Stockage Sous indicateur de R_PEST - concerne la dégradabilité des produits phytosanitaires utilisés en profondeur (drainage)
+
+      ADI_fav(C)                                 Borne favorable de la dose ADI (toxicité humaine)
+STOCK_ADI_fav(H,C)                               Stockage Borne favorable de la dose ADI (toxicité humaine)
+
+      ADI_defav(C)                               Borne defavorable de la dose ADI (toxicité humaine)
+STOCK_ADI_defav(H,C)                             Stockage Borne defavorable de la dose ADI (toxicité humaine)
+
+      T_PROF(P,C)                                Sous indicateur de R_PEST - concerne la toxicité des produits phytosanitaires utilisés en profondeur (drainage)
+STOCK_T_PROF(H,P,C)                              Stockage Sous indicateur de R_PEST - concerne la toxicité des produits phytosanitaires utilisés en profondeur (drainage)
+
+      R_SURF(P,C)                                Sous indicateur de R_PEST - moyenne entre E_SURF et T_SURF
+STOCK_R_SURF(H,P,C)                              Stockage Sous indicateur de R_PEST - moyenne entre E_SURF et T_SURF
+
+      R_PROF(P,C)                                Sous indicateur de R_PEST - moyenne entre E_PROF et T_PROF
+STOCK_R_PROF(H,P,C)                              Stockage Sous indicateur de R_PEST - moyenne entre E_PROF et T_PROF
+
+      R_PEST(P,C)                                R_PEST par parcelle et par culture - maximum entre R_SURF et R_PROF - echelle de 1 à 10
+STOCK_R_PEST(H,P,C)                              Stockage R_PEST par parcelle et par culture - maximum entre R_SURF et R_PROF - echelle de 1 à 10
+
+      R_PEST_Parc(P)                             R_PEST par parcelle - echelle de 1 à 10
+STOCK_R_PEST_Parc(H,P)                           Stockage R_PEST par parcelle - echelle de 1 à 10
+
+      R_PEST_Gwad                                Calcul du R_PEST Gwad - somme des sufaces pour lesquelles le R_PEST est supérieur à 6
+STOCK_R_PEST_Gwad(H)                             Stockage Calcul du R_PEST Gwad - somme des sufaces pour lesquelles le R_PEST est supérieur à 6
+
+
+*12°) ooooooo Déclaration des paramètres pour le calcul des pressions sur les rivières oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+*      NV_POLL_RIV(SRIV)                          Niveau de pollution des rivières (basé sur R-PEST)
+*STOCK_NV_POLL_RIV(H,SRIV)                        Stockage Niveau de pollution des rivières (basé sur R-PEST)
+
+*      POLL_RIV(SRIV)                             Indicateur de pollution des rivières (basé sur R-PEST - 0= non polluée - 1= polluée)
+*STOCK_POLL_RIV(H,SRIV)                           Stockage Indicateur de pollution des rivières (basé sur R-PEST - 0= non polluée - 1= polluée)
+
+*      NB_RIV_POLL                                Nombre de rivières polluées (basé sur R-PEST)
+*STOCK_NB_RIV_POLL(H)                             Stockage Nombre de rivières polluées (basé sur R-PEST)
+
+*      NB_RIV(RIV)                                Indicateur d'état de présence d'une rivière (0= pas une rivière - 1= rivière)
+*STOCK_NB_RIV(H,SRIV)                             Stockage Indicateur d'état de présence d'une rivière (0= pas une rivière - 1= rivière)
+
+*      NB_RIV_TOT                                 Nombre total de rivères
+*STOCK_NB_RIV_TOT(H)                              Stockage Nombre total de rivières
+
+*      RATIO_RIV_POLL                             Ratio du nombre de bassins versants polluées sur le nombre total de rivières
+*STOCK_RATIO_RIV_POLL(H)                          Stockage Ratio du nombre de bassins versants polluées sur le nombre total de rivières
+
+
+*13°) ooooooo déclaration des paramètres pour le calcul des pressions phytos dans les BV oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      NV_POLL_BV(SBV)                            Niveau de pollution des bassins versants (basé sur R-PEST)
+STOCK_NV_POLL_BV(H,SBV)                          Stockage Niveau de pollution des bassins versants (basé sur R-PEST)
+
+      POLL_BV(SBV)                               Indicateur de pollution des bassins versants (basé sur R-PEST - 0= non pollué - 1= polluée)
+STOCK_POLL_BV(H,SBV)                             Stockage Indicateur de pollution des bassins versants (basé sur R-PEST - 0= non pollué - 1= polluée)
+
+      NB_BV_POLL                                 Nombre de bassins versants pollués (basé sur R-PEST)
+STOCK_NB_BV_POLL(H)                              Stockage Nombre de bassins versants pollués (basé sur R-PEST)
+
+      NB_BV(BV)                                  Indicateur d'état de présence d'un bassin versant (0= pas un bassin versant - 1= bassin versant)
+STOCK_NB_BV(H,SBV)                               Stockage Indicateur d'état de présence d'un bassin versant (0= pas un bassin versant - 1= bassin versant)
+
+      NB_BV_TOT                                  Nombre total de bassins versants
+STOCK_NB_BV_TOT(H)                               Stockage Nombre total de bassins versants
+
+      RATIO_BV_POLL                              Ratio du nombre de bassins versants pollués sur le nombre total de bassins versants
+STOCK_RATIO_BV_POLL(H)                           Stockage Ratio du nombre de bassins versants pollués sur le nombre total de bassins versants
+
+
+*14°) ooooooo déclaration des paramètres pour le calcul des pressions sur captages oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      NV_POLL_CPT(SCPT)                          Niveau de pollution des captages d'eau potable (basé sur R-PEST)
+STOCK_NV_POLL_CPT(H,SCPT)                        Stockage Niveau de pollution des captages d'eau potable (basé sur R-PEST)
+
+      POLL_CPT(SCPT)                             Indicateur de pollution des captages d'eau potable (basé sur R-PEST - 0= non pollué - 1= polluée)
+STOCK_POLL_CPT(H,SCPT)                           Stockage Indicateur de pollution des captages d'eau potable (basé sur R-PEST - 0= non pollué - 1= polluée)
+
+      NB_CPT_POLL                                Nombre de captages d'eau potable pollués (basé sur R-PEST)
+STOCK_NB_CPT_POLL(H)                             Stockage Nombre de captages d'eau potable pollués (basé sur R-PEST)
+
+      NB_CPT(CPT)                                Indicateur d'état de présence d'un captage d'eau potable (0= pas un captage d'eau potable - 1= un captage d'eau potable)
+STOCK_NB_CPT(H,SCPT)                             Stockage Indicateur d'état de présence d'un captage d'eau potable (0= pas un captage d'eau potable - 1= un captage d'eau potable)
+
+      NB_CPT_TOT                                 Nombre total de captages d'eau potable
+STOCK_NB_CPT_TOT(H)                              Stockage Nombre total de captages d'eau potable
+
+      RATIO_CPT_POLL                             Ratio du nombre de captages d'eau potable pollués sur le nombre total de captages d'eau potable
+STOCK_RATIO_CPT_POLL(H)                          Stockage Ratio du nombre de captages d'eau potable pollués sur le nombre total de captages d'eau potable
+
+
+*15°) ooooooo Déclaration des paramètres pour le calcul de l'irriguation oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      BESOIN_EAU_01_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de janvier
+STOCK_BESOIN_EAU_01_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de janvier
+
+      BESOIN_EAU_02_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de février
+STOCK_BESOIN_EAU_02_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de février
+
+      BESOIN_EAU_03_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de mars
+STOCK_BESOIN_EAU_03_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de mars
+
+      BESOIN_EAU_04_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois d'avril
+STOCK_BESOIN_EAU_04_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois d'vril
+
+      BESOIN_EAU_05_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de mai
+STOCK_BESOIN_EAU_05_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de mai
+
+      BESOIN_EAU_06_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de juin
+STOCK_BESOIN_EAU_06_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de juin
+
+      BESOIN_EAU_07_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de juillet
+STOCK_BESOIN_EAU_07_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de juillet
+
+      BESOIN_EAU_08_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois d'août
+STOCK_BESOIN_EAU_08_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois d'août
+
+      BESOIN_EAU_09_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de septembre
+STOCK_BESOIN_EAU_09_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de septembre
+
+      BESOIN_EAU_10_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois d'octobre
+STOCK_BESOIN_EAU_10_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois d'octobre
+
+      BESOIN_EAU_11_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de novembre
+STOCK_BESOIN_EAU_11_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de novembre
+
+      BESOIN_EAU_12_parc(P)                      Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de décembre
+STOCK_BESOIN_EAU_12_parc(H,P)                    Stockage Besoin en eau par parcelle en fonction de la culture présente (en mm par jour) pour le mois de décembre
+
+
+      IRRIG_PARC(P)                              Besoin en eau des parcelles irriguées (en mm par an)
+STOCK_IRRIG_PARC(H,P)                            Stockage Besoin en eau des parcelles irriguées (en mm par an)
+
+      IRRIG_PARC2(P)                             Indicateur du besoin en irrigation par parcelle (0<= pas besoin d'irrigation - >0 besoin d'irrigation en mm par an)
+STOCK_IRRIG_PARC2(H,P)                           Stockage Indicateur du besoin en irrigation par parcelle (0<= pas besoin d'irrigation - >0 besoin d'irrigation en mm par an)
+
+      EAU_EXPL(E)                                Indicateur du besoin en irrigation par exploitation (0<= pas besoin d'irrigation - >0 besoin d'irrigation en mm par an) ?????????????????????????????? pourquoi x 10?
+STOCK_EAU_EXPL(H,E)                              Stockage Indicateur du besoin en irrigation par exploitation (0<= pas besoin d'irrigation - >0 besoin d'irrigation en mm par an) ?????????????????????????????? pourquoi x 10?
+
+      BESOIN_EAU_Gwad                            Indicateur du besoin en irrigation par exploitation (0<= pas besoin d'irrigation - >0 besoin d'irrigation en milliers de m3 par an) ?????????????????????????????? pourquoi x 10?
+STOCK_BESOIN_EAU_Gwad(H)                         Stockage Indicateur du besoin en irrigation par exploitation (0<= pas besoin d'irrigation - >0 besoin d'irrigation en milliers de m3 par an) ?????????????????????????????? pourquoi x 10?
+
+
+*16°) ooooooo Déclaration des paramètres pour le calcul de R_ERO oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      SENS_W_ECOU_fav(P)                         Borne favorable pour la difference entre angle de travail du sol et droite verticale avec angle d'écoulement de l'eau sur la parcelle (dir° flux de l'eau et droite verticale) à la parcelle
+STOCK_SENS_W_ECOU_fav(H,P)                       Stockage Borne favorable pour la difference entre angle de travail du sol et droite verticale avec angle d'écoulement de l'eau sur la parcelle (dir° flux de l'eau et droite verticale) à la parcelle
+
+      SENS_W_ECOU_defav(P)                       Borne defavorable pour la difference entre angle de travail du sol et droite verticale avec angle d'écoulement de l'eau sur la parcelle (dir° flux de l'eau et droite verticale) à la parcelle
+STOCK_SENS_W_ECOU_defav(H,P)                     Stockage Borne defavorable pour la difference entre angle de travail du sol et droite verticale avec angle d'écoulement de l'eau sur la parcelle (dir° flux de l'eau et droite verticale) à la parcelle
+
+      COUV_SOL_fav(C)                            Borne favorable pour l'indice de couverture du sol (entre 0 et 100)
+STOCK_COUV_SOL_fav(H,C)                          Stockage Borne favorable pour l'indice de couverture du sol (entre 0 et 100)
+
+      COUV_SOL_defav(C)                          Borne defavorable pour l'indice de couverture du sol (entre 0 et 100)
+STOCK_COUV_SOL_defav(H,C)                        Stockage Borne defavorable pour l'indice de couverture du sol (entre 0 et 100)
+
+      PROF_SILLONS_fav(C)                        Borne favorable pour la profondeur des sillons (en cm)
+STOCK_PROF_SILLONS_fav(H,C)                      Stockage Borne favorable pour la profondeur des sillons (en cm)
+
+      PROF_SILLONS_defav(C)                      Borne defavorable pour la profondeur des sillons (en cm)
+STOCK_PROF_SILLONS_defav(H,C)                    Stockage Borne defavorable pour la profondeur des sillons (en cm)
+
+      PLUIE_fav(P)                               Borne favorable pour la pluviométrie (en mm)
+STOCK_PLUIE_fav(H,P)                             Stockage Borne favorable pour la pluviométrie (en mm)
+
+      PLUIE_defav(P)                             Borne defavorable pour la pluviométrie (en mm)
+STOCK_PLUIE_defav(H,P)                           Stockage Borne defavorable pour la pluviométrie (en mm)
+
+      PENTE_fav(P)                               Borne favorable pour la pente de la parcelle (en %)
+STOCK_PENTE_fav(H,P)                             Stockage Borne favorable pour la pente de la parcelle (en %)
+
+      PENTE_defav(P)                             Borne defavorable pour la pente de la parcelle (en %)
+STOCK_PENTE_defav(H,P)                           Stockage Borne defavorable pour la pente de la parcelle (en %)
+
+
+      RRP(P,C)                                   Risque de Ruissellement Potentiel à la parcelle par culture (entre 0 et 10)
+STOCK_RRP(H,P,C)                                 Stockage Risque de Ruissellement Potentiel à la parcelle par culture (entre 0 et 10)
+
+      RRP_Parc(P)                                Risque de Ruissellement Potentiel à la parcelle (entre 0 et 10)
+STOCK_RRP_Parc(H,P)                              Stockage Risque de Ruissellement Potentiel à la parcelle (entre 0 et 10)
+
+      RRP_fav(P)                                 Borne favorable pour le Risque de Ruissellement Potentiel à la parcelle
+STOCK_RRP_fav(H,P)                               Stockage Borne favorable pour le Risque de Ruissellement Potentiel à la parcelle
+
+      RRP_defav(P)                               Borne defavorable pour le Risque de Ruissellement Potentiel à la parcelle (entre 0 et 10)
+STOCK_RRP_defav(H,P)                             Stockage Borne defavorable pour le Risque de Ruissellement Potentiel à la parcelle (entre 0 et 10)
+
+
+      RRR(P,C)                                   Risque de Ruissellement Réel à la parcelle par culture (entre 0 et 10)
+STOCK_RRR(H,P,C)                                 Stockage Risque de Ruissellement Réel à la parcelle par culture (entre 0 et 10)
+
+      RRR_Parc(P)                                Risque de Ruissellement Réel à la parcelle (entre 0 et 10)
+STOCK_RRR_Parc(H,P)                              Stockage Risque de Ruissellement Réel à la parcelle (entre 0 et 10)
+
+      RRR_fav(P)                                 Borne favorable pour le risque de Ruissellement Réel (entre 0 et 10)
+STOCK_RRR_fav(H,P)                               Stockage Borne favorable pour le risque de Ruissellement Réel (entre 0 et 10)
+
+      RRR_defav(P)                               Borne defavorable pour le risque de Ruissellement Réel (entre 0 et 10)
+STOCK_RRR_defav(H,P)                             Stockage Borne defavorable pour le risque de Ruissellement Réel (entre 0 et 10)
+
+
+      R_ERO(P,C)                                 Risque d'Erosion à la parcelle par culture (entre 0 et 10)
+STOCK_R_ERO(H,P,C)                               Stockage Risque d' Erosion à la parcelle par culture (entre 0 et 10)
+
+      R_ERO_Parc(P)                              Risque d'Erosion à la parcelle (entre 0 et 10)
+STOCK_R_ERO_Parc(H,P)                            Stockage Risque d' Erosion à la parcelle (entre 0 et 10)
+
+      R_ERO_Parc2(P)                             Risque d'Erosion à la parcelle (entre 0 et 10)
+STOCK_R_ERO_Parc2(H,P)                           Stockage Risque d'Erosion à la parcelle (entre 0 et 10)
+
+      R_ERO_Parc3(P)                             Risque d'Erosion à la parcelle (entre 0 et 10)
+STOCK_R_ERO_Parc3(H,P)                           Stockage Risque d'Erosion à la parcelle (entre 0 et 10)
+
+      R_ERO_Gwad                                 Calcul du R_ERO GUADELOUPE la somme des sufaces pour lesquelles le R_ERO est superieur à 6
+STOCK_R_ERO_Gwad(H)                              Stockage Calcul du R_ERO GUADELOUPE la somme des sufaces pour lesquelles le R_ERO est superieur à 6
+
+
+*17°) ooooooo Overall emissions of CO2 from farming activities  ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+      GES_ha_OTK_Cult(C,K)                       Quantité d'équivalent carbone émis pour chaque culture par OTK (en kg par ha)
+STOCK_GES_ha_OTK_Cult(H,C,K)                     Stockage Quantité d'équivalent carbone émis pour chaque culture par OTK (en kg par ha)
+
+      GES_Ha_Cult(C)                             Quantité d'équivalent carbone émis de culture (en kg par ha)
+STOCK_GES_Ha_Cult(H,C)                           Stockage Quantité d'équivalent carbone émis de culture (en kg par ha)
+
+      GES_Kg_Cult(C)                             Quantité d'équivalent carbone émis pour 1kg de la culture décrite (en kg de CO2 par kg de production)
+STOCK_GES_Kg_Cult(H,C)                           Stockage Quantité d'équivalent carbone émis pour 1kg de la culture décrite (en kg de CO2 par kg de production)
+
+      GES_Parc(P)                                Quantité d'équivalent carbone émis par parcelle (en kg)
+STOCK_GES_Parc(H,P)                              Stockage Quantité d'équivalent carbone émis par parcelle (en kg)
+
+      GES_Cult(C)                                Quantité d'équivalent carbone émis par culture (en kg)
+STOCK_GES_Cult(H,C)                              Stockage Quantité d'équivalent carbone émis par culture (en kg)
+
+      GES_Expl(E)                                Quantité d'équivalent carbone émis par exploitation (en kg)
+STOCK_GES_Expl(H,E)                              Stockage Quantité d'équivalent carbone émis par exploitation (en kg)
+
+      GES_Reg(R)                                 Quantité d'équivalent carbone émis par petite région (en kg)
+STOCK_GES_Reg(H,R)                               Stockage Quantité d'équivalent carbone émis par petite région (en kg)
+
+      GES_Gwad                                   Quantité d'équivalent carbone émis en Guadeloupe (en kg)
+STOCK_GES_Gwad(H)                                Stockage Quantité d'équivalent carbone émis en Guadeloupe (en kg)
+
+      GES_Gwad_Moy_ha
+*18°) ooooooo déclaration des paramètres pour le calcul de la diversité paysagère ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+ISI_SOBT_PLANT                                   Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Sud-Ouest Basse-Terre
+STOCK_ISI_SOBT_PLANT(H)                          Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Sud-Ouest Basse-Terre
+
+ISI_SEBT_PLANT                                   Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Sud-Est Basse-Terre
+STOCK_ISI_SEBT_PLANT(H)                          Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Sud-Est Basse-Terre
+
+ISI_NBT_PLANT                                    Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Nord Basse-Terre
+STOCK_ISI_NBT_PLANT(H)                           Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Nord Basse-Terre
+
+ISI_NGT_PLANT                                    Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Nord Grande-Terre
+STOCK_ISI_NGT_PLANT(H)                           Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Nord Grande-Terre
+
+ISI_CGT_PLANT                                    Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Centre Grande-Terre
+STOCK_ISI_CGT_PLANT(H)                           Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour le Centre Grande-Terre
+
+ISI_EGT_PLANT                                    Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour l'Est Grande-Terre
+STOCK_ISI_EGT_PLANT(H)                           Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour l'Est Grande-Terre
+
+ISI_MG_PLANT                                     Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour Marie-Galante
+STOCK_ISI_MG_PLANT(H)                            Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour Marie-Galante
+
+ISI_TOT_PLANT                                    Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour la Guadeloupe
+STOCK_ISI_TOT_PLANT(H)                           Stockage Indicateur de diversification des systèmes de cultures dans l'assolement (ISI) pour la Guadeloupe
+
+
+
+PAD_SOBT_TOTAL
+PAD_SEBT_TOTAL
+PAD_NBT_TOTAL
+PAD_NGT_TOTAL
+PAD_CGT_TOTAL
+PAD_EGT_TOTAL
+PAD_MG_TOTAL
+PAD_GWAD_TOTAL
+
+PAD_SOBT_ANA
+PAD_SEBT_ANA
+PAD_NBT_ANA
+PAD_NGT_ANA
+PAD_CGT_ANA
+PAD_EGT_ANA
+PAD_MG_ANA
+PAD_GWAD_ANA
+
+PAD_SOBT_BAN
+PAD_SEBT_BAN
+PAD_NBT_BAN
+PAD_NGT_BAN
+PAD_CGT_BAN
+PAD_EGT_BAN
+PAD_MG_BAN
+PAD_GWAD_BAN
+
+PAD_SOBT_BAN_EX
+PAD_SEBT_BAN_EX
+PAD_NBT_BAN_EX
+PAD_NGT_BAN_EX
+PAD_CGT_BAN_EX
+PAD_EGT_BAN_EX
+PAD_MG_BAN_EX
+PAD_GWAD_BAN_EX
+
+PAD_SOBT_BAN_INT
+PAD_SEBT_BAN_INT
+PAD_NBT_BAN_INT
+PAD_NGT_BAN_INT
+PAD_CGT_BAN_INT
+PAD_EGT_BAN_INT
+PAD_MG_BAN_INT
+PAD_GWAD_BAN_INT
+
+PAD_SOBT_BAN_SINT
+PAD_SEBT_BAN_SINT
+PAD_NBT_BAN_SINT
+PAD_NGT_BAN_SINT
+PAD_CGT_BAN_SINT
+PAD_EGT_BAN_SINT
+PAD_MG_BAN_SINT
+PAD_GWAD_BAN_SINT
+
+PAD_SOBT_BAN_PER
+PAD_SEBT_BAN_PER
+PAD_NBT_BAN_PER
+PAD_NGT_BAN_PER
+PAD_CGT_BAN_PER
+PAD_EGT_BAN_PER
+PAD_MG_BAN_PER
+PAD_GWAD_BAN_PER
+
+PAD_SOBT_BAN_IRR
+PAD_SEBT_BAN_IRR
+PAD_NBT_BAN_IRR
+PAD_NGT_BAN_IRR
+PAD_CGT_BAN_IRR
+PAD_EGT_BAN_IRR
+PAD_MG_BAN_IRR
+PAD_GWAD_BAN_IRR
+
+PAD_SOBT_BC
+PAD_SEBT_BC
+PAD_NBT_BC
+PAD_NGT_BC
+PAD_CGT_BC
+PAD_EGT_BC
+PAD_MG_BC
+PAD_GWAD_BC
+
+PAD_SOBT_CAN
+PAD_SEBT_CAN
+PAD_NBT_CAN
+PAD_NGT_CAN
+PAD_CGT_CAN
+PAD_EGT_CAN
+PAD_MG_CAN
+PAD_GWAD_CAN
+
+PAD_SOBT_CS
+PAD_SEBT_CS
+PAD_NBT_CS
+PAD_NGT_CS
+PAD_CGT_CS
+PAD_EGT_CS
+PAD_MG_CS
+PAD_GWAD_CS
+
+PAD_SOBT_CF
+PAD_SEBT_CF
+PAD_NBT_CF
+PAD_NGT_CF
+PAD_CGT_CF
+PAD_EGT_CF
+PAD_MG_CF
+PAD_GWAD_CF
+
+
+PAD_SOBT_MAR
+PAD_SEBT_MAR
+PAD_NBT_MAR
+PAD_NGT_MAR
+PAD_CGT_MAR
+PAD_EGT_MAR
+PAD_MG_MAR
+PAD_GWAD_MAR
+
+PAD_SOBT_MA
+PAD_SEBT_MA
+PAD_NBT_MA
+PAD_NGT_MA
+PAD_CGT_MA
+PAD_EGT_MA
+PAD_MG_MA
+PAD_GWAD_MA
+
+PAD_SOBT_ME
+PAD_SEBT_ME
+PAD_NBT_ME
+PAD_NGT_ME
+PAD_CGT_ME
+PAD_EGT_ME
+PAD_MG_ME
+PAD_GWAD_ME
+
+PAD_SOBT_IG
+PAD_SEBT_IG
+PAD_NBT_IG
+PAD_NGT_IG
+PAD_CGT_IG
+PAD_EGT_IG
+PAD_MG_IG
+PAD_GWAD_IG
+
+PAD_SOBT_NON
+PAD_SEBT_NON
+PAD_NBT_NON
+PAD_NGT_NON
+PAD_CGT_NON
+PAD_EGT_NON
+PAD_MG_NON
+PAD_GWAD_NON
+
+PAD_GWAD_FRICHES
+PAD_SOBT_FRICHES
+PAD_SEBT_FRICHES
+PAD_NBT_FRICHES
+PAD_NGT_FRICHES
+PAD_CGT_FRICHES
+PAD_EGT_FRICHES
+PAD_MG_FRICHES
+
+
+PAD_SOBT_JA
+PAD_SEBT_JA
+PAD_NBT_JA
+PAD_NGT_JA
+PAD_CGT_JA
+PAD_EGT_JA
+PAD_MG_JA
+PAD_GWAD_JA
+
+
+PAD_SOBT_PAT
+PAD_SEBT_PAT
+PAD_NBT_PAT
+PAD_NGT_PAT
+PAD_CGT_PAT
+PAD_EGT_PAT
+PAD_MG_PAT
+PAD_GWAD_PAT
+
+PAD_SOBT_PLU
+PAD_SEBT_PLU
+PAD_NBT_PLU
+PAD_NGT_PLU
+PAD_CGT_PLU
+PAD_EGT_PLU
+PAD_MG_PLU
+PAD_GWAD_PLU
+
+
+
+PAD_EFF_TYPE_0_GWAD
+PAD_EFF_TYPE_1_GWAD
+PAD_EFF_TYPE_2_GWAD
+PAD_EFF_TYPE_3_GWAD
+PAD_EFF_TYPE_4_GWAD
+PAD_EFF_TYPE_5_GWAD
+PAD_EFF_TYPE_6_GWAD
+PAD_EFF_TYPE_7_GWAD
+PAD_EFF_TYPE_8_GWAD
+
+PAD_EFF_TYPE_0_SOBT
+PAD_EFF_TYPE_1_SOBT
+PAD_EFF_TYPE_2_SOBT
+PAD_EFF_TYPE_3_SOBT
+PAD_EFF_TYPE_4_SOBT
+PAD_EFF_TYPE_5_SOBT
+PAD_EFF_TYPE_6_SOBT
+PAD_EFF_TYPE_7_SOBT
+PAD_EFF_TYPE_8_SOBT
+
+
+
+;
+

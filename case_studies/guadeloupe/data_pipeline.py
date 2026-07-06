@@ -1,0 +1,70 @@
+from pathlib import Path
+
+import pandas as pd
+
+from core.data.dataset import Dataset
+from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
+
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+SETS_DIR = DATA_DIR / "sets"
+TABLES_DIR = DATA_DIR / "tables"
+INDICE_H_DIR = TABLES_DIR / "indice_H"
+
+YEAR = "2017"
+SCENARIO = "RESTIT"
+
+
+def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) -> pd.Series:
+    merged = expl_parc.assign(surface=expl_parc["plot"].map(plot_surface))
+    return merged.groupby("farm")["surface"].sum()
+
+
+def build_dataset() -> Dataset:
+    sets = {
+        "crops": read_flat_set(SETS_DIR / "CULT_2017.set"),
+        "soils": read_flat_set(SETS_DIR / "SOL.set"),
+        "otk": read_flat_set(SETS_DIR / "OTK.set"),
+        "watersheds": read_flat_set(SETS_DIR / "BV_2017.set"),
+        "catchments": read_flat_set(SETS_DIR / "CPT_2017.set"),
+    }
+
+    expl_parc = read_mapping_set(SETS_DIR / "EXPL_PARC_2017.set", "farm", "plot")
+    bv_parc = read_mapping_set(SETS_DIR / "BV_PARC_2017.set", "watershed", "plot")
+    reg_parc = read_mapping_set(SETS_DIR / "REG_PARC_2017.set", "region", "plot")
+    cpt_parc = read_mapping_set(SETS_DIR / "CPT_PARC_2017.set", "catchment", "plot")
+
+    data_parc = read_wide_table(TABLES_DIR / "Data_Parc_Gwad_2017.txt")
+    data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
+    data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
+    matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{SCENARIO}.txt")
+    prix_cult = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[YEAR]
+    rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[YEAR]
+
+    plot_surface = data_parc["SURF_HA"]
+    farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
+
+    parameters = {
+        "expl_parc": expl_parc,
+        "bv_parc": bv_parc,
+        "reg_parc": reg_parc,
+        "cpt_parc": cpt_parc,
+        "data_parc": data_parc,
+        "data_cult": data_cult,
+        "data_otk": data_otk,
+        "matrice_otk_cult": matrice_otk_cult,
+        "prix_cult": prix_cult,
+        "rdt_cult": rdt_cult,
+        "farm_surface_ha": farm_surface_ha,
+    }
+
+    return Dataset(sets=sets, parameters=parameters, scalars={})
+
+
+if __name__ == "__main__":
+    dataset = build_dataset()
+    print(f"crops: {len(dataset.sets['crops'])}")
+    print(f"soils: {len(dataset.sets['soils'])}")
+    print(f"otk: {len(dataset.sets['otk'])}")
+    print(f"plots (expl_parc rows): {len(dataset.parameters['expl_parc'])}")
+    print(f"farms: {dataset.parameters['expl_parc']['farm'].nunique()}")
+    print(f"farm_surface_ha sample:\n{dataset.parameters['farm_surface_ha'].head()}")

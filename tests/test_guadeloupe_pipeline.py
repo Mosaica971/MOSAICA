@@ -1,0 +1,38 @@
+import pandas as pd
+import pytest
+
+from case_studies.guadeloupe.data_pipeline import build_dataset, compute_farm_surface_ha
+
+
+def test_compute_farm_surface_ha_sums_plot_surface_per_farm():
+    plot_surface = pd.Series({"P1": 3.68, "P2": 3.3, "P3": 1.36, "P4": 1.24})
+    expl_parc = pd.DataFrame(
+        {
+            "farm": ["E1", "E1", "E1", "E2"],
+            "plot": ["P1", "P2", "P3", "P4"],
+        }
+    )
+
+    result = compute_farm_surface_ha(plot_surface, expl_parc)
+
+    assert result["E1"] == 3.68 + 3.3 + 1.36
+    assert result["E2"] == 1.24
+
+
+def test_build_dataset_loads_known_set_sizes():
+    dataset = build_dataset()
+
+    assert len(dataset.sets["crops"]) == 84
+    assert len(dataset.sets["soils"]) == 5
+    assert len(dataset.sets["otk"]) == 189
+    assert len(dataset.parameters["expl_parc"]) == 24734
+    assert dataset.parameters["expl_parc"]["farm"].nunique() == 4638
+
+
+def test_build_dataset_computes_farm_surface_ha_matching_gams_init_logic():
+    dataset = build_dataset()
+
+    farm_surface_ha = dataset.parameters["farm_surface_ha"]
+
+    assert farm_surface_ha["E1"] == pytest.approx(3.68 + 3.3 + 1.36)
+    assert farm_surface_ha["E2"] == pytest.approx(1.24)

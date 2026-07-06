@@ -1,0 +1,2377 @@
+
+*DISPLAY PART_C_INIT;
+DISPLAY PLUVIO_01_PARC;
+DISPLAY MB_ha_Cult;
+DISPLAY Prix_Cult
+DISPLAY MO_Expl_init;
+DISPLAY ASSOL_CPT;
+DISPLAY ASSOL_Parc;
+
+DISPLAY DT50_OTK_Cult;
+DISPLAY ADI_OTK_cult;
+
+DISPLAY ASSOL_Gwad;
+
+DISPLAY ASSOL_GWAD_tot_TOTAL;
+DISPLAY NBRE_PARC_init;
+DISPLAY NBRE_EXPL_init;
+DISPLAY TONNE_BANANE;
+DISPLAY TONNE_SUCRE;
+
+DISPLAY REV_Moy_ha_Gwad;
+DISPLAY REV_Expl_Moy_Gwad;
+
+DISPLAY SUB_POSEI_Gwad;
+DISPLAY SUB_NAT_Gwad;
+DISPLAY SUB_PDRG_Gwad;
+DISPLAY SUB_TOT_Gwad;
+DISPLAY SUB_TOT_Moy_ha;
+
+DISPLAY MO_Gwad;
+DISPLAY MO_Gwad_Moy_ha;
+
+DISPLAY EFF_TYPE_1_Gwad;
+DISPLAY EFF_TYPE_2_Gwad;
+DISPLAY EFF_TYPE_3_Gwad;
+DISPLAY EFF_TYPE_4_Gwad;
+DISPLAY EFF_TYPE_5_Gwad;
+DISPLAY EFF_TYPE_6_Gwad;
+DISPLAY EFF_TYPE_7_Gwad;
+DISPLAY EFF_TYPE_8_Gwad;
+DISPLAY EFF_TYPE_0_Gwad;
+
+DISPLAY PART_TYPE_1_Gwad;
+DISPLAY PART_TYPE_2_Gwad;
+DISPLAY PART_TYPE_3_Gwad;
+DISPLAY PART_TYPE_4_Gwad;
+DISPLAY PART_TYPE_5_Gwad;
+DISPLAY PART_TYPE_6_Gwad;
+DISPLAY PART_TYPE_7_Gwad;
+DISPLAY PART_TYPE_8_Gwad;
+DISPLAY PART_TYPE_0_Gwad;
+
+DISPLAY GES_Gwad;
+DISPLAY GES_Gwad_Moy_ha;
+
+DISPLAY ISI_TOT_PLANT;
+
+DISPLAY IFT_Gwad;
+DISPLAY IFT_Moy_ha_Gwad;
+
+DISPLAY AZOTE_Moy_ha_Gwad;
+
+DISPLAY RCLD_Gwad;
+
+DISPLAY NV_CLD_parc;
+
+DISPLAY R_PEST_Gwad;
+
+DISPLAY R_PEST;
+
+* ASSOLEMENT.TXT
+file result_RIVAGE_01     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\ASSOLEMENT.TXT/ ;
+     result_RIVAGE_01.pc=5;
+     result_RIVAGE_01.nw=8;
+     result_RIVAGE_01.pw=1000;
+
+put result_RIVAGE_01;
+
+put "ASSOLEMENT"  put /
+loop(SC,put SC.tl, put ASSOL_Gwad(SC); put / );
+
+* PARAM_INIT.TXT
+file result_PARAM_INIT_001     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\PARAM_INIT.TXT/ ;
+     result_PARAM_INIT_001.pc=5;
+     result_PARAM_INIT_001.nw=8;
+     result_PARAM_INIT_001.pw=1000;
+
+put result_PARAM_INIT_001;
+
+
+
+
+
+
+
+
+* TYPES_EXPL.TXT
+file result_RIVAGE_02     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\TYPES_EXPL.TXT/ ;
+     result_RIVAGE_02.pc=5;
+     result_RIVAGE_02.nw=8;
+     result_RIVAGE_02.pw=1000;
+
+put result_RIVAGE_02;
+
+put "TYPE_EXPL", "EFF_TYPE", "PART_TYPE"  put /
+put "ARBORICUTLEURS", put EFF_TYPE_1_Gwad, put PART_TYPE_1_Gwad put /
+put "BANANIERS",      put EFF_TYPE_2_Gwad, put PART_TYPE_2_Gwad put /
+put "CANNIERS",       put EFF_TYPE_3_Gwad, put PART_TYPE_3_Gwad put /
+put "CANNIERS DIV",   put EFF_TYPE_4_Gwad, put PART_TYPE_4_Gwad put /
+put "DIVERSIFIES",    put EFF_TYPE_5_Gwad, put PART_TYPE_5_Gwad put /
+put "ELEVEURS",       put EFF_TYPE_6_Gwad, put PART_TYPE_6_Gwad put /
+put "MARAICHERS",     put EFF_TYPE_7_Gwad, put PART_TYPE_7_Gwad put /
+put "MIXTES CAN ELV", put EFF_TYPE_8_Gwad, put PART_TYPE_8_Gwad put /
+put "FRICHIERS",      put EFF_TYPE_0_Gwad, put PART_TYPE_0_Gwad put /
+
+
+* INDICATEURS.TXT
+file result_RIVAGE_03     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\INDICATEURS.TXT/ ;
+     result_RIVAGE_03.pc=5;
+     result_RIVAGE_03.nw=8;
+     result_RIVAGE_03.pw=1000;
+
+put result_RIVAGE_03;
+
+put "SAU_TOTALE",     put ASSOL_GWAD_tot_TOTAL, put /;
+put "NBRE_PARCELLES", put NBRE_PARC_init,       put /;
+put "NBRE_EXPL",      put NBRE_EXPL_init,       put /;
+put "Q_BANANES",      put TONNE_BANANE,         put /;
+put "Q_SUCRE",        put TONNE_SUCRE,          put /;
+put "REV_MOY_HA",     put REV_Moy_ha_Gwad,      put /;
+put "REV_MOY_EXPL",   put REV_Expl_Moy_Gwad,    put /;
+put "SUB_POSEI",      put SUB_POSEI_Gwad,       put /;
+put "SUB_NAT",        put SUB_NAT_Gwad,         put /;
+put "SUB_PDRG",       put SUB_PDRG_Gwad,        put /;
+put "SUB_TOT",        put SUB_TOT_Gwad,         put /;
+put "SUB_TOT_MOY_HA", put SUB_TOT_Moy_ha,       put /;
+put "TRAVAIL_TOT",    put MO_Gwad,              put /;
+put "TRAVAIL_MOY_HA", put MO_Gwad_Moy_ha,       put /;
+
+put "GES TOTAL",      put GES_Gwad,             put /;
+put "GES MOY HA",     put GES_Gwad_Moy_ha,      put /;
+put "ISI TOTAL",      put ISI_TOT_PLANT,        put /;
+put "IFT TOTAL",      put IFT_Gwad,             put /;
+put "IFT MOY HA",     put IFT_Moy_ha_Gwad,      put /;
+put "AZOTE_MOY_HA",   put AZOTE_Moy_ha_Gwad,    put /;
+put "SURF RCLD",      put RCLD_gwad,            put /;
+put "SURF R_PEST",    put R_PEST_Gwad,          put /;
+
+
+
+* ASSOL_PARC_INIT.TXT
+file result_Parc_000     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\ASSOL_PARC_INIT.TXT/ ;
+     result_Parc_000.pc=5;
+     result_Parc_000.nw=8;
+     result_Parc_000.pw=1000;
+
+put result_Parc_000;
+put "Parcelle",loop(SC,put SC.tl);
+loop(
+         SP, put/, SP.tl, loop(SC,put STOCK_ASSOL_Parc("init",SP,SC) );
+);
+
+
+* ASSOL_PARC_CALIB.TXT
+file result_Parc_00     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\ASSOL_PARC_CALIB.TXT/ ;
+     result_Parc_00.pc=5;
+     result_Parc_00.nw=8;
+     result_Parc_00.pw=1000;
+
+put result_Parc_00;
+put "Parcelle",loop(SC,put SC.tl);
+loop(
+         SP, put/, SP.tl, loop(SC,put STOCK_ASSOL_Parc("calib",SP,SC) );
+);
+
+
+* ASSOL_PARC_2017.TXT
+file result_Parc_01     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\ASSOL_PARC_2017.TXT/ ;
+     result_Parc_01.pc=5;
+     result_Parc_01.nw=8;
+     result_Parc_01.pw=1000;
+
+put result_Parc_01;
+put "Parcelle", loop(SC,put SC.tl) ;
+loop(
+         SP, put/, SP.tl, loop(SC,put STOCK_ASSOL_Parc("2017",SP,SC) ) ;
+);
+
+
+* ASSOL_BASSIN_CALIB.TXT
+file result_Parc_02     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\ASSOL_BASSIN_CALIB.TXT/ ;
+     result_Parc_02.pc=5;
+     result_Parc_02.nw=8;
+     result_Parc_02.pw=1000;
+
+put result_Parc_02;
+put "BASSIN",loop(SC,put SC.tl);
+
+         put/,"SOBT" ,loop(SC,put STOCK_ASSOL_SOBT_tot("calib",SC) );
+         put/,"SEBT" ,loop(SC,put STOCK_ASSOL_SEBT_tot("calib",SC) );
+
+         put/,"NBT"  ,loop(SC,put STOCK_ASSOL_NBT_tot("calib",SC)   );
+
+         put/,"NGT"  ,loop(SC,put STOCK_ASSOL_NGT_tot("calib",SC)   );
+         put/,"CGT"  ,loop(SC,put STOCK_ASSOL_CGT_tot("calib",SC)   );
+         put/,"EGT"  ,loop(SC,put STOCK_ASSOL_EGT_tot("calib",SC)   );
+
+         put/,"MG"   ,loop(SC,put STOCK_ASSOL_MG_tot("calib",SC)     );
+
+
+
+* ASSOL_BASSIN_2017.TXT
+file result_Parc_03     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\ASSOL_BASSIN_2017.TXT/ ;
+     result_Parc_03.pc=5;
+     result_Parc_03.nw=8;
+     result_Parc_03.pw=1000;
+
+put result_Parc_03;
+put "BASSIN",loop(SC,put SC.tl);
+
+         put/,"SOBT" ,loop(SC,put STOCK_ASSOL_SOBT_tot("2017",SC) );
+         put/,"SEBT" ,loop(SC,put STOCK_ASSOL_SEBT_tot("2017",SC) );
+
+         put/,"NBT"  ,loop(SC,put STOCK_ASSOL_NBT_tot("2017",SC)   );
+
+         put/,"NGT"  ,loop(SC,put STOCK_ASSOL_NGT_tot("2017",SC)   );
+         put/,"CGT"  ,loop(SC,put STOCK_ASSOL_CGT_tot("2017",SC)   );
+         put/,"EGT"  ,loop(SC,put STOCK_ASSOL_EGT_tot("2017",SC)   );
+
+         put/,"MG"   ,loop(SC,put STOCK_ASSOL_MG_tot("2017",SC)     );
+
+
+
+
+*INDIC_SURF_GWAD.TXT
+file result_Gwad_01     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\INDIC_SURF_GWAD.TXT/ ;
+     result_Gwad_01.pc=5;
+     result_Gwad_01.nw=8;
+     result_Gwad_01.pw=1000;
+
+put result_Gwad_01;
+
+put "INDIC", "INIT", "CALIB", "2017", "2018", "2019", "2020", "2021", "2022"          put /
+
+put "STOCK_ASSOL_GWAD_tot_ANA",      loop(SH, put STOCK_ASSOL_GWAD_tot_ANA(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_BAN",      loop(SH, put STOCK_ASSOL_GWAD_tot_BAN(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_BAN_EX",   loop(SH, put STOCK_ASSOL_GWAD_tot_BAN_EX(SH));   put /
+put "STOCK_ASSOL_GWAD_tot_BAN_INT",  loop(SH, put STOCK_ASSOL_GWAD_tot_BAN_INT(SH));  put /
+put "STOCK_ASSOL_GWAD_tot_BAN_SINT", loop(SH, put STOCK_ASSOL_GWAD_tot_BAN_SINT(SH)); put /
+put "STOCK_ASSOL_GWAD_tot_BAN_PER",  loop(SH, put STOCK_ASSOL_GWAD_tot_BAN_PER(SH));  put /
+put "STOCK_ASSOL_GWAD_tot_BAN_IRR",  loop(SH, put STOCK_ASSOL_GWAD_tot_BAN_IRR(SH));  put /
+put "STOCK_ASSOL_GWAD_tot_BC",       loop(SH, put STOCK_ASSOL_GWAD_tot_BC(SH));       put /
+put "STOCK_ASSOL_GWAD_tot_CAN",      loop(SH, put STOCK_ASSOL_GWAD_tot_CAN(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_MAR",      loop(SH, put STOCK_ASSOL_GWAD_tot_MAR(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_MA",       loop(SH, put STOCK_ASSOL_GWAD_tot_MA(SH));       put /
+put "STOCK_ASSOL_GWAD_tot_ME",       loop(SH, put STOCK_ASSOL_GWAD_tot_ME(SH));       put /
+put "STOCK_ASSOL_GWAD_tot_IG",       loop(SH, put STOCK_ASSOL_GWAD_tot_IG(SH));       put /
+put "STOCK_ASSOL_GWAD_tot_NON",      loop(SH, put STOCK_ASSOL_GWAD_tot_NON(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_PAT",      loop(SH, put STOCK_ASSOL_GWAD_tot_PAT(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_PLU",      loop(SH, put STOCK_ASSOL_GWAD_tot_PLU(SH));      put /
+put "STOCK_ASSOL_GWAD_tot_TOTAL",    loop(SH, put STOCK_ASSOL_GWAD_tot_TOTAL(SH));    put /
+put "STOCK_SURF_GWAD",               loop(SH, put STOCK_SURF_GWAD(SH));               put / /
+
+put "STOCK_ASSOL_Gwad", "INIT", "CALIB", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+loop(SC,put SC.tl, loop(SH, put STOCK_ASSOL_Gwad(SH,SC)); put /);   put /
+
+put "STOCK_EVAL_ASSOL_Gwad", "INIT", "CALIB", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+loop(SC,put SC.tl, loop(SH, put STOCK_EVAL_ASSOL_Gwad(SH,SC)); put /);   put /
+
+
+*INDIC_EFF_GWAD.TXT
+file result_Gwad_02     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\INDIC_EFF_GWAD.TXT/ ;
+     result_Gwad_02.pc=5;
+     result_Gwad_02.nw=8;
+     result_Gwad_02.pw=1000;
+
+put result_Gwad_02;
+
+put "INDIC", "INIT", "CALIB", "2017", "2018", "2019", "2020", "2021", "2022"          put /
+
+*put "STOCK_EVAL_EFF_Type_Gwad",      loop(SH, put STOCK_EFF_Type_Gwad(SH));           put /
+put "STOCK_EFF_TYPE_0_Gwad",         loop(SH, put STOCK_EFF_TYPE_0_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_1_Gwad",         loop(SH, put STOCK_EFF_TYPE_1_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_2_Gwad",         loop(SH, put STOCK_EFF_TYPE_2_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_3_Gwad",         loop(SH, put STOCK_EFF_TYPE_3_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_4_Gwad",         loop(SH, put STOCK_EFF_TYPE_4_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_5_Gwad",         loop(SH, put STOCK_EFF_TYPE_5_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_6_Gwad",         loop(SH, put STOCK_EFF_TYPE_6_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_7_Gwad",         loop(SH, put STOCK_EFF_TYPE_7_Gwad(SH));         put /
+put "STOCK_EFF_TYPE_8_Gwad",         loop(SH, put STOCK_EFF_TYPE_8_Gwad(SH));         put / /
+
+put "INDIC", "INIT", "CALIB", "2017", "2018", "2019", "2020", "2021", "2022"          put /
+
+put "STOCK_EVAL_EFF_Type_Gwad",      loop(SH, put STOCK_EVAL_EFF_Type_Gwad(SH));      put /
+put "STOCK_EVAL_EFF_TYPE_1_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_1_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_2_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_2_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_3_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_3_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_4_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_4_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_5_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_5_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_6_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_6_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_7_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_7_Gwad(SH));    put /
+put "STOCK_EVAL_EFF_TYPE_8_Gwad",    loop(SH, put STOCK_EVAL_EFF_TYPE_8_Gwad(SH));    put /
+
+
+* Matrice_Parc_Cult_Init.TXT
+file result_Gwad_03     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\Matrice_Parc_Cult_Init.TXT/ ;
+     result_Gwad_03.pc=5;
+     result_Gwad_03.nw=8;
+     result_Gwad_03.pw=1000;
+
+put result_Gwad_03;
+put "Parcelle",loop(SC,put SC.tl) put/
+loop(SP, put SP.tl,
+                    loop(SC, put Matrice_Parc_Cult(SP,SC)
+                    );
+put /);
+
+
+* Matrice_Parc_Cult_Calib.TXT
+file result_Gwad_04     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\Matrice_Parc_Cult_Calib.TXT/ ;
+     result_Gwad_04.pc=5;
+     result_Gwad_04.nw=8;
+     result_Gwad_04.pw=1000;
+
+put result_Gwad_04;
+put "Parcelle",loop(SC,put SC.tl) put/
+loop(SP, put SP.tl,
+                    loop(SC, put Matrice_Parc_Cult_Calib(SP,SC)
+                    );
+put /);
+
+
+* Matrice_Parc_Cult_PAD.TXT
+file result_Gwad_05     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\Matrice_Parc_Cult_PAD.TXT/ ;
+     result_Gwad_05.pc=5;
+     result_Gwad_05.nw=8;
+     result_Gwad_05.pw=1000;
+
+put result_Gwad_05;
+put "Parcelle",loop(SC,put SC.tl) put/
+loop(SP, put SP.tl,
+                    loop(SC, put Matrice_Parc_Cult_PAD(SP,SC)
+                    );
+put /);
+
+
+
+* PAD_PARC_CULT.TXT
+file result_Gwad_06     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\PAD_PARC_CULT.TXT/ ;
+     result_Gwad_06.pc=5;
+     result_Gwad_06.nw=8;
+     result_Gwad_06.pw=1000;
+
+put result_Gwad_06;
+put "Culture", "PAD_CULT", put/
+loop(SC, put SC.tl, put PAD_PARC_CULT(SC), put /);
+
+
+
+* TYPE_EXPL_CALIB.TXT
+file result_Gwad_07     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\TYPE_EXPL_CALIB.TXT/ ;
+     result_Gwad_07.pc=5;
+     result_Gwad_07.nw=8;
+     result_Gwad_07.pw=1000;
+
+put result_Gwad_07;
+put "EXPL", "TYPE_EXPL", "SURF_CF" , put/
+loop(SE, put SE.tl, put STOCK_TYPE_EXPL("CALIB",SE), put STOCK_SURF_CF("calib",SE)
+
+put /);
+
+
+* TYPE_EXPL_2017.TXT
+file result_Gwad_08     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\TYPE_EXPL_2017.TXT/ ;
+     result_Gwad_08.pc=5;
+     result_Gwad_08.nw=8;
+     result_Gwad_08.pw=1000;
+
+put result_Gwad_08;
+put "EXPL", "TYPE_EXPL", "SURF_CF" , put/
+loop(SE, put SE.tl, put STOCK_TYPE_EXPL("CALIB",SE), put STOCK_SURF_CF("2017",SE)
+
+put /);
+
+
+* MATRICE_TYPE_EXPL_2017.TXT
+file result_Gwad_09     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SORTIES\MATRICE_TYPE_EXPL_2017.TXT/ ;
+     result_Gwad_09.pc=5;
+     result_Gwad_09.nw=8;
+     result_Gwad_09.pw=1000;
+
+put result_Gwad_09;
+put "EXPL",  loop(ST, put ST.tl) put/
+loop(SE, put SE.tl,
+                         loop(ST, put Matrice_Type_Expl(ST, SE)
+                         );
+put /);
+
+
+
+
+
+
+*MORGWANIK.TXT
+file result06     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\MORGWANIK.TXT/ ;
+     result06.pc=5;
+     result06.nw=8;
+     result06.pw=1000;
+
+
+put result06;
+put      "Parcelle", "Zone",
+* "Amendement",
+         "PART_C_INIT", "C_ha_2017", "C_ha_2018", "C_ha_2019", "C_ha_2020", "C_ha_2021", "C_ha_2022",
+         "CLD_ha_2017", "CLD_ha_2018", "CLD_ha_2019", "CLD_ha_2020", "CLD_ha_2021", "CLD_ha_2022",
+put / ;
+
+loop(SP,put SP.tl, Data_Parc_Gwad(SP,"TYPE_SOL"),
+*Q_FERTIGWA
+         Data_Parc_Gwad(SP,"PART_C_INIT"),
+         STOCK_C_ORG_ha_Parc("2017",SP),    STOCK_C_ORG_ha_Parc("2018",SP),    STOCK_C_ORG_ha_Parc("2019",SP),    STOCK_C_ORG_ha_Parc("2020",SP),    STOCK_C_ORG_ha_Parc("2021",SP),    STOCK_C_ORG_ha_Parc("2022",SP),
+         STOCK_CLD_Cont_ha_Parc("2017",SP), STOCK_CLD_Cont_ha_Parc("2018",SP), STOCK_CLD_Cont_ha_Parc("2019",SP), STOCK_CLD_Cont_ha_Parc("2020",SP), STOCK_CLD_Cont_ha_Parc("2021",SP), STOCK_CLD_Cont_ha_Parc("2022",SP)
+
+/);
+
+
+
+
+
+*ASSOL_GWAD.TXT
+file result00     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ASSOL_GWAD.TXT/ ;
+     result00.pc=5;
+     result00.nw=8;
+     result00.pw=1000;
+
+put result00;
+put         "Culture", "Assol_Init", "Assol_Calib", "Assol_2017", "Assol_2018", "Assol_2019", "Assol_2020", "Assol_2021", "Assol_2022"  put / ;
+loop(SC,put SC.tl,
+STOCK_ASSOL_Gwad("init",SC),
+STOCK_ASSOL_Gwad("calib",SC),
+STOCK_ASSOL_Gwad("2017",SC),
+STOCK_ASSOL_Gwad("2018",SC),
+STOCK_ASSOL_Gwad("2019",SC),
+STOCK_ASSOL_Gwad("2020",SC),
+STOCK_ASSOL_Gwad("2021",SC),
+STOCK_ASSOL_Gwad("2022",SC)/);
+
+
+*ASSOL_BASSIN.TXT
+file result01     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ASSOL_BASSIN.TXT/ ;
+     result01.pc=5;
+     result01.nw=8;
+     result01.pw=1000;
+
+put result01;
+
+put "TOTAL", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_TOTAL("init"),
+STOCK_ASSOL_SOBT_tot_TOTAL("calib"),
+PAD_SOBT_TOTAL,
+STOCK_ASSOL_SOBT_tot_TOTAL("2017"),
+STOCK_ASSOL_SOBT_tot_TOTAL("2018"),
+STOCK_ASSOL_SOBT_tot_TOTAL("2019"),
+STOCK_ASSOL_SOBT_tot_TOTAL("2020"),
+STOCK_ASSOL_SOBT_tot_TOTAL("2021"),
+STOCK_ASSOL_SOBT_tot_TOTAL("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_TOTAL("init"),
+STOCK_ASSOL_SEBT_tot_TOTAL("calib"),
+PAD_SEBT_TOTAL,
+STOCK_ASSOL_SEBT_tot_TOTAL("2017"),
+STOCK_ASSOL_SEBT_tot_TOTAL("2018"),
+STOCK_ASSOL_SEBT_tot_TOTAL("2019"),
+STOCK_ASSOL_SEBT_tot_TOTAL("2020"),
+STOCK_ASSOL_SEBT_tot_TOTAL("2021"),
+STOCK_ASSOL_SEBT_tot_TOTAL("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_TOTAL("init"),
+STOCK_ASSOL_NBT_tot_TOTAL("calib"),
+PAD_NBT_TOTAL,
+STOCK_ASSOL_NBT_tot_TOTAL("2017"),
+STOCK_ASSOL_NBT_tot_TOTAL("2018"),
+STOCK_ASSOL_NBT_tot_TOTAL("2019"),
+STOCK_ASSOL_NBT_tot_TOTAL("2020"),
+STOCK_ASSOL_NBT_tot_TOTAL("2021"),
+STOCK_ASSOL_NBT_tot_TOTAL("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_TOTAL("init"),
+STOCK_ASSOL_NGT_tot_TOTAL("calib"),
+PAD_NGT_TOTAL,
+STOCK_ASSOL_NGT_tot_TOTAL("2017"),
+STOCK_ASSOL_NGT_tot_TOTAL("2018"),
+STOCK_ASSOL_NGT_tot_TOTAL("2019"),
+STOCK_ASSOL_NGT_tot_TOTAL("2020"),
+STOCK_ASSOL_NGT_tot_TOTAL("2021"),
+STOCK_ASSOL_NGT_tot_TOTAL("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_TOTAL("init"),
+STOCK_ASSOL_CGT_tot_TOTAL("calib"),
+PAD_CGT_TOTAL,
+STOCK_ASSOL_CGT_tot_TOTAL("2017"),
+STOCK_ASSOL_CGT_tot_TOTAL("2018"),
+STOCK_ASSOL_CGT_tot_TOTAL("2019"),
+STOCK_ASSOL_CGT_tot_TOTAL("2020"),
+STOCK_ASSOL_CGT_tot_TOTAL("2021"),
+STOCK_ASSOL_CGT_tot_TOTAL("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_TOTAL("init"),
+STOCK_ASSOL_EGT_tot_TOTAL("calib"),
+PAD_EGT_TOTAL,
+STOCK_ASSOL_EGT_tot_TOTAL("2017"),
+STOCK_ASSOL_EGT_tot_TOTAL("2018"),
+STOCK_ASSOL_EGT_tot_TOTAL("2019"),
+STOCK_ASSOL_EGT_tot_TOTAL("2020"),
+STOCK_ASSOL_EGT_tot_TOTAL("2021"),
+STOCK_ASSOL_EGT_tot_TOTAL("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_TOTAL("init"),
+STOCK_ASSOL_MG_tot_TOTAL("calib"),
+PAD_MG_TOTAL,
+STOCK_ASSOL_MG_tot_TOTAL("2017"),
+STOCK_ASSOL_MG_tot_TOTAL("2018"),
+STOCK_ASSOL_MG_tot_TOTAL("2019"),
+STOCK_ASSOL_MG_tot_TOTAL("2020"),
+STOCK_ASSOL_MG_tot_TOTAL("2021"),
+STOCK_ASSOL_MG_tot_TOTAL("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_TOTAL("init"),
+STOCK_ASSOL_GWAD_tot_TOTAL("calib"),
+PAD_GWAD_TOTAL,
+STOCK_ASSOL_GWAD_tot_TOTAL("2017"),
+STOCK_ASSOL_GWAD_tot_TOTAL("2018"),
+STOCK_ASSOL_GWAD_tot_TOTAL("2019"),
+STOCK_ASSOL_GWAD_tot_TOTAL("2020"),
+STOCK_ASSOL_GWAD_tot_TOTAL("2021"),
+STOCK_ASSOL_GWAD_tot_TOTAL("2022")/
+/;
+
+put "ANANAS", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_ANA("init"),
+STOCK_ASSOL_SOBT_tot_ANA("calib"),
+PAD_SOBT_ANA,
+STOCK_ASSOL_SOBT_tot_ANA("2017"),
+STOCK_ASSOL_SOBT_tot_ANA("2018"),
+STOCK_ASSOL_SOBT_tot_ANA("2019"),
+STOCK_ASSOL_SOBT_tot_ANA("2020"),
+STOCK_ASSOL_SOBT_tot_ANA("2021"),
+STOCK_ASSOL_SOBT_tot_ANA("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_ANA("init"),
+STOCK_ASSOL_SEBT_tot_ANA("calib"),
+PAD_SEBT_ANA,
+STOCK_ASSOL_SEBT_tot_ANA("2017"),
+STOCK_ASSOL_SEBT_tot_ANA("2018"),
+STOCK_ASSOL_SEBT_tot_ANA("2019"),
+STOCK_ASSOL_SEBT_tot_ANA("2020"),
+STOCK_ASSOL_SEBT_tot_ANA("2021"),
+STOCK_ASSOL_SEBT_tot_ANA("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_ANA("init"),
+STOCK_ASSOL_NBT_tot_ANA("calib"),
+PAD_NBT_ANA,
+STOCK_ASSOL_NBT_tot_ANA("2017"),
+STOCK_ASSOL_NBT_tot_ANA("2018"),
+STOCK_ASSOL_NBT_tot_ANA("2019"),
+STOCK_ASSOL_NBT_tot_ANA("2020"),
+STOCK_ASSOL_NBT_tot_ANA("2021"),
+STOCK_ASSOL_NBT_tot_ANA("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_ANA("init"),
+STOCK_ASSOL_NGT_tot_ANA("calib"),
+PAD_NGT_ANA,
+STOCK_ASSOL_NGT_tot_ANA("2017"),
+STOCK_ASSOL_NGT_tot_ANA("2018"),
+STOCK_ASSOL_NGT_tot_ANA("2019"),
+STOCK_ASSOL_NGT_tot_ANA("2020"),
+STOCK_ASSOL_NGT_tot_ANA("2021"),
+STOCK_ASSOL_NGT_tot_ANA("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_ANA("init"),
+STOCK_ASSOL_CGT_tot_ANA("calib"),
+PAD_CGT_ANA,
+STOCK_ASSOL_CGT_tot_ANA("2017"),
+STOCK_ASSOL_CGT_tot_ANA("2018"),
+STOCK_ASSOL_CGT_tot_ANA("2019"),
+STOCK_ASSOL_CGT_tot_ANA("2020"),
+STOCK_ASSOL_CGT_tot_ANA("2021"),
+STOCK_ASSOL_CGT_tot_ANA("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_ANA("init"),
+STOCK_ASSOL_EGT_tot_ANA("calib"),
+PAD_EGT_ANA,
+STOCK_ASSOL_EGT_tot_ANA("2017"),
+STOCK_ASSOL_EGT_tot_ANA("2018"),
+STOCK_ASSOL_EGT_tot_ANA("2019"),
+STOCK_ASSOL_EGT_tot_ANA("2020"),
+STOCK_ASSOL_EGT_tot_ANA("2021"),
+STOCK_ASSOL_EGT_tot_ANA("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_ANA("init"),
+STOCK_ASSOL_MG_tot_ANA("calib"),
+PAD_MG_ANA,
+STOCK_ASSOL_MG_tot_ANA("2017"),
+STOCK_ASSOL_MG_tot_ANA("2018"),
+STOCK_ASSOL_MG_tot_ANA("2019"),
+STOCK_ASSOL_MG_tot_ANA("2020"),
+STOCK_ASSOL_MG_tot_ANA("2021"),
+STOCK_ASSOL_MG_tot_ANA("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_ANA("init"),
+STOCK_ASSOL_GWAD_tot_ANA("calib"),
+PAD_GWAD_ANA,
+STOCK_ASSOL_GWAD_tot_ANA("2017"),
+STOCK_ASSOL_GWAD_tot_ANA("2018"),
+STOCK_ASSOL_GWAD_tot_ANA("2019"),
+STOCK_ASSOL_GWAD_tot_ANA("2020"),
+STOCK_ASSOL_GWAD_tot_ANA("2021"),
+STOCK_ASSOL_GWAD_tot_ANA("2022")/
+/;
+
+put "BANANE_EXP", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BAN_EX("init"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("calib"),
+PAD_SOBT_BAN_EX,
+STOCK_ASSOL_SOBT_tot_BAN_EX("2017"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2018"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2019"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2020"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2021"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BAN_EX("init"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("calib"),
+PAD_SEBT_BAN_EX,
+STOCK_ASSOL_SEBT_tot_BAN_EX("2017"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2018"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2019"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2020"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2021"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BAN_EX("init"),
+STOCK_ASSOL_NBT_tot_BAN_EX("calib"),
+PAD_NBT_BAN_EX,
+STOCK_ASSOL_NBT_tot_BAN_EX("2017"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2018"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2019"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2020"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2021"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BAN_EX("init"),
+STOCK_ASSOL_NGT_tot_BAN_EX("calib"),
+PAD_NGT_BAN_EX,
+STOCK_ASSOL_NGT_tot_BAN_EX("2017"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2018"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2019"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2020"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2021"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BAN_EX("init"),
+STOCK_ASSOL_CGT_tot_BAN_EX("calib"),
+PAD_CGT_BAN_EX,
+STOCK_ASSOL_CGT_tot_BAN_EX("2017"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2018"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2019"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2020"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2021"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BAN_EX("init"),
+STOCK_ASSOL_EGT_tot_BAN_EX("calib"),
+PAD_EGT_BAN_EX,
+STOCK_ASSOL_EGT_tot_BAN_EX("2017"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2018"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2019"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2020"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2021"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BAN_EX("init"),
+STOCK_ASSOL_MG_tot_BAN_EX("calib"),
+PAD_MG_BAN_EX,
+STOCK_ASSOL_MG_tot_BAN_EX("2017"),
+STOCK_ASSOL_MG_tot_BAN_EX("2018"),
+STOCK_ASSOL_MG_tot_BAN_EX("2019"),
+STOCK_ASSOL_MG_tot_BAN_EX("2020"),
+STOCK_ASSOL_MG_tot_BAN_EX("2021"),
+STOCK_ASSOL_MG_tot_BAN_EX("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BAN_EX("init"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("calib"),
+PAD_GWAD_BAN_EX,
+STOCK_ASSOL_GWAD_tot_BAN_EX("2017"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2018"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2019"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2020"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2021"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2022")/
+/;
+
+put "PLANTAIN", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BC("init"),
+STOCK_ASSOL_SOBT_tot_BC("calib"),
+PAD_SOBT_BC,
+STOCK_ASSOL_SOBT_tot_BC("2017"),
+STOCK_ASSOL_SOBT_tot_BC("2018"),
+STOCK_ASSOL_SOBT_tot_BC("2019"),
+STOCK_ASSOL_SOBT_tot_BC("2020"),
+STOCK_ASSOL_SOBT_tot_BC("2021"),
+STOCK_ASSOL_SOBT_tot_BC("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BC("init"),
+STOCK_ASSOL_SEBT_tot_BC("calib"),
+PAD_SEBT_BC,
+STOCK_ASSOL_SEBT_tot_BC("2017"),
+STOCK_ASSOL_SEBT_tot_BC("2018"),
+STOCK_ASSOL_SEBT_tot_BC("2019"),
+STOCK_ASSOL_SEBT_tot_BC("2020"),
+STOCK_ASSOL_SEBT_tot_BC("2021"),
+STOCK_ASSOL_SEBT_tot_BC("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BC("init"),
+STOCK_ASSOL_NBT_tot_BC("calib"),
+PAD_NBT_BC,
+STOCK_ASSOL_NBT_tot_BC("2017"),
+STOCK_ASSOL_NBT_tot_BC("2018"),
+STOCK_ASSOL_NBT_tot_BC("2019"),
+STOCK_ASSOL_NBT_tot_BC("2020"),
+STOCK_ASSOL_NBT_tot_BC("2021"),
+STOCK_ASSOL_NBT_tot_BC("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BC("init"),
+STOCK_ASSOL_NGT_tot_BC("calib"),
+PAD_NGT_BC,
+STOCK_ASSOL_NGT_tot_BC("2017"),
+STOCK_ASSOL_NGT_tot_BC("2018"),
+STOCK_ASSOL_NGT_tot_BC("2019"),
+STOCK_ASSOL_NGT_tot_BC("2020"),
+STOCK_ASSOL_NGT_tot_BC("2021"),
+STOCK_ASSOL_NGT_tot_BC("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BC("init"),
+STOCK_ASSOL_CGT_tot_BC("calib"),
+PAD_CGT_BC,
+STOCK_ASSOL_CGT_tot_BC("2017"),
+STOCK_ASSOL_CGT_tot_BC("2018"),
+STOCK_ASSOL_CGT_tot_BC("2019"),
+STOCK_ASSOL_CGT_tot_BC("2020"),
+STOCK_ASSOL_CGT_tot_BC("2021"),
+STOCK_ASSOL_CGT_tot_BC("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BC("init"),
+STOCK_ASSOL_EGT_tot_BC("calib"),
+PAD_EGT_BC,
+STOCK_ASSOL_EGT_tot_BC("2017"),
+STOCK_ASSOL_EGT_tot_BC("2018"),
+STOCK_ASSOL_EGT_tot_BC("2019"),
+STOCK_ASSOL_EGT_tot_BC("2020"),
+STOCK_ASSOL_EGT_tot_BC("2021"),
+STOCK_ASSOL_EGT_tot_BC("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BC("init"),
+STOCK_ASSOL_MG_tot_BC("calib"),
+PAD_MG_BC,
+STOCK_ASSOL_MG_tot_BC("2017"),
+STOCK_ASSOL_MG_tot_BC("2018"),
+STOCK_ASSOL_MG_tot_BC("2019"),
+STOCK_ASSOL_MG_tot_BC("2020"),
+STOCK_ASSOL_MG_tot_BC("2021"),
+STOCK_ASSOL_MG_tot_BC("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BC("init"),
+STOCK_ASSOL_GWAD_tot_BC("calib"),
+PAD_GWAD_BC,
+STOCK_ASSOL_GWAD_tot_BC("2017"),
+STOCK_ASSOL_GWAD_tot_BC("2018"),
+STOCK_ASSOL_GWAD_tot_BC("2019"),
+STOCK_ASSOL_GWAD_tot_BC("2020"),
+STOCK_ASSOL_GWAD_tot_BC("2021"),
+STOCK_ASSOL_GWAD_tot_BC("2022")/
+/;
+
+put "CANNES", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_CAN("init"),
+STOCK_ASSOL_SOBT_tot_CAN("calib"),
+PAD_SOBT_CAN
+STOCK_ASSOL_SOBT_tot_CAN("2017"),
+STOCK_ASSOL_SOBT_tot_CAN("2018"),
+STOCK_ASSOL_SOBT_tot_CAN("2019"),
+STOCK_ASSOL_SOBT_tot_CAN("2020"),
+STOCK_ASSOL_SOBT_tot_CAN("2021"),
+STOCK_ASSOL_SOBT_tot_CAN("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_CAN("init"),
+STOCK_ASSOL_SEBT_tot_CAN("calib"),
+PAD_SEBT_CAN
+STOCK_ASSOL_SEBT_tot_CAN("2017"),
+STOCK_ASSOL_SEBT_tot_CAN("2018"),
+STOCK_ASSOL_SEBT_tot_CAN("2019"),
+STOCK_ASSOL_SEBT_tot_CAN("2020"),
+STOCK_ASSOL_SEBT_tot_CAN("2021"),
+STOCK_ASSOL_SEBT_tot_CAN("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_CAN("init"),
+STOCK_ASSOL_NBT_tot_CAN("calib"),
+PAD_NBT_CAN
+STOCK_ASSOL_NBT_tot_CAN("2017"),
+STOCK_ASSOL_NBT_tot_CAN("2018"),
+STOCK_ASSOL_NBT_tot_CAN("2019"),
+STOCK_ASSOL_NBT_tot_CAN("2020"),
+STOCK_ASSOL_NBT_tot_CAN("2021"),
+STOCK_ASSOL_NBT_tot_CAN("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_CAN("init"),
+STOCK_ASSOL_NGT_tot_CAN("calib"),
+PAD_NGT_CAN
+STOCK_ASSOL_NGT_tot_CAN("2017"),
+STOCK_ASSOL_NGT_tot_CAN("2018"),
+STOCK_ASSOL_NGT_tot_CAN("2019"),
+STOCK_ASSOL_NGT_tot_CAN("2020"),
+STOCK_ASSOL_NGT_tot_CAN("2021"),
+STOCK_ASSOL_NGT_tot_CAN("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_CAN("init"),
+STOCK_ASSOL_CGT_tot_CAN("calib"),
+PAD_CGT_CAN
+STOCK_ASSOL_CGT_tot_CAN("2017"),
+STOCK_ASSOL_CGT_tot_CAN("2018"),
+STOCK_ASSOL_CGT_tot_CAN("2019"),
+STOCK_ASSOL_CGT_tot_CAN("2020"),
+STOCK_ASSOL_CGT_tot_CAN("2021"),
+STOCK_ASSOL_CGT_tot_CAN("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_CAN("init"),
+STOCK_ASSOL_EGT_tot_CAN("calib"),
+PAD_EGT_CAN
+STOCK_ASSOL_EGT_tot_CAN("2017"),
+STOCK_ASSOL_EGT_tot_CAN("2018"),
+STOCK_ASSOL_EGT_tot_CAN("2019"),
+STOCK_ASSOL_EGT_tot_CAN("2020"),
+STOCK_ASSOL_EGT_tot_CAN("2021"),
+STOCK_ASSOL_EGT_tot_CAN("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_CAN("init"),
+STOCK_ASSOL_MG_tot_CAN("calib"),
+PAD_MG_CAN
+STOCK_ASSOL_MG_tot_CAN("2017"),
+STOCK_ASSOL_MG_tot_CAN("2018"),
+STOCK_ASSOL_MG_tot_CAN("2019"),
+STOCK_ASSOL_MG_tot_CAN("2020"),
+STOCK_ASSOL_MG_tot_CAN("2021"),
+STOCK_ASSOL_MG_tot_CAN("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_CAN("init"),
+STOCK_ASSOL_GWAD_tot_CAN("calib"),
+PAD_GWAD_CAN
+STOCK_ASSOL_GWAD_tot_CAN("2017"),
+STOCK_ASSOL_GWAD_tot_CAN("2018"),
+STOCK_ASSOL_GWAD_tot_CAN("2019"),
+STOCK_ASSOL_GWAD_tot_CAN("2020"),
+STOCK_ASSOL_GWAD_tot_CAN("2021"),
+STOCK_ASSOL_GWAD_tot_CAN("2022")/
+/;
+
+put "CS", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_CS("init"),
+STOCK_ASSOL_SOBT_tot_CS("calib"),
+PAD_SOBT_CS
+STOCK_ASSOL_SOBT_tot_CS("2017"),
+STOCK_ASSOL_SOBT_tot_CS("2018"),
+STOCK_ASSOL_SOBT_tot_CS("2019"),
+STOCK_ASSOL_SOBT_tot_CS("2020"),
+STOCK_ASSOL_SOBT_tot_CS("2021"),
+STOCK_ASSOL_SOBT_tot_CS("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_CS("init"),
+STOCK_ASSOL_SEBT_tot_CS("calib"),
+PAD_SEBT_CS
+STOCK_ASSOL_SEBT_tot_CS("2017"),
+STOCK_ASSOL_SEBT_tot_CS("2018"),
+STOCK_ASSOL_SEBT_tot_CS("2019"),
+STOCK_ASSOL_SEBT_tot_CS("2020"),
+STOCK_ASSOL_SEBT_tot_CS("2021"),
+STOCK_ASSOL_SEBT_tot_CS("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_CS("init"),
+STOCK_ASSOL_NBT_tot_CS("calib"),
+PAD_NBT_CS
+STOCK_ASSOL_NBT_tot_CS("2017"),
+STOCK_ASSOL_NBT_tot_CS("2018"),
+STOCK_ASSOL_NBT_tot_CS("2019"),
+STOCK_ASSOL_NBT_tot_CS("2020"),
+STOCK_ASSOL_NBT_tot_CS("2021"),
+STOCK_ASSOL_NBT_tot_CS("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_CS("init"),
+STOCK_ASSOL_NGT_tot_CS("calib"),
+PAD_NGT_CS
+STOCK_ASSOL_NGT_tot_CS("2017"),
+STOCK_ASSOL_NGT_tot_CS("2018"),
+STOCK_ASSOL_NGT_tot_CS("2019"),
+STOCK_ASSOL_NGT_tot_CS("2020"),
+STOCK_ASSOL_NGT_tot_CS("2021"),
+STOCK_ASSOL_NGT_tot_CS("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_CS("init"),
+STOCK_ASSOL_CGT_tot_CS("calib"),
+PAD_CGT_CS
+STOCK_ASSOL_CGT_tot_CS("2017"),
+STOCK_ASSOL_CGT_tot_CS("2018"),
+STOCK_ASSOL_CGT_tot_CS("2019"),
+STOCK_ASSOL_CGT_tot_CS("2020"),
+STOCK_ASSOL_CGT_tot_CS("2021"),
+STOCK_ASSOL_CGT_tot_CS("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_CS("init"),
+STOCK_ASSOL_EGT_tot_CS("calib"),
+PAD_EGT_CS
+STOCK_ASSOL_EGT_tot_CS("2017"),
+STOCK_ASSOL_EGT_tot_CS("2018"),
+STOCK_ASSOL_EGT_tot_CS("2019"),
+STOCK_ASSOL_EGT_tot_CS("2020"),
+STOCK_ASSOL_EGT_tot_CS("2021"),
+STOCK_ASSOL_EGT_tot_CS("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_CS("init"),
+STOCK_ASSOL_MG_tot_CS("calib"),
+PAD_MG_CS
+STOCK_ASSOL_MG_tot_CS("2017"),
+STOCK_ASSOL_MG_tot_CS("2018"),
+STOCK_ASSOL_MG_tot_CS("2019"),
+STOCK_ASSOL_MG_tot_CS("2020"),
+STOCK_ASSOL_MG_tot_CS("2021"),
+STOCK_ASSOL_MG_tot_CS("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_CS("init"),
+STOCK_ASSOL_GWAD_tot_CS("calib"),
+PAD_GWAD_CS
+STOCK_ASSOL_GWAD_tot_CS("2017"),
+STOCK_ASSOL_GWAD_tot_CS("2018"),
+STOCK_ASSOL_GWAD_tot_CS("2019"),
+STOCK_ASSOL_GWAD_tot_CS("2020"),
+STOCK_ASSOL_GWAD_tot_CS("2021"),
+STOCK_ASSOL_GWAD_tot_CS("2022")/
+/;
+
+
+put "CF", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_CF("init"),
+STOCK_ASSOL_SOBT_tot_CF("calib"),
+PAD_SOBT_CF
+STOCK_ASSOL_SOBT_tot_CF("2017"),
+STOCK_ASSOL_SOBT_tot_CF("2018"),
+STOCK_ASSOL_SOBT_tot_CF("2019"),
+STOCK_ASSOL_SOBT_tot_CF("2020"),
+STOCK_ASSOL_SOBT_tot_CF("2021"),
+STOCK_ASSOL_SOBT_tot_CF("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_CF("init"),
+STOCK_ASSOL_SEBT_tot_CF("calib"),
+PAD_SEBT_CF
+STOCK_ASSOL_SEBT_tot_CF("2017"),
+STOCK_ASSOL_SEBT_tot_CF("2018"),
+STOCK_ASSOL_SEBT_tot_CF("2019"),
+STOCK_ASSOL_SEBT_tot_CF("2020"),
+STOCK_ASSOL_SEBT_tot_CF("2021"),
+STOCK_ASSOL_SEBT_tot_CF("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_CF("init"),
+STOCK_ASSOL_NBT_tot_CF("calib"),
+PAD_NBT_CF
+STOCK_ASSOL_NBT_tot_CF("2017"),
+STOCK_ASSOL_NBT_tot_CF("2018"),
+STOCK_ASSOL_NBT_tot_CF("2019"),
+STOCK_ASSOL_NBT_tot_CF("2020"),
+STOCK_ASSOL_NBT_tot_CF("2021"),
+STOCK_ASSOL_NBT_tot_CF("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_CF("init"),
+STOCK_ASSOL_NGT_tot_CF("calib"),
+PAD_NGT_CF
+STOCK_ASSOL_NGT_tot_CF("2017"),
+STOCK_ASSOL_NGT_tot_CF("2018"),
+STOCK_ASSOL_NGT_tot_CF("2019"),
+STOCK_ASSOL_NGT_tot_CF("2020"),
+STOCK_ASSOL_NGT_tot_CF("2021"),
+STOCK_ASSOL_NGT_tot_CF("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_CF("init"),
+STOCK_ASSOL_CGT_tot_CF("calib"),
+PAD_CGT_CF
+STOCK_ASSOL_CGT_tot_CF("2017"),
+STOCK_ASSOL_CGT_tot_CF("2018"),
+STOCK_ASSOL_CGT_tot_CF("2019"),
+STOCK_ASSOL_CGT_tot_CF("2020"),
+STOCK_ASSOL_CGT_tot_CF("2021"),
+STOCK_ASSOL_CGT_tot_CF("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_CF("init"),
+STOCK_ASSOL_EGT_tot_CF("calib"),
+PAD_EGT_CF
+STOCK_ASSOL_EGT_tot_CF("2017"),
+STOCK_ASSOL_EGT_tot_CF("2018"),
+STOCK_ASSOL_EGT_tot_CF("2019"),
+STOCK_ASSOL_EGT_tot_CF("2020"),
+STOCK_ASSOL_EGT_tot_CF("2021"),
+STOCK_ASSOL_EGT_tot_CF("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_CF("init"),
+STOCK_ASSOL_MG_tot_CF("calib"),
+PAD_MG_CF
+STOCK_ASSOL_MG_tot_CF("2017"),
+STOCK_ASSOL_MG_tot_CF("2018"),
+STOCK_ASSOL_MG_tot_CF("2019"),
+STOCK_ASSOL_MG_tot_CF("2020"),
+STOCK_ASSOL_MG_tot_CF("2021"),
+STOCK_ASSOL_MG_tot_CF("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_CF("init"),
+STOCK_ASSOL_GWAD_tot_CF("calib"),
+PAD_GWAD_CF
+STOCK_ASSOL_GWAD_tot_CF("2017"),
+STOCK_ASSOL_GWAD_tot_CF("2018"),
+STOCK_ASSOL_GWAD_tot_CF("2019"),
+STOCK_ASSOL_GWAD_tot_CF("2020"),
+STOCK_ASSOL_GWAD_tot_CF("2021"),
+STOCK_ASSOL_GWAD_tot_CF("2022")/
+/;
+
+
+put "MARAICHAGE", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_MA("init"),
+STOCK_ASSOL_SOBT_tot_MA("calib"),
+PAD_SOBT_MA,
+STOCK_ASSOL_SOBT_tot_MA("2017"),
+STOCK_ASSOL_SOBT_tot_MA("2018"),
+STOCK_ASSOL_SOBT_tot_MA("2019"),
+STOCK_ASSOL_SOBT_tot_MA("2020"),
+STOCK_ASSOL_SOBT_tot_MA("2021"),
+STOCK_ASSOL_SOBT_tot_MA("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_MA("init"),
+STOCK_ASSOL_SEBT_tot_MA("calib"),
+PAD_SEBT_MA,
+STOCK_ASSOL_SEBT_tot_MA("2017"),
+STOCK_ASSOL_SEBT_tot_MA("2018"),
+STOCK_ASSOL_SEBT_tot_MA("2019"),
+STOCK_ASSOL_SEBT_tot_MA("2020"),
+STOCK_ASSOL_SEBT_tot_MA("2021"),
+STOCK_ASSOL_SEBT_tot_MA("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_MA("init"),
+STOCK_ASSOL_NBT_tot_MA("calib"),
+PAD_NBT_MA,
+STOCK_ASSOL_NBT_tot_MA("2017"),
+STOCK_ASSOL_NBT_tot_MA("2018"),
+STOCK_ASSOL_NBT_tot_MA("2019"),
+STOCK_ASSOL_NBT_tot_MA("2020"),
+STOCK_ASSOL_NBT_tot_MA("2021"),
+STOCK_ASSOL_NBT_tot_MA("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_MA("init"),
+STOCK_ASSOL_NGT_tot_MA("calib"),
+PAD_NGT_MA,
+STOCK_ASSOL_NGT_tot_MA("2017"),
+STOCK_ASSOL_NGT_tot_MA("2018"),
+STOCK_ASSOL_NGT_tot_MA("2019"),
+STOCK_ASSOL_NGT_tot_MA("2020"),
+STOCK_ASSOL_NGT_tot_MA("2021"),
+STOCK_ASSOL_NGT_tot_MA("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_MA("init"),
+STOCK_ASSOL_CGT_tot_MA("calib"),
+PAD_CGT_MA,
+STOCK_ASSOL_CGT_tot_MA("2017"),
+STOCK_ASSOL_CGT_tot_MA("2018"),
+STOCK_ASSOL_CGT_tot_MA("2019"),
+STOCK_ASSOL_CGT_tot_MA("2020"),
+STOCK_ASSOL_CGT_tot_MA("2021"),
+STOCK_ASSOL_CGT_tot_MA("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_MA("init"),
+STOCK_ASSOL_EGT_tot_MA("calib"),
+PAD_EGT_MA,
+STOCK_ASSOL_EGT_tot_MA("2017"),
+STOCK_ASSOL_EGT_tot_MA("2018"),
+STOCK_ASSOL_EGT_tot_MA("2019"),
+STOCK_ASSOL_EGT_tot_MA("2020"),
+STOCK_ASSOL_EGT_tot_MA("2021"),
+STOCK_ASSOL_EGT_tot_MA("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_MA("init"),
+STOCK_ASSOL_MG_tot_MA("calib"),
+PAD_MG_MA,
+STOCK_ASSOL_MG_tot_MA("2017"),
+STOCK_ASSOL_MG_tot_MA("2018"),
+STOCK_ASSOL_MG_tot_MA("2019"),
+STOCK_ASSOL_MG_tot_MA("2020"),
+STOCK_ASSOL_MG_tot_MA("2021"),
+STOCK_ASSOL_MG_tot_MA("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_MA("init"),
+STOCK_ASSOL_GWAD_tot_MA("calib"),
+PAD_GWAD_MA,
+STOCK_ASSOL_GWAD_tot_MA("2017"),
+STOCK_ASSOL_GWAD_tot_MA("2018"),
+STOCK_ASSOL_GWAD_tot_MA("2019"),
+STOCK_ASSOL_GWAD_tot_MA("2020"),
+STOCK_ASSOL_GWAD_tot_MA("2021"),
+STOCK_ASSOL_GWAD_tot_MA("2022")/
+/;
+
+put "TUBERCULES", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_IG("init"),
+STOCK_ASSOL_SOBT_tot_IG("calib"),
+PAD_SOBT_IG,
+STOCK_ASSOL_SOBT_tot_IG("2017"),
+STOCK_ASSOL_SOBT_tot_IG("2018"),
+STOCK_ASSOL_SOBT_tot_IG("2019"),
+STOCK_ASSOL_SOBT_tot_IG("2020"),
+STOCK_ASSOL_SOBT_tot_IG("2021"),
+STOCK_ASSOL_SOBT_tot_IG("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_IG("init"),
+STOCK_ASSOL_SEBT_tot_IG("calib"),
+PAD_SEBT_IG,
+STOCK_ASSOL_SEBT_tot_IG("2017"),
+STOCK_ASSOL_SEBT_tot_IG("2018"),
+STOCK_ASSOL_SEBT_tot_IG("2019"),
+STOCK_ASSOL_SEBT_tot_IG("2020"),
+STOCK_ASSOL_SEBT_tot_IG("2021"),
+STOCK_ASSOL_SEBT_tot_IG("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_IG("init"),
+STOCK_ASSOL_NBT_tot_IG("calib"),
+PAD_NBT_IG,
+STOCK_ASSOL_NBT_tot_IG("2017"),
+STOCK_ASSOL_NBT_tot_IG("2018"),
+STOCK_ASSOL_NBT_tot_IG("2019"),
+STOCK_ASSOL_NBT_tot_IG("2020"),
+STOCK_ASSOL_NBT_tot_IG("2021"),
+STOCK_ASSOL_NBT_tot_IG("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_IG("init"),
+STOCK_ASSOL_NGT_tot_IG("calib"),
+PAD_NGT_IG,
+STOCK_ASSOL_NGT_tot_IG("2017"),
+STOCK_ASSOL_NGT_tot_IG("2018"),
+STOCK_ASSOL_NGT_tot_IG("2019"),
+STOCK_ASSOL_NGT_tot_IG("2020"),
+STOCK_ASSOL_NGT_tot_IG("2021"),
+STOCK_ASSOL_NGT_tot_IG("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_IG("init"),
+STOCK_ASSOL_CGT_tot_IG("calib"),
+PAD_CGT_IG,
+STOCK_ASSOL_CGT_tot_IG("2017"),
+STOCK_ASSOL_CGT_tot_IG("2018"),
+STOCK_ASSOL_CGT_tot_IG("2019"),
+STOCK_ASSOL_CGT_tot_IG("2020"),
+STOCK_ASSOL_CGT_tot_IG("2021"),
+STOCK_ASSOL_CGT_tot_IG("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_IG("init"),
+STOCK_ASSOL_EGT_tot_IG("calib"),
+PAD_EGT_IG,
+STOCK_ASSOL_EGT_tot_IG("2017"),
+STOCK_ASSOL_EGT_tot_IG("2018"),
+STOCK_ASSOL_EGT_tot_IG("2019"),
+STOCK_ASSOL_EGT_tot_IG("2020"),
+STOCK_ASSOL_EGT_tot_IG("2021"),
+STOCK_ASSOL_EGT_tot_IG("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_IG("init"),
+STOCK_ASSOL_MG_tot_IG("calib"),
+PAD_MG_IG,
+STOCK_ASSOL_MG_tot_IG("2017"),
+STOCK_ASSOL_MG_tot_IG("2018"),
+STOCK_ASSOL_MG_tot_IG("2019"),
+STOCK_ASSOL_MG_tot_IG("2020"),
+STOCK_ASSOL_MG_tot_IG("2021"),
+STOCK_ASSOL_MG_tot_IG("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_IG("init"),
+STOCK_ASSOL_GWAD_tot_IG("calib"),
+PAD_GWAD_IG,
+STOCK_ASSOL_GWAD_tot_IG("2017"),
+STOCK_ASSOL_GWAD_tot_IG("2018"),
+STOCK_ASSOL_GWAD_tot_IG("2019"),
+STOCK_ASSOL_GWAD_tot_IG("2020"),
+STOCK_ASSOL_GWAD_tot_IG("2021"),
+STOCK_ASSOL_GWAD_tot_IG("2022")/
+/;
+
+put "MELON", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_ME("init"),
+STOCK_ASSOL_SOBT_tot_ME("calib"),
+PAD_SOBT_ME,
+STOCK_ASSOL_SOBT_tot_ME("2017"),
+STOCK_ASSOL_SOBT_tot_ME("2018"),
+STOCK_ASSOL_SOBT_tot_ME("2019"),
+STOCK_ASSOL_SOBT_tot_ME("2020"),
+STOCK_ASSOL_SOBT_tot_ME("2021"),
+STOCK_ASSOL_SOBT_tot_ME("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_ME("init"),
+STOCK_ASSOL_SEBT_tot_ME("calib"),
+PAD_SEBT_ME,
+STOCK_ASSOL_SEBT_tot_ME("2017"),
+STOCK_ASSOL_SEBT_tot_ME("2018"),
+STOCK_ASSOL_SEBT_tot_ME("2019"),
+STOCK_ASSOL_SEBT_tot_ME("2020"),
+STOCK_ASSOL_SEBT_tot_ME("2021"),
+STOCK_ASSOL_SEBT_tot_ME("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_ME("init"),
+STOCK_ASSOL_NBT_tot_ME("calib"),
+PAD_NBT_ME,
+STOCK_ASSOL_NBT_tot_ME("2017"),
+STOCK_ASSOL_NBT_tot_ME("2018"),
+STOCK_ASSOL_NBT_tot_ME("2019"),
+STOCK_ASSOL_NBT_tot_ME("2020"),
+STOCK_ASSOL_NBT_tot_ME("2021"),
+STOCK_ASSOL_NBT_tot_ME("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_ME("init"),
+STOCK_ASSOL_NGT_tot_ME("calib"),
+PAD_NGT_ME,
+STOCK_ASSOL_NGT_tot_ME("2017"),
+STOCK_ASSOL_NGT_tot_ME("2018"),
+STOCK_ASSOL_NGT_tot_ME("2019"),
+STOCK_ASSOL_NGT_tot_ME("2020"),
+STOCK_ASSOL_NGT_tot_ME("2021"),
+STOCK_ASSOL_NGT_tot_ME("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_ME("init"),
+STOCK_ASSOL_CGT_tot_ME("calib"),
+PAD_CGT_ME,
+STOCK_ASSOL_CGT_tot_ME("2017"),
+STOCK_ASSOL_CGT_tot_ME("2018"),
+STOCK_ASSOL_CGT_tot_ME("2019"),
+STOCK_ASSOL_CGT_tot_ME("2020"),
+STOCK_ASSOL_CGT_tot_ME("2021"),
+STOCK_ASSOL_CGT_tot_ME("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_ME("init"),
+STOCK_ASSOL_EGT_tot_ME("calib"),
+PAD_EGT_ME,
+STOCK_ASSOL_EGT_tot_ME("2017"),
+STOCK_ASSOL_EGT_tot_ME("2018"),
+STOCK_ASSOL_EGT_tot_ME("2019"),
+STOCK_ASSOL_EGT_tot_ME("2020"),
+STOCK_ASSOL_EGT_tot_ME("2021"),
+STOCK_ASSOL_EGT_tot_ME("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_ME("init"),
+STOCK_ASSOL_MG_tot_ME("calib"),
+PAD_MG_ME,
+STOCK_ASSOL_MG_tot_ME("2017"),
+STOCK_ASSOL_MG_tot_ME("2018"),
+STOCK_ASSOL_MG_tot_ME("2019"),
+STOCK_ASSOL_MG_tot_ME("2020"),
+STOCK_ASSOL_MG_tot_ME("2021"),
+STOCK_ASSOL_MG_tot_ME("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_ME("init"),
+STOCK_ASSOL_GWAD_tot_ME("calib"),
+PAD_GWAD_ME,
+STOCK_ASSOL_GWAD_tot_ME("2017"),
+STOCK_ASSOL_GWAD_tot_ME("2018"),
+STOCK_ASSOL_GWAD_tot_ME("2019"),
+STOCK_ASSOL_GWAD_tot_ME("2020"),
+STOCK_ASSOL_GWAD_tot_ME("2021"),
+STOCK_ASSOL_GWAD_tot_ME("2022")/
+/;
+
+put "NON_CULT", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_NON("init"),
+STOCK_ASSOL_SOBT_tot_NON("calib"),
+PAD_SOBT_NON,
+STOCK_ASSOL_SOBT_tot_NON("2017"),
+STOCK_ASSOL_SOBT_tot_NON("2018"),
+STOCK_ASSOL_SOBT_tot_NON("2019"),
+STOCK_ASSOL_SOBT_tot_NON("2020"),
+STOCK_ASSOL_SOBT_tot_NON("2021"),
+STOCK_ASSOL_SOBT_tot_NON("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_NON("init"),
+STOCK_ASSOL_SEBT_tot_NON("calib"),
+PAD_SEBT_NON,
+STOCK_ASSOL_SEBT_tot_NON("2017"),
+STOCK_ASSOL_SEBT_tot_NON("2018"),
+STOCK_ASSOL_SEBT_tot_NON("2019"),
+STOCK_ASSOL_SEBT_tot_NON("2020"),
+STOCK_ASSOL_SEBT_tot_NON("2021"),
+STOCK_ASSOL_SEBT_tot_NON("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_NON("init"),
+STOCK_ASSOL_NBT_tot_NON("calib"),
+PAD_NBT_NON,
+STOCK_ASSOL_NBT_tot_NON("2017"),
+STOCK_ASSOL_NBT_tot_NON("2018"),
+STOCK_ASSOL_NBT_tot_NON("2019"),
+STOCK_ASSOL_NBT_tot_NON("2020"),
+STOCK_ASSOL_NBT_tot_NON("2021"),
+STOCK_ASSOL_NBT_tot_NON("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_NON("init"),
+STOCK_ASSOL_NGT_tot_NON("calib"),
+PAD_NGT_NON,
+STOCK_ASSOL_NGT_tot_NON("2017"),
+STOCK_ASSOL_NGT_tot_NON("2018"),
+STOCK_ASSOL_NGT_tot_NON("2019"),
+STOCK_ASSOL_NGT_tot_NON("2020"),
+STOCK_ASSOL_NGT_tot_NON("2021"),
+STOCK_ASSOL_NGT_tot_NON("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_NON("init"),
+STOCK_ASSOL_CGT_tot_NON("calib"),
+PAD_CGT_NON,
+STOCK_ASSOL_CGT_tot_NON("2017"),
+STOCK_ASSOL_CGT_tot_NON("2018"),
+STOCK_ASSOL_CGT_tot_NON("2019"),
+STOCK_ASSOL_CGT_tot_NON("2020"),
+STOCK_ASSOL_CGT_tot_NON("2021"),
+STOCK_ASSOL_CGT_tot_NON("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_NON("init"),
+STOCK_ASSOL_EGT_tot_NON("calib"),
+PAD_EGT_NON,
+STOCK_ASSOL_EGT_tot_NON("2017"),
+STOCK_ASSOL_EGT_tot_NON("2018"),
+STOCK_ASSOL_EGT_tot_NON("2019"),
+STOCK_ASSOL_EGT_tot_NON("2020"),
+STOCK_ASSOL_EGT_tot_NON("2021"),
+STOCK_ASSOL_EGT_tot_NON("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_NON("init"),
+STOCK_ASSOL_MG_tot_NON("calib"),
+PAD_MG_NON,
+STOCK_ASSOL_MG_tot_NON("2017"),
+STOCK_ASSOL_MG_tot_NON("2018"),
+STOCK_ASSOL_MG_tot_NON("2019"),
+STOCK_ASSOL_MG_tot_NON("2020"),
+STOCK_ASSOL_MG_tot_NON("2021"),
+STOCK_ASSOL_MG_tot_NON("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_NON("init"),
+STOCK_ASSOL_GWAD_tot_NON("calib"),
+PAD_GWAD_NON,
+STOCK_ASSOL_GWAD_tot_NON("2017"),
+STOCK_ASSOL_GWAD_tot_NON("2018"),
+STOCK_ASSOL_GWAD_tot_NON("2019"),
+STOCK_ASSOL_GWAD_tot_NON("2020"),
+STOCK_ASSOL_GWAD_tot_NON("2021"),
+STOCK_ASSOL_GWAD_tot_NON("2022")/
+/;
+
+put "FRICHES", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_FRICHES("init"),
+STOCK_ASSOL_SOBT_tot_FRICHES("calib"),
+PAD_SOBT_FRICHES,
+STOCK_ASSOL_SOBT_tot_FRICHES("2017"),
+STOCK_ASSOL_SOBT_tot_FRICHES("2018"),
+STOCK_ASSOL_SOBT_tot_FRICHES("2019"),
+STOCK_ASSOL_SOBT_tot_FRICHES("2020"),
+STOCK_ASSOL_SOBT_tot_FRICHES("2021"),
+STOCK_ASSOL_SOBT_tot_FRICHES("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_FRICHES("init"),
+STOCK_ASSOL_SEBT_tot_FRICHES("calib"),
+PAD_SEBT_FRICHES,
+STOCK_ASSOL_SEBT_tot_FRICHES("2017"),
+STOCK_ASSOL_SEBT_tot_FRICHES("2018"),
+STOCK_ASSOL_SEBT_tot_FRICHES("2019"),
+STOCK_ASSOL_SEBT_tot_FRICHES("2020"),
+STOCK_ASSOL_SEBT_tot_FRICHES("2021"),
+STOCK_ASSOL_SEBT_tot_FRICHES("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_FRICHES("init"),
+STOCK_ASSOL_NBT_tot_FRICHES("calib"),
+PAD_NBT_FRICHES,
+STOCK_ASSOL_NBT_tot_FRICHES("2017"),
+STOCK_ASSOL_NBT_tot_FRICHES("2018"),
+STOCK_ASSOL_NBT_tot_FRICHES("2019"),
+STOCK_ASSOL_NBT_tot_FRICHES("2020"),
+STOCK_ASSOL_NBT_tot_FRICHES("2021"),
+STOCK_ASSOL_NBT_tot_FRICHES("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_FRICHES("init"),
+STOCK_ASSOL_NGT_tot_FRICHES("calib"),
+PAD_NGT_FRICHES,
+STOCK_ASSOL_NGT_tot_FRICHES("2017"),
+STOCK_ASSOL_NGT_tot_FRICHES("2018"),
+STOCK_ASSOL_NGT_tot_FRICHES("2019"),
+STOCK_ASSOL_NGT_tot_FRICHES("2020"),
+STOCK_ASSOL_NGT_tot_FRICHES("2021"),
+STOCK_ASSOL_NGT_tot_FRICHES("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_FRICHES("init"),
+STOCK_ASSOL_CGT_tot_FRICHES("calib"),
+PAD_CGT_FRICHES,
+STOCK_ASSOL_CGT_tot_FRICHES("2017"),
+STOCK_ASSOL_CGT_tot_FRICHES("2018"),
+STOCK_ASSOL_CGT_tot_FRICHES("2019"),
+STOCK_ASSOL_CGT_tot_FRICHES("2020"),
+STOCK_ASSOL_CGT_tot_FRICHES("2021"),
+STOCK_ASSOL_CGT_tot_FRICHES("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_FRICHES("init"),
+STOCK_ASSOL_EGT_tot_FRICHES("calib"),
+PAD_EGT_FRICHES,
+STOCK_ASSOL_EGT_tot_FRICHES("2017"),
+STOCK_ASSOL_EGT_tot_FRICHES("2018"),
+STOCK_ASSOL_EGT_tot_FRICHES("2019"),
+STOCK_ASSOL_EGT_tot_FRICHES("2020"),
+STOCK_ASSOL_EGT_tot_FRICHES("2021"),
+STOCK_ASSOL_EGT_tot_FRICHES("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_FRICHES("init"),
+STOCK_ASSOL_MG_tot_FRICHES("calib"),
+PAD_MG_FRICHES,
+STOCK_ASSOL_MG_tot_FRICHES("2017"),
+STOCK_ASSOL_MG_tot_FRICHES("2018"),
+STOCK_ASSOL_MG_tot_FRICHES("2019"),
+STOCK_ASSOL_MG_tot_FRICHES("2020"),
+STOCK_ASSOL_MG_tot_FRICHES("2021"),
+STOCK_ASSOL_MG_tot_FRICHES("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_FRICHES("init"),
+STOCK_ASSOL_GWAD_tot_FRICHES("calib"),
+PAD_GWAD_FRICHES,
+STOCK_ASSOL_GWAD_tot_FRICHES("2017"),
+STOCK_ASSOL_GWAD_tot_FRICHES("2018"),
+STOCK_ASSOL_GWAD_tot_FRICHES("2019"),
+STOCK_ASSOL_GWAD_tot_FRICHES("2020"),
+STOCK_ASSOL_GWAD_tot_FRICHES("2021"),
+STOCK_ASSOL_GWAD_tot_FRICHES("2022")/
+/;
+
+put "JA", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_JA("init"),
+STOCK_ASSOL_SOBT_tot_JA("calib"),
+PAD_SOBT_JA,
+STOCK_ASSOL_SOBT_tot_JA("2017"),
+STOCK_ASSOL_SOBT_tot_JA("2018"),
+STOCK_ASSOL_SOBT_tot_JA("2019"),
+STOCK_ASSOL_SOBT_tot_JA("2020"),
+STOCK_ASSOL_SOBT_tot_JA("2021"),
+STOCK_ASSOL_SOBT_tot_JA("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_JA("init"),
+STOCK_ASSOL_SEBT_tot_JA("calib"),
+PAD_SEBT_JA,
+STOCK_ASSOL_SEBT_tot_JA("2017"),
+STOCK_ASSOL_SEBT_tot_JA("2018"),
+STOCK_ASSOL_SEBT_tot_JA("2019"),
+STOCK_ASSOL_SEBT_tot_JA("2020"),
+STOCK_ASSOL_SEBT_tot_JA("2021"),
+STOCK_ASSOL_SEBT_tot_JA("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_JA("init"),
+STOCK_ASSOL_NBT_tot_JA("calib"),
+PAD_NBT_JA,
+STOCK_ASSOL_NBT_tot_JA("2017"),
+STOCK_ASSOL_NBT_tot_JA("2018"),
+STOCK_ASSOL_NBT_tot_JA("2019"),
+STOCK_ASSOL_NBT_tot_JA("2020"),
+STOCK_ASSOL_NBT_tot_JA("2021"),
+STOCK_ASSOL_NBT_tot_JA("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_JA("init"),
+STOCK_ASSOL_NGT_tot_JA("calib"),
+PAD_NGT_JA,
+STOCK_ASSOL_NGT_tot_JA("2017"),
+STOCK_ASSOL_NGT_tot_JA("2018"),
+STOCK_ASSOL_NGT_tot_JA("2019"),
+STOCK_ASSOL_NGT_tot_JA("2020"),
+STOCK_ASSOL_NGT_tot_JA("2021"),
+STOCK_ASSOL_NGT_tot_JA("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_JA("init"),
+STOCK_ASSOL_CGT_tot_JA("calib"),
+PAD_CGT_JA,
+STOCK_ASSOL_CGT_tot_JA("2017"),
+STOCK_ASSOL_CGT_tot_JA("2018"),
+STOCK_ASSOL_CGT_tot_JA("2019"),
+STOCK_ASSOL_CGT_tot_JA("2020"),
+STOCK_ASSOL_CGT_tot_JA("2021"),
+STOCK_ASSOL_CGT_tot_JA("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_JA("init"),
+STOCK_ASSOL_EGT_tot_JA("calib"),
+PAD_EGT_JA,
+STOCK_ASSOL_EGT_tot_JA("2017"),
+STOCK_ASSOL_EGT_tot_JA("2018"),
+STOCK_ASSOL_EGT_tot_JA("2019"),
+STOCK_ASSOL_EGT_tot_JA("2020"),
+STOCK_ASSOL_EGT_tot_JA("2021"),
+STOCK_ASSOL_EGT_tot_JA("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_JA("init"),
+STOCK_ASSOL_MG_tot_JA("calib"),
+PAD_MG_JA,
+STOCK_ASSOL_MG_tot_JA("2017"),
+STOCK_ASSOL_MG_tot_JA("2018"),
+STOCK_ASSOL_MG_tot_JA("2019"),
+STOCK_ASSOL_MG_tot_JA("2020"),
+STOCK_ASSOL_MG_tot_JA("2021"),
+STOCK_ASSOL_MG_tot_JA("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_JA("init"),
+STOCK_ASSOL_GWAD_tot_JA("calib"),
+PAD_GWAD_JA,
+STOCK_ASSOL_GWAD_tot_JA("2017"),
+STOCK_ASSOL_GWAD_tot_JA("2018"),
+STOCK_ASSOL_GWAD_tot_JA("2019"),
+STOCK_ASSOL_GWAD_tot_JA("2020"),
+STOCK_ASSOL_GWAD_tot_JA("2021"),
+STOCK_ASSOL_GWAD_tot_JA("2022")/
+/;
+
+
+
+put "PATURAGES", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_PAT("init"),
+STOCK_ASSOL_SOBT_tot_PAT("calib"),
+PAD_SOBT_PAT,
+STOCK_ASSOL_SOBT_tot_PAT("2017"),
+STOCK_ASSOL_SOBT_tot_PAT("2018"),
+STOCK_ASSOL_SOBT_tot_PAT("2019"),
+STOCK_ASSOL_SOBT_tot_PAT("2020"),
+STOCK_ASSOL_SOBT_tot_PAT("2021"),
+STOCK_ASSOL_SOBT_tot_PAT("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_PAT("init"),
+STOCK_ASSOL_SEBT_tot_PAT("calib"),
+PAD_SEBT_PAT,
+STOCK_ASSOL_SEBT_tot_PAT("2017"),
+STOCK_ASSOL_SEBT_tot_PAT("2018"),
+STOCK_ASSOL_SEBT_tot_PAT("2019"),
+STOCK_ASSOL_SEBT_tot_PAT("2020"),
+STOCK_ASSOL_SEBT_tot_PAT("2021"),
+STOCK_ASSOL_SEBT_tot_PAT("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_PAT("init"),
+STOCK_ASSOL_NBT_tot_PAT("calib"),
+PAD_NBT_PAT,
+STOCK_ASSOL_NBT_tot_PAT("2017"),
+STOCK_ASSOL_NBT_tot_PAT("2018"),
+STOCK_ASSOL_NBT_tot_PAT("2019"),
+STOCK_ASSOL_NBT_tot_PAT("2020"),
+STOCK_ASSOL_NBT_tot_PAT("2021"),
+STOCK_ASSOL_NBT_tot_PAT("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_PAT("init"),
+STOCK_ASSOL_NGT_tot_PAT("calib"),
+PAD_NGT_PAT,
+STOCK_ASSOL_NGT_tot_PAT("2017"),
+STOCK_ASSOL_NGT_tot_PAT("2018"),
+STOCK_ASSOL_NGT_tot_PAT("2019"),
+STOCK_ASSOL_NGT_tot_PAT("2020"),
+STOCK_ASSOL_NGT_tot_PAT("2021"),
+STOCK_ASSOL_NGT_tot_PAT("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_PAT("init"),
+STOCK_ASSOL_CGT_tot_PAT("calib"),
+PAD_CGT_PAT,
+STOCK_ASSOL_CGT_tot_PAT("2017"),
+STOCK_ASSOL_CGT_tot_PAT("2018"),
+STOCK_ASSOL_CGT_tot_PAT("2019"),
+STOCK_ASSOL_CGT_tot_PAT("2020"),
+STOCK_ASSOL_CGT_tot_PAT("2021"),
+STOCK_ASSOL_CGT_tot_PAT("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_PAT("init"),
+STOCK_ASSOL_EGT_tot_PAT("calib"),
+PAD_EGT_PAT,
+STOCK_ASSOL_EGT_tot_PAT("2017"),
+STOCK_ASSOL_EGT_tot_PAT("2018"),
+STOCK_ASSOL_EGT_tot_PAT("2019"),
+STOCK_ASSOL_EGT_tot_PAT("2020"),
+STOCK_ASSOL_EGT_tot_PAT("2021"),
+STOCK_ASSOL_EGT_tot_PAT("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_PAT("init"),
+STOCK_ASSOL_MG_tot_PAT("calib"),
+PAD_MG_PAT,
+STOCK_ASSOL_MG_tot_PAT("2017"),
+STOCK_ASSOL_MG_tot_PAT("2018"),
+STOCK_ASSOL_MG_tot_PAT("2019"),
+STOCK_ASSOL_MG_tot_PAT("2020"),
+STOCK_ASSOL_MG_tot_PAT("2021"),
+STOCK_ASSOL_MG_tot_PAT("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_PAT("init"),
+STOCK_ASSOL_GWAD_tot_PAT("calib"),
+PAD_GWAD_PAT,
+STOCK_ASSOL_GWAD_tot_PAT("2017"),
+STOCK_ASSOL_GWAD_tot_PAT("2018"),
+STOCK_ASSOL_GWAD_tot_PAT("2019"),
+STOCK_ASSOL_GWAD_tot_PAT("2020"),
+STOCK_ASSOL_GWAD_tot_PAT("2021"),
+STOCK_ASSOL_GWAD_tot_PAT("2022")/
+/;
+
+put "PLURI_ANN", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_PLU("init"),
+STOCK_ASSOL_SOBT_tot_PLU("calib"),
+PAD_SOBT_PLU,
+STOCK_ASSOL_SOBT_tot_PLU("2017"),
+STOCK_ASSOL_SOBT_tot_PLU("2018"),
+STOCK_ASSOL_SOBT_tot_PLU("2019"),
+STOCK_ASSOL_SOBT_tot_PLU("2020"),
+STOCK_ASSOL_SOBT_tot_PLU("2021"),
+STOCK_ASSOL_SOBT_tot_PLU("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_PLU("init"),
+STOCK_ASSOL_SEBT_tot_PLU("calib"),
+PAD_SEBT_PLU,
+STOCK_ASSOL_SEBT_tot_PLU("2017"),
+STOCK_ASSOL_SEBT_tot_PLU("2018"),
+STOCK_ASSOL_SEBT_tot_PLU("2019"),
+STOCK_ASSOL_SEBT_tot_PLU("2020"),
+STOCK_ASSOL_SEBT_tot_PLU("2021"),
+STOCK_ASSOL_SEBT_tot_PLU("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_PLU("init"),
+STOCK_ASSOL_NBT_tot_PLU("calib"),
+PAD_NBT_PLU,
+STOCK_ASSOL_NBT_tot_PLU("2017"),
+STOCK_ASSOL_NBT_tot_PLU("2018"),
+STOCK_ASSOL_NBT_tot_PLU("2019"),
+STOCK_ASSOL_NBT_tot_PLU("2020"),
+STOCK_ASSOL_NBT_tot_PLU("2021"),
+STOCK_ASSOL_NBT_tot_PLU("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_PLU("init"),
+STOCK_ASSOL_NGT_tot_PLU("calib"),
+PAD_NGT_PLU,
+STOCK_ASSOL_NGT_tot_PLU("2017"),
+STOCK_ASSOL_NGT_tot_PLU("2018"),
+STOCK_ASSOL_NGT_tot_PLU("2019"),
+STOCK_ASSOL_NGT_tot_PLU("2020"),
+STOCK_ASSOL_NGT_tot_PLU("2021"),
+STOCK_ASSOL_NGT_tot_PLU("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_PLU("init"),
+STOCK_ASSOL_CGT_tot_PLU("calib"),
+PAD_CGT_PLU,
+STOCK_ASSOL_CGT_tot_PLU("2017"),
+STOCK_ASSOL_CGT_tot_PLU("2018"),
+STOCK_ASSOL_CGT_tot_PLU("2019"),
+STOCK_ASSOL_CGT_tot_PLU("2020"),
+STOCK_ASSOL_CGT_tot_PLU("2021"),
+STOCK_ASSOL_CGT_tot_PLU("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_PLU("init"),
+STOCK_ASSOL_EGT_tot_PLU("calib"),
+PAD_EGT_PLU,
+STOCK_ASSOL_EGT_tot_PLU("2017"),
+STOCK_ASSOL_EGT_tot_PLU("2018"),
+STOCK_ASSOL_EGT_tot_PLU("2019"),
+STOCK_ASSOL_EGT_tot_PLU("2020"),
+STOCK_ASSOL_EGT_tot_PLU("2021"),
+STOCK_ASSOL_EGT_tot_PLU("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_PLU("init"),
+STOCK_ASSOL_MG_tot_PLU("calib"),
+PAD_MG_PLU,
+STOCK_ASSOL_MG_tot_PLU("2017"),
+STOCK_ASSOL_MG_tot_PLU("2018"),
+STOCK_ASSOL_MG_tot_PLU("2019"),
+STOCK_ASSOL_MG_tot_PLU("2020"),
+STOCK_ASSOL_MG_tot_PLU("2021"),
+STOCK_ASSOL_MG_tot_PLU("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_PLU("init"),
+STOCK_ASSOL_GWAD_tot_PLU("calib"),
+PAD_GWAD_PLU,
+STOCK_ASSOL_GWAD_tot_PLU("2017"),
+STOCK_ASSOL_GWAD_tot_PLU("2018"),
+STOCK_ASSOL_GWAD_tot_PLU("2019"),
+STOCK_ASSOL_GWAD_tot_PLU("2020"),
+STOCK_ASSOL_GWAD_tot_PLU("2021"),
+STOCK_ASSOL_GWAD_tot_PLU("2022")/
+/;
+
+
+*MARGES_BRUTES.TXT
+file result02     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\MARGES_BRUTES.TXT/ ;
+     result02.pc=5;
+     result02.nw=8;
+     result02.pw=1000;
+
+put result02;
+put         "Culture", "MB_Init"                  , "MB_Calib"                  , "MB_2017"                   , "MB_2018"                  put / ;
+loop(SC,put SC.tl    , STOCK_MB_HA_Cult("init",SC), STOCK_MB_HA_Cult("calib",SC), STOCK_MB_HA_Cult("2017",SC) , STOCK_MB_HA_Cult("2018",SC)    /);
+
+
+
+* RECAP_CULT_init.TXT
+file result03     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\RECAP_CULT_init.TXT/ ;
+     result03.pc=5;
+     result03.nw=8;
+     result03.pw=1000;
+
+put result03;
+put "VAR_HA_AN"       , loop(SC,put SC.tl                           ) put /;
+put "MB"              , loop(SC,put STOCK_MB_Ha_Cult("init",SC)     ) put /;
+put "PROD_BRUT"       , loop(SC,put STOCK_PB_Ha_Cult("init",SC)     ) put /;
+put "AIDES"           , loop(SC,put STOCK_SUB_TOT_HA_cult("init",SC)) put /;
+put "CV"              , loop(SC,put STOCK_CV_Ha_Cult("init",SC)     ) put /;
+put "RDT"             , loop(SC,put RDT_CULT(SC,"init")             ) put /;
+put "PRIX"            , loop(SC,put PRIX_CULT(SC,"init")            ) put /;
+put "MO"              , loop(SC,put STOCK_MO_Ha_Cult("init",SC)     ) put /;
+
+put "Assol_Gwad_Init" , loop(SC,put STOCK_ASSOL_Gwad("init",SC)     ) put /;
+put "Assol_Gwad_Calib", loop(SC,put STOCK_ASSOL_Gwad("calib",SC)    ) put /;
+put "Assol_Gwad_2017" , loop(SC,put STOCK_ASSOL_Gwad("2017",SC)     ) put /;
+
+
+
+
+*BAN_EXP_BASSIN.TXT
+file result04     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\BAN_EXP_BASSIN.TXT/ ;
+     result04.pc=5;
+     result04.nw=8;
+     result04.pw=1000;
+
+put result04;
+
+put "BAN_INT", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BAN_INT("init"),
+STOCK_ASSOL_SOBT_tot_BAN_INT("calib"),
+PAD_SOBT_BAN_INT,
+STOCK_ASSOL_SOBT_tot_BAN_INT("2017"),
+STOCK_ASSOL_SOBT_tot_BAN_INT("2018"),
+STOCK_ASSOL_SOBT_tot_BAN_INT("2019"),
+STOCK_ASSOL_SOBT_tot_BAN_INT("2020"),
+STOCK_ASSOL_SOBT_tot_BAN_INT("2021"),
+STOCK_ASSOL_SOBT_tot_BAN_INT("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BAN_INT("init"),
+STOCK_ASSOL_SEBT_tot_BAN_INT("calib"),
+PAD_SEBT_BAN_INT,
+STOCK_ASSOL_SEBT_tot_BAN_INT("2017"),
+STOCK_ASSOL_SEBT_tot_BAN_INT("2018"),
+STOCK_ASSOL_SEBT_tot_BAN_INT("2019"),
+STOCK_ASSOL_SEBT_tot_BAN_INT("2020"),
+STOCK_ASSOL_SEBT_tot_BAN_INT("2021"),
+STOCK_ASSOL_SEBT_tot_BAN_INT("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BAN_INT("init"),
+STOCK_ASSOL_NBT_tot_BAN_INT("calib"),
+PAD_NBT_BAN_INT,
+STOCK_ASSOL_NBT_tot_BAN_INT("2017"),
+STOCK_ASSOL_NBT_tot_BAN_INT("2018"),
+STOCK_ASSOL_NBT_tot_BAN_INT("2019"),
+STOCK_ASSOL_NBT_tot_BAN_INT("2020"),
+STOCK_ASSOL_NBT_tot_BAN_INT("2021"),
+STOCK_ASSOL_NBT_tot_BAN_INT("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BAN_INT("init"),
+STOCK_ASSOL_NGT_tot_BAN_INT("calib"),
+PAD_NGT_BAN_INT,
+STOCK_ASSOL_NGT_tot_BAN_INT("2017"),
+STOCK_ASSOL_NGT_tot_BAN_INT("2018"),
+STOCK_ASSOL_NGT_tot_BAN_INT("2019"),
+STOCK_ASSOL_NGT_tot_BAN_INT("2020"),
+STOCK_ASSOL_NGT_tot_BAN_INT("2021"),
+STOCK_ASSOL_NGT_tot_BAN_INT("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BAN_INT("init"),
+STOCK_ASSOL_CGT_tot_BAN_INT("calib"),
+PAD_CGT_BAN_INT,
+STOCK_ASSOL_CGT_tot_BAN_INT("2017"),
+STOCK_ASSOL_CGT_tot_BAN_INT("2018"),
+STOCK_ASSOL_CGT_tot_BAN_INT("2019"),
+STOCK_ASSOL_CGT_tot_BAN_INT("2020"),
+STOCK_ASSOL_CGT_tot_BAN_INT("2021"),
+STOCK_ASSOL_CGT_tot_BAN_INT("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BAN_INT("init"),
+STOCK_ASSOL_EGT_tot_BAN_INT("calib"),
+PAD_EGT_BAN_INT,
+STOCK_ASSOL_EGT_tot_BAN_INT("2017"),
+STOCK_ASSOL_EGT_tot_BAN_INT("2018"),
+STOCK_ASSOL_EGT_tot_BAN_INT("2019"),
+STOCK_ASSOL_EGT_tot_BAN_INT("2020"),
+STOCK_ASSOL_EGT_tot_BAN_INT("2021"),
+STOCK_ASSOL_EGT_tot_BAN_INT("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BAN_INT("init"),
+STOCK_ASSOL_MG_tot_BAN_INT("calib"),
+PAD_MG_BAN_INT,
+STOCK_ASSOL_MG_tot_BAN_INT("2017"),
+STOCK_ASSOL_MG_tot_BAN_INT("2018"),
+STOCK_ASSOL_MG_tot_BAN_INT("2019"),
+STOCK_ASSOL_MG_tot_BAN_INT("2020"),
+STOCK_ASSOL_MG_tot_BAN_INT("2021"),
+STOCK_ASSOL_MG_tot_BAN_INT("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BAN_INT("init"),
+STOCK_ASSOL_GWAD_tot_BAN_INT("calib"),
+PAD_GWAD_BAN_INT,
+STOCK_ASSOL_GWAD_tot_BAN_INT("2017"),
+STOCK_ASSOL_GWAD_tot_BAN_INT("2018"),
+STOCK_ASSOL_GWAD_tot_BAN_INT("2019"),
+STOCK_ASSOL_GWAD_tot_BAN_INT("2020"),
+STOCK_ASSOL_GWAD_tot_BAN_INT("2021"),
+STOCK_ASSOL_GWAD_tot_BAN_INT("2022")/
+/;
+
+put "BAN_SINT", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BAN_SINT("init"),
+STOCK_ASSOL_SOBT_tot_BAN_SINT("calib"),
+PAD_SOBT_BAN_SINT,
+STOCK_ASSOL_SOBT_tot_BAN_SINT("2017"),
+STOCK_ASSOL_SOBT_tot_BAN_SINT("2018"),
+STOCK_ASSOL_SOBT_tot_BAN_SINT("2019"),
+STOCK_ASSOL_SOBT_tot_BAN_SINT("2020"),
+STOCK_ASSOL_SOBT_tot_BAN_SINT("2021"),
+STOCK_ASSOL_SOBT_tot_BAN_SINT("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BAN_SINT("init"),
+STOCK_ASSOL_SEBT_tot_BAN_SINT("calib"),
+PAD_SEBT_BAN_SINT,
+STOCK_ASSOL_SEBT_tot_BAN_SINT("2017"),
+STOCK_ASSOL_SEBT_tot_BAN_SINT("2018"),
+STOCK_ASSOL_SEBT_tot_BAN_SINT("2019"),
+STOCK_ASSOL_SEBT_tot_BAN_SINT("2020"),
+STOCK_ASSOL_SEBT_tot_BAN_SINT("2021"),
+STOCK_ASSOL_SEBT_tot_BAN_SINT("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BAN_SINT("init"),
+STOCK_ASSOL_NBT_tot_BAN_SINT("calib"),
+PAD_NBT_BAN_SINT,
+STOCK_ASSOL_NBT_tot_BAN_SINT("2017"),
+STOCK_ASSOL_NBT_tot_BAN_SINT("2018"),
+STOCK_ASSOL_NBT_tot_BAN_SINT("2019"),
+STOCK_ASSOL_NBT_tot_BAN_SINT("2020"),
+STOCK_ASSOL_NBT_tot_BAN_SINT("2021"),
+STOCK_ASSOL_NBT_tot_BAN_SINT("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BAN_SINT("init"),
+STOCK_ASSOL_NGT_tot_BAN_SINT("calib"),
+PAD_NGT_BAN_SINT,
+STOCK_ASSOL_NGT_tot_BAN_SINT("2017"),
+STOCK_ASSOL_NGT_tot_BAN_SINT("2018"),
+STOCK_ASSOL_NGT_tot_BAN_SINT("2019"),
+STOCK_ASSOL_NGT_tot_BAN_SINT("2020"),
+STOCK_ASSOL_NGT_tot_BAN_SINT("2021"),
+STOCK_ASSOL_NGT_tot_BAN_SINT("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BAN_SINT("init"),
+STOCK_ASSOL_CGT_tot_BAN_SINT("calib"),
+PAD_CGT_BAN_SINT,
+STOCK_ASSOL_CGT_tot_BAN_SINT("2017"),
+STOCK_ASSOL_CGT_tot_BAN_SINT("2018"),
+STOCK_ASSOL_CGT_tot_BAN_SINT("2019"),
+STOCK_ASSOL_CGT_tot_BAN_SINT("2020"),
+STOCK_ASSOL_CGT_tot_BAN_SINT("2021"),
+STOCK_ASSOL_CGT_tot_BAN_SINT("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BAN_SINT("init"),
+STOCK_ASSOL_EGT_tot_BAN_SINT("calib"),
+PAD_EGT_BAN_SINT,
+STOCK_ASSOL_EGT_tot_BAN_SINT("2017"),
+STOCK_ASSOL_EGT_tot_BAN_SINT("2018"),
+STOCK_ASSOL_EGT_tot_BAN_SINT("2019"),
+STOCK_ASSOL_EGT_tot_BAN_SINT("2020"),
+STOCK_ASSOL_EGT_tot_BAN_SINT("2021"),
+STOCK_ASSOL_EGT_tot_BAN_SINT("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BAN_SINT("init"),
+STOCK_ASSOL_MG_tot_BAN_SINT("calib"),
+PAD_MG_BAN_SINT,
+STOCK_ASSOL_MG_tot_BAN_SINT("2017"),
+STOCK_ASSOL_MG_tot_BAN_SINT("2018"),
+STOCK_ASSOL_MG_tot_BAN_SINT("2019"),
+STOCK_ASSOL_MG_tot_BAN_SINT("2020"),
+STOCK_ASSOL_MG_tot_BAN_SINT("2021"),
+STOCK_ASSOL_MG_tot_BAN_SINT("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BAN_SINT("init"),
+STOCK_ASSOL_GWAD_tot_BAN_SINT("calib"),
+PAD_GWAD_BAN_SINT,
+STOCK_ASSOL_GWAD_tot_BAN_SINT("2017"),
+STOCK_ASSOL_GWAD_tot_BAN_SINT("2018"),
+STOCK_ASSOL_GWAD_tot_BAN_SINT("2019"),
+STOCK_ASSOL_GWAD_tot_BAN_SINT("2020"),
+STOCK_ASSOL_GWAD_tot_BAN_SINT("2021"),
+STOCK_ASSOL_GWAD_tot_BAN_SINT("2022")/
+/;
+
+put "BAN_PER", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BAN_PER("init"),
+STOCK_ASSOL_SOBT_tot_BAN_PER("calib"),
+PAD_SOBT_BAN_PER,
+STOCK_ASSOL_SOBT_tot_BAN_PER("2017"),
+STOCK_ASSOL_SOBT_tot_BAN_PER("2018"),
+STOCK_ASSOL_SOBT_tot_BAN_PER("2019"),
+STOCK_ASSOL_SOBT_tot_BAN_PER("2020"),
+STOCK_ASSOL_SOBT_tot_BAN_PER("2021"),
+STOCK_ASSOL_SOBT_tot_BAN_PER("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BAN_PER("init"),
+STOCK_ASSOL_SEBT_tot_BAN_PER("calib"),
+PAD_SEBT_BAN_PER,
+STOCK_ASSOL_SEBT_tot_BAN_PER("2017"),
+STOCK_ASSOL_SEBT_tot_BAN_PER("2018"),
+STOCK_ASSOL_SEBT_tot_BAN_PER("2019"),
+STOCK_ASSOL_SEBT_tot_BAN_PER("2020"),
+STOCK_ASSOL_SEBT_tot_BAN_PER("2021"),
+STOCK_ASSOL_SEBT_tot_BAN_PER("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BAN_PER("init"),
+STOCK_ASSOL_NBT_tot_BAN_PER("calib"),
+PAD_NBT_BAN_PER,
+STOCK_ASSOL_NBT_tot_BAN_PER("2017"),
+STOCK_ASSOL_NBT_tot_BAN_PER("2018"),
+STOCK_ASSOL_NBT_tot_BAN_PER("2019"),
+STOCK_ASSOL_NBT_tot_BAN_PER("2020"),
+STOCK_ASSOL_NBT_tot_BAN_PER("2021"),
+STOCK_ASSOL_NBT_tot_BAN_PER("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BAN_PER("init"),
+STOCK_ASSOL_NGT_tot_BAN_PER("calib"),
+PAD_NGT_BAN_PER,
+STOCK_ASSOL_NGT_tot_BAN_PER("2017"),
+STOCK_ASSOL_NGT_tot_BAN_PER("2018"),
+STOCK_ASSOL_NGT_tot_BAN_PER("2019"),
+STOCK_ASSOL_NGT_tot_BAN_PER("2020"),
+STOCK_ASSOL_NGT_tot_BAN_PER("2021"),
+STOCK_ASSOL_NGT_tot_BAN_PER("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BAN_PER("init"),
+STOCK_ASSOL_CGT_tot_BAN_PER("calib"),
+PAD_CGT_BAN_PER,
+STOCK_ASSOL_CGT_tot_BAN_PER("2017"),
+STOCK_ASSOL_CGT_tot_BAN_PER("2018"),
+STOCK_ASSOL_CGT_tot_BAN_PER("2019"),
+STOCK_ASSOL_CGT_tot_BAN_PER("2020"),
+STOCK_ASSOL_CGT_tot_BAN_PER("2021"),
+STOCK_ASSOL_CGT_tot_BAN_PER("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BAN_PER("init"),
+STOCK_ASSOL_EGT_tot_BAN_PER("calib"),
+PAD_EGT_BAN_PER,
+STOCK_ASSOL_EGT_tot_BAN_PER("2017"),
+STOCK_ASSOL_EGT_tot_BAN_PER("2018"),
+STOCK_ASSOL_EGT_tot_BAN_PER("2019"),
+STOCK_ASSOL_EGT_tot_BAN_PER("2020"),
+STOCK_ASSOL_EGT_tot_BAN_PER("2021"),
+STOCK_ASSOL_EGT_tot_BAN_PER("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BAN_PER("init"),
+STOCK_ASSOL_MG_tot_BAN_PER("calib"),
+PAD_MG_BAN_PER,
+STOCK_ASSOL_MG_tot_BAN_PER("2017"),
+STOCK_ASSOL_MG_tot_BAN_PER("2018"),
+STOCK_ASSOL_MG_tot_BAN_PER("2019"),
+STOCK_ASSOL_MG_tot_BAN_PER("2020"),
+STOCK_ASSOL_MG_tot_BAN_PER("2021"),
+STOCK_ASSOL_MG_tot_BAN_PER("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BAN_PER("init"),
+STOCK_ASSOL_GWAD_tot_BAN_PER("calib"),
+PAD_GWAD_BAN_PER,
+STOCK_ASSOL_GWAD_tot_BAN_PER("2017"),
+STOCK_ASSOL_GWAD_tot_BAN_PER("2018"),
+STOCK_ASSOL_GWAD_tot_BAN_PER("2019"),
+STOCK_ASSOL_GWAD_tot_BAN_PER("2020"),
+STOCK_ASSOL_GWAD_tot_BAN_PER("2021"),
+STOCK_ASSOL_GWAD_tot_BAN_PER("2022")/
+/;
+
+put "BAN_IRR", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BAN_IRR("init"),
+STOCK_ASSOL_SOBT_tot_BAN_IRR("calib"),
+PAD_SOBT_BAN_IRR,
+STOCK_ASSOL_SOBT_tot_BAN_IRR("2017"),
+STOCK_ASSOL_SOBT_tot_BAN_IRR("2018"),
+STOCK_ASSOL_SOBT_tot_BAN_IRR("2019"),
+STOCK_ASSOL_SOBT_tot_BAN_IRR("2020"),
+STOCK_ASSOL_SOBT_tot_BAN_IRR("2021"),
+STOCK_ASSOL_SOBT_tot_BAN_IRR("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BAN_IRR("init"),
+STOCK_ASSOL_SEBT_tot_BAN_IRR("calib"),
+PAD_SEBT_BAN_IRR,
+STOCK_ASSOL_SEBT_tot_BAN_IRR("2017"),
+STOCK_ASSOL_SEBT_tot_BAN_IRR("2018"),
+STOCK_ASSOL_SEBT_tot_BAN_IRR("2019"),
+STOCK_ASSOL_SEBT_tot_BAN_IRR("2020"),
+STOCK_ASSOL_SEBT_tot_BAN_IRR("2021"),
+STOCK_ASSOL_SEBT_tot_BAN_IRR("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BAN_IRR("init"),
+STOCK_ASSOL_NBT_tot_BAN_IRR("calib"),
+PAD_NBT_BAN_IRR,
+STOCK_ASSOL_NBT_tot_BAN_IRR("2017"),
+STOCK_ASSOL_NBT_tot_BAN_IRR("2018"),
+STOCK_ASSOL_NBT_tot_BAN_IRR("2019"),
+STOCK_ASSOL_NBT_tot_BAN_IRR("2020"),
+STOCK_ASSOL_NBT_tot_BAN_IRR("2021"),
+STOCK_ASSOL_NBT_tot_BAN_IRR("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BAN_IRR("init"),
+STOCK_ASSOL_NGT_tot_BAN_IRR("calib"),
+PAD_NGT_BAN_IRR,
+STOCK_ASSOL_NGT_tot_BAN_IRR("2017"),
+STOCK_ASSOL_NGT_tot_BAN_IRR("2018"),
+STOCK_ASSOL_NGT_tot_BAN_IRR("2019"),
+STOCK_ASSOL_NGT_tot_BAN_IRR("2020"),
+STOCK_ASSOL_NGT_tot_BAN_IRR("2021"),
+STOCK_ASSOL_NGT_tot_BAN_IRR("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BAN_IRR("init"),
+STOCK_ASSOL_CGT_tot_BAN_IRR("calib"),
+PAD_CGT_BAN_IRR,
+STOCK_ASSOL_CGT_tot_BAN_IRR("2017"),
+STOCK_ASSOL_CGT_tot_BAN_IRR("2018"),
+STOCK_ASSOL_CGT_tot_BAN_IRR("2019"),
+STOCK_ASSOL_CGT_tot_BAN_IRR("2020"),
+STOCK_ASSOL_CGT_tot_BAN_IRR("2021"),
+STOCK_ASSOL_CGT_tot_BAN_IRR("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BAN_IRR("init"),
+STOCK_ASSOL_EGT_tot_BAN_IRR("calib"),
+PAD_EGT_BAN_IRR,
+STOCK_ASSOL_EGT_tot_BAN_IRR("2017"),
+STOCK_ASSOL_EGT_tot_BAN_IRR("2018"),
+STOCK_ASSOL_EGT_tot_BAN_IRR("2019"),
+STOCK_ASSOL_EGT_tot_BAN_IRR("2020"),
+STOCK_ASSOL_EGT_tot_BAN_IRR("2021"),
+STOCK_ASSOL_EGT_tot_BAN_IRR("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BAN_IRR("init"),
+STOCK_ASSOL_MG_tot_BAN_IRR("calib"),
+PAD_MG_BAN_IRR,
+STOCK_ASSOL_MG_tot_BAN_IRR("2017"),
+STOCK_ASSOL_MG_tot_BAN_IRR("2018"),
+STOCK_ASSOL_MG_tot_BAN_IRR("2019"),
+STOCK_ASSOL_MG_tot_BAN_IRR("2020"),
+STOCK_ASSOL_MG_tot_BAN_IRR("2021"),
+STOCK_ASSOL_MG_tot_BAN_IRR("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BAN_IRR("init"),
+STOCK_ASSOL_GWAD_tot_BAN_IRR("calib"),
+PAD_GWAD_BAN_IRR,
+STOCK_ASSOL_GWAD_tot_BAN_IRR("2017"),
+STOCK_ASSOL_GWAD_tot_BAN_IRR("2018"),
+STOCK_ASSOL_GWAD_tot_BAN_IRR("2019"),
+STOCK_ASSOL_GWAD_tot_BAN_IRR("2020"),
+STOCK_ASSOL_GWAD_tot_BAN_IRR("2021"),
+STOCK_ASSOL_GWAD_tot_BAN_IRR("2022")/
+/;
+
+
+put "BAN_EX", "INIT", "CALIB", "PAD", "2017", "2018", "2019", "2020", "2021", "2022"  put /
+
+"SOBT",
+STOCK_ASSOL_SOBT_tot_BAN_EX("init"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("calib"),
+PAD_SOBT_BAN_EX,
+STOCK_ASSOL_SOBT_tot_BAN_EX("2017"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2018"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2019"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2020"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2021"),
+STOCK_ASSOL_SOBT_tot_BAN_EX("2022") put/
+
+"SEBT",
+STOCK_ASSOL_SEBT_tot_BAN_EX("init"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("calib"),
+PAD_SEBT_BAN_EX,
+STOCK_ASSOL_SEBT_tot_BAN_EX("2017"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2018"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2019"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2020"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2021"),
+STOCK_ASSOL_SEBT_tot_BAN_EX("2022") put/
+
+"NBT",
+STOCK_ASSOL_NBT_tot_BAN_EX("init"),
+STOCK_ASSOL_NBT_tot_BAN_EX("calib"),
+PAD_NBT_BAN_EX,
+STOCK_ASSOL_NBT_tot_BAN_EX("2017"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2018"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2019"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2020"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2021"),
+STOCK_ASSOL_NBT_tot_BAN_EX("2022") put/
+
+"NGT",
+STOCK_ASSOL_NGT_tot_BAN_EX("init"),
+STOCK_ASSOL_NGT_tot_BAN_EX("calib"),
+PAD_NGT_BAN_EX,
+STOCK_ASSOL_NGT_tot_BAN_EX("2017"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2018"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2019"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2020"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2021"),
+STOCK_ASSOL_NGT_tot_BAN_EX("2022") put/
+
+"CGT",
+STOCK_ASSOL_CGT_tot_BAN_EX("init"),
+STOCK_ASSOL_CGT_tot_BAN_EX("calib"),
+PAD_CGT_BAN_EX,
+STOCK_ASSOL_CGT_tot_BAN_EX("2017"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2018"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2019"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2020"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2021"),
+STOCK_ASSOL_CGT_tot_BAN_EX("2022") put/
+
+"EGT",
+STOCK_ASSOL_EGT_tot_BAN_EX("init"),
+STOCK_ASSOL_EGT_tot_BAN_EX("calib"),
+PAD_EGT_BAN_EX,
+STOCK_ASSOL_EGT_tot_BAN_EX("2017"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2018"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2019"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2020"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2021"),
+STOCK_ASSOL_EGT_tot_BAN_EX("2022") put/
+
+"MG",
+STOCK_ASSOL_MG_tot_BAN_EX("init"),
+STOCK_ASSOL_MG_tot_BAN_EX("calib"),
+PAD_MG_BAN_EX,
+STOCK_ASSOL_MG_tot_BAN_EX("2017"),
+STOCK_ASSOL_MG_tot_BAN_EX("2018"),
+STOCK_ASSOL_MG_tot_BAN_EX("2019"),
+STOCK_ASSOL_MG_tot_BAN_EX("2020"),
+STOCK_ASSOL_MG_tot_BAN_EX("2021"),
+STOCK_ASSOL_MG_tot_BAN_EX("2022") put/
+
+"GWAD",
+STOCK_ASSOL_GWAD_tot_BAN_EX("init"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("calib"),
+PAD_GWAD_BAN_EX,
+STOCK_ASSOL_GWAD_tot_BAN_EX("2017"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2018"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2019"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2020"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2021"),
+STOCK_ASSOL_GWAD_tot_BAN_EX("2022")/
+/;
+
+
+*EFF_TYPE_EXP.TXT
+file result05     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\EFF_TYPE_EXP.TXT/ ;
+     result05.pc=5;
+     result05.nw=8;
+     result05.pw=1000;
+
+put result05;
+
+put "GWAD", "EFF_INIT", "EFF_CALIB", "PAD_EXPL" put /
+
+"TYPE_0", STOCK_EFF_TYPE_0_Gwad("init"), STOCK_EFF_TYPE_0_Gwad("calib"), PAD_EFF_TYPE_0_GWAD put/
+"TYPE_1", STOCK_EFF_TYPE_1_Gwad("init"), STOCK_EFF_TYPE_1_Gwad("calib"), PAD_EFF_TYPE_1_GWAD put/
+"TYPE_2", STOCK_EFF_TYPE_2_Gwad("init"), STOCK_EFF_TYPE_2_Gwad("calib"), PAD_EFF_TYPE_2_GWAD put/
+"TYPE_3", STOCK_EFF_TYPE_3_Gwad("init"), STOCK_EFF_TYPE_3_Gwad("calib"), PAD_EFF_TYPE_3_GWAD put/
+"TYPE_4", STOCK_EFF_TYPE_4_Gwad("init"), STOCK_EFF_TYPE_4_Gwad("calib"), PAD_EFF_TYPE_4_GWAD put/
+"TYPE_5", STOCK_EFF_TYPE_5_Gwad("init"), STOCK_EFF_TYPE_5_Gwad("calib"), PAD_EFF_TYPE_5_GWAD put/
+"TYPE_6", STOCK_EFF_TYPE_6_Gwad("init"), STOCK_EFF_TYPE_6_Gwad("calib"), PAD_EFF_TYPE_6_GWAD put/
+"TYPE_7", STOCK_EFF_TYPE_7_Gwad("init"), STOCK_EFF_TYPE_7_Gwad("calib"), PAD_EFF_TYPE_7_GWAD put/
+"TYPE_8", STOCK_EFF_TYPE_8_Gwad("init"), STOCK_EFF_TYPE_8_Gwad("calib"), PAD_EFF_TYPE_8_GWAD put/
+/
+put "SOBT", "EFF_INIT", "EFF_CALIB", "PAD_EXPL" put /
+
+*"TYPE_0", STOCK_EFF_TYPE_0_SOBT("init"), STOCK_EFF_TYPE_0_SOBT("calib"), PAD_EFF_TYPE_0_SOBT put/
+*"TYPE_1", STOCK_EFF_TYPE_1_SOBT("init"), STOCK_EFF_TYPE_1_SOBT("calib"), PAD_EFF_TYPE_1_SOBT put/
+*"TYPE_2", STOCK_EFF_TYPE_2_SOBT("init"), STOCK_EFF_TYPE_2_SOBT("calib"), PAD_EFF_TYPE_2_SOBT put/
+*"TYPE_3", STOCK_EFF_TYPE_3_SOBT("init"), STOCK_EFF_TYPE_3_SOBT("calib"), PAD_EFF_TYPE_3_SOBT put/
+*"TYPE_4", STOCK_EFF_TYPE_4_SOBT("init"), STOCK_EFF_TYPE_4_SOBT("calib"), PAD_EFF_TYPE_4_SOBT put/
+*"TYPE_5", STOCK_EFF_TYPE_5_SOBT("init"), STOCK_EFF_TYPE_5_SOBT("calib"), PAD_EFF_TYPE_5_SOBT put/
+*"TYPE_6", STOCK_EFF_TYPE_6_SOBT("init"), STOCK_EFF_TYPE_6_SOBT("calib"), PAD_EFF_TYPE_6_SOBT put/
+*"TYPE_7", STOCK_EFF_TYPE_7_SOBT("init"), STOCK_EFF_TYPE_7_SOBT("calib"), PAD_EFF_TYPE_7_SOBT put/
+*"TYPE_8", STOCK_EFF_TYPE_8_SOBT("init"), STOCK_EFF_TYPE_8_SOBT("calib"), PAD_EFF_TYPE_8_SOBT put/
+/;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

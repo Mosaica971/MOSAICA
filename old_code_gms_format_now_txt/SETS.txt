@@ -1,0 +1,698 @@
+
+SET
+
+R               Régions            /R0*R27/
+SR(R)           Sous ensemble de R /R0*R27/
+
+E               Exploitations             /E1*E4638/
+SE(E)           Sous ensemble de E1*E5336 /E1*E4638/
+*SE(E)           Sous ensemble de E1*E5336 contenant les exploitations du Nord Basse Terre /
+*$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\EXPL_NBT.set
+*/
+
+P               Parcelles                 /P1*P24734/
+SP(P)           Sous ensemble de P*P25057 /P1*P24734/
+*SP(P)           Sous ensemble de P*P25057 contenant les parcelles du Nord Basse Terre /
+*$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\PARC_NBT.set
+*/
+
+
+EXPL_PARC(E,P)  Relation exploitations - parcelles /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\EXPL_PARC_2017.set
+/
+
+
+
+H               Années             /init, calib, 2017*2022/
+SH(H)           Sous ensemble de H /init, calib, 2017/
+*
+K               Opérations techniques /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\OTK.set
+/
+SK(K)           Sous ensemble opérations techniques /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\OTK.set
+/
+
+T               Type d'exploitation /T0*T8/
+ST(T)           Sous ensemble Type d'exploitation /T0*T8/
+ST_NON_T2(T)    Sous ensemble Type d'exploitation non T2 /T0, T1, T3, T4, T5, T6, T7, T8/
+
+C               Cultures /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\cult_2017.set
+/
+SC(C)           Sous ensemble de C /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\cult_2017.set
+/
+
+S               Sols /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\sol.set
+/
+SS(S)           Sous ensemble de S /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\sol.set
+/
+
+VAR_C           Variables descriptives des cultures non dépendantes de l'année /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\var_c.set
+/
+
+VAR_P           Variables descriptives des parcelles /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\var_parc_2017.set
+/
+
+VAR_OTK         Variables decriptives des opérations techniques /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\var_otk.set
+/
+
+VAR_SOL         Variables decriptives des sols pour calculs MORGWANIK /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\var_sol.set
+/
+
+BV              Bassin-versants /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\BV_2017.set
+/
+SBV(BV)         sous ensemble de BV /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\BV_2017.set
+/
+
+*RIV             Rivières /
+*$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\RIV_2017.set
+*/
+
+*SRIV(RIV)       Sous ensemble de RIV /
+*$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\RIV_2017.set
+*/
+
+*SGRIV(RIV)      Grandes rivières (surface de plus de 10ha) /
+*$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\SGRIV_2017.set
+*/
+
+CPT             Captages (captage avec une parcelle agricle au moins à proximité) /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\CPT_2017.set
+/
+SCPT(CPT)       Sous ensemble de CPT /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\CPT_2017.set
+/
+
+
+REG_PARC(R,P)   Relation communes - parcelles /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\REG_PARC_2017.set
+/
+
+BV_PARC(BV,P)   Relation bassin - parcelles /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\BV_PARC_2017.set
+/
+
+*RIV_PARC(RIV,P) Relation rivières - parcelles /
+*$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\RIV_PARC_2017.set
+*/
+
+CPT_PARC(CPT,P) Relation captages - parcelles /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\CPT_PARC_2017.set
+/
+
+SC_AN(C)        Sous ensemble de cultures ananas /
+AN,
+AN_NU,
+AN_PA/
+
+SC_ME(C)        Sous ensemble de cultures melon /
+ME/
+
+
+SC_CS_IRRIG(C)  Sous ensemble de C canne à sucre irriguée /
+CS_BT_IM,
+CS_SBT_IM,
+CS_NGT_IM,
+CS_CGT_IM,
+CS_EGT_IM,
+CS_MG_IM
+/
+
+SC_CS_MECA(C)   Sous ensemble de C canne à sucre mécanisée /
+CS_BT_NIM,
+CS_BT_IM,
+CS_SBT_NIM,
+CS_SBT_IM,
+CS_NGT_NIM,
+CS_NGT_IM,
+CS_CGT_NIM,
+CS_CGT_IM,
+CS_EGT_NIM,
+CS_EGT_IM,
+CS_MG_NIM,
+CS_MG_IM
+/
+
+SC_CS_NGT(C)    Sous ensemble de C canne à sucre en Nord Grande-Terre /
+CS_NGT_NISM,
+CS_NGT_NIM,
+CS_NGT_IM
+/
+
+SC_CS_CGT(C)    Sous ensemble de C canne à sucre en Centre Grande-Terre /
+CS_CGT_NISM,
+CS_CGT_NIM,
+CS_CGT_IM
+/
+
+SC_CS_EGT(C)    Sous ensemble de C canne à sucre en Est Grande-Terre /
+CS_EGT_NISM,
+CS_EGT_NIM,
+CS_EGT_IM
+/
+
+SC_CS_MG(C)     Sous ensemble de C canne à sucre à Marie-Galante /
+CS_MG_NISM,
+CS_MG_NIM,
+CS_MG_IM
+/
+
+SC_CS_BT(C)     Sous ensemble de C canne à sucre en Nord Basse-Terre et Ouest basse-Terre /
+CS_BT_NISM,
+CS_BT_NIM,
+CS_BT_IM
+/
+
+SC_CS_SBT(C)    Sous ensemble de C canne à sucre en Sud Basse-Terre /
+CS_SBT_NISM,
+CS_SBT_NIM,
+CS_SBT_IM
+/
+
+SC_CF_MECA(C)   Sous ensemble de C canne fibre mécanisée /
+CF_NBT_NIM,
+CF_SBT_NIM,
+CF_NGT_NIM,
+CF_CGT_NIM,
+CF_EGT_NIM
+/
+
+SC_CF(C)        Sous ensemble de C canne fibre /
+CF_NBT_NISM,
+CF_NBT_NIM,
+CF_SBT_NISM,
+CF_SBT_NIM,
+CF_NGT_NISM,
+CF_NGT_NIM,
+CF_CGT_NISM,
+CF_CGT_NIM,
+CF_EGT_NISM,
+CF_EGT_NIM
+/
+
+SC_CF_NGT(C)    Sous ensemble de C Canne fibre en Nord Grande-Terre /
+CF_NGT_NISM,
+CF_NGT_NIM
+/
+
+SC_CF_CGT(C)    Sous ensemble de C Canne fibre en Centre Grande-Terre /
+CF_CGT_NISM,
+CF_CGT_NIM
+/
+
+SC_CF_EGT(C)    Sous ensemble de C Canne fibre en Est Grande-Terre /
+CF_EGT_NISM,
+CF_EGT_NIM
+/
+
+SC_CF_BT(C)     Sous ensemble de C Canne fibre en Nord Basse-terre et Sud-Ouest Basse-Terre /
+CF_NBT_NISM,
+CF_NBT_NIM
+/
+
+SC_CF_SBT(C)    Sous ensemble de C Canne fibre en Sud-Est Basse-Terre /
+CF_SBT_NISM,
+CF_SBT_NIM
+/
+
+SC_BA_JA(C)     Sous ensemble de C banane export en rotaion avec de la jachère /
+BA_INT,
+BA_IRR,
+BA_SINT
+/
+
+SC_CULTIV(C)    Sous ensemble de C cultivées /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\cultiv_2017.set
+/
+
+SC_NONBOIS(C)   Sous ensemble de C non arborées /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\nonbois_2017.set
+/
+
+SC_CULT_NON_NC(C)   Sous ensemble de C non arborées /
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\CULT_NON_NC_2017.set
+/
+
+
+SC_NON_INDIV(C) Sous ensemble de C non réalisables en indivision (couts d'investissements forts) /
+AG,
+BA,
+BA_INT,
+BA_IRR,
+BA_PER,
+BA_SINT,
+BC,
+BC_BT,
+BC_GTMG,
+VE,
+VE_BTGT,
+VE_PLUIE
+/
+
+SC_VOL(C)       Sous ensemble de C sensibles au vol /
+AN,
+AN_NU,
+AN_PA,
+MA,
+MA_TO_CHOU_JA,
+MA_PLBIO,
+MA_MOBIO,
+MA_ROTA,
+ME,
+TH,
+MA_TO_CO_JA,
+MA_BAG_BIO_I,
+MA_BAG_BIO_NI,
+MA_BAG_VEG_I,
+MA_BAG_VEG_NI,
+MA_BAG_FER_I,
+MA_BAG_FER_NI,
+MA_BAG_NON_I,
+MA_BAG_NON_NI,
+MA_BRF_BIO_I,
+MA_BRF_BIO_NI,
+MA_BRF_VEG_I,
+MA_BRF_VEG_NI,
+MA_BRF_FER_I,
+MA_BRF_FER_NI,
+MA_BRF_NON_I,
+MA_BRF_NON_NI,
+MA_PAI_BIO_I,
+MA_PAI_BIO_NI,
+MA_PAI_VEG_I,
+MA_PAI_VEG_NI,
+MA_PAI_FER_I,
+MA_PAI_FER_NI,
+MA_PAI_NON_I,
+MA_PAI_NON_NI
+/
+
+SC_CS(C)        Sous ensemble de C canne à sucre /
+CS,
+CS_BT_NISM,
+CS_BT_NIM,
+CS_BT_IM,
+CS_SBT_NISM,
+CS_SBT_NIM,
+CS_SBT_IM,
+CS_NGT_NISM,
+CS_NGT_NIM,
+CS_NGT_IM,
+CS_CGT_NISM,
+CS_CGT_NIM,
+CS_CGT_IM,
+CS_EGT_NISM,
+CS_EGT_NIM,
+CS_EGT_IM,
+CS_MG_NISM,
+CS_MG_NIM,
+CS_MG_IM
+/
+
+SC_IG(C)        Sous ensemble de C ignames /
+IG,
+IG_PLA,
+IG_TUT
+/
+
+SC_BAN_EX(C)    Sous ensemble de C banane export /
+BA,
+BA_INT,
+BA_IRR,
+BA_PER,
+BA_SINT/
+
+SC_BAN_INT(C)    Sous ensemble de C banane export intensive /
+BA_INT/
+
+SC_BAN_SINT(C)   Sous ensemble de C banane export semi-intensive /
+BA_SINT/
+
+SC_BAN_PER(C)    Sous ensemble de C banane export perenne /
+BA_PER/
+
+SC_BAN_IRR(C)    Sous ensemble de C banane export irriguée /
+BA_IRR/
+
+
+SC_BC(C)        Sous ensemble de C banane plantain /
+BC,
+BC_BT,
+BC_GTMG/
+
+
+SC_MA(C)        Sous ensemble de C maraichage /
+MA,
+MA_PLBIO,
+MA_MOBIO,
+MA_ROTA,
+MA_TO_CHOU_JA,
+MA_TO_CO_JA,
+MA_BAG_BIO_I,
+MA_BAG_BIO_NI,
+MA_BAG_VEG_I,
+MA_BAG_VEG_NI,
+MA_BAG_FER_I,
+MA_BAG_FER_NI,
+MA_BAG_NON_I,
+MA_BAG_NON_NI,
+MA_BRF_BIO_I,
+MA_BRF_BIO_NI,
+MA_BRF_VEG_I,
+MA_BRF_VEG_NI,
+MA_BRF_FER_I,
+MA_BRF_FER_NI,
+MA_BRF_NON_I,
+MA_BRF_NON_NI,
+MA_PAI_BIO_I,
+MA_PAI_BIO_NI,
+MA_PAI_VEG_I,
+MA_PAI_VEG_NI,
+MA_PAI_FER_I,
+MA_PAI_FER_NI,
+MA_PAI_NON_I,
+MA_PAI_NON_NI
+
+/
+
+SC_CAN(C)       Sous ensemble de C Cannes (canne à sucre et canne fibre) /
+CF_NBT_NISM,
+CF_NBT_NIM,
+CF_SBT_NISM,
+CF_SBT_NIM,
+CF_NGT_NISM,
+CF_NGT_NIM,
+CF_CGT_NISM,
+CF_CGT_NIM,
+CF_EGT_NISM,
+CF_EGT_NIM,
+CS,
+CS_BT_NISM,
+CS_BT_NIM,
+CS_BT_IM,
+CS_SBT_NISM,
+CS_SBT_NIM,
+CS_SBT_IM,
+CS_NGT_NISM,
+CS_NGT_NIM,
+CS_NGT_IM,
+CS_CGT_NISM,
+CS_CGT_NIM,
+CS_CGT_IM,
+CS_EGT_NISM,
+CS_EGT_NIM,
+CS_EGT_IM,
+CS_MG_NISM,
+CS_MG_NIM,
+CS_MG_IM
+/
+
+SC_BAN(C)       Sous ensemble de C Bananes (banane export et banane plantain) /
+BA,
+BA_INT,
+BA_IRR,
+BA_PER,
+BA_SINT,
+BC,
+BC_BT,
+BC_GTMG
+/
+
+SC_PAT(C)       Sous ensemble de C paturages /
+PN,
+PN_PIQ,
+PN_TOUR
+/
+
+SC_NON(C)       Sous ensemble de C non cultivées (Jachères - Friches - Bois)/
+JA,
+NC
+/
+
+SC_FRICHES(C)       Sous ensemble de C non cultivées (Jachères - Friches - Bois)/
+NC
+/
+
+SC_JA(C)       Sous ensemble de C non cultivées (Jachères - Friches - Bois)/
+JA
+/
+
+SC_PLU(C)       Sous ensemble de C pluriannuelles (Agrumes - Cultures sous Tonnelles - Plantes Médicinales - Vergers)/
+AG,
+VE,
+VE_BTGT,
+VE_PLUIE
+/
+
+SC_MAR(C)       Sous ensemble de C maraichage & tubercules /
+IG,
+IG_PLA,
+IG_TUT,
+MA,
+MA_TO_CHOU_JA,
+MA_PLBIO,
+MA_MOBIO,
+MA_ROTA,
+ME,
+TH,
+MA_TO_CO_JA,
+MA_BAG_BIO_I,
+MA_BAG_BIO_NI,
+MA_BAG_VEG_I,
+MA_BAG_VEG_NI,
+MA_BAG_FER_I,
+MA_BAG_FER_NI,
+MA_BAG_NON_I,
+MA_BAG_NON_NI,
+MA_BRF_BIO_I,
+MA_BRF_BIO_NI,
+MA_BRF_VEG_I,
+MA_BRF_VEG_NI,
+MA_BRF_FER_I,
+MA_BRF_FER_NI,
+MA_BRF_NON_I,
+MA_BRF_NON_NI,
+MA_PAI_BIO_I,
+MA_PAI_BIO_NI,
+MA_PAI_VEG_I,
+MA_PAI_VEG_NI,
+MA_PAI_FER_I,
+MA_PAI_FER_NI,
+MA_PAI_NON_I,
+MA_PAI_NON_NI
+
+/
+
+SC_MAR_ESSAI_KS(C)       Sous ensemble de C maraichage essayé sur Karusmart/
+MA_TO_CHOU_JA,
+MA_BAG_BIO_I,
+MA_BAG_BIO_NI,
+MA_BAG_VEG_I,
+MA_BAG_VEG_NI,
+MA_BAG_FER_I,
+MA_BAG_FER_NI,
+MA_BAG_NON_I,
+MA_BAG_NON_NI,
+MA_BRF_BIO_I,
+MA_BRF_BIO_NI,
+MA_BRF_VEG_I,
+MA_BRF_VEG_NI,
+MA_BRF_FER_I,
+MA_BRF_FER_NI,
+MA_BRF_NON_I,
+MA_BRF_NON_NI,
+MA_PAI_BIO_I,
+MA_PAI_BIO_NI,
+MA_PAI_VEG_I,
+MA_PAI_VEG_NI,
+MA_PAI_FER_I,
+MA_PAI_FER_NI,
+MA_PAI_NON_I,
+MA_PAI_NON_NI
+
+/
+
+
+
+
+SC_NON_CF(C)        Sous ensemble de C hors canne fibre /
+AG,
+AN,
+AN_NU,
+AN_PA,
+BA,
+BA_INT,
+BA_IRR,
+BA_PER,
+BA_SINT,
+BC,
+BC_BT,
+BC_GTMG,
+CS,
+CS_BT_NISM,
+CS_BT_NIM,
+CS_BT_IM,
+CS_SBT_NISM,
+CS_SBT_NIM,
+CS_SBT_IM,
+CS_NGT_NISM,
+CS_NGT_NIM,
+CS_NGT_IM,
+CS_CGT_NISM,
+CS_CGT_NIM,
+CS_CGT_IM,
+CS_EGT_NISM,
+CS_EGT_NIM,
+CS_EGT_IM,
+CS_MG_NISM,
+CS_MG_NIM,
+CS_MG_IM,
+IG,
+IG_PLA,
+IG_TUT,
+JA,
+MA,
+MA_TO_CHOU_JA,
+MA_PLBIO,
+MA_MOBIO,
+MA_ROTA,
+ME,
+NC,
+PN,
+PN_PIQ,
+PN_TOUR,
+TH,
+VE,
+VE_BTGT,
+VE_PLUIE,
+MA_TO_CO_JA,
+MA_BAG_BIO_I,
+MA_BAG_BIO_NI,
+MA_BAG_VEG_I,
+MA_BAG_VEG_NI,
+MA_BAG_FER_I,
+MA_BAG_FER_NI,
+MA_BAG_NON_I,
+MA_BAG_NON_NI,
+MA_BRF_BIO_I,
+MA_BRF_BIO_NI,
+MA_BRF_VEG_I,
+MA_BRF_VEG_NI,
+MA_BRF_FER_I,
+MA_BRF_FER_NI,
+MA_BRF_NON_I,
+MA_BRF_NON_NI,
+MA_PAI_BIO_I,
+MA_PAI_BIO_NI,
+MA_PAI_VEG_I,
+MA_PAI_VEG_NI,
+MA_PAI_FER_I,
+MA_PAI_FER_NI,
+MA_PAI_NON_I,
+MA_PAI_NON_NI
+
+
+/
+
+SC_TOT(C)       Sous ensemble de C de toutes les cultures/
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\SET\cult_2017.set
+/
+
+
+********************************************************************************
+********************************************************************************
+SRSOBT(R)       Sous ensemble des communes du Sud-Ouest Basse Terre: Deshaies - Basse Terre - Vieux-Habitants - Baillif - Gourbeyre - Pointe Noire  - Bouillante - Saint-Claude /
+         R10,R5,R27,R4,R9,R19,R6,R21/
+SRSEBT(R)       Sous ensemble des communes du Sud-Est Basse Terre: Capesterre-Belle-Eau - Trois-Rivières /
+         R7,R26/
+SRNBT(R)        Sous ensemble des communes du Nord Basse-Terre: Goyave - Saint-Rose - Lamentin - Petit-Bourg - Baie-Mahault /
+         R13,R25,R14,R17,R3/
+SRNGT(R)        Sous ensemble des communes du Centre-Nord Grande Terre: Anse-Bertrand - Petit-Canal - Port-Louis - Morne-à-l'eau - Les Abymes /
+         R2,R18,R20/
+SRCGT(R)        Sous ensemble des communes du Sud Grande-Terre: Abymes - Morne - Gosier /
+         R1,R15,R12/
+SREGT(R)        Sous ensemble des communes du Est Grande-Terre: Le Moule - Saint-François - Saint-Anne- Gosier /
+         R16,R22,R24/
+SRMG(R)         Sous ensemble des communes de Marie-Galante: Capesterre-de-M-G - Grand-Bourg - Saint-Louis /
+         R8,R11,R23/
+
+SRM(R)          Sous ensemble des communes non melonnières /
+         R0,R1,R3,R4,R5,R6,R7,R9,R10,R12,R13,R14,R17,R19,R21,R25,R26,R27/
+
+
+VAR_FAVDEFAV    Seuils des variables de calculs des indicateurs Tixier: bon si <= FAVORABLE - mauvais si >= DEFAVORABLE - proportionnel sinon /
+FAVORABLE             Favorable
+DEFAVORABLE           Defavorable
+/
+
+VAR_RTIXIER     Variables de calcul des indicateurs Tixier ayant des seuils favorables ou défavorables /
+SEUIL_SENS_W_ECOU     Difference entre angle de travail du sol et droite verticale avec angle d'écoulement de l'eau sur la parcelle (dir° flux de l'eau et droite verticale) à la parcelle
+SEUIL_COUV_SOL        Indice de couverture du sol (entre 0 et 100)
+SEUIL_PROF_SILLONS    Profondeur des sillons (en cm)
+SEUIL_COMPACTION      Sous indicateur dépendant de nb_engin_lourd et nbre_labours à l'activité (entre 0 et 10)
+SEUIL_RRP             Risque de Ruissellement potentiel à la parcelle (entre 0 et 10)
+SEUIL_PLUIE           Pluviométrie (en mm)
+SEUIL_PENTE           Pente de la parcelle (en %)
+SEUIL_RRR             Risque de Ruissellement réel
+
+SEUIL_DOSE_CULT       Dose de matière active utilisée par hectare de culture
+SEUIL_ADI_CULT        Dose maximale de matière active ingérable admise pour un humain (en mg par kg) par culture
+SEUIL_AQUATOX_CULT    Dose maximale de matière active ingérable admise pour poisson (en mg par litre)   par culture
+SEUIL_DT50_CULT       Durée au bout de laquelle la quantité de substance active est diminuée de moitié par dégradation naturelle (en jours)
+SEUIL_GUS_CULT        Constante de gustafson plus GUS fort plus dégradabilité faible (sans unité)
+
+SEUIL_RUI_PARC        Ruissellement par parcelle *******************************************  à sourcer - quelle unité en mm?
+SEUIL_DRAI_PARC       Drainage par parcelle ************************************************  à sourcer - quelle unité en mm?
+SEUIL_MIN_ADIAQUATOX  Valeur minimum entre ADI et AQUATOX
+/
+
+
+VAR_NUT         Variables descriptives des régimes nutritionnels /
+Q_TOT                 Quantité d'aliments (en tonnes)
+KCAL                  Quantité d'énergie (en kilos calories par tonne)
+LIP                   Quantité de lipides (en grammes par tonne)
+GLU                   Quantité de glucideglucides (en grammes par tonne)
+FIBRES                Quantité de fibres (en grammes par tonne)
+PROT                  Quantité de proteines (en grammes par tonne)
+CA                    Quantité de calcuim (en milligrammes par tonne)
+P                     Quantité de phosphore (en milligrammes par tonne)
+MG                    Quantité de magnésium (en milligrammes par tonne)
+K                     Quantité de potassium (en milligrammes par tonne)
+FE                    Quantité de fer (en milligrammes par tonne)
+/
+
+SVAR_NUT(VAR_NUT) Sous ensemble de variables descriptives des régimes nutritionnels /
+KCAL                  Quantité d'énergie (en kilos calories par tonne)
+GLU                   Quantité de glucideglucides (en grammes par tonne)
+PROT                  Quantité de proteines (en grammes par tonne)
+LIP                   Quantité de lipides (en grammes par tonne)
+/
+
+VAR_ALIM        Variables decriptives OMS de la population guadeloupéennes & des autres postes de fourniture des besoins /
+IND_MOY               Individu moyen
+H_0-4                 Homme entre 0 et 4 ans
+H_5-9                 Homme entre 5 et 9 ans
+H_10-19               Homme entre 10 et 19 ans
+H_20-29               Homme entre 20 et 29 ans
+H_30-59               Homme entre 30 et 59 ans
+H_60-SUP              Homme de plus de 60 ans
+F_0-4                 Femme entre 0 et 4 ans
+F_5-9                 Femme entre 5 et 9 ans
+F_10-19               Femme entre 10 et 19 ans
+F_20-29               Femme entre 20 et 29 ans
+F_30-59               Femme entre 30 et 59 ans
+F_60-SUP              Femme de plus de 60 ans
+PECHE                 Apports liès à la pêche
+IMPORT                Apports liés aux importations
+/
+;

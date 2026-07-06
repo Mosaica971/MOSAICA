@@ -1,0 +1,67 @@
+
+$title MOSAICA Modèle d'Offre Spatialisé des Agricultures Insulaires CAribeennes
+
+
+$offlisting
+
+*XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX FICHIERS GMS APPELES XXXXXXXXXXXXXXXXXXXXXXXXXX
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\DESCRIPTION_SETS.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\SETS.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\DONNEES.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\ENTREES.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\DECLAR_OPT.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\MODELE.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\OPTIMISATION.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\FICHES_ITK.GMS
+
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\MODELE\RESULTATS.GMS
+
+
+;
+
+*XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+$ontext
+
+L'ensemble des fichiers .GMS est stocké dans le dossier MODELE.
+
+Le fichier RACINE.GMS est le fichier à lancer pour générer une optimisation.
+Il contient le titre du modèle.
+C'est une "table des matières" qui permet d'appeler les morceaux de code découpés et stockés dans différents fichiers .gms
+
+Le fichier DESCRIPTION.GMS est un fichier d'information contenant la description des entrées (indices et données), leur source et de leurs modalités.
+
+Le fichier SETS.GMS contient les divers indices et sous ensembles d'indices utilisés pour la modélisation.
+Certains indices sont inclus sous forme de tables (.set) stockés dans le dossier SET
+
+Le fichier DONNEES.GMS contient les données exogènes utilisées par le modèle.
+Il peut s'agir de paramètres ou de tables.
+Certaines données sont incluses sous forme de tables (.txt) stockées dans le dossier TABLE.
+
+Le fichier ENTREES.GMS contient la déclaration et le calcul des paramètres initiaux du modèle.
+Ces paramètres ne sont pas inclus dans la boucle d'optimisation.
+
+Le fichier MODELE.GMS contient la déclaration des variables, et les équations de contraintes et de fonction objectif.
+
+Le fichier OPTIMISATION.GMS contient la boucle d'optimisation.
+La première partie est constituée de calculs de paramètres pré-optimisation.
+La seconde partie est la spécification de l'algorithme de résolution du modèle
+La troisième partie est constituée de calcul de paramètres post-optimisation.
+
+Le fichier SORTIES.GMS contient les calculs de paramètres post-optimisation non inclus dans la boucle d'optimisation.
+
+Le fichier RESULTATS.GMS contient la partie du programme qui permet d'éditer les résultats.
+La première partie regroupe la déclaration et la spécification des tableaux de sorties (.txt) stockés dans le dossier SORTIES.
+La seconde partie regroupe les DISPLAY, sorties ponctuelles de paramètres d'entrée et/ou de sortie dans le listing du programme.
+
+$offtext
+$onlisting

@@ -1,0 +1,487 @@
+
+$ontext
+NB_BOUCLE
+R et SR(R) Régions
+
+R          Commune          Code insee   Code postal
+R1         Les Abymes         97101        97139
+R2         Anse-Bertrand      97102        97121
+R3         Baie-Mahault       97103        97122
+R4         Baillif            97104        97123
+R5         Basse-Terre        97105        97100
+R6         Bouillante         97106        97125
+R7         Capesterre-B-E     97107        97130
+R8         Capesterre-de-M-G  97108        97140
+R9         Gourbeyre          97109        97113
+R10        Deshaies           97111        97126
+R11        Grand-Bourg        97112        97112
+R12        Le Gosier          97113        97190
+R13        Goyave             97114        97128
+R14        Lamentin           97115        97129
+R15        Morne-à-l'Eau      97116        97111
+R16        Le Moule           97117        97160
+R17        Petit-Bourg        97118        97170
+R18        Petit-Canal        97119        97131
+R19        Pointe-Noire       97121        97110
+R20        Port-Louis         97122        97117
+R21        Saint-Claude       97124        97120
+R22        Saint-François     97125        97118
+R23        Saint-Louis        97126        97180
+R24        Sainte-Anne        97128        97180
+R25        Sainte-Rose        97129        97115
+R26        Trois-Rivières     97132        97114
+R27        Vieux-Habitants    97134        97119
+
+
+
+K et SK(K) Opérations techniques
+
+ABREUVEMENT               OTK Abreuvement des animaux
+BACHE_MA_BIO              OTK Bachage plastique pour lutter contre les adventices
+BECHAGE                   OTK Béchage du sol
+BILLONAGE                 OTK Billonage du sol
+BUTTAGE_TO                OTK Buttage du sol pour des tommates
+BINAGE                    OTK Binage du sol
+CONDI_EXP_DEST_BA         OTK Conditionnement-expedition de la banane
+COND_EXP_ME               OTK Conditionnement-expedition du melon
+COND_TO                   OTK Conditionnement de la tomate
+COMPLEMENTATION_BOV       OTK Apport de compléments alimentaires pour les bovins dans les systèmes pâturages tournants
+COUPE_TRANSP_CHARG_BA     OTK Coupe-Chargement-Transport des bananes du champ au hangar
+CULTIVATEUR               OTK Passage de cultivateur sur le sol
+DEBROUSSAILLEUSE          OTK Passage de debroussailleuse pour desherbage dans l'ITK SMART
+DECHAUMAGE                OTK Déchaumage du sol
+DEFANAGE                  OTK Défanage du sol
+DEGOURMANDAGE             OTK Dégourmandage des plants
+DEMONTAGE_TO              OTK Démontage des tuteurs et irrigation des tomates
+DEPLACEMENT_PIQ           OTK Déplacement des animaux au piquet
+DEPLACEMENT_TOUR          OTK Déplacement des animaux en paturage tourant
+DESHERB_MANUEL            OTK Désherbage manuel
+DESTRUCT_PREC             OTK Destruction du précédent cultural
+DETUTEURAGE               OTK Retrait des tuteurs d'igname
+DRAINAGE_MANU             OTK Mise en place manuelle du drainage
+ENGAINAGE                 OTK Engainage
+ENLEVEMENT_GOUT           OTK Enlèvement de l'irrigation en goutte à goutte
+EPAND_MANU_ENG_AN         OTK Epandage manuel d'engrais sur ananas
+EPAND_MANU_ENG_BA         OTK Epandage manuel d'engrais sur banane
+EPAND_MANU_ENG_AG         OTK Epandage manuel d'engrais sur agrumes
+EPAND_MANU_ENG_CONC       OTK Epandage manuel d'engrais sur concombre
+EPAND_MANU_ENG_IG         OTK Epandage manuel d'engrais sur ignames
+EPAND_MANU_ENG_TO         OTK Epandage manuel d'engrais sur tomate
+EPAND_MANU_AMEND          OTK Epandage manuel d'amendement
+EPAND_MECA_AMEND          OTK Epandage mécanique d'amendement
+EPAND_MECA_COMPOST        OTK Epandage mécanique du compost dans l'ITK SMART
+EPISTILLAGE               OTK Epistillage des régimes
+FACONS_CONC               OTK Façons culturales diverses sur concombre
+FICELAGE                  OTK Ficelage
+GRIFFAGE_PLANT            OTK Griffage du sol à la plantation pour deherbage manuel dans l'ITK SMART
+GRIFFAGE                  OTK Griffage du sol
+HAUBANAGE                 OTK Haubanage
+HERSAGE                   OTK Hersage du sol
+JALONNAGE                 OTK Jalonnage
+LABOUR                    OTK Labour du sol
+MARQUAGE                  OTK Marquage des régimes
+OEIL_EFFEUIL_RECOUR       OTK Oeilletonnage - effeuillage - recourage
+PARAGE_BC                 OTK Parage des plants de banane plantain
+PLANTATION_AUB            OTK Plantation des aubergines
+PLANTATION_CIVES          OTK Plantation des cives
+PLANTATION_HAR            OTK Plantation des haricots
+PLANTATION_GIRA           OTK Plantation des giraumons
+PLANTATION_BA             OTK Plantation des bananes
+PLANTATION_AN             OTK Plantation des ananas
+PLANTATION_AG             OTK Plantation des agrumes
+PLANTATION_CONC           OTK Plantation des concombres
+PLANTATION_CS             OTK Plantation de la canne à sucre
+PLANTATION_IG_TUT         OTK Plantation des ignames tuteurés
+PLANTATION_IG_PLA         OTK Plantation des ignames à plat
+PLANTATION_ME             OTK Plantation des melons
+PLANTATION_TO             OTK Plantation des tomates
+POSE_PLASTIQUE            OTK Pose de mulch plastique
+POSE_IRRIG                OTK Pose de l'irriguation
+PREPA_MANU_SOL            OTK Préparation manuelle du sol
+PREPA_MANU_SOL_CIVES      OTK Préparation manuelle du sol pour les cives
+PULVE_MANU_PHYTO          OTK Pulvérisation manuelle de produits phytosanitaires
+PULVE_MECA_ENG_PHYTO      OTK Pulvérisation écanique d'engrais et de produits phytosanitaires
+PULVE_MECA_PHYTO_PLANT    OTK Pulvérisation manuelle de produits phytosanitaires à la plantation
+PULVERISEUR               OTK Pulvériseur du sol
+RECOLTE_BC                OTK Récolte des bananes créoles
+CONDI_BA_INT              OTK Récolte et conditionnement des bananes intensives
+CONDI_BA_SINT             OTK Récolte et conditionnement des bananes semi-intensives
+CONDI_BA_PER              OTK Récolte et conditionnement des bananes perennes
+CONDI_BA_IRR              OTK Récolte et conditionnement des bananes irriguées
+RECOLTE_AG                OTK Récolte des agrumes
+RECOLTE_VE                OTK Récolte des fruits du verger
+RECOLTE_AN                OTK Récolte des ananas
+RECOLTE_CIVES             OTK Récolte des cives
+RECOLTE_CONC              OTK Récolte des concombres
+RECOLTE_CS_BT             OTK Récolte de la canne à sucre en Basse-Terre
+RECOLTE_CSCGTNONIRRIG     OTK Récolte de la canne à sucre non irriguée en Centre Grande-Terre
+RECOLTE_CSCGTIRRIG        OTK Récolte de la canne à sucre irriguée en Centre Grande-Terre
+RECOLTE_CSEGTNONIRRIG     OTK Récolte de la canne à sucre non irriguée en Est Grande-Terre
+RECOLTE_CSEGTIRRIG        OTK Récolte de la canne à sucre irriguée en Est Grande-Terre
+RECOLTE_CSNGTNONIRRIG     OTK Récolte de la canne à sucre non irriguée en Nord Grande-Terre
+RECOLTE_CSNGTIRRIG        OTK Récolte de la canne à sucre irriguée en Nord Grande-Terre
+RECOLTE_CSMG              OTK Récolte de la canne à sucre à Marie-Galante
+RECOLTE_SEMIM             OTK Récolte de la canne à sucre semi mécanisée
+RECOLTE_CSROTBA           OTK Récolte de la canne à sucre en rotation avec la banane
+RECOLTE_IG_TUT            OTK Récolte des ignames tuteurées
+RECOLTE_IG_PLA            OTK Récolte des ignames à plat
+RECOLTE_ME                OTK Récolte des melons
+RECOLTE_TO                OTK Récolte des tomates
+RECCOURAGE_CS             OTK Recourage de la canne à sucre
+RECCOURAGE_TO             OTK Recourage des tomates
+ROME_PLOW                 OTK Passage de rom-plow sur le sol
+ROTOBECHE                 OTK Passage de rotobèche sur le sol
+SAILLIS                   OTK Opération de saillie des animaux
+SARCLAGE_MAN_BC           OTK Sarclage manuel de la banane plantain
+SEMIS_VP                  OTK Semi des vitro-plants
+SILLONNAGE                OTK Sillonnage du sol
+SOUS_SOLAGE               OTK Sous-solage du sol
+SUIVI_PIQ                 OTK Opération de suivi des animaux au piquet
+SURVEILLANCE              OTK Surveillance de la culture
+TAILLE_AG                 OTK Taille des agrumes
+TAILLE_ME                 OTK Taille des plants de melon
+TAILLE_TO                 OTK Tailles des pieds de tomate
+TRAITEMENT_BOV            OTK Traitements des bovins
+TRANSPORT_REJETS_BC       OTK Transport des rejets de banane plantain
+TROU_MANU                 OTK Trouaison manuelle du sol
+TUTEURAGE_IG              OTK Tuteurage des ignames
+TUTEURAGE_TO              OTK Tuteurage des tomates
+
+DAP_18_46                 INTRANT Fertilisation
+KNO3                      INTRANT Fertilisation Nitrate de potasse
+K2SO4                     INTRANT Fertilisation Sulfate de potassium
+08_20_20_CS               INTRANT Fertilisation de la canne à sucre
+08_20_20_IG               INTRANT Fertilisation des ignames
+08_20_20                  INTRANT Fertilisation
+11_11_33                  INTRANT Fertilisation
+11_11_33_MAR              INTRANT Fertilisation du maraichage
+11_11_33_CONC             INTRANT Fertilisation des concombres
+12_06_20                  INTRANT Fertilisation
+14_04_25_BA_INT           INTRANT Fertilisation des bananes intensives
+14_04_25_BA_SINT          INTRANT Fertilisation des bananes semi-intensives
+14_04_25_BA_PER           INTRANT Fertilisation des bananes perennes
+14_04_25_BA_IRR           INTRANT Fertilisation des bananes irriguées
+14_07_21                  INTRANT Fertilisation
+15_07_21                  INTRANT Fertilisation
+15_11_22                  INTRANT Fertilisation
+18_09_28                  INTRANT Fertilisation
+FERTI_MA_MOBIO            INTRANT Fertilisation du maraichage bio en monospécifique (en €/ha)
+FERTI_MA_PLBIO            INTRANT Fertilisation du maraichage bio en plurispécifique (en €/ha)
+ALIETTE_FLASH_AG          INTRANT Fongicide pour agrumes
+ALIETTE_FLASH             INTRANT Fongicide
+AMENDEMENT                INTRANT Amendement calco-magnésien
+ASULOX                    INTRANT Herbicide
+BASTA_F1                  INTRANT Herbicide
+BOUILLIE_BORD             INTRANT Fongicide
+COSMIC                    INTRANT Herbicide
+DECIS_PROTECH             INTRANT Insecticide
+DICOPUR_600               INTRANT Herbicide
+DITHANE_M_45              INTRANT Fongicide
+DIPEL_DF                  INTRANT Insecticide
+DURSBAN_5G                INTRANT Insecticide
+EAU_IRRIG                 INTRANT Eau d'irrigation
+ETHREL                    INTRANT Régulateur de croissance - initiation florale
+EUPHYTANE_GOLD            INTRANT Insecticide
+FERTIGWA                  INTRANT Fertilisation amendement organique
+FUMIER                    INTRANT Fertilisation amendement organique
+FUSILADE_MAX_TO           INTRANT Herbicide pour les tomates
+FUSILADE_MAX_CONC         INTRANT Herbicide pour les concombres
+GRESIL                    INTRANT Désinfectant
+HORTIMEC                  INTRANT Insecticide
+HORTIMEC_TO               INTRANT Insecticide pour les tomates
+KANIELTRA_25FE            INTRANT Fertilisation
+KCL                       INTRANT Fertilisation Chlorure de potassium
+MAT_IRRIG                 INTRANT Materiel d'irrigation
+MERLIN                    INTRANT Herbicide
+NEMATHORIN                INTRANT Nématicide
+NIMROD                    INTRANT Fongicide
+OPAL_DICAMBA              INTRANT Herbicide
+ORGANOR                   INTRANT Fertilisation amendement organique
+OVIPHYT                   INTRANT Insecticide
+PILOT                     INTRANT Herbicide
+PLANTS_AUB                INTRANT Plants d'aubergines
+PLANTS_AG                 INTRANT Plants de d'agrumes - citrus
+PLANTS_CIVES              INTRANT Plants de cives
+PLANTS_CONC               INTRANT Plants de concombres
+PLANTS_CS                 INTRANT Plants de canne à sucre
+PLANTS_HAR                INTRANT Plants de haricots
+PLANTS_GIRA               INTRANT Plants de giraumons
+PLANTS_IG                 INTRANT Plants d'ignames
+PLANTS_TO                 INTRANT Plants de tomates
+PLASTIQUE                 INTRANT Bache plastique pour le mulch
+PLENUM_50_WG              INTRANT Insecticide
+PROWL_400                 INTRANT Herbicide
+PROWL_400_TO              INTRANT Herbicide pour les tomates
+ROUND_UP_FLASH            INTRANT Herbicide
+ROUND_UP_FLASH_AUB        INTRANT Herbicide pour les aubergines
+SEMENCES_ME               INTRANT Semences de melon
+SUPREME                   INTRANT Insecticide
+TEPPEKI                   INTRANT Insecticide
+TOUCHDOWN_EV              INTRANT Herbicide
+TRAITEMENTBOVPRODUIT      INTRANT Antiparasitaire (TAKTIK)
+TRIMANOC_DG               INTRANT Fongicide
+TUTEURS_IG                INTRANT Tuteurs pour les ignames
+UREE                      INTRANT Fertilisation
+VERTIMEC_AG               INTRANT Insecticide pour les agrumes et arbustes
+VERTIMEC                  INTRANT Insecticide
+VITROPLANTS               INTRANT Vitroplants
+PROC_BIO_BOVIN            PROCESSUS BIOLOGIQUE comprend la fermentation entérique + emissions N excrétion et CH4 des déjections voir feuille "Emissions de CO2" feuille BOVIN dans DOCUMENTS SOUS MOSAICA
+
+
+C et SC(C) cultures
+
+AG            Agrumes (1)
+AN            Ananas (2)
+AN_NU         Ananas: systèmes technique sans paillage plastique
+AN_PA         Ananas: systèmes technique avec paillage plastique
+BA            Banane fruit (4)
+BA_INT        Banane: système technique intensif en plaine
+BA_IRR        Banane: système technique irrigué
+BA_PER        Banane: système technique extensif en montange
+BA_SINT       Banane: système technique intensif en montagne
+BC            Banane plantain (3)
+BC_BT         Banane plantain Basse-Terre
+BC_GTMG       Banane plantain Grande-Terre & Marie-Galante
+
+CF_NBT_NISM   Canne fibre: Nord Basse-Terre, non irrigué, récolte semi-mécanisée
+CF_NBT_NIM    Canne fibre: Nord Basse-Terre, non irrigué, récolte mécanisée
+CF_SBT_NISM   Canne fibre: Sud Basse-Terre, non irrigué, récolte semi-mécanisée
+CF_SBT_NIM    Canne fibre: Nord Basse-Terre, non irrigué, récolte mécanisée
+CF_NGT_NISM   Canne fibre: Nord Grande-Terre, non irrigué, récolte semi-mécanisée
+CF_NGT_NIM    Canne fibre: Nord Grande-Terre, non irrigué, récolte mécanisée
+CF_CGT_NISM   Canne fibre: Centre Grande-Terre, non irrigué, récolte semi-mécanisée
+CF_CGT_NIM    Canne fibre: Centre Grande-Terre, non irrigué, récolte mécanisée
+CF_EGT_NISM   Canne fibre: Est Grande-Terre, non irrigué, récolte semi-mécanisée
+CF_EGT_NIM    Canne fibre: Est Grande-Terre, non irrigué, récolte mécanisée
+
+CS            Canne à sucre (6)
+CS_BT_NISM    Canne à sucre: Basse-Terre, non irrigué, récolte semi-mécanisée
+CS_BT_NIM     Canne à sucre: Basse-Terre, non irrigué, récolte mécanisée
+CS_BT_IM      Canne à sucre: Basse-Terre, irrigué, récolte mécanisée
+CS_SBT_NISM   Canne à sucre: Sud-Est Basse-Terre, non irrigué, récolte semi-mécanisée
+CS_SBT_NIM    Canne à sucre: Sud-Est Basse-Terre, non irrigué, récolte mécanisée
+CS_SBT_IM     Canne à sucre: Sud-Est Basse-Terre, irrigué, récolte mécanisée
+CS_NGT_NISM   Canne à sucre: Nord Grande-Terre, non irrigué, récolte semi-mécanisée
+CS_NGT_NIM    Canne à sucre: Nord Grande-Terre, non irrigué, récolte mécanisée
+CS_NGT_IM     Canne à sucre: Nord Grande-Terre, irrigué, récolte mécanisée
+CS_CGT_NISM   Canne à sucre: Centre Grande-Terre, non irrigué, récolte semi-mécanisée
+CS_CGT_NIM    Canne à sucre: Centre Grande-Terre, non irrigué, récolte mécanisée
+CS_CGT_IM     Canne à sucre: Centre Grande-Terre, irrigué, récolte mécanisée
+CS_EGT_NISM   Canne à sucre: Est Grande-Terre, non irrigué, récolte semi-mécanisée
+CS_EGT_NIM    Canne à sucre: Est Grande-Terre, non irrigué, récolte mécanisée
+CS_EGT_IM     Canne à sucre: Est Grande-Terre, irrigué, récolte mécanisée
+CS_MG_NISM    Canne à sucre: Marie-Galante, non irrigué, récolte semi-mécanisée
+CS_MG_NIM     Canne à sucre: Marie-Galante, non irrigué, récolte mécanisée
+CS_MG_IM      Canne à sucre: Marie-Galante, irrigué, récolte mécanisée
+
+IG            Igname et tubercules tropicaux  (18)
+IG_PLA        Igname à plat
+IG_TUT        Igname tuteuré
+JA            Jachère (10)
+MA            Maraîchage de plein champs hors tubercules tropicaux (8,9,11,12,15)
+MA_TO_CHOU_JA Maraîchage:
+MA_PLBIO      Maraichage biologique plurispécifique
+MA_MOBIO      Maraichage biologique monospécifique
+MA_ROTA       Maraichage en rotation
+ME            Melon (13)
+NC            Non cultivé(14)
+PN            Prairies & savanes (7,16,17)
+PN_PIQ        Prairies naturelles avec elevage au piquet
+PN_TOUR       Prairies naturelles avec paturage tournant
+TH            Tomate
+VE            Vergers hors agrumes (5,19,20)
+VE_BTGT       Vergers: Basse-Terre & Grande-Terre
+VE_PLUIE      Vergers: Zones très pluvieuses
+
+0 =Non renseigné
+1 =Agrumes
+2 =Ananas
+3 =Banane créole
+4 =Banane Export
+5 =Café/Cacao
+6 =Canne à sucre
+7 =Cultures fourragères
+8 =Horticulture ornementale de plein champ
+9 =Horticulture ornementale sous abri
+10=Jachère
+11=Maraichage de plein champ
+12=Maraichage sous abri
+13=Melon
+14=Non cultivé
+15=Pastèque
+16=Prairie permanente
+17=Prairie temporaire
+18=Tubercules tropicaux
+19=Vanille et PPAM
+20=Vergers
+
+
+
+S et SS(S)  sols
+VERTISOL      Sols de la zone 1 Grande-Terre & Marie-Galante de MORGWANIK
+FERRALSOL     Sols de la zone 2 Nord Basse-Terre de MORGWANIK
+ANDOSOL       Sols de la zone 3 Souffrière de MORGWANIK
+NITISOL       Sols de la zone 4 Sud Basse-Terre de MORGWANIK
+AUTRES        Sols de la zone 5 Autres sols
+
+
+
+VAR_P      Variables descriptives des parcelles
+
+
+cult_2012       RPG 2012                Culture présente sur la parcelle en 2012
+cult_2013       RPG 2013                Culture présente sur la parcelle en 2013
+cult_2014       RPG 2014                Culture présente sur la parcelle en 2014
+cult_2015       RPG 2015                Culture présente sur la parcelle en 2015
+cult_2016       RPG 2016                Culture présente sur la parcelle en 2016
+cult_2017       RPG 2017                Culture présente sur la parcelle en 2017
+
+ILE             ARCGIS                  Si parcelles sur 1=Basse Terre, 2=Grande Terre, ou 3=Marie Galante
+REGION          ARCGIS                  CGT (1) EGT (2), NGT(3), NBT(4), SEBT(5), SOBT(6), MG(7)
+COMMUNE         ARCGIS                  Commune de localisation de la parcelle
+CULT_MORG       ARCGIS                  1=canne, 2=banane, 3=savane, 4=diversififation
+
+SURF_HA         ARCGIS                  Surface de la parcelle en hectare sur la parcelle en 2010 (en ha)
+PENTE           ARCGIS                  Pente moyenne de la parcelle (en degrés)
+ALTITUDE        ARCGIS                  Altitude moyenne de la parcelle (en mètres)
+TYPE_SOL        Carte des sols          Type de sol de la parcelle (Vertisols=1,Sols ferralitiques=2,Andosols=3,Nitisols=4,Autres=5)
+SOL_COURT       Carte des sols          1: Sols squelettiques et affleurements calcaires 0: autres types de sols
+PLUVIO_PARC     ATLAS Guad + Raster_PC  Pluviometrie moyenne annuelle (en mm)
+IRRIG_PARC      Carte reseau irrigation Presence/Absence d'irrigation (0=pas d'irrigation, 1=irrigation)
+RISQUE_CLD      Carte YMC               Niveau de risque de présence de chlordécone  (1=trés fort, 2=fort, 3=moyen, 4=faible, 5=autre)
+CONFORM         ARCGIS                  Indice de conformation des parcelles: si > 1500 alors CS interdit car parcelle très "biscornue" (= périmètre / surface)
+GFA_EXPL        SAFER                   Appartenance ou non à un GFA (0=pas d'appartenance à un GFA, 1=GFA)
+ZNIEFF1T        PNG                     Appartenance ou non à une zone ZNIEFF1 (0=pas d'appartenance; 1=zone ZNIEFF1)
+ZNIEFF2T        PNG                     Appartenance ou non à une zone ZNIEFF2 (0=pas d'appartenance; 1=zone ZNIEFF2)
+SENS_W_ECOU     PC                      Angle entre le sens de travail du sol et sens d'écoulement de l'eau (ppour calcul de R_ERO
+RUI_PARC        ATLAS Guad + Raster_PC  Quantité moyenne annuelle d'eau ruisselée (en mm)
+DRAI_PARC       ATLAS Guad + Raster_PC  Quantité moyenne annuelle d'eau drainée (en mm)
+
+NB_PARC         Loic                    Nombre de parcelles sur l'exploitation
+PART_C_INIT     Jorge                   Part de carbone initial dans le sol par parcelle (en %).
+CLD_KG_HA       Jorge                   Quantité moyenne de CLD par parcelle (en kg par ha)
+                                        Pour le moment, moyenne selon le type de sol, mais à individualiser en fonction des données d'analyses
+ZONE_MORGWANIK  Jorge                   Zone d'appartenance à MORGWANIK par parcelle (Vertisol=1, Ferralsol=2, Andosol=3, Nitisol=4, Autres sols=5)
+                                        Pour le moment, Vertisols = 2.7%, Sols ferralitiques = 2.08%, Andosols = 4.37%, Nitisols = 2.04%, Autres Sols = 2%.
+
+
+
+
+
+VAR_OTK    Variables decriptives des opérations techniques (GES HOUDART_TOX_SCORE HOUDART_SOLUB_SCORE HARMFUL_FACTOR) à vérifier
+/
+
+DOSE                Dose utilisée de la variable
+PRIX_UNIT           Prix par unité de variable
+NATURE              Nature de la variable (0=intrant - 1=opération technique)
+AMORTI              Amortissement des opérations sur plusieurs cycles (0=non - 1=oui)
+MO_EXPL             Main d'oeuvre utilisée (en heures)
+GES                 Emission de GES en équivalent carbone(en tonne par an)
+AZOTE               Quantité d'azote apporté (en kg de N par an)
+IFT                 Nombre de traitements phytosanitaires appliqués (en nbre par an)
+DLRAT               Dose létale pour tuer 50% de rats (en grammes) (PPDB Mammifères - Toxicité aiguë par voie orale LD50 (mg kg-1))
+SOLUBILITE          Solubilité du produit phyto (en mg par litre) (PPDB Solubilité - dans l'eau à 20oC (mg l-1))
+QMA                 Quantite de matiere active par otk (en kg)
+HOUDART_TOX_SCORE   Note qualitative de toxicité (1 a 5)
+HOUDART_SOLUB_SCORE Note qualitative de solubilité (1 a 5)
+HARMFUL_FACTOR      Note qualitative de dangerosité (1 a 5)
+ADI                 Dose maximale de matière active ingérable admise pour un humain (en mg par kg)     (PPDB ARfD - Acute Reference Dose (mg kg-1 de poids corporel jours-1))
+AQUATOX             Dose maximale de matière active ingérable admise pour poisson (en mg par litre)    (PPDB Poissons - Toxicité aiguë 96 heure LC50 (mg l-1))
+DT50                Durée au bout de laquelle la quantité de substance active est diminuée de moitié par dégradation naturelle (en jours)   (PPDB Soil degradation (jours) (aerobic) - DT50 (au champ))
+KOC                 Coeff de partage carbone organique-eau. Aptitude de la matière active à être adsorbée sur la matière organique du sol - pour le calcul du GUS (en cm3 par g) (PPDB Linéaire Koc)
+GUS                 Constante de gustafson - Groundwater Ubiquity Score plus GUS fort plus dégradabilité faible (sans unité) (PPDB Index GUS)  GUS = log10 (DT50) x [4 - log10 (Koc)]
+BIRD                Dose maximale de matière active ingérable admise pour un oiseau (en mg par kg) (PPDB Oiseaux - Toxicité aiguë par voie orale LD50 (mg kg-1))
+HUM                 Taux d'humidité (en %)
+CARB                Part de carbone dans l'amandement organique (en %)
+FHUM                Facteur d'humefaction , c'est à dire la part de C qui rentre dans la MO du sol(en %)
+/
+
+
+
+VAR_C    Variables decriptives des cultures
+/
+SURF_PARC_MIN       Surface minimum de la culture (en ha)
+SURF_PARC_MAX       Surface maximum de la culture (en ha)
+ALTI_MIN            Altitude minimum de la culture (en mètres)
+ALTI_MAX            Altitude maximum de la culture (en mètres)
+PENTE_MIN           Pente minimum de la culture (en %)
+PENTE_MAX           Pente maximum de la culture (en %)
+PLUVIO_MIN          Pluviométrie minimum de la culture (en millimètres)
+PLUVIO_MAX          Pluviométrie maximum de la culture (en millimètres)
+CLD                 Indicateur de sensibilité de la culture à la Chlordécone  4: plante non sensible, 3: plante peu sensible, 2: plante moyenne sensible, 1: plante très sensible
+MW                  Quantité d'électricité pouvant être produite avec une tonne de biomasse (
+COUV_SOL
+PROF_SILLONS
+BESOIN_EAU_01
+BESOIN_EAU_02
+BESOIN_EAU_03
+BESOIN_EAU_04
+BESOIN_EAU_05
+BESOIN_EAU_06
+BESOIN_EAU_07
+BESOIN_EAU_08
+BESOIN_EAU_09
+BESOIN_EAU_10
+BESOIN_EAU_11
+BESOIN_EAU_12
+LONG_RAC
+
+KCROP               KCROP: corrfm dans la feuille "BD et calculs résidus" dans Morgwanik : coefficient prenant en compte la mineralisation liée au système de culture.
+                    Données inconnues pour AG, CT, NC, PN, PN_PIQ, PN_TOUR, VE, VE_BTGT, VE_PLUIE. Pour le moment, valeur moyenne à 0.9
+HRES                HRES:  fhum dans la feuille "BD et calculs résidus" dans Morgwanik : coefficient prenance en compte l'humification des résidus des systèmes de culture.
+                    Données inconnues pour AG, CT, NC, PN, PN_PIQ, PN_TOUR, VE, VE_BTGT, VE_PLUIE. Pour le moment, valeur moyenne à 0.3
+CARB                Pourcentage de carbone dans les résidus.
+                    Données inconnues pour AG, CT, NC, PN, PN_PIQ, PN_TOUR, VE, VE_BTGT, VE_PLUIE. Pour le moment, valeur moyenne à 0.4
+RAC                 Pourcentage de racines / rendement pour le calcul de la biomasse racinaire.
+                    Données inconnues pour AG, CT, NC, PN, PN_PIQ, PN_TOUR, VE, VE_BTGT, VE_PLUIE. Pour le moment, valeur moyenne à 0.1
+BIOM_AER            Biomasse aerienne des résidus de cultures pour MORGWANIK. Les biomasses aeriennes peuvent être calculées en fonction du rendement
+                    pour la banane ( = RDT / 4.5), la canne ( = RDT*0.11+8.16) et la canne fibre ( = RDT_MS_TOT * 0.025 + (1 - 0.89)*RDT_MS_TOT ) (0.89 est la fraction récoltée de la canne fibre)
+                    Tous les maraichages sont considérés comme maraichage fruit (maraichage Feuille à 2 tonnes de MS ou de MF???)
+                    Données inconnues pour AG, CT, NC, PN, PN_PIQ, PN_TOUR, VE, VE_BTGT, VE_PLUIE. Pour le moment, valeur  à 6
+
+*variables culture conservées dans Data_Cult_Temp pour usage posterieur possible
+DENSITE             Densité de plantation en plants par ha
+ALIM                Indicateur de culture alimentaire pour marché locale (=1 si alimentaire pour le marché local, =0 sinon)
+************
+
+
+
+VAR_FAVDEFAV   Seuils des variables de calculs des indicateurs Tixier: bon si <= FAVORABLE - mauvais si >= DEFAVORABLE - proportionnel sinon /
+FAVORABLE           Favorable
+DEFAVORABLE         Defavorable
+/
+
+VAR_RTIXIER    Variables de calcul des indicateurs Tixier ayant des seuils favorables ou défavorables /
+SEUIL_SENS_W_ECOU     Difference entre angle de travail du sol et droite verticale avec angle d'écoulement de l'eau sur la parcelle (dir° flux de l'eau et droite verticale) à la parcelle
+SEUIL_COUV_SOL        Indice de couverture du sol (entre 0 et 100)
+SEUIL_PROF_SILLONS    Profondeur des sillons (en cm)
+
+SEUIL_RRP             Risque de Ruissellement potentiel à la parcelle (entre 0 et 10)
+SEUIL_PLUIE           Pluviométrie (en mm)
+SEUIL_PENTE           Pente de la parcelle (en %)
+SEUIL_RRR             Risque de Ruissellement réel
+
+SEUIL_DOSE_CULT       Dose de matière active utilisée par hectare de culture
+SEUIL_ADI_CULT        Dose maximale de matière active ingérable admise pour un humain (en mg par kg) par culture
+SEUIL_AQUATOX_CULT    Dose maximale de matière active ingérable admise pour poisson (en mg par litre)   par culture
+SEUIL_DT50_CULT       Durée au bout de laquelle la quantité de substance active est diminuée de moitié par dégradation naturelle (en jours)
+SEUIL_GUS_CULT        Constante de gustafson plus GUS fort plus dégradabilité faible (sans unité)
+
+SEUIL_RUI_PARC        Ruissellement par parcelle *******************************************  à sourcer - quelle unité en mm?
+SEUIL_DRAI_PARC       Drainage par parcelle ************************************************  à sourcer - quelle unité en mm?
+SEUIL_MIN_ADIAQUATOX  Valeur minimum entre ADI et AQUATOX
+
+
+
+VAR_SOL         Variables decriptives des sols pour calculs MORGWANIK
+
+KAER            coefficient de minéralisation du carbone du sols (en % du cabone minéralisé par an)
+DENS            densité du sol
+PROF            profondeur du sol
+PART_C_INIT     part initiale de carbone dans le sol
+KOC             Coefficient de partage eau - matière organique de la CLD
+/
+
+
+
+$offtext

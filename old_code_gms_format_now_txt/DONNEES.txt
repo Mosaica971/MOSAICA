@@ -1,0 +1,323 @@
+
+PARAMETER
+
+PROP_CF      Proportion maximum de la surface des exploitations en Canne fibre /
+0.3/
+
+COEFF_C_CO2  Coefficient de conversion du Carbone en CO2 /
+0.272/
+
+PROP_BA_JA   Coefficient de proportion de jachère dans les exploitations bananières: environ 1 an de jachère et 5 ans de banane de banane /
+0.2/
+
+MIN_CS_GFA   Proportion minimum de surface de canne à sucre dans un GFA (uniquement appliquée sur les surfaces issues de la réforme foncière) /
+0.6/
+
+MAX_AGRO_AN  Maximum agronomique de surface ananas dans une exploitation /
+0.75/
+
+MAX_AGRO_IG  Maximum agronomique de surface igname dans une exploitation /
+0.66/
+
+QUOTA_BA_MAX  Quota de banane export subventionné par l'union européenne (en tonnes) /
+77877/
+
+QUOTA_ME_MAX  Volume maximum de melon exportable (en tonnes) /
+80000/
+*ce volume de melon maximum est déterminé à partir de la production RPG de ......ha pour un rendement de ..t/ha, soit un tonnage 2010 de ....t
+
+QUOTA_AN_MAX  Volume maximum d'ananas à produire (en tonnes) /
+70000/
+*7000 à 14000 ce volume de melon maximum est déterminé à partir de la production RPG de ......ha pour un rendement de ..t/ha, soit un tonnage 2010 de ....t
+
+QUOTA_IG_MAX  Volume maximum d'igname à produire (en tonnes) /
+50000/
+* 4600 à 9200 tonnes d'igname à + de 10000Ce volume d'igname correspond grossièrement à 1600 tonnes d'importations + la production locale (300ha d'IG à 10T de rendement)  ::::: => 4600
+
+QUOTA_BC_MAX  Volume maximum de banane plantain à produire (en tonnes) /
+40000/
+* 4000 à 8000 Ce volume d'igname correspond grossièrement à 140 tonnes d'importations + la production locale (350ha de plantain à 18T de rendement) ::: fixé à 6440
+
+QUOTA_SUCRE_MAX     Volume max de canne en tonnes /
+107000/
+*ce volume de Canne maximum est déterminé à partir de la production RPG de ......ha pour un rendement de ..t/ha, soit un tonnage 2010 de ....t
+*cette donnée est importante à caler, car elle contraint fortement la production d'ananas - initialement 5000T fixé à MODIFIER
+
+
+QUOTA_BC_MIN     Volume minimum de banane plantain à produire = production 2017 BC_BT+BC_GTMG 4057/
+*0/
+4056   /
+QUOTA_IG_MIN     Volume minimum d'ignames à produire = production 2017 IG_PLA+IG_TUT 5125/
+*0/
+5125   /
+QUOTA_MA_MIN     Volume minimum de maraichage à produire = production 2017 MA_ROTA+MA_TO_CO_JA 26404/
+*0/
+26404  /
+QUOTA_AN_MIN     Volume minimum d'ananas à produire = production 2017 AN_NU+AN_PA 2322/
+*0/
+2322   /
+QUOTA_PLU_MIN    Volume minimum d'arboriculture à produire = production 2017 VE_BTGT+VE_PLUIE+AG 5879/
+*0/
+5879   /
+QUOTA_ME_MIN     Volume minimum de melon à produire = production 2017 ME (2000t export + reste autoconsommé) 4135/
+*0/
+4135/
+
+QUOTA_PN_PIQ_MIN Surface minimum de paturage naturel à utiliser = surface 2017 PN_PIQ 6096/
+*0/
+6096   /
+
+
+QUOTA_LEG Volume objectif de production de légumes dans scénario S1=doublement de la production actuelle MA+IG /  63059
+/
+* S1   =63059/  LEG=MA+IG
+* S2   =42528/  LEG=MA+IG
+* S3   =95540/  LEG=MA+IG
+* S3bis=60898/  LEG=MA
+
+QUOTA_TUB Volume objectif de production de légumes dans scénario S1=doublement de la production actuelle MA+IG /  0
+/
+* S1   =0/
+* S2   =0/
+* S3   =0/
+* S3bis=50849/
+
+
+QUOTA_FRU  Volume objectif de production de fruits dans scénario S1=doublement de la production actuelle ABRO+BC+AN+ME / 30789
+/
+* S1   =30789/
+* S2   =18767/
+* S3   =34284/
+* S3bis=20250/
+
+QUOTA_PAT Surface objectif de production de ruminants dans le scénario S1=doublement des surfaces en paturâge/  12193
+/
+* S1   =12193/
+* S2   =3965/
+* S3   =16263/
+* S3bis=16895/
+
+$ontext
+S3        Seuil (t/an)
+maraichage    60898
+Igname        50849
+fruits        20250
+Bovin         16895
+$offtext
+
+
+Q_CF_MIN  Quantité maximum de canne fibre necessaire au fonctionnement d'une usine de 12MWe
+/0/
+*/37000/
+*/150216/
+* /200000/
+*/150216/
+*/107297/
+*/53648/
+*/15022/
+*/10730/
+
+
+PART_PLUVIO_01 Part de la pluviométrie annuelle pour le mois de janvier   /0.0743/
+PART_PLUVIO_02 Part de la pluviométrie annuelle pour le mois de février   /0.0378/
+PART_PLUVIO_03 Part de la pluviométrie annuelle pour le mois de mars      /0.0464/
+PART_PLUVIO_04 Part de la pluviométrie annuelle pour le mois de avril     /0.0906/
+PART_PLUVIO_05 Part de la pluviométrie annuelle pour le mois de mai       /0.1034/
+PART_PLUVIO_06 Part de la pluviométrie annuelle pour le mois de juin      /0.0681/
+PART_PLUVIO_07 Part de la pluviométrie annuelle pour le mois de juillet   /0.0816/
+PART_PLUVIO_08 Part de la pluviométrie annuelle pour le mois de août      /0.1135/
+PART_PLUVIO_09 Part de la pluviométrie annuelle pour le mois de septembre /0.0957/
+PART_PLUVIO_10 Part de la pluviométrie annuelle pour le mois de octobre   /0.1169/
+PART_PLUVIO_11 Part de la pluviométrie annuelle pour le mois de novembre  /0.0986/
+PART_PLUVIO_12 Part de la pluviométrie annuelle pour le mois de décembre  /0.0731/
+
+
+AN_SURF_EXPL_MIN Surface minimum d'exploitation necessaire à la pratique de l'ananas paillé AN_PA /
+10/
+
+RDT_INDUS_SUCRE Rendement industriel de la sucrerie /
+0.9/
+
+
+TABLE Data_RPG_Gwad(P,VAR_P)   Données de base des parcelles
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Data_RPG_Gwad_2017.txt
+$offdelim;
+
+TABLE Data_Parc_Gwad(P,VAR_P)      Données de base des parcelles
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Data_Parc_Gwad_2017.txt
+$offdelim;
+
+
+TABLE Data_Cult(VAR_C,C)           Données decriptives des cultures
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Data_Cult.txt
+$offdelim;
+
+
+TABLE Matrice_OTK_Cult(K,C)        Matrice de présence - abscence des OTK par cultures     _SMART           xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Matrice_OTK_Cult_RESTIT.txt
+$offdelim;
+
+TABLE Data_OTK(K,VAR_OTK)          Données decriptives des opérations techniques des cultures
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Data_OTK.txt
+$offdelim;
+
+TABLE Data_Sol(VAR_SOL,S)           Données decriptives des cultures
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Data_Sol.txt
+$offdelim;
+
+Table R_Tixier(VAR_RTIXIER,VAR_FAVDEFAV) Seuils favorables et défavorables des variables des indicateurs de Tixier
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\R_Tixier.txt
+$offdelim;
+
+
+
+
+TABLE Aide_Garantie_Prix_Cult(C,H) Montant de l'aide nationale à la garantie de prix pour la canne à sucre (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Aide_Garantie_Prix_Cult.txt
+$offdelim;
+
+TABLE Aide_Indus_Cult(C,H)         Montant de l'aide UE pour les industriels sucriers (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Aide_Indus_Cult.txt
+$offdelim;
+
+TABLE Aide_Replant_Cult(C,H)       Montant de l'aide UE à la replantation de la canne à sucre (en euros par hectare)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Aide_Replant_Cult.txt
+$offdelim;
+
+TABLE Aide_Transp_Cult(C,H)        Montant de l'aide nationale au transport de la canne à sucre (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Aide_Transp_Cult.txt
+$offdelim;
+
+TABLE Bagasse_Cult(C,H)            Montant du prix de valorisation de la bagasse (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Bagasse_Cult.txt
+$offdelim;
+
+TABLE Cout_Recolte_Cult(C,H)       Montant du cout de la récolte de la canne à sucre et e la banane (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Cout_Recolte_Cult.txt
+$offdelim;
+
+TABLE Cout_Transp_Cult(C,H)       Montant du cout du transport de la canne à sucre (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Cout_Transp_Cult_LAM.txt
+$offdelim;
+
+TABLE Duree_Cycle_Cult(C,H)        Durée du cycle de la culture (en années)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Duree_Cycle_Cult.txt
+$offdelim;
+
+TABLE Duree_Plant_Cult(C,H)        Durée entre deux replantations (en années)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Duree_Plant_Cult.txt
+$offdelim;
+
+
+TABLE MAE_Compost_Cult(C,H) Montant de la MAE compost pour la canne fibre (en euros par ha)  _SMART      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\MAE_Compost_Cult_RESTIT.txt
+$offdelim;
+
+
+TABLE MAE_Jachere_Sol_Nu_Cult(C,H) Montant de la MAE Jachère sur sol nu (en euros par ha)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\MAE_Jachere_Sol_Nu_Cult.txt
+$offdelim;
+
+TABLE MAE_Recolte_Vert_Cult(C,H)   Montant de la MAE Récolte de la Canne à sucre en vert (en euros par ha)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\MAE_Recolte_Vert_Cult.txt
+$offdelim;
+
+TABLE MB_ADD_Cult(C,H)             Montant de la marge brute additionnelle (modification ad hock des niveau de MB par ha) (en euros par ha)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\MB_ADD_Cult.txt
+$offdelim;
+
+TABLE POSEI_Surf_Cult(C,H)         Montant de l'aide POSEI par culture (en euros par ha)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\POSEI_Surf_Cult.txt
+$offdelim;
+
+TABLE POSEI_Q_Cult(C,H)            Montant de l'aide POSEI par culture (en euros par tonne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\POSEI_Q_Cult.txt
+$offdelim;
+
+TABLE Prix_Cult(C,H)               Prix de marché par culture (en euros par tonne) _SMART              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Prix_Cult_CF_RESTIT.txt
+$offdelim;
+
+TABLE Rdt_Cult(C,H)                Rendement commercialisable par culture (tonne par ha)  _SMART      xxxxxxxxxxxx rdt = 0 pour ITK MA_Solène xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Rdt_Cult_CF_RESTIT.txt
+$offdelim;
+
+TABLE Var_Rdt_Cult(C,H)            Rendement commercialisable par culture (tonne par ha)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\Var_Rdt_Cult.txt
+$offdelim;
+
+TABLE RS_Cult(C,H)                 Richesse saccarimétrique de la canne à sucre (en tonne de sucre par tonne de canne)
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Indice_H\RS_Cult.txt
+$offdelim;
+
+
+Table Nutri_Cult(VAR_NUT,C)        Données descriptives des propriétés nutritionnelles des cultures
+*Les données nutritionnels sont calculés par tonne de produit. Les lip gluc prot sont en g/t de Ca à VitE en mg/T
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Nutri_Cult.txt
+$offdelim;
+
+Table Nutri_Alim(VAR_NUT,VAR_ALIM) Données des besoins nutritionels des catégories de population
+* Les données nutritionnels sont les besoins en nutriments.../pers/an (donc à multiplier par le nb de pers dans la catégorie) - données ORSAG pour les proportions homme femme
+* femme adulte = 0,8 * besoin homme adulte (sujet moyen) basé sur apport Kcal
+* femmes vieille= 0,8 femme jeune - homme vieux = 0,8 * homme adulte enfant = 1,1 * ((Hommes jeunes + femmes jeune)/2)
+* PECHE: les apports sont comptés en g/T de poisson ou mg/t si oligoélemnts ou micro nutriments
+$offlisting
+$ondelim
+$include C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\TABLE\Nutri_Alim.txt
+$offdelim;
+
+

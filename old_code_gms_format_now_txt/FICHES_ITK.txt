@@ -1,0 +1,1784 @@
+
+* FICHE TECHNIQUE AG
+file result1     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_AG.TXT/ ;
+     result1.pc=5;
+     result1.nw=8;
+     result1.pw=1000;
+
+put result1;
+
+put "AG"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("AG")                      , put /,
+put "PB"          , put PB_Ha_Cult("AG")                      , put /;
+put "CV"          , put CV_Ha_Cult("AG")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("AG","2017")         , put /,
+put "RDT"         , put RDT_CULT("AG","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("AG","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("AG")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("AG")                      , put /,
+
+put /,
+put /,
+
+put "AG"          , put "OTK", put "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "AG"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE AN
+file result2     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_AN.TXT/ ;
+     result2.pc=5;
+     result2.nw=8;
+     result2.pw=1000;
+
+put result2;
+
+put "AN"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("AN")                      , put /,
+put "PB"          , put PB_Ha_Cult("AN")                      , put /;
+put "CV"          , put CV_Ha_Cult("AN")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("AN","2017")         , put /,
+put "RDT"         , put RDT_CULT("AN","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("AN","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("AN")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("AN")                      , put /,
+
+put /,
+put /,
+
+put "AN"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "AN"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE AN_NU
+file result3     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_AN_NU.TXT/ ;
+     result3.pc=5;
+     result3.nw=8;
+     result3.pw=1000;
+
+put result3;
+
+put "AN_NU"       , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("AN_NU")                   , put /,
+put "PB"          , put PB_Ha_Cult("AN_NU")                   , put /;
+put "CV"          , put CV_Ha_Cult("AN_NU")                   , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("AN_NU","2017")      , put /,
+put "RDT"         , put RDT_CULT("AN_NU","2017")              , put /,
+put "PRIX"        , put PRIX_CULT("AN_NU","2017")             , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("AN_NU")              , put /,
+put "MO_CULT"     , put MO_Ha_Cult("AN_NU")                   , put /,
+
+put /,
+put /,
+
+put "AN_NU"       , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "AN_NU"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE AN_PA
+file result4     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_AN_PA.TXT/ ;
+     result4.pc=5;
+     result4.nw=8;
+     result4.pw=1000;
+
+put result4;
+
+put "AN_PA"       , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("AN_PA")                   , put /,
+put "PB"          , put PB_Ha_Cult("AN_PA")                   , put /;
+put "CV"          , put CV_Ha_Cult("AN_PA")                   , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("AN_PA","2017")      , put /,
+put "RDT"         , put RDT_CULT("AN_PA","2017")              , put /,
+put "PRIX"        , put PRIX_CULT("AN_PA","2017")             , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("AN_PA")              , put /,
+put "MO_CULT"     , put MO_Ha_Cult("AN_PA")                   , put /,
+
+put /,
+put /,
+
+put "AN_PA"       , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "AN_PA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BA
+file result5     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BA.TXT/ ;
+     result5.pc=5;
+     result5.nw=8;
+     result5.pw=1000;
+
+put result5;
+
+put "BA"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BA")                      , put /,
+put "PB"          , put PB_Ha_Cult("BA")                      , put /;
+put "CV"          , put CV_Ha_Cult("BA")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BA","2017")         , put /,
+put "RDT"         , put RDT_CULT("BA","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("BA","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BA")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BA")                      , put /,
+
+put /,
+put /,
+
+put "BA"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BA_INT
+file result6     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BA_INT.TXT/ ;
+     result6.pc=5;
+     result6.nw=8;
+     result6.pw=1000;
+
+put result6;
+
+put "BA_INT"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BA_INT")                  , put /,
+put "PB"          , put PB_Ha_Cult("BA_INT")                  , put /;
+put "CV"          , put CV_Ha_Cult("BA_INT")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BA_INT","2017")     , put /,
+put "RDT"         , put RDT_CULT("BA_INT","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("BA_INT","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BA_INT")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BA_INT")                  , put /,
+
+put /,
+put /,
+
+put "BA_INT"      , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BA_INT"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BA_IRR
+file result7     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BA_IRR.TXT/ ;
+     result7.pc=5;
+     result7.nw=8;
+     result7.pw=1000;
+
+put result7;
+
+put "BA_IRR"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BA_IRR")                  , put /,
+put "PB"          , put PB_Ha_Cult("BA_IRR")                  , put /;
+put "CV"          , put CV_Ha_Cult("BA_IRR")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BA_IRR","2017")     , put /,
+put "RDT"         , put RDT_CULT("BA_IRR","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("BA_IRR","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BA_IRR")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BA_IRR")                  , put /,
+
+put /,
+put /,
+
+put "BA_IRR"      , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BA_IRR"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BA_PER
+file result8     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BA_PER.TXT/ ;
+     result8.pc=5;
+     result8.nw=8;
+     result8.pw=1000;
+
+put result8;
+
+put "BA_PER"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BA_PER")                  , put /,
+put "PB"          , put PB_Ha_Cult("BA_PER")                  , put /;
+put "CV"          , put CV_Ha_Cult("BA_PER")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BA_PER","2017")     , put /,
+put "RDT"         , put RDT_CULT("BA_PER","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("BA_PER","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BA_PER")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BA_PER")                  , put /,
+
+put /,
+put /,
+
+put "BA_PER"      , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BA_PER"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BA_SINT
+file result9     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BA_SINT.TXT/ ;
+     result9.pc=5;
+     result9.nw=8;
+     result9.pw=1000;
+
+put result9;
+
+put "BA_SINT"     , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BA_SINT")                 , put /,
+put "PB"          , put PB_Ha_Cult("BA_SINT")                 , put /;
+put "CV"          , put CV_Ha_Cult("BA_SINT")                 , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BA_SINT","2017")    , put /,
+put "RDT"         , put RDT_CULT("BA_SINT","2017")            , put /,
+put "PRIX"        , put PRIX_CULT("BA_SINT","2017")           , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BA_SINT")            , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BA_SINT")                 , put /,
+
+put /,
+put /,
+
+put "BA_SINT"     , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BA_SINT"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BC
+file result10     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BC.TXT/ ;
+     result10.pc=5;
+     result10.nw=8;
+     result10.pw=1000;
+
+put result10;
+
+put "BC"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BC")                      , put /,
+put "PB"          , put PB_Ha_Cult("BC")                      , put /;
+put "CV"          , put CV_Ha_Cult("BC")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BC","2017")         , put /,
+put "RDT"         , put RDT_CULT("BC","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("BC","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BC")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BC")                      , put /,
+
+put /,
+put /,
+
+put "BC"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BC"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BC_BT
+file result11     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BC_BT.TXT/ ;
+     result11.pc=5;
+     result11.nw=8;
+     result11.pw=1000;
+
+put result11;
+
+put "BC_BT"       , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BC_BT")                   , put /,
+put "PB"          , put PB_Ha_Cult("BC_BT")                   , put /;
+put "CV"          , put CV_Ha_Cult("BC_BT")                   , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BC_BT","2017")      , put /,
+put "RDT"         , put RDT_CULT("BC_BT","2017")              , put /,
+put "PRIX"        , put PRIX_CULT("BC_BT","2017")             , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BC_BT")              , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BC_BT")                   , put /,
+
+put /,
+put /,
+
+put "BC_BT"       , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BC_BT"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE BC_GTMG
+file result12     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_BC_GTMG.TXT/ ;
+     result12.pc=5;
+     result12.nw=8;
+     result12.pw=1000;
+
+put result12;
+
+put "BC_GTMG"     , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("BC_GTMG")                 , put /,
+put "PB"          , put PB_Ha_Cult("BC_GTMG")                 , put /;
+put "CV"          , put CV_Ha_Cult("BC_GTMG")                 , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("BC_GTMG","2017")    , put /,
+put "RDT"         , put RDT_CULT("BC_GTMG","2017")            , put /,
+put "PRIX"        , put PRIX_CULT("BC_GTMG","2017")           , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("BC_GTMG")            , put /,
+put "MO_CULT"     , put MO_Ha_Cult("BC_GTMG")                 , put /,
+
+put /,
+put /,
+
+put "BC_GTMG"     , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "BC_GTMG"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_NBT_NISM
+file result13     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_NBT_NISM.TXT/ ;
+     result13.pc=5;
+     result13.nw=8;
+     result13.pw=1000;
+
+put result13;
+
+put "CF_NBT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_NBT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CF_NBT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CF_NBT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_NBT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CF_NBT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CF_NBT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_NBT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_NBT_NISM")             , put /,
+put /,
+put /,
+
+put "CF_NBT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_NBT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_NBT_NIM
+file result14     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_NBT_NIM.TXT/ ;
+     result14.pc=5;
+     result14.nw=8;
+     result14.pw=1000;
+
+put result14;
+
+put "CF_NBT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_NBT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CF_NBT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CF_NBT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_NBT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CF_NBT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CF_NBT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_NBT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_NBT_NIM")              , put /,
+put /,
+put /,
+
+put "CF_NBT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_NBT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_SBT_NISM
+file result15     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_SBT_NISM.TXT/ ;
+     result15.pc=5;
+     result15.nw=8;
+     result15.pw=1000;
+
+put result15;
+
+put "CF_SBT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_SBT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CF_SBT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CF_SBT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_SBT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CF_SBT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CF_SBT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_SBT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_SBT_NISM")             , put /,
+put /,
+put /,
+
+put "CF_SBT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_SBT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+
+* FICHE TECHNIQUE CF_SBT_NIM
+file result16     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_SBT_NIM.TXT/ ;
+     result16.pc=5;
+     result16.nw=8;
+     result16.pw=1000;
+
+put result16;
+
+put "CF_SBT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_SBT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CF_SBT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CF_SBT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_SBT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CF_SBT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CF_SBT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_SBT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_SBT_NIM")              , put /,
+put /,
+put /,
+
+put "CF_SBT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_SBT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_NGT_NISM
+file result17     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_NGT_NISM.TXT/ ;
+     result17.pc=5;
+     result17.nw=8;
+     result17.pw=1000;
+
+put result17;
+
+put "CF_NGT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_NGT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CF_NGT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CF_NGT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_NGT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CF_NGT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CF_NGT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_NGT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_NGT_NISM")             , put /,
+put /,
+put /,
+
+put "CF_NGT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_NGT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_NGT_NIM
+file result18     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_NGT_NIM.TXT/ ;
+     result18.pc=5;
+     result18.nw=8;
+     result18.pw=1000;
+
+put result18;
+
+put "CF_NGT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_NGT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CF_NGT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CF_NGT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_NGT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CF_NGT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CF_NGT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_NGT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_NGT_NIM")              , put /,
+put /,
+put /,
+
+put "CF_NGT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_NGT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_CGT_NISM
+file result19     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_CGT_NISM.TXT/ ;
+     result19.pc=5;
+     result19.nw=8;
+     result19.pw=1000;
+
+put result19;
+
+put "CF_CGT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_CGT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CF_CGT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CF_CGT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_CGT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CF_CGT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CF_CGT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_CGT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_CGT_NISM")             , put /,
+put /,
+put /,
+
+put "CF_CGT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_CGT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_CGT_NIM
+file result20     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_CGT_NIM.TXT/ ;
+     result20.pc=5;
+     result20.nw=8;
+     result20.pw=1000;
+
+put result20;
+
+put "CF_CGT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_CGT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CF_CGT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CF_CGT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_CGT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CF_CGT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CF_CGT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_CGT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_CGT_NIM")              , put /,
+put /,
+put /,
+
+put "CF_CGT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_CGT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_EGT_NISM
+file result21     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_EGT_NISM.TXT/ ;
+     result21.pc=5;
+     result21.nw=8;
+     result21.pw=1000;
+
+put result21;
+
+put "CF_EGT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_EGT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CF_EGT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CF_EGT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_EGT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CF_EGT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CF_EGT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_EGT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_EGT_NISM")             , put /,
+put /,
+put /,
+
+put "CF_EGT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_EGT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CF_EGT_NIM
+file result22     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CF_EGT_NIM.TXT/ ;
+     result22.pc=5;
+     result22.nw=8;
+     result22.pw=1000;
+
+put result22;
+
+put "CF_EGT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CF_EGT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CF_EGT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CF_EGT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CF_EGT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CF_EGT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CF_EGT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CF_EGT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CF_EGT_NIM")              , put /,
+put /,
+put /,
+
+put "CF_EGT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CF_EGT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS
+file result23     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS.TXT/ ;
+     result23.pc=5;
+     result23.nw=8;
+     result23.pw=1000;
+
+put result23;
+
+put "CS"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS")                      , put /,
+put "PB"          , put PB_Ha_Cult("CS")                      , put /;
+put "CV"          , put CV_Ha_Cult("CS")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS","2017")         , put /,
+put "RDT"         , put RDT_CULT("CS","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("CS","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS")                      , put /,
+put /,
+put /,
+
+put "CS"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_BT_NISM
+file result24     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_BT_NISM.TXT/ ;
+     result24.pc=5;
+     result24.nw=8;
+     result24.pw=1000;
+
+put result24;
+
+put "CS_BT_NISM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_BT_NISM")              , put /,
+put "PB"          , put PB_Ha_Cult("CS_BT_NISM")              , put /;
+put "CV"          , put CV_Ha_Cult("CS_BT_NISM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_BT_NISM","2017") , put /,
+put "RDT"         , put RDT_CULT("CS_BT_NISM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CS_BT_NISM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_BT_NISM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_BT_NISM")              , put /,
+put /,
+put /,
+
+put "CS_BT_NISM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_BT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_BT_NIM
+file result25     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_BT_NIM.TXT/ ;
+     result25.pc=5;
+     result25.nw=8;
+     result25.pw=1000;
+
+put result25;
+
+put "CS_BT_NIM"   , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_BT_NIM")               , put /,
+put "PB"          , put PB_Ha_Cult("CS_BT_NIM")               , put /;
+put "CV"          , put CV_Ha_Cult("CS_BT_NIM")               , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_BT_NIM","2017")  , put /,
+put "RDT"         , put RDT_CULT("CS_BT_NIM","2017")          , put /,
+put "PRIX"        , put PRIX_CULT("CS_BT_NIM","2017")         , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_BT_NIM")          , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_BT_NIM")               , put /,
+put /,
+put /,
+
+put "CS_BT_NIM"   , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_BT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_BT_IM
+file result26     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_BT_IM.TXT/ ;
+     result26.pc=5;
+     result26.nw=8;
+     result26.pw=1000;
+
+put result26;
+
+put "CS_BT_IM"    , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_BT_IM")                , put /,
+put "PB"          , put PB_Ha_Cult("CS_BT_IM")                , put /;
+put "CV"          , put CV_Ha_Cult("CS_BT_IM")                , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_BT_IM","2017")   , put /,
+put "RDT"         , put RDT_CULT("CS_BT_IM","2017")           , put /,
+put "PRIX"        , put PRIX_CULT("CS_BT_IM","2017")          , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_BT_IM")           , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_BT_IM")                , put /,
+put /,
+put /,
+
+put "CS_BT_IM"    , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_BT_IM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_SBT_NISM
+file result27     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_SBT_NISM.TXT/ ;
+     result27.pc=5;
+     result27.nw=8;
+     result27.pw=1000;
+
+put result27;
+
+put "CS_SBT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_SBT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CS_SBT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CS_SBT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_SBT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CS_SBT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CS_SBT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_SBT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_SBT_NISM")             , put /,
+put /,
+put /,
+
+put "CS_SBT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_SBT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_SBT_NIM
+file result28     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_SBT_NIM.TXT/ ;
+     result28.pc=5;
+     result28.nw=8;
+     result28.pw=1000;
+
+put result28;
+
+put "CS_SBT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_SBT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CS_SBT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CS_SBT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_SBT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CS_SBT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CS_SBT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_SBT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_SBT_NIM")              , put /,
+put /,
+put /,
+
+put "CS_SBT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_SBT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_SBT_IM
+file result29     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_SBT_IM.TXT/ ;
+     result29.pc=5;
+     result29.nw=8;
+     result29.pw=1000;
+
+put result29;
+
+put "CS_SBT_IM"   , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_SBT_IM")               , put /,
+put "PB"          , put PB_Ha_Cult("CS_SBT_IM")               , put /;
+put "CV"          , put CV_Ha_Cult("CS_SBT_IM")               , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_SBT_IM","2017")  , put /,
+put "RDT"         , put RDT_CULT("CS_SBT_IM","2017")          , put /,
+put "PRIX"        , put PRIX_CULT("CS_SBT_IM","2017")         , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_SBT_IM")          , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_SBT_IM")               , put /,
+put /,
+put /,
+
+put "CS_SBT_IM"   , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_SBT_IM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_NGT_NISM
+file result30     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_NGT_NISM.TXT/ ;
+     result30.pc=5;
+     result30.nw=8;
+     result30.pw=1000;
+
+put result30;
+
+put "CS_NGT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_NGT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CS_NGT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CS_NGT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_NGT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CS_NGT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CS_NGT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_NGT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_NGT_NISM")             , put /,
+put /,
+put /,
+
+put "CS_NGT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_NGT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_NGT_NIM
+file result31     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_NGT_NIM.TXT/ ;
+     result31.pc=5;
+     result31.nw=8;
+     result31.pw=1000;
+
+put result31;
+
+put "CS_NGT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_NGT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CS_NGT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CS_NGT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_NGT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CS_NGT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CS_NGT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_NGT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_NGT_NIM")              , put /,
+put /,
+put /,
+
+put "CS_NGT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_NGT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_NGT_IM
+file result32     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_NGT_IM.TXT/ ;
+     result32.pc=5;
+     result32.nw=8;
+     result32.pw=1000;
+
+put result32;
+
+put "CS_NGT_IM"   , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_NGT_IM")               , put /,
+put "PB"          , put PB_Ha_Cult("CS_NGT_IM")               , put /;
+put "CV"          , put CV_Ha_Cult("CS_NGT_IM")               , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_NGT_IM","2017")  , put /,
+put "RDT"         , put RDT_CULT("CS_NGT_IM","2017")          , put /,
+put "PRIX"        , put PRIX_CULT("CS_NGT_IM","2017")         , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_NGT_IM")          , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_NGT_IM")               , put /,
+put /,
+put /,
+
+put "CS_NGT_IM"   , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_NGT_IM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_CGT_NISM
+file result33     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_CGT_NISM.TXT/ ;
+     result33.pc=5;
+     result33.nw=8;
+     result33.pw=1000;
+
+put result33;
+
+put "CS_CGT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_CGT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CS_CGT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CS_CGT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_CGT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CS_CGT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CS_CGT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_CGT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_CGT_NISM")             , put /,
+put /,
+put /,
+
+put "CS_CGT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_CGT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_CGT_NIM
+file result34     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_CGT_NIM.TXT/ ;
+     result34.pc=5;
+     result34.nw=8;
+     result34.pw=1000;
+
+put result34;
+
+put "CS_CGT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_CGT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CS_CGT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CS_CGT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_CGT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CS_CGT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CS_CGT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_CGT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_CGT_NIM")              , put /,
+put /,
+put /,
+
+put "CS_CGT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_CGT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_CGT_IM
+file result35     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_CGT_IM.TXT/ ;
+     result35.pc=5;
+     result35.nw=8;
+     result35.pw=1000;
+
+put result35;
+
+put "CS_CGT_IM"   , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_CGT_IM")               , put /,
+put "PB"          , put PB_Ha_Cult("CS_CGT_IM")               , put /;
+put "CV"          , put CV_Ha_Cult("CS_CGT_IM")               , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_CGT_IM","2017")  , put /,
+put "RDT"         , put RDT_CULT("CS_CGT_IM","2017")          , put /,
+put "PRIX"        , put PRIX_CULT("CS_CGT_IM","2017")         , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_CGT_IM")          , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_CGT_IM")               , put /,
+put /,
+put /,
+
+put "CS_CGT_IM"   , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_CGT_IM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_EGT_NISM
+file result36     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_EGT_NISM.TXT/ ;
+     result36.pc=5;
+     result36.nw=8;
+     result36.pw=1000;
+
+put result36;
+
+put "CS_EGT_NISM" , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_EGT_NISM")             , put /,
+put "PB"          , put PB_Ha_Cult("CS_EGT_NISM")             , put /;
+put "CV"          , put CV_Ha_Cult("CS_EGT_NISM")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_EGT_NISM","2017"), put /,
+put "RDT"         , put RDT_CULT("CS_EGT_NISM","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("CS_EGT_NISM","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_EGT_NISM")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_EGT_NISM")             , put /,
+put /,
+put /,
+
+put "CS_EGT_NISM" , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_EGT_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_EGT_NIM
+file result37     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_EGT_NIM.TXT/ ;
+     result37.pc=5;
+     result37.nw=8;
+     result37.pw=1000;
+
+put result37;
+
+put "CS_EGT_NIM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_EGT_NIM")              , put /,
+put "PB"          , put PB_Ha_Cult("CS_EGT_NIM")              , put /;
+put "CV"          , put CV_Ha_Cult("CS_EGT_NIM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_EGT_NIM","2017") , put /,
+put "RDT"         , put RDT_CULT("CS_EGT_NIM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CS_EGT_NIM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_EGT_NIM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_EGT_NIM")              , put /,
+put /,
+put /,
+
+put "CS_EGT_NIM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_EGT_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_EGT_IM
+file result38     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_EGT_IM.TXT/ ;
+     result38.pc=5;
+     result38.nw=8;
+     result38.pw=1000;
+
+put result38;
+
+put "CS_EGT_IM"   , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_EGT_IM")               , put /,
+put "PB"          , put PB_Ha_Cult("CS_EGT_IM")               , put /;
+put "CV"          , put CV_Ha_Cult("CS_EGT_IM")               , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_EGT_IM","2017")  , put /,
+put "RDT"         , put RDT_CULT("CS_EGT_IM","2017")          , put /,
+put "PRIX"        , put PRIX_CULT("CS_EGT_IM","2017")         , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_EGT_IM")          , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_EGT_IM")               , put /,
+put /,
+put /,
+
+put "CS_EGT_IM",    put "OTK", put "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_EGT_IM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_MG_NISM
+file result39     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_MG_NISM.TXT/ ;
+     result39.pc=5;
+     result39.nw=8;
+     result39.pw=1000;
+
+put result39;
+
+put "CS_MG_NISM"  , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_MG_NISM")              , put /,
+put "PB"          , put PB_Ha_Cult("CS_MG_NISM")              , put /;
+put "CV"          , put CV_Ha_Cult("CS_MG_NISM")              , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_MG_NISM","2017") , put /,
+put "RDT"         , put RDT_CULT("CS_MG_NISM","2017")         , put /,
+put "PRIX"        , put PRIX_CULT("CS_MG_NISM","2017")        , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_MG_NISM")         , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_MG_NISM")              , put /,
+put /,
+put /,
+
+put "CS_MG_NISM"  , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_MG_NISM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_MG_NIM
+file result40     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_MG_NIM.TXT/ ;
+     result40.pc=5;
+     result40.nw=8;
+     result40.pw=1000;
+
+put result40;
+
+put "CS_MG_NIM"   , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_MG_NIM")               , put /,
+put "PB"          , put PB_Ha_Cult("CS_MG_NIM")               , put /;
+put "CV"          , put CV_Ha_Cult("CS_MG_NIM")               , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_MG_NIM","2017")  , put /,
+put "RDT"         , put RDT_CULT("CS_MG_NIM","2017")          , put /,
+put "PRIX"        , put PRIX_CULT("CS_MG_NIM","2017")         , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_MG_NIM")          , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_MG_NIM")               , put /,
+put /,
+put /,
+
+put "CS_MG_NIM"   , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_MG_NIM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE CS_MG_IM
+file result41     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_CS_MG_IM.TXT/ ;
+     result41.pc=5;
+     result41.nw=8;
+     result41.pw=1000;
+
+put result41;
+
+put "CS_MG_IM"    , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("CS_MG_IM")                , put /,
+put "PB"          , put PB_Ha_Cult("CS_MG_IM")                , put /;
+put "CV"          , put CV_Ha_Cult("CS_MG_IM")                , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("CS_MG_IM","2017")   , put /,
+put "RDT"         , put RDT_CULT("CS_MG_IM","2017")           , put /,
+put "PRIX"        , put PRIX_CULT("CS_MG_IM","2017")          , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("CS_MG_IM")           , put /,
+put "MO_CULT"     , put MO_Ha_Cult("CS_MG_IM")                , put /,
+put /,
+put /,
+
+put "CS_MG_IM"    , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "CS_MG_IM"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE IG
+file result43     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_IG.TXT/ ;
+     result43.pc=5;
+     result43.nw=8;
+     result43.pw=1000;
+
+put result43;
+
+put "IG"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("IG")                      , put /,
+put "PB"          , put PB_Ha_Cult("IG")                      , put /;
+put "CV"          , put CV_Ha_Cult("IG")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("IG","2017")         , put /,
+put "RDT"         , put RDT_CULT("IG","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("IG","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("IG")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("IG")                      , put /,
+put /,
+put /,
+
+put "IG"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "IG"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE IG_PLA
+file result44     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_IG_PLA.TXT/ ;
+     result44.pc=5;
+     result44.nw=8;
+     result44.pw=1000;
+
+put result44;
+
+put "IG_PLA"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("IG_PLA")                  , put /,
+put "PB"          , put PB_Ha_Cult("IG_PLA")                  , put /;
+put "CV"          , put CV_Ha_Cult("IG_PLA")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("IG_PLA","2017")     , put /,
+put "RDT"         , put RDT_CULT("IG_PLA","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("IG_PLA","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("IG_PLA")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("IG_PLA")                  , put /,
+put /,
+put /,
+
+put "IG_PLA"      , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "IG_PLA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE IG_TUT
+file result45     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_IG_TUT.TXT/ ;
+     result45.pc=5;
+     result45.nw=8;
+     result45.pw=1000;
+
+put result45;
+
+put "IG_TUT"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("IG_TUT")                  , put /,
+put "PB"          , put PB_Ha_Cult("IG_TUT")                  , put /;
+put "CV"          , put CV_Ha_Cult("IG_TUT")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("IG_TUT","2017")     , put /,
+put "RDT"         , put RDT_CULT("IG_TUT","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("IG_TUT","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("IG_TUT")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("IG_TUT")                  , put /,
+put /,
+put /,
+
+put "IG_TUT"      , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "IG_TUT"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE JA
+file result46     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_JA.TXT/ ;
+     result46.pc=5;
+     result46.nw=8;
+     result46.pw=1000;
+
+put result46;
+
+put "JA"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("JA")                      , put /,
+put "PB"          , put PB_Ha_Cult("JA")                      , put /;
+put "CV"          , put CV_Ha_Cult("JA")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("JA","2017")         , put /,
+put "RDT"         , put RDT_CULT("JA","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("JA","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("JA")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("JA")                      , put /,
+put /,
+put /,
+
+put "JA"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "JA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE MA
+file result47     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_MA.TXT/ ;
+     result47.pc=5;
+     result47.nw=8;
+     result47.pw=1000;
+
+put result47;
+
+put "MA"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("MA")                      , put /,
+put "PB"          , put PB_Ha_Cult("MA")                      , put /;
+put "CV"          , put CV_Ha_Cult("MA")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("MA","2017")         , put /,
+put "RDT"         , put RDT_CULT("MA","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("MA","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("MA")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("MA")                      , put /,
+put /,
+put /,
+
+put "MA"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "MA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE MA_TO_CHOU_JA
+file result48     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_MA_TO_CHOU_JA.TXT/ ;
+     result48.pc=5;
+     result48.nw=8;
+     result48.pw=1000;
+
+put result48;
+
+put "MA_TO_CHOU_JA", put "VARIABLES"                            , put /,
+put "MB"          , put MB_Ha_Cult("MA_TO_CHOU_JA")             , put /,
+put "PB"          , put PB_Ha_Cult("MA_TO_CHOU_JA")             , put /;
+put "CV"          , put CV_Ha_Cult("MA_TO_CHOU_JA")             , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("MA_TO_CHOU_JA","2017"), put /,
+put "RDT"         , put RDT_CULT("MA_TO_CHOU_JA","2017")        , put /,
+put "PRIX"        , put PRIX_CULT("MA_TO_CHOU_JA","2017")       , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("MA_TO_CHOU_JA")        , put /,
+put "MO_CULT"     , put MO_Ha_Cult("MA_TO_CHOU_JA")             , put /,
+put /,
+put /,
+
+put "MA_TO_CHOU_JA", put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "MA_TO_CHOU_JA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE MA_PLBIO
+file result49     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_MA_PLBIO.TXT/ ;
+     result49.pc=5;
+     result49.nw=8;
+     result49.pw=1000;
+
+put result49;
+
+put "MA_PLBIO"    , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("MA_PLBIO")                , put /,
+put "PB"          , put PB_Ha_Cult("MA_PLBIO")                , put /;
+put "CV"          , put CV_Ha_Cult("MA_PLBIO")                , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("MA_PLBIO","2017")   , put /,
+put "RDT"         , put RDT_CULT("MA_PLBIO","2017")           , put /,
+put "PRIX"        , put PRIX_CULT("MA_PLBIO","2017")          , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("MA_PLBIO")           , put /,
+put "MO_CULT"     , put MO_Ha_Cult("MA_PLBIO")                , put /,
+put /,
+put /,
+
+put "MA_PLBIO"    , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "MA_PLBIO"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE MA_MOBIO
+file result50     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_MA_MOBIO.TXT/ ;
+     result50.pc=5;
+     result50.nw=8;
+     result50.pw=1000;
+
+put result50;
+
+put "MA_MOBIO"    , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("MA_MOBIO")                , put /,
+put "PB"          , put PB_Ha_Cult("MA_MOBIO")                , put /;
+put "CV"          , put CV_Ha_Cult("MA_MOBIO")                , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("MA_MOBIO","2017")   , put /,
+put "RDT"         , put RDT_CULT("MA_MOBIO","2017")           , put /,
+put "PRIX"        , put PRIX_CULT("MA_MOBIO","2017")          , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("MA_MOBIO")           , put /,
+put "MO_CULT"     , put MO_Ha_Cult("MA_MOBIO")                , put /,
+put /,
+put /,
+
+put "MA_MOBIO"    , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "MA_MOBIO"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE MA_ROTA
+file result51     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_MA_ROTA.TXT/ ;
+     result51.pc=5;
+     result51.nw=8;
+     result51.pw=1000;
+
+put result51;
+
+put "MA_ROTA"     , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("MA_ROTA")                 , put /,
+put "PB"          , put PB_Ha_Cult("MA_ROTA")                 , put /;
+put "CV"          , put CV_Ha_Cult("MA_ROTA")                 , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("MA_ROTA","2017")    , put /,
+put "RDT"         , put RDT_CULT("MA_ROTA","2017")            , put /,
+put "PRIX"        , put PRIX_CULT("MA_ROTA","2017")           , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("MA_ROTA")            , put /,
+put "MO_CULT"     , put MO_Ha_Cult("MA_ROTA")                 , put /,
+put /,
+put /,
+
+put "MA_ROTA"     , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "MA_ROTA"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE ME
+file result52     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_ME.TXT/ ;
+     result52.pc=5;
+     result52.nw=8;
+     result52.pw=1000;
+
+put result52;
+
+put "ME"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("ME")                      , put /,
+put "PB"          , put PB_Ha_Cult("ME")                      , put /;
+put "CV"          , put CV_Ha_Cult("ME")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("ME","2017")         , put /,
+put "RDT"         , put RDT_CULT("ME","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("ME","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("ME")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("ME")                      , put /,
+put /,
+put /,
+
+put "ME"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "ME"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE NC
+file result53     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_NC.TXT/ ;
+     result53.pc=5;
+     result53.nw=8;
+     result53.pw=1000;
+
+put result53;
+
+put "NC"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("NC")                      , put /,
+put "PB"          , put PB_Ha_Cult("NC")                      , put /;
+put "CV"          , put CV_Ha_Cult("NC")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("NC","2017")         , put /,
+put "RDT"         , put RDT_CULT("NC","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("NC","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("NC")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("NC")                      , put /,
+put /,
+put /,
+
+put "NC"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "NC"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+
+* FICHE TECHNIQUE PN
+file result55     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_PN.TXT/ ;
+     result55.pc=5;
+     result55.nw=8;
+     result55.pw=1000;
+
+put result55;
+
+put "PN"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("PN")                      , put /,
+put "PB"          , put PB_Ha_Cult("PN")                      , put /;
+put "CV"          , put CV_Ha_Cult("PN")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("PN","2017")         , put /,
+put "RDT"         , put RDT_CULT("PN","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("PN","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("PN")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("PN")                      , put /,
+put /,
+put /,
+
+put "PN"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "PN"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE PN_PIQ
+file result56     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_PN_PIQ.TXT/ ;
+     result56.pc=5;
+     result56.nw=8;
+     result56.pw=1000;
+
+put result56;
+
+put "PN_PIQ"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("PN_PIQ")                  , put /,
+put "PB"          , put PB_Ha_Cult("PN_PIQ")                  , put /;
+put "CV"          , put CV_Ha_Cult("PN_PIQ")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("PN_PIQ","2017")     , put /,
+put "RDT"         , put RDT_CULT("PN_PIQ","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("PN_PIQ","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("PN_PIQ")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("PN_PIQ")                  , put /,
+put /,
+put /,
+
+put "PN_PIQ"      , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "PN_PIQ"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE PN_TOUR
+file result57     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_PN_TOUR.TXT/ ;
+     result57.pc=5;
+     result57.nw=8;
+     result57.pw=1000;
+
+put result57;
+
+put "PN_TOUR"     , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("PN_TOUR")                 , put /,
+put "PB"          , put PB_Ha_Cult("PN_TOUR")                 , put /;
+put "CV"          , put CV_Ha_Cult("PN_TOUR")                 , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("PN_TOUR","2017")    , put /,
+put "RDT"         , put RDT_CULT("PN_TOUR","2017")            , put /,
+put "PRIX"        , put PRIX_CULT("PN_TOUR","2017")           , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("PN_TOUR")            , put /,
+put "MO_CULT"     , put MO_Ha_Cult("PN_TOUR")                 , put /,
+put /,
+put /,
+
+put "PN_TOUR"     , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "PN_TOUR"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE TH
+file result58     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_TH.TXT/ ;
+     result58.pc=5;
+     result58.nw=8;
+     result58.pw=1000;
+
+put result58;
+
+put "TH"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("TH")                      , put /,
+put "PB"          , put PB_Ha_Cult("TH")                      , put /;
+put "CV"          , put CV_Ha_Cult("TH")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("TH","2017")         , put /,
+put "RDT"         , put RDT_CULT("TH","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("TH","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("TH")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("TH")                      , put /,
+put /,
+put /,
+
+put "TH"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "TH"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE VE
+file result59     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_VE.TXT/ ;
+     result59.pc=5;
+     result59.nw=8;
+     result59.pw=1000;
+
+put result59;
+
+put "VE"          , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("VE")                      , put /,
+put "PB"          , put PB_Ha_Cult("VE")                      , put /;
+put "CV"          , put CV_Ha_Cult("VE")                      , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("VE","2017")         , put /,
+put "RDT"         , put RDT_CULT("VE","2017")                 , put /,
+put "PRIX"        , put PRIX_CULT("VE","2017")                , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("VE")                 , put /,
+put "MO_CULT"     , put MO_Ha_Cult("VE")                      , put /,
+put /,
+put /,
+
+put "VE"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "VE"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE VE_BTGT
+file result60     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_VE_BTGT.TXT/ ;
+     result60.pc=5;
+     result60.nw=8;
+     result60.pw=1000;
+
+put result60;
+
+put "VE_BTGT"      , put "VARIABLES"                           , put /,
+put "MB"          , put MB_Ha_Cult("VE_BTGT")                  , put /,
+put "PB"          , put PB_Ha_Cult("VE_BTGT")                  , put /;
+put "CV"          , put CV_Ha_Cult("VE_BTGT")                  , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("VE_BTGT","2017")     , put /,
+put "RDT"         , put RDT_CULT("VE_BTGT","2017")             , put /,
+put "PRIX"        , put PRIX_CULT("VE_BTGT","2017")            , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("VE_BTGT")             , put /,
+put "MO_CULT"     , put MO_Ha_Cult("VE_BTGT")                  , put /,
+put /,
+put /,
+
+put "VE_BTGT"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "VE_BTGT"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );
+
+* FICHE TECHNIQUE VE_PLUIE
+file result61     /C:\FichierII\MOSAICA\MOSAICA_V3\MOSAICA_3.5\\SORTIES\ITK\ITK_VE_PLUIE.TXT/ ;
+     result61.pc=5;
+     result61.nw=8;
+     result61.pw=1000;
+
+put result61;
+
+put "VE_PLUIE"    , put "VARIABLES"                            , put /,
+put "MB"          , put MB_Ha_Cult("VE_PLUIE")                 , put /,
+put "PB"          , put PB_Ha_Cult("VE_PLUIE")                 , put /;
+put "CV"          , put CV_Ha_Cult("VE_PLUIE")                 , put /,
+put "DUREE"       , put DUREE_PLANT_CULT("VE_PLUIE","2017")    , put /,
+put "RDT"         , put RDT_CULT("VE_PLUIE","2017")            , put /,
+put "PRIX"        , put PRIX_CULT("VE_PLUIE","2017")           , put /,
+put "AIDES"       , put SUB_TOT_HA_cult("VE_PLUIE")            , put /,
+put "MO_CULT"     , put MO_Ha_Cult("VE_PLUIE")                 , put /,
+put /,
+put /,
+
+put "VE_PLUIE"          , put "OTK", "DOSE", "PRIX", "NATURE", "AMORTI", "MO_EXPL";
+         loop(SK,   put/,
+                    put SK.tl,
+                    put Matrice_OTK_Cult(SK, "VE_PLUIE"),
+                    put Data_OTK(SK,"DOSE"),
+                    put Data_OTK(SK,"PRIX_UNIT"),
+                    put Data_OTK(SK,"NATURE"),
+                    put Data_OTK(SK,"AMORTI"),
+                    put Data_OTK(SK,"MO_EXPL")  );

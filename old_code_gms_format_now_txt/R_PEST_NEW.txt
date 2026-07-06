@@ -1,0 +1,306 @@
+
+*ooooooo Calcul de la DT50 moyenne par culture pondérée par les quantités de produits phytosanitaires utilisés (en jours/ha/an) moyenne, année de plantation comprise (pour le calcul de R_PEST)
+
+* La persistance dans le sol ou temps de demi-vie (DT50) est évaluée par le temps de dégradation ou la dissipation de 50 % de la substance active présente dans le sol. La base de données « phytosanitaires »
+*renseigne la persistance (DT50) mesurée au champ. Elle est exprimée en jours.
+
+         DT50_OTK_Cult(SC,SK)$((        Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                     + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                                )/  Duree_Cycle_Cult(SC,SH)*12
+                               )
+                                =((     Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"DT50")
+                                     + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"DT50") )/Duree_Plant_Cult(SC,SH)
+                                )/  Duree_Cycle_Cult(SC,SH)*12 )/
+                               ((       Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                     + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                               )/   Duree_Cycle_Cult(SC,SH)*12
+                               );
+         STOCK_DT50_OTK_Cult(SH,SC,SK)= DT50_OTK_Cult(SC,SK);
+
+         DT50_Cult(SC)= sum(SK, DT50_OTK_Cult(SC,SK));
+         STOCK_DT50_Cult(SH,SC)= DT50_Cult(SC);
+
+
+*ooooooo Calcul de la dose maximum admise par un humain moyenne par culture pondérée par les quantités de produits phytosanitaires utilisés (en jours/ha/an) moyenne, année de plantation comprise (pour le calcul de R_PEST)
+         ADI_OTK_cult(SC,SK)$((        Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                    + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                               )/  Duree_Cycle_Cult(SC,SH)*12
+                               )
+                               =((     Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"ADI")
+                                    + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"ADI") )/Duree_Plant_Cult(SC,SH)
+                                )/  Duree_Cycle_Cult(SC,SH)*12 )/
+                              ((       Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                    + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                               )/   Duree_Cycle_Cult(SC,SH)*12
+                              );
+         STOCK_ADI_OTK_cult(SH,SC,SK)= ADI_OTK_cult(SC,SK);
+
+         ADI_Cult(SC)= sum(SK, ADI_OTK_cult(SC,SK));
+         STOCK_ADI_Cult(SH,SC)= ADI_Cult(SC);
+
+
+*ooooooo Calcul de la dose maximum admise par un poisson moyenne par culture pondérée par les quantités de produits phytosanitaires utilisés (en jours/ha/an) moyenne, année de plantation comprise (pour le calcul de R_PEST)
+         AQUATOX_OTK_cult(SC,SK)$((    Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                    + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                               )/  Duree_Cycle_Cult(SC,SH)*12
+                               )
+                               =((     Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"AQUATOX")
+                                    + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"AQUATOX") )/Duree_Plant_Cult(SC,SH)
+                                )/  Duree_Cycle_Cult(SC,SH)*12 )/
+                              ((       Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                    + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                               )/   Duree_Cycle_Cult(SC,SH)*12
+                              );
+         STOCK_AQUATOX_OTK_cult(SH,SC,SK)= AQUATOX_OTK_cult(SC,SK);
+
+         AQUATOX_Cult(SC)= sum(SK, AQUATOX_OTK_cult(SC,SK));
+         STOCK_AQUATOX_Cult(SH,SC)= AQUATOX_Cult(SC);
+
+
+*ooooooo Calcul GUS moyen par culture pondérée par les quantités de produits phytosanitaires utilisés (en jours/ha/an) moyenne, année de plantation comprise (pour le calcul de R_PEST)
+         GUS_OTK_cult(SC,SK)$((        Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                     + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                                )/  Duree_Cycle_Cult(SC,SH)*12
+                               )
+                                =((     Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"GUS")
+                                     + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"GUS") )/Duree_Plant_Cult(SC,SH)
+                                )/  Duree_Cycle_Cult(SC,SH)*12 )/
+                               ((       Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")
+                                     + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE") )/Duree_Plant_Cult(SC,SH)
+                               )/   Duree_Cycle_Cult(SC,SH)*12
+                               );
+         STOCK_GUS_OTK_cult(SH,SC,SK)= GUS_OTK_cult(SC,SK);
+
+         GUS_Cult(SC)= sum(SK, GUS_OTK_cult(SC,SK));
+         STOCK_GUS_Cult(SH,SC)= GUS_Cult(SC);
+
+
+*ooooooo Calcul de la charge en matière active par culture (en kg de MA/ha/an) moyenne, année de plantation comprise (pour le calcul de R_PEST)
+         QMA_ha_OTK_cult(SC,SK)= (  Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=0)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"QMA")
+                                 + (Matrice_OTK_Cult(SK, SC)$(Data_OTK(SK,"AMORTI")=1)*Data_OTK(SK,"DOSE")*Data_OTK(SK,"QMA") )/Duree_Plant_Cult(SC,SH)
+                                )/ Duree_Cycle_Cult(SC,SH)*12;
+         STOCK_QMA_ha_OTK_cult(SH,SC,SK)= QMA_ha_OTK_cult(SC,SK);
+
+         QMA_Ha_Cult(SC)= sum(SK, QMA_ha_OTK_cult(SC,SK));
+         STOCK_QMA_Ha_Cult(SH,SC)= QMA_Ha_Cult(SC);
+
+
+*ooooooo Calcul de R-PEST par parcelle ooooooooooooooooooooooooooooooooooooooooo
+
+         LOOP(SC,
+                  IF (QMA_Ha_Cult(SC) >  R_Tixier("SEUIL_DOSE_CULT","DEFAVORABLE"), DOSE_defav(SC)=1;
+                  );
+                  IF (QMA_Ha_Cult(SC) <  R_Tixier("SEUIL_DOSE_CULT","FAVORABLE"),   DOSE_defav(SC)=0;
+                  );
+                  IF (QMA_Ha_Cult(SC) <= R_Tixier("SEUIL_DOSE_CULT","DEFAVORABLE") and (QMA_Ha_Cult(SC)>R_Tixier("SEUIL_DOSE_CULT","FAVORABLE")),
+                        DOSE_defav(SC)$((R_Tixier("SEUIL_DOSE_CULT","DEFAVORABLE") - R_Tixier("SEUIL_DOSE_CULT","FAVORABLE")))
+                     =(QMA_Ha_Cult(SC) - R_Tixier("SEUIL_DOSE_CULT","FAVORABLE")) /((R_Tixier("SEUIL_DOSE_CULT","DEFAVORABLE") - R_Tixier("SEUIL_DOSE_CULT","FAVORABLE")));
+                  );
+         );
+         STOCK_DOSE_defav(SH,SC)= DOSE_defav(SC);
+
+         DOSE_fav(SC)= 1-DOSE_defav(SC);
+         STOCK_DOSE_fav(SH,SC)= DOSE_fav(SC);
+
+
+
+         LOOP(SP,
+                  IF (Data_Parc_Gwad(SP,"RUI_PARC") <  R_Tixier("SEUIL_RUI_PARC","FAVORABLE"),   RUI_defav(SP)=0;
+                  );
+                  IF (Data_Parc_Gwad(SP,"RUI_PARC") >  R_Tixier("SEUIL_RUI_PARC","DEFAVORABLE"), RUI_defav(SP)=1;
+                  );
+                  IF (Data_Parc_Gwad(SP,"RUI_PARC") <= R_Tixier("SEUIL_RUI_PARC","DEFAVORABLE") and (Data_Parc_Gwad(SP,"RUI_PARC")>R_Tixier("SEUIL_RUI_PARC","FAVORABLE")),
+                      RUI_defav(SP)$((R_Tixier("SEUIL_RUI_PARC","DEFAVORABLE") - R_Tixier("SEUIL_RUI_PARC","FAVORABLE")))
+                    =((Data_Parc_Gwad(SP,"RUI_PARC") - R_Tixier("SEUIL_RUI_PARC","FAVORABLE"))) /((R_Tixier("SEUIL_RUI_PARC","DEFAVORABLE") - R_Tixier("SEUIL_RUI_PARC","FAVORABLE")));
+                  );
+         );
+         STOCK_RUI_defav(SH,SP)= RUI_defav(SP);
+
+         RUI_fav(SP)= 1-RUI_defav(SP);
+         STOCK_RUI_fav(SH,SP)= RUI_fav(SP);
+
+
+         E_SURF(SP,SC)$
+                  ( min(DOSE_fav(SC),  RUI_fav(SP))  *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  RUI_defav(SP))*ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),RUI_fav(SP))  *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),RUI_defav(SP) *ASSOL_Parc(SP,SC)))
+                  =
+                  ((0*(min(DOSE_fav(SC),  RUI_fav(SP))  *ASSOL_Parc(SP,SC))+
+                   (4*min(DOSE_fav(SC),   RUI_defav(SP))*ASSOL_Parc(SP,SC))+
+                   (6*min(DOSE_defav(SC), RUI_fav(SP))  *ASSOL_Parc(SP,SC))+
+                   (10*min(DOSE_defav(SC),RUI_defav(SP))*ASSOL_Parc(SP,SC))))
+                  /
+                  ((min(DOSE_fav(SC),  RUI_fav(SP))  *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  RUI_defav(SP))*ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),RUI_fav(SP))  *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),RUI_defav(SP))*ASSOL_Parc(SP,SC)));
+         STOCK_E_SURF(SH,SP,SC)= E_SURF(SP,SC);
+
+
+         LOOP(SC,
+                  IF (DT50_Cult(SC) <  R_Tixier("SEUIL_DT50_CULT","FAVORABLE"), DT50_defav(SC) =0;
+                  );
+                  IF (DT50_Cult(SC) >  R_Tixier("SEUIL_DT50_CULT","DEFAVORABLE"), DT50_defav(SC) =1;
+                  );
+                  IF (DT50_Cult(SC) <= R_Tixier("SEUIL_DT50_CULT","DEFAVORABLE") and ( DT50_Cult(SC)>R_Tixier("SEUIL_DT50_CULT","FAVORABLE")),
+                      DT50_defav(SC)$((R_Tixier("SEUIL_DT50_CULT","DEFAVORABLE") - R_Tixier("SEUIL_DT50_CULT","FAVORABLE")))
+                  = ((DT50_Cult(SC) -  R_Tixier("SEUIL_DT50_CULT","FAVORABLE"))) /((R_Tixier("SEUIL_DT50_CULT","DEFAVORABLE") - R_Tixier("SEUIL_DT50_CULT","FAVORABLE")));
+                  ;)
+         );
+         STOCK_DT50_defav(SH,SC)= DT50_defav(SC);
+
+         DT50_fav(SC) = 1-DT50_defav(SC);
+         STOCK_DT50_fav(SH,SC)= DT50_fav(SC);
+
+
+         LOOP(SC,
+                  IF ((min(ADI_Cult(SC),AQUATOX_Cult(SC))) >  R_Tixier("SEUIL_MIN_ADIAQUATOX","DEFAVORABLE"), MIN_ADIAQUATOX_defav(SC) =1; );
+                  IF ((min(ADI_Cult(SC),AQUATOX_Cult(SC))) <  R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE"),   MIN_ADIAQUATOX_defav(SC) =0; );
+                  IF ((min(ADI_Cult(SC),AQUATOX_Cult(SC))) <= R_Tixier("SEUIL_MIN_ADIAQUATOX","DEFAVORABLE") and
+                     ((min(ADI_Cult(SC),AQUATOX_Cult(SC))) >  R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE")),
+                  MIN_ADIAQUATOX_defav(SC)$((R_Tixier("SEUIL_MIN_ADIAQUATOX","DEFAVORABLE") - R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE")))
+
+                  = ((min(ADI_Cult(SC),AQUATOX_Cult(SC)) - R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE"))) / ((R_Tixier("SEUIL_MIN_ADIAQUATOX","DEFAVORABLE") - R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE")));)
+
+*                  = ((DT50_Cult(SC) - R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE"))) / ((R_Tixier("SEUIL_MIN_ADIAQUATOX","DEFAVORABLE") - R_Tixier("SEUIL_MIN_ADIAQUATOX","FAVORABLE")));)
+         );
+         STOCK_MIN_ADIAQUATOX_defav(SH,SC)= MIN_ADIAQUATOX_defav(SC);
+
+         MIN_ADIAQUATOX_fav(SC)= 1-MIN_ADIAQUATOX_defav(SC);
+         STOCK_MIN_ADIAQUATOX_fav(SH,SC)= MIN_ADIAQUATOX_fav(SC);
+
+
+         T_SURF(SP,SC)$
+                  (min(DT50_fav(SC),  MIN_ADIAQUATOX_fav(SC))  *ASSOL_Parc(SP,SC)+
+                   min(DT50_fav(SC),  MIN_ADIAQUATOX_defav(SC))*ASSOL_Parc(SP,SC)+
+                   min(DT50_defav(SC),MIN_ADIAQUATOX_fav(SC))  *ASSOL_Parc(SP,SC)+
+                   min(DT50_defav(SC),MIN_ADIAQUATOX_defav(SC) *ASSOL_Parc(SP,SC)))
+                  =
+                  ((0*(min(DT50_fav(SC),  MIN_ADIAQUATOX_fav(SC))  *ASSOL_Parc(SP,SC))+
+                   (4*min(DT50_fav(SC),   MIN_ADIAQUATOX_defav(SC))*ASSOL_Parc(SP,SC))+
+                   (6*min(DT50_defav(SC), MIN_ADIAQUATOX_fav(SC))  *ASSOL_Parc(SP,SC))+
+                   (10*min(DT50_defav(SC),MIN_ADIAQUATOX_defav(SC))*ASSOL_Parc(SP,SC))))
+                  /
+                  ((min(DT50_fav(SC),  MIN_ADIAQUATOX_fav(SC))  *ASSOL_Parc(SP,SC)+
+                    min(DT50_fav(SC),  MIN_ADIAQUATOX_defav(SC))*ASSOL_Parc(SP,SC)+
+                    min(DT50_defav(SC),MIN_ADIAQUATOX_fav(SC))  *ASSOL_Parc(SP,SC)+
+                    min(DT50_defav(SC),MIN_ADIAQUATOX_defav(SC))*ASSOL_Parc(SP,SC)));
+         STOCK_T_SURF(SH,SP,SC)= T_SURF(SP,SC);
+
+
+         LOOP(SC,
+                  IF ( GUS_Cult(SC) <  R_Tixier("SEUIL_GUS_CULT","FAVORABLE"), GUS_defav(SC) =0;
+                  );
+                  IF ( GUS_Cult(SC) >  R_Tixier("SEUIL_GUS_CULT","DEFAVORABLE"), GUS_defav(SC) =1;
+                  );
+                  IF ( GUS_Cult(SC) <= R_Tixier("SEUIL_GUS_CULT","DEFAVORABLE") and ( GUS_Cult(SC)>R_Tixier("SEUIL_GUS_CULT","FAVORABLE")),
+                  GUS_defav(SC)$((R_Tixier("SEUIL_GUS_CULT","DEFAVORABLE") - R_Tixier("SEUIL_GUS_CULT","FAVORABLE")))
+                  =  ((GUS_Cult(SC) - R_Tixier("SEUIL_GUS_CULT","FAVORABLE"))) /((R_Tixier("SEUIL_GUS_CULT","DEFAVORABLE") - R_Tixier("SEUIL_GUS_CULT","FAVORABLE")));
+                  );
+         );
+         STOCK_GUS_defav(SH,SC)= GUS_defav(SC);
+
+         GUS_fav(SC)= 1-GUS_defav(SC);
+         STOCK_GUS_fav(SH,SC)= GUS_fav(SC);
+
+
+
+
+
+         LOOP(SP,
+                  IF ( Data_Parc_Gwad(SP,"DRAI_PARC") <  R_Tixier("SEUIL_DRAI_PARC","FAVORABLE"), DRAI_defav(SP) =0; );
+                  IF ( Data_Parc_Gwad(SP,"DRAI_PARC") >  R_Tixier("SEUIL_DRAI_PARC","DEFAVORABLE"), DRAI_defav(SP) =1; );
+                  IF ( Data_Parc_Gwad(SP,"DRAI_PARC") <= R_Tixier("SEUIL_DRAI_PARC","DEFAVORABLE") and ( Data_Parc_Gwad(SP,"DRAI_PARC")>R_Tixier("SEUIL_DRAI_PARC","FAVORABLE")),
+                  DRAI_defav(SP)$((R_Tixier("SEUIL_DRAI_PARC","DEFAVORABLE") - R_Tixier("SEUIL_DRAI_PARC","FAVORABLE")))
+                  = ((Data_Parc_Gwad(SP,"DRAI_PARC") - R_Tixier("SEUIL_DRAI_PARC","FAVORABLE")))
+                  /((R_Tixier("SEUIL_DRAI_PARC","DEFAVORABLE") - R_Tixier("SEUIL_DRAI_PARC","FAVORABLE")));)
+         );
+         STOCK_DRAI_defav(SH,SP)= DRAI_defav(SP);
+
+         DRAI_fav(SP)= 1-DRAI_defav(SP);
+         STOCK_DRAI_fav(SH,SP)= DRAI_fav(SP);
+
+
+         E_PROF(SP,SC)$
+                  ((min(DOSE_fav(SC),  GUS_fav(SC),  DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  GUS_fav(SC),  DRAI_defav(SP)) *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  GUS_defav(SC),DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  GUS_defav(SC),DRAI_defav(SP)) *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_fav(SC),  DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_fav(SC),  DRAI_defav(SP)) *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_defav(SC),DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_defav(SC),DRAI_defav(SP)))*ASSOL_Parc(SP,SC))
+                  =
+                  ((0*(min(DOSE_fav(SC),  GUS_fav(SC),  DRAI_fav(SP)))  *ASSOL_Parc(SP,SC)+
+                   (3*min(DOSE_fav(SC),   GUS_fav(SC),  DRAI_defav(SP)))*ASSOL_Parc(SP,SC)+
+                   (4*min(DOSE_fav(SC),   GUS_defav(SC),DRAI_fav(SP)))  *ASSOL_Parc(SP,SC)+
+                   (7*min(DOSE_fav(SC),   GUS_defav(SC),DRAI_defav(SP)))*ASSOL_Parc(SP,SC)+
+                   (3*min(DOSE_defav(SC), GUS_fav(SC),  DRAI_fav(SP)))  *ASSOL_Parc(SP,SC)+
+                   (6*min(DOSE_defav(SC), GUS_fav(SC),  DRAI_defav(SP)))*ASSOL_Parc(SP,SC)+
+                   (7*min(DOSE_defav(SC), GUS_defav(SC),DRAI_fav(SP)))  *ASSOL_Parc(SP,SC)+
+                   (10*min(DOSE_defav(SC),GUS_defav(SC),DRAI_defav(SP)))*ASSOL_Parc(SP,SC)))
+                  /
+                  ((min(DOSE_fav(SC),  GUS_fav(SC),  DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  GUS_fav(SC),  DRAI_defav(SP)) *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  GUS_defav(SC),DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_fav(SC),  GUS_defav(SC),DRAI_defav(SP)) *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_fav(SC),  DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_fav(SC),  DRAI_defav(SP)) *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_defav(SC),DRAI_fav(SP))   *ASSOL_Parc(SP,SC)+
+                    min(DOSE_defav(SC),GUS_defav(SC),DRAI_defav(SP)))*ASSOL_Parc(SP,SC));
+         STOCK_E_PROF(SH,SP,SC)= E_PROF(SP,SC);
+
+
+         LOOP(SC,
+                  IF ( ADI_Cult(SC) <  R_Tixier("SEUIL_ADI_CULT","FAVORABLE"), ADI_defav(SC) =0;
+                  );
+                  IF ( ADI_Cult(SC) >  R_Tixier("SEUIL_ADI_CULT","DEFAVORABLE"), ADI_defav(SC) =1;
+                  );
+                  IF ( ADI_Cult(SC) <= R_Tixier("SEUIL_ADI_CULT","DEFAVORABLE") and ( ADI_Cult(SC)>R_Tixier("SEUIL_ADI_CULT","FAVORABLE")),
+                  ADI_defav(SC)$((R_Tixier("SEUIL_ADI_CULT","DEFAVORABLE") - R_Tixier("SEUIL_ADI_CULT","FAVORABLE")))
+                  = ((ADI_Cult(SC) - R_Tixier("SEUIL_ADI_CULT","FAVORABLE")))
+                  /((R_Tixier("SEUIL_ADI_CULT","DEFAVORABLE") - R_Tixier("SEUIL_ADI_CULT","FAVORABLE")));
+                  );
+         );
+         STOCK_ADI_defav(SH,SC)= ADI_defav(SC);
+
+         ADI_fav(SC)= 1-ADI_defav(SC);
+         STOCK_ADI_fav(SH,SC)= ADI_fav(SC);
+
+
+         T_PROF(SP,SC)$
+                  ((min(DT50_fav(SC),  ADI_fav(SC))  *ASSOL_Parc(SP,SC)+
+                    min(DT50_fav(SC),  ADI_defav(SC))*ASSOL_Parc(SP,SC)+
+                    min(DT50_defav(SC),ADI_fav(SC))  *ASSOL_Parc(SP,SC)+
+                    min(DT50_defav(SC),ADI_defav(SC))*ASSOL_Parc(SP,SC)))
+                  =
+                  ((0*(min(DT50_fav(SC),  ADI_fav(SC)))  *ASSOL_Parc(SP,SC)+
+                   (4*min(DT50_fav(SC),   ADI_defav(SC)))*ASSOL_Parc(SP,SC)+
+                   (6*min(DT50_defav(SC), ADI_fav(SC)))  *ASSOL_Parc(SP,SC)+
+                   (10*min(DT50_defav(SC),ADI_defav(SC)))*ASSOL_Parc(SP,SC)))
+                  /
+                  ((min(DT50_fav(SC),  ADI_fav(SC))   *ASSOL_Parc(SP,SC)+
+                    min(DT50_fav(SC),  ADI_defav(SC)) *ASSOL_Parc(SP,SC)+
+                    min(DT50_defav(SC),ADI_fav(SC))   *ASSOL_Parc(SP,SC)+
+                    min(DT50_defav(SC),ADI_defav(SC)))*ASSOL_Parc(SP,SC));
+         STOCK_T_PROF(SH,SP,SC)= T_PROF(SP,SC);
+
+
+         R_SURF(SP,SC)= ((E_SURF(SP,SC))+(T_SURF(SP,SC)))/2;
+         STOCK_R_SURF(SH,SP,SC)= R_SURF(SP,SC);
+
+         R_PROF(SP,SC)= ((E_PROF(SP,SC))+(T_PROF(SP,SC)))/2;
+         STOCK_R_PROF(SH,SP,SC)= R_PROF(SP,SC);
+
+
+         R_PEST(SP,SC)= max(R_SURF(SP,SC), R_PROF(SP,SC));
+         STOCK_R_PEST(SH,SP,SC)= R_PEST(SP,SC);
+
+         R_PEST_parc(SP)$SURF_Parc(SP)= (sum(SC, R_PEST(SP,SC)*ASSOL_Parc(SP,SC))) / SURF_Parc(SP);
+         STOCK_R_PEST_Parc(SH,SP)= R_PEST_Parc(SP);
+
+         R_PEST_Gwad =  sum(SP$(R_PEST_parc(SP)>6), SURF_Parc(SP));
+         STOCK_R_PEST_Gwad(SH)= R_PEST_Gwad;
+
+
