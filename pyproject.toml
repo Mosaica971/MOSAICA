@@ -5,6 +5,8 @@ description = "Python/Pyomo rewrite of the MOSAICA crop-allocation optimization 
 requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.0",
+    "pyomo>=6.7",
+    "highspy>=1.7",
 ]
 
 [project.optional-dependencies]

@@ -63,6 +63,12 @@ def build_dataset() -> Dataset:
     )
     eligible_pairs = eligible_pairs_from_mask(eligibility_mask)
 
+    # Simplified margin proxy (price * yield, i.e. gross product before variable
+    # costs and subsidies) used to bootstrap the optimization model. The full
+    # GAMS MB_Ha_Cult formula also nets out OTK-based variable costs and POSEI/
+    # national/PDRG subsidies -- deferred until those tables are wired in.
+    revenue_per_ha_cult = prix_cult * rdt_cult
+
     parameters = {
         "expl_parc": expl_parc,
         "bv_parc": bv_parc,
@@ -77,6 +83,7 @@ def build_dataset() -> Dataset:
         "farm_surface_ha": farm_surface_ha,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
+        "revenue_per_ha_cult": revenue_per_ha_cult,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

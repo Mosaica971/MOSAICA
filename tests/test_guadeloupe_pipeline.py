@@ -58,3 +58,11 @@ def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
     eligible_pairs = dataset.parameters["eligible_pairs"]
     total_pairs = mask.shape[0] * mask.shape[1]
     assert 0 < len(eligible_pairs) < total_pairs
+
+
+def test_build_dataset_computes_revenue_per_ha_as_price_times_yield():
+    dataset = build_dataset()
+
+    revenue_per_ha_cult = dataset.parameters["revenue_per_ha_cult"]
+
+    assert revenue_per_ha_cult["AG"] == pytest.approx(700 * 20)

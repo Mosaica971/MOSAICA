@@ -1,12 +1,10 @@
 from main import main
 
 
-def test_main_prints_a_registry_row_for_each_dataset_entry(capsys):
+def test_main_runs_full_pipeline_and_prints_solution_summary(capsys):
     main()
 
     captured = capsys.readouterr()
 
-    assert "sets" in captured.out
-    assert "crops" in captured.out
-    assert "parameters" in captured.out
-    assert "farm_surface_ha" in captured.out
+    assert "Total revenue" in captured.out
+    assert "Plots allocated" in captured.out
