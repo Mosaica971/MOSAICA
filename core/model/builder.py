@@ -1,13 +1,21 @@
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
+from typing import Any
 
 import pyomo.environ as pyo
+
+from core.config import resolve_enabled
+from core.model import constraints as _constraints  # noqa: F401 (registers builders)
+from core.model import objectives as _objectives  # noqa: F401 (registers builders)
+from core.model.model_inputs import ModelInputs
+from core.model.registry import CONSTRAINT_REGISTRY, OBJECTIVE_REGISTRY
 
 
 def build_crop_allocation_model(
     plot_surface_ha: Mapping[str, float],
     crop_margin_per_ha: Mapping[str, float],
     eligible_pairs: Sequence[tuple[str, str]],
+    config: dict[str, Any],
 ) -> pyo.ConcreteModel:
     model = pyo.ConcreteModel()
 
@@ -19,19 +27,21 @@ def build_crop_allocation_model(
     model.PLOTS = pyo.Set(initialize=list(plots_to_crops.keys()))
     model.Y = pyo.Var(model.PAIRS, within=pyo.Binary)
 
-    model.objective = pyo.Objective(
-        expr=sum(
-            model.Y[plot, crop] * plot_surface_ha[plot] * crop_margin_per_ha[crop]
-            for plot, crop in eligible_pairs
-        ),
-        sense=pyo.maximize,
+    inputs = ModelInputs(
+        plot_surface_ha=plot_surface_ha,
+        crop_margin_per_ha=crop_margin_per_ha,
+        eligible_pairs=eligible_pairs,
     )
 
-    def _at_most_one_crop_per_plot_rule(model, plot):
-        return sum(model.Y[plot, crop] for crop in plots_to_crops[plot]) <= 1
+    for build_constraint, args in resolve_enabled(config["constraints"], CONSTRAINT_REGISTRY):
+        build_constraint(model, inputs, **args)
 
-    model.at_most_one_crop_per_plot = pyo.Constraint(
-        model.PLOTS, rule=_at_most_one_crop_per_plot_rule
-    )
+    enabled_objectives = resolve_enabled(config["objectives"], OBJECTIVE_REGISTRY)
+    if len(enabled_objectives) != 1:
+        raise ValueError(
+            f"Expected exactly one enabled objective, got {len(enabled_objectives)}"
+        )
+    build_objective, args = enabled_objectives[0]
+    build_objective(model, inputs, **args)
 
     return model

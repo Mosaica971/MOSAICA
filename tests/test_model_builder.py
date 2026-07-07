@@ -3,6 +3,11 @@ import pytest
 
 from core.model.builder import build_crop_allocation_model
 
+CONFIG = {
+    "constraints": [{"name": "at_most_one_crop_per_plot", "enable": True, "args": {}}],
+    "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+}
+
 
 def test_build_model_creates_binary_variable_only_for_eligible_pairs():
     eligible_pairs = [("P1", "C1"), ("P1", "C2"), ("P2", "C1")]
@@ -11,6 +16,7 @@ def test_build_model_creates_binary_variable_only_for_eligible_pairs():
         plot_surface_ha={"P1": 1.0, "P2": 2.0},
         crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
         eligible_pairs=eligible_pairs,
+        config=CONFIG,
     )
 
     assert set(model.Y.keys()) == set(eligible_pairs)
@@ -25,6 +31,7 @@ def test_solving_model_picks_most_profitable_eligible_crop_per_plot():
         plot_surface_ha={"P1": 1.0, "P2": 2.0},
         crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
         eligible_pairs=eligible_pairs,
+        config=CONFIG,
     )
 
     solver = pyo.SolverFactory("appsi_highs")
@@ -43,6 +50,7 @@ def test_at_most_one_crop_per_plot_constraint_rejects_two_crops_at_once():
         plot_surface_ha={"P1": 1.0},
         crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
         eligible_pairs=eligible_pairs,
+        config=CONFIG,
     )
 
     constraint = model.at_most_one_crop_per_plot["P1"]
@@ -51,3 +59,67 @@ def test_at_most_one_crop_per_plot_constraint_rejects_two_crops_at_once():
 
     assert pyo.value(constraint.body) == pytest.approx(2)
     assert constraint.upper() == pytest.approx(1)
+
+
+def test_build_model_skips_disabled_constraints():
+    config = {
+        "constraints": [{"name": "at_most_one_crop_per_plot", "enable": False, "args": {}}],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        config=config,
+    )
+
+    assert not hasattr(model, "at_most_one_crop_per_plot")
+
+
+def test_build_model_raises_when_no_objective_enabled():
+    config = {
+        "constraints": [],
+        "objectives": [{"name": "maximize_gross_margin", "enable": False, "args": {}}],
+    }
+
+    with pytest.raises(ValueError, match="exactly one enabled objective"):
+        build_crop_allocation_model(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1")],
+            config=config,
+        )
+
+
+def test_build_model_raises_when_multiple_objectives_enabled():
+    config = {
+        "constraints": [],
+        "objectives": [
+            {"name": "maximize_gross_margin", "enable": True, "args": {}},
+            {"name": "maximize_gross_margin", "enable": True, "args": {}},
+        ],
+    }
+
+    with pytest.raises(ValueError, match="exactly one enabled objective"):
+        build_crop_allocation_model(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1")],
+            config=config,
+        )
+
+
+def test_build_model_raises_for_unknown_constraint_name():
+    config = {
+        "constraints": [{"name": "not_a_real_constraint", "enable": True, "args": {}}],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    with pytest.raises(KeyError, match="not_a_real_constraint"):
+        build_crop_allocation_model(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1")],
+            config=config,
+        )
