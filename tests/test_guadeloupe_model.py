@@ -5,6 +5,11 @@ import pytest
 from case_studies.guadeloupe.model import build_model
 from core.data.dataset import Dataset
 
+CONFIG = {
+    "constraints": [{"name": "at_most_one_crop_per_plot", "enable": True, "args": {}}],
+    "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+}
+
 
 def _fake_dataset() -> Dataset:
     data_parc = pd.DataFrame({"SURF_HA": [1.0, 2.0]}, index=["P1", "P2"])
@@ -25,7 +30,7 @@ def _fake_dataset() -> Dataset:
 def test_build_model_wires_dataset_into_crop_allocation_model():
     dataset = _fake_dataset()
 
-    model = build_model(dataset)
+    model = build_model(dataset, CONFIG)
 
     assert set(model.Y.keys()) == {("P1", "C1"), ("P1", "C2"), ("P2", "C1")}
 
