@@ -1,3 +1,4 @@
+import pandas as pd
 import pyomo.environ as pyo
 import pytest
 
@@ -146,3 +147,17 @@ def test_build_model_defaults_to_empty_farms_set_when_farm_plots_omitted():
     )
 
     assert list(model.FARMS) == []
+
+
+def test_build_model_accepts_pandas_series_for_farm_level_parameters():
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=[("P1", "C1")],
+        config=CONFIG,
+        farm_plots={"E1": ["P1"]},
+        farm_surface_ha=pd.Series({"E1": 1.0}),
+        crop_yield_per_ha=pd.Series({"C1": 2.0}),
+    )
+
+    assert set(model.FARMS) == {"E1"}

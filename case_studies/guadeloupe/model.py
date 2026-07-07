@@ -6,13 +6,6 @@ from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
 
 
-def _to_dict(value):
-    """Convert pandas Series to dict, or return value as-is if already dict-like."""
-    if hasattr(value, "to_dict"):
-        return value.to_dict()
-    return value
-
-
 def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
     return build_crop_allocation_model(
         plot_surface_ha=dataset.parameters["data_parc"]["SURF_HA"],
@@ -20,7 +13,7 @@ def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
         eligible_pairs=dataset.parameters["eligible_pairs"],
         config=config,
         farm_plots=dataset.parameters.get("farm_plots", {}),
-        farm_surface_ha=_to_dict(dataset.parameters.get("farm_surface_ha", {})),
-        farm_gfa_surface_ha=_to_dict(dataset.parameters.get("farm_gfa_surface_ha", {})),
-        crop_yield_per_ha=_to_dict(dataset.parameters.get("rdt_cult", {})),
+        farm_surface_ha=dataset.parameters.get("farm_surface_ha", {}),
+        farm_gfa_surface_ha=dataset.parameters.get("farm_gfa_surface_ha", {}),
+        crop_yield_per_ha=dataset.parameters.get("rdt_cult", {}),
     )

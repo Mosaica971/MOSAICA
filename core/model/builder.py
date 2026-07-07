@@ -22,10 +22,10 @@ def build_crop_allocation_model(
     crop_yield_per_ha: Mapping[str, float] | None = None,
 ) -> pyo.ConcreteModel:
     model = pyo.ConcreteModel()
-    farm_plots = farm_plots or {}
-    farm_surface_ha = farm_surface_ha or {}
-    farm_gfa_surface_ha = farm_gfa_surface_ha or {}
-    crop_yield_per_ha = crop_yield_per_ha or {}
+    farm_plots = {} if farm_plots is None else farm_plots
+    farm_surface_ha = {} if farm_surface_ha is None else farm_surface_ha
+    farm_gfa_surface_ha = {} if farm_gfa_surface_ha is None else farm_gfa_surface_ha
+    crop_yield_per_ha = {} if crop_yield_per_ha is None else crop_yield_per_ha
 
     plots_to_crops = defaultdict(list)
     for plot, crop in eligible_pairs:
