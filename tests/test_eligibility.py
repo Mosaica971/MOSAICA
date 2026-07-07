@@ -1,6 +1,10 @@
 import pandas as pd
 
-from core.data.eligibility import compute_eligibility_mask, eligible_pairs_from_mask
+from core.data.eligibility import (
+    compute_eligibility_mask,
+    eligible_pairs_from_mask,
+    forbid_where,
+)
 
 
 def test_compute_eligibility_mask_applies_min_max_bounds_per_attribute():
@@ -39,3 +43,17 @@ def test_eligible_pairs_from_mask_returns_only_true_cells_as_plot_crop_pairs():
     pairs = eligible_pairs_from_mask(mask)
 
     assert pairs == [("P1", "C1")]
+
+
+def test_forbid_where_clears_target_crops_only_for_plots_matching_condition():
+    mask = pd.DataFrame(
+        {"C1": [True, True], "C2": [True, True]},
+        index=["P1", "P2"],
+    )
+    condition = pd.Series({"P1": True, "P2": False})
+
+    result = forbid_where(mask, condition, crops=["C1"])
+
+    assert result.loc["P1", "C1"] == False  # noqa: E712 (P1 matches condition)
+    assert result.loc["P2", "C1"] == True  # noqa: E712 (P2 does not match condition)
+    assert result.loc["P1", "C2"] == True  # noqa: E712 (C2 not targeted by the rule)

@@ -3,7 +3,11 @@ from pathlib import Path
 import pandas as pd
 
 from core.data.dataset import Dataset
-from core.data.eligibility import compute_eligibility_mask, eligible_pairs_from_mask
+from core.data.eligibility import (
+    compute_eligibility_mask,
+    eligible_pairs_from_mask,
+    forbid_where,
+)
 from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -15,16 +19,35 @@ YEAR = "2017"
 SCENARIO = "RESTIT"
 
 # Maps a plot attribute (Data_Parc_Gwad_2017 column) to the (min, max) bound
-# columns that describe it per crop in Data_Cult. Only the generic min/max
-# agronomic envelope is covered here (altitude, slope, rainfall, plot size) --
-# categorical rules (chlordecone risk, irrigation, region restrictions) are a
-# separate, Guadeloupe-specific concern deferred to a later milestone.
+# columns that describe it per crop in Data_Cult -- the generic min/max
+# agronomic envelope (altitude, slope, rainfall, plot size).
 ELIGIBILITY_ATTRIBUTE_BOUNDS = {
     "ALTITUDE": ("ALTI_MIN", "ALTI_MAX"),
     "PENTE": ("PENTE_MIN", "PENTE_MAX"),
     "PLUVIO_PARC": ("PLUVIO_MIN", "PLUVIO_MAX"),
     "SURF_HA": ("SURF_PARC_MIN", "SURF_PARC_MAX"),
 }
+
+
+def build_categorical_eligibility_rules(
+    data_parc: pd.DataFrame,
+) -> list[tuple[list[str], pd.Series]]:
+    """Guadeloupe-specific eligibility rules ported from MODELE.GMS "interdiction"
+    equations that are not expressible as a simple per-attribute min/max envelope.
+    Only a representative subset is ported so far (irrigation, soil type,
+    chlordecone risk) -- the remaining region/commune/mechanization restrictions
+    are deferred to a later milestone.
+    """
+    return [
+        (["ME"], data_parc["IRRIG_PARC"] == 0),  # Eq_ME_IRR: melon requires irrigation
+        (["MA_ROTA"], data_parc["IRRIG_PARC"] == 0),  # Eq_MA_ROTA_IRR
+        # Eq_AN_SOL_Parc: pineapple forbidden on calcareous soil (TYPE_SOL=2)
+        (["AN_NU", "AN_PA"], data_parc["TYPE_SOL"] == 2),
+        # Eq_ME_SOL_Parc: melon forbidden on non-calcareous Grande-Terre soils or Basse-Terre
+        (["ME"], data_parc["TYPE_SOL"].isin([2, 3, 4]) | (data_parc["ILE"] == 1)),
+        (["IG_TUT"], data_parc["RISQUE_CLD"] <= 3),  # Eq_IG_CLD: chlordecone risk
+        (["PN_PIQ"], data_parc["RISQUE_CLD"] == 1),  # Eq_PN_PIQ_CLD: chlordecone risk
+    ]
 
 
 def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) -> pd.Series:
@@ -61,6 +84,8 @@ def build_dataset() -> Dataset:
     eligibility_mask = compute_eligibility_mask(
         plot_attributes, crop_bounds, ELIGIBILITY_ATTRIBUTE_BOUNDS
     )
+    for crops, condition in build_categorical_eligibility_rules(data_parc):
+        eligibility_mask = forbid_where(eligibility_mask, condition, crops)
     eligible_pairs = eligible_pairs_from_mask(eligibility_mask)
 
     # Simplified margin proxy (price * yield, i.e. gross product before variable

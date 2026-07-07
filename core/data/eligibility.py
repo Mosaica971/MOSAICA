@@ -18,6 +18,12 @@ def compute_eligibility_mask(
     return mask
 
 
+def forbid_where(mask: pd.DataFrame, condition: pd.Series, crops: list[str]) -> pd.DataFrame:
+    result = mask.copy()
+    result.loc[condition, crops] = False
+    return result
+
+
 def eligible_pairs_from_mask(mask: pd.DataFrame) -> list[tuple[str, str]]:
     stacked = mask.stack()
     return list(stacked[stacked].index)

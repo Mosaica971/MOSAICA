@@ -66,3 +66,16 @@ def test_build_dataset_computes_revenue_per_ha_as_price_times_yield():
     revenue_per_ha_cult = dataset.parameters["revenue_per_ha_cult"]
 
     assert revenue_per_ha_cult["AG"] == pytest.approx(700 * 20)
+
+
+def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
+    dataset = build_dataset()
+
+    mask = dataset.parameters["eligibility_mask"]
+
+    # P5: IRRIG_PARC=0 -- melon requires irrigation (Eq_ME_IRR)
+    assert mask.loc["P5", "ME"] == False  # noqa: E712
+    # P78: RISQUE_CLD=3 (<=3) -- irrigated yam forbidden on CLD-polluted soils (Eq_IG_CLD)
+    assert mask.loc["P78", "IG_TUT"] == False  # noqa: E712
+    # P366: TYPE_SOL=2 (calcareous) -- pineapple forbidden on calcareous soil (Eq_AN_SOL_Parc)
+    assert mask.loc["P366", "AN_NU"] == False  # noqa: E712
