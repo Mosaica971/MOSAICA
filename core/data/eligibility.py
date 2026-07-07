@@ -84,7 +84,7 @@ def rule_melon_soil_restriction(
 def rule_max_risk_threshold(
     data_parc: pd.DataFrame, *, crops: list[str], risk_column: str, max_allowed: float
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[risk_column] > max_allowed
+    condition = data_parc[risk_column] <= max_allowed
     return crops, condition
 
 
@@ -92,7 +92,7 @@ def rule_max_risk_threshold(
 def rule_exact_risk_value(
     data_parc: pd.DataFrame, *, crops: list[str], risk_column: str, allowed_value: float
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[risk_column] != allowed_value
+    condition = data_parc[risk_column] == allowed_value
     return crops, condition
 
 

@@ -105,7 +105,7 @@ def test_rule_melon_soil_restriction_matches_soil_type_or_island():
     assert condition.tolist() == [True, True, False]
 
 
-def test_rule_max_risk_threshold_forbids_values_above_threshold():
+def test_rule_max_risk_threshold_forbids_values_at_or_below_threshold():
     data_parc = pd.DataFrame({"RISQUE_CLD": [3, 4]}, index=["P1", "P2"])
 
     crops, condition = rule_max_risk_threshold(
@@ -113,10 +113,10 @@ def test_rule_max_risk_threshold_forbids_values_above_threshold():
     )
 
     assert crops == ["IG_TUT"]
-    assert condition.tolist() == [False, True]
+    assert condition.tolist() == [True, False]
 
 
-def test_rule_exact_risk_value_forbids_values_other_than_allowed():
+def test_rule_exact_risk_value_forbids_the_matching_value():
     data_parc = pd.DataFrame({"RISQUE_CLD": [1, 2]}, index=["P1", "P2"])
 
     crops, condition = rule_exact_risk_value(
@@ -124,7 +124,7 @@ def test_rule_exact_risk_value_forbids_values_other_than_allowed():
     )
 
     assert crops == ["PN_PIQ"]
-    assert condition.tolist() == [False, True]
+    assert condition.tolist() == [True, False]
 
 
 def test_attribute_bounds_from_config_keeps_only_enabled_entries():
