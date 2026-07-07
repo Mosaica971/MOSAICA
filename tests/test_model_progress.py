@@ -70,6 +70,15 @@ def test_corrupt_file_falls_back_to_empty_history(tmp_path):
     assert history.estimate_seconds("guadeloupe", 100) is None
 
 
+def test_valid_json_of_the_wrong_shape_falls_back_to_empty_history(tmp_path):
+    path = tmp_path / "history.json"
+    path.write_text("[1, 2, 3]")
+
+    history = SolveHistory(path=path)
+
+    assert history.estimate_seconds("guadeloupe", 100) is None
+
+
 def test_history_persists_across_instances(tmp_path):
     path = tmp_path / "history.json"
     SolveHistory(path=path).record("guadeloupe", 100, 5.0)

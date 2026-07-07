@@ -28,9 +28,10 @@ class SolveHistory:
         if not self.path.exists():
             return {}
         try:
-            return json.loads(self.path.read_text())
+            data = json.loads(self.path.read_text())
         except (json.JSONDecodeError, OSError):
             return {}
+        return data if isinstance(data, dict) else {}
 
     def estimate_seconds(self, case_study: str, problem_size: int) -> float | None:
         entries = self._data.get(case_study, [])
