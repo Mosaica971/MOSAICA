@@ -92,13 +92,13 @@ from core.model.progress import run_with_progress
 
 def test_run_with_progress_returns_result_and_duration():
     def slow_add():
-        time.sleep(0.05)
+        time.sleep(0.1)
         return 1 + 1
 
     result, duration = run_with_progress(slow_add, label="test", estimate_seconds=None)
 
     assert result == 2
-    assert duration >= 0.05
+    assert duration >= 0.08
 
 
 def test_run_with_progress_works_with_a_known_estimate():
