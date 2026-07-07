@@ -60,12 +60,15 @@ def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
     assert 0 < len(eligible_pairs) < total_pairs
 
 
-def test_build_dataset_computes_revenue_per_ha_as_price_times_yield():
+def test_build_dataset_computes_gross_margin_per_ha_cult():
     dataset = build_dataset()
 
-    revenue_per_ha_cult = dataset.parameters["revenue_per_ha_cult"]
+    margin_per_ha_cult = dataset.parameters["margin_per_ha_cult"]
 
-    assert revenue_per_ha_cult["AG"] == pytest.approx(700 * 20)
+    # AG: PB=rdt*prix=20*700=14000 (no subsidies/bagasse for citrus), CV~8001.31
+    # from OTK variable costs -- hand-verified via a one-off script using
+    # case_studies.guadeloupe.economics against the real data tables.
+    assert margin_per_ha_cult["AG"] == pytest.approx(5998.69, abs=0.01)
 
 
 def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():

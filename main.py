@@ -14,7 +14,7 @@ def main() -> None:
     allocated_plots = sum(1 for index in model.Y if pyo.value(model.Y[index]) > 0.5)
     total_plots = len(dataset.parameters["data_parc"])
 
-    print(f"Total revenue (price x yield proxy): {total_revenue:,.2f}")
+    print(f"Total revenue (gross margin, MB_Ha_Cult): {total_revenue:,.2f}")
     print(f"Plots allocated to a crop: {allocated_plots} / {total_plots}")
 
 

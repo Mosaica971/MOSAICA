@@ -8,14 +8,14 @@ from core.data.dataset import Dataset
 
 def _fake_dataset() -> Dataset:
     data_parc = pd.DataFrame({"SURF_HA": [1.0, 2.0]}, index=["P1", "P2"])
-    revenue_per_ha_cult = pd.Series({"C1": 100.0, "C2": 200.0})
+    margin_per_ha_cult = pd.Series({"C1": 100.0, "C2": 200.0})
     eligible_pairs = [("P1", "C1"), ("P1", "C2"), ("P2", "C1")]
 
     return Dataset(
         sets={},
         parameters={
             "data_parc": data_parc,
-            "revenue_per_ha_cult": revenue_per_ha_cult,
+            "margin_per_ha_cult": margin_per_ha_cult,
             "eligible_pairs": eligible_pairs,
         },
         scalars={},

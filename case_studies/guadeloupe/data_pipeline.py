@@ -2,6 +2,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from case_studies.guadeloupe.economics import (
+    compute_gross_margin_per_ha_cult,
+    compute_gross_product_per_ha_cult,
+    compute_subsidy_per_ha_cult,
+    compute_variable_cost_per_ha_cult,
+)
 from core.data.dataset import Dataset
 from core.data.eligibility import (
     compute_eligibility_mask,
@@ -75,6 +81,21 @@ def build_dataset() -> Dataset:
     matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{SCENARIO}.txt")
     prix_cult = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[YEAR]
     rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[YEAR]
+    bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[YEAR]
+    duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[YEAR]
+    duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[YEAR]
+    cout_recolte_cult = read_wide_table(INDICE_H_DIR / "Cout_Recolte_Cult.txt")[YEAR]
+    cout_transp_cult = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult.txt")[YEAR]
+    posei_surf_cult = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[YEAR]
+    posei_q_cult = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[YEAR]
+    aide_indus_cult = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[YEAR]
+    aide_replant_cult = read_wide_table(INDICE_H_DIR / "Aide_Replant_Cult.txt")[YEAR]
+    aide_transp_cult = read_wide_table(INDICE_H_DIR / "Aide_Transp_Cult.txt")[YEAR]
+    aide_garantie_prix_cult = read_wide_table(INDICE_H_DIR / "Aide_Garantie_Prix_Cult.txt")[YEAR]
+    mae_recolte_vert_cult = read_wide_table(INDICE_H_DIR / "MAE_Recolte_Vert_Cult.txt")[YEAR]
+    mae_jachere_sol_nu_cult = read_wide_table(INDICE_H_DIR / "MAE_Jachere_Sol_Nu_Cult.txt")[YEAR]
+    mae_compost_cult = read_wide_table(INDICE_H_DIR / f"MAE_Compost_Cult_{SCENARIO}.txt")[YEAR]
+    mb_add_cult = read_wide_table(INDICE_H_DIR / "MB_ADD_Cult.txt")[YEAR]
 
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
@@ -88,11 +109,41 @@ def build_dataset() -> Dataset:
         eligibility_mask = forbid_where(eligibility_mask, condition, crops)
     eligible_pairs = eligible_pairs_from_mask(eligibility_mask)
 
-    # Simplified margin proxy (price * yield, i.e. gross product before variable
-    # costs and subsidies) used to bootstrap the optimization model. The full
-    # GAMS MB_Ha_Cult formula also nets out OTK-based variable costs and POSEI/
-    # national/PDRG subsidies -- deferred until those tables are wired in.
-    revenue_per_ha_cult = prix_cult * rdt_cult
+    variable_cost_per_ha_cult = compute_variable_cost_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+        cout_recolte_cult=cout_recolte_cult,
+        cout_transp_cult=cout_transp_cult,
+        rdt_cult=rdt_cult,
+    )
+    subsidy_per_ha_cult = compute_subsidy_per_ha_cult(
+        posei_surf_cult=posei_surf_cult,
+        posei_q_cult=posei_q_cult,
+        aide_indus_cult=aide_indus_cult,
+        aide_replant_cult=aide_replant_cult,
+        aide_transp_cult=aide_transp_cult,
+        aide_garantie_prix_cult=aide_garantie_prix_cult,
+        mae_recolte_vert_cult=mae_recolte_vert_cult,
+        mae_jachere_sol_nu_cult=mae_jachere_sol_nu_cult,
+        mae_compost_cult=mae_compost_cult,
+        mb_add_cult=mb_add_cult,
+        rdt_cult=rdt_cult,
+        duree_cycle_cult=duree_cycle_cult,
+        duree_plant_cult=duree_plant_cult,
+    )
+    gross_product_per_ha_cult = compute_gross_product_per_ha_cult(
+        rdt_cult=rdt_cult,
+        prix_cult=prix_cult,
+        bagasse_cult=bagasse_cult,
+        subsidy_per_ha_cult=subsidy_per_ha_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+    margin_per_ha_cult = compute_gross_margin_per_ha_cult(
+        gross_product_per_ha_cult=gross_product_per_ha_cult,
+        variable_cost_per_ha_cult=variable_cost_per_ha_cult,
+    )
 
     parameters = {
         "expl_parc": expl_parc,
@@ -108,7 +159,7 @@ def build_dataset() -> Dataset:
         "farm_surface_ha": farm_surface_ha,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
-        "revenue_per_ha_cult": revenue_per_ha_cult,
+        "margin_per_ha_cult": margin_per_ha_cult,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})
