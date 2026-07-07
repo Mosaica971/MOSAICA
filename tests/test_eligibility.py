@@ -9,6 +9,7 @@ from core.data.eligibility import (
     rule_irrigation_required,
     rule_max_risk_threshold,
     rule_melon_soil_restriction,
+    rule_region_crop_forbidden,
     rule_soil_type_forbidden,
 )
 
@@ -124,6 +125,17 @@ def test_rule_exact_risk_value_forbids_the_matching_value():
     )
 
     assert crops == ["PN_PIQ"]
+    assert condition.tolist() == [True, False]
+
+
+def test_rule_region_crop_forbidden_matches_listed_regions():
+    data_parc = pd.DataFrame({"REGION_CODE": ["R1", "R2"]}, index=["P1", "P2"])
+
+    crops, condition = rule_region_crop_forbidden(
+        data_parc, crops=["ME"], region_column="REGION_CODE", forbidden_regions=["R1"]
+    )
+
+    assert crops == ["ME"]
     assert condition.tolist() == [True, False]
 
 

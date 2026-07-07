@@ -89,6 +89,10 @@ def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
     assert mask.loc["P78", "IG_TUT"] == False  # noqa: E712
     # P366: TYPE_SOL=2 (calcareous) -- pineapple forbidden on calcareous soil (Eq_AN_SOL_Parc)
     assert mask.loc["P366", "AN_NU"] == False  # noqa: E712
+    # P938: region R1, a non-melon-producing commune (Eq_ME_Reg) -- otherwise
+    # ME-eligible under every other rule/bound, hand-verified via a one-off
+    # script against the real data tables.
+    assert mask.loc["P938", "ME"] == False  # noqa: E712
 
 
 def test_build_dataset_skips_disabled_categorical_rule():
@@ -102,3 +106,5 @@ def test_build_dataset_skips_disabled_categorical_rule():
 
     # P5 would be forbidden for ME by irrigation_required, but that rule is disabled here.
     assert mask.loc["P5", "ME"] == True  # noqa: E712
+    # P938 would be forbidden for ME by region_crop_forbidden, but disabled here.
+    assert mask.loc["P938", "ME"] == True  # noqa: E712

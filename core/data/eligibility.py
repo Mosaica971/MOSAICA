@@ -80,6 +80,18 @@ def rule_melon_soil_restriction(
     return crops, condition
 
 
+@register_categorical_rule("region_crop_forbidden")
+def rule_region_crop_forbidden(
+    data_parc: pd.DataFrame,
+    *,
+    crops: list[str],
+    region_column: str,
+    forbidden_regions: list[str],
+) -> tuple[list[str], pd.Series]:
+    condition = data_parc[region_column].isin(forbidden_regions)
+    return crops, condition
+
+
 @register_categorical_rule("max_risk_threshold")
 def rule_max_risk_threshold(
     data_parc: pd.DataFrame, *, crops: list[str], risk_column: str, max_allowed: float

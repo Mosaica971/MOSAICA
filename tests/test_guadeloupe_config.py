@@ -26,4 +26,5 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
         "melon_soil_restriction",
         "max_risk_threshold",
         "exact_risk_value",
+        "region_crop_forbidden",
     }

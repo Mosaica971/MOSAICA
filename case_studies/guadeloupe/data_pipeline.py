@@ -74,6 +74,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
 
+    data_parc = data_parc.assign(
+        REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
+    )
+
     attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
     plot_attributes = data_parc[list(attribute_bounds.keys())]
     crop_bounds = data_cult.T
