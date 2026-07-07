@@ -1,0 +1,72 @@
+solver:
+  name: appsi_highs
+  args: {}
+
+objectives:
+  - name: maximize_gross_margin
+    enable: true
+    args: {}
+
+constraints:
+  - name: at_most_one_crop_per_plot
+    enable: true
+    args: {}
+
+eligibility_criteria:
+  - name: altitude
+    enable: true
+    args:
+      attribute: ALTITUDE
+      min_col: ALTI_MIN
+      max_col: ALTI_MAX
+  - name: slope
+    enable: true
+    args:
+      attribute: PENTE
+      min_col: PENTE_MIN
+      max_col: PENTE_MAX
+  - name: rainfall
+    enable: true
+    args:
+      attribute: PLUVIO_PARC
+      min_col: PLUVIO_MIN
+      max_col: PLUVIO_MAX
+  - name: plot_size
+    enable: true
+    args:
+      attribute: SURF_HA
+      min_col: SURF_PARC_MIN
+      max_col: SURF_PARC_MAX
+
+categorical_rules:
+  - name: irrigation_required
+    enable: true
+    args:
+      crops: [ME, MA_ROTA]
+      irrigation_column: IRRIG_PARC
+  - name: soil_type_forbidden
+    enable: true
+    args:
+      crops: [AN_NU, AN_PA]
+      soil_column: TYPE_SOL
+      forbidden_soil_types: [2]
+  - name: melon_soil_restriction
+    enable: true
+    args:
+      crops: [ME]
+      soil_column: TYPE_SOL
+      forbidden_soil_types: [2, 3, 4]
+      island_column: ILE
+      forbidden_island: 1
+  - name: max_risk_threshold
+    enable: true
+    args:
+      crops: [IG_TUT]
+      risk_column: RISQUE_CLD
+      max_allowed: 3
+  - name: exact_risk_value
+    enable: true
+    args:
+      crops: [PN_PIQ]
+      risk_column: RISQUE_CLD
+      allowed_value: 1
