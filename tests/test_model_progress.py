@@ -1,4 +1,5 @@
 import pytest
+import time
 
 from core.model.progress import SolveHistory
 
@@ -84,3 +85,35 @@ def test_case_studies_are_kept_separate(tmp_path):
     history.record("guadeloupe", 100, 5.0)
 
     assert history.estimate_seconds("other_case_study", 100) is None
+
+
+from core.model.progress import run_with_progress
+
+
+def test_run_with_progress_returns_result_and_duration():
+    def slow_add():
+        time.sleep(0.05)
+        return 1 + 1
+
+    result, duration = run_with_progress(slow_add, label="test", estimate_seconds=None)
+
+    assert result == 2
+    assert duration >= 0.05
+
+
+def test_run_with_progress_works_with_a_known_estimate():
+    def instant_value():
+        return "done"
+
+    result, duration = run_with_progress(instant_value, label="test", estimate_seconds=10.0)
+
+    assert result == "done"
+    assert duration >= 0.0
+
+
+def test_run_with_progress_reraises_exception_from_worker_thread():
+    def boom():
+        raise RuntimeError("solve failed")
+
+    with pytest.raises(RuntimeError, match="solve failed"):
+        run_with_progress(boom, label="test", estimate_seconds=None)

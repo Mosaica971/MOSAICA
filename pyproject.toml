@@ -8,6 +8,7 @@ dependencies = [
     "pyomo>=6.7",
     "highspy>=1.7",
     "pyyaml>=6.0",
+    "tqdm>=4.66",
 ]
 
 [project.optional-dependencies]
