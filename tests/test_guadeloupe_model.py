@@ -39,3 +39,13 @@ def test_build_model_wires_dataset_into_crop_allocation_model():
 
     assert pyo.value(model.Y["P1", "C2"]) == pytest.approx(1)
     assert pyo.value(model.Y["P2", "C1"]) == pytest.approx(1)
+
+
+def test_build_model_wires_farm_level_parameters_into_farms_set():
+    dataset = _fake_dataset()
+    dataset.parameters["farm_plots"] = {"E1": ["P1", "P2"]}
+    dataset.parameters["farm_surface_ha"] = pd.Series({"E1": 3.0})
+
+    model = build_model(dataset, CONFIG)
+
+    assert set(model.FARMS) == {"E1"}
