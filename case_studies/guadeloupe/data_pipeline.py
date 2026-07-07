@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from core.data.dataset import Dataset
+from core.data.eligibility import compute_eligibility_mask, eligible_pairs_from_mask
 from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -12,6 +13,18 @@ INDICE_H_DIR = TABLES_DIR / "indice_H"
 
 YEAR = "2017"
 SCENARIO = "RESTIT"
+
+# Maps a plot attribute (Data_Parc_Gwad_2017 column) to the (min, max) bound
+# columns that describe it per crop in Data_Cult. Only the generic min/max
+# agronomic envelope is covered here (altitude, slope, rainfall, plot size) --
+# categorical rules (chlordecone risk, irrigation, region restrictions) are a
+# separate, Guadeloupe-specific concern deferred to a later milestone.
+ELIGIBILITY_ATTRIBUTE_BOUNDS = {
+    "ALTITUDE": ("ALTI_MIN", "ALTI_MAX"),
+    "PENTE": ("PENTE_MIN", "PENTE_MAX"),
+    "PLUVIO_PARC": ("PLUVIO_MIN", "PLUVIO_MAX"),
+    "SURF_HA": ("SURF_PARC_MIN", "SURF_PARC_MAX"),
+}
 
 
 def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) -> pd.Series:
@@ -43,6 +56,13 @@ def build_dataset() -> Dataset:
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
 
+    plot_attributes = data_parc[list(ELIGIBILITY_ATTRIBUTE_BOUNDS.keys())]
+    crop_bounds = data_cult.T
+    eligibility_mask = compute_eligibility_mask(
+        plot_attributes, crop_bounds, ELIGIBILITY_ATTRIBUTE_BOUNDS
+    )
+    eligible_pairs = eligible_pairs_from_mask(eligibility_mask)
+
     parameters = {
         "expl_parc": expl_parc,
         "bv_parc": bv_parc,
@@ -55,6 +75,8 @@ def build_dataset() -> Dataset:
         "prix_cult": prix_cult,
         "rdt_cult": rdt_cult,
         "farm_surface_ha": farm_surface_ha,
+        "eligibility_mask": eligibility_mask,
+        "eligible_pairs": eligible_pairs,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

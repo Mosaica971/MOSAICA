@@ -43,3 +43,18 @@ def test_build_dataset_selects_2017_column_for_price_and_yield():
 
     assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
     assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(20)
+
+
+def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
+    dataset = build_dataset()
+
+    mask = dataset.parameters["eligibility_mask"]
+
+    # P1: altitude 23, pente 1, pluvio 1483 -- within CS's bounds (alti<=250, pente<=20)
+    assert mask.loc["P1", "CS"] == True  # noqa: E712
+    # P2483: altitude 301 -- exceeds CS's ALTI_MAX of 250
+    assert mask.loc["P2483", "CS"] == False  # noqa: E712
+
+    eligible_pairs = dataset.parameters["eligible_pairs"]
+    total_pairs = mask.shape[0] * mask.shape[1]
+    assert 0 < len(eligible_pairs) < total_pairs
