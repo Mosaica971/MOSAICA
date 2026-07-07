@@ -4,9 +4,12 @@ import json
 import threading
 import time
 from pathlib import Path
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar
 
+import pyomo.environ as pyo
 from tqdm import tqdm
+
+from core.model.solver import solve_model
 
 DEFAULT_HISTORY_PATH = Path(__file__).resolve().parents[2] / ".mosaica_solve_history.json"
 _MAX_ENTRIES_PER_CASE_STUDY = 20
@@ -91,3 +94,24 @@ def run_with_progress(
     if "value" in error:
         raise error["value"]
     return outcome["value"], duration
+
+
+def solve_with_progress(
+    model: pyo.ConcreteModel,
+    config: dict[str, Any],
+    *,
+    case_study: str,
+    history: SolveHistory | None = None,
+) -> Any:
+    history = history or SolveHistory()
+    problem_size = sum(1 for _ in model.component_data_objects(pyo.Var))
+    estimate = history.estimate_seconds(case_study, problem_size)
+
+    results, duration = run_with_progress(
+        lambda: solve_model(model, config),
+        label=f"Solving [{case_study}, {problem_size} vars]",
+        estimate_seconds=estimate,
+    )
+
+    history.record(case_study, problem_size, duration)
+    return results

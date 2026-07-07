@@ -117,3 +117,65 @@ def test_run_with_progress_reraises_exception_from_worker_thread():
 
     with pytest.raises(RuntimeError, match="solve failed"):
         run_with_progress(boom, label="test", estimate_seconds=None)
+
+
+import pyomo.environ as pyo
+
+from core.model.builder import build_crop_allocation_model
+from core.model.progress import solve_with_progress
+
+_SOLVE_CONFIG = {
+    "solver": {"name": "appsi_highs", "args": {}},
+    "constraints": [{"name": "at_most_one_crop_per_plot", "enable": True, "args": {}}],
+    "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+}
+
+
+def test_solve_with_progress_records_history_on_success(tmp_path):
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        config=_SOLVE_CONFIG,
+    )
+    history = SolveHistory(path=tmp_path / "history.json")
+
+    solve_with_progress(model, _SOLVE_CONFIG, case_study="test_case", history=history)
+
+    entries = history._data["test_case"]
+    assert len(entries) == 1
+    assert entries[0]["size"] == 2  # Y["P1","C1"], Y["P1","C2"]
+    assert entries[0]["duration"] >= 0.0
+    assert pyo.value(model.Y["P1", "C2"]) == pytest.approx(1)
+
+
+def test_solve_with_progress_does_not_record_history_on_failure(tmp_path):
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=[("P1", "C1")],
+        config=_SOLVE_CONFIG,
+    )
+    model.Y["P1", "C1"].fix(1)
+    model.infeasible_constraint = pyo.Constraint(expr=model.Y["P1", "C1"] == 0)
+    history = SolveHistory(path=tmp_path / "history.json")
+
+    with pytest.raises(RuntimeError, match="optimal"):
+        solve_with_progress(model, _SOLVE_CONFIG, case_study="test_case", history=history)
+
+    assert "test_case" not in history._data
+
+
+def test_solve_with_progress_defaults_to_a_fresh_solve_history_when_none_given():
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        config=_SOLVE_CONFIG,
+    )
+
+    # No history= passed: solve_with_progress must construct its own SolveHistory()
+    # and must not raise even though this touches the real default history path
+    # (consistent with the design's non-goal: the default path is wired up but
+    # not asserted on beyond "it doesn't blow up").
+    solve_with_progress(model, _SOLVE_CONFIG, case_study="test_case_default_history")
