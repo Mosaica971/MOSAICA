@@ -1,7 +1,14 @@
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
 from case_studies.guadeloupe.data_pipeline import build_dataset, compute_farm_surface_ha
+from core.config import load_config
+
+CONFIG = load_config(
+    Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
+)
 
 
 def test_compute_farm_surface_ha_sums_plot_surface_per_farm():
@@ -20,7 +27,7 @@ def test_compute_farm_surface_ha_sums_plot_surface_per_farm():
 
 
 def test_build_dataset_loads_known_set_sizes():
-    dataset = build_dataset()
+    dataset = build_dataset(CONFIG)
 
     assert len(dataset.sets["crops"]) == 84
     assert len(dataset.sets["soils"]) == 5
@@ -30,7 +37,7 @@ def test_build_dataset_loads_known_set_sizes():
 
 
 def test_build_dataset_computes_farm_surface_ha_matching_gams_init_logic():
-    dataset = build_dataset()
+    dataset = build_dataset(CONFIG)
 
     farm_surface_ha = dataset.parameters["farm_surface_ha"]
 
@@ -39,14 +46,14 @@ def test_build_dataset_computes_farm_surface_ha_matching_gams_init_logic():
 
 
 def test_build_dataset_selects_2017_column_for_price_and_yield():
-    dataset = build_dataset()
+    dataset = build_dataset(CONFIG)
 
     assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
     assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(20)
 
 
 def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
-    dataset = build_dataset()
+    dataset = build_dataset(CONFIG)
 
     mask = dataset.parameters["eligibility_mask"]
 
@@ -61,7 +68,7 @@ def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
 
 
 def test_build_dataset_computes_gross_margin_per_ha_cult():
-    dataset = build_dataset()
+    dataset = build_dataset(CONFIG)
 
     margin_per_ha_cult = dataset.parameters["margin_per_ha_cult"]
 
@@ -72,7 +79,7 @@ def test_build_dataset_computes_gross_margin_per_ha_cult():
 
 
 def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
-    dataset = build_dataset()
+    dataset = build_dataset(CONFIG)
 
     mask = dataset.parameters["eligibility_mask"]
 
@@ -82,3 +89,16 @@ def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
     assert mask.loc["P78", "IG_TUT"] == False  # noqa: E712
     # P366: TYPE_SOL=2 (calcareous) -- pineapple forbidden on calcareous soil (Eq_AN_SOL_Parc)
     assert mask.loc["P366", "AN_NU"] == False  # noqa: E712
+
+
+def test_build_dataset_skips_disabled_categorical_rule():
+    config = {**CONFIG, "categorical_rules": [
+        {**entry, "enable": False} for entry in CONFIG["categorical_rules"]
+    ]}
+
+    dataset = build_dataset(config)
+
+    mask = dataset.parameters["eligibility_mask"]
+
+    # P5 would be forbidden for ME by irrigation_required, but that rule is disabled here.
+    assert mask.loc["P5", "ME"] == True  # noqa: E712

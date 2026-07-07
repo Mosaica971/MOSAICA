@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -8,8 +9,11 @@ from case_studies.guadeloupe.economics import (
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
+from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
+    CATEGORICAL_RULE_REGISTRY,
+    attribute_bounds_from_config,
     compute_eligibility_mask,
     eligible_pairs_from_mask,
     forbid_where,
@@ -20,40 +24,10 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SETS_DIR = DATA_DIR / "sets"
 TABLES_DIR = DATA_DIR / "tables"
 INDICE_H_DIR = TABLES_DIR / "indice_H"
+CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
 
 YEAR = "2017"
 SCENARIO = "RESTIT"
-
-# Maps a plot attribute (Data_Parc_Gwad_2017 column) to the (min, max) bound
-# columns that describe it per crop in Data_Cult -- the generic min/max
-# agronomic envelope (altitude, slope, rainfall, plot size).
-ELIGIBILITY_ATTRIBUTE_BOUNDS = {
-    "ALTITUDE": ("ALTI_MIN", "ALTI_MAX"),
-    "PENTE": ("PENTE_MIN", "PENTE_MAX"),
-    "PLUVIO_PARC": ("PLUVIO_MIN", "PLUVIO_MAX"),
-    "SURF_HA": ("SURF_PARC_MIN", "SURF_PARC_MAX"),
-}
-
-
-def build_categorical_eligibility_rules(
-    data_parc: pd.DataFrame,
-) -> list[tuple[list[str], pd.Series]]:
-    """Guadeloupe-specific eligibility rules ported from MODELE.GMS "interdiction"
-    equations that are not expressible as a simple per-attribute min/max envelope.
-    Only a representative subset is ported so far (irrigation, soil type,
-    chlordecone risk) -- the remaining region/commune/mechanization restrictions
-    are deferred to a later milestone.
-    """
-    return [
-        (["ME"], data_parc["IRRIG_PARC"] == 0),  # Eq_ME_IRR: melon requires irrigation
-        (["MA_ROTA"], data_parc["IRRIG_PARC"] == 0),  # Eq_MA_ROTA_IRR
-        # Eq_AN_SOL_Parc: pineapple forbidden on calcareous soil (TYPE_SOL=2)
-        (["AN_NU", "AN_PA"], data_parc["TYPE_SOL"] == 2),
-        # Eq_ME_SOL_Parc: melon forbidden on non-calcareous Grande-Terre soils or Basse-Terre
-        (["ME"], data_parc["TYPE_SOL"].isin([2, 3, 4]) | (data_parc["ILE"] == 1)),
-        (["IG_TUT"], data_parc["RISQUE_CLD"] <= 3),  # Eq_IG_CLD: chlordecone risk
-        (["PN_PIQ"], data_parc["RISQUE_CLD"] == 1),  # Eq_PN_PIQ_CLD: chlordecone risk
-    ]
 
 
 def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) -> pd.Series:
@@ -61,7 +35,7 @@ def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) ->
     return merged.groupby("farm")["surface"].sum()
 
 
-def build_dataset() -> Dataset:
+def build_dataset(config: dict[str, Any]) -> Dataset:
     sets = {
         "crops": read_flat_set(SETS_DIR / "CULT_2017.set"),
         "soils": read_flat_set(SETS_DIR / "SOL.set"),
@@ -100,12 +74,14 @@ def build_dataset() -> Dataset:
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
 
-    plot_attributes = data_parc[list(ELIGIBILITY_ATTRIBUTE_BOUNDS.keys())]
+    attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
+    plot_attributes = data_parc[list(attribute_bounds.keys())]
     crop_bounds = data_cult.T
-    eligibility_mask = compute_eligibility_mask(
-        plot_attributes, crop_bounds, ELIGIBILITY_ATTRIBUTE_BOUNDS
-    )
-    for crops, condition in build_categorical_eligibility_rules(data_parc):
+    eligibility_mask = compute_eligibility_mask(plot_attributes, crop_bounds, attribute_bounds)
+    for build_rule, args in resolve_enabled(
+        config["categorical_rules"], CATEGORICAL_RULE_REGISTRY
+    ):
+        crops, condition = build_rule(data_parc, **args)
         eligibility_mask = forbid_where(eligibility_mask, condition, crops)
     eligible_pairs = eligible_pairs_from_mask(eligibility_mask)
 
@@ -166,7 +142,8 @@ def build_dataset() -> Dataset:
 
 
 if __name__ == "__main__":
-    dataset = build_dataset()
+    config = load_config(CONFIG_PATH)
+    dataset = build_dataset(config)
     print(f"crops: {len(dataset.sets['crops'])}")
     print(f"soils: {len(dataset.sets['soils'])}")
     print(f"otk: {len(dataset.sets['otk'])}")
