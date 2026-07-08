@@ -108,6 +108,20 @@ def rule_exact_risk_value(
     return crops, condition
 
 
+@register_categorical_rule("friche_lock")
+def rule_friche_lock(
+    data_parc: pd.DataFrame,
+    *,
+    crops: list[str],
+    history_columns: list[str],
+    fallow_codes: list[int],
+) -> tuple[list[str], pd.Series]:
+    condition = pd.Series(True, index=data_parc.index)
+    for column in history_columns:
+        condition &= data_parc[column].isin(fallow_codes)
+    return crops, condition
+
+
 def attribute_bounds_from_config(entries: list[dict]) -> dict[str, tuple[str, str]]:
     return {
         entry["args"]["attribute"]: (entry["args"]["min_col"], entry["args"]["max_col"])

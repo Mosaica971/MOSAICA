@@ -6,6 +6,7 @@ from core.data.eligibility import (
     eligible_pairs_from_mask,
     forbid_where,
     rule_exact_risk_value,
+    rule_friche_lock,
     rule_irrigation_required,
     rule_max_risk_threshold,
     rule_melon_soil_restriction,
@@ -156,3 +157,25 @@ def test_attribute_bounds_from_config_keeps_only_enabled_entries():
     bounds = attribute_bounds_from_config(entries)
 
     assert bounds == {"ALTITUDE": ("ALTI_MIN", "ALTI_MAX")}
+
+
+def test_rule_friche_lock_matches_plots_fallow_for_every_listed_year():
+    data_parc = pd.DataFrame(
+        {
+            "cult_2015": [14, 14, 5],
+            "cult_2016": [14, 5, 14],
+            "cult_2017": [10, 14, 14],
+        },
+        index=["P1", "P2", "P3"],
+    )
+
+    crops, condition = rule_friche_lock(
+        data_parc,
+        crops=["AG", "CS"],
+        history_columns=["cult_2015", "cult_2016", "cult_2017"],
+        fallow_codes=[0, 10, 14],
+    )
+
+    assert crops == ["AG", "CS"]
+    # P1: 14,14,10 -- all fallow codes, locked. P2/P3: one year has a real crop (5).
+    assert condition.tolist() == [True, False, False]
