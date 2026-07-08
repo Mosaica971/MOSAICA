@@ -1,3 +1,4 @@
+import pandas as pd
 import pyomo.environ as pyo
 import pytest
 
@@ -123,3 +124,312 @@ def test_build_model_raises_for_unknown_constraint_name():
             eligible_pairs=[("P1", "C1")],
             config=config,
         )
+
+
+def test_build_model_creates_farms_set_from_farm_plots():
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0, "P2": 2.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=[("P1", "C1"), ("P2", "C1")],
+        config=CONFIG,
+        farm_plots={"E1": ["P1", "P2"]},
+    )
+
+    assert set(model.FARMS) == {"E1"}
+
+
+def test_build_model_defaults_to_empty_farms_set_when_farm_plots_omitted():
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=[("P1", "C1")],
+        config=CONFIG,
+    )
+
+    assert list(model.FARMS) == []
+
+
+def test_build_model_accepts_pandas_series_for_farm_level_parameters():
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=[("P1", "C1")],
+        config=CONFIG,
+        farm_plots={"E1": ["P1"]},
+        farm_surface_ha=pd.Series({"E1": 1.0}),
+        crop_yield_per_ha=pd.Series({"C1": 2.0}),
+    )
+
+    assert set(model.FARMS) == {"E1"}
+
+
+def test_territory_production_bound_constraint_limits_total_yield_le_threshold():
+    config = {
+        "constraints": [
+            {
+                "name": "territory_production_bound",
+                "enable": True,
+                "args": {
+                    "label": "quota_c1",
+                    "groups": [{"crops": ["C1"], "use_yield": True, "rate_multiplier": 1.0}],
+                    "sense": "le",
+                    "threshold": 5.0,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 2.0, "P2": 2.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=[("P1", "C1"), ("P2", "C1")],
+        config=config,
+        crop_yield_per_ha={"C1": 2.0},
+    )
+    model.Y["P1", "C1"].fix(1)
+    model.Y["P2", "C1"].fix(1)
+
+    # 2.0ha*2.0yield + 2.0ha*2.0yield = 8.0
+    assert pyo.value(model.quota_c1.body) == pytest.approx(8.0)
+    assert model.quota_c1.upper() == pytest.approx(5.0)
+
+
+def test_territory_production_bound_constraint_supports_area_only_groups():
+    config = {
+        "constraints": [
+            {
+                "name": "territory_production_bound",
+                "enable": True,
+                "args": {
+                    "label": "min_pasture",
+                    "groups": [
+                        {"crops": ["PN_PIQ"], "use_yield": False, "rate_multiplier": 1.0}
+                    ],
+                    "sense": "ge",
+                    "threshold": 1.0,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 3.0},
+        crop_margin_per_ha={"PN_PIQ": 10.0},
+        eligible_pairs=[("P1", "PN_PIQ")],
+        config=config,
+    )
+    model.Y["P1", "PN_PIQ"].fix(1)
+
+    assert pyo.value(model.min_pasture.body) == pytest.approx(3.0)
+    assert model.min_pasture.lower() == pytest.approx(1.0)
+
+
+def test_territory_production_bound_constraint_sums_multiple_groups():
+    config = {
+        "constraints": [
+            {
+                "name": "territory_production_bound",
+                "enable": True,
+                "args": {
+                    "label": "combined",
+                    "groups": [
+                        {"crops": ["C1"], "use_yield": True, "rate_multiplier": 1.0},
+                        {"crops": ["C2"], "use_yield": True, "rate_multiplier": 0.5},
+                    ],
+                    "sense": "ge",
+                    "threshold": 0.0,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0, "P2": 1.0},
+        crop_margin_per_ha={"C1": 10.0, "C2": 10.0},
+        eligible_pairs=[("P1", "C1"), ("P2", "C2")],
+        config=config,
+        crop_yield_per_ha={"C1": 4.0, "C2": 4.0},
+    )
+    model.Y["P1", "C1"].fix(1)
+    model.Y["P2", "C2"].fix(1)
+
+    # group1: 1.0ha*4.0*1.0=4.0, group2: 1.0ha*4.0*0.5=2.0, total=6.0
+    assert pyo.value(model.combined.body) == pytest.approx(6.0)
+
+
+def test_territory_production_bound_constraint_raises_for_unknown_sense():
+    config = {
+        "constraints": [
+            {
+                "name": "territory_production_bound",
+                "enable": True,
+                "args": {
+                    "label": "bad",
+                    "groups": [{"crops": ["C1"], "use_yield": False, "rate_multiplier": 1.0}],
+                    "sense": "eq",
+                    "threshold": 1.0,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    with pytest.raises(ValueError, match="Unknown sense"):
+        build_crop_allocation_model(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 10.0},
+            eligible_pairs=[("P1", "C1")],
+            config=config,
+        )
+
+
+def test_territory_production_bound_constraint_handles_no_matching_eligible_pairs():
+    # Regression: sum() over zero matching pairs is a plain Python 0, not a Pyomo
+    # expression. Comparing two plain numbers produces a bare bool, which Pyomo
+    # rejects unless the rule explicitly returns Constraint.Feasible/.Infeasible.
+    # This must not raise.
+    config = {
+        "constraints": [
+            {
+                "name": "territory_production_bound",
+                "enable": True,
+                "args": {
+                    "label": "empty_group",
+                    "groups": [{"crops": ["NOT_ELIGIBLE_ANYWHERE"], "use_yield": False, "rate_multiplier": 1.0}],
+                    "sense": "ge",
+                    "threshold": 0.0,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 10.0},
+        eligible_pairs=[("P1", "C1")],
+        config=config,
+    )
+
+    assert model.empty_group.expr()
+
+
+def test_farm_area_share_max_constraint_limits_crop_family_area_per_farm():
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_share_max",
+                "enable": True,
+                "args": {"label": "an_cap", "crops": ["AN"], "max_share": 0.5},
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 4.0, "P2": 6.0},
+        crop_margin_per_ha={"AN": 100.0, "OTHER": 50.0},
+        eligible_pairs=[("P1", "AN"), ("P2", "OTHER")],
+        config=config,
+        farm_plots={"E1": ["P1", "P2"]},
+        farm_surface_ha={"E1": 10.0},
+    )
+    model.Y["P1", "AN"].fix(1)
+    model.Y["P2", "OTHER"].fix(1)
+
+    # AN area = 4.0ha, cap = 0.5 * 10.0ha farm surface = 5.0ha
+    assert pyo.value(model.an_cap["E1"].body) == pytest.approx(4.0)
+    assert model.an_cap["E1"].upper() == pytest.approx(5.0)
+
+
+def test_farm_area_share_max_constraint_handles_farm_with_no_eligible_crop_family_plots():
+    # Regression: a farm with zero eligible plots for `crops` sums to a plain 0, not
+    # a Pyomo expression -- must not raise (see territory_production_bound's note).
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_share_max",
+                "enable": True,
+                "args": {"label": "an_cap", "crops": ["AN"], "max_share": 0.5},
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 4.0},
+        crop_margin_per_ha={"OTHER": 50.0},
+        eligible_pairs=[("P1", "OTHER")],
+        config=config,
+        farm_plots={"E1": ["P1"]},
+        farm_surface_ha={"E1": 4.0},
+    )
+
+    assert model.an_cap["E1"].expr()
+
+
+def test_farm_area_ratio_min_constraint_forces_fallow_proportional_to_target_crop():
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_ratio_min",
+                "enable": True,
+                "args": {
+                    "label": "fallow_ratio",
+                    "numerator_crops": ["JA"],
+                    "denominator_crops": ["BA_INT"],
+                    "ratio": 0.2,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 5.0, "P2": 1.0},
+        crop_margin_per_ha={"BA_INT": 100.0, "JA": 1.0},
+        eligible_pairs=[("P1", "BA_INT"), ("P1", "JA"), ("P2", "BA_INT"), ("P2", "JA")],
+        config=config,
+        farm_plots={"E1": ["P1", "P2"]},
+    )
+
+    solver = pyo.SolverFactory("appsi_highs")
+    solver.solve(model)
+
+    # Unconstrained profit-max would pick BA_INT on both plots (margin 100 > 1),
+    # giving BA_INT area 6.0ha and JA area 0 -- violating JA >= 0.2*BA_INT (0 >= 1.2).
+    # The constraint forces the cheaper plot (P2, 1.0ha) to JA instead: BA_INT area
+    # becomes 5.0ha (P1 only), JA area 1.0ha, and 1.0 >= 0.2*5.0 = 1.0 exactly.
+    assert pyo.value(model.Y["P1", "BA_INT"]) == pytest.approx(1)
+    assert pyo.value(model.Y["P2", "JA"]) == pytest.approx(1)
+
+
+def test_farm_area_ratio_min_constraint_builds_one_instance_per_denominator_crop():
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_ratio_min",
+                "enable": True,
+                "args": {
+                    "label": "fallow_ratio",
+                    "numerator_crops": ["JA"],
+                    "denominator_crops": ["BA_INT", "BA_IRR"],
+                    "ratio": 0.2,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"BA_INT": 10.0},
+        eligible_pairs=[("P1", "BA_INT")],
+        config=config,
+        farm_plots={"E1": ["P1"]},
+    )
+
+    assert set(model.fallow_ratio.keys()) == {("E1", "BA_INT"), ("E1", "BA_IRR")}

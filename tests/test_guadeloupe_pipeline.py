@@ -108,3 +108,56 @@ def test_build_dataset_skips_disabled_categorical_rule():
     assert mask.loc["P5", "ME"] == True  # noqa: E712
     # P938 would be forbidden for ME by region_crop_forbidden, but disabled here.
     assert mask.loc["P938", "ME"] == True  # noqa: E712
+
+
+def test_build_dataset_computes_farm_plots_grouping():
+    dataset = build_dataset(CONFIG)
+
+    farm_plots = dataset.parameters["farm_plots"]
+
+    assert farm_plots["E1"] == ["P1", "P2", "P3"]
+
+
+def test_build_dataset_computes_farm_gfa_surface_ha():
+    dataset = build_dataset(CONFIG)
+
+    farm_gfa_surface_ha = dataset.parameters["farm_gfa_surface_ha"]
+
+    # E5: 7 plots (P12..P18), all GFA_PARC=1, total surface 8.1ha -- entirely GFA-tenure
+    assert farm_gfa_surface_ha["E5"] == pytest.approx(8.1)
+    # E1002: 26 plots, only P7119 (1.67ha) has GFA_PARC=1
+    assert farm_gfa_surface_ha["E1002"] == pytest.approx(1.67)
+
+
+def test_build_dataset_merges_land_use_history_columns_into_data_parc():
+    dataset = build_dataset(CONFIG)
+
+    data_parc = dataset.parameters["data_parc"]
+
+    # P9: fallow/non-cultivated (code 14) in 2015, 2016, and 2017 -- a friche-lock case
+    assert data_parc.loc["P9", "cult_2015"] == 14
+    assert data_parc.loc["P9", "cult_2016"] == 14
+    assert data_parc.loc["P9", "cult_2017"] == 14
+
+
+def test_build_dataset_applies_friche_lock_categorical_rule():
+    dataset = build_dataset(CONFIG)
+
+    mask = dataset.parameters["eligibility_mask"]
+
+    # P9: fallow (code 14) in 2015, 2016, and 2017 -- friche-locked (Eq_FRICHE)
+    assert mask.loc["P9", "AG"] == False  # noqa: E712
+
+
+def test_friche_lock_config_crops_match_cult_non_nc_set_file_exactly():
+    from core.data.readers import read_flat_set
+
+    friche_entry = next(
+        entry for entry in CONFIG["categorical_rules"] if entry["name"] == "friche_lock"
+    )
+    expected = read_flat_set(
+        Path(__file__).resolve().parent.parent / "data" / "sets" / "CULT_NON_NC_2017.set"
+    )
+
+    assert set(friche_entry["args"]["crops"]) == set(expected)
+    assert len(friche_entry["args"]["crops"]) == len(expected)

@@ -50,6 +50,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     cpt_parc = read_mapping_set(SETS_DIR / "CPT_PARC_2017.set", "catchment", "plot")
 
     data_parc = read_wide_table(TABLES_DIR / "Data_Parc_Gwad_2017.txt")
+    data_rpg = read_wide_table(TABLES_DIR / "Data_RPG_Gwad_2017.txt")
     data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
     data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
     matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{SCENARIO}.txt")
@@ -73,10 +74,15 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
 
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
+    farm_plots = expl_parc.groupby("farm")["plot"].apply(list).to_dict()
+    farm_gfa_surface_ha = compute_farm_surface_ha(
+        plot_surface * data_parc["GFA_PARC"], expl_parc
+    )
 
     data_parc = data_parc.assign(
         REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
     )
+    data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
 
     attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
     plot_attributes = data_parc[list(attribute_bounds.keys())]
@@ -137,6 +143,8 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "prix_cult": prix_cult,
         "rdt_cult": rdt_cult,
         "farm_surface_ha": farm_surface_ha,
+        "farm_plots": farm_plots,
+        "farm_gfa_surface_ha": farm_gfa_surface_ha,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
         "margin_per_ha_cult": margin_per_ha_cult,
