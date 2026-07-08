@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import pyomo.environ as pyo
 import pytest
@@ -49,3 +51,34 @@ def test_build_model_wires_farm_level_parameters_into_farms_set():
     model = build_model(dataset, CONFIG)
 
     assert set(model.FARMS) == {"E1"}
+
+
+def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint():
+    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from core.config import load_config
+
+    config = load_config(
+        Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
+    )
+    dataset = build_dataset(config)
+
+    model = build_model(dataset, config)
+
+    for label in [
+        "an_agro_max_expl", "ig_agro_max_expl",
+        "ba_ja", "ba_rota",
+        "ba_quota_max", "cs_quota_max",
+        "bc_prod_min", "ig_prod_min", "ma_prod_min", "an_prod_min",
+        "plu_prod_min", "me_prod_min", "pn_prod_min",
+        "leg_prod_obj", "fru_prod_obj", "pat_surf_obj",
+    ]:
+        assert hasattr(model, label), f"expected constraint '{label}' to be built"
+
+    # cs_gfa is disabled by default -- see the comment above its entry in
+    # config.yaml: it is correctly implemented (Task 8) but combined with
+    # friche_lock (Task 7) it makes 3 real GFA farms algebraically infeasible.
+    for disabled_label in [
+        "me_quota_max", "an_quota_max", "ig_quota_max", "bc_quota_max", "tub_prod_obj",
+        "cs_gfa",
+    ]:
+        assert not hasattr(model, disabled_label)

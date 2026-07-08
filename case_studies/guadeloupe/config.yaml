@@ -2,6 +2,24 @@ solver:
   name: appsi_highs
   args: {}
 
+crop_families:
+  an: &SC_AN [AN, AN_NU, AN_PA]
+  ig: &SC_IG [IG, IG_PLA, IG_TUT]
+  cs: &SC_CS
+    [CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
+     CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM, CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM,
+     CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NISM, CS_MG_NIM, CS_MG_IM]
+  ban_ex: &SC_BAN_EX [BA, BA_INT, BA_IRR, BA_PER, BA_SINT]
+  bc: &SC_BC [BC, BC_BT, BC_GTMG]
+  ma: &SC_MA
+    [MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA,
+     MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI, MA_BAG_FER_I, MA_BAG_FER_NI,
+     MA_BAG_NON_I, MA_BAG_NON_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
+     MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI, MA_PAI_BIO_I, MA_PAI_BIO_NI,
+     MA_PAI_VEG_I, MA_PAI_VEG_NI, MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
+  plu: &SC_PLU [AG, VE, VE_BTGT, VE_PLUIE]
+  ba_ja: &SC_BA_JA [BA_INT, BA_IRR, BA_SINT]
+
 objectives:
   - name: maximize_gross_margin
     enable: true
@@ -11,6 +29,173 @@ constraints:
   - name: at_most_one_crop_per_plot
     enable: true
     args: {}
+
+  - name: farm_area_share_max
+    enable: true
+    args: {label: an_agro_max_expl, crops: *SC_AN, max_share: 0.75}
+  - name: farm_area_share_max
+    enable: true
+    args: {label: ig_agro_max_expl, crops: *SC_IG, max_share: 0.66}
+
+  - name: farm_area_ratio_min
+    enable: true
+    args: {label: ba_ja, numerator_crops: [JA], denominator_crops: *SC_BA_JA, ratio: 0.2}
+  - name: farm_area_ratio_min
+    enable: true
+    args:
+      label: ba_rota
+      numerator_crops:
+        [JA,
+         CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
+         CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM, CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM,
+         CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NISM, CS_MG_NIM, CS_MG_IM,
+         CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM, CF_NGT_NIM,
+         CF_CGT_NISM, CF_CGT_NIM, CF_EGT_NISM, CF_EGT_NIM]
+      denominator_crops: *SC_BA_JA
+      ratio: 0.2
+
+  # Disabled by default: correctly implemented and unit-tested (Task 8), and this
+  # entry is a byte-for-byte transcription of GAMS's Eq_CS_GFA, which does appear in
+  # the SCENARIO equation list (MODELE.txt line 651) alongside Eq_FRICHE. But solving
+  # the real 2017 Guadeloupe dataset with both active reveals a genuine algebraic
+  # infeasibility: 3 real GFA farms (E1471, E273, E3955) have every plot fallow-locked
+  # by friche_lock (Task 7) for 2015-2017, which forbids CS on those plots, while this
+  # constraint demands >=60% of the farm's GFA area be planted in CS -- unsatisfiable
+  # for a farm with zero CS-eligible area. Both equations are individually correct and
+  # match GAMS; this is a genuine interaction in the real dataset, not a porting bug.
+  # Re-enable once someone with the original GAMS/production results confirms whether
+  # the real SCENARIO run tolerated this (e.g. per-farm exception, relaxed threshold,
+  # or the real 2017 GFA/fallow data differed) -- see docs/superpowers/plans/
+  # 2026-07-07-gams-parity-phase1-territory-farm-constraints.md Task 9 notes.
+  - name: cs_gfa_minimum_share
+    enable: false
+    args: {label: cs_gfa, crops: *SC_CS, min_share: 0.6}
+
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: ba_quota_max
+      groups: [{crops: *SC_BAN_EX, use_yield: true, rate_multiplier: 1.0}]
+      sense: le
+      threshold: 77877
+  - name: territory_production_bound
+    enable: false
+    args:
+      label: me_quota_max
+      groups: [{crops: [ME], use_yield: true, rate_multiplier: 1.0}]
+      sense: le
+      threshold: 80000
+  - name: territory_production_bound
+    enable: false
+    args:
+      label: an_quota_max
+      groups: [{crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}]
+      sense: le
+      threshold: 70000
+  - name: territory_production_bound
+    enable: false
+    args:
+      label: ig_quota_max
+      groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
+      sense: le
+      threshold: 50000
+  - name: territory_production_bound
+    enable: false
+    args:
+      label: bc_quota_max
+      groups: [{crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}]
+      sense: le
+      threshold: 40000
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: cs_quota_max
+      groups: [{crops: *SC_CS, use_yield: true, rate_multiplier: 0.072}]
+      sense: le
+      threshold: 107000
+
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: bc_prod_min
+      groups: [{crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 4056
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: ig_prod_min
+      groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 5125
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: ma_prod_min
+      groups: [{crops: *SC_MA, use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 26404
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: an_prod_min
+      groups: [{crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}]
+      sense: ge
+      threshold: 2322
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: plu_prod_min
+      groups: [{crops: *SC_PLU, use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 5879
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: me_prod_min
+      groups: [{crops: [ME], use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 4135
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: pn_prod_min
+      groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 6096
+
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: leg_prod_obj
+      groups: [{crops: *SC_MA, use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 63059
+  - name: territory_production_bound
+    enable: false
+    args:
+      label: tub_prod_obj
+      groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 0
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: fru_prod_obj
+      groups:
+        - {crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}
+        - {crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}
+        - {crops: *SC_PLU, use_yield: true, rate_multiplier: 1.0}
+        - {crops: [ME], use_yield: true, rate_multiplier: 1.0}
+      sense: ge
+      threshold: 30789
+  - name: territory_production_bound
+    enable: true
+    args:
+      label: pat_surf_obj
+      groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]
+      sense: ge
+      threshold: 12193
 
 eligibility_criteria:
   - name: altitude
@@ -76,3 +261,21 @@ categorical_rules:
       crops: [ME]
       region_column: REGION_CODE
       forbidden_regions: [R0, R1, R3, R4, R5, R6, R7, R9, R10, R12, R13, R14, R17, R19, R21, R25, R26, R27]
+  - name: friche_lock
+    enable: true
+    args:
+      history_columns: [cult_2015, cult_2016, cult_2017]
+      fallow_codes: [0, 10, 14]
+      crops:
+        [AG, AN, AN_NU, AN_PA, BA, BA_INT, BA_IRR, BA_PER, BA_SINT, BC, BC_BT, BC_GTMG,
+         CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM, CF_NGT_NIM,
+         CF_CGT_NISM, CF_CGT_NIM, CF_EGT_NISM, CF_EGT_NIM,
+         CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
+         CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM, CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM,
+         CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NISM, CS_MG_NIM, CS_MG_IM,
+         IG, IG_PLA, IG_TUT, JA, MA, MA_TO_CHOU_JA, MA_PLBIO, MA_MOBIO, MA_ROTA, ME,
+         PN, PN_PIQ, PN_TOUR, TH, VE, VE_BTGT, VE_PLUIE, MA_TO_CO_JA,
+         MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI, MA_BAG_FER_I, MA_BAG_FER_NI,
+         MA_BAG_NON_I, MA_BAG_NON_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
+         MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI, MA_PAI_BIO_I, MA_PAI_BIO_NI,
+         MA_PAI_VEG_I, MA_PAI_VEG_NI, MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]

@@ -138,3 +138,26 @@ def test_build_dataset_merges_land_use_history_columns_into_data_parc():
     assert data_parc.loc["P9", "cult_2015"] == 14
     assert data_parc.loc["P9", "cult_2016"] == 14
     assert data_parc.loc["P9", "cult_2017"] == 14
+
+
+def test_build_dataset_applies_friche_lock_categorical_rule():
+    dataset = build_dataset(CONFIG)
+
+    mask = dataset.parameters["eligibility_mask"]
+
+    # P9: fallow (code 14) in 2015, 2016, and 2017 -- friche-locked (Eq_FRICHE)
+    assert mask.loc["P9", "AG"] == False  # noqa: E712
+
+
+def test_friche_lock_config_crops_match_cult_non_nc_set_file_exactly():
+    from core.data.readers import read_flat_set
+
+    friche_entry = next(
+        entry for entry in CONFIG["categorical_rules"] if entry["name"] == "friche_lock"
+    )
+    expected = read_flat_set(
+        Path(__file__).resolve().parent.parent / "data" / "sets" / "CULT_NON_NC_2017.set"
+    )
+
+    assert set(friche_entry["args"]["crops"]) == set(expected)
+    assert len(friche_entry["args"]["crops"]) == len(expected)
