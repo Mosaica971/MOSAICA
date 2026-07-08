@@ -33,3 +33,27 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
         "region_crop_forbidden",
         "friche_lock",
     }
+
+
+def test_ba_rota_numerator_crops_match_sc_cs_anchor_plus_ja_and_canne_fibre():
+    # ba_rota's numerator is hand-written longhand (YAML can't splice an anchor list
+    # inline with extra items), unlike friche_lock's crop list which has a set-file
+    # equivalence test. This guards it from silently drifting out of sync with the
+    # *SC_CS anchor it's supposed to mirror.
+    config = load_config(CONFIG_PATH)
+
+    ba_rota = next(
+        entry
+        for entry in config["constraints"]
+        if entry["name"] == "farm_area_ratio_min" and entry["args"]["label"] == "ba_rota"
+    )
+
+    sc_cf = {
+        "CF_NBT_NISM", "CF_NBT_NIM", "CF_SBT_NISM", "CF_SBT_NIM",
+        "CF_NGT_NISM", "CF_NGT_NIM", "CF_CGT_NISM", "CF_CGT_NIM",
+        "CF_EGT_NISM", "CF_EGT_NIM",
+    }
+    expected = {"JA"} | set(config["crop_families"]["cs"]) | sc_cf
+
+    assert set(ba_rota["args"]["numerator_crops"]) == expected
+    assert len(ba_rota["args"]["numerator_crops"]) == len(expected)
