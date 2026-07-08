@@ -315,3 +315,57 @@ def test_territory_production_bound_constraint_handles_no_matching_eligible_pair
     )
 
     assert model.empty_group.expr()
+
+
+def test_farm_area_share_max_constraint_limits_crop_family_area_per_farm():
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_share_max",
+                "enable": True,
+                "args": {"label": "an_cap", "crops": ["AN"], "max_share": 0.5},
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 4.0, "P2": 6.0},
+        crop_margin_per_ha={"AN": 100.0, "OTHER": 50.0},
+        eligible_pairs=[("P1", "AN"), ("P2", "OTHER")],
+        config=config,
+        farm_plots={"E1": ["P1", "P2"]},
+        farm_surface_ha={"E1": 10.0},
+    )
+    model.Y["P1", "AN"].fix(1)
+    model.Y["P2", "OTHER"].fix(1)
+
+    # AN area = 4.0ha, cap = 0.5 * 10.0ha farm surface = 5.0ha
+    assert pyo.value(model.an_cap["E1"].body) == pytest.approx(4.0)
+    assert model.an_cap["E1"].upper() == pytest.approx(5.0)
+
+
+def test_farm_area_share_max_constraint_handles_farm_with_no_eligible_crop_family_plots():
+    # Regression: a farm with zero eligible plots for `crops` sums to a plain 0, not
+    # a Pyomo expression -- must not raise (see territory_production_bound's note).
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_share_max",
+                "enable": True,
+                "args": {"label": "an_cap", "crops": ["AN"], "max_share": 0.5},
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 4.0},
+        crop_margin_per_ha={"OTHER": 50.0},
+        eligible_pairs=[("P1", "OTHER")],
+        config=config,
+        farm_plots={"E1": ["P1"]},
+        farm_surface_ha={"E1": 4.0},
+    )
+
+    assert model.an_cap["E1"].expr()

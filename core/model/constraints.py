@@ -60,3 +60,35 @@ def build_territory_production_bound_constraint(
 
     expr = total <= threshold if sense == "le" else total >= threshold
     setattr(model, label, pyo.Constraint(expr=expr))
+
+
+@register_constraint("farm_area_share_max")
+def build_farm_area_share_max_constraint(
+    model: pyo.ConcreteModel,
+    inputs: ModelInputs,
+    *,
+    label: str,
+    crops: list[str],
+    max_share: float,
+    **_args,
+) -> None:
+    crop_set = set(crops)
+    plot_crops = defaultdict(list)
+    for plot, crop in inputs.eligible_pairs:
+        if crop in crop_set:
+            plot_crops[plot].append(crop)
+
+    def _rule(model, farm):
+        area = sum(
+            model.Y[plot, crop] * inputs.plot_surface_ha[plot]
+            for plot in inputs.farm_plots.get(farm, [])
+            for crop in plot_crops.get(plot, [])
+        )
+        limit = max_share * inputs.farm_surface_ha[farm]
+        # A farm with zero eligible plots for these crops sums to a plain 0, not a
+        # Pyomo expression -- see the note in territory_production_bound above.
+        if isinstance(area, (int, float)):
+            return pyo.Constraint.Feasible if area <= limit else pyo.Constraint.Infeasible
+        return area <= limit
+
+    setattr(model, label, pyo.Constraint(model.FARMS, rule=_rule))
