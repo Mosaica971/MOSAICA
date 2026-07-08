@@ -2,6 +2,7 @@ from typing import Any
 
 import pyomo.environ as pyo
 
+from case_studies.guadeloupe import constraints as _guadeloupe_constraints  # noqa: F401
 from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
 
