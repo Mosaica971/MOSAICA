@@ -369,3 +369,67 @@ def test_farm_area_share_max_constraint_handles_farm_with_no_eligible_crop_famil
     )
 
     assert model.an_cap["E1"].expr()
+
+
+def test_farm_area_ratio_min_constraint_forces_fallow_proportional_to_target_crop():
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_ratio_min",
+                "enable": True,
+                "args": {
+                    "label": "fallow_ratio",
+                    "numerator_crops": ["JA"],
+                    "denominator_crops": ["BA_INT"],
+                    "ratio": 0.2,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 5.0, "P2": 1.0},
+        crop_margin_per_ha={"BA_INT": 100.0, "JA": 1.0},
+        eligible_pairs=[("P1", "BA_INT"), ("P1", "JA"), ("P2", "BA_INT"), ("P2", "JA")],
+        config=config,
+        farm_plots={"E1": ["P1", "P2"]},
+    )
+
+    solver = pyo.SolverFactory("appsi_highs")
+    solver.solve(model)
+
+    # Unconstrained profit-max would pick BA_INT on both plots (margin 100 > 1),
+    # giving BA_INT area 6.0ha and JA area 0 -- violating JA >= 0.2*BA_INT (0 >= 1.2).
+    # The constraint forces the cheaper plot (P2, 1.0ha) to JA instead: BA_INT area
+    # becomes 5.0ha (P1 only), JA area 1.0ha, and 1.0 >= 0.2*5.0 = 1.0 exactly.
+    assert pyo.value(model.Y["P1", "BA_INT"]) == pytest.approx(1)
+    assert pyo.value(model.Y["P2", "JA"]) == pytest.approx(1)
+
+
+def test_farm_area_ratio_min_constraint_builds_one_instance_per_denominator_crop():
+    config = {
+        "constraints": [
+            {
+                "name": "farm_area_ratio_min",
+                "enable": True,
+                "args": {
+                    "label": "fallow_ratio",
+                    "numerator_crops": ["JA"],
+                    "denominator_crops": ["BA_INT", "BA_IRR"],
+                    "ratio": 0.2,
+                },
+            }
+        ],
+        "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"BA_INT": 10.0},
+        eligible_pairs=[("P1", "BA_INT")],
+        config=config,
+        farm_plots={"E1": ["P1"]},
+    )
+
+    assert set(model.fallow_ratio.keys()) == {("E1", "BA_INT"), ("E1", "BA_IRR")}

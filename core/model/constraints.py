@@ -92,3 +92,45 @@ def build_farm_area_share_max_constraint(
         return area <= limit
 
     setattr(model, label, pyo.Constraint(model.FARMS, rule=_rule))
+
+
+@register_constraint("farm_area_ratio_min")
+def build_farm_area_ratio_min_constraint(
+    model: pyo.ConcreteModel,
+    inputs: ModelInputs,
+    *,
+    label: str,
+    numerator_crops: list[str],
+    denominator_crops: list[str],
+    ratio: float,
+    **_args,
+) -> None:
+    numerator_set = set(numerator_crops)
+    denominator_set = set(denominator_crops)
+    plot_numerator_crops = defaultdict(list)
+    plot_denominator_crops = defaultdict(list)
+    for plot, crop in inputs.eligible_pairs:
+        if crop in numerator_set:
+            plot_numerator_crops[plot].append(crop)
+        if crop in denominator_set:
+            plot_denominator_crops[plot].append(crop)
+
+    def _rule(model, farm, denom_crop):
+        numerator_area = sum(
+            model.Y[plot, crop] * inputs.plot_surface_ha[plot]
+            for plot in inputs.farm_plots.get(farm, [])
+            for crop in plot_numerator_crops.get(plot, [])
+        )
+        denominator_area = sum(
+            model.Y[plot, denom_crop] * inputs.plot_surface_ha[plot]
+            for plot in inputs.farm_plots.get(farm, [])
+            if denom_crop in plot_denominator_crops.get(plot, [])
+        )
+        # Both sides trivially 0 (no eligible plots for either side, on this farm)
+        # -- see the note in territory_production_bound above.
+        if isinstance(numerator_area, (int, float)) and isinstance(denominator_area, (int, float)):
+            satisfied = numerator_area >= ratio * denominator_area
+            return pyo.Constraint.Feasible if satisfied else pyo.Constraint.Infeasible
+        return numerator_area >= ratio * denominator_area
+
+    setattr(model, label, pyo.Constraint(model.FARMS, denominator_crops, rule=_rule))
