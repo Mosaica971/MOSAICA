@@ -84,16 +84,22 @@ penalized identically regardless of their real risk profile is equivalent to not
 implementing Markovitz's actual purpose. Computing it from source is the more
 GAMS-faithful choice and doesn't cost much: all its raw inputs are already on disk.)
 
-**Cascade** (`OPTIMISATION.txt:1467-1552` for `TYPE_EXPL`, `:1744-1761` for the
-`AVERS` lookup):
+**Cascade** (`OPTIMISATION.txt:1467-1561` for `TYPE_EXPL`/`TYPE_EXPL_Bis`, `:1744-1758`
+for the `AVERS` lookup — all values below re-verified directly against the source during
+plan-writing, superseding an earlier, incomplete pass over this section):
 
 1. Per farm, compute land-use shares by crop group from the farm's **initial (2017)**
-   observed allocation: `PART_CAN` (cane, `SC_CAN`), `PART_PAT` (pasture, `SC_PAT`),
-   `PART_BAN` (export banana, `SC_BAN_EX`), `PART_MAR` (market garden + tubers,
-   `SC_MAR`), `PART_PLU` (perennial/tree crops, `SC_PLU`) — each a share of cultivated
-   area excluding fallow/non-cultivated.
+   observed allocation, each as a share of cultivated area excluding fallow/non-cultivated
+   (`SURF_CUL − SURF_NON`, see step 4 for exact set membership):
+   `PART_CAN` (cane, `SC_CAN`), `PART_PAT` (pasture, `SC_PAT`), `PART_BAN` (export
+   banana, `SC_BAN_EX` — **not** the wider `SC_BAN = SC_BAN_EX ∪ SC_BC`, a
+   similarly-named but different set that TYPE_EXPL does not use), `PART_MAR` (market
+   garden + tubers, `SC_MAR`), `PART_PLU` (perennial/tree crops, `SC_PLU`), plus two more
+   needed only for step 3's sub-split: `PART_BC` (plantain banana, `SC_BC`) and `PART_TT`
+   (tubers, confusingly computed as `sum(SC_IG, ...)` in GAMS despite the "TT" name —
+   `SC_IG` is the correct set, there is no separate `SC_TT`).
 2. Classify into `TYPE_EXPL ∈ {0..8}` via the threshold cascade at
-   `OPTIMISATION.txt:1542-1552` (values transcribed in the research below). **Decision:
+   `OPTIMISATION.txt:1542-1552` (values transcribed in the implementation plan). **Decision:
    use this cascade, not the different-threshold cascade at `OPTIMISATION.txt:1530-1540`
    immediately above it.** Both blocks assign the same `TYPE_EXPL(SE)` parameter in
    sequence; only the second one's result survives to
@@ -104,12 +110,72 @@ GAMS-faithful choice and doesn't cost much: all its raw inputs are already on di
    `Eq_BA_JA`/`Eq_BA_ROTA`; here the tie-break is unambiguous — GAMS execution order plus
    single-read-site makes the second block's precedence a hard fact, not a judgment
    call — but it's flagged here because getting it backwards would silently produce a
-   different, wrong classification for every farm.)
-3. Look up `AVERS(farm)` from `TYPE_EXPL(farm)` via the ten-value table at
-   `OPTIMISATION.txt:1744-1761` (values transcribed below). Farms with `TYPE_EXPL=0`
-   (`Frichiers`, fully fallow, `SURF_CUL=0`) get `AVERS=0` (GAMS's default, never
-   overwritten by that farm-type — `ENTREES.txt:487` initializes `AVERS(SE)=0` and no
-   `TYPE_EXPL=0` case appears in the lookup).
+   different, wrong classification for every farm.) **User confirmed 2026-07-08: proceed
+   with this reading.**
+3. **Newly found during plan-writing, not in the original design pass:** farms classified
+   `TYPE_EXPL=4` ("Canniers diversifiés") get a second-level split into
+   `TYPE_EXPL_Bis ∈ {41, 42}` (`OPTIMISATION.txt:1557-1561`) based on `PART_MAR`,
+   `PART_PLU`, `PART_BC`, `PART_TT`, and **this sub-split — not the bare `TYPE_EXPL=4`
+   value — determines `AVERS` for every type-4 farm** (see step 4). Both `41`'s and `42`'s
+   conditions are OR-chains evaluated in GAMS's `IF`/`IF` (not `IF`/`ELSEIF`) sequence, so
+   whichever condition is true *last* wins if both are true — same "last assignment in
+   iteration order wins" semantics as step 2. In practice `42`'s condition
+   (`PART_MAR=0 OR PART_PLU=0 OR PART_BC=0 OR PART_TT=0`) is true for the large majority
+   of real farms (any one of the four shares being exactly zero triggers it, and having
+   all four simultaneously positive is rare), so most type-4 farms end up `42`; only
+   farms diversified across all four of market-garden/perennial/plantain/tuber
+   simultaneously stay at `41`.
+4. Look up `AVERS(farm)` from `TYPE_EXPL(farm)` (and `TYPE_EXPL_Bis(farm)` for type-4
+   farms) via the table at `OPTIMISATION.txt:1744-1758`, applied in GAMS's exact order —
+   the `TYPE_EXPL=4 → 1.40` assignment always fires first for a type-4 farm and is then
+   unconditionally overwritten by its `TYPE_EXPL_Bis` value, so `1.40` never survives as a
+   final value for any real farm (this corrects the original design pass, which listed
+   `1.40` as one of "ten possible discrete values" — it is transient, not final):
+
+   | `TYPE_EXPL` | Label (from GAMS comment) | `AVERS` |
+   |---|---|---|
+   | 1 | Arboriculteurs | 1.30 |
+   | 2 | Bananiers | 1.20 |
+   | 3 | Canniers | 0.30 |
+   | 4, then Bis=41 | Canniers diversifiés (fully diversified) | 0.50 |
+   | 4, then Bis=42 | Canniers diversifiés (partially diversified) | 1.60 |
+   | 5 | Diversifiés | 0.55 |
+   | 6 | Eleveurs | 2.40 |
+   | 7 | Maraîchers | 0.00 |
+   | 8 | Mixtes canniers-éleveurs | 2.30 |
+   | 0 | Frichiers (`SURF_CUL=0`) | 0.00 (default, never overwritten — `ENTREES.txt:487` initializes `AVERS(SE)=0`, confirmed, and no lookup row targets `TYPE_EXPL=0`) |
+
+   Nine distinct final values: `{0, 0.30, 0.50, 0.55, 1.20, 1.30, 1.60, 2.30, 2.40}` (not
+   ten — `1.40` is excluded per the correction above).
+
+**Exact crop-group set membership** (re-verified directly against
+`old_code_gms_format_now_txt/SETS.txt` during plan-writing; only `SC_BC`, `SC_IG`,
+`SC_BAN_EX` already existed as `config.yaml` anchors from Phase 1 and need no changes —
+`SC_CAN`, `SC_PAT`, `SC_NON`, `SC_MAR`, `SC_CULTIV` are new and must be added):
+
+- `SC_CAN` (29 codes) = `SC_CF` (10 cane-fiber ITK codes: `CF_NBT_NISM, CF_NBT_NIM,
+  CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM, CF_NGT_NIM, CF_CGT_NISM, CF_CGT_NIM, CF_EGT_NISM,
+  CF_EGT_NIM`) ∪ `SC_CS` (the existing 19-code `cs` anchor, which includes the bare `CS`
+  in addition to its 18 ITK-technique variants).
+- `SC_PAT` (3 codes) = `[PN, PN_PIQ, PN_TOUR]`.
+- `SC_NON` (2 codes) = `[JA, NC]`.
+- `SC_MAR` (35 codes) = the existing 30-code `ma` anchor ∪ the existing 3-code `ig`
+  anchor ∪ `{ME, TH}` (two additional bare codes not covered by either existing anchor —
+  `ME` = melon, `TH` appears in the crop universe but is never produced by the base
+  RPG→crop mapping below, so it is a harmless always-zero member for this port's purposes).
+- `SC_CULTIV` = the full 84-code crop universe minus `NC` (83 codes) — i.e. every crop
+  code except "non cultivé", notably including `JA` (fallow still counts as
+  "cultivated" for this set, which is exactly why the `PART_*` shares divide by
+  `SURF_CUL − SURF_NON` rather than by `SURF_CUL` alone: `SURF_NON = JA + NC` area still
+  needs subtracting out even though `JA` is inside `SC_CULTIV`).
+
+Because this port already scopes `TYPE_EXPL`'s inputs to the **base crop-group** mapping
+(next section) rather than the full ITK-technique code space, and every one of these
+family sets contains its own "bare" base-group code as a member (`CS ∈ SC_CS ⊂ SC_CAN`,
+`BA ∈ SC_BAN_EX`, `BC ∈ SC_BC`, `IG ∈ SC_IG ⊂ SC_MAR`, `MA ∈ SC_MAR`, `ME ∈ SC_MAR`,
+`PN ∈ SC_PAT`, `AG, VE ∈ SC_PLU`, `JA, NC ∈ SC_NON`), each of a plot's 12 possible base
+crop groups maps to exactly one family aggregate — no ITK-level detail is needed to
+compute any `SURF_*`/`PART_*` share correctly.
 
 Both `TYPE_EXPL` and `AVERS` are computed once from the **initial** observed allocation
 and never recomputed for later years, even in GAMS's own multi-year loop
@@ -125,8 +191,7 @@ crop-group sets (`SC_CAN`, `SC_PAT`, `SC_BAN_EX`, `SC_MAR`, `SC_PLU`) — granul
 coarser than the ITK-technique split (e.g. all of `CS_BT_NISM`/`CS_BT_NIM`/... roll up
 into `SC_CAN` regardless of which ITK variant). **Decision: port only the base
 crop-code mapping** (`ENTREES.txt:62-103` — maps each plot's observed `cult_2017` RPG
-code to one of the model's base crop groups, e.g. `4=Banane export→BA`,
-`6=Canne à sucre→CS`) **and skip the ITK-technique refinement**
+code to one of the model's base crop groups) **and skip the ITK-technique refinement**
 (`ENTREES.txt:304-458` — the region/soil/farm-size cascade that further splits `BA` into
 `BA_INT`/`BA_SINT`/`BA_PER`/`BA_IRR`, etc.). Nothing in the Markovitz objective or the
 `TYPE_EXPL`/`AVERS` pipeline consumes the ITK-level split; it exists in GAMS to drive
@@ -134,6 +199,41 @@ code to one of the model's base crop groups, e.g. `4=Banane export→BA`,
 equations, none of which are in scope here. If a future phase needs per-ITK initial
 allocations, the full cascade can be added then — deferring it now keeps this phase
 tightly scoped to what Markovitz actually requires.
+
+**Complete RPG→base-crop-group mapping** (`ENTREES.txt:62-103`, all 20 codes,
+re-verified verbatim during plan-writing):
+
+| RPG `cult_2017` code | Meaning | Base group |
+|---|---|---|
+| 1 | Agrumes | `AG` |
+| 2 | Ananas | `AN` |
+| 3 | Banane créole | `BC` |
+| 4 | Banane export | `BA` |
+| 5 | Café/Cacao | `VE` |
+| 6 | Canne à sucre | `CS` |
+| 7 | Cultures fourragères | `PN` |
+| 8 | Horticulture ornementale de plein champ | `MA` |
+| 9 | Horticulture ornementale sous abri | `MA` |
+| 10 | Jachère | `JA` |
+| 11 | Maraîchage de plein champ | `MA` |
+| 12 | Maraîchage sous abri | `MA` |
+| 13 | Melon | `ME` |
+| 14 | Non cultivé | `NC` |
+| 15 | Pastèque | `MA` |
+| 16 | Prairie permanente | `PN` |
+| 17 | Prairie temporaire | `PN` |
+| 18 | Tubercules tropicaux | `IG` |
+| 19 | Vanille et PPAM | `VE` |
+| 20 | Vergers | `VE` |
+
+A continuity override precedes this mapping (`ENTREES.txt:50-57`): if a plot's
+`cult_2015`, `cult_2016`, and `cult_2017` are **all** in `{14, 10, 0}` (non-cultivé,
+jachère, or the sentinel `0`), `cult_2017` is force-set to `14` (Non cultivé) before the
+table above is applied. This is a narrower, RPG-code-space version of the same
+"fallow-for-N-years" idea Phase 1's `friche_lock` rule already implements at the
+crop-eligibility level (`core/data/eligibility.py`) — the two are independent
+mechanisms (this one only affects which base group a farm's *own* initial allocation is
+classified into for `TYPE_EXPL`; it does not touch plot eligibility) and both must exist.
 
 ## Architecture
 
@@ -216,14 +316,28 @@ otherwise silently produce a uniform-again result).
   stale file becomes simply unused, not fixed. Deleting or regenerating it on disk is a
   separate, optional cleanup.
 
-## Open items for human review before implementation
+## Open items — resolved 2026-07-08
 
-1. Confirm the `TYPE_EXPL` dead-code tie-break (second cascade block wins) reads
-   correctly to someone who can cross-check against a real GAMS run's `TYPE_EXPL`
-   output, if one exists.
-2. Confirm treating `Avers.txt` as a stub (compute in-memory instead) rather than a file
-   this codebase should keep honoring is the right call — if there's institutional
-   knowledge about why that file is uniformly `1`, that changes the plan.
-3. Decide, when this ships, whether `maximize_risk_adjusted_gross_margin` should be the
-   enabled-by-default objective (matching GAMS's real behavior) or stay opt-in
-   (matching this codebase's current default).
+1. `TYPE_EXPL` dead-code tie-break (second cascade block wins): confirmed unambiguous
+   from GAMS execution order + single-read-site; user approved proceeding on this
+   reading.
+2. `Avers.txt` stub vs. in-memory computation: user does not have institutional
+   knowledge to confirm either way. **Decision: compute `AVERS` in-memory from the
+   ported cascade** (this design's original recommendation), and leave an explicit code
+   comment plus a note in the implementation plan flagging this for later verification
+   against a real GAMS run's output, if one becomes available.
+3. Default-enabled objective: **decision: keep `maximize_gross_margin` enabled by
+   default**; ship `maximize_risk_adjusted_gross_margin` disabled, a one-line
+   `config.yaml` flip to enable — same pattern Phase 1 used for `cs_gfa_minimum_share`.
+
+## Correction made during plan-writing (2026-07-08)
+
+The original design pass (drafted overnight) summarized the `TYPE_EXPL`/`AVERS` cascade
+from a research agent's conversational report rather than re-reading the GAMS source
+directly, and missed the `TYPE_EXPL_Bis` sub-split entirely — it claimed `AVERS` had "ten
+possible discrete values" including `1.40` for bare `TYPE_EXPL=4`. Re-reading
+`OPTIMISATION.txt:1467-1561` and `:1744-1758` directly while writing the implementation
+plan found that every `TYPE_EXPL=4` farm is always subsequently reclassified into
+`TYPE_EXPL_Bis ∈ {41,42}`, and `1.40` is never a farm's final `AVERS` value — see the
+corrected "Cascade" section above for the exact nine-value table. The plan below
+implements the corrected version.
