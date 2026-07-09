@@ -14,7 +14,7 @@ def main() -> None:
     config = load_config(CONFIG_PATH)
     dataset = build_dataset(config)
     model = build_model(dataset, config)
-    solve_with_progress(model, config, case_study=CONFIG_PATH.parent.name)
+    results, duration = solve_with_progress(model, config, case_study=CONFIG_PATH.parent.name)
 
     total_revenue = pyo.value(model.objective)
     allocated_plots = sum(1 for index in model.Y if pyo.value(model.Y[index]) > 0.5)
