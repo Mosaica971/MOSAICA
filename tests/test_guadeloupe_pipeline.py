@@ -179,3 +179,33 @@ def test_build_dataset_computes_farm_risk_aversion_for_known_farm():
     # E1: P1(3.68ha)+P2(3.3ha)+P3(1.36ha), all cult_2017=6 (Canne a sucre) -> base group
     # CS for every plot -> PART_CAN=1.0 (>=0.939) -> TYPE_EXPL=3 (Canniers) -> AVERS=0.30.
     assert farm_risk_aversion["E1"] == pytest.approx(0.30)
+
+
+def test_build_dataset_farm_risk_aversion_is_not_degenerately_uniform():
+    dataset = build_dataset(CONFIG)
+
+    farm_risk_aversion = dataset.parameters["farm_risk_aversion"]
+
+    # Every farm in expl_parc must get a classification (no missing/NaN AVERS).
+    all_farms = set(dataset.parameters["expl_parc"]["farm"].unique())
+    assert set(farm_risk_aversion.index) == all_farms
+    assert not farm_risk_aversion.isna().any()
+
+    # Guards against the exact failure mode data/tables/Avers.txt already has (a
+    # uniform AVERS=1 for every farm, which would make risk-aversion meaningless): at
+    # least 2 of the 9 possible values must appear across 4,638 real farms.
+    assert farm_risk_aversion.nunique() >= 2
+    assert set(farm_risk_aversion.unique()) <= {
+        0.00, 0.30, 0.50, 0.55, 1.20, 1.30, 1.60, 2.30, 2.40,
+    }
+
+
+def test_build_dataset_base_crop_group_has_no_unmapped_plots():
+    dataset = build_dataset(CONFIG)
+
+    data_parc = dataset.parameters["data_parc"]
+    from case_studies.guadeloupe.farm_typology import compute_base_crop_group
+
+    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+
+    assert not base_crop_group.isna().any()
