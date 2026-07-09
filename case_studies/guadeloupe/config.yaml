@@ -25,6 +25,18 @@ objectives:
     enable: true
     args: {}
 
+  # Disabled by default: GAMS's own real solves (CALIB, SCENARIO) always maximize this
+  # risk-adjusted objective rather than plain gross margin
+  # (OPTIMISATION.txt:174-185), but this codebase keeps maximize_gross_margin as the
+  # default per 2026-07-08 user review -- see docs/superpowers/specs/
+  # 2026-07-08-gams-parity-phase2-markovitz-itk-design.md. AVERS is computed in-memory
+  # from the TYPE_EXPL/TYPE_EXPL_Bis cascade (case_studies/guadeloupe/farm_typology.py)
+  # rather than read from data/tables/Avers.txt (a uniform, unvalidated stub) -- flagged
+  # for later verification against a real GAMS run if one becomes available.
+  - name: maximize_risk_adjusted_gross_margin
+    enable: false
+    args: {}
+
 constraints:
   - name: at_most_one_crop_per_plot
     enable: true

@@ -161,3 +161,21 @@ def test_friche_lock_config_crops_match_cult_non_nc_set_file_exactly():
 
     assert set(friche_entry["args"]["crops"]) == set(expected)
     assert len(friche_entry["args"]["crops"]) == len(expected)
+
+
+def test_build_dataset_computes_crop_variance_per_ha_from_var_rdt_cult_init_column():
+    dataset = build_dataset(CONFIG)
+
+    crop_variance_per_ha = dataset.parameters["crop_variance_per_ha"]
+
+    assert crop_variance_per_ha["AG"] == pytest.approx(0.3)
+
+
+def test_build_dataset_computes_farm_risk_aversion_for_known_farm():
+    dataset = build_dataset(CONFIG)
+
+    farm_risk_aversion = dataset.parameters["farm_risk_aversion"]
+
+    # E1: P1(3.68ha)+P2(3.3ha)+P3(1.36ha), all cult_2017=6 (Canne a sucre) -> base group
+    # CS for every plot -> PART_CAN=1.0 (>=0.939) -> TYPE_EXPL=3 (Canniers) -> AVERS=0.30.
+    assert farm_risk_aversion["E1"] == pytest.approx(0.30)

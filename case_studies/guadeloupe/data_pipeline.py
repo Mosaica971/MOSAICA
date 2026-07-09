@@ -9,6 +9,11 @@ from case_studies.guadeloupe.economics import (
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
+from case_studies.guadeloupe.farm_typology import (
+    compute_avers,
+    compute_base_crop_group,
+    compute_type_expl,
+)
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
@@ -56,6 +61,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{SCENARIO}.txt")
     prix_cult = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[YEAR]
     rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[YEAR]
+    var_rdt_cult = read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"]
     bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[YEAR]
     duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[YEAR]
     duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[YEAR]
@@ -83,6 +89,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
     )
     data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
+
+    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+    type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface)
+    farm_risk_aversion = compute_avers(type_expl, type_expl_bis)
 
     attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
     plot_attributes = data_parc[list(attribute_bounds.keys())]
@@ -142,6 +152,8 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "matrice_otk_cult": matrice_otk_cult,
         "prix_cult": prix_cult,
         "rdt_cult": rdt_cult,
+        "crop_variance_per_ha": var_rdt_cult,
+        "farm_risk_aversion": farm_risk_aversion,
         "farm_surface_ha": farm_surface_ha,
         "farm_plots": farm_plots,
         "farm_gfa_surface_ha": farm_gfa_surface_ha,

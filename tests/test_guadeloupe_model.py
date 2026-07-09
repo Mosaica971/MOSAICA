@@ -82,3 +82,24 @@ def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint()
         "cs_gfa",
     ]:
         assert not hasattr(model, disabled_label)
+
+
+def test_build_model_supports_enabling_risk_adjusted_objective():
+    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from core.config import load_config
+
+    config = load_config(
+        Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
+    )
+    config = {
+        **config,
+        "objectives": [
+            {"name": "maximize_gross_margin", "enable": False, "args": {}},
+            {"name": "maximize_risk_adjusted_gross_margin", "enable": True, "args": {}},
+        ],
+    }
+    dataset = build_dataset(config)
+
+    model = build_model(dataset, config)
+
+    assert model.objective is not None
