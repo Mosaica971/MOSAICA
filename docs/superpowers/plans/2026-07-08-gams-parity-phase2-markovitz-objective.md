@@ -271,10 +271,20 @@ git commit -m "Add maximize_risk_adjusted_gross_margin objective (Markovitz port
 - Test: `tests/test_farm_typology.py`
 
 **Interfaces:**
-- Consumes: nothing from other tasks (pure function of three `pd.Series`).
-- Produces: `compute_base_crop_group(cult_2015: pd.Series, cult_2016: pd.Series,
-  cult_2017: pd.Series) -> pd.Series` — same index as the inputs, values are one of the
-  12 base-group strings. Task 3 and Task 4 both call this.
+- Consumes: nothing from other tasks (pure function of two `pd.Series`).
+- Produces: `compute_base_crop_group(cult_2016: pd.Series, cult_2017: pd.Series) ->
+  pd.Series` — same index as the inputs, values are one of the 12 base-group strings.
+  Task 3 and Task 4 both call this.
+
+**Correction (2026-07-09, found during this task's review):** an earlier version of
+this plan specified a 3-year (`cult_2015`/`cult_2016`/`cult_2017`) fallow-continuity
+check. Reading the raw bytes of `old_code_gms_format_now_txt/ENTREES.txt:49-57` shows
+the `cult_2015` clause of the GAMS `IF` condition is commented out (`*` in column 1,
+line 51) — GAMS's own executable rule only checks `cult_2016` and `cult_2017`. The
+human-readable comment one line above states the rule as "en 2015, 2016 et 2017", but
+that comment does not match the code that actually runs. `cult_2015` plays no role and
+is dropped from this function's signature entirely — see the design spec's "Correction
+made during plan-writing" section (updated 2026-07-09) for the full byte-level citation.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -287,11 +297,10 @@ from case_studies.guadeloupe.farm_typology import compute_base_crop_group
 
 
 def test_compute_base_crop_group_maps_rpg_codes_to_base_groups():
-    cult_2015 = pd.Series([6, 4, 10], index=["P1", "P2", "P3"])
     cult_2016 = pd.Series([6, 4, 10], index=["P1", "P2", "P3"])
     cult_2017 = pd.Series([6, 4, 13], index=["P1", "P2", "P3"])
 
-    result = compute_base_crop_group(cult_2015, cult_2016, cult_2017)
+    result = compute_base_crop_group(cult_2016, cult_2017)
 
     assert result.to_dict() == {"P1": "CS", "P2": "BA", "P3": "ME"}
 
@@ -301,10 +310,9 @@ def test_compute_base_crop_group_covers_every_rpg_code():
     cult_2017 = pd.Series(codes, index=[f"P{c}" for c in codes])
     # Use a non-fallow prior-year code (6) everywhere so the continuity override never
     # fires, isolating the base mapping table itself.
-    cult_2015 = pd.Series(6, index=cult_2017.index)
     cult_2016 = pd.Series(6, index=cult_2017.index)
 
-    result = compute_base_crop_group(cult_2015, cult_2016, cult_2017)
+    result = compute_base_crop_group(cult_2016, cult_2017)
 
     expected = {
         "P1": "AG", "P2": "AN", "P3": "BC", "P4": "BA", "P5": "VE", "P6": "CS",
@@ -316,23 +324,22 @@ def test_compute_base_crop_group_covers_every_rpg_code():
 
 
 def test_compute_base_crop_group_applies_fallow_continuity_override():
-    # cult_2015, cult_2016, cult_2017 all in {0, 10, 14} -> cult_2017 forced to 14 (NC),
-    # per old_code_gms_format_now_txt/ENTREES.txt:50-57.
-    cult_2015 = pd.Series([10], index=["P1"])
+    # cult_2016 and cult_2017 both in {0, 10, 14} -> cult_2017 forced to 14 (NC), per
+    # the executable condition in old_code_gms_format_now_txt/ENTREES.txt:49-57 (only
+    # cult_2016/cult_2017 are checked -- the cult_2015 clause is commented out in GAMS).
     cult_2016 = pd.Series([0], index=["P1"])
     cult_2017 = pd.Series([10], index=["P1"])  # would otherwise map to JA
 
-    result = compute_base_crop_group(cult_2015, cult_2016, cult_2017)
+    result = compute_base_crop_group(cult_2016, cult_2017)
 
     assert result.to_dict() == {"P1": "NC"}
 
 
-def test_compute_base_crop_group_does_not_override_when_one_year_is_not_fallow():
-    cult_2015 = pd.Series([6], index=["P1"])  # 2015 was sugarcane, not fallow
-    cult_2016 = pd.Series([10], index=["P1"])
+def test_compute_base_crop_group_does_not_override_when_2016_is_not_fallow():
+    cult_2016 = pd.Series([6], index=["P1"])  # 2016 was sugarcane, not fallow
     cult_2017 = pd.Series([10], index=["P1"])
 
-    result = compute_base_crop_group(cult_2015, cult_2016, cult_2017)
+    result = compute_base_crop_group(cult_2016, cult_2017)
 
     assert result.to_dict() == {"P1": "JA"}
 ```
@@ -356,20 +363,19 @@ _RPG_CODE_TO_BASE_GROUP: dict[int, str] = {
     16: "PN", 17: "PN", 18: "IG", 19: "VE", 20: "VE",
 }
 
-# old_code_gms_format_now_txt/ENTREES.txt:50-57 -- if a plot's cult_2015, cult_2016, and
-# cult_2017 are all in this set, cult_2017 is forced to 14 (Non cultivé) before mapping.
+# old_code_gms_format_now_txt/ENTREES.txt:49-57 -- if a plot's cult_2016 and cult_2017
+# are both in this set, cult_2017 is forced to 14 (Non cultivé) before mapping. The
+# source's own comment describes a 3-year (cult_2015/2016/2017) rule, but the
+# cult_2015 clause of the actual IF condition is commented out (`*` in column 1) --
+# only cult_2016/cult_2017 are checked by the code that actually runs.
 _FALLOW_CONTINUITY_CODES = {0, 10, 14}
 
 
-def compute_base_crop_group(
-    cult_2015: pd.Series, cult_2016: pd.Series, cult_2017: pd.Series
-) -> pd.Series:
-    all_three_fallow = (
-        cult_2015.isin(_FALLOW_CONTINUITY_CODES)
-        & cult_2016.isin(_FALLOW_CONTINUITY_CODES)
-        & cult_2017.isin(_FALLOW_CONTINUITY_CODES)
+def compute_base_crop_group(cult_2016: pd.Series, cult_2017: pd.Series) -> pd.Series:
+    both_fallow = cult_2016.isin(_FALLOW_CONTINUITY_CODES) & cult_2017.isin(
+        _FALLOW_CONTINUITY_CODES
     )
-    resolved_2017 = cult_2017.where(~all_three_fallow, 14)
+    resolved_2017 = cult_2017.where(~both_fallow, 14)
     return resolved_2017.map(_RPG_CODE_TO_BASE_GROUP)
 ```
 
@@ -713,9 +719,7 @@ After the existing line
 `data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])`, add:
 
 ```python
-    base_crop_group = compute_base_crop_group(
-        data_parc["cult_2015"], data_parc["cult_2016"], data_parc["cult_2017"]
-    )
+    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
     type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface)
     farm_risk_aversion = compute_avers(type_expl, type_expl_bis)
 ```
@@ -859,9 +863,7 @@ def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     data_parc = dataset.parameters["data_parc"]
     from case_studies.guadeloupe.farm_typology import compute_base_crop_group
 
-    base_crop_group = compute_base_crop_group(
-        data_parc["cult_2015"], data_parc["cult_2016"], data_parc["cult_2017"]
-    )
+    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
 
     assert not base_crop_group.isna().any()
 ```
