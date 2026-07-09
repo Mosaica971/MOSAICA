@@ -209,3 +209,19 @@ def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
 
     assert not base_crop_group.isna().any()
+
+
+def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
+    dataset = build_dataset(CONFIG)
+
+    sales = dataset.parameters["sales_per_ha_cult"]
+    subsidy_annualized = dataset.parameters["subsidy_per_ha_cult_annualized"]
+    margin = dataset.parameters["margin_per_ha_cult"]
+
+    # AG: PB=rdt*prix=20*700=14000, no subsidies/bagasse (see the existing
+    # gross-margin test's comment) -- sales alone should equal the full gross
+    # product, and reconciling with the already-verified margin gives the
+    # same CV~8001.31 hand-verified variable cost.
+    assert sales["AG"] == pytest.approx(14000.0, abs=0.01)
+    assert subsidy_annualized["AG"] == pytest.approx(0.0, abs=0.01)
+    assert (sales["AG"] + subsidy_annualized["AG"] - margin["AG"]) == pytest.approx(8001.31, abs=1.0)
