@@ -22,15 +22,44 @@ guadeloupéen, RPG, ou autre source), jointe sur `ident`, pour activer une
 vraie carte dans le dashboard (brique B).
 _Constaté le 2026-07-09._
 
-### Majeur — Pas de données ETP / travail
-Aucune occurrence de "ETP" (ni d'équivalent travail/main d'œuvre) dans tout le
-repo. L'indicateur "revenu / ETP de travail" demandé n'est donc pas
-calculable actuellement.
-**Prochain fix possible** : identifier une source de données ETP par
-exploitation ou par culture (temps de travail par ha et par itinéraire
-technique, éventuellement dans les fichiers GAMS d'origine
-`old_code_gms_format_now_txt/` s'ils existent) avant de pouvoir l'ajouter au
-dashboard.
+### Majeur — Données de main d'œuvre non portées (ETP)
+Le modèle GAMS d'origine calcule bel et bien la main d'œuvre
+(`MO_Ha_Cult_init(SC)` par culture, `MO_Parc_init(SP)` par parcelle,
+`ENTREES.txt:31,469`, agrégée en `MO_Gwad`/`MO_Gwad_Moy_ha` dans
+`OPTIMISATION.txt:2015-2019` et affichée dans `RESULTATS.txt:137-138`
+"TRAVAIL_TOT"/"TRAVAIL_MOY_HA"). Mais ces données n'ont jamais été portées
+dans `data/tables/` côté Python (aucun fichier `MO_*`/`Travail_*`) — ce n'est
+donc pas un manque de donnée source, juste un portage GAMS→Python non fait.
+L'indicateur "revenu / ETP de travail" demandé reste donc non calculable
+tant que ce portage n'est pas fait.
+**Prochain fix possible** : porter `MO_Ha_Cult_init` (et sa source amont
+dans `DONNEES.txt`/`ENTREES.txt`) vers un nouveau `data/tables/MO_Cult.txt`,
+suivant le même pattern que `Prix_Cult.txt`/`Rdt_Cult.txt`.
+_Constaté le 2026-07-09._
+
+### Majeur — Comparaison entrée/sortie limitée à la résolution du groupe RPG
+`cult_2017` (l'allocation observée, utilisée comme baseline "entrée") n'encode
+les cultures qu'à la résolution de 12 groupes RPG
+(`case_studies/guadeloupe/farm_typology._RPG_CODE_TO_BASE_GROUP`), alors que
+le solveur alloue parmi ~84 cultures fines (`CULT_2017.set`), chacune avec
+son propre rendement/subvention/marge à l'hectare. Il n'existe aucune table
+officielle fine→groupe dans le repo Python. Le modèle GAMS d'origine, lui,
+définissait une taxonomie `SC_*` bien plus riche (~40 familles,
+`old_code_gms_format_now_txt/SETS.txt` lignes 113-607) qui aurait permis ce
+rapprochement — mais elle n'est que partiellement portée dans
+`config.yaml` (`crop_families`: 8 familles sur ~40, seulement celles utiles
+aux contraintes actuellement actives). Construire un mapping fine→groupe par
+préfixe de nom serait une supposition non validée (des cultures comme
+`CF_*`/`TH` n'apparaissent dans aucun des deux schémas existants).
+**Conséquence pour la brique A** : les indicateurs de production/subvention/
+revenu par culture ne sont calculés qu'en sortie (résolution fine, précise) ;
+côté entrée, seuls les indicateurs de surface/nombre de parcelles/diversité
+sont calculés (résolution 12 groupes RPG, précise) ; les écarts entrée/sortie
+se limitent aux agrégats indépendants de la résolution (surface totale
+cultivée, nb parcelles actives, nb exploitations).
+**Prochain fix possible** : porter la taxonomie `SC_*` de `SETS.txt` dans
+`config.yaml` (comme déjà fait pour les 8 familles existantes) pour permettre
+une comparaison entrée/sortie par famille de culture.
 _Constaté le 2026-07-09._
 
 ### Mineur — `YEAR`/`SCENARIO` codés en dur

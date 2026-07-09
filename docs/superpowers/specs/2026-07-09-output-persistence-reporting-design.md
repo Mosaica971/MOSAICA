@@ -15,24 +15,43 @@ not-yet-designed piece) will read from.
 - No real geographic map — no parcel geometry exists in the repo (no
   shapefile/GeoJSON, no lat/lon in `Data_Parc_Gwad_2017.txt`); indicators use
   `ILE`/`REGION`/`COMMUNE` breakdowns instead. Tracked in `VIGILANCE.md`.
-- No revenue/ETP indicator — no labor data exists anywhere in the repo.
-  Tracked in `VIGILANCE.md`.
+- No revenue/ETP indicator — the legacy GAMS model computes labor
+  (`MO_Ha_Cult_init`) but it was never ported to `data/tables/`. Tracked in
+  `VIGILANCE.md`.
 - No zone-exclusion / sub-scoping — a separate, not-yet-designed piece.
 - No config changes to make `YEAR`/`SCENARIO` selectable — tracked as a minor
   vigilance item, out of scope here.
+- No per-crop economic delta between input and output. The observed baseline
+  (`cult_2017`) only resolves crops to 12 coarse RPG groups
+  (`farm_typology._RPG_CODE_TO_BASE_GROUP`), while the solver allocates among
+  ~84 fine crops with per-crop economics — there is no validated mapping
+  between the two (tracked in `VIGILANCE.md`). Economic indicators (production,
+  subsidy, revenue) are therefore computed at full fine-crop resolution for
+  the *output* only; the *input* gets surface/plot-count/diversity indicators
+  at RPG-group resolution; deltas are limited to resolution-independent
+  aggregates (total cultivated surface, active plot count, farm count).
 
 ## Architecture
 
 ### New module: `core/reporting/`
 
-- `indicators.py` — pure functions computing indicators from a `Dataset` plus
-  an allocation (a `plot -> crop` mapping — either the observed baseline
-  `data_parc["cult_2017"]` or the optimized `model.Y` solution decoded to the
-  same shape). Same functions run against both allocations so a delta is a
-  plain subtraction. Computes, per crop: production (t), subsidy (€, €/t,
-  €/€ sold), sales revenue (€), total revenue (sales + subsidy); per farm:
-  total revenue and a Gini coefficient over the farm revenue distribution;
-  per farm/region: a Shannon diversity index over crop surface shares.
+- `indicators.py` — pure functions computing indicators from a `Dataset`.
+  Two allocation resolutions are used, kept deliberately separate (see
+  Non-goals): the optimized solution (`model.Y` decoded to a
+  `plot -> fine_crop` mapping, ~84 crops) for **output** indicators, and the
+  observed baseline (`data_parc["cult_2017"]` decoded via
+  `farm_typology.compute_base_crop_group` to `plot -> rpg_group`, 12 groups)
+  for **input** indicators.
+  - Output (fine-crop resolution): production (t), subsidy (€, €/t, €/€
+    sold), sales revenue (€), total revenue (sales + subsidy) per crop; total
+    revenue and a Gini coefficient per farm; a Shannon diversity index over
+    crop surface shares per farm/region; surface by region/island.
+  - Input (RPG-group resolution): surface and plot count per group; a
+    Shannon diversity index over group surface shares per farm/region;
+    surface by region/island.
+  - Shared aggregates (both resolutions, used for the delta): total
+    cultivated surface (ha), count of active/cultivated plots, count of
+    farms.
 - `plots.py` — matplotlib rendering of the `indicators.py` outputs to PNG:
   bar chart of production/crop, bar chart of subsidy/crop (and the two
   normalized variants), bar chart of total revenue, a region/island surface
