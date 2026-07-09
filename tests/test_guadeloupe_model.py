@@ -85,21 +85,29 @@ def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint()
 
 
 def test_build_model_supports_enabling_risk_adjusted_objective():
-    from case_studies.guadeloupe.data_pipeline import build_dataset
-    from core.config import load_config
+    dataset = _fake_dataset()
+    dataset.parameters["farm_plots"] = {"E1": ["P1"]}
+    dataset.parameters["crop_variance_per_ha"] = pd.Series({"C1": 0.0, "C2": 1.0})
+    dataset.parameters["farm_risk_aversion"] = pd.Series({"E1": 1.5})
+    # Restrict to P1's two crops so the choice between them is unambiguous.
+    dataset.parameters["eligible_pairs"] = [("P1", "C1"), ("P1", "C2")]
 
-    config = load_config(
-        Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
-    )
     config = {
-        **config,
+        "constraints": [{"name": "at_most_one_crop_per_plot", "enable": True, "args": {}}],
         "objectives": [
             {"name": "maximize_gross_margin", "enable": False, "args": {}},
             {"name": "maximize_risk_adjusted_gross_margin", "enable": True, "args": {}},
         ],
     }
-    dataset = build_dataset(config)
 
     model = build_model(dataset, config)
+    solver = pyo.SolverFactory("appsi_highs")
+    solver.solve(model)
 
-    assert model.objective is not None
+    # Plain gross margin would prefer C2 (200/ha over C1's 100/ha). Wiring
+    # farm_risk_aversion=1.5 and crop_variance_per_ha[C2]=1.0 through model.py
+    # makes C2's risk-adjusted value negative (200*(1-1.5*1.0)=-100), flipping
+    # the optimal choice to C1. This fails if model.py's two passthrough lines
+    # (crop_variance_per_ha=..., farm_risk_aversion=...) are ever dropped.
+    assert pyo.value(model.Y["P1", "C1"]) == pytest.approx(1)
+    assert pyo.value(model.Y["P1", "C2"]) == pytest.approx(0)
