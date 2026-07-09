@@ -1,3 +1,6 @@
+from collections.abc import Mapping, Sequence
+
+import numpy as np
 import pandas as pd
 
 # old_code_gms_format_now_txt/ENTREES.txt:62-103 -- RPG cult_2017 code -> base crop group.
@@ -21,3 +24,111 @@ def compute_base_crop_group(cult_2016: pd.Series, cult_2017: pd.Series) -> pd.Se
     )
     resolved_2017 = cult_2017.where(~both_fallow, 14)
     return resolved_2017.map(_RPG_CODE_TO_BASE_GROUP)
+
+
+# old_code_gms_format_now_txt/OPTIMISATION.txt:1467-1498 -- which base crop groups feed
+# which SURF_*/PART_* family aggregate. A base group may feed more than one family (e.g.
+# IG counts toward both "mar" and "tt"); "cultiv" is handled separately below since every
+# group except NC counts toward it.
+_FAMILIES_BY_BASE_GROUP: dict[str, tuple[str, ...]] = {
+    "AG": ("plu",),
+    "AN": (),
+    "BA": ("ban",),
+    "BC": ("bc",),
+    "CS": ("can",),
+    "IG": ("mar", "tt"),
+    "JA": ("non",),
+    "MA": ("mar",),
+    "ME": ("mar",),
+    "NC": ("non",),
+    "PN": ("pat",),
+    "VE": ("plu",),
+}
+
+_FAMILIES = ("can", "pat", "ban", "mar", "plu", "bc", "tt", "non")
+
+# old_code_gms_format_now_txt/OPTIMISATION.txt:1744-1758.
+_AVERS_BY_TYPE_EXPL: dict[int, float] = {
+    1: 1.30, 2: 1.20, 3: 0.30, 5: 0.55, 6: 2.40, 7: 0.00, 8: 2.30,
+}
+_AVERS_BY_TYPE_EXPL_BIS: dict[int, float] = {41: 0.50, 42: 1.60}
+
+
+def compute_type_expl(
+    farm_plots: Mapping[str, Sequence[str]],
+    base_crop_group: pd.Series,
+    plot_surface_ha: Mapping[str, float],
+) -> tuple[pd.Series, pd.Series]:
+    farms = list(farm_plots.keys())
+    plot_to_farm = {plot: farm for farm, plots in farm_plots.items() for plot in plots}
+
+    frame = pd.DataFrame(
+        {
+            "farm": pd.Series(plot_to_farm),
+            "group": base_crop_group,
+            "surface": pd.Series(plot_surface_ha),
+        }
+    ).dropna(subset=["farm", "group"])
+
+    def surface_by_farm(groups: set[str]) -> pd.Series:
+        subset = frame[frame["group"].isin(groups)]
+        return subset.groupby("farm")["surface"].sum().reindex(farms, fill_value=0.0)
+
+    all_groups = set(_FAMILIES_BY_BASE_GROUP.keys())
+    surf_cultiv = surface_by_farm(all_groups - {"NC"})
+    surf = {
+        family: surface_by_farm(
+            {group for group, families in _FAMILIES_BY_BASE_GROUP.items() if family in families}
+        )
+        for family in _FAMILIES
+    }
+
+    denom = surf_cultiv - surf["non"]
+    safe_denom = denom.where(denom != 0, 1.0)
+
+    def part(family: str) -> pd.Series:
+        return (surf[family] / safe_denom).where(denom != 0, 0.0)
+
+    part_can, part_pat, part_ban = part("can"), part("pat"), part("ban")
+    part_mar, part_plu = part("mar"), part("plu")
+    part_bc, part_tt = part("bc"), part("tt")
+
+    # old_code_gms_format_now_txt/OPTIMISATION.txt:1542-1552 -- the second, authoritative
+    # cascade (the first one at :1530-1540 is dead code, unconditionally overwritten
+    # before anything reads it; see the design spec for the full justification).
+    conditions = [
+        (part_can >= 0.625) & (part_can < 0.939),
+        part_can >= 0.939,
+        (part_can < 0.625) & (part_pat >= 0.606),
+        (part_can < 0.625) & (part_pat < 0.606) & (part_pat >= 0.327),
+        (part_can < 0.625) & (part_pat < 0.327) & (part_ban >= 0.364),
+        (part_can < 0.625) & (part_pat < 0.327) & (part_ban < 0.364) & (part_mar >= 0.801),
+        (part_can < 0.625) & (part_pat < 0.327) & (part_ban < 0.364) & (part_mar < 0.801)
+        & (part_plu >= 0.522),
+        (part_can < 0.625) & (part_pat < 0.327) & (part_ban < 0.364) & (part_mar < 0.801)
+        & (part_plu < 0.522),
+    ]
+    choices = [4, 3, 6, 8, 2, 7, 1, 5]
+    type_expl = pd.Series(
+        np.select(conditions, choices, default=-1), index=farms
+    ).astype(int)
+    type_expl[surf_cultiv == 0] = 0
+
+    # old_code_gms_format_now_txt/OPTIMISATION.txt:1557-1561 -- sub-split for
+    # TYPE_EXPL=4 farms. Both conditions are evaluated in GAMS's written order (41 then
+    # 42); whichever is true last wins, so the 42 assignment below is applied after 41.
+    type_expl_bis = pd.Series(np.nan, index=farms)
+    is_type_4 = type_expl == 4
+    bis_41 = (part_mar > 0) | (part_plu > 0) | (part_bc > 0) | (part_tt > 0)
+    bis_42 = (part_mar == 0) | (part_plu == 0) | (part_bc == 0) | (part_tt == 0)
+    type_expl_bis[is_type_4 & bis_41] = 41
+    type_expl_bis[is_type_4 & bis_42] = 42
+
+    return type_expl, type_expl_bis
+
+
+def compute_avers(type_expl: pd.Series, type_expl_bis: pd.Series) -> pd.Series:
+    avers = type_expl.map(_AVERS_BY_TYPE_EXPL).fillna(0.0)
+    is_type_4 = type_expl == 4
+    avers = avers.where(~is_type_4, type_expl_bis.map(_AVERS_BY_TYPE_EXPL_BIS))
+    return avers
