@@ -20,12 +20,16 @@ def build_crop_allocation_model(
     farm_surface_ha: Mapping[str, float] | None = None,
     farm_gfa_surface_ha: Mapping[str, float] | None = None,
     crop_yield_per_ha: Mapping[str, float] | None = None,
+    crop_variance_per_ha: Mapping[str, float] | None = None,
+    farm_risk_aversion: Mapping[str, float] | None = None,
 ) -> pyo.ConcreteModel:
     model = pyo.ConcreteModel()
     farm_plots = {} if farm_plots is None else farm_plots
     farm_surface_ha = {} if farm_surface_ha is None else farm_surface_ha
     farm_gfa_surface_ha = {} if farm_gfa_surface_ha is None else farm_gfa_surface_ha
     crop_yield_per_ha = {} if crop_yield_per_ha is None else crop_yield_per_ha
+    crop_variance_per_ha = {} if crop_variance_per_ha is None else crop_variance_per_ha
+    farm_risk_aversion = {} if farm_risk_aversion is None else farm_risk_aversion
 
     plots_to_crops = defaultdict(list)
     for plot, crop in eligible_pairs:
@@ -44,6 +48,8 @@ def build_crop_allocation_model(
         farm_surface_ha=farm_surface_ha,
         farm_gfa_surface_ha=farm_gfa_surface_ha,
         crop_yield_per_ha=crop_yield_per_ha,
+        crop_variance_per_ha=crop_variance_per_ha,
+        farm_risk_aversion=farm_risk_aversion,
     )
 
     for build_constraint, args in resolve_enabled(config["constraints"], CONSTRAINT_REGISTRY):
