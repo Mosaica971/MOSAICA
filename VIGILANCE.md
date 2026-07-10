@@ -113,19 +113,34 @@ manuellement (`enable: false`) les `territory_production_bound` concernées dans
 `config.yaml` pour les runs à petite échelle.
 _Constaté le 2026-07-10._
 
-### Mineur — Gain solveur APPSI persistante à re-confirmer sur le run complet
-L'adaptation vers l'interface APPSI persistante est faite (voir "Résolu" ci-dessous),
-mais le gain (~25% mesuré sur le sous-ensemble île 1) n'a pas encore été re-profilé sur
-le **run complet** (506 243 variables), car cette session n'exécute pas `main.py`.
-**Prochain fix possible** : lors d'un run `main.py` de fin de journée, relancer
-`scripts/profile_solver.py` (sans `zone_filter`, ou sur un sous-ensemble large) pour
-confirmer que le gain tient à pleine échelle, et enregistrer la nouvelle durée.
+### Majeur — Le gain de l'interface APPSI persistante ne tient PAS à pleine échelle
+Re-confirmé sur un run `main.py` complet le 2026-07-10 : le gain ~25% mesuré sur l'île 1
+**ne se retrouve pas** sur le vrai problème (1 683 058 variables). Durée du run APPSI :
+3310s ; historique de l'ancien solveur (`SolverFactory`) pour la même taille : 1622s,
+2600s, 3132s, 3442s (moyenne ~2699s). 3310s est en plein dans cette fourchette, plutôt
+côté haut — aucun gain mesurable. La variance run-à-run (×2,1 pour un problème identique)
+montre que le goulot à pleine échelle est la **recherche branch-and-bound MILP** (des
+milliers de secondes, très variable), pas les ~15s de conversion Pyomo→HiGHS que
+l'interface persistante supprime. Le gain île 1 venait de ce que ce sous-ensemble est
+résolu **entièrement au presolve (0 nœud B&B)**, régime où les 15s de conversion étaient
+dominantes — non représentatif du vrai run.
+**Conséquence** : brique D (perf solveur) n'a pas produit d'accélération réelle sur le
+workload cible. L'interface APPSI reste néanmoins conservée (code plus propre, même
+optimum, résultat identique) — voir "Résolu" ci-dessous.
+**Prochain fix possible (si la perf redevient prioritaire)** : agir sur la *recherche*
+et non sur l'enveloppe — tolérance de gap MIP (`mip_rel_gap`/`mip_abs_gap` via
+`solver.args`, accepter une solution à ε% de l'optimum pour couper le B&B tôt), warm
+start depuis l'allocation observée `cult_2017`, ou réduction du nombre de variables
+binaires (pré-filtrage d'éligibilité plus agressif). Chacun demande de vérifier l'impact
+sur le résultat, contrairement au changement d'interface (neutre sur l'optimum).
 _Constaté le 2026-07-10._
 
 ## Résolu
 
-### Majeur — Goulot d'étranglement du solveur (enveloppe `SolverFactory`, pas HiGHS)
-_Résolu le 2026-07-10._ Le profilage (île 1, 8376 parcelles, quotas territoriaux
+### Majeur — Interface solveur migrée vers APPSI persistant (gain réel : voir nuance)
+_Résolu le 2026-07-10 (changement de code fait et validé), mais **sans accélération réelle
+à pleine échelle** — voir le point ouvert « Le gain de l'interface APPSI persistante ne
+tient PAS à pleine échelle » ci-dessus._ Le profilage (île 1, 8376 parcelles, quotas territoriaux
 désactivés, `scripts/profile_solver.py`) avait montré que la durée était dominée non
 par HiGHS (~6s, dont ~5.9s de presolve, 0 nœud de branch-and-bound) mais par l'enveloppe
 `SolverFactory('appsi_highs')` (LegacySolver) convertissant le modèle Pyomo (506 243
