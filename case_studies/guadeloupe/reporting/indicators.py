@@ -57,3 +57,37 @@ def compute_aggregate_summary(dataset: Dataset, allocation: pd.Series) -> dict:
         "active_plot_count": int(len(allocation)),
         "farm_count": int(farms.nunique()),
     }
+
+
+def compute_production_tonnes_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    rdt_cult = dataset.parameters["rdt_cult"]
+    return surface_by_crop * rdt_cult.reindex(surface_by_crop.index)
+
+
+def compute_sales_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    sales_per_ha_cult = dataset.parameters["sales_per_ha_cult"]
+    return surface_by_crop * sales_per_ha_cult.reindex(surface_by_crop.index)
+
+
+def compute_subsidy_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    subsidy_per_ha_cult = dataset.parameters["subsidy_per_ha_cult_annualized"]
+    return surface_by_crop * subsidy_per_ha_cult.reindex(surface_by_crop.index)
+
+
+def compute_total_revenue_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    return compute_sales_by_crop(dataset, allocation) + compute_subsidy_by_crop(dataset, allocation)
+
+
+def compute_subsidy_per_tonne_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    subsidy = compute_subsidy_by_crop(dataset, allocation)
+    production = compute_production_tonnes_by_crop(dataset, allocation)
+    return (subsidy / production).replace([np.inf, -np.inf], np.nan)
+
+
+def compute_subsidy_per_euro_sold_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    subsidy = compute_subsidy_by_crop(dataset, allocation)
+    sales = compute_sales_by_crop(dataset, allocation)
+    return (subsidy / sales).replace([np.inf, -np.inf], np.nan)

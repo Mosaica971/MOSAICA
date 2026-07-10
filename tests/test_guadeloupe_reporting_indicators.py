@@ -97,3 +97,63 @@ def test_compute_aggregate_summary_totals_surface_plots_and_farms():
     summary = indicators.compute_aggregate_summary(dataset, allocation)
 
     assert summary == {"total_surface_ha": 10.0, "active_plot_count": 5, "farm_count": 3}
+
+
+def test_compute_production_tonnes_by_crop_multiplies_surface_by_yield():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_production_tonnes_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(400.0)
+    assert result["ME"] == pytest.approx(20.0)
+
+
+def test_compute_sales_by_crop_multiplies_surface_by_sales_rate():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_sales_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(15000.0)
+    assert result["ME"] == pytest.approx(5000.0)
+
+
+def test_compute_subsidy_by_crop_multiplies_surface_by_subsidy_rate():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_subsidy_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(2500.0)
+    assert result["ME"] == pytest.approx(200.0)
+
+
+def test_compute_total_revenue_by_crop_sums_sales_and_subsidy():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_total_revenue_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(17500.0)
+    assert result["ME"] == pytest.approx(5200.0)
+
+
+def test_compute_subsidy_per_tonne_by_crop_divides_subsidy_by_production():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_subsidy_per_tonne_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(6.25)
+    assert result["ME"] == pytest.approx(10.0)
+
+
+def test_compute_subsidy_per_euro_sold_by_crop_divides_subsidy_by_sales():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_subsidy_per_euro_sold_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(2500.0 / 15000.0)
+    assert result["ME"] == pytest.approx(200.0 / 5000.0)
