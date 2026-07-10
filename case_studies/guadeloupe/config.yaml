@@ -2,6 +2,16 @@ solver:
   name: appsi_highs
   args: {}
 
+# Optional: restrict the optimization to a subset of plots (island/region/farm/plot),
+# for faster small-scale test runs or local policy-transition scenarios. See
+# docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md. Absent (as here)
+# means no restriction -- every plot is in play.
+# zone_filter:
+#   include:
+#     islands: [1]
+#   exclude:
+#     farms: [E1471]
+
 crop_families:
   an: &SC_AN [AN, AN_NU, AN_PA]
   ig: &SC_IG [IG, IG_PLA, IG_TUT]

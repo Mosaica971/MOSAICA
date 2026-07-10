@@ -83,9 +83,20 @@ _Constaté le 2026-07-09._
 Cadrés dans l'ordre choisi avec l'utilisateur le 2026-07-09 :
 - [x] **A. Sauvegarde des résultats** (`outputs/output_N/` + récap + PNG) — en cours d'implémentation.
 - [ ] **B. Dashboard de visualisation** — dépend de A pour les données de sortie ; le côté "entrée" peut démarrer indépendamment.
-- [ ] **C. Exclusion de zones** (parcelles/exploitations/régions/îles) avant optimisation, pour tests à petite échelle et scénarios de transition locale.
+- [x] **C. Exclusion de zones** (parcelles/exploitations/régions/îles) avant optimisation, pour tests à petite échelle et scénarios de transition locale — voir `zone_filter` dans `config.yaml` (`core/data/zone_filter.py`).
 - [ ] **D. Performance du solver** — nécessite d'abord un profilage pour diagnostiquer où le temps est perdu.
 - [ ] **E. Remise à niveau du code** (suppression du mort, commentaires concis) — a priori continu, au fil des autres briques.
+
+### Mineur — `zone_filter` ne redimensionne pas les quotas territoriaux
+`territory_production_bound` (quotas min/max sur toute la Guadeloupe, dans
+`config.yaml`) n'est pas recalculé quand `zone_filter` restreint les parcelles : un
+sous-ensemble (ex: une seule île) peut devenir infaisable vis-à-vis de seuils pensés
+pour tout le territoire. C'est un choix assumé (voir la section "Non-goals" de
+`docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md`), pas un bug.
+**Prochain fix possible** : si ça devient gênant en pratique, désactiver
+manuellement (`enable: false`) les `territory_production_bound` concernées dans
+`config.yaml` pour les runs à petite échelle.
+_Constaté le 2026-07-10._
 
 ## Résolu
 
