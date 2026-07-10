@@ -45,12 +45,29 @@ def build_zone_filter_from_args(args: argparse.Namespace) -> dict | None:
     return {"include": include}
 
 
+def disable_territory_bounds(config: dict) -> dict:
+    """Drop territory_production_bound constraints (whole-Guadeloupe quotas that a
+    zone_filter subset can't satisfy -- see VIGILANCE.md's "zone_filter ne
+    redimensionne pas les quotas territoriaux"). Only meant for profiling runs."""
+    return {
+        **config,
+        "constraints": [
+            entry for entry in config["constraints"] if entry["name"] != "territory_production_bound"
+        ],
+    }
+
+
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     config = load_config(CONFIG_PATH)
     zone_filter = build_zone_filter_from_args(args)
     if zone_filter is not None:
         config = {**config, "zone_filter": zone_filter}
+        config = disable_territory_bounds(config)
+        print(
+            "zone_filter active: territory_production_bound constraints disabled "
+            "(whole-territory quotas don't apply to a subset -- see VIGILANCE.md)."
+        )
 
     _dataset, _model, _results, timings = time_phases(
         lambda: build_dataset(config),
