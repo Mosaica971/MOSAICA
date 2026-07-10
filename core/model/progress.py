@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 import json
-import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
 import pyomo.environ as pyo
+from tqdm import tqdm
 
 from core.model.solver import solve_model
 
 DEFAULT_HISTORY_PATH = Path(__file__).resolve().parents[2] / ".mosaica_solve_history.json"
 _MAX_ENTRIES_PER_CASE_STUDY = 20
 _NEIGHBORS_FOR_ESTIMATE = 3
+_POLL_INTERVAL_SECONDS = 0.2
 
 T = TypeVar("T")
 
@@ -56,25 +58,43 @@ def run_with_progress(
     label: str,
     estimate_seconds: float | None,
 ) -> tuple[T, float]:
-    # Runs func synchronously on the calling (main) thread, bracketed by static
-    # progress lines. It deliberately does NOT background the call behind a live
-    # animated bar: the persistent APPSI HiGHS solver loads the model inside
-    # capture_output(capture_fd=True), which redirects process-global stdout/stderr
-    # file descriptors and toggles a process-global lock. Any progress I/O emitted
-    # concurrently from another thread corrupts that state (global lock released too
-    # many times / fd mismatch). Bracketing prints emitted before and after the call
-    # -- never during it -- keeps the fast solver and still shows an ETA + real
-    # duration. See docs/superpowers/specs/
-    # 2026-07-10-solver-appsi-persistent-interface-design.md.
-    suffix = f" (est ~{estimate_seconds:.0f}s)" if estimate_seconds else ""
-    print(f"{label}{suffix}...", file=sys.stderr, flush=True)
+    outcome: dict[str, T] = {}
+    error: dict[str, BaseException] = {}
 
+    def _target() -> None:
+        try:
+            outcome["value"] = func()
+        except BaseException as exc:  # noqa: BLE001 - re-raised on the caller's thread below
+            error["value"] = exc
+
+    thread = threading.Thread(target=_target, daemon=True)
     start = time.monotonic()
-    result = func()
-    duration = time.monotonic() - start
+    thread.start()
 
-    print(f"{label}: done in {duration:.1f}s", file=sys.stderr, flush=True)
-    return result, duration
+    bar_format = (
+        "{desc}: {bar} {n:.0f}s/{total:.0f}s [ETA {remaining}]"
+        if estimate_seconds
+        else "{desc}: {n:.0f}s elapsed"
+    )
+    with tqdm(total=estimate_seconds, desc=label, bar_format=bar_format) as bar:
+        last = 0.0
+        while thread.is_alive():
+            elapsed = time.monotonic() - start
+            if bar.total is not None and elapsed > bar.total:
+                bar.total = elapsed
+            bar.update(elapsed - last)
+            last = elapsed
+            thread.join(timeout=_POLL_INTERVAL_SECONDS)
+
+        elapsed = time.monotonic() - start
+        if bar.total is not None and elapsed > bar.total:
+            bar.total = elapsed
+        bar.update(elapsed - last)
+
+    duration = time.monotonic() - start
+    if "value" in error:
+        raise error["value"]
+    return outcome["value"], duration
 
 
 def solve_with_progress(

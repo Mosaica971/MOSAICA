@@ -2,6 +2,18 @@
 
 _2026-07-10_
 
+> **STATUS: REVERTED (2026-07-10).** This approach was implemented (commit `3c8e450`) and
+> then rolled back the same day. A full `main.py` run showed the ~25% gain measured on the
+> island-1 subset does **not** transfer to the real 1.68M-var problem — at full scale the
+> bottleneck is the MILP branch-and-bound search, not the ~15s Pyomo→HiGHS translation this
+> change removes. The persistent interface also loads the model inside
+> `capture_output(capture_fd=True)`, which is incompatible with the background-threaded
+> animated `tqdm` progress bar (global stdout/stderr fd corruption). With no real gain and
+> the loss of the live bar, the change was reverted to `SolverFactory` + the animated bar.
+> This document is kept for its root-cause analysis (the thread/`capture_output` conflict)
+> in case APPSI is revisited via the real perf levers (MIP gap, warm start, fewer binaries).
+> See `VIGILANCE.md`.
+
 ## Problem
 
 Profiling (brique D, see `2026-07-10-solver-performance-design.md` and `VIGILANCE.md`)

@@ -25,20 +25,6 @@ def test_solve_model_returns_optimal_solved_model():
     assert pyo.value(model.objective) == pytest.approx(200.0)
 
 
-def test_solve_model_returns_normalized_termination_condition():
-    # report.py::_build_recap consumes results.termination_condition as a string.
-    model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
-        config=CONFIG,
-    )
-
-    result = solve_model(model, CONFIG)
-
-    assert result.termination_condition == "optimal"
-
-
 def test_solve_model_raises_on_infeasible_model():
     model = build_crop_allocation_model(
         plot_surface_ha={"P1": 1.0},

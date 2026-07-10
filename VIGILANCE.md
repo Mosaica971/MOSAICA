@@ -113,57 +113,40 @@ manuellement (`enable: false`) les `territory_production_bound` concernées dans
 `config.yaml` pour les runs à petite échelle.
 _Constaté le 2026-07-10._
 
-### Majeur — Le gain de l'interface APPSI persistante ne tient PAS à pleine échelle
-Re-confirmé sur un run `main.py` complet le 2026-07-10 : le gain ~25% mesuré sur l'île 1
-**ne se retrouve pas** sur le vrai problème (1 683 058 variables). Durée du run APPSI :
-3310s ; historique de l'ancien solveur (`SolverFactory`) pour la même taille : 1622s,
-2600s, 3132s, 3442s (moyenne ~2699s). 3310s est en plein dans cette fourchette, plutôt
-côté haut — aucun gain mesurable. La variance run-à-run (×2,1 pour un problème identique)
-montre que le goulot à pleine échelle est la **recherche branch-and-bound MILP** (des
-milliers de secondes, très variable), pas les ~15s de conversion Pyomo→HiGHS que
-l'interface persistante supprime. Le gain île 1 venait de ce que ce sous-ensemble est
-résolu **entièrement au presolve (0 nœud B&B)**, régime où les 15s de conversion étaient
-dominantes — non représentatif du vrai run.
-**Conséquence** : brique D (perf solveur) n'a pas produit d'accélération réelle sur le
-workload cible. L'interface APPSI reste néanmoins conservée (code plus propre, même
-optimum, résultat identique) — voir "Résolu" ci-dessous.
-**Prochain fix possible (si la perf redevient prioritaire)** : agir sur la *recherche*
-et non sur l'enveloppe — tolérance de gap MIP (`mip_rel_gap`/`mip_abs_gap` via
-`solver.args`, accepter une solution à ε% de l'optimum pour couper le B&B tôt), warm
-start depuis l'allocation observée `cult_2017`, ou réduction du nombre de variables
-binaires (pré-filtrage d'éligibilité plus agressif). Chacun demande de vérifier l'impact
-sur le résultat, contrairement au changement d'interface (neutre sur l'optimum).
+### Majeur — Le run complet reste lent (~30–55 min) ; seul levier restant = la recherche MILP
+Le run `main.py` complet (1 683 058 variables) prend de l'ordre de 30 à 55 min, avec une
+**variance run-à-run énorme** (historique pour cette taille : 1622s, 2600s, 3132s, 3310s,
+3442s — ×2,1 pour un problème identique). Le profilage (brique D, `scripts/profile_solver.py`)
+avait fait croire que le goulot était l'enveloppe `SolverFactory('appsi_highs')` (LegacySolver)
+convertissant le modèle Pyomo vers HiGHS (~15s sur l'île 1). Mais ce n'est vrai que sur un
+sous-ensemble résolu **entièrement au presolve (0 nœud B&B)**. Sur le vrai problème le goulot
+est la **recherche branch-and-bound elle-même** (des milliers de secondes) ; les ~15s
+d'enveloppe sont négligeables. Confirmé par le run complet du 2026-07-10 : l'interface APPSI
+persistante (qui supprime ces 15s) n'a donné **aucun gain mesurable** (3310s, en plein dans la
+fourchette de l'ancien solveur) — elle a donc été **revertée** (voir "Résolu" ci-dessous).
+**Prochain fix possible (si la perf redevient prioritaire)** : agir sur la *recherche*, pas
+l'enveloppe — tolérance de gap MIP (`mip_rel_gap`/`mip_abs_gap` via `solver.args`, accepter
+une solution à ε% de l'optimum pour couper le B&B tôt), warm start depuis l'allocation
+observée `cult_2017`, ou réduction du nombre de variables binaires (pré-filtrage d'éligibilité
+plus agressif). Chacun demande de vérifier l'impact sur le *résultat* (contrairement à un simple
+changement d'enveloppe, neutre sur l'optimum), donc à cadrer comme un vrai sous-projet.
 _Constaté le 2026-07-10._
 
 ## Résolu
 
-### Majeur — Interface solveur migrée vers APPSI persistant (gain réel : voir nuance)
-_Résolu le 2026-07-10 (changement de code fait et validé), mais **sans accélération réelle
-à pleine échelle** — voir le point ouvert « Le gain de l'interface APPSI persistante ne
-tient PAS à pleine échelle » ci-dessus._ Le profilage (île 1, 8376 parcelles, quotas territoriaux
-désactivés, `scripts/profile_solver.py`) avait montré que la durée était dominée non
-par HiGHS (~6s, dont ~5.9s de presolve, 0 nœud de branch-and-bound) mais par l'enveloppe
-`SolverFactory('appsi_highs')` (LegacySolver) convertissant le modèle Pyomo (506 243
-variables binaires) vers HiGHS (~15s). `core/model/solver.py::solve_model` utilise
-désormais l'interface APPSI persistante (`pyomo.contrib.appsi.solvers.highs.Highs`) au
-lieu de `SolverFactory`, ce qui contourne cette enveloppe (~25% de gain mesuré, 16s vs
-21.5s sur le sous-ensemble île 1). La forme différente de `results`
-(`results.termination_condition` au lieu de `results.solver.termination_condition`) est
-contenue par un petit `SolveResult` normalisé renvoyé par `solve_model` ; seul
-`report.py::_build_recap` consommait l'ancienne forme et a été mis à jour. Aucun
-changement de résultat numérique (même optimum). Voir `docs/superpowers/specs/
-2026-07-10-solver-appsi-persistent-interface-design.md`. Re-confirmation du gain sur le
-run complet : voir le point ouvert ci-dessus.
-
-**Effet de bord — barre de progression animée supprimée.** L'interface APPSI persistante
-charge le modèle dans `capture_output(capture_fd=True)` (Pyomo), qui redirige les
-descripteurs de fichier stdout/stderr du process et manipule un verrou global. L'ancienne
-barre `tqdm` tournait pendant que le solve était lancé dans un thread de fond : cette I/O
-concurrente corrompt l'état global (`semaphore or lock released too many times`, fd stdout
-cassé). Diagnostic (debug systématique) : un solve sans I/O concurrente marche ; toute
-barre/ticker concurrent(e) reproduit le crash, même en isolant la barre sur un fd dupliqué
-— le verrou global reste partagé. Choix utilisateur (2026-07-10) : garder le solveur
-rapide, remplacer la barre animée par une estimation ETA (via l'historique) affichée avant
-+ durée réelle après, le solve tournant sur le thread principal
-(`core/model/progress.py::run_with_progress`, désormais synchrone). `tqdm` retiré de
-`pyproject.toml`. Contrat `(result, duration)` inchangé.
+### Majeur — Interface APPSI persistante : testée puis revertée (aucun gain à pleine échelle)
+_Investigué et **rollback** le 2026-07-10._ On a migré `solve_model` de
+`SolverFactory('appsi_highs')` vers l'interface APPSI persistante
+(`pyomo.contrib.appsi.solvers.highs.Highs`) — commit `3c8e450` — en pariant sur le gain ~25%
+mesuré sur l'île 1. Le run complet a montré que ce gain **ne tient pas** à pleine échelle (le
+goulot est la recherche B&B, pas l'enveloppe — voir le point ouvert ci-dessus). De plus,
+l'interface persistante charge le modèle dans `capture_output(capture_fd=True)` (Pyomo), qui
+redirige les fd stdout/stderr du process et manipule un verrou global : incompatible avec la
+barre de progression `tqdm` animée (lancée dans un thread de fond), ce qui corrompait l'état
+global (`semaphore released too many times`, fd stdout cassé) et avait forcé à passer la
+progression en mode statique. **Bilan : gain nul + perte de la barre animée → revert.**
+`solver.py`, `progress.py` (barre animée restaurée), `report.py`, `pyproject.toml` (`tqdm`
+restauré) et les tests sont revenus à l'état d'avant `3c8e450` ; `CLAUDE.md` (issu du `/init`)
+est conservé. Le spec `docs/superpowers/specs/2026-07-10-solver-appsi-persistent-interface-design.md`
+garde l'analyse détaillée (dont la cause racine du conflit thread/`capture_output`) au cas où
+l'on retenterait APPSI, mais est marqué comme **reverté** en tête.
