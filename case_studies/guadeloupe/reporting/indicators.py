@@ -113,3 +113,41 @@ def compute_gini(values: pd.Series) -> float:
         return 0.0
     ranks = np.arange(1, n + 1)
     return float((2 * np.sum(ranks * x)) / (n * total) - (n + 1) / n)
+
+
+def compute_shannon_diversity(
+    dataset: Dataset, allocation: pd.Series, grouping: pd.Series
+) -> pd.Series:
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    frame = pd.DataFrame(
+        {
+            "group_key": grouping.reindex(allocation.index),
+            "crop": allocation,
+            "surface": surface,
+        }
+    )
+
+    def _shannon(rows: pd.DataFrame) -> float:
+        shares = rows.groupby("crop")["surface"].sum()
+        shares = shares[shares > 0] / shares.sum()
+        return float(-(shares * np.log(shares)).sum())
+
+    return frame.groupby("group_key").apply(_shannon)
+
+
+def compute_surface_by_region_and_key(dataset: Dataset, allocation: pd.Series) -> pd.DataFrame:
+    region = plot_to_region(dataset).reindex(allocation.index)
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    frame = pd.DataFrame({"region": region, "crop": allocation, "surface": surface})
+    return frame.pivot_table(
+        index="region", columns="crop", values="surface", aggfunc="sum", fill_value=0.0
+    )
+
+
+def compute_surface_by_island_and_key(dataset: Dataset, allocation: pd.Series) -> pd.DataFrame:
+    island = plot_to_island(dataset).reindex(allocation.index)
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    frame = pd.DataFrame({"island": island, "crop": allocation, "surface": surface})
+    return frame.pivot_table(
+        index="island", columns="crop", values="surface", aggfunc="sum", fill_value=0.0
+    )

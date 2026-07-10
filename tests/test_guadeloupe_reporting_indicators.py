@@ -185,3 +185,36 @@ def test_compute_gini_is_zero_for_equal_distribution():
 
 def test_compute_gini_is_zero_for_empty_series():
     assert indicators.compute_gini(pd.Series(dtype=float)) == 0.0
+
+
+def test_compute_shannon_diversity_is_zero_for_single_crop_farms_and_positive_for_mixed():
+    dataset = _small_dataset()
+    allocation = indicators.decode_baseline_allocation(dataset)
+    farms = indicators.plot_to_farm(dataset)
+
+    result = indicators.compute_shannon_diversity(dataset, allocation, farms)
+
+    assert result["E1"] == pytest.approx(0.0)
+    assert result["E2"] == pytest.approx(0.0)
+    assert result["E3"] == pytest.approx(0.5623, abs=1e-3)
+
+
+def test_compute_surface_by_region_and_key_pivots_surface_by_region_and_crop():
+    dataset = _small_dataset()
+    allocation = indicators.decode_baseline_allocation(dataset)
+
+    result = indicators.compute_surface_by_region_and_key(dataset, allocation)
+
+    assert result.loc["R1", "CS"] == pytest.approx(8.0)
+    assert result.loc["R2", "ME"] == pytest.approx(2.0)
+    assert result.loc["R1", "ME"] == pytest.approx(0.0)
+
+
+def test_compute_surface_by_island_and_key_pivots_surface_by_island_and_crop():
+    dataset = _small_dataset()
+    allocation = indicators.decode_baseline_allocation(dataset)
+
+    result = indicators.compute_surface_by_island_and_key(dataset, allocation)
+
+    assert result.loc[1, "CS"] == pytest.approx(8.0)
+    assert result.loc[2, "ME"] == pytest.approx(2.0)
