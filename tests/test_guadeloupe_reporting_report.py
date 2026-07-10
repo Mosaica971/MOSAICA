@@ -2,6 +2,7 @@ import json
 
 import pandas as pd
 import pytest
+import yaml
 
 from case_studies.guadeloupe.reporting import report
 from core.data.dataset import Dataset
@@ -63,6 +64,8 @@ def test_generate_report_writes_full_output_folder(tmp_path):
     assert (output_dir / "plots" / "production_by_crop.png").exists()
     assert (output_dir / "plots" / "subsidy_by_crop.png").exists()
     assert (output_dir / "plots" / "revenue_by_crop.png").exists()
+    assert (output_dir / "plots" / "surface_by_region_output.png").exists()
+    assert (output_dir / "plots" / "surface_by_region_input.png").exists()
 
     recap = json.loads((output_dir / "recap.json").read_text())
     assert recap["solve_duration_seconds"] == pytest.approx(1.23)
@@ -70,3 +73,34 @@ def test_generate_report_writes_full_output_folder(tmp_path):
     assert recap["constraints"] == [{"name": "at_most_one_crop_per_plot", "args": {}}]
     assert recap["total_plots"] == 2
     assert recap["total_farms"] == 1
+
+    assert isinstance(recap["timestamp"], str) and recap["timestamp"]
+    assert isinstance(recap["termination_condition"], str) and recap["termination_condition"]
+    assert "optimal" in recap["termination_condition"].lower()
+    assert recap["solver"] == {"name": "appsi_highs", "args": {}}
+
+    expected_summary_keys = {"total_surface_ha", "active_plot_count", "farm_count"}
+    for key in ("input", "output", "delta"):
+        summary = recap[key]
+        assert set(summary.keys()) == expected_summary_keys
+        for value in summary.values():
+            assert isinstance(value, (int, float))
+
+    allocation_output = pd.read_csv(output_dir / "allocation_output.csv")
+    assert list(allocation_output.columns) == [
+        "plot",
+        "crop",
+        "farm",
+        "region",
+        "island",
+        "surface_ha",
+    ]
+    assert len(allocation_output) == 2
+    assert set(allocation_output["plot"]) == {"P1", "P2"}
+
+    recap_md = (output_dir / "recap.md").read_text()
+    assert recap_md
+    assert "maximize_gross_margin" in recap_md
+
+    config_used = yaml.safe_load((output_dir / "config_used.yaml").read_text())
+    assert config_used == _CONFIG
