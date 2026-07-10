@@ -104,3 +104,43 @@ def test_generate_report_writes_full_output_folder(tmp_path):
 
     config_used = yaml.safe_load((output_dir / "config_used.yaml").read_text())
     assert config_used == _CONFIG
+
+
+def test_generate_report_writes_additional_indicators(tmp_path):
+    dataset = _tiny_dataset()
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 2.0, "P2": 3.0},
+        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        config=_CONFIG,
+    )
+    results = solve_model(model, _CONFIG)
+
+    output_dir = report.generate_report(
+        dataset, _CONFIG, model, results, duration=1.23, outputs_root=tmp_path
+    )
+
+    for name in (
+        "subsidy_per_tonne_by_crop.csv",
+        "subsidy_per_euro_sold_by_crop.csv",
+        "revenue_by_farm.csv",
+        "shannon_diversity_by_region_input.csv",
+        "shannon_diversity_by_region_output.csv",
+        "shannon_diversity_by_island_input.csv",
+        "shannon_diversity_by_island_output.csv",
+        "surface_by_region_input.csv",
+        "surface_by_region_output.csv",
+        "surface_by_island_input.csv",
+        "surface_by_island_output.csv",
+    ):
+        assert (output_dir / name).exists(), name
+
+    revenue_by_farm = pd.read_csv(output_dir / "revenue_by_farm.csv")
+    assert list(revenue_by_farm.columns) == ["farm", "revenue"]
+    assert set(revenue_by_farm["farm"]) == {"E1"}
+
+    recap = json.loads((output_dir / "recap.json").read_text())
+    assert isinstance(recap["gini_revenue_by_farm"], float)
+
+    surface_by_region_output = pd.read_csv(output_dir / "surface_by_region_output.csv")
+    assert "region" in surface_by_region_output.columns

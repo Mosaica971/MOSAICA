@@ -51,6 +51,11 @@ def generate_report(
     input_summary = indicators.compute_aggregate_summary(dataset, input_allocation)
     delta_summary = {key: output_summary[key] - input_summary[key] for key in output_summary}
 
+    gini_revenue_by_farm = _write_output_only_indicators(dataset, output_allocation, output_dir)
+    _write_shannon_and_surface_by_key(
+        dataset, input_allocation, output_allocation, output_dir
+    )
+
     recap = _build_recap(
         dataset=dataset,
         config=config,
@@ -60,6 +65,7 @@ def generate_report(
         input_summary=input_summary,
         output_summary=output_summary,
         delta_summary=delta_summary,
+        gini_revenue_by_farm=gini_revenue_by_farm,
     )
     (output_dir / "recap.json").write_text(json.dumps(recap, indent=2))
     (output_dir / "recap.md").write_text(_render_recap_markdown(recap))
@@ -68,6 +74,57 @@ def generate_report(
     )
 
     return output_dir
+
+
+def _write_output_only_indicators(
+    dataset: Dataset, output_allocation: pd.Series, output_dir: Path
+) -> float:
+    """Indicators that need fine-crop-keyed price/yield data, so they can only be
+    computed on the (84-crop) output allocation, not the (12-RPG-group) baseline --
+    see VIGILANCE.md "Comparaison entree/sortie limitee a la resolution du groupe RPG"."""
+    indicators.compute_subsidy_per_tonne_by_crop(dataset, output_allocation).to_csv(
+        output_dir / "subsidy_per_tonne_by_crop.csv", header=["subsidy_per_tonne"], index_label="crop"
+    )
+    indicators.compute_subsidy_per_euro_sold_by_crop(dataset, output_allocation).to_csv(
+        output_dir / "subsidy_per_euro_sold_by_crop.csv",
+        header=["subsidy_per_euro_sold"],
+        index_label="crop",
+    )
+
+    revenue_by_farm = indicators.compute_revenue_by_farm(dataset, output_allocation)
+    revenue_by_farm.to_csv(
+        output_dir / "revenue_by_farm.csv", header=["revenue"], index_label="farm"
+    )
+    return indicators.compute_gini(revenue_by_farm)
+
+
+def _write_shannon_and_surface_by_key(
+    dataset: Dataset,
+    input_allocation: pd.Series,
+    output_allocation: pd.Series,
+    output_dir: Path,
+) -> None:
+    """Indicators that only need surface data, so they're valid at both the input
+    (12-group) and output (84-crop) resolution."""
+    region = indicators.plot_to_region(dataset)
+    island = indicators.plot_to_island(dataset)
+    for side, allocation in (("input", input_allocation), ("output", output_allocation)):
+        indicators.compute_shannon_diversity(dataset, allocation, region).to_csv(
+            output_dir / f"shannon_diversity_by_region_{side}.csv",
+            header=["shannon_diversity"],
+            index_label="region",
+        )
+        indicators.compute_shannon_diversity(dataset, allocation, island).to_csv(
+            output_dir / f"shannon_diversity_by_island_{side}.csv",
+            header=["shannon_diversity"],
+            index_label="island",
+        )
+        indicators.compute_surface_by_region_and_key(dataset, allocation).to_csv(
+            output_dir / f"surface_by_region_{side}.csv", index_label="region"
+        )
+        indicators.compute_surface_by_island_and_key(dataset, allocation).to_csv(
+            output_dir / f"surface_by_island_{side}.csv", index_label="island"
+        )
 
 
 def _write_allocation_csv(dataset: Dataset, allocation: pd.Series, path: Path) -> None:
@@ -96,6 +153,7 @@ def _build_recap(
     input_summary: dict,
     output_summary: dict,
     delta_summary: dict,
+    gini_revenue_by_farm: float,
 ) -> dict:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
@@ -117,6 +175,7 @@ def _build_recap(
         "input": input_summary,
         "output": output_summary,
         "delta": delta_summary,
+        "gini_revenue_by_farm": gini_revenue_by_farm,
         "total_plots": int(len(dataset.parameters["data_parc"])),
         "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),
     }
