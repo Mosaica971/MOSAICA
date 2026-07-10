@@ -209,3 +209,38 @@ def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
 
     assert not base_crop_group.isna().any()
+
+
+def test_build_dataset_zone_filter_include_restricts_to_one_island():
+    config = {**CONFIG, "zone_filter": {"include": {"islands": [1]}}}
+
+    dataset = build_dataset(config)
+
+    data_parc = dataset.parameters["data_parc"]
+    assert len(data_parc) == 8376  # real count of island-1 plots in Data_Parc_Gwad_2017.txt
+    assert (data_parc["ILE"] == 1).all()
+    # E1's plots (P1,P2,P3) are on island 2 -- must be gone.
+    assert "E1" not in dataset.parameters["farm_plots"]
+    # Every plot-mapping table must be filtered consistently, not just data_parc/expl_parc.
+    assert dataset.parameters["reg_parc"]["plot"].isin(data_parc.index).all()
+    assert len(dataset.parameters["reg_parc"]) == len(data_parc)
+    assert dataset.parameters["bv_parc"]["plot"].isin(data_parc.index).all()
+    assert dataset.parameters["cpt_parc"]["plot"].isin(data_parc.index).all()
+
+
+def test_build_dataset_zone_filter_exclude_removes_one_farm():
+    config = {**CONFIG, "zone_filter": {"exclude": {"farms": ["E1"]}}}
+
+    dataset = build_dataset(config)
+
+    data_parc = dataset.parameters["data_parc"]
+    assert len(data_parc) == 24734 - 3  # E1 has exactly 3 plots: P1, P2, P3
+    assert "P1" not in data_parc.index
+    assert "E1" not in dataset.parameters["expl_parc"]["farm"].values
+
+
+def test_build_dataset_zone_filter_raises_when_selection_is_empty():
+    config = {**CONFIG, "zone_filter": {"include": {"farms": ["NONEXISTENT_FARM"]}}}
+
+    with pytest.raises(ValueError, match="zone_filter excludes every plot"):
+        build_dataset(config)

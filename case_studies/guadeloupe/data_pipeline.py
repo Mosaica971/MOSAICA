@@ -24,6 +24,7 @@ from core.data.eligibility import (
     forbid_where,
 )
 from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
+from core.data.zone_filter import resolve_kept_plots
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SETS_DIR = DATA_DIR / "sets"
@@ -78,17 +79,34 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     mae_compost_cult = read_wide_table(INDICE_H_DIR / f"MAE_Compost_Cult_{SCENARIO}.txt")[YEAR]
     mb_add_cult = read_wide_table(INDICE_H_DIR / "MB_ADD_Cult.txt")[YEAR]
 
+    data_parc = data_parc.assign(
+        REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
+    )
+    data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
+
+    plot_to_farm = expl_parc.set_index("plot")["farm"].reindex(data_parc.index)
+    kept_plots = resolve_kept_plots(
+        data_parc.index,
+        {
+            "islands": data_parc["ILE"],
+            "regions": data_parc["REGION_CODE"],
+            "farms": plot_to_farm,
+            "plots": pd.Series(data_parc.index, index=data_parc.index),
+        },
+        config,
+    )
+    data_parc = data_parc.loc[kept_plots]
+    expl_parc = expl_parc[expl_parc["plot"].isin(kept_plots)]
+    bv_parc = bv_parc[bv_parc["plot"].isin(kept_plots)]
+    reg_parc = reg_parc[reg_parc["plot"].isin(kept_plots)]
+    cpt_parc = cpt_parc[cpt_parc["plot"].isin(kept_plots)]
+
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
     farm_plots = expl_parc.groupby("farm")["plot"].apply(list).to_dict()
     farm_gfa_surface_ha = compute_farm_surface_ha(
         plot_surface * data_parc["GFA_PARC"], expl_parc
     )
-
-    data_parc = data_parc.assign(
-        REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
-    )
-    data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
 
     base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
     type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface)
