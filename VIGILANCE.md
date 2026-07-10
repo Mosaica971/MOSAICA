@@ -81,11 +81,26 @@ _Constaté le 2026-07-09._
 ## Roadmap (sous-projets identifiés, non encore cadrés)
 
 Cadrés dans l'ordre choisi avec l'utilisateur le 2026-07-09 :
-- [x] **A. Sauvegarde des résultats** (`outputs/output_N/` + récap + PNG) — en cours d'implémentation.
-- [ ] **B. Dashboard de visualisation** — dépend de A pour les données de sortie ; le côté "entrée" peut démarrer indépendamment.
+- [x] **A. Sauvegarde des résultats** (`outputs/output_N/` + récap + PNG) —
+  mergée dans `gams-parity-phase2` le 2026-07-10 (commit `9ee9b24`). Task 12
+  (vérif manuelle end-to-end via `main.py` complet) reste différée à la
+  demande de fin de journée.
+- [x] **B. Dashboard de visualisation** — app Streamlit en lecture seule sur
+  `outputs/output_N/`, voir `case_studies/guadeloupe/dashboard/`
+  (`loaders.py` + `app.py`) et `docs/superpowers/specs/
+  2026-07-10-dashboard-design.md`. `generate_report` persiste maintenant
+  aussi subvention/tonne, subvention/€ vendu, revenu par exploitation + Gini,
+  diversité de Shannon, surface par île. Revenu/ETP et carte géographique
+  réelle restent des placeholders "non disponible" (voir points ouverts
+  ci-dessous) ; côté entrée, seuls les indicateurs de surface sont affichés
+  (résolution RPG, cf. point ouvert "Comparaison entrée/sortie limitée...").
 - [x] **C. Exclusion de zones** (parcelles/exploitations/régions/îles) avant optimisation, pour tests à petite échelle et scénarios de transition locale — voir `zone_filter` dans `config.yaml` (`core/data/zone_filter.py`).
-- [ ] **D. Performance du solver** — nécessite d'abord un profilage pour diagnostiquer où le temps est perdu.
-- [ ] **E. Remise à niveau du code** (suppression du mort, commentaires concis) — a priori continu, au fil des autres briques.
+- [x] **D. Performance du solver** — profilé (voir `scripts/profile_solver.py`
+  et `core/model/timing.py`) sur un sous-ensemble réduit (île 1, 8376
+  parcelles, quotas territoriaux désactivés). Aucun réglage `solver.args`
+  (threads/parallel/presolve) ne change la durée de façon mesurable — voir le
+  nouveau point ouvert "Le vrai goulot d'étranglement..." ci-dessous.
+- [x] **E. Remise à niveau du code** (suppression du mort, commentaires concis) — a priori continu, au fil des autres briques.
 
 ### Mineur — `zone_filter` ne redimensionne pas les quotas territoriaux
 `territory_production_bound` (quotas min/max sur toute la Guadeloupe, dans
@@ -96,6 +111,33 @@ pour tout le territoire. C'est un choix assumé (voir la section "Non-goals" de
 **Prochain fix possible** : si ça devient gênant en pratique, désactiver
 manuellement (`enable: false`) les `territory_production_bound` concernées dans
 `config.yaml` pour les runs à petite échelle.
+_Constaté le 2026-07-10._
+
+### Majeur — Le vrai goulot d'étranglement du solveur n'est ni le solveur ni les données
+Profilage sur un sous-ensemble réduit (île 1, 8376 parcelles, quotas
+territoriaux désactivés, voir `scripts/profile_solver.py`) : `data_pipeline`
+~0.25s, `model_build` (construction du modèle Pyomo) ~8s, `solve` ~22s. Mais
+en isolant `solve` avec `tee=True`, HiGHS rapporte lui-même ne passer que
+~6s au total (dont ~5.9s de presolve — le problème est résolu entièrement
+par le presolve, 0 nœud de branch-and-bound). Le reste (~15s) est du temps
+passé dans l'enveloppe `SolverFactory('appsi_highs')` (LegacySolver) à
+convertir le modèle Pyomo (506 243 variables binaires) vers les structures
+internes de HiGHS -- pas du calcul d'optimisation. Passer par l'interface
+APPSI directe et persistante (`pyomo.contrib.appsi.solvers.highs.Highs()`
+au lieu de `SolverFactory('appsi_highs')`) réduit ce temps de ~25% (16s vs
+21.5s sur le même sous-ensemble, mesuré hors `model.solutions.load_from`)
+mais casse la compatibilité : son objet `results` n'a pas la même forme que
+celui de `SolverFactory` (`results.termination_condition` au lieu de
+`results.solver.termination_condition`), utilisé par `solve_model` et
+`report.py`. Reste donc hors du périmètre "solveur/config uniquement, pas
+de risque sur les résultats" choisi pour cette session -- aucun réglage
+`solver.args` (HiGHS `threads`/`parallel`/`presolve`) ne change quoi que ce
+soit puisque le goulot n'est pas dans l'algorithme HiGHS lui-même.
+**Prochain fix possible** : adapter `solve_model`/`report.py` pour accepter
+la forme de `results` de l'interface APPSI persistante (ou écrire un petit
+adaptateur qui expose `results.solver.termination_condition` par-dessus),
+puis re-profiler pour confirmer le gain sur le run complet -- un projet à
+part entière, pas un simple réglage de config.
 _Constaté le 2026-07-10._
 
 ## Résolu
