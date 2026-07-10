@@ -113,33 +113,42 @@ manuellement (`enable: false`) les `territory_production_bound` concernées dans
 `config.yaml` pour les runs à petite échelle.
 _Constaté le 2026-07-10._
 
-### Majeur — Le vrai goulot d'étranglement du solveur n'est ni le solveur ni les données
-Profilage sur un sous-ensemble réduit (île 1, 8376 parcelles, quotas
-territoriaux désactivés, voir `scripts/profile_solver.py`) : `data_pipeline`
-~0.25s, `model_build` (construction du modèle Pyomo) ~8s, `solve` ~22s. Mais
-en isolant `solve` avec `tee=True`, HiGHS rapporte lui-même ne passer que
-~6s au total (dont ~5.9s de presolve — le problème est résolu entièrement
-par le presolve, 0 nœud de branch-and-bound). Le reste (~15s) est du temps
-passé dans l'enveloppe `SolverFactory('appsi_highs')` (LegacySolver) à
-convertir le modèle Pyomo (506 243 variables binaires) vers les structures
-internes de HiGHS -- pas du calcul d'optimisation. Passer par l'interface
-APPSI directe et persistante (`pyomo.contrib.appsi.solvers.highs.Highs()`
-au lieu de `SolverFactory('appsi_highs')`) réduit ce temps de ~25% (16s vs
-21.5s sur le même sous-ensemble, mesuré hors `model.solutions.load_from`)
-mais casse la compatibilité : son objet `results` n'a pas la même forme que
-celui de `SolverFactory` (`results.termination_condition` au lieu de
-`results.solver.termination_condition`), utilisé par `solve_model` et
-`report.py`. Reste donc hors du périmètre "solveur/config uniquement, pas
-de risque sur les résultats" choisi pour cette session -- aucun réglage
-`solver.args` (HiGHS `threads`/`parallel`/`presolve`) ne change quoi que ce
-soit puisque le goulot n'est pas dans l'algorithme HiGHS lui-même.
-**Prochain fix possible** : adapter `solve_model`/`report.py` pour accepter
-la forme de `results` de l'interface APPSI persistante (ou écrire un petit
-adaptateur qui expose `results.solver.termination_condition` par-dessus),
-puis re-profiler pour confirmer le gain sur le run complet -- un projet à
-part entière, pas un simple réglage de config.
+### Mineur — Gain solveur APPSI persistante à re-confirmer sur le run complet
+L'adaptation vers l'interface APPSI persistante est faite (voir "Résolu" ci-dessous),
+mais le gain (~25% mesuré sur le sous-ensemble île 1) n'a pas encore été re-profilé sur
+le **run complet** (506 243 variables), car cette session n'exécute pas `main.py`.
+**Prochain fix possible** : lors d'un run `main.py` de fin de journée, relancer
+`scripts/profile_solver.py` (sans `zone_filter`, ou sur un sous-ensemble large) pour
+confirmer que le gain tient à pleine échelle, et enregistrer la nouvelle durée.
 _Constaté le 2026-07-10._
 
 ## Résolu
 
-_(rien pour l'instant)_
+### Majeur — Goulot d'étranglement du solveur (enveloppe `SolverFactory`, pas HiGHS)
+_Résolu le 2026-07-10._ Le profilage (île 1, 8376 parcelles, quotas territoriaux
+désactivés, `scripts/profile_solver.py`) avait montré que la durée était dominée non
+par HiGHS (~6s, dont ~5.9s de presolve, 0 nœud de branch-and-bound) mais par l'enveloppe
+`SolverFactory('appsi_highs')` (LegacySolver) convertissant le modèle Pyomo (506 243
+variables binaires) vers HiGHS (~15s). `core/model/solver.py::solve_model` utilise
+désormais l'interface APPSI persistante (`pyomo.contrib.appsi.solvers.highs.Highs`) au
+lieu de `SolverFactory`, ce qui contourne cette enveloppe (~25% de gain mesuré, 16s vs
+21.5s sur le sous-ensemble île 1). La forme différente de `results`
+(`results.termination_condition` au lieu de `results.solver.termination_condition`) est
+contenue par un petit `SolveResult` normalisé renvoyé par `solve_model` ; seul
+`report.py::_build_recap` consommait l'ancienne forme et a été mis à jour. Aucun
+changement de résultat numérique (même optimum). Voir `docs/superpowers/specs/
+2026-07-10-solver-appsi-persistent-interface-design.md`. Re-confirmation du gain sur le
+run complet : voir le point ouvert ci-dessus.
+
+**Effet de bord — barre de progression animée supprimée.** L'interface APPSI persistante
+charge le modèle dans `capture_output(capture_fd=True)` (Pyomo), qui redirige les
+descripteurs de fichier stdout/stderr du process et manipule un verrou global. L'ancienne
+barre `tqdm` tournait pendant que le solve était lancé dans un thread de fond : cette I/O
+concurrente corrompt l'état global (`semaphore or lock released too many times`, fd stdout
+cassé). Diagnostic (debug systématique) : un solve sans I/O concurrente marche ; toute
+barre/ticker concurrent(e) reproduit le crash, même en isolant la barre sur un fd dupliqué
+— le verrou global reste partagé. Choix utilisateur (2026-07-10) : garder le solveur
+rapide, remplacer la barre animée par une estimation ETA (via l'historique) affichée avant
++ durée réelle après, le solve tournant sur le thread principal
+(`core/model/progress.py::run_with_progress`, désormais synchrone). `tqdm` retiré de
+`pyproject.toml`. Contrat `(result, duration)` inchangé.

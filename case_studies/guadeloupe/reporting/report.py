@@ -164,7 +164,7 @@ def _build_recap(
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "solve_duration_seconds": duration,
-        "termination_condition": str(results.solver.termination_condition),
+        "termination_condition": results.termination_condition,
         "solver": config["solver"],
         "objective": {
             "name": enabled_objective["name"],
