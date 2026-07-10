@@ -157,3 +157,31 @@ def test_compute_subsidy_per_euro_sold_by_crop_divides_subsidy_by_sales():
 
     assert result["CS"] == pytest.approx(2500.0 / 15000.0)
     assert result["ME"] == pytest.approx(200.0 / 5000.0)
+
+
+def test_compute_revenue_by_farm_sums_sales_plus_subsidy_weighted_by_surface():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_revenue_by_farm(dataset, allocation)
+
+    assert result["E1"] == pytest.approx(17500.0)
+    assert result["E2"] == pytest.approx(5200.0)
+
+
+def test_compute_gini_matches_hand_computed_value_for_two_farms():
+    values = pd.Series({"E1": 17500.0, "E2": 5200.0})
+
+    result = indicators.compute_gini(values)
+
+    assert result == pytest.approx(0.270925, abs=1e-4)
+
+
+def test_compute_gini_is_zero_for_equal_distribution():
+    values = pd.Series({"E1": 50.0, "E2": 50.0})
+
+    assert indicators.compute_gini(values) == pytest.approx(0.0)
+
+
+def test_compute_gini_is_zero_for_empty_series():
+    assert indicators.compute_gini(pd.Series(dtype=float)) == 0.0

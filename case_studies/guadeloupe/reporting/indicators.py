@@ -91,3 +91,25 @@ def compute_subsidy_per_euro_sold_by_crop(dataset: Dataset, allocation: pd.Serie
     subsidy = compute_subsidy_by_crop(dataset, allocation)
     sales = compute_sales_by_crop(dataset, allocation)
     return (subsidy / sales).replace([np.inf, -np.inf], np.nan)
+
+
+def compute_revenue_by_farm(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    sales_per_ha = dataset.parameters["sales_per_ha_cult"].reindex(allocation.values)
+    subsidy_per_ha = dataset.parameters["subsidy_per_ha_cult_annualized"].reindex(allocation.values)
+    revenue_per_plot = pd.Series(
+        surface.to_numpy() * (sales_per_ha.to_numpy() + subsidy_per_ha.to_numpy()),
+        index=allocation.index,
+    )
+    farms = plot_to_farm(dataset).reindex(allocation.index)
+    return revenue_per_plot.groupby(farms).sum()
+
+
+def compute_gini(values: pd.Series) -> float:
+    x = np.sort(values.to_numpy(dtype=float))
+    n = len(x)
+    total = x.sum()
+    if n == 0 or total == 0:
+        return 0.0
+    ranks = np.arange(1, n + 1)
+    return float((2 * np.sum(ranks * x)) / (n * total) - (n + 1) / n)
