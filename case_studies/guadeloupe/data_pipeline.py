@@ -6,6 +6,7 @@ import pandas as pd
 from case_studies.guadeloupe.economics import (
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
+    compute_sales_per_ha_cult,
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
@@ -147,6 +148,13 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_cycle_cult=duree_cycle_cult,
         duree_plant_cult=duree_plant_cult,
     )
+    sales_per_ha_cult = compute_sales_per_ha_cult(
+        rdt_cult=rdt_cult,
+        prix_cult=prix_cult,
+        bagasse_cult=bagasse_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+    subsidy_per_ha_cult_annualized = subsidy_per_ha_cult / duree_cycle_cult * 12
     gross_product_per_ha_cult = compute_gross_product_per_ha_cult(
         rdt_cult=rdt_cult,
         prix_cult=prix_cult,
@@ -178,6 +186,8 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
         "margin_per_ha_cult": margin_per_ha_cult,
+        "sales_per_ha_cult": sales_per_ha_cult,
+        "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

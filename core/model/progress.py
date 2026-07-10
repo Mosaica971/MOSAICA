@@ -103,7 +103,7 @@ def solve_with_progress(
     *,
     case_study: str,
     history: SolveHistory | None = None,
-) -> Any:
+) -> tuple[Any, float]:
     history = history or SolveHistory()
     problem_size = sum(1 for _ in model.component_data_objects(pyo.Var))
     estimate = history.estimate_seconds(case_study, problem_size)
@@ -115,4 +115,4 @@ def solve_with_progress(
     )
 
     history.record(case_study, problem_size, duration)
-    return results
+    return results, duration

@@ -6,4 +6,5 @@ venv/
 *.egg-info/
 /data/
 .mosaica_solve_history.json
+/outputs/
 .worktrees/

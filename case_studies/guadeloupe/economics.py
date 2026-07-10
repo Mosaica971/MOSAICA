@@ -61,6 +61,16 @@ def compute_subsidy_per_ha_cult(
     return posei + national + pdrg + mb_add_cult
 
 
+def compute_sales_per_ha_cult(
+    rdt_cult: pd.Series,
+    prix_cult: pd.Series,
+    bagasse_cult: pd.Series,
+    duree_cycle_cult: pd.Series,
+) -> pd.Series:
+    """Sales-only component of PB_Ha_Cult, annualized the same way (excludes subsidy)."""
+    return rdt_cult * (prix_cult + bagasse_cult) / duree_cycle_cult * 12
+
+
 def compute_gross_product_per_ha_cult(
     rdt_cult: pd.Series,
     prix_cult: pd.Series,
@@ -69,7 +79,8 @@ def compute_gross_product_per_ha_cult(
     duree_cycle_cult: pd.Series,
 ) -> pd.Series:
     """PB_Ha_Cult: gross product per ha, annualized (OPTIMISATION.GMS lines 36-38)."""
-    return (rdt_cult * (prix_cult + bagasse_cult) + subsidy_per_ha_cult) / duree_cycle_cult * 12
+    sales = compute_sales_per_ha_cult(rdt_cult, prix_cult, bagasse_cult, duree_cycle_cult)
+    return sales + subsidy_per_ha_cult / duree_cycle_cult * 12
 
 
 def compute_gross_margin_per_ha_cult(

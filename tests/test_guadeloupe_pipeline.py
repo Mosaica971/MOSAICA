@@ -244,3 +244,28 @@ def test_build_dataset_zone_filter_raises_when_selection_is_empty():
 
     with pytest.raises(ValueError, match="zone_filter excludes every plot"):
         build_dataset(config)
+
+
+def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
+    dataset = build_dataset(CONFIG)
+
+    sales = dataset.parameters["sales_per_ha_cult"]
+    subsidy_annualized = dataset.parameters["subsidy_per_ha_cult_annualized"]
+    margin = dataset.parameters["margin_per_ha_cult"]
+
+    # AG: PB=rdt*prix=20*700=14000, no subsidies/bagasse (see the existing
+    # gross-margin test's comment) -- sales alone should equal the full gross
+    # product, and reconciling with the already-verified margin gives the
+    # same CV~8001.31 hand-verified variable cost.
+    assert sales["AG"] == pytest.approx(14000.0, abs=0.01)
+    assert subsidy_annualized["AG"] == pytest.approx(0.0, abs=0.01)
+    assert (sales["AG"] + subsidy_annualized["AG"] - margin["AG"]) == pytest.approx(8001.31, abs=1.0)
+
+    # BA_INT (intensive banana): subsidy_per_ha_cult=18658.0 (POSEI + national aid,
+    # dominated by Aide_Indus_Cult/POSEI_Q_Cult), duree_cycle_cult=12 --
+    # hand-verified via a one-off script calling
+    # case_studies.guadeloupe.economics.compute_subsidy_per_ha_cult against the
+    # real data tables, giving subsidy_per_ha_cult_annualized = 18658.0 / 12 * 12
+    # = 18658.0. Unlike AG (subsidy=0), this exercises the annualization
+    # division/multiplication against a meaningfully nonzero subsidy.
+    assert subsidy_annualized["BA_INT"] == pytest.approx(18658.0, abs=0.01)
