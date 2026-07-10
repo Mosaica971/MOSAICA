@@ -52,6 +52,7 @@ def generate_report(
     delta_summary = {key: output_summary[key] - input_summary[key] for key in output_summary}
 
     gini_revenue_by_farm = _write_output_only_indicators(dataset, output_allocation, output_dir)
+    total_etp = _write_etp_indicators(dataset, output_allocation, config, output_dir)
     _write_shannon_and_surface_by_key(
         dataset, input_allocation, output_allocation, output_dir
     )
@@ -66,6 +67,7 @@ def generate_report(
         output_summary=output_summary,
         delta_summary=delta_summary,
         gini_revenue_by_farm=gini_revenue_by_farm,
+        total_etp=total_etp,
     )
     (output_dir / "recap.json").write_text(json.dumps(recap, indent=2))
     (output_dir / "recap.md").write_text(_render_recap_markdown(recap))
@@ -96,6 +98,29 @@ def _write_output_only_indicators(
         output_dir / "revenue_by_farm.csv", header=["revenue"], index_label="farm"
     )
     return indicators.compute_gini(revenue_by_farm)
+
+
+def _write_etp_indicators(
+    dataset: Dataset, output_allocation: pd.Series, config: dict[str, Any], output_dir: Path
+) -> float:
+    """Estimated employment (ETP / full-time equivalents) from the labor hours embedded
+    in each crop's technical itinerary. Output-only, like the other fine-crop indicators:
+    the 12-RPG-group baseline has no labor rate at that resolution (see VIGILANCE.md)."""
+    hours_per_etp = indicators.hours_per_etp_from_config(config)
+    region = indicators.plot_to_region(dataset)
+    island = indicators.plot_to_island(dataset)
+    farm = indicators.plot_to_farm(dataset)
+
+    etp_by_region = indicators.compute_etp_by_key(dataset, output_allocation, region, hours_per_etp)
+    etp_by_island = indicators.compute_etp_by_key(dataset, output_allocation, island, hours_per_etp)
+    etp_by_farm = indicators.compute_etp_by_key(dataset, output_allocation, farm, hours_per_etp)
+
+    etp_by_region.to_csv(output_dir / "etp_by_region.csv", header=["etp"], index_label="region")
+    etp_by_island.to_csv(output_dir / "etp_by_island.csv", header=["etp"], index_label="island")
+    etp_by_farm.to_csv(output_dir / "etp_by_farm.csv", header=["etp"], index_label="farm")
+    plots.plot_etp_by_region(etp_by_region, output_dir / "plots" / "etp_by_region.png")
+
+    return indicators.compute_total_etp(dataset, output_allocation, hours_per_etp)
 
 
 def _write_shannon_and_surface_by_key(
@@ -154,6 +179,7 @@ def _build_recap(
     output_summary: dict,
     delta_summary: dict,
     gini_revenue_by_farm: float,
+    total_etp: float,
 ) -> dict:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
@@ -176,6 +202,7 @@ def _build_recap(
         "output": output_summary,
         "delta": delta_summary,
         "gini_revenue_by_farm": gini_revenue_by_farm,
+        "total_etp": total_etp,
         "total_plots": int(len(dataset.parameters["data_parc"])),
         "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),
     }
@@ -194,6 +221,9 @@ def _render_recap_markdown(recap: dict) -> str:
         "",
         "## Objectif",
         f"- {recap['objective']['name']} = {recap['objective']['value']:,.2f}",
+        "",
+        "## Emploi estimé (sortie)",
+        f"- ETP total (équivalent temps plein) : {recap['total_etp']:,.1f}",
         "",
         "## Contraintes activees",
     ]

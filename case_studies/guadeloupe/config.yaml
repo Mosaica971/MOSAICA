@@ -2,6 +2,13 @@ solver:
   name: appsi_highs
   args: {}
 
+# Labor: annual working hours per full-time-equivalent (ETP/UTA), used to convert the
+# estimated labor hours (surface x crop x technical itinerary x time per operation) into
+# a number of full-time jobs. 1607 h/year is the French legal full-time base (35h/week).
+# Adjust per scenario if you use a different labor convention.
+labor:
+  hours_per_etp: 1607
+
 # Optional: restrict the optimization to a subset of plots (island/region/farm/plot),
 # for faster small-scale test runs or local policy-transition scenarios. See
 # docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md. Absent (as here)

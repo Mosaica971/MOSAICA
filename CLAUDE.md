@@ -90,14 +90,15 @@ the YAML, not the builder.
    enabled constraint/objective builder against a `ModelInputs` bundle
    (`core/model/model_inputs.py`).
 4. `solve_with_progress(model, config, case_study=...)` (`core/model/progress.py`) runs
-   `solve_model` (`core/model/solver.py`, persistent APPSI HiGHS interface
-   `pyomo.contrib.appsi.solvers.highs.Highs`) **synchronously on the main thread**,
-   printing a static ETA before and the real duration after. The ETA comes from
-   `SolveHistory` (past durations keyed by problem size in `.mosaica_solve_history.json`).
-   Note: the solve must NOT be backgrounded behind a live progress bar — the APPSI solver
-   loads the model inside `capture_output(capture_fd=True)`, and concurrent progress I/O
-   from another thread corrupts Pyomo's process-global stdout/stderr fd state (see
-   `docs/superpowers/specs/2026-07-10-solver-appsi-persistent-interface-design.md`).
+   `solve_model` (`core/model/solver.py`, `SolverFactory('appsi_highs')` → HiGHS)
+   **synchronously on the main thread**, printing a static ETA before and the real
+   duration after. The ETA comes from `SolveHistory` (past durations keyed by problem size
+   in `.mosaica_solve_history.json`). Note: the solve must NOT be backgrounded behind a
+   live progress bar — `appsi_highs` (via either `SolverFactory` or the persistent
+   interface) loads the model inside `capture_output(capture_fd=True)`, and concurrent
+   progress I/O from another thread corrupts Pyomo's process-global stdout/stderr fd state,
+   crashing every real run (see
+   `docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md`).
 5. `generate_report(...)` (`case_studies/guadeloupe/reporting/report.py`) decodes the
    solution, computes indicators (`reporting/indicators.py`), renders PNGs
    (`reporting/plots.py`), and writes a timestamped `outputs/output_N/` folder

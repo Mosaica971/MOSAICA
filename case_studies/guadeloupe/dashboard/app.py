@@ -34,6 +34,8 @@ col2.metric("Duree de resolution", f"{recap['solve_duration_seconds']:.2f}s")
 col2.metric("Condition de terminaison", recap["termination_condition"])
 col3.metric("Parcelles (total)", recap["total_plots"])
 col3.metric("Exploitations (total)", recap["total_farms"])
+if "total_etp" in recap:
+    col1.metric("Emploi estimé (ETP, sortie)", f"{recap['total_etp']:,.1f}")
 
 with st.expander("Contraintes activees"):
     for constraint in recap["constraints"]:
@@ -111,9 +113,25 @@ for tab, side in ((input_tab, "input"), (output_tab, "output")):
             )
             if revenue_by_farm is not None:
                 st.bar_chart(revenue_by_farm.set_index(revenue_by_farm.columns[0]))
+
+            etp_by_region = loaders.load_csv(run_dir, "etp_by_region.csv")
+            total_etp = recap.get("total_etp")
+            st.caption(
+                f"Emploi estimé par région (ETP — total {total_etp:,.1f})"
+                if total_etp is not None
+                else "Emploi estimé par région (ETP)"
+            )
+            if etp_by_region is not None:
+                st.bar_chart(etp_by_region.set_index(etp_by_region.columns[0]))
+            else:
+                st.info("non disponible pour ce run")
         else:
-            st.caption("Revenu/ETP de travail : non disponible (donnees de main "
-                       "d'oeuvre non portees, voir VIGILANCE.md).")
+            st.caption(
+                "Emploi/ETP de travail : disponible uniquement en sortie (calculé à "
+                "partir des heures de travail de chaque itinéraire technique par culture "
+                "fine ; la baseline d'entrée n'est connue qu'à la résolution des 12 "
+                "groupes RPG, sans taux de travail à cette résolution — voir VIGILANCE.md)."
+            )
             st.caption(
                 "Production/subvention/revenu par culture : non disponible en "
                 "entree (baseline connue a la resolution des 12 groupes RPG, sans "

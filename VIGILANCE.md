@@ -22,20 +22,16 @@ guadeloupéen, RPG, ou autre source), jointe sur `ident`, pour activer une
 vraie carte dans le dashboard (brique B).
 _Constaté le 2026-07-09._
 
-### Majeur — Données de main d'œuvre non portées (ETP)
-Le modèle GAMS d'origine calcule bel et bien la main d'œuvre
-(`MO_Ha_Cult_init(SC)` par culture, `MO_Parc_init(SP)` par parcelle,
-`ENTREES.txt:31,469`, agrégée en `MO_Gwad`/`MO_Gwad_Moy_ha` dans
-`OPTIMISATION.txt:2015-2019` et affichée dans `RESULTATS.txt:137-138`
-"TRAVAIL_TOT"/"TRAVAIL_MOY_HA"). Mais ces données n'ont jamais été portées
-dans `data/tables/` côté Python (aucun fichier `MO_*`/`Travail_*`) — ce n'est
-donc pas un manque de donnée source, juste un portage GAMS→Python non fait.
-L'indicateur "revenu / ETP de travail" demandé reste donc non calculable
-tant que ce portage n'est pas fait.
-**Prochain fix possible** : porter `MO_Ha_Cult_init` (et sa source amont
-dans `DONNEES.txt`/`ENTREES.txt`) vers un nouveau `data/tables/MO_Cult.txt`,
-suivant le même pattern que `Prix_Cult.txt`/`Rdt_Cult.txt`.
-_Constaté le 2026-07-09._
+### Mineur — ETP en entrée limité à la résolution RPG (sortie OK)
+_L'indicateur ETP lui-même est fait (voir "Résolu — Indicateur ETP…")._ Le seul reliquat :
+l'ETP **en entrée** (baseline 2017) n'est pas calculable finement, car la baseline n'est
+connue qu'à la résolution des 12 groupes RPG (comme les autres indicateurs par culture),
+alors que le taux de travail `MO_Ha_Cult` est par culture fine. L'ETP **en sortie** est
+précis. Même cause racine que le point "Comparaison entrée/sortie limitée à la résolution
+du groupe RPG" ci-dessus.
+**Prochain fix possible** : porter l'allocation fine initiale (`Matrice_Parc_Cult` du
+GAMS) pour débloquer tous les indicateurs par culture en entrée d'un coup, dont l'ETP.
+_Constaté le 2026-07-10._
 
 ### Majeur — Comparaison entrée/sortie limitée à la résolution du groupe RPG
 `cult_2017` (l'allocation observée, utilisée comme baseline "entrée") n'encode
@@ -139,14 +135,43 @@ _Investigué et **rollback** le 2026-07-10._ On a migré `solve_model` de
 `SolverFactory('appsi_highs')` vers l'interface APPSI persistante
 (`pyomo.contrib.appsi.solvers.highs.Highs`) — commit `3c8e450` — en pariant sur le gain ~25%
 mesuré sur l'île 1. Le run complet a montré que ce gain **ne tient pas** à pleine échelle (le
-goulot est la recherche B&B, pas l'enveloppe — voir le point ouvert ci-dessus). De plus,
-l'interface persistante charge le modèle dans `capture_output(capture_fd=True)` (Pyomo), qui
-redirige les fd stdout/stderr du process et manipule un verrou global : incompatible avec la
-barre de progression `tqdm` animée (lancée dans un thread de fond), ce qui corrompait l'état
-global (`semaphore released too many times`, fd stdout cassé) et avait forcé à passer la
-progression en mode statique. **Bilan : gain nul + perte de la barre animée → revert.**
-`solver.py`, `progress.py` (barre animée restaurée), `report.py`, `pyproject.toml` (`tqdm`
-restauré) et les tests sont revenus à l'état d'avant `3c8e450` ; `CLAUDE.md` (issu du `/init`)
-est conservé. Le spec `docs/superpowers/specs/2026-07-10-solver-appsi-persistent-interface-design.md`
-garde l'analyse détaillée (dont la cause racine du conflit thread/`capture_output`) au cas où
-l'on retenterait APPSI, mais est marqué comme **reverté** en tête.
+goulot est la recherche B&B, pas l'enveloppe — voir le point ouvert ci-dessus). Le **solveur**
+est donc revenu à `SolverFactory('appsi_highs')` (commit `de00f98`) ; `CLAUDE.md` (issu du
+`/init`) est conservé. Le spec `2026-07-10-solver-appsi-persistent-interface-design.md` garde
+l'analyse au cas où l'on retenterait APPSI, marqué **reverté** en tête.
+
+### Majeur — Barre de progression : synchrone obligatoire (conflit `capture_output`/thread)
+_Résolu le 2026-07-10._ La barre `tqdm` animée lançait le solve dans un **thread de fond**.
+Or `SolverFactory('appsi_highs')` route vers le **même** `pyomo...highs.Highs.set_instance`
+que l'interface persistante, qui charge le modèle dans `capture_output(capture_fd=True)`
+(redirection des fd stdout/stderr du process + verrou global). Toute I/O de progression
+concurrente corrompt cet état → `semaphore released too many times`, stdout cassé — **à
+chaque vrai run** (terminal, fichier ou pipe ; seul pytest y échappe car ses flux n'ont pas
+de vrai `fileno`). Ce n'est donc PAS spécifique à APPSI : la barre animée n'a jamais été
+viable dans cet environnement (Pyomo 6.10.1). `run_with_progress` est désormais **synchrone**
+(solve sur le thread principal, ETA statique avant + durée après ; `tqdm` retiré). C'est la
+seule option qui tourne sur de vrais fd. Vérifié end-to-end sur sous-ensemble `zone_filter`
+(exit 0, stdout propre). Voir `docs/superpowers/specs/
+2026-07-10-solver-progress-capture-fd-conflict.md`.
+
+### Majeur — Indicateur ETP (emploi) calculé depuis les itinéraires techniques
+_Résolu le 2026-07-10 — corrige le faux "point ouvert" « Données de main d'œuvre non
+portées »._ Le temps de travail n'était pas une donnée manquante : `Data_OTK.txt` porte la
+colonne `MO_EXPL` (heures par opération), et le GAMS calcule `MO_Ha_Cult` exactement comme le
+coût variable mais pondéré par `MO_EXPL` au lieu de `PRIX_UNIT` (`ENTREES.txt:463-469`).
+`economics.compute_labor_hours_per_ha_cult` reproduit cette formule (annualisée
+`/Duree_Cycle*12`, amortissement `/Duree_Plant`), câblée dans `data_pipeline`. Les indicateurs
+`indicators.compute_labor_hours_by_plot`/`compute_etp_by_key`/`compute_total_etp` donnent
+l'ETP par parcelle/exploitation/région/île/total, avec conversion heures→ETP configurable
+(`config.yaml` `labor.hours_per_etp`, défaut 1607 h/an = base légale). Persisté par
+`report.py` (CSV + `etp_by_region.png` + `total_etp` dans le recap) et affiché au dashboard.
+**Sortie uniquement** (l'entrée reste limitée à la résolution RPG, voir point ouvert). Validé
+sur vraies données : 0 NaN, taux plausibles (canne mécanisée ~7-13 h/ha, banane ~1000-1560).
+
+### Mineur — Figures : noms de cultures explicites + style
+_Résolu le 2026-07-10._ Les figures affichaient les codes de variables (AN, CS_BT_NISM…).
+`case_studies/guadeloupe/crop_labels.py` (porté de `DESCRIPTION_SETS.txt`) mappe chaque code
+→ nom FR ; `plots.py` les utilise, avec un style matplotlib soigné (séparateurs de milliers,
+rotation, grille, légende hors cadre) — sans dépendance seaborn (choix utilisateur). Les 24
+sous-types maraîchage `MA_*` sont décodés partiellement (mulch + irrigation ; le token
+fertilisation BIO/VEG/FER/NON reste littéral, non documenté dans le GAMS).

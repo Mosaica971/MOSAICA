@@ -30,6 +30,32 @@ def compute_variable_cost_per_ha_cult(
     return cost_from_otk + (cout_recolte_cult + cout_transp_cult) * rdt_cult
 
 
+def compute_labor_hours_per_ha_cult(
+    data_otk: pd.DataFrame,
+    matrice_otk_cult: pd.DataFrame,
+    duree_plant_cult: pd.Series,
+    duree_cycle_cult: pd.Series,
+) -> pd.Series:
+    """MO_Ha_Cult: labor hours per ha per year (ENTREES.txt:463-466).
+
+    Same OTK structure as compute_variable_cost_per_ha_cult, but each technical
+    operation is weighted by its labor requirement (DOSE*MO_EXPL, in hours) instead
+    of its monetary cost (DOSE*PRIX_UNIT). Amortized operations (AMORTI=1, e.g.
+    plantation) are spread over the plantation lifetime; one-off operations are not.
+    Unlike cost, there is no harvest/transport term -- labor is entirely in the OTK.
+    """
+    labor_per_application = data_otk["DOSE"] * data_otk["MO_EXPL"]
+    otk_labor = matrice_otk_cult.multiply(labor_per_application, axis=0)
+
+    amortized = data_otk["AMORTI"] == 1
+    otk_labor_amortized = otk_labor.mul(amortized.astype(float), axis=0).div(
+        duree_plant_cult, axis=1
+    )
+    otk_labor_upfront = otk_labor.mul((~amortized).astype(float), axis=0)
+
+    return (otk_labor_upfront + otk_labor_amortized).sum(axis=0) / duree_cycle_cult * 12
+
+
 def compute_subsidy_per_ha_cult(
     posei_surf_cult: pd.Series,
     posei_q_cult: pd.Series,

@@ -120,12 +120,33 @@ def test_run_with_progress_works_with_a_known_estimate():
     assert duration >= 0.0
 
 
-def test_run_with_progress_reraises_exception_from_worker_thread():
+def test_run_with_progress_reraises_exception_from_func():
     def boom():
         raise RuntimeError("solve failed")
 
     with pytest.raises(RuntimeError, match="solve failed"):
         run_with_progress(boom, label="test", estimate_seconds=None)
+
+
+def test_run_with_progress_runs_func_on_the_calling_thread():
+    # Architectural guard: the solve must NOT be backgrounded. The appsi_highs solver
+    # loads the model inside capture_output(capture_fd=True); running it on a worker
+    # thread while a progress bar writes from the main thread corrupts Pyomo's
+    # process-global stdout/stderr fd state (crashes on real file descriptors). See
+    # docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md.
+    import threading
+
+    caller = threading.current_thread()
+    seen: dict[str, threading.Thread] = {}
+
+    def func():
+        seen["thread"] = threading.current_thread()
+        return "ok"
+
+    result, _ = run_with_progress(func, label="test", estimate_seconds=None)
+
+    assert result == "ok"
+    assert seen["thread"] is caller
 
 
 import pyomo.environ as pyo

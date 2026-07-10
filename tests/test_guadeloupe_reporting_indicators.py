@@ -32,6 +32,7 @@ def _small_dataset() -> Dataset:
     rdt_cult = pd.Series({"CS": 80.0, "ME": 20.0})
     sales_per_ha_cult = pd.Series({"CS": 3000.0, "ME": 5000.0})
     subsidy_per_ha_cult_annualized = pd.Series({"CS": 500.0, "ME": 200.0})
+    labor_hours_per_ha_cult = pd.Series({"CS": 400.0, "ME": 800.0})
     return Dataset(
         sets={},
         parameters={
@@ -40,6 +41,7 @@ def _small_dataset() -> Dataset:
             "rdt_cult": rdt_cult,
             "sales_per_ha_cult": sales_per_ha_cult,
             "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
+            "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
         },
         scalars={},
     )
@@ -167,6 +169,42 @@ def test_compute_revenue_by_farm_sums_sales_plus_subsidy_weighted_by_surface():
 
     assert result["E1"] == pytest.approx(17500.0)
     assert result["E2"] == pytest.approx(5200.0)
+
+
+def test_compute_labor_hours_by_plot_multiplies_surface_by_labor_rate():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_labor_hours_by_plot(dataset, allocation)
+
+    assert result["P1"] == pytest.approx(800.0)   # 2.0 ha * 400 h/ha
+    assert result["P2"] == pytest.approx(1200.0)  # 3.0 ha * 400 h/ha
+    assert result["P3"] == pytest.approx(800.0)   # 1.0 ha * 800 h/ha
+
+
+def test_compute_total_etp_divides_total_hours_by_hours_per_etp():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_total_etp(dataset, allocation, hours_per_etp=1000.0)
+
+    assert result == pytest.approx(2.8)  # (800 + 1200 + 800) / 1000
+
+
+def test_compute_etp_by_key_groups_hours_then_divides():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+    farms = indicators.plot_to_farm(dataset)
+
+    result = indicators.compute_etp_by_key(dataset, allocation, farms, hours_per_etp=1000.0)
+
+    assert result["E1"] == pytest.approx(2.0)  # (800 + 1200) / 1000
+    assert result["E2"] == pytest.approx(0.8)  # 800 / 1000
+
+
+def test_hours_per_etp_from_config_reads_value_or_defaults():
+    assert indicators.hours_per_etp_from_config({"labor": {"hours_per_etp": 1800}}) == 1800.0
+    assert indicators.hours_per_etp_from_config({}) == indicators.DEFAULT_HOURS_PER_ETP
 
 
 def test_compute_gini_matches_hand_computed_value_for_two_farms():

@@ -6,6 +6,7 @@ import pandas as pd
 from case_studies.guadeloupe.economics import (
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
+    compute_labor_hours_per_ha_cult,
     compute_sales_per_ha_cult,
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
@@ -166,6 +167,12 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         gross_product_per_ha_cult=gross_product_per_ha_cult,
         variable_cost_per_ha_cult=variable_cost_per_ha_cult,
     )
+    labor_hours_per_ha_cult = compute_labor_hours_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
 
     parameters = {
         "expl_parc": expl_parc,
@@ -188,6 +195,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "margin_per_ha_cult": margin_per_ha_cult,
         "sales_per_ha_cult": sales_per_ha_cult,
         "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
+        "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

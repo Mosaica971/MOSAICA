@@ -4,9 +4,32 @@ import pytest
 from case_studies.guadeloupe.economics import (
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
+    compute_labor_hours_per_ha_cult,
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
+
+
+def test_compute_labor_hours_per_ha_cult_weights_otk_by_mo_expl():
+    # OP1 one-off (AMORTI=0): 3 applications/cycle at DOSE*MO_EXPL = 2*3 = 6 -> 18.
+    # OP2 amortized (AMORTI=1): 1 application at 5*4 = 20, spread over Duree_Plant=5 -> 4.
+    data_otk = pd.DataFrame(
+        {"DOSE": [2, 5], "MO_EXPL": [3, 4], "AMORTI": [0, 1]},
+        index=["OP1", "OP2"],
+    )
+    matrice_otk_cult = pd.DataFrame({"C1": [3, 1]}, index=["OP1", "OP2"])
+    duree_plant_cult = pd.Series({"C1": 5})
+    duree_cycle_cult = pd.Series({"C1": 24})
+
+    result = compute_labor_hours_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+
+    # (3*6 + (1*20)/5) / 24 * 12 = 11.0 hours/ha/year
+    assert result["C1"] == pytest.approx(11.0)
 
 
 def test_compute_variable_cost_per_ha_cult_combines_otk_and_harvest_transport_costs():

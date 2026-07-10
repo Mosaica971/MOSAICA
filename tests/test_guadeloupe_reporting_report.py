@@ -36,6 +36,7 @@ def _tiny_dataset() -> Dataset:
             "rdt_cult": pd.Series({"CS": 80.0, "ME": 20.0}),
             "sales_per_ha_cult": pd.Series({"CS": 3000.0, "ME": 5000.0}),
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
+            "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
         },
         scalars={},
     )
@@ -124,6 +125,9 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "subsidy_per_tonne_by_crop.csv",
         "subsidy_per_euro_sold_by_crop.csv",
         "revenue_by_farm.csv",
+        "etp_by_region.csv",
+        "etp_by_island.csv",
+        "etp_by_farm.csv",
         "shannon_diversity_by_region_input.csv",
         "shannon_diversity_by_region_output.csv",
         "shannon_diversity_by_island_input.csv",
@@ -134,6 +138,7 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "surface_by_island_output.csv",
     ):
         assert (output_dir / name).exists(), name
+    assert (output_dir / "plots" / "etp_by_region.png").exists()
 
     revenue_by_farm = pd.read_csv(output_dir / "revenue_by_farm.csv")
     assert list(revenue_by_farm.columns) == ["farm", "revenue"]
@@ -141,6 +146,13 @@ def test_generate_report_writes_additional_indicators(tmp_path):
 
     recap = json.loads((output_dir / "recap.json").read_text())
     assert isinstance(recap["gini_revenue_by_farm"], float)
+
+    # ETP (output-only employment indicator): total is hours / hours_per_etp.
+    # P1=CS: 2ha*400=800h, P2=CS or ME. With CS margin 100 & ME margin 200, both plots
+    # go to ME (higher margin): 2*800 + 3*800 = 4000h / 1607 default.
+    assert recap["total_etp"] == pytest.approx(4000.0 / 1607.0)
+    etp_by_region = pd.read_csv(output_dir / "etp_by_region.csv")
+    assert list(etp_by_region.columns) == ["region", "etp"]
 
     surface_by_region_output = pd.read_csv(output_dir / "surface_by_region_output.csv")
     assert "region" in surface_by_region_output.columns

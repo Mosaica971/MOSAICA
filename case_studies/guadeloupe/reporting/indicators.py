@@ -105,6 +105,39 @@ def compute_revenue_by_farm(dataset: Dataset, allocation: pd.Series) -> pd.Serie
     return revenue_per_plot.groupby(farms).sum()
 
 
+DEFAULT_HOURS_PER_ETP = 1607.0
+
+
+def hours_per_etp_from_config(config: dict) -> float:
+    """Annual working hours per full-time-equivalent (ETP), from config['labor']."""
+    return float((config.get("labor") or {}).get("hours_per_etp", DEFAULT_HOURS_PER_ETP))
+
+
+def compute_labor_hours_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Estimated annual labor hours per plot: surface x labor_hours_per_ha[crop].
+
+    Only meaningful for a fine-crop allocation (the solver output): the 12-RPG-group
+    baseline has no labor rate at that resolution, so ETP is an output-only indicator
+    (see VIGILANCE.md, same limitation as the other per-crop indicators)."""
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    labor_per_ha = dataset.parameters["labor_hours_per_ha_cult"].reindex(allocation.to_numpy())
+    return pd.Series(surface.to_numpy() * labor_per_ha.to_numpy(), index=allocation.index)
+
+
+def compute_total_etp(dataset: Dataset, allocation: pd.Series, hours_per_etp: float) -> float:
+    """Total full-time-equivalent jobs across all plots (labor hours / hours_per_etp)."""
+    return float(compute_labor_hours_by_plot(dataset, allocation).sum() / hours_per_etp)
+
+
+def compute_etp_by_key(
+    dataset: Dataset, allocation: pd.Series, grouping: pd.Series, hours_per_etp: float
+) -> pd.Series:
+    """ETP grouped by a plot-keyed Series (farm / region / island)."""
+    hours = compute_labor_hours_by_plot(dataset, allocation)
+    key = grouping.reindex(allocation.index)
+    return hours.groupby(key).sum() / hours_per_etp
+
+
 def compute_gini(values: pd.Series) -> float:
     x = np.sort(values.to_numpy(dtype=float))
     n = len(x)
