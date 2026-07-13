@@ -27,6 +27,25 @@ def decode_baseline_allocation(dataset: Dataset) -> pd.Series:
     return groups[groups != _NON_CULTIVATED_GROUP].dropna()
 
 
+def decode_baseline_representative_allocation(dataset: Dataset, config: dict) -> pd.Series:
+    """Baseline 2017 allocation remapped from aggregate families to representative fine
+    crops, so the fine-crop economics indicators (production/subsidy/revenue/ETP) apply to
+    the input side. The observed baseline is only known at aggregate/RPG resolution and the
+    aggregate codes carry no economics of their own; `config['baseline_representative_crops']`
+    substitutes a representative fine variant per family (an assumption -- see VIGILANCE.md
+    "point 4"). Real single-crop families (AG/ME/JA) map to themselves; NC is already
+    dropped by decode_baseline_allocation."""
+    baseline = decode_baseline_allocation(dataset)
+    mapping = config.get("baseline_representative_crops") or {}
+    return baseline.map(lambda family: mapping.get(family, family)).rename("crop")
+
+
+def crop_family(code: str) -> str:
+    """Aggregate family of a crop code -- the token before the first underscore:
+    CS_BT_NISM -> CS, AN_NU -> AN, MA_ROTA -> MA, AG -> AG."""
+    return str(code).split("_")[0]
+
+
 def plot_to_farm(dataset: Dataset) -> pd.Series:
     expl_parc = dataset.parameters["expl_parc"]
     return expl_parc.set_index("plot")["farm"]
@@ -136,6 +155,20 @@ def compute_etp_by_key(
     hours = compute_labor_hours_by_plot(dataset, allocation)
     key = grouping.reindex(allocation.index)
     return hours.groupby(key).sum() / hours_per_etp
+
+
+def compute_economic_totals(
+    dataset: Dataset, allocation: pd.Series, hours_per_etp: float
+) -> dict:
+    """Headline totals for one allocation: production (tonnes), subsidy (EUR),
+    revenue (EUR), employment (ETP). Valid for both the output (fine crops) and the
+    representative baseline (see decode_baseline_representative_allocation)."""
+    return {
+        "total_production_tonnes": float(compute_production_tonnes_by_crop(dataset, allocation).sum()),
+        "total_subsidy": float(compute_subsidy_by_crop(dataset, allocation).sum()),
+        "total_revenue": float(compute_total_revenue_by_crop(dataset, allocation).sum()),
+        "total_etp": compute_total_etp(dataset, allocation, hours_per_etp),
+    }
 
 
 def compute_gini(values: pd.Series) -> float:

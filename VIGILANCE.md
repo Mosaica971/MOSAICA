@@ -22,41 +22,25 @@ guadeloupéen, RPG, ou autre source), jointe sur `ident`, pour activer une
 vraie carte dans le dashboard (brique B).
 _Constaté le 2026-07-09._
 
-### Mineur — ETP en entrée limité à la résolution RPG (sortie OK)
-_L'indicateur ETP lui-même est fait (voir "Résolu — Indicateur ETP…")._ Le seul reliquat :
-l'ETP **en entrée** (baseline 2017) n'est pas calculable finement, car la baseline n'est
-connue qu'à la résolution des 12 groupes RPG (comme les autres indicateurs par culture),
-alors que le taux de travail `MO_Ha_Cult` est par culture fine. L'ETP **en sortie** est
-précis. Même cause racine que le point "Comparaison entrée/sortie limitée à la résolution
-du groupe RPG" ci-dessus.
-**Prochain fix possible** : porter l'allocation fine initiale (`Matrice_Parc_Cult` du
-GAMS) pour débloquer tous les indicateurs par culture en entrée d'un coup, dont l'ETP.
-_Constaté le 2026-07-10._
-
-### Majeur — Comparaison entrée/sortie limitée à la résolution du groupe RPG
-`cult_2017` (l'allocation observée, utilisée comme baseline "entrée") n'encode
-les cultures qu'à la résolution de 12 groupes RPG
-(`case_studies/guadeloupe/farm_typology._RPG_CODE_TO_BASE_GROUP`), alors que
-le solveur alloue parmi ~84 cultures fines (`CULT_2017.set`), chacune avec
-son propre rendement/subvention/marge à l'hectare. Il n'existe aucune table
-officielle fine→groupe dans le repo Python. Le modèle GAMS d'origine, lui,
-définissait une taxonomie `SC_*` bien plus riche (~40 familles,
-`old_code_gms_format_now_txt/SETS.txt` lignes 113-607) qui aurait permis ce
-rapprochement — mais elle n'est que partiellement portée dans
-`config.yaml` (`crop_families`: 8 familles sur ~40, seulement celles utiles
-aux contraintes actuellement actives). Construire un mapping fine→groupe par
-préfixe de nom serait une supposition non validée (des cultures comme
-`CF_*`/`TH` n'apparaissent dans aucun des deux schémas existants).
-**Conséquence pour la brique A** : les indicateurs de production/subvention/
-revenu par culture ne sont calculés qu'en sortie (résolution fine, précise) ;
-côté entrée, seuls les indicateurs de surface/nombre de parcelles/diversité
-sont calculés (résolution 12 groupes RPG, précise) ; les écarts entrée/sortie
-se limitent aux agrégats indépendants de la résolution (surface totale
-cultivée, nb parcelles actives, nb exploitations).
-**Prochain fix possible** : porter la taxonomie `SC_*` de `SETS.txt` dans
-`config.yaml` (comme déjà fait pour les 8 familles existantes) pour permettre
-une comparaison entrée/sortie par famille de culture.
-_Constaté le 2026-07-09._
+### Majeur — L'allocation fine 2017 en entrée n'a jamais existé (indicateurs d'entrée = hypothèse)
+La baseline observée `cult_2017` n'encode la culture qu'au niveau **agrégat/RPG** (12 codes :
+AG, AN, BC, BA, VE, CS, PN, MA, JA, ME, NC, IG — `farm_typology._RPG_CODE_TO_BASE_GROUP`).
+**Le GAMS d'origine faisait pareil** : `Matrice_Parc_Cult` (ENTREES.txt:64-102) mappe chaque
+code RPG vers un code **agrégat**, jamais une variante fine. La variante technique de 2017
+(quel système de canne, etc.) n'a donc **jamais été observée** — ce n'est pas un portage
+manquant, la donnée n'existe nulle part. Les codes agrégats sont dans `CULT_2017.set` avec
+une économie nulle (rdt/prix/travail = 0) : ils servent à représenter la baseline, et le
+solveur réalloue vers les variantes fines (84 cultures) en sortie.
+**Conséquence / choix (point 4, brique A)** : pour tout de même calculer production/
+subvention/revenu/ETP **en entrée**, on substitue une **variante fine représentante par
+famille** (`config.yaml baseline_representative_crops`), puis on réutilise les indicateurs de
+sortie. Les indicateurs d'entrée et les écarts entrée/sortie reposent donc sur cette
+**hypothèse** (documentée, configurable), pas sur une allocation fine réellement observée.
+**Prochain fix possible / à raffiner** : (a) rendre le représentant **conscient de la
+région** pour les familles région-codées (CS, CF, BC) plutôt qu'un seul représentant global ;
+(b) vérifier s'il existe des valeurs « init » par agrégat dans le GAMS (`STOCK_*_init`,
+RESULTATS.txt:1853) à porter comme représentatives officielles.
+_Constaté le 2026-07-09, reformulé et adressé le 2026-07-13._
 
 ### Mineur — `YEAR`/`SCENARIO` codés en dur
 `case_studies/guadeloupe/data_pipeline.py` fixe `YEAR = "2017"` et
@@ -129,6 +113,34 @@ changement d'enveloppe, neutre sur l'optimum), donc à cadrer comme un vrai sous
 _Constaté le 2026-07-10._
 
 ## Résolu
+
+### Majeur — Indicateurs d'entrée (production/subvention/revenu/ETP) via cultures représentantes (point 4)
+_Résolu le 2026-07-13._ Les indicateurs par culture et l'ETP sont désormais calculés **en
+entrée** (baseline 2017), plus seulement en sortie. Mécanisme : `indicators.
+decode_baseline_representative_allocation` remappe chaque famille agrégat de la baseline vers
+une variante fine représentante (`config.yaml baseline_representative_crops` : AN→AN_NU,
+BA→BA_INT, BC→BC_BT, CS→CS_NGT_NISM, IG→IG_PLA, MA→MA_ROTA, PN→PN_TOUR, VE→VE_BTGT ; AG/ME/JA
+gardent leur économie propre ; NC exclu), puis on réutilise les indicateurs de sortie.
+`report.py` écrit production/subvention/revenu/ETP par culture **des deux côtés** (fichiers
+`*_input.csv`/`*_output.csv` + figures) et un bloc `recap["economics"]` = {input, output,
+delta} (production t, subvention €, revenu €, ETP). Le dashboard affiche les deux côtés + les
+écarts. **C'est une hypothèse** (le représentant par famille) — voir le point ouvert
+« L'allocation fine 2017 en entrée n'a jamais existé ». Validé sur vraies données (0 NaN,
+totaux finis). `indicators.crop_family(code)` (préfixe avant `_`) est dispo pour agréger par
+famille.
+
+### Mineur — Vérification couverture des cultures (les 84 sont bien implémentées)
+_Vérifié le 2026-07-13, suite à un doute sur AG/NC absents de `config.yaml`._ Les 84 cultures
+de `CULT_2017.set` ont **toutes** des données économiques (Prix/Rdt/OTK) et une entrée
+d'éligibilité — rien n'est silencieusement absent. `crop_families` dans le config n'est **pas**
+l'univers des cultures, juste un regroupement pour contraintes. AG (agrumes), ME (melon), JA
+(jachère) sont de vraies cultures mono-code (AG est même choisie sur 222 parcelles au run
+complet). Les codes AN/BA/BC/CS/IG/MA/PN/VE (agrégats) + NC ont une économie nulle → jamais
+choisis en sortie : c'est voulu (ils représentent la baseline, cf. point 4). NB : au run
+complet le margin-max ne retient que ~9 cultures et **abandonne totalement la canne à sucre et
+la banane export** (aucun min-quota ne les force) — résultat d'optimisation, pas un bug de
+couverture, mais à garder en tête.
+
 
 ### Majeur — Interface APPSI persistante : testée puis revertée (aucun gain à pleine échelle)
 _Investigué et **rollback** le 2026-07-10._ On a migré `solve_model` de

@@ -34,14 +34,15 @@ col2.metric("Duree de resolution", f"{recap['solve_duration_seconds']:.2f}s")
 col2.metric("Condition de terminaison", recap["termination_condition"])
 col3.metric("Parcelles (total)", recap["total_plots"])
 col3.metric("Exploitations (total)", recap["total_farms"])
-if "total_etp" in recap:
-    col1.metric("Emploi estimé (ETP, sortie)", f"{recap['total_etp']:,.1f}")
+economics = recap.get("economics")
+if economics:
+    col1.metric("Emploi estimé (ETP, sortie)", f"{economics['output']['total_etp']:,.1f}")
 
 with st.expander("Contraintes activees"):
     for constraint in recap["constraints"]:
         st.write(f"- **{constraint['name']}** {constraint['args']}")
 
-st.subheader("Entree vs sortie")
+st.subheader("Entree vs sortie (surface)")
 delta_cols = st.columns(3)
 for col, key, label in zip(
     delta_cols,
@@ -53,11 +54,23 @@ for col, key, label in zip(
         f"{recap['output'][key]:,.2f}" if isinstance(recap["output"][key], float) else recap["output"][key],
         delta=f"{recap['delta'][key]:+,.2f}" if isinstance(recap["delta"][key], float) else f"{recap['delta'][key]:+d}",
     )
-st.caption(
-    "Comparaison limitee a la surface/nb de parcelles/nb d'exploitations : la "
-    "baseline (entree) n'est connue qu'a la resolution des 12 groupes RPG, sans "
-    "rendement/prix propres a cette resolution -- voir VIGILANCE.md."
-)
+
+if economics:
+    st.subheader("Entree vs sortie (economie)")
+    econ_cols = st.columns(4)
+    for col, key, label, fmt in zip(
+        econ_cols,
+        ("total_production_tonnes", "total_subsidy", "total_revenue", "total_etp"),
+        ("Production (t)", "Subvention (€)", "Revenu (€)", "Emploi (ETP)"),
+        ("{:,.0f}", "{:,.0f}", "{:,.0f}", "{:,.1f}"),
+    ):
+        col.metric(label, fmt.format(economics["output"][key]), delta=fmt.format(economics["delta"][key]))
+    st.caption(
+        "Entree = baseline 2017 a economie representative par famille : chaque famille "
+        "(canne, banane...) est evaluee via une variante fine representante assignee dans "
+        "config `baseline_representative_crops` (hypothese -- voir VIGILANCE.md point 4). "
+        "L'allocation fine de 2017 n'a jamais ete observee."
+    )
 
 input_tab, output_tab = st.tabs(["Entree (baseline 2017)", "Sortie (allocation optimisee)"])
 
@@ -83,29 +96,40 @@ for tab, side in ((input_tab, "input"), (output_tab, "output")):
                 st.bar_chart(surface_island.set_index(surface_island.columns[0]))
             else:
                 st.info("non disponible pour ce run")
-        st.caption(
-            "Carte des cultures par parcelle : non disponible (pas de donnees "
-            "geographiques dans le repo) -- repartition ILE/REGION affichee a la "
-            "place. Voir VIGILANCE.md."
-        )
 
         shannon_region = loaders.load_csv(run_dir, f"shannon_diversity_by_region_{side}.csv")
         if shannon_region is not None:
             st.caption("Diversite de Shannon par region")
             st.bar_chart(shannon_region.set_index(shannon_region.columns[0]))
 
+        # Per-crop economics + employment, now available on both sides (input uses the
+        # representative baseline crops -- see the "economie" caption above).
+        if side == "input":
+            st.caption(
+                "Cote entree : chaque famille est evaluee via sa variante fine representante "
+                "(config `baseline_representative_crops`), l'allocation fine 2017 n'ayant "
+                "jamais ete observee (VIGILANCE.md point 4)."
+            )
+        for name, label in (
+            (f"production_by_crop_{side}.csv", "Production par culture (t)"),
+            (f"subsidy_by_crop_{side}.csv", "Subvention par culture (€)"),
+            (f"revenue_by_crop_{side}.csv", "Revenu par culture (€)"),
+            (f"etp_by_region_{side}.csv", "Emploi par region (ETP)"),
+        ):
+            df = loaders.load_csv(run_dir, name)
+            if df is not None:
+                st.caption(label)
+                st.bar_chart(df.set_index(df.columns[0]))
+
         if side == "output":
-            production = loaders.load_csv(run_dir, "allocation_output.csv")
-            for name, label, unit in (
-                ("subsidy_per_tonne_by_crop.csv", "Subvention par tonne", "€/t"),
-                ("subsidy_per_euro_sold_by_crop.csv", "Subvention par euro vendu", "€/€"),
+            for name, label in (
+                ("subsidy_per_tonne_by_crop.csv", "Subvention par tonne (€/t)"),
+                ("subsidy_per_euro_sold_by_crop.csv", "Subvention par euro vendu (€/€)"),
             ):
                 df = loaders.load_csv(run_dir, name)
-                st.caption(f"{label} ({unit})")
                 if df is not None:
+                    st.caption(label)
                     st.bar_chart(df.set_index(df.columns[0]))
-                else:
-                    st.info("non disponible pour ce run")
 
             revenue_by_farm = loaders.load_csv(run_dir, "revenue_by_farm.csv")
             st.caption(
@@ -114,26 +138,8 @@ for tab, side in ((input_tab, "input"), (output_tab, "output")):
             if revenue_by_farm is not None:
                 st.bar_chart(revenue_by_farm.set_index(revenue_by_farm.columns[0]))
 
-            etp_by_region = loaders.load_csv(run_dir, "etp_by_region.csv")
-            total_etp = recap.get("total_etp")
-            st.caption(
-                f"Emploi estimé par région (ETP — total {total_etp:,.1f})"
-                if total_etp is not None
-                else "Emploi estimé par région (ETP)"
-            )
-            if etp_by_region is not None:
-                st.bar_chart(etp_by_region.set_index(etp_by_region.columns[0]))
-            else:
-                st.info("non disponible pour ce run")
-        else:
-            st.caption(
-                "Emploi/ETP de travail : disponible uniquement en sortie (calculé à "
-                "partir des heures de travail de chaque itinéraire technique par culture "
-                "fine ; la baseline d'entrée n'est connue qu'à la résolution des 12 "
-                "groupes RPG, sans taux de travail à cette résolution — voir VIGILANCE.md)."
-            )
-            st.caption(
-                "Production/subvention/revenu par culture : non disponible en "
-                "entree (baseline connue a la resolution des 12 groupes RPG, sans "
-                "rendement/prix a cette resolution, voir VIGILANCE.md)."
-            )
+        st.caption(
+            "Carte des cultures par parcelle : non disponible (pas de donnees "
+            "geographiques dans le repo) -- repartition ILE/REGION affichee plus haut. "
+            "Voir VIGILANCE.md."
+        )

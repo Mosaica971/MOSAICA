@@ -171,6 +171,42 @@ def test_compute_revenue_by_farm_sums_sales_plus_subsidy_weighted_by_surface():
     assert result["E2"] == pytest.approx(5200.0)
 
 
+def test_decode_baseline_representative_allocation_substitutes_aggregates():
+    dataset = _small_dataset()
+    config = {"baseline_representative_crops": {"CS": "CS_BT_NISM"}}
+
+    result = indicators.decode_baseline_representative_allocation(dataset, config)
+
+    # baseline groups P1/P2/P5=CS, P3/P6=ME, P4=NC(dropped); CS -> rep, ME kept (unmapped)
+    assert result.to_dict() == {
+        "P1": "CS_BT_NISM", "P2": "CS_BT_NISM", "P3": "ME", "P5": "CS_BT_NISM", "P6": "ME",
+    }
+
+
+def test_decode_baseline_representative_allocation_keeps_unmapped_families():
+    result = indicators.decode_baseline_representative_allocation(_small_dataset(), {})
+
+    assert set(result.unique()) == {"CS", "ME"}  # no mapping -> aggregates unchanged
+
+
+def test_crop_family_is_token_before_first_underscore():
+    assert indicators.crop_family("CS_BT_NISM") == "CS"
+    assert indicators.crop_family("AN_NU") == "AN"
+    assert indicators.crop_family("AG") == "AG"
+
+
+def test_compute_economic_totals_sums_production_subsidy_revenue_and_etp():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    totals = indicators.compute_economic_totals(dataset, allocation, hours_per_etp=1000.0)
+
+    assert totals["total_production_tonnes"] == pytest.approx(420.0)   # 5ha*80 + 1ha*20
+    assert totals["total_subsidy"] == pytest.approx(2700.0)            # 5*500 + 1*200
+    assert totals["total_revenue"] == pytest.approx(22700.0)           # sales 20000 + subsidy 2700
+    assert totals["total_etp"] == pytest.approx(2.8)                   # (800+1200+800)/1000
+
+
 def test_compute_labor_hours_by_plot_multiplies_surface_by_labor_rate():
     dataset = _small_dataset()
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})

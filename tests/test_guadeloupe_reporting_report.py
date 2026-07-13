@@ -62,11 +62,11 @@ def test_generate_report_writes_full_output_folder(tmp_path):
     assert (output_dir / "config_used.yaml").exists()
     assert (output_dir / "allocation_input.csv").exists()
     assert (output_dir / "allocation_output.csv").exists()
-    assert (output_dir / "plots" / "production_by_crop.png").exists()
-    assert (output_dir / "plots" / "subsidy_by_crop.png").exists()
-    assert (output_dir / "plots" / "revenue_by_crop.png").exists()
-    assert (output_dir / "plots" / "surface_by_region_output.png").exists()
-    assert (output_dir / "plots" / "surface_by_region_input.png").exists()
+    for side in ("input", "output"):
+        assert (output_dir / "plots" / f"production_by_crop_{side}.png").exists()
+        assert (output_dir / "plots" / f"subsidy_by_crop_{side}.png").exists()
+        assert (output_dir / "plots" / f"revenue_by_crop_{side}.png").exists()
+        assert (output_dir / "plots" / f"surface_by_region_{side}.png").exists()
 
     recap = json.loads((output_dir / "recap.json").read_text())
     assert recap["solve_duration_seconds"] == pytest.approx(1.23)
@@ -125,9 +125,18 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "subsidy_per_tonne_by_crop.csv",
         "subsidy_per_euro_sold_by_crop.csv",
         "revenue_by_farm.csv",
-        "etp_by_region.csv",
-        "etp_by_island.csv",
-        "etp_by_farm.csv",
+        "production_by_crop_input.csv",
+        "production_by_crop_output.csv",
+        "subsidy_by_crop_input.csv",
+        "subsidy_by_crop_output.csv",
+        "revenue_by_crop_input.csv",
+        "revenue_by_crop_output.csv",
+        "etp_by_region_input.csv",
+        "etp_by_region_output.csv",
+        "etp_by_island_input.csv",
+        "etp_by_island_output.csv",
+        "etp_by_farm_input.csv",
+        "etp_by_farm_output.csv",
         "shannon_diversity_by_region_input.csv",
         "shannon_diversity_by_region_output.csv",
         "shannon_diversity_by_island_input.csv",
@@ -138,7 +147,8 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "surface_by_island_output.csv",
     ):
         assert (output_dir / name).exists(), name
-    assert (output_dir / "plots" / "etp_by_region.png").exists()
+    assert (output_dir / "plots" / "etp_by_region_output.png").exists()
+    assert (output_dir / "plots" / "etp_by_region_input.png").exists()
 
     revenue_by_farm = pd.read_csv(output_dir / "revenue_by_farm.csv")
     assert list(revenue_by_farm.columns) == ["farm", "revenue"]
@@ -147,11 +157,17 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     recap = json.loads((output_dir / "recap.json").read_text())
     assert isinstance(recap["gini_revenue_by_farm"], float)
 
-    # ETP (output-only employment indicator): total is hours / hours_per_etp.
-    # P1=CS: 2ha*400=800h, P2=CS or ME. With CS margin 100 & ME margin 200, both plots
-    # go to ME (higher margin): 2*800 + 3*800 = 4000h / 1607 default.
-    assert recap["total_etp"] == pytest.approx(4000.0 / 1607.0)
-    etp_by_region = pd.read_csv(output_dir / "etp_by_region.csv")
+    # Economics block: input=baseline (both plots CS, representative unmapped in this config),
+    # output=solved (both go to ME, higher margin). See indicators fixture rates.
+    econ = recap["economics"]
+    assert set(econ) == {"input", "output", "delta"}
+    # input production: (2+3)ha * rdt CS 80 = 400 t
+    assert econ["input"]["total_production_tonnes"] == pytest.approx(400.0)
+    # output ETP: both plots ME, labor 800 h/ha -> (2+3)*800 = 4000 h / 1607 default
+    assert econ["output"]["total_etp"] == pytest.approx(4000.0 / 1607.0)
+    for key in ("total_production_tonnes", "total_subsidy", "total_revenue", "total_etp"):
+        assert econ["delta"][key] == pytest.approx(econ["output"][key] - econ["input"][key])
+    etp_by_region = pd.read_csv(output_dir / "etp_by_region_output.csv")
     assert list(etp_by_region.columns) == ["region", "etp"]
 
     surface_by_region_output = pd.read_csv(output_dir / "surface_by_region_output.csv")

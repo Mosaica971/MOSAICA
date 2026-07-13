@@ -9,6 +9,23 @@ solver:
 labor:
   hours_per_etp: 1607
 
+# Representative fine crop per aggregate baseline family (see VIGILANCE.md "point 4").
+# The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",
+# not which technical system), and the aggregate codes carry no economics of their own.
+# To compute input-side production/subsidy/revenue/ETP (and input-vs-output deltas) we
+# substitute a representative fine variant per family. THESE ARE ASSUMPTIONS -- review and
+# adjust to your knowledge of the 2017 land use. Families AG/ME/JA are real single crops
+# and need no substitution; NC (non cultivated) is excluded from the baseline.
+baseline_representative_crops:
+  AN: AN_NU        # ananas sans paillage plastique
+  BA: BA_INT       # banane export intensive en plaine
+  BC: BC_BT        # banane plantain Basse-Terre
+  CS: CS_NGT_NISM  # canne a sucre Nord Grande-Terre, non irriguee, semi-mecanisee
+  IG: IG_PLA       # igname a plat
+  MA: MA_ROTA      # maraichage en rotation
+  PN: PN_TOUR      # prairie avec paturage tournant
+  VE: VE_BTGT      # vergers Basse-Terre & Grande-Terre
+
 # Optional: restrict the optimization to a subset of plots (island/region/farm/plot),
 # for faster small-scale test runs or local policy-transition scenarios. See
 # docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md. Absent (as here)
