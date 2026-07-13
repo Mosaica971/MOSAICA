@@ -114,6 +114,24 @@ commentaires expliquent le rôle (quoi/pourquoi), pas la syntaxe YAML. Préserve
 commentaires existants qui documentent des choix de parité (ex. entrées désactivées
 `enable: false` avec leur raison) — les compléter, pas les écraser.
 
+**Chaque entrée de `crop_families` et de `constraints` est commentée individuellement**,
+en commentaire **inline** (sur la même ligne que l'argument), sans alourdir la lecture.
+Règle pratique selon la forme de l'entrée :
+
+- **Entrée sur une seule ligne** (ex. `an: &SC_AN [AN, AN_NU, AN_PA]`, ou une contrainte
+  dont les `args` tiennent sur la ligne) → commentaire en fin de ligne :
+  `an: &SC_AN [AN, AN_NU, AN_PA]  # aubergine family: base group + fine variants`.
+- **Entrée multi-lignes** (familles `cs`, `ma` ; contraintes dont les `args:` sont un bloc
+  sur plusieurs lignes) → un commentaire concis sur la **ligne d'en-tête** de l'entrée
+  (`cs: &SC_CS  # ...` ou `- name: farm_area_ratio_min  # ...`). On n'ajoute PAS de
+  commentaire en fin de liste crochetée multi-lignes (illisible).
+
+Pour une famille : dire quel groupe de cultures elle représente. Pour une contrainte :
+dire quelle règle elle impose et ce que signifie son `label`/ses paramètres clés (ex.
+`max_share`, `ratio`, `threshold`, `sense`). Les longs blocs de commentaire existants qui
+justifient une entrée `enable: false` (rationale de parité GAMS) sont **conservés tels
+quels** ; l'inline ne les remplace pas.
+
 ## Plan de tests (data-free, style existant)
 
 1. Config par défaut (sans section `data:`) → `year == "2017"`, `scenario == "RESTIT"`.
