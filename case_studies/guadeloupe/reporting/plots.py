@@ -72,6 +72,24 @@ def plot_revenue_by_crop(total_revenue_by_crop: pd.Series, output_path: Path) ->
     )
 
 
+def plot_gross_margin_by_crop(gross_margin_by_crop: pd.Series, output_path: Path) -> Path:
+    return _save_bar_chart(
+        gross_margin_by_crop,
+        title="Marge brute par culture",
+        ylabel="Euros",
+        output_path=output_path,
+    )
+
+
+def plot_labor_cost_by_crop(labor_cost_by_crop: pd.Series, output_path: Path) -> Path:
+    return _save_bar_chart(
+        labor_cost_by_crop,
+        title="Coût main d'œuvre par culture",
+        ylabel="Euros",
+        output_path=output_path,
+    )
+
+
 def plot_etp_by_region(etp_by_region: pd.Series, output_path: Path) -> Path:
     """ETP (full-time-equivalent jobs) per region -- region keys, not crop codes."""
     output_path.parent.mkdir(parents=True, exist_ok=True)

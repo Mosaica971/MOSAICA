@@ -37,6 +37,7 @@ def _tiny_dataset() -> Dataset:
             "sales_per_ha_cult": pd.Series({"CS": 3000.0, "ME": 5000.0}),
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
             "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
+            "margin_per_ha_cult": pd.Series({"CS": 1500.0, "ME": 2000.0}),
         },
         scalars={},
     )
@@ -60,8 +61,8 @@ def test_generate_report_writes_full_output_folder(tmp_path):
     assert (output_dir / "recap.json").exists()
     assert (output_dir / "recap.md").exists()
     assert (output_dir / "config_used.yaml").exists()
-    assert (output_dir / "allocation_input.csv").exists()
-    assert (output_dir / "allocation_output.csv").exists()
+    assert (output_dir / "csv" / "allocation_input.csv").exists()
+    assert (output_dir / "csv" / "allocation_output.csv").exists()
     for side in ("input", "output"):
         assert (output_dir / "plots" / f"production_by_crop_{side}.png").exists()
         assert (output_dir / "plots" / f"subsidy_by_crop_{side}.png").exists()
@@ -87,7 +88,7 @@ def test_generate_report_writes_full_output_folder(tmp_path):
         for value in summary.values():
             assert isinstance(value, (int, float))
 
-    allocation_output = pd.read_csv(output_dir / "allocation_output.csv")
+    allocation_output = pd.read_csv(output_dir / "csv" / "allocation_output.csv")
     assert list(allocation_output.columns) == [
         "plot",
         "crop",
@@ -131,6 +132,12 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "subsidy_by_crop_output.csv",
         "revenue_by_crop_input.csv",
         "revenue_by_crop_output.csv",
+        "gross_margin_by_crop_input.csv",
+        "gross_margin_by_crop_output.csv",
+        "labor_cost_by_crop_input.csv",
+        "labor_cost_by_crop_output.csv",
+        "facts_input.csv",
+        "facts_output.csv",
         "etp_by_region_input.csv",
         "etp_by_region_output.csv",
         "etp_by_island_input.csv",
@@ -146,11 +153,16 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "surface_by_island_input.csv",
         "surface_by_island_output.csv",
     ):
-        assert (output_dir / name).exists(), name
-    assert (output_dir / "plots" / "etp_by_region_output.png").exists()
-    assert (output_dir / "plots" / "etp_by_region_input.png").exists()
+        assert (output_dir / "csv" / name).exists(), name
+    for name in (
+        "etp_by_region_output.png",
+        "etp_by_region_input.png",
+        "gross_margin_by_crop_output.png",
+        "labor_cost_by_crop_output.png",
+    ):
+        assert (output_dir / "plots" / name).exists(), name
 
-    revenue_by_farm = pd.read_csv(output_dir / "revenue_by_farm.csv")
+    revenue_by_farm = pd.read_csv(output_dir / "csv" / "revenue_by_farm.csv")
     assert list(revenue_by_farm.columns) == ["farm", "revenue"]
     assert set(revenue_by_farm["farm"]) == {"E1"}
 
@@ -165,10 +177,18 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     assert econ["input"]["total_production_tonnes"] == pytest.approx(400.0)
     # output ETP: both plots ME, labor 800 h/ha -> (2+3)*800 = 4000 h / 1607 default
     assert econ["output"]["total_etp"] == pytest.approx(4000.0 / 1607.0)
-    for key in ("total_production_tonnes", "total_subsidy", "total_revenue", "total_etp"):
+    # output gross margin: both plots ME, margin 2000/ha -> (2+3)*2000 = 10000
+    assert econ["output"]["total_gross_margin"] == pytest.approx(10000.0)
+    # no cost_per_hour in _CONFIG -> labor cost defaults to 0, net revenue == gross margin
+    assert econ["output"]["total_labor_cost"] == pytest.approx(0.0)
+    assert econ["output"]["total_net_revenue"] == pytest.approx(10000.0)
+    for key in (
+        "total_production_tonnes", "total_subsidy", "total_revenue", "total_gross_margin",
+        "total_variable_cost", "total_labor_cost", "total_net_revenue", "total_etp",
+    ):
         assert econ["delta"][key] == pytest.approx(econ["output"][key] - econ["input"][key])
-    etp_by_region = pd.read_csv(output_dir / "etp_by_region_output.csv")
+    etp_by_region = pd.read_csv(output_dir / "csv" / "etp_by_region_output.csv")
     assert list(etp_by_region.columns) == ["region", "etp"]
 
-    surface_by_region_output = pd.read_csv(output_dir / "surface_by_region_output.csv")
+    surface_by_region_output = pd.read_csv(output_dir / "csv" / "surface_by_region_output.csv")
     assert "region" in surface_by_region_output.columns

@@ -20,8 +20,13 @@ solver:
 # estimated labor hours (surface x crop x technical itinerary x time per operation) into
 # a number of full-time jobs. 1607 h/year is the French legal full-time base (35h/week).
 # Adjust per scenario if you use a different labor convention.
+# cost_per_hour (EUR/h) values that labor: total_labor_cost = total_hours x cost_per_hour,
+# and net revenue = gross margin - labor cost (reported for input and output). Labor is NOT
+# in the GAMS variable cost, so this is purely a reporting indicator (does not affect the
+# optimum). 0 = leave labor unpriced (net revenue then equals gross margin).
 labor:
   hours_per_etp: 1607
+  cost_per_hour: 15.5
 
 # Representative fine crop per aggregate baseline family (see VIGILANCE.md "point 4").
 # The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",

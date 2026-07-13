@@ -28,8 +28,18 @@ def load_recap(run_dir: Path) -> dict[str, Any]:
     return json.loads((run_dir / "recap.json").read_text())
 
 
+def load_facts(run_dir: Path, side: str) -> pd.DataFrame | None:
+    """Tidy (crop x region) fact table for one side ('output'/'input'), or None if the run
+    predates the facts table (older output folders)."""
+    return load_csv(run_dir, f"facts_{side}.csv")
+
+
 def load_csv(run_dir: Path, name: str) -> pd.DataFrame | None:
-    path = run_dir / name
+    # CSVs now live in run_dir/csv/; fall back to the run root for older output folders
+    # written before that reorg.
+    path = run_dir / "csv" / name
+    if not path.exists():
+        path = run_dir / name
     if not path.exists():
         return None
     return pd.read_csv(path)

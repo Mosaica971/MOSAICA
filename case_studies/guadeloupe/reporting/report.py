@@ -15,6 +15,14 @@ from core.data.dataset import Dataset
 from core.reporting.run_folder import create_output_folder
 
 
+def _csv_path(output_dir: Path, name: str) -> Path:
+    """Path for a run CSV, under output_dir/csv/ (created on demand). Non-CSV artifacts
+    (recap.*, config_used.yaml) stay at the run root; plots live in output_dir/plots/."""
+    csv_dir = output_dir / "csv"
+    csv_dir.mkdir(parents=True, exist_ok=True)
+    return csv_dir / name
+
+
 def generate_report(
     dataset: Dataset,
     config: dict[str, Any],
@@ -26,6 +34,7 @@ def generate_report(
 ) -> Path:
     output_dir = create_output_folder(outputs_root)
     hours_per_etp = indicators.hours_per_etp_from_config(config)
+    cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
 
     output_allocation = indicators.decode_output_allocation(model)
     input_allocation = indicators.decode_baseline_allocation(dataset)
@@ -34,11 +43,16 @@ def generate_report(
     # "point 4"). Surface/diversity below stay on the raw aggregate baseline.
     input_representative = indicators.decode_baseline_representative_allocation(dataset, config)
 
-    _write_allocation_csv(dataset, output_allocation, output_dir / "allocation_output.csv")
-    _write_allocation_csv(dataset, input_allocation, output_dir / "allocation_input.csv")
+    _write_allocation_csv(dataset, output_allocation, _csv_path(output_dir, "allocation_output.csv"))
+    _write_allocation_csv(dataset, input_allocation, _csv_path(output_dir, "allocation_input.csv"))
 
-    _write_crop_economics(dataset, output_allocation, output_dir, "output")
-    _write_crop_economics(dataset, input_representative, output_dir, "input")
+    _write_crop_economics(dataset, output_allocation, output_dir, "output", cost_per_hour)
+    _write_crop_economics(dataset, input_representative, output_dir, "input", cost_per_hour)
+    # Tidy (crop x region) fact tables backing the comparison dashboard's free pivoting.
+    for side, allocation in (("output", output_allocation), ("input", input_representative)):
+        indicators.compute_facts_table(dataset, allocation, hours_per_etp, cost_per_hour).to_csv(
+            _csv_path(output_dir, f"facts_{side}.csv"), index=False
+        )
     _write_etp_indicators(dataset, output_allocation, hours_per_etp, output_dir, "output")
     _write_etp_indicators(dataset, input_representative, hours_per_etp, output_dir, "input")
 
@@ -49,8 +63,12 @@ def generate_report(
     input_summary = indicators.compute_aggregate_summary(dataset, input_allocation)
     delta_summary = {key: output_summary[key] - input_summary[key] for key in output_summary}
 
-    output_econ = indicators.compute_economic_totals(dataset, output_allocation, hours_per_etp)
-    input_econ = indicators.compute_economic_totals(dataset, input_representative, hours_per_etp)
+    output_econ = indicators.compute_economic_totals(
+        dataset, output_allocation, hours_per_etp, cost_per_hour
+    )
+    input_econ = indicators.compute_economic_totals(
+        dataset, input_representative, hours_per_etp, cost_per_hour
+    )
     delta_econ = {key: output_econ[key] - input_econ[key] for key in output_econ}
 
     recap = _build_recap(
@@ -75,24 +93,37 @@ def generate_report(
 
 
 def _write_crop_economics(
-    dataset: Dataset, allocation: pd.Series, output_dir: Path, side: str
+    dataset: Dataset, allocation: pd.Series, output_dir: Path, side: str, cost_per_hour: float
 ) -> None:
-    """Per-crop production (tonnes), subsidy (EUR) and revenue (EUR) for one side, with a
-    figure each. `side` is "output" (fine solved crops) or "input" (representative
-    baseline crops -- see decode_baseline_representative_allocation)."""
+    """Per-crop production (tonnes), subsidy, revenue, gross margin and labor cost (EUR) for
+    one side, with a figure each. `side` is "output" (fine solved crops) or "input"
+    (representative baseline crops -- see decode_baseline_representative_allocation)."""
     production = indicators.compute_production_tonnes_by_crop(dataset, allocation)
     subsidy = indicators.compute_subsidy_by_crop(dataset, allocation)
     revenue = indicators.compute_total_revenue_by_crop(dataset, allocation)
+    gross_margin = indicators.compute_gross_margin_by_crop(dataset, allocation)
+    labor_cost = indicators.compute_labor_cost_by_crop(dataset, allocation, cost_per_hour)
 
     production.to_csv(
-        output_dir / f"production_by_crop_{side}.csv", header=["production_tonnes"], index_label="crop"
+        _csv_path(output_dir, f"production_by_crop_{side}.csv"),
+        header=["production_tonnes"], index_label="crop",
     )
-    subsidy.to_csv(output_dir / f"subsidy_by_crop_{side}.csv", header=["subsidy"], index_label="crop")
-    revenue.to_csv(output_dir / f"revenue_by_crop_{side}.csv", header=["revenue"], index_label="crop")
+    subsidy.to_csv(_csv_path(output_dir, f"subsidy_by_crop_{side}.csv"), header=["subsidy"], index_label="crop")
+    revenue.to_csv(_csv_path(output_dir, f"revenue_by_crop_{side}.csv"), header=["revenue"], index_label="crop")
+    gross_margin.to_csv(
+        _csv_path(output_dir, f"gross_margin_by_crop_{side}.csv"),
+        header=["gross_margin"], index_label="crop",
+    )
+    labor_cost.to_csv(
+        _csv_path(output_dir, f"labor_cost_by_crop_{side}.csv"),
+        header=["labor_cost"], index_label="crop",
+    )
 
     plots.plot_production_by_crop(production, output_dir / "plots" / f"production_by_crop_{side}.png")
     plots.plot_subsidy_by_crop(subsidy, output_dir / "plots" / f"subsidy_by_crop_{side}.png")
     plots.plot_revenue_by_crop(revenue, output_dir / "plots" / f"revenue_by_crop_{side}.png")
+    plots.plot_gross_margin_by_crop(gross_margin, output_dir / "plots" / f"gross_margin_by_crop_{side}.png")
+    plots.plot_labor_cost_by_crop(labor_cost, output_dir / "plots" / f"labor_cost_by_crop_{side}.png")
 
 
 def _write_output_only_indicators(
@@ -102,17 +133,18 @@ def _write_output_only_indicators(
     allocation. Per-farm revenue needs a per-plot crop, and the ratios need fine-crop
     yields; the aggregate baseline has neither, so these stay output-only."""
     indicators.compute_subsidy_per_tonne_by_crop(dataset, output_allocation).to_csv(
-        output_dir / "subsidy_per_tonne_by_crop.csv", header=["subsidy_per_tonne"], index_label="crop"
+        _csv_path(output_dir, "subsidy_per_tonne_by_crop.csv"),
+        header=["subsidy_per_tonne"], index_label="crop",
     )
     indicators.compute_subsidy_per_euro_sold_by_crop(dataset, output_allocation).to_csv(
-        output_dir / "subsidy_per_euro_sold_by_crop.csv",
+        _csv_path(output_dir, "subsidy_per_euro_sold_by_crop.csv"),
         header=["subsidy_per_euro_sold"],
         index_label="crop",
     )
 
     revenue_by_farm = indicators.compute_revenue_by_farm(dataset, output_allocation)
     revenue_by_farm.to_csv(
-        output_dir / "revenue_by_farm.csv", header=["revenue"], index_label="farm"
+        _csv_path(output_dir, "revenue_by_farm.csv"), header=["revenue"], index_label="farm"
     )
     return indicators.compute_gini(revenue_by_farm)
 
@@ -128,13 +160,13 @@ def _write_etp_indicators(
 
     etp_by_region = indicators.compute_etp_by_key(dataset, allocation, region, hours_per_etp)
     indicators.compute_etp_by_key(dataset, allocation, island, hours_per_etp).to_csv(
-        output_dir / f"etp_by_island_{side}.csv", header=["etp"], index_label="island"
+        _csv_path(output_dir, f"etp_by_island_{side}.csv"), header=["etp"], index_label="island"
     )
     indicators.compute_etp_by_key(dataset, allocation, farm, hours_per_etp).to_csv(
-        output_dir / f"etp_by_farm_{side}.csv", header=["etp"], index_label="farm"
+        _csv_path(output_dir, f"etp_by_farm_{side}.csv"), header=["etp"], index_label="farm"
     )
     etp_by_region.to_csv(
-        output_dir / f"etp_by_region_{side}.csv", header=["etp"], index_label="region"
+        _csv_path(output_dir, f"etp_by_region_{side}.csv"), header=["etp"], index_label="region"
     )
     plots.plot_etp_by_region(etp_by_region, output_dir / "plots" / f"etp_by_region_{side}.png")
 
@@ -151,22 +183,24 @@ def _write_shannon_and_surface_by_key(
     island = indicators.plot_to_island(dataset)
     for side, allocation in (("input", input_allocation), ("output", output_allocation)):
         indicators.compute_shannon_diversity(dataset, allocation, region).to_csv(
-            output_dir / f"shannon_diversity_by_region_{side}.csv",
+            _csv_path(output_dir, f"shannon_diversity_by_region_{side}.csv"),
             header=["shannon_diversity"],
             index_label="region",
         )
         indicators.compute_shannon_diversity(dataset, allocation, island).to_csv(
-            output_dir / f"shannon_diversity_by_island_{side}.csv",
+            _csv_path(output_dir, f"shannon_diversity_by_island_{side}.csv"),
             header=["shannon_diversity"],
             index_label="island",
         )
         surface_by_region = indicators.compute_surface_by_region_and_key(dataset, allocation)
-        surface_by_region.to_csv(output_dir / f"surface_by_region_{side}.csv", index_label="region")
+        surface_by_region.to_csv(
+            _csv_path(output_dir, f"surface_by_region_{side}.csv"), index_label="region"
+        )
         plots.plot_surface_by_region(
             surface_by_region, output_dir / "plots" / f"surface_by_region_{side}.png"
         )
         indicators.compute_surface_by_island_and_key(dataset, allocation).to_csv(
-            output_dir / f"surface_by_island_{side}.csv", index_label="island"
+            _csv_path(output_dir, f"surface_by_island_{side}.csv"), index_label="island"
         )
 
 
@@ -272,8 +306,16 @@ def _render_recap_markdown(recap: dict[str, Any]) -> str:
         f"(delta {econ['delta']['total_production_tonnes']:+,.0f})",
         f"- Subvention (EUR) : {econ['input']['total_subsidy']:,.0f} -> "
         f"{econ['output']['total_subsidy']:,.0f} (delta {econ['delta']['total_subsidy']:+,.0f})",
-        f"- Revenu (EUR) : {econ['input']['total_revenue']:,.0f} -> "
+        f"- Revenu / produit brut (EUR) : {econ['input']['total_revenue']:,.0f} -> "
         f"{econ['output']['total_revenue']:,.0f} (delta {econ['delta']['total_revenue']:+,.0f})",
+        f"- Cout variable (EUR) : {econ['input']['total_variable_cost']:,.0f} -> "
+        f"{econ['output']['total_variable_cost']:,.0f} (delta {econ['delta']['total_variable_cost']:+,.0f})",
+        f"- Marge brute (EUR) : {econ['input']['total_gross_margin']:,.0f} -> "
+        f"{econ['output']['total_gross_margin']:,.0f} (delta {econ['delta']['total_gross_margin']:+,.0f})",
+        f"- Cout main d'oeuvre (EUR) : {econ['input']['total_labor_cost']:,.0f} -> "
+        f"{econ['output']['total_labor_cost']:,.0f} (delta {econ['delta']['total_labor_cost']:+,.0f})",
+        f"- Revenu net (marge brute - cout MO, EUR) : {econ['input']['total_net_revenue']:,.0f} -> "
+        f"{econ['output']['total_net_revenue']:,.0f} (delta {econ['delta']['total_net_revenue']:+,.0f})",
         f"- Emploi (ETP) : {econ['input']['total_etp']:,.1f} -> "
         f"{econ['output']['total_etp']:,.1f} (delta {econ['delta']['total_etp']:+,.1f})",
     ]

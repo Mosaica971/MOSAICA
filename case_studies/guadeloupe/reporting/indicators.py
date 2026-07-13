@@ -92,6 +92,15 @@ def compute_total_revenue_by_crop(dataset: Dataset, allocation: pd.Series) -> pd
     return compute_sales_by_crop(dataset, allocation) + compute_subsidy_by_crop(dataset, allocation)
 
 
+def compute_gross_margin_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Gross margin (EUR) by crop: surface x margin_per_ha_cult (gross product minus variable
+    input costs, the same per-ha margin the objective maximizes). Labor is NOT priced in here
+    -- that is compute_labor_cost_by_crop, subtracted separately for the net revenue."""
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    margin_per_ha_cult = dataset.parameters["margin_per_ha_cult"]
+    return surface_by_crop * margin_per_ha_cult.reindex(surface_by_crop.index)
+
+
 def compute_subsidy_per_tonne_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     subsidy = compute_subsidy_by_crop(dataset, allocation)
     production = compute_production_tonnes_by_crop(dataset, allocation)
@@ -117,11 +126,19 @@ def compute_revenue_by_farm(dataset: Dataset, allocation: pd.Series) -> pd.Serie
 
 
 DEFAULT_HOURS_PER_ETP = 1607.0
+# No labor cost unless config sets one: net revenue then equals gross margin (current view).
+DEFAULT_COST_PER_HOUR = 0.0
 
 
 def hours_per_etp_from_config(config: dict[str, Any]) -> float:
     """Annual working hours per full-time-equivalent (ETP), from config['labor']."""
     return float((config.get("labor") or {}).get("hours_per_etp", DEFAULT_HOURS_PER_ETP))
+
+
+def labor_cost_per_hour_from_config(config: dict[str, Any]) -> float:
+    """Labor cost per worked hour (EUR/h), from config['labor']. Used to value the labor
+    embedded in each crop's itinerary; see compute_labor_cost_by_crop."""
+    return float((config.get("labor") or {}).get("cost_per_hour", DEFAULT_COST_PER_HOUR))
 
 
 def compute_labor_hours_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
@@ -149,18 +166,88 @@ def compute_etp_by_key(
     return hours.groupby(key).sum() / hours_per_etp
 
 
+def compute_labor_cost_by_crop(
+    dataset: Dataset, allocation: pd.Series, cost_per_hour: float
+) -> pd.Series:
+    """Labor cost (EUR) by crop: labor hours per plot x cost_per_hour, grouped by crop.
+    Values the family/hired labor the gross margin leaves unpriced (labor is tracked in
+    hours, not monetized, in the GAMS variable cost -- see economics.py)."""
+    hours = compute_labor_hours_by_plot(dataset, allocation)
+    return hours.groupby(allocation).sum() * cost_per_hour
+
+
+def compute_total_labor_cost(
+    dataset: Dataset, allocation: pd.Series, cost_per_hour: float
+) -> float:
+    """Total labor cost across all plots (labor hours x cost_per_hour)."""
+    return float(compute_labor_hours_by_plot(dataset, allocation).sum() * cost_per_hour)
+
+
 def compute_economic_totals(
-    dataset: Dataset, allocation: pd.Series, hours_per_etp: float
+    dataset: Dataset, allocation: pd.Series, hours_per_etp: float, cost_per_hour: float
 ) -> dict[str, float]:
-    """Headline totals for one allocation: production (tonnes), subsidy (EUR),
-    revenue (EUR), employment (ETP). Valid for both the output (fine crops) and the
-    representative baseline (see decode_baseline_representative_allocation)."""
+    """Headline totals for one allocation: production (tonnes), subsidy (EUR), revenue
+    (=gross product: sales+subsidy, EUR), gross margin (EUR, after variable input costs),
+    variable cost (EUR, derived = revenue - gross margin), labor cost (EUR), net revenue
+    (EUR, = gross margin - labor cost), and employment (ETP). Valid for both the output
+    (fine crops) and the representative baseline (see
+    decode_baseline_representative_allocation)."""
+    revenue = float(compute_total_revenue_by_crop(dataset, allocation).sum())
+    gross_margin = float(compute_gross_margin_by_crop(dataset, allocation).sum())
+    labor_cost = compute_total_labor_cost(dataset, allocation, cost_per_hour)
     return {
         "total_production_tonnes": float(compute_production_tonnes_by_crop(dataset, allocation).sum()),
         "total_subsidy": float(compute_subsidy_by_crop(dataset, allocation).sum()),
-        "total_revenue": float(compute_total_revenue_by_crop(dataset, allocation).sum()),
+        "total_revenue": revenue,
+        "total_gross_margin": gross_margin,
+        "total_variable_cost": revenue - gross_margin,
+        "total_labor_cost": labor_cost,
+        "total_net_revenue": gross_margin - labor_cost,
         "total_etp": compute_total_etp(dataset, allocation, hours_per_etp),
     }
+
+
+_FACT_MEASURES = [
+    "surface", "production", "sales", "subsidy", "revenue",
+    "gross_margin", "labor_hours", "labor_cost", "etp",
+]
+
+
+def compute_facts_table(
+    dataset: Dataset, allocation: pd.Series, hours_per_etp: float, cost_per_hour: float
+) -> pd.DataFrame:
+    """Tidy fact table for one allocation: every plot rolled up by (crop, region), with all
+    additive economic/labor measures plus its island. Backs the comparison dashboard's free
+    pivoting (x in culture/sous-culture/region/island, any measure, stacked by the other
+    dimension). ETP is labor_hours / hours_per_etp, which stays additive across rows."""
+    data_parc = dataset.parameters["data_parc"]
+    crops = allocation.to_numpy()
+    surface = data_parc["SURF_HA"].reindex(allocation.index).to_numpy()
+
+    def rate(name: str) -> "np.ndarray":
+        return dataset.parameters[name].reindex(crops).to_numpy()
+
+    per_plot = pd.DataFrame(
+        {
+            "crop": crops,
+            "region": data_parc["REGION"].reindex(allocation.index).to_numpy(),
+            "island": data_parc["ILE"].reindex(allocation.index).to_numpy(),
+            "surface": surface,
+            "production": surface * rate("rdt_cult"),
+            "sales": surface * rate("sales_per_ha_cult"),
+            "subsidy": surface * rate("subsidy_per_ha_cult_annualized"),
+            "gross_margin": surface * rate("margin_per_ha_cult"),
+            "labor_hours": surface * rate("labor_hours_per_ha_cult"),
+        }
+    )
+    per_plot["revenue"] = per_plot["sales"] + per_plot["subsidy"]
+    per_plot["labor_cost"] = per_plot["labor_hours"] * cost_per_hour
+    per_plot["etp"] = per_plot["labor_hours"] / hours_per_etp
+
+    grouped = per_plot.groupby(["crop", "region"], as_index=False).agg(
+        {"island": "first", **{measure: "sum" for measure in _FACT_MEASURES}}
+    )
+    return grouped[["crop", "region", "island", *_FACT_MEASURES]]
 
 
 def compute_gini(values: pd.Series) -> float:
