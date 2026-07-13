@@ -9,9 +9,12 @@ data:
   year: "2017"        # economic-table column: 2017..2022, or init/calib
   scenario: "RESTIT"  # RESTIT | SMART
 
+# MILP solver. `name` is the Pyomo solver interface (appsi_highs = HiGHS via Pyomo's
+# persistent APPSI wrapper); `args` passes extra HiGHS options (e.g. mip_rel_gap, threads).
+# See core/model/solver.py.
 solver:
   name: appsi_highs
-  args: {}
+  args: {}          # extra HiGHS options; {} = HiGHS defaults
 
 # Labor: annual working hours per full-time-equivalent (ETP/UTA), used to convert the
 # estimated labor hours (surface x crop x technical itinerary x time per operation) into
@@ -47,26 +50,29 @@ baseline_representative_crops:
 #   exclude:
 #     farms: [E1471]
 
+# Named crop groups reused by the constraints below via YAML anchors (&SC_*), referenced
+# with *SC_* aliases. Each groups a base aggregate code with its fine technical variants.
 crop_families:
-  an: &SC_AN [AN, AN_NU, AN_PA]
-  ig: &SC_IG [IG, IG_PLA, IG_TUT]
-  cs: &SC_CS
+  an: &SC_AN [AN, AN_NU, AN_PA]           # pineapple (ananas): base + variants
+  ig: &SC_IG [IG, IG_PLA, IG_TUT]         # yam (igname): base + variants
+  cs: &SC_CS                              # sugarcane (canne a sucre): base + all technical systems
     [CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
      CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM, CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM,
      CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NISM, CS_MG_NIM, CS_MG_IM]
-  ban_ex: &SC_BAN_EX [BA, BA_INT, BA_IRR, BA_PER, BA_SINT]
-  bc: &SC_BC [BC, BC_BT, BC_GTMG]
-  ma: &SC_MA
+  ban_ex: &SC_BAN_EX [BA, BA_INT, BA_IRR, BA_PER, BA_SINT]  # export banana (banane export)
+  bc: &SC_BC [BC, BC_BT, BC_GTMG]         # plantain/creole banana (banane plantain)
+  ma: &SC_MA                              # market gardening (maraichage): all mulch/fertiliser/irrigation combos
     [MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA,
      MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI, MA_BAG_FER_I, MA_BAG_FER_NI,
      MA_BAG_NON_I, MA_BAG_NON_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
      MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI, MA_PAI_BIO_I, MA_PAI_BIO_NI,
      MA_PAI_VEG_I, MA_PAI_VEG_NI, MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
-  plu: &SC_PLU [AG, VE, VE_BTGT, VE_PLUIE]
-  ba_ja: &SC_BA_JA [BA_INT, BA_IRR, BA_SINT]
+  plu: &SC_PLU [AG, VE, VE_BTGT, VE_PLUIE]  # rainfed fruit/orchards (agrumes + vergers)
+  ba_ja: &SC_BA_JA [BA_INT, BA_IRR, BA_SINT]  # export-banana subset used in fallow-rotation ratios
 
+# Objective functions. Exactly one must be enabled; the builder is selected by `name`.
 objectives:
-  - name: maximize_gross_margin
+  - name: maximize_gross_margin          # default: maximise sum(margin/ha x plot surface)
     enable: true
     args: {}
 
@@ -78,29 +84,36 @@ objectives:
   # from the TYPE_EXPL/TYPE_EXPL_Bis cascade (case_studies/guadeloupe/farm_typology.py)
   # rather than read from data/tables/Avers.txt (a uniform, unvalidated stub) -- flagged
   # for later verification against a real GAMS run if one becomes available.
-  - name: maximize_risk_adjusted_gross_margin
+  - name: maximize_risk_adjusted_gross_margin  # Markowitz: margin minus AVERS-weighted yield variance
     enable: false
     args: {}
 
+# Model constraints, each built by the registered function in `name`. The same builder may
+# recur with different `args`/`label`. Disabled entries (enable: false) are kept on purpose
+# -- read the comment above each before re-enabling.
 constraints:
-  - name: at_most_one_crop_per_plot
+  - name: at_most_one_crop_per_plot      # each plot gets at most one crop (core assignment rule)
     enable: true
     args: {}
 
+  # farm_area_share_max: a crop group may cover at most `max_share` of each farm's area
+  # (agronomic rotation ceiling).
   - name: farm_area_share_max
     enable: true
-    args: {label: an_agro_max_expl, crops: *SC_AN, max_share: 0.75}
+    args: {label: an_agro_max_expl, crops: *SC_AN, max_share: 0.75}  # pineapple <= 75% of farm area
   - name: farm_area_share_max
     enable: true
-    args: {label: ig_agro_max_expl, crops: *SC_IG, max_share: 0.66}
+    args: {label: ig_agro_max_expl, crops: *SC_IG, max_share: 0.66}  # yam <= 66% of farm area
 
+  # farm_area_ratio_min: numerator-crop area must be >= `ratio` x denominator-crop area per
+  # farm (enforces fallow/rotation alongside banana).
   - name: farm_area_ratio_min
     enable: true
-    args: {label: ba_ja, numerator_crops: [JA], denominator_crops: *SC_BA_JA, ratio: 0.2}
+    args: {label: ba_ja, numerator_crops: [JA], denominator_crops: *SC_BA_JA, ratio: 0.2}  # fallow >= 20% of banana area
   - name: farm_area_ratio_min
     enable: true
     args:
-      label: ba_rota
+      label: ba_rota  # fallow + sugarcane/CF area >= 20% of export-banana area (rotation)
       numerator_crops:
         [JA,
          CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
@@ -126,47 +139,51 @@ constraints:
   # 2026-07-07-gams-parity-phase1-territory-farm-constraints.md Task 9 notes.
   - name: cs_gfa_minimum_share
     enable: false
-    args: {label: cs_gfa, crops: *SC_CS, min_share: 0.6}
+    args: {label: cs_gfa, crops: *SC_CS, min_share: 0.6}  # sugarcane >= 60% of each GFA farm's area
 
+  # territory_production_bound: territory-wide production floor/ceiling. `sense` le = cap,
+  # ge = floor. A group contributes sum(plot surface x crop yield x rate_multiplier) when
+  # use_yield: true (tonnes), or x rate_multiplier only when false (hectares). rate_multiplier
+  # also carries edible/extraction fractions. Thresholds transcribe the GAMS territorial targets.
   - name: territory_production_bound
     enable: true
     args:
-      label: ba_quota_max
+      label: ba_quota_max  # export banana: cap <= 77,877 t
       groups: [{crops: *SC_BAN_EX, use_yield: true, rate_multiplier: 1.0}]
       sense: le
       threshold: 77877
   - name: territory_production_bound
     enable: false
     args:
-      label: me_quota_max
+      label: me_quota_max  # melon: cap <= 80,000 t (disabled)
       groups: [{crops: [ME], use_yield: true, rate_multiplier: 1.0}]
       sense: le
       threshold: 80000
   - name: territory_production_bound
     enable: false
     args:
-      label: an_quota_max
+      label: an_quota_max  # pineapple: cap <= 70,000 t (x0.667 edible fraction) (disabled)
       groups: [{crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}]
       sense: le
       threshold: 70000
   - name: territory_production_bound
     enable: false
     args:
-      label: ig_quota_max
+      label: ig_quota_max  # yam: cap <= 50,000 t (disabled)
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: le
       threshold: 50000
   - name: territory_production_bound
     enable: false
     args:
-      label: bc_quota_max
+      label: bc_quota_max  # plantain: cap <= 40,000 t (disabled)
       groups: [{crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}]
       sense: le
       threshold: 40000
   - name: territory_production_bound
     enable: true
     args:
-      label: cs_quota_max
+      label: cs_quota_max  # sugarcane: sugar cap <= 107,000 t (x0.072 extraction rate)
       groups: [{crops: *SC_CS, use_yield: true, rate_multiplier: 0.072}]
       sense: le
       threshold: 107000
@@ -174,49 +191,49 @@ constraints:
   - name: territory_production_bound
     enable: true
     args:
-      label: bc_prod_min
+      label: bc_prod_min  # plantain: floor >= 4,056 t
       groups: [{crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 4056
   - name: territory_production_bound
     enable: true
     args:
-      label: ig_prod_min
+      label: ig_prod_min  # yam: floor >= 5,125 t
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 5125
   - name: territory_production_bound
     enable: true
     args:
-      label: ma_prod_min
+      label: ma_prod_min  # market gardening: floor >= 26,404 t
       groups: [{crops: *SC_MA, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 26404
   - name: territory_production_bound
     enable: true
     args:
-      label: an_prod_min
+      label: an_prod_min  # pineapple: floor >= 2,322 t (x0.667 edible fraction)
       groups: [{crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}]
       sense: ge
       threshold: 2322
   - name: territory_production_bound
     enable: true
     args:
-      label: plu_prod_min
+      label: plu_prod_min  # rainfed fruit/orchards: floor >= 5,879 t
       groups: [{crops: *SC_PLU, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 5879
   - name: territory_production_bound
     enable: true
     args:
-      label: me_prod_min
+      label: me_prod_min  # melon: floor >= 4,135 t
       groups: [{crops: [ME], use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 4135
   - name: territory_production_bound
     enable: true
     args:
-      label: pn_prod_min
+      label: pn_prod_min  # pasture (PN_PIQ): floor >= 6,096 ha (surface, use_yield false)
       groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]
       sense: ge
       threshold: 6096
@@ -224,21 +241,21 @@ constraints:
   - name: territory_production_bound
     enable: true
     args:
-      label: leg_prod_obj
+      label: leg_prod_obj  # vegetables/market gardening: production target >= 63,059 t
       groups: [{crops: *SC_MA, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 63059
   - name: territory_production_bound
     enable: false
     args:
-      label: tub_prod_obj
+      label: tub_prod_obj  # tuber target (disabled; threshold 0 = no-op)
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 0
   - name: territory_production_bound
     enable: true
     args:
-      label: fru_prod_obj
+      label: fru_prod_obj  # all fruit combined (plantain + pineapple + rainfed + melon): >= 30,789 t
       groups:
         - {crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}
         - {crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}
@@ -249,50 +266,56 @@ constraints:
   - name: territory_production_bound
     enable: true
     args:
-      label: pat_surf_obj
+      label: pat_surf_obj  # pasture surface target >= 12,193 ha
       groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]
       sense: ge
       threshold: 12193
 
+# Numeric eligibility bounds: a (plot, crop) pair is eligible only if the plot's `attribute`
+# lies within the crop's [min_col, max_col] range (columns read from Data_Cult). All four
+# criteria are intersected. See core/data/eligibility.py.
 eligibility_criteria:
-  - name: altitude
+  - name: altitude                       # plot ALTITUDE within crop's [ALTI_MIN, ALTI_MAX] (m)
     enable: true
     args:
       attribute: ALTITUDE
       min_col: ALTI_MIN
       max_col: ALTI_MAX
-  - name: slope
+  - name: slope                          # plot PENTE within crop's [PENTE_MIN, PENTE_MAX] (%)
     enable: true
     args:
       attribute: PENTE
       min_col: PENTE_MIN
       max_col: PENTE_MAX
-  - name: rainfall
+  - name: rainfall                       # plot PLUVIO_PARC within crop's [PLUVIO_MIN, PLUVIO_MAX] (mm)
     enable: true
     args:
       attribute: PLUVIO_PARC
       min_col: PLUVIO_MIN
       max_col: PLUVIO_MAX
-  - name: plot_size
+  - name: plot_size                      # plot SURF_HA within crop's [SURF_PARC_MIN, SURF_PARC_MAX] (ha)
     enable: true
     args:
       attribute: SURF_HA
       min_col: SURF_PARC_MIN
       max_col: SURF_PARC_MAX
 
+# Categorical eligibility rules: each forbids a set of crops on plots matching a categorical
+# condition (irrigation, soil, region, risk, fallow history). Intersected with the numeric
+# bounds above. See core/data/eligibility.py + case_studies/guadeloupe/constraints.py.
 categorical_rules:
-  - name: irrigation_required
+  - name: irrigation_required            # ME, MA_ROTA only on irrigated plots (IRRIG_PARC true)
     enable: true
     args:
       crops: [ME, MA_ROTA]
       irrigation_column: IRRIG_PARC
-  - name: soil_type_forbidden
+  - name: soil_type_forbidden           # pineapple AN_NU/AN_PA forbidden on soil type 2
     enable: true
     args:
       crops: [AN_NU, AN_PA]
       soil_column: TYPE_SOL
       forbidden_soil_types: [2]
-  - name: melon_soil_restriction
+  - name: melon_soil_restriction        # ME forbidden on soil types 2/3/4 and on island 1
     enable: true
     args:
       crops: [ME]
@@ -300,24 +323,26 @@ categorical_rules:
       forbidden_soil_types: [2, 3, 4]
       island_column: ILE
       forbidden_island: 1
-  - name: max_risk_threshold
+  - name: max_risk_threshold            # IG_TUT only where black-leaf-streak risk RISQUE_CLD <= 3
     enable: true
     args:
       crops: [IG_TUT]
       risk_column: RISQUE_CLD
       max_allowed: 3
-  - name: exact_risk_value
+  - name: exact_risk_value              # PN_PIQ only where RISQUE_CLD == 1
     enable: true
     args:
       crops: [PN_PIQ]
       risk_column: RISQUE_CLD
       allowed_value: 1
-  - name: region_crop_forbidden
+  - name: region_crop_forbidden         # ME forbidden in the listed REGION_CODE regions
     enable: true
     args:
       crops: [ME]
       region_column: REGION_CODE
       forbidden_regions: [R0, R1, R3, R4, R5, R6, R7, R9, R10, R12, R13, R14, R17, R19, R21, R25, R26, R27]
+  # friche_lock: plots left fallow (fallow_codes) across every year of history_columns are
+  # locked out of the listed crops -- the GAMS Eq_FRICHE rule. crops list = CULT_NON_NC set.
   - name: friche_lock
     enable: true
     args:
