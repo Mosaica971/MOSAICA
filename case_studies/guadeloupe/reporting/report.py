@@ -193,12 +193,12 @@ def _build_recap(
     results: Any,
     duration: float,
     objective_value: float,
-    input_summary: dict,
-    output_summary: dict,
-    delta_summary: dict,
+    input_summary: dict[str, Any],
+    output_summary: dict[str, Any],
+    delta_summary: dict[str, Any],
     gini_revenue_by_farm: float,
-    economics: dict,
-) -> dict:
+    economics: dict[str, Any],
+) -> dict[str, Any]:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
         for entry in config["constraints"]
@@ -232,7 +232,7 @@ def _build_recap(
     }
 
 
-def _render_recap_markdown(recap: dict) -> str:
+def _render_recap_markdown(recap: dict[str, Any]) -> str:
     econ = recap["economics"]
     lines = [
         "# Recap de simulation",

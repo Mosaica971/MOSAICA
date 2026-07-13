@@ -11,6 +11,7 @@ Usage:
 
 import argparse
 from pathlib import Path
+from typing import Any
 
 from case_studies.guadeloupe.data_pipeline import build_dataset
 from case_studies.guadeloupe.model import build_model
@@ -32,7 +33,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def build_zone_filter_from_args(args: argparse.Namespace) -> dict | None:
+def build_zone_filter_from_args(args: argparse.Namespace) -> dict[str, Any] | None:
     include = {
         "islands": args.island,
         "regions": args.region,
@@ -45,7 +46,7 @@ def build_zone_filter_from_args(args: argparse.Namespace) -> dict | None:
     return {"include": include}
 
 
-def disable_territory_bounds(config: dict) -> dict:
+def disable_territory_bounds(config: dict[str, Any]) -> dict[str, Any]:
     """Drop territory_production_bound constraints (whole-Guadeloupe quotas that a
     zone_filter subset can't satisfy -- see VIGILANCE.md's "zone_filter ne
     redimensionne pas les quotas territoriaux"). Only meant for profiling runs."""

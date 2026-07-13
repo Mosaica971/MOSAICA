@@ -1,4 +1,5 @@
 import warnings
+from typing import Any
 
 import pandas as pd
 
@@ -6,7 +7,7 @@ import pandas as pd
 def resolve_kept_plots(
     plot_index: pd.Index,
     criteria: dict[str, pd.Series],
-    config: dict,
+    config: dict[str, Any],
 ) -> pd.Index:
     zone_filter = config.get("zone_filter")
     if not zone_filter:
@@ -41,7 +42,7 @@ def resolve_kept_plots(
     return kept
 
 
-def _check_unknown_keys(spec: dict, criteria: dict, section: str) -> None:
+def _check_unknown_keys(spec: dict[str, Any], criteria: dict[str, Any], section: str) -> None:
     unknown = set(spec) - set(criteria)
     if unknown:
         available = ", ".join(sorted(criteria))

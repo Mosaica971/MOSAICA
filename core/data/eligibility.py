@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 import pandas as pd
 
@@ -122,7 +123,7 @@ def rule_friche_lock(
     return crops, condition
 
 
-def attribute_bounds_from_config(entries: list[dict]) -> dict[str, tuple[str, str]]:
+def attribute_bounds_from_config(entries: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
     return {
         entry["args"]["attribute"]: (entry["args"]["min_col"], entry["args"]["max_col"])
         for entry in entries

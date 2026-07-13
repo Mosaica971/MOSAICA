@@ -135,8 +135,9 @@ gardent leur économie propre ; NC exclu), puis on réutilise les indicateurs de
 delta} (production t, subvention €, revenu €, ETP). Le dashboard affiche les deux côtés + les
 écarts. **C'est une hypothèse** (le représentant par famille) — voir le point ouvert
 « L'allocation fine 2017 en entrée n'a jamais existé ». Validé sur vraies données (0 NaN,
-totaux finis). `indicators.crop_family(code)` (préfixe avant `_`) est dispo pour agréger par
-famille.
+totaux finis). (NB : le helper `indicators.crop_family(code)`, ajouté « au cas où » pour
+agréger par famille mais jamais utilisé, a été supprimé le 2026-07-13 lors de la passe
+qualité — la famille reste le préfixe avant `_` si besoin de la recalculer.)
 
 ### Mineur — Vérification couverture des cultures (les 84 sont bien implémentées)
 _Vérifié le 2026-07-13, suite à un doute sur AG/NC absents de `config.yaml`._ Les 84 cultures

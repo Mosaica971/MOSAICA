@@ -1,5 +1,6 @@
 import time
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 TDataset = TypeVar("TDataset")
 TModel = TypeVar("TModel")

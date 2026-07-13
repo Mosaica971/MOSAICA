@@ -3,6 +3,7 @@ for the dashboard (brique B). Read-only: never writes, never triggers a solve.""
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -23,7 +24,7 @@ def list_output_runs(outputs_root: Path) -> list[Path]:
     return [child for _, child in numbered]
 
 
-def load_recap(run_dir: Path) -> dict:
+def load_recap(run_dir: Path) -> dict[str, Any]:
     return json.loads((run_dir / "recap.json").read_text())
 
 

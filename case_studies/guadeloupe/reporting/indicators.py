@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
@@ -27,7 +29,7 @@ def decode_baseline_allocation(dataset: Dataset) -> pd.Series:
     return groups[groups != _NON_CULTIVATED_GROUP].dropna()
 
 
-def decode_baseline_representative_allocation(dataset: Dataset, config: dict) -> pd.Series:
+def decode_baseline_representative_allocation(dataset: Dataset, config: dict[str, Any]) -> pd.Series:
     """Baseline 2017 allocation remapped from aggregate families to representative fine
     crops, so the fine-crop economics indicators (production/subsidy/revenue/ETP) apply to
     the input side. The observed baseline is only known at aggregate/RPG resolution and the
@@ -38,12 +40,6 @@ def decode_baseline_representative_allocation(dataset: Dataset, config: dict) ->
     baseline = decode_baseline_allocation(dataset)
     mapping = config.get("baseline_representative_crops") or {}
     return baseline.map(lambda family: mapping.get(family, family)).rename("crop")
-
-
-def crop_family(code: str) -> str:
-    """Aggregate family of a crop code -- the token before the first underscore:
-    CS_BT_NISM -> CS, AN_NU -> AN, MA_ROTA -> MA, AG -> AG."""
-    return str(code).split("_")[0]
 
 
 def plot_to_farm(dataset: Dataset) -> pd.Series:
@@ -64,11 +60,7 @@ def compute_surface_by_key(dataset: Dataset, allocation: pd.Series) -> pd.Series
     return surface.groupby(allocation).sum()
 
 
-def compute_plot_count_by_key(allocation: pd.Series) -> pd.Series:
-    return allocation.value_counts()
-
-
-def compute_aggregate_summary(dataset: Dataset, allocation: pd.Series) -> dict:
+def compute_aggregate_summary(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
     surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
     farms = plot_to_farm(dataset).reindex(allocation.index)
     return {
@@ -127,7 +119,7 @@ def compute_revenue_by_farm(dataset: Dataset, allocation: pd.Series) -> pd.Serie
 DEFAULT_HOURS_PER_ETP = 1607.0
 
 
-def hours_per_etp_from_config(config: dict) -> float:
+def hours_per_etp_from_config(config: dict[str, Any]) -> float:
     """Annual working hours per full-time-equivalent (ETP), from config['labor']."""
     return float((config.get("labor") or {}).get("hours_per_etp", DEFAULT_HOURS_PER_ETP))
 
@@ -159,7 +151,7 @@ def compute_etp_by_key(
 
 def compute_economic_totals(
     dataset: Dataset, allocation: pd.Series, hours_per_etp: float
-) -> dict:
+) -> dict[str, float]:
     """Headline totals for one allocation: production (tonnes), subsidy (EUR),
     revenue (EUR), employment (ETP). Valid for both the output (fine crops) and the
     representative baseline (see decode_baseline_representative_allocation)."""

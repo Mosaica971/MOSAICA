@@ -83,15 +83,6 @@ def test_compute_surface_by_key_sums_surface_per_crop():
     assert result["ME"] == pytest.approx(1.0)
 
 
-def test_compute_plot_count_by_key_counts_plots_per_crop():
-    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME", "P5": "CS", "P6": "ME"})
-
-    result = indicators.compute_plot_count_by_key(allocation)
-
-    assert result["CS"] == 3
-    assert result["ME"] == 2
-
-
 def test_compute_aggregate_summary_totals_surface_plots_and_farms():
     dataset = _small_dataset()
     allocation = indicators.decode_baseline_allocation(dataset)
@@ -187,12 +178,6 @@ def test_decode_baseline_representative_allocation_keeps_unmapped_families():
     result = indicators.decode_baseline_representative_allocation(_small_dataset(), {})
 
     assert set(result.unique()) == {"CS", "ME"}  # no mapping -> aggregates unchanged
-
-
-def test_crop_family_is_token_before_first_underscore():
-    assert indicators.crop_family("CS_BT_NISM") == "CS"
-    assert indicators.crop_family("AN_NU") == "AN"
-    assert indicators.crop_family("AG") == "AG"
 
 
 def test_compute_economic_totals_sums_production_subsidy_revenue_and_etp():

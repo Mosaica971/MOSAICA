@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Any
 
 import pyomo.environ as pyo
 
@@ -26,7 +27,7 @@ def build_territory_production_bound_constraint(
     inputs: ModelInputs,
     *,
     label: str,
-    groups: list[dict],
+    groups: list[dict[str, Any]],
     sense: str,
     threshold: float,
     **_args,
