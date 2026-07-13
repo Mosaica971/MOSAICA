@@ -8,3 +8,4 @@ venv/
 .mosaica_solve_history.json
 /outputs/
 .worktrees/
+.claude/*.lock
