@@ -106,6 +106,39 @@ _Constaté le 2026-07-10._
 
 ## Résolu
 
+### Majeur — Dashboard comparatif multi-scénarios (page « Comparaison »)
+_Résolu le 2026-07-13._ Nouvelle page Streamlit `dashboard/pages/2_Comparaison.py` (multipage,
+à côté de la vue mono-run) pour comparer plusieurs `output_N` côte à côte. Backbone : une
+**table de faits tidy par run et par côté**, `csv/facts_<side>.csv` (une ligne par
+`culture × région` + île, toutes mesures), produite par `indicators.compute_facts_table`. Le
+dashboard pivote librement : **x ∈ {culture, sous-culture, région, île}**, **mesure y** au
+choix (surface, production, revenu, marge, subvention, coût MO, heures, ETP), **empilement**
+par une 2ᵉ dimension. Une « série » = **(run × côté)**, cochable — ce qui unifie « paires
+entrée/sortie » et « scénario vs scénario ». Règles de couleur : la **canne (CS/CF)** est
+colorée par sa combinaison irrigation×récolte (3 modalités réelles : `NISM`/`NIM`/`IM` ;
+l'irrigué est toujours mécanisé), région ignorée ; les autres cultures par sous-culture.
+Axe **y log à limites figées partagées** (mode groupé uniquement — une pile ne s'additionne pas
+en log ; l'empilé reste linéaire), plancher positif pour le zéro. 2ᵉ vue : **coordonnées
+parallèles normalisées** (Gini, revenu net, ETP, production… un axe par indicateur, une ligne
+par série). Toute la logique de données est dans `dashboard/comparison.py` (pur, testé) ; la
+page ne fait que câbler les widgets + matplotlib. NB : la refonte des **PNG statiques** (brique
+D) est volontairement minimisée — les demandes « jolis histogrammes groupés/empilés » vivent
+désormais dans le dashboard ; les PNG par culture restent simples.
+
+### Mineur — Coût de la main d'œuvre + revenu net exposés (réglage `labor.cost_per_hour`)
+_Résolu le 2026-07-13._ La MO n'est **pas** monétisée dans le coût variable GAMS (comptée en
+heures seulement, cf. `economics.py`). On ajoute donc un indicateur de reporting (n'affecte
+**pas** l'optimum) : `labor.cost_per_hour` (€/h) dans `config.yaml` → `coût_MO = Σ heures ×
+cost_per_hour`, et un **revenu net = marge brute − coût MO**, calculés côté entrée ET sortie.
+`compute_economic_totals` expose désormais aussi `total_gross_margin`, `total_variable_cost`
+(dérivé = produit brut − marge), `total_labor_cost`, `total_net_revenue`. CSV/PNG
+`gross_margin_by_crop_*` et `labor_cost_by_crop_*` par côté. Défaut `cost_per_hour=0` →
+revenu net = marge brute (rétro-compatible). Caveat côté entrée : mêmes cultures
+représentantes que les autres indicateurs économiques (point 4). Réorg au passage : **tous
+les `.csv` d'un run sont désormais sous `output_N/csv/`** (les `recap.*`/`config_used.yaml`
+restent à la racine, les PNG sous `plots/`) ; `dashboard/loaders.load_csv` lit `csv/` avec
+repli sur la racine pour les anciens dossiers.
+
 ### Mineur — `year`/`scenario` exposés dans la config (plus de constantes codées en dur)
 _Résolu le 2026-07-13 (brique #3)._ `data_pipeline.py` ne fige plus `YEAR`/`SCENARIO` en
 constantes de module : une section `data: {year, scenario}` de `config.yaml` les pilote

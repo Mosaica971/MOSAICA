@@ -37,6 +37,14 @@ col3.metric("Exploitations (total)", recap["total_farms"])
 economics = recap.get("economics")
 if economics:
     col1.metric("Emploi estimé (ETP, sortie)", f"{economics['output']['total_etp']:,.1f}")
+    output_econ = economics["output"]
+    # total_net_revenue / total_labor_cost are absent from runs made before the labor-cost
+    # feature; guard so the dashboard still opens on older output folders.
+    if "total_net_revenue" in output_econ:
+        col2.metric(
+            "Revenu net (marge - coût MO, sortie)", f"{output_econ['total_net_revenue']:,.0f} €"
+        )
+        col3.metric("Coût main d'œuvre (sortie)", f"{output_econ['total_labor_cost']:,.0f} €")
 
 with st.expander("Contraintes activees"):
     for constraint in recap["constraints"]:
