@@ -433,3 +433,49 @@ def test_farm_area_ratio_min_constraint_builds_one_instance_per_denominator_crop
     )
 
     assert set(model.fallow_ratio.keys()) == {("E1", "BA_INT"), ("E1", "BA_IRR")}
+
+
+def test_risk_adjusted_objective_penalizes_risky_crop_on_averse_farm():
+    eligible_pairs = [("P1", "C1"), ("P2", "C1")]
+    config = {
+        "constraints": [],
+        "objectives": [
+            {"name": "maximize_risk_adjusted_gross_margin", "enable": True, "args": {}}
+        ],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0, "P2": 1.0},
+        crop_margin_per_ha={"C1": 100.0},
+        eligible_pairs=eligible_pairs,
+        config=config,
+        farm_plots={"FARM_AVERSE": ["P1"], "FARM_NEUTRAL": ["P2"]},
+        crop_variance_per_ha={"C1": 0.4},
+        farm_risk_aversion={"FARM_AVERSE": 1.30, "FARM_NEUTRAL": 0.0},
+    )
+    for plot, crop in eligible_pairs:
+        model.Y[plot, crop].fix(1)
+
+    expected = 1.0 * 100.0 * (1 - 1.30 * 0.4) + 1.0 * 100.0 * (1 - 0.0 * 0.4)
+    assert pyo.value(model.objective) == pytest.approx(expected)
+
+
+def test_risk_adjusted_objective_defaults_to_zero_variance_and_aversion():
+    eligible_pairs = [("P1", "C1")]
+    config = {
+        "constraints": [],
+        "objectives": [
+            {"name": "maximize_risk_adjusted_gross_margin", "enable": True, "args": {}}
+        ],
+    }
+
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 2.0},
+        crop_margin_per_ha={"C1": 50.0},
+        eligible_pairs=eligible_pairs,
+        config=config,
+        farm_plots={"FARM1": ["P1"]},
+    )
+    model.Y["P1", "C1"].fix(1)
+
+    assert pyo.value(model.objective) == pytest.approx(2.0 * 50.0)

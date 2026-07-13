@@ -6,8 +6,15 @@ import pandas as pd
 from case_studies.guadeloupe.economics import (
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
+    compute_labor_hours_per_ha_cult,
+    compute_sales_per_ha_cult,
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
+)
+from case_studies.guadeloupe.farm_typology import (
+    compute_avers,
+    compute_base_crop_group,
+    compute_type_expl,
 )
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
@@ -19,6 +26,7 @@ from core.data.eligibility import (
     forbid_where,
 )
 from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
+from core.data.zone_filter import resolve_kept_plots
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SETS_DIR = DATA_DIR / "sets"
@@ -26,8 +34,47 @@ TABLES_DIR = DATA_DIR / "tables"
 INDICE_H_DIR = TABLES_DIR / "indice_H"
 CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
 
-YEAR = "2017"
-SCENARIO = "RESTIT"
+DEFAULT_YEAR = "2017"
+DEFAULT_SCENARIO = "RESTIT"
+
+
+def _available_years() -> list[str]:
+    """Column labels available in the indice_H economic tables (canonical table:
+    Prix_Cult.txt). Includes the special baseline columns ``init``/``calib`` alongside the
+    calendar years 2017..2022."""
+    return list(read_wide_table(INDICE_H_DIR / "Prix_Cult.txt").columns)
+
+
+def _available_scenarios() -> list[str]:
+    """Scenario suffixes for which the scenario-specific input tables exist on disk,
+    discovered from the Matrice_OTK_Cult_<scenario>.txt file names (e.g. RESTIT, SMART)."""
+    prefix = "Matrice_OTK_Cult_"
+    return sorted(path.stem[len(prefix):] for path in TABLES_DIR.glob(f"{prefix}*.txt"))
+
+
+def _validate_data_selection(year: str, scenario: str) -> None:
+    """Fail fast, with an explicit message, when config's ``data.year``/``data.scenario``
+    have no backing data -- otherwise a bare pandas KeyError (year) or FileNotFoundError
+    (scenario) surfaces deep inside the pipeline.
+
+    ``year`` selects a column in the indice_H economic tables; ``scenario`` selects the
+    Matrice_OTK_Cult_<scenario> and MAE_Compost_Cult_<scenario> input files."""
+    years = _available_years()
+    if year not in years:
+        raise ValueError(
+            f"data.year={year!r} is not an available economic-table column; "
+            f"expected one of {years}."
+        )
+    required = [
+        TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt",
+        INDICE_H_DIR / f"MAE_Compost_Cult_{scenario}.txt",
+    ]
+    missing = [path.name for path in required if not path.exists()]
+    if missing:
+        raise ValueError(
+            f"data.scenario={scenario!r} is missing required file(s) {missing}; "
+            f"available scenarios: {_available_scenarios()}."
+        )
 
 
 def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) -> pd.Series:
@@ -36,6 +83,16 @@ def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) ->
 
 
 def build_dataset(config: dict[str, Any]) -> Dataset:
+    # `year` selects the economic time-series column (2017..2022, or init/calib); the plot/
+    # farm structure stays pinned to 2017 (no other year's structural data exists). `scenario`
+    # (RESTIT|SMART) selects the OTK cost matrix and MAE-compost subsidy tables. Defaults
+    # reproduce the historical hard-coded behaviour, so a config without a `data` section is
+    # unchanged.
+    data_cfg: dict[str, Any] = config.get("data", {})
+    year: str = data_cfg.get("year", DEFAULT_YEAR)
+    scenario: str = data_cfg.get("scenario", DEFAULT_SCENARIO)
+    _validate_data_selection(year, scenario)
+
     sets = {
         "crops": read_flat_set(SETS_DIR / "CULT_2017.set"),
         "soils": read_flat_set(SETS_DIR / "SOL.set"),
@@ -53,24 +110,47 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     data_rpg = read_wide_table(TABLES_DIR / "Data_RPG_Gwad_2017.txt")
     data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
     data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
-    matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{SCENARIO}.txt")
-    prix_cult = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[YEAR]
-    rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[YEAR]
-    bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[YEAR]
-    duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[YEAR]
-    duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[YEAR]
-    cout_recolte_cult = read_wide_table(INDICE_H_DIR / "Cout_Recolte_Cult.txt")[YEAR]
-    cout_transp_cult = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult.txt")[YEAR]
-    posei_surf_cult = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[YEAR]
-    posei_q_cult = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[YEAR]
-    aide_indus_cult = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[YEAR]
-    aide_replant_cult = read_wide_table(INDICE_H_DIR / "Aide_Replant_Cult.txt")[YEAR]
-    aide_transp_cult = read_wide_table(INDICE_H_DIR / "Aide_Transp_Cult.txt")[YEAR]
-    aide_garantie_prix_cult = read_wide_table(INDICE_H_DIR / "Aide_Garantie_Prix_Cult.txt")[YEAR]
-    mae_recolte_vert_cult = read_wide_table(INDICE_H_DIR / "MAE_Recolte_Vert_Cult.txt")[YEAR]
-    mae_jachere_sol_nu_cult = read_wide_table(INDICE_H_DIR / "MAE_Jachere_Sol_Nu_Cult.txt")[YEAR]
-    mae_compost_cult = read_wide_table(INDICE_H_DIR / f"MAE_Compost_Cult_{SCENARIO}.txt")[YEAR]
-    mb_add_cult = read_wide_table(INDICE_H_DIR / "MB_ADD_Cult.txt")[YEAR]
+    matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt")
+    prix_cult = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[year]
+    rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[year]
+    var_rdt_cult = read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"]
+    bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[year]
+    duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[year]
+    duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[year]
+    cout_recolte_cult = read_wide_table(INDICE_H_DIR / "Cout_Recolte_Cult.txt")[year]
+    cout_transp_cult = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult.txt")[year]
+    posei_surf_cult = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[year]
+    posei_q_cult = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[year]
+    aide_indus_cult = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[year]
+    aide_replant_cult = read_wide_table(INDICE_H_DIR / "Aide_Replant_Cult.txt")[year]
+    aide_transp_cult = read_wide_table(INDICE_H_DIR / "Aide_Transp_Cult.txt")[year]
+    aide_garantie_prix_cult = read_wide_table(INDICE_H_DIR / "Aide_Garantie_Prix_Cult.txt")[year]
+    mae_recolte_vert_cult = read_wide_table(INDICE_H_DIR / "MAE_Recolte_Vert_Cult.txt")[year]
+    mae_jachere_sol_nu_cult = read_wide_table(INDICE_H_DIR / "MAE_Jachere_Sol_Nu_Cult.txt")[year]
+    mae_compost_cult = read_wide_table(INDICE_H_DIR / f"MAE_Compost_Cult_{scenario}.txt")[year]
+    mb_add_cult = read_wide_table(INDICE_H_DIR / "MB_ADD_Cult.txt")[year]
+
+    data_parc = data_parc.assign(
+        REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
+    )
+    data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
+
+    plot_to_farm = expl_parc.set_index("plot")["farm"].reindex(data_parc.index)
+    kept_plots = resolve_kept_plots(
+        data_parc.index,
+        {
+            "islands": data_parc["ILE"],
+            "regions": data_parc["REGION_CODE"],
+            "farms": plot_to_farm,
+            "plots": pd.Series(data_parc.index, index=data_parc.index),
+        },
+        config,
+    )
+    data_parc = data_parc.loc[kept_plots]
+    expl_parc = expl_parc[expl_parc["plot"].isin(kept_plots)]
+    bv_parc = bv_parc[bv_parc["plot"].isin(kept_plots)]
+    reg_parc = reg_parc[reg_parc["plot"].isin(kept_plots)]
+    cpt_parc = cpt_parc[cpt_parc["plot"].isin(kept_plots)]
 
     plot_surface = data_parc["SURF_HA"]
     farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
@@ -79,10 +159,9 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         plot_surface * data_parc["GFA_PARC"], expl_parc
     )
 
-    data_parc = data_parc.assign(
-        REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
-    )
-    data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
+    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+    type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface)
+    farm_risk_aversion = compute_avers(type_expl, type_expl_bis)
 
     attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
     plot_attributes = data_parc[list(attribute_bounds.keys())]
@@ -119,6 +198,13 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_cycle_cult=duree_cycle_cult,
         duree_plant_cult=duree_plant_cult,
     )
+    sales_per_ha_cult = compute_sales_per_ha_cult(
+        rdt_cult=rdt_cult,
+        prix_cult=prix_cult,
+        bagasse_cult=bagasse_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+    subsidy_per_ha_cult_annualized = subsidy_per_ha_cult / duree_cycle_cult * 12
     gross_product_per_ha_cult = compute_gross_product_per_ha_cult(
         rdt_cult=rdt_cult,
         prix_cult=prix_cult,
@@ -129,6 +215,12 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     margin_per_ha_cult = compute_gross_margin_per_ha_cult(
         gross_product_per_ha_cult=gross_product_per_ha_cult,
         variable_cost_per_ha_cult=variable_cost_per_ha_cult,
+    )
+    labor_hours_per_ha_cult = compute_labor_hours_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
     )
 
     parameters = {
@@ -142,12 +234,17 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "matrice_otk_cult": matrice_otk_cult,
         "prix_cult": prix_cult,
         "rdt_cult": rdt_cult,
+        "crop_variance_per_ha": var_rdt_cult,
+        "farm_risk_aversion": farm_risk_aversion,
         "farm_surface_ha": farm_surface_ha,
         "farm_plots": farm_plots,
         "farm_gfa_surface_ha": farm_gfa_surface_ha,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
         "margin_per_ha_cult": margin_per_ha_cult,
+        "sales_per_ha_cult": sales_per_ha_cult,
+        "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
+        "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

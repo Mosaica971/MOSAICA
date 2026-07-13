@@ -120,12 +120,33 @@ def test_run_with_progress_works_with_a_known_estimate():
     assert duration >= 0.0
 
 
-def test_run_with_progress_reraises_exception_from_worker_thread():
+def test_run_with_progress_reraises_exception_from_func():
     def boom():
         raise RuntimeError("solve failed")
 
     with pytest.raises(RuntimeError, match="solve failed"):
         run_with_progress(boom, label="test", estimate_seconds=None)
+
+
+def test_run_with_progress_runs_func_on_the_calling_thread():
+    # Architectural guard: the solve must NOT be backgrounded. The appsi_highs solver
+    # loads the model inside capture_output(capture_fd=True); running it on a worker
+    # thread while a progress bar writes from the main thread corrupts Pyomo's
+    # process-global stdout/stderr fd state (crashes on real file descriptors). See
+    # docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md.
+    import threading
+
+    caller = threading.current_thread()
+    seen: dict[str, threading.Thread] = {}
+
+    def func():
+        seen["thread"] = threading.current_thread()
+        return "ok"
+
+    result, _ = run_with_progress(func, label="test", estimate_seconds=None)
+
+    assert result == "ok"
+    assert seen["thread"] is caller
 
 
 import pyomo.environ as pyo
@@ -188,3 +209,20 @@ def test_solve_with_progress_defaults_to_a_fresh_solve_history_when_none_given()
     # (consistent with the design's non-goal: the default path is wired up but
     # not asserted on beyond "it doesn't blow up").
     solve_with_progress(model, _SOLVE_CONFIG, case_study="test_case_default_history")
+
+
+def test_solve_with_progress_returns_results_and_duration(tmp_path):
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 1.0},
+        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        config=_SOLVE_CONFIG,
+    )
+    history = SolveHistory(path=tmp_path / "history.json")
+
+    results, duration = solve_with_progress(
+        model, _SOLVE_CONFIG, case_study="test_case", history=history
+    )
+
+    assert results is not None
+    assert duration >= 0.0

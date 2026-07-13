@@ -14,6 +14,10 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     assert [e["name"] for e in config["objectives"] if e["enable"]] == [
         "maximize_gross_margin"
     ]
+    assert {e["name"] for e in config["objectives"]} == {
+        "maximize_gross_margin",
+        "maximize_risk_adjusted_gross_margin",
+    }
     enabled_constraints = [e["name"] for e in config["constraints"] if e["enable"]]
     assert enabled_constraints[0] == "at_most_one_crop_per_plot"
     assert enabled_constraints.count("farm_area_share_max") == 2

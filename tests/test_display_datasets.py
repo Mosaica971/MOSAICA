@@ -1,4 +1,4 @@
-from display_datasets import main
+from scripts.display_datasets import main
 
 
 def test_main_prints_a_registry_row_for_each_dataset_entry(capsys):

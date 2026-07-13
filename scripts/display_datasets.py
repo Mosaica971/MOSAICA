@@ -1,10 +1,18 @@
+"""Manual inspection tool: print the dataset registry (every set/parameter/scalar with
+its category, type and size) for a quick sanity check of what build_dataset produces.
+
+    python scripts/display_datasets.py
+"""
+
 from pathlib import Path
 
 from case_studies.guadeloupe.data_pipeline import build_dataset
 from core.config import load_config
 from core.data.dataset import build_registry
 
-CONFIG_PATH = Path(__file__).resolve().parent / "case_studies" / "guadeloupe" / "config.yaml"
+CONFIG_PATH = (
+    Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
+)
 
 
 def main() -> None:

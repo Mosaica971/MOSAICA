@@ -17,4 +17,6 @@ def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
         farm_surface_ha=dataset.parameters.get("farm_surface_ha", {}),
         farm_gfa_surface_ha=dataset.parameters.get("farm_gfa_surface_ha", {}),
         crop_yield_per_ha=dataset.parameters.get("rdt_cult", {}),
+        crop_variance_per_ha=dataset.parameters.get("crop_variance_per_ha", {}),
+        farm_risk_aversion=dataset.parameters.get("farm_risk_aversion", {}),
     )

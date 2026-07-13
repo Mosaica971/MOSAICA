@@ -226,14 +226,21 @@ re-verified verbatim during plan-writing):
 | 19 | Vanille et PPAM | `VE` |
 | 20 | Vergers | `VE` |
 
-A continuity override precedes this mapping (`ENTREES.txt:50-57`): if a plot's
-`cult_2015`, `cult_2016`, and `cult_2017` are **all** in `{14, 10, 0}` (non-cultivé,
-jachère, or the sentinel `0`), `cult_2017` is force-set to `14` (Non cultivé) before the
-table above is applied. This is a narrower, RPG-code-space version of the same
-"fallow-for-N-years" idea Phase 1's `friche_lock` rule already implements at the
-crop-eligibility level (`core/data/eligibility.py`) — the two are independent
-mechanisms (this one only affects which base group a farm's *own* initial allocation is
-classified into for `TYPE_EXPL`; it does not touch plot eligibility) and both must exist.
+A continuity override precedes this mapping (`ENTREES.txt:49-57`). **Correction found
+during Task 2's review (2026-07-09):** the human-readable comment on line 49 states the
+rule as a 3-year check ("si Non cultivé ou Jachère en 2015, 2016 et 2017"), but the
+`cult_2015` clause of the actual `IF` condition is commented out in the executable GAMS
+(`*` in column 1, `ENTREES.txt:51`) — the *real*, executable rule only checks
+`cult_2016` and `cult_2017`. Confirmed by reading the raw file bytes directly (the `*`
+is unambiguous; this file uses the same leading-`*`-disables-a-line convention
+throughout, including its own section-header banners). **The correct rule: if a plot's
+`cult_2016` and `cult_2017` are both in `{14, 10, 0}`, `cult_2017` is force-set to `14`
+(Non cultivé) before the table above is applied — `cult_2015` plays no role.** This is a
+narrower, RPG-code-space version of the same "fallow-for-N-years" idea Phase 1's
+`friche_lock` rule already implements at the crop-eligibility level
+(`core/data/eligibility.py`) — the two are independent mechanisms (this one only affects
+which base group a farm's *own* initial allocation is classified into for `TYPE_EXPL`;
+it does not touch plot eligibility) and both must exist.
 
 ## Architecture
 

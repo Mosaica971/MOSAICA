@@ -11,3 +11,5 @@ class ModelInputs:
     farm_surface_ha: Mapping[str, float] = field(default_factory=dict)
     farm_gfa_surface_ha: Mapping[str, float] = field(default_factory=dict)
     crop_yield_per_ha: Mapping[str, float] = field(default_factory=dict)
+    crop_variance_per_ha: Mapping[str, float] = field(default_factory=dict)
+    farm_risk_aversion: Mapping[str, float] = field(default_factory=dict)

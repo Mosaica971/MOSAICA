@@ -1,20 +1,19 @@
 from __future__ import annotations
 
 import json
-import threading
+import sys
 import time
 from pathlib import Path
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 import pyomo.environ as pyo
-from tqdm import tqdm
 
 from core.model.solver import solve_model
 
 DEFAULT_HISTORY_PATH = Path(__file__).resolve().parents[2] / ".mosaica_solve_history.json"
 _MAX_ENTRIES_PER_CASE_STUDY = 20
 _NEIGHBORS_FOR_ESTIMATE = 3
-_POLL_INTERVAL_SECONDS = 0.2
 
 T = TypeVar("T")
 
@@ -58,43 +57,25 @@ def run_with_progress(
     label: str,
     estimate_seconds: float | None,
 ) -> tuple[T, float]:
-    outcome: dict[str, T] = {}
-    error: dict[str, BaseException] = {}
+    # Runs func synchronously on the calling (main) thread, bracketed by static
+    # progress lines (ETA before, real duration after). It deliberately does NOT
+    # background the solve behind a live animated bar: the HiGHS solver behind
+    # `appsi_highs` -- whether reached via SolverFactory or the persistent APPSI
+    # interface -- loads the model inside capture_output(capture_fd=True), which
+    # redirects the process-global stdout/stderr file descriptors and toggles a
+    # process-global lock. Any progress I/O emitted concurrently from another thread
+    # corrupts that state ("semaphore released too many times" / broken stdout). The
+    # only robust option with real file descriptors is to not overlap solve and I/O.
+    # See docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md.
+    suffix = f" (est ~{estimate_seconds:.0f}s)" if estimate_seconds else ""
+    print(f"{label}{suffix}...", file=sys.stderr, flush=True)
 
-    def _target() -> None:
-        try:
-            outcome["value"] = func()
-        except BaseException as exc:  # noqa: BLE001 - re-raised on the caller's thread below
-            error["value"] = exc
-
-    thread = threading.Thread(target=_target, daemon=True)
     start = time.monotonic()
-    thread.start()
-
-    bar_format = (
-        "{desc}: {bar} {n:.0f}s/{total:.0f}s [ETA {remaining}]"
-        if estimate_seconds
-        else "{desc}: {n:.0f}s elapsed"
-    )
-    with tqdm(total=estimate_seconds, desc=label, bar_format=bar_format) as bar:
-        last = 0.0
-        while thread.is_alive():
-            elapsed = time.monotonic() - start
-            if bar.total is not None and elapsed > bar.total:
-                bar.total = elapsed
-            bar.update(elapsed - last)
-            last = elapsed
-            thread.join(timeout=_POLL_INTERVAL_SECONDS)
-
-        elapsed = time.monotonic() - start
-        if bar.total is not None and elapsed > bar.total:
-            bar.total = elapsed
-        bar.update(elapsed - last)
-
+    result = func()
     duration = time.monotonic() - start
-    if "value" in error:
-        raise error["value"]
-    return outcome["value"], duration
+
+    print(f"{label}: done in {duration:.1f}s", file=sys.stderr, flush=True)
+    return result, duration
 
 
 def solve_with_progress(
@@ -103,7 +84,7 @@ def solve_with_progress(
     *,
     case_study: str,
     history: SolveHistory | None = None,
-) -> Any:
+) -> tuple[Any, float]:
     history = history or SolveHistory()
     problem_size = sum(1 for _ in model.component_data_objects(pyo.Var))
     estimate = history.estimate_seconds(case_study, problem_size)
@@ -115,4 +96,4 @@ def solve_with_progress(
     )
 
     history.record(case_study, problem_size, duration)
-    return results
+    return results, duration
