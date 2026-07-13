@@ -42,14 +42,6 @@ région** pour les familles région-codées (CS, CF, BC) plutôt qu'un seul repr
 RESULTATS.txt:1853) à porter comme représentatives officielles.
 _Constaté le 2026-07-09, reformulé et adressé le 2026-07-13._
 
-### Mineur — `YEAR`/`SCENARIO` codés en dur
-`case_studies/guadeloupe/data_pipeline.py` fixe `YEAR = "2017"` et
-`SCENARIO = "RESTIT"` en constantes de module plutôt qu'en config. Ça
-complique la comparaison multi-années/multi-scénarios et l'exclusion de zones
-par scénario (brique C, à venir).
-**Prochain fix possible** : exposer `year`/`scenario` dans `config.yaml`.
-_Constaté le 2026-07-09._
-
 ### Mineur — `REGION` vs `REGION_CODE` potentiellement redondants
 `Data_Parc_Gwad_2017.txt` a une colonne `REGION`, et `data_pipeline.py`
 calcule en plus `REGION_CODE` via la jointure avec `REG_PARC_2017.set`. Pas
@@ -113,6 +105,23 @@ changement d'enveloppe, neutre sur l'optimum), donc à cadrer comme un vrai sous
 _Constaté le 2026-07-10._
 
 ## Résolu
+
+### Mineur — `year`/`scenario` exposés dans la config (plus de constantes codées en dur)
+_Résolu le 2026-07-13 (brique #3)._ `data_pipeline.py` ne fige plus `YEAR`/`SCENARIO` en
+constantes de module : une section `data: {year, scenario}` de `config.yaml` les pilote
+(défauts `2017`/`RESTIT` → comportement historique reproduit à l'identique). `year`
+sélectionne la colonne des tables `indice_H` (`2017`–`2022`, ou `init`/`calib`) et ne pilote
+que **l'économie** — la structure du parcellaire reste figée à 2017 (seule année dont les
+données structurelles existent). `scenario` (`RESTIT`|`SMART`) sélectionne
+`Matrice_OTK_Cult_<scenario>` et `MAE_Compost_Cult_<scenario>`. Validation *fail-fast*
+(`ValueError` listant années/scénarios disponibles) ; `var_rdt_cult` reste délibérément sur
+sa colonne `init`. L'année/scénario du run est enregistrée dans le recap (JSON + markdown).
+Tests dans `tests/test_guadeloupe_pipeline.py`. Spec :
+`docs/superpowers/specs/2026-07-13-expose-year-scenario-config-design.md`.
+**Écart connu restant** : `scenario` ne pilote PAS encore les fichiers CF scénario-spécifiques
+(`Prix_Cult_CF_{RESTIT,SMART}.txt`, `Rdt_Cult_CF_{RESTIT,SMART}.txt`), qui existent en données
+mais ne sont pas chargés par le pipeline. À porter si les cultures CF deviennent
+scénario-dépendantes.
 
 ### Majeur — Indicateurs d'entrée (production/subvention/revenu/ETP) via cultures représentantes (point 4)
 _Résolu le 2026-07-13._ Les indicateurs par culture et l'ETP sont désormais calculés **en

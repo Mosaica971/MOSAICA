@@ -132,5 +132,11 @@ decision variables, which keeps the MILP tractable.
 - Tests exercise builders in isolation with tiny hand-built configs and `plot_surface_ha`/
   `eligible_pairs` dicts (see `tests/test_guadeloupe_constraints.py`) — they do not read
   `data/`. Follow that style for new model logic so tests stay fast and data-free.
-- `YEAR = "2017"` and `SCENARIO = "RESTIT"` are hardcoded module constants in
-  `data_pipeline.py` (flagged in `VIGILANCE.md` for eventual config exposure).
+- **`data.year` / `data.scenario` come from `config.yaml`** (defaults `2017` / `RESTIT`,
+  which reproduce the historical hard-coded behavior). `year` selects the economic
+  time-series column in the `indice_H` tables (`2017`–`2022`, or `init`/`calib`) and drives
+  **economics only** — the plot/farm structure stays pinned to 2017, the only year whose
+  structural data exists. `scenario` (`RESTIT`|`SMART`) selects `Matrice_OTK_Cult_<scenario>`
+  and `MAE_Compost_Cult_<scenario>`. `data_pipeline.build_dataset` validates both (fail-fast
+  `ValueError`) and `var_rdt_cult` deliberately stays on its `init` column regardless of
+  `year`. The chosen year/scenario is recorded in each run's recap.
