@@ -3,8 +3,14 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe.data_pipeline import build_dataset, compute_farm_surface_ha
+from case_studies.guadeloupe.data_pipeline import (
+    INDICE_H_DIR,
+    TABLES_DIR,
+    build_dataset,
+    compute_farm_surface_ha,
+)
 from core.config import load_config
+from core.data.readers import read_wide_table
 
 CONFIG = load_config(
     Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
@@ -169,6 +175,68 @@ def test_build_dataset_computes_crop_variance_per_ha_from_var_rdt_cult_init_colu
     crop_variance_per_ha = dataset.parameters["crop_variance_per_ha"]
 
     assert crop_variance_per_ha["AG"] == pytest.approx(0.3)
+
+
+# --- data.year / data.scenario selection (brique #3) --------------------------------------
+
+def test_build_dataset_defaults_to_2017_restit_without_data_section():
+    config = {key: value for key, value in CONFIG.items() if key != "data"}
+
+    dataset = build_dataset(config)
+
+    # 2017 economics reproduced (AG price/yield unchanged from the hard-coded default).
+    assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
+    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(20)
+
+
+def test_build_dataset_rejects_unknown_year():
+    config = {**CONFIG, "data": {"year": "1999", "scenario": "RESTIT"}}
+
+    with pytest.raises(ValueError, match="data.year"):
+        build_dataset(config)
+
+
+def test_build_dataset_rejects_unknown_scenario():
+    config = {**CONFIG, "data": {"year": "2017", "scenario": "BOGUS"}}
+
+    with pytest.raises(ValueError, match="data.scenario"):
+        build_dataset(config)
+
+
+def test_build_dataset_year_selects_requested_economic_column():
+    raw_2018 = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")["2018"]
+    config = {**CONFIG, "data": {"year": "2018", "scenario": "RESTIT"}}
+
+    dataset = build_dataset(config)
+
+    assert dataset.parameters["prix_cult"].equals(raw_2018)
+
+
+def test_build_dataset_accepts_init_baseline_column_as_year():
+    raw_init = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")["init"]
+    config = {**CONFIG, "data": {"year": "init", "scenario": "RESTIT"}}
+
+    dataset = build_dataset(config)
+
+    assert dataset.parameters["prix_cult"].equals(raw_init)
+
+
+def test_build_dataset_scenario_selects_requested_otk_matrix():
+    raw_smart = read_wide_table(TABLES_DIR / "Matrice_OTK_Cult_SMART.txt")
+    config = {**CONFIG, "data": {"year": "2017", "scenario": "SMART"}}
+
+    dataset = build_dataset(config)
+
+    assert dataset.parameters["matrice_otk_cult"].equals(raw_smart)
+
+
+def test_build_dataset_var_rdt_stays_on_init_column_regardless_of_year():
+    config = {**CONFIG, "data": {"year": "2018", "scenario": "RESTIT"}}
+
+    dataset = build_dataset(config)
+
+    # crop variance must keep reading Var_Rdt_Cult's "init" column (0.3 for AG), not `year`.
+    assert dataset.parameters["crop_variance_per_ha"]["AG"] == pytest.approx(0.3)
 
 
 def test_build_dataset_computes_farm_risk_aversion_for_known_farm():

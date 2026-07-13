@@ -9,6 +9,7 @@ import pandas as pd
 import pyomo.environ as pyo
 import yaml
 
+from case_studies.guadeloupe.data_pipeline import DEFAULT_SCENARIO, DEFAULT_YEAR
 from case_studies.guadeloupe.reporting import indicators, plots
 from core.data.dataset import Dataset
 from core.reporting.run_folder import create_output_folder
@@ -204,11 +205,17 @@ def _build_recap(
         if entry.get("enable", False)
     ]
     enabled_objective = next(entry for entry in config["objectives"] if entry.get("enable", False))
+    data_cfg = config.get("data", {})
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "solve_duration_seconds": duration,
         "termination_condition": str(results.solver.termination_condition),
         "solver": config["solver"],
+        # Which economic year and scenario produced this run (see data_pipeline.build_dataset).
+        "data": {
+            "year": data_cfg.get("year", DEFAULT_YEAR),
+            "scenario": data_cfg.get("scenario", DEFAULT_SCENARIO),
+        },
         "objective": {
             "name": enabled_objective["name"],
             "args": enabled_objective.get("args") or {},
@@ -234,6 +241,7 @@ def _render_recap_markdown(recap: dict) -> str:
         f"- Duree de resolution : {recap['solve_duration_seconds']:.2f}s",
         f"- Condition de terminaison : {recap['termination_condition']}",
         f"- Solveur : {recap['solver']['name']}",
+        f"- Annee / scenario : {recap['data']['year']} / {recap['data']['scenario']}",
         f"- Nombre de parcelles (total) : {recap['total_plots']}",
         f"- Nombre d'exploitations (total) : {recap['total_farms']}",
         "",

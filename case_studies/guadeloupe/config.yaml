@@ -1,3 +1,14 @@
+# Which economic year and policy scenario to load. `year` picks a column in the indice_H
+# economic tables (prices, yields, subsidies): one of 2017..2022, or the baseline columns
+# init/calib. It drives ECONOMICS ONLY -- the plot/farm structure stays pinned to 2017,
+# the only year whose structural data exists. `scenario` (RESTIT | SMART) selects the OTK
+# cost matrix (Matrice_OTK_Cult_<scenario>) and the MAE-compost subsidy table
+# (MAE_Compost_Cult_<scenario>). Note: it does NOT yet drive the CF crop files
+# (Prix_Cult_CF_*, Rdt_Cult_CF_*), which the pipeline does not load -- see VIGILANCE.md.
+data:
+  year: "2017"        # economic-table column: 2017..2022, or init/calib
+  scenario: "RESTIT"  # RESTIT | SMART
+
 solver:
   name: appsi_highs
   args: {}
