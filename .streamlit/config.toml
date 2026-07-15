@@ -1,0 +1,10 @@
+# Bind only to the loopback interface. Windows Firewall prompts for admin rights when a
+# program listens on a non-loopback interface (the default, which also prints a "Network URL").
+# Restricting to localhost keeps the dashboard reachable at http://localhost:8501 with no
+# firewall prompt -- suitable for the read-only local dashboard.
+[server]
+address = "localhost"
+headless = true
+
+[browser]
+gatherUsageStats = false

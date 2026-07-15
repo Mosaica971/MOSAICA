@@ -7,13 +7,20 @@ brique A's generate_report already persisted. Run with:
 See docs/superpowers/specs/2026-07-10-dashboard-design.md.
 """
 
+import sys
 from pathlib import Path
+
+# `streamlit run app.py` executes this file as a top-level script, so the repo root is not
+# on sys.path and `import case_studies...` fails. Put it there before any such import.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import streamlit as st
 
 from case_studies.guadeloupe.dashboard import loaders
 
-OUTPUTS_ROOT = Path(__file__).resolve().parents[3] / "outputs"
+OUTPUTS_ROOT = _REPO_ROOT / "outputs"
 
 st.set_page_config(page_title="MOSAICA Guadeloupe -- Dashboard", layout="wide")
 st.title("MOSAICA Guadeloupe -- Dashboard")

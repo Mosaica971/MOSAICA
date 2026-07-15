@@ -6,7 +6,14 @@ dashboard from the repo root with:  streamlit run case_studies/guadeloupe/dashbo
 (the pages/ folder is discovered automatically).
 """
 
+import sys
 from pathlib import Path
+
+# Streamlit runs each page as its own top-level script, so (like app.py) the repo root must
+# be on sys.path before importing `case_studies...`.
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import pandas as pd
 import streamlit as st
@@ -14,7 +21,7 @@ import streamlit as st
 from case_studies.guadeloupe.crop_labels import label_for
 from case_studies.guadeloupe.dashboard import comparison, loaders
 
-OUTPUTS_ROOT = Path(__file__).resolve().parents[4] / "outputs"
+OUTPUTS_ROOT = _REPO_ROOT / "outputs"
 SIDES = ("output", "input")
 
 # Per-run scalar indicators for the development profile: economics totals (per side) plus the
