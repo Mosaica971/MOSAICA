@@ -12,8 +12,11 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 import pandas as pd
+
+from case_studies.guadeloupe.crop_labels import label_for
 
 # Measures available on the y-axis, in display order, with French labels.
 MEASURE_LABELS: dict[str, str] = {
@@ -56,6 +59,86 @@ _CANE_COMBO_LABELS = {
 }
 
 X_DIMENSIONS = ("culture", "subculture", "region", "island")
+
+# Region / island codes -> human names (GAMS source: DESCRIPTION_SETS.txt). The facts tables
+# store the raw numeric codes; these turn "1, 2, ..." into readable axis/legend labels.
+REGION_LABELS: dict[str, str] = {
+    "1": "CGT · Centre Grande-Terre",
+    "2": "EGT · Est Grande-Terre",
+    "3": "NGT · Nord Grande-Terre",
+    "4": "NBT · Nord Basse-Terre",
+    "5": "SEBT · Sud-Est Basse-Terre",
+    "6": "SOBT · Sud-Ouest Basse-Terre",
+    "7": "MG · Marie-Galante",
+}
+ISLAND_LABELS: dict[str, str] = {
+    "1": "Basse-Terre",
+    "2": "Grande-Terre",
+    "3": "Marie-Galante",
+}
+# Full universe of region / island codes, so an exhaustive axis can include codes absent from
+# a given allocation (as zero-height bars).
+REGION_CODES: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7)
+ISLAND_CODES: tuple[int, ...] = (1, 2, 3)
+
+# Stable per-scenario colors (matplotlib tab10, as hex) used as the default value of the
+# per-scenario color pickers and as the figure fallback when no override is supplied.
+SERIES_PALETTE_HEX: tuple[str, ...] = (
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+)
+
+
+def _code_key(value: object) -> str:
+    """Normalize a region/island cell (int, float, numpy int, or str) to its str code key."""
+    try:
+        return str(int(float(value)))  # 4 / 4.0 / np.int64(4) / "4" -> "4"
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def label_region(value: object) -> str:
+    return REGION_LABELS.get(_code_key(value), str(value))
+
+
+def label_island(value: object) -> str:
+    return ISLAND_LABELS.get(_code_key(value), str(value))
+
+
+def format_dim_value(dim: str, value: object) -> str:
+    """Human label for a value on a given dimension: French crop names for culture/subculture
+    (falls back to the raw code, so cane-combo strata labels pass through untouched), region /
+    island names for those, str otherwise."""
+    if dim in ("culture", "subculture"):
+        return label_for(str(value))
+    if dim == "region":
+        return label_region(value)
+    if dim == "island":
+        return label_island(value)
+    return str(value)
+
+
+def ordered_categories(
+    series_pivots: list[tuple[str, pd.DataFrame]],
+    universe: "list | tuple | None",
+    include_zeros: bool,
+    sort_by_value: bool,
+) -> list:
+    """Final ordered x-axis category list across all series. With `include_zeros` and a
+    `universe`, every universe category is kept (zero bars included); otherwise only categories
+    with a non-zero total appear. `sort_by_value` ranks by descending total (ties by label),
+    else lexicographically."""
+    totals: dict[object, float] = {}
+    for _, pivot in series_pivots:
+        for cat, value in pivot.sum(axis=1).items():
+            totals[cat] = totals.get(cat, 0.0) + float(value)
+    if include_zeros and universe:
+        cats = list(dict.fromkeys([*universe, *totals]))
+    else:
+        cats = [cat for cat, total in totals.items() if total != 0.0]
+    if sort_by_value:
+        return sorted(cats, key=lambda c: (-totals.get(c, 0.0), str(c)))
+    return sorted(cats, key=str)
 
 
 def culture_of(crop_code: str) -> str:
@@ -144,17 +227,6 @@ def positive_floor(pivots: list[pd.DataFrame]) -> float:
     return min(positives) if positives else 1.0
 
 
-def normalize_columns(frame: pd.DataFrame) -> pd.DataFrame:
-    """Min-max normalize each column to 0..1 across rows (for parallel-coordinates axes).
-    A constant column maps to 0.5 (its scenarios are tied on that indicator)."""
-    out = frame.astype(float).copy()
-    for column in out.columns:
-        col = out[column]
-        span = col.max() - col.min()
-        out[column] = 0.5 if span == 0 else (col - col.min()) / span
-    return out
-
-
 def series_label(run_name: str, side: str, year: object, scenario: object) -> str:
     """Stable, human label for a (run, side) series in legends and pickers."""
     side_fr = {"output": "sortie", "input": "entrée"}.get(side, side)
@@ -185,84 +257,174 @@ def build_grouped_bar_figure(
     log: bool,
     ceiling: float,
     floor: float,
+    categories: "list | None" = None,
+    horizontal: bool = False,
+    relative: bool = False,
+    series_colors: "dict[str, object] | None" = None,
     format_x: Callable[[object], str] = str,
+    format_stack: Callable[[object], str] = str,
 ) -> "plt.Figure":
     """Grouped bars: one bar per series within each x category. Unstacked -> one color per
-    series (legend = series). Stacked -> each bar is split into strata colored consistently
-    (legend = strata; the bar order within a group is the series order passed in). The y-axis
-    uses the shared, fixed `ceiling` so every series reads on the same scale; log applies only
-    when not stacked (a log axis misrepresents stacked sums), with `floor` as its lower bound."""
-    categories = sorted(set().union(*[p.index for _, p in series_pivots])) if series_pivots else []
+    series (legend = series, colored via `series_colors` when given). Stacked -> each bar is
+    split into strata colored consistently (legend = strata, relabeled by `format_stack`; the
+    bar order within a group is the series order passed in).
+
+    `categories`, when given, fixes the x-axis order and set (pass the full universe to keep
+    zero-height bars). The value axis uses the shared, fixed `ceiling` so every series reads on
+    the same scale; `relative=True` rescales each stacked bar to 0-100% instead. `horizontal`
+    lays the bars out as `barh` (readable for the ~70 sub-culture codes). `log` applies only to
+    plain (non-stacked, non-relative) bars, with `floor` as its lower bound."""
+    if categories is None:
+        categories = sorted(set().union(*[p.index for _, p in series_pivots])) if series_pivots else []
     strata = sorted(set().union(*[p.columns for _, p in series_pivots])) if series_pivots else []
     n = max(len(series_pivots), 1)
-    x = np.arange(len(categories))
+    pos = np.arange(len(categories))
     width = 0.8 / n
-    effective_log = log and not stacked
+    effective_log = log and not stacked and not relative
+    value_label = "Part relative (%)" if relative else measure_label
 
-    fig, ax = plt.subplots(figsize=(max(9, len(categories) * 0.55 * n + 2), 6))
-    series_colors = plt.get_cmap("tab10").colors
+    if horizontal:
+        fig, ax = plt.subplots(figsize=(10, max(4, len(categories) * 0.32 * n + 1.5)))
+    else:
+        fig, ax = plt.subplots(figsize=(max(9, len(categories) * 0.55 * n + 2), 6))
+    default_colors = plt.get_cmap("tab10").colors
     stratum_colors = _stratum_colors(strata)
+    overrides = series_colors or {}
+
+    def _draw(center, length, base, **kwargs):
+        if horizontal:
+            ax.barh(center, length, height=width, left=base, **kwargs)
+        else:
+            ax.bar(center, length, width, bottom=base, **kwargs)
 
     for s_idx, (label, pivot) in enumerate(series_pivots):
         aligned = pivot.reindex(index=categories, columns=strata, fill_value=0.0)
+        if relative and stacked:
+            totals = aligned.sum(axis=1).replace(0.0, np.nan)
+            aligned = aligned.div(totals, axis=0).fillna(0.0) * 100.0
         offset = (s_idx - (n - 1) / 2) * width
         if not stacked:
-            # single "total" stratum -> one color per series
             values = aligned.sum(axis=1).to_numpy()
-            ax.bar(x + offset, values, width, color=series_colors[s_idx % len(series_colors)],
-                   label=label)
+            color = overrides.get(label) or default_colors[s_idx % len(default_colors)]
+            _draw(pos + offset, values, 0, color=color, label=label)
         else:
             bottoms = np.zeros(len(categories))
             for stratum in strata:
                 values = aligned[stratum].to_numpy()
-                ax.bar(x + offset, values, width, bottom=bottoms,
-                       color=stratum_colors[stratum],
-                       label=str(stratum) if s_idx == 0 else None,
-                       edgecolor="white", linewidth=0.3)
+                _draw(pos + offset, values, bottoms, color=stratum_colors[stratum],
+                      label=format_stack(stratum) if s_idx == 0 else None,
+                      edgecolor="white", linewidth=0.3)
                 bottoms = bottoms + values
 
-    ax.set_xticks(x)
-    ax.set_xticklabels([format_x(c) for c in categories], rotation=45, ha="right")
-    ax.set_ylabel(measure_label)
-    ax.set_xlabel(x_axis_label)
-    ax.grid(axis="y", alpha=0.3)
-    ax.set_axisbelow(True)
-    if effective_log:
-        ax.set_yscale("log")
-        ax.set_ylim(floor * 0.9 if floor > 0 else None, ceiling * 1.15 if ceiling > 0 else None)
+    tick_labels = [format_x(c) for c in categories]
+    if horizontal:
+        ax.set_yticks(pos)
+        ax.set_yticklabels(tick_labels)
+        ax.invert_yaxis()  # first (largest) category on top
+        ax.set_xlabel(value_label)
+        ax.set_ylabel(x_axis_label)
+        ax.grid(axis="x", alpha=0.3)
     else:
-        ax.set_ylim(0, ceiling * 1.05 if ceiling > 0 else None)
+        ax.set_xticks(pos)
+        ax.set_xticklabels(tick_labels, rotation=45, ha="right")
+        ax.set_ylabel(value_label)
+        ax.set_xlabel(x_axis_label)
+        ax.grid(axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+
+    value_axis = ax.set_xlim if horizontal else ax.set_ylim
+    if relative:
+        value_axis(0, 100)
+    elif effective_log:
+        (ax.set_xscale if horizontal else ax.set_yscale)("log")
+        value_axis(floor * 0.9 if floor > 0 else None, ceiling * 1.15 if ceiling > 0 else None)
+    else:
+        value_axis(0, ceiling * 1.05 if ceiling > 0 else None)
+
     if strata != ["total"] or not stacked:
-        ax.legend(fontsize=8, ncol=2, loc="upper right")
+        ax.legend(fontsize=8, ncol=2, loc="best")
     fig.tight_layout()
     return fig
 
 
-def build_parallel_coordinates_figure(
-    normalized: pd.DataFrame, raw: pd.DataFrame, indicator_labels: dict[str, str]
+def _compact_tick(value: float, _pos: object = None) -> str:
+    """Short tick label that reads for both euros (M/k) and small ratios (Gini)."""
+    magnitude = abs(value)
+    if magnitude >= 1e6:
+        return f"{value / 1e6:.1f}M"
+    if magnitude >= 1e3:
+        return f"{value / 1e3:.0f}k"
+    if magnitude >= 10:
+        return f"{value:.0f}"
+    return f"{value:.2f}"
+
+
+def _axis_range(values: "np.ndarray") -> tuple[float, float]:
+    """Native (min, max) for one indicator's axis, padded; constant columns get a small span."""
+    finite = values[np.isfinite(values)]
+    low, high = float(finite.min()), float(finite.max())
+    if low == high:
+        pad = abs(low) * 0.05 or 1.0
+        return low - pad, high + pad
+    margin = (high - low) * 0.05
+    return low - margin, high + margin
+
+
+def build_indicator_parallel_axes_figure(
+    raw: pd.DataFrame,
+    indicator_labels: dict[str, str],
+    series_colors: "dict[str, object] | None" = None,
 ) -> "plt.Figure":
-    """Parallel-coordinates: one vertical axis per indicator (normalized 0..1 across the
-    shown series), one broken line per series. Each axis is annotated with its real min/max
-    so the normalization stays legible."""
-    indicators = list(normalized.columns)
-    x = np.arange(len(indicators))
-    fig, ax = plt.subplots(figsize=(max(8, len(indicators) * 1.6), 6))
-    colors = plt.get_cmap("tab10").colors
+    """Parallel coordinates with independent, native-scale axes: one vertical axis per indicator
+    (each labelled in its own real units -- no cross-indicator normalization), one broken line
+    per scenario crossing every axis. `raw` is indexed by series (scenario), one column per
+    indicator; `series_colors` overrides the per-scenario line color."""
+    indicators = list(raw.columns)
+    series = list(raw.index)
+    n = max(len(indicators), 1)
+    ranges = {ind: _axis_range(raw[ind].to_numpy(dtype=float)) for ind in indicators}
+
+    def to_unit(ind: str, value: float) -> float:
+        low, high = ranges[ind]
+        return (value - low) / (high - low)
+
+    fig, host = plt.subplots(figsize=(max(6.0, n * 2.4), 5.5))
+    x = np.arange(n)
+    default_colors = plt.get_cmap("tab10").colors
+    overrides = series_colors or {}
 
     for axis_x in x:
-        ax.axvline(axis_x, color="0.8", linewidth=1, zorder=0)
-    for s_idx, series in enumerate(normalized.index):
-        ax.plot(x, normalized.loc[series].to_numpy(), marker="o",
-                color=colors[s_idx % len(colors)], label=str(series))
-    for axis_x, indicator in zip(x, indicators):
-        ax.text(axis_x, 1.02, f"{raw[indicator].max():,.2f}", ha="center", va="bottom", fontsize=7)
-        ax.text(axis_x, -0.02, f"{raw[indicator].min():,.2f}", ha="center", va="top", fontsize=7)
+        host.axvline(axis_x, color="0.85", linewidth=1, zorder=0)
+    for s_idx, s in enumerate(series):
+        ys = [to_unit(ind, float(raw.loc[s, ind])) for ind in indicators]
+        color = overrides.get(s) or default_colors[s_idx % len(default_colors)]
+        host.plot(x, ys, marker="o", color=color, linewidth=2, label=str(s), zorder=2)
 
-    ax.set_xticks(x)
-    ax.set_xticklabels([indicator_labels.get(i, i) for i in indicators], rotation=30, ha="right")
-    ax.set_yticks([0, 0.5, 1])
-    ax.set_ylim(-0.08, 1.08)
-    ax.set_ylabel("Valeur normalisée (0–1 sur les séries affichées)")
-    ax.legend(fontsize=8, loc="upper left", bbox_to_anchor=(1.01, 1))
+    host.set_xlim(-0.3, n - 0.7)
+    host.set_ylim(0, 1)
+    host.set_xticks(x)
+    host.set_xticklabels([indicator_labels.get(i, i) for i in indicators], fontsize=9)
+    host.get_yaxis().set_visible(False)
+    for spine in ("left", "right", "top"):
+        host.spines[spine].set_visible(False)
+
+    # A twin y-axis per indicator, its spine anchored at the indicator's x, showing native ticks.
+    # The leftmost axis puts its ticks/labels on the left (outside the lines) so they don't
+    # overlap the plot; every other axis labels to the right of its line.
+    for i, ind in enumerate(indicators):
+        axis = host.twinx()
+        axis.set_ylim(*ranges[ind])
+        side = "left" if i == 0 else "right"
+        other = "right" if i == 0 else "left"
+        axis.spines[side].set_position(("data", x[i]))
+        axis.yaxis.set_ticks_position(side)
+        axis.yaxis.set_label_position(side)
+        axis.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(6))
+        axis.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(_compact_tick))
+        for spine in (other, "top", "bottom"):
+            axis.spines[spine].set_visible(False)
+        axis.tick_params(labelsize=7)
+
+    host.legend(fontsize=8, loc="upper left", bbox_to_anchor=(1.04, 1))
     fig.tight_layout()
     return fig

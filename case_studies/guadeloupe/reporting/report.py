@@ -83,6 +83,9 @@ def generate_report(
         gini_revenue_by_farm=gini_revenue_by_farm,
         economics={"input": input_econ, "output": output_econ, "delta": delta_econ},
     )
+    # Full CULT_2017 universe (every fine crop the model could pick, allocated or not) so the
+    # dashboard can show an exhaustive crop/subculture axis including never-chosen crops.
+    recap["crop_universe"] = sorted(dataset.sets.get("crops", []))
     (output_dir / "recap.json").write_text(json.dumps(recap, indent=2))
     (output_dir / "recap.md").write_text(_render_recap_markdown(recap))
     (output_dir / "config_used.yaml").write_text(

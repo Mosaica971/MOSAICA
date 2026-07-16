@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -84,17 +85,6 @@ def test_positive_floor_is_smallest_strictly_positive_stratum():
     assert comparison.positive_floor([]) == 1.0
 
 
-def test_normalize_columns_min_max_scales_and_maps_constants_to_half():
-    frame = pd.DataFrame(
-        {"gini": [0.2, 0.4, 0.6], "const": [5.0, 5.0, 5.0]}, index=["A", "B", "C"]
-    )
-
-    out = comparison.normalize_columns(frame)
-
-    assert list(out["gini"]) == pytest.approx([0.0, 0.5, 1.0])
-    assert list(out["const"]) == pytest.approx([0.5, 0.5, 0.5])
-
-
 def test_series_label_is_human_readable():
     assert comparison.series_label("output_4", "output", 2017, "RESTIT") == (
         "output_4 · sortie (2017/RESTIT)"
@@ -126,18 +116,78 @@ def test_build_grouped_bar_figure_stacked_and_unstacked_return_figures():
     assert isinstance(unstacked, matplotlib.figure.Figure)
 
 
-def test_build_parallel_coordinates_figure_returns_figure():
+def test_format_dim_value_maps_region_and_island_codes_to_names():
+    assert comparison.format_dim_value("region", 4).startswith("NBT")
+    assert comparison.format_dim_value("region", "7").startswith("MG")
+    assert comparison.format_dim_value("island", 1) == "Basse-Terre"
+    # crop dims go through label_for; unknown region code falls back to str
+    assert comparison.format_dim_value("culture", "CS") == "Canne à sucre"
+    assert comparison.format_dim_value("region", "BT") == "BT"
+
+
+def test_ordered_categories_zeros_and_sorting():
+    pivot = comparison.pivot_measure(_facts(), "culture", "revenue", "none")  # CS=150, MA=50
+    series = [("s1", pivot)]
+
+    # zeros excluded -> only non-zero categories, biggest first
+    assert comparison.ordered_categories(series, ["CS", "MA", "AG"], False, True) == ["CS", "MA"]
+    # zeros included -> full universe kept, still value-ranked (AG at 0 goes last)
+    assert comparison.ordered_categories(series, ["CS", "MA", "AG"], True, True) == ["CS", "MA", "AG"]
+    # lexicographic when not ranking by value
+    assert comparison.ordered_categories(series, ["CS", "MA", "AG"], True, False) == ["AG", "CS", "MA"]
+
+
+def test_build_grouped_bar_figure_horizontal_relative_and_forced_categories():
+    import matplotlib
+
+    facts = _facts()
+    pivot = comparison.pivot_measure(facts, "culture", "revenue", "subculture")
+    fig = comparison.build_grouped_bar_figure(
+        [("run · sortie", pivot)],
+        measure_label="Revenu (€)", x_axis_label="Culture",
+        stacked=True, log=False, ceiling=150.0, floor=20.0,
+        categories=["CS", "MA", "AG"],  # AG absent from data -> zero bar
+        horizontal=True, relative=True,
+        series_colors={"run · sortie": "#123456"},
+        format_x=lambda c: comparison.format_dim_value("culture", c),
+        format_stack=lambda s: comparison.format_dim_value("subculture", s),
+    )
+    assert isinstance(fig, matplotlib.figure.Figure)
+
+
+def test_build_indicator_parallel_axes_figure_returns_figure_with_native_axes():
     import matplotlib
 
     raw = pd.DataFrame(
-        {"gini": [0.2, 0.4], "total_etp": [100.0, 130.0]}, index=["run_1", "run_2"]
+        {"total_revenue": [1000.0, 1500.0], "gini_revenue_by_farm": [0.3, 0.42]},
+        index=["run_1 · sortie", "run_2 · sortie"],
     )
-    normalized = comparison.normalize_columns(raw)
-
-    fig = comparison.build_parallel_coordinates_figure(
-        normalized, raw, {"gini": "Gini", "total_etp": "ETP total"}
+    fig = comparison.build_indicator_parallel_axes_figure(
+        raw, {"total_revenue": "Revenu (€)", "gini_revenue_by_farm": "Gini"},
+        {"run_1 · sortie": "#1f77b4"},
     )
     assert isinstance(fig, matplotlib.figure.Figure)
+    # one broken line per scenario on the host axes
+    host = fig.axes[0]
+    assert len(host.lines) >= 2
+    # constant column keeps a non-degenerate axis range
+    assert comparison._axis_range(np.array([5.0, 5.0]))[0] < 5.0
+
+
+def test_recap_carries_crop_universe(tmp_path):
+    """generate_report persists the full crop set so the dashboard axis can show zero crops."""
+    dataset = _dataset()
+    dataset.sets["crops"] = ["ME", "CS"]
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 2.0, "P2": 3.0},
+        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        config=_CONFIG,
+    )
+    results = solve_model(model, _CONFIG)
+    run_dir = report.generate_report(dataset, _CONFIG, model, results, duration=1.0, outputs_root=tmp_path)
+
+    assert loaders.load_recap(run_dir)["crop_universe"] == ["CS", "ME"]
 
 
 _CONFIG = {
