@@ -24,6 +24,10 @@ def _tiny_dataset() -> Dataset:
             "ILE": [1, 1],
             "cult_2016": [6, 6],
             "cult_2017": [6, 6],
+            # Chlordécone: for the output allocation (both ME, uptake class 3), P1 (r=2,
+            # soil 4) is flagged at-risk, P2 (r=5) is not.
+            "RISQUE_CLD": [2, 5],
+            "TYPE_SOL": [4, 1],
         },
         index=["P1", "P2"],
     )
@@ -38,6 +42,10 @@ def _tiny_dataset() -> Dataset:
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
             "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
             "margin_per_ha_cult": pd.Series({"CS": 1500.0, "ME": 2000.0}),
+            "azote_per_ha_cult": pd.Series({"CS": 100.0, "ME": 50.0}),
+            "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
+            "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
+            "cld_uptake_cult": pd.Series({"CS": 4, "ME": 3}),
         },
         scalars={},
     )
@@ -187,6 +195,24 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "total_variable_cost", "total_labor_cost", "total_net_revenue", "total_etp",
     ):
         assert econ["delta"][key] == pytest.approx(econ["output"][key] - econ["input"][key])
+    # Environment block: symmetric to economics. Output = both ME; input = both CS.
+    env = recap["environment"]
+    assert set(env) == {"input", "output", "delta"}
+    # output (both ME, 5 ha): GES 5*1=5, IFT 5*6=30, azote 5*50=250, surface_cld=P1=2.0
+    assert env["output"]["total_ges"] == pytest.approx(5.0)
+    assert env["output"]["total_ift"] == pytest.approx(30.0)
+    assert env["output"]["total_azote"] == pytest.approx(250.0)
+    assert env["output"]["surface_cld"] == pytest.approx(2.0)
+    assert env["output"]["ges_per_ha"] == pytest.approx(5.0 / 5.0)
+    # input (both CS, 5 ha): GES 5*2=10 ; CS uptake class 4 -> no chlordécone risk
+    assert env["input"]["total_ges"] == pytest.approx(10.0)
+    assert env["input"]["surface_cld"] == pytest.approx(0.0)
+    for key in ("total_ges", "total_ift", "total_azote", "surface_cld"):
+        assert env["delta"][key] == pytest.approx(env["output"][key] - env["input"][key])
+
+    facts_output = pd.read_csv(output_dir / "csv" / "facts_output.csv")
+    assert {"ges", "ift", "azote", "surface_cld"} <= set(facts_output.columns)
+
     etp_by_region = pd.read_csv(output_dir / "csv" / "etp_by_region_output.csv")
     assert list(etp_by_region.columns) == ["region", "etp"]
 

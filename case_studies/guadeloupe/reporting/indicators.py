@@ -101,6 +101,78 @@ def compute_gross_margin_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.
     return surface_by_crop * margin_per_ha_cult.reindex(surface_by_crop.index)
 
 
+def compute_azote_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Nitrogen applied (kg N) by crop: surface x azote_per_ha_cult."""
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    rate = dataset.parameters["azote_per_ha_cult"]
+    return surface_by_crop * rate.reindex(surface_by_crop.index)
+
+
+def compute_ges_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Greenhouse-gas emissions (t CO2) by crop: surface x ges_per_ha_cult."""
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    rate = dataset.parameters["ges_per_ha_cult"]
+    return surface_by_crop * rate.reindex(surface_by_crop.index)
+
+
+def compute_ift_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Pesticide treatment-frequency index (IFT, summed over ha) by crop:
+    surface x ift_per_ha_cult."""
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    rate = dataset.parameters["ift_per_ha_cult"]
+    return surface_by_crop * rate.reindex(surface_by_crop.index)
+
+
+def _cld_at_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Boolean per allocated plot: True where the assigned crop, the parcel's chlordécone
+    soil-risk level (RISQUE_CLD, 1=worst..5=none) and its soil type (TYPE_SOL) trigger
+    at-risk food production. Faithful to OPTIMISATION.txt indicator n°10 (NV_CLD_parc),
+    with c = crop uptake class (Data_Cult["CLD"], 1=high..4=none)."""
+    data_parc = dataset.parameters["data_parc"]
+    r = data_parc["RISQUE_CLD"].reindex(allocation.index)
+    s = data_parc["TYPE_SOL"].reindex(allocation.index)
+    c = pd.Series(
+        dataset.parameters["cld_uptake_cult"].reindex(allocation.to_numpy()).to_numpy(),
+        index=allocation.index,
+    )
+    return (
+        ((c == 1) & (r <= 3))
+        | ((c == 2) & (r <= 2))
+        | ((c == 3) & (r <= 2) & s.isin([2, 4]))
+        | ((c == 3) & (r == 1) & s.isin([1, 3, 5]))
+    )
+
+
+def compute_cld_at_risk_surface(dataset: Dataset, allocation: pd.Series) -> float:
+    """Cultivated surface (ha) flagged at chlordécone risk by the crop x soil rule."""
+    mask = _cld_at_risk_mask(dataset, allocation)
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    return float(surface[mask].sum())
+
+
+def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
+    """Headline environmental totals for one allocation: nitrogen (kg N), GES (t CO2), IFT,
+    chlordécone-exposed surface (ha), plus per-ha averages over the cultivated surface."""
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    total_surface = float(surface.sum())
+    total_azote = float(compute_azote_by_crop(dataset, allocation).sum())
+    total_ges = float(compute_ges_by_crop(dataset, allocation).sum())
+    total_ift = float(compute_ift_by_crop(dataset, allocation).sum())
+
+    def per_ha(value: float) -> float:
+        return value / total_surface if total_surface else 0.0
+
+    return {
+        "total_azote": total_azote,
+        "total_ges": total_ges,
+        "total_ift": total_ift,
+        "surface_cld": compute_cld_at_risk_surface(dataset, allocation),
+        "azote_per_ha": per_ha(total_azote),
+        "ges_per_ha": per_ha(total_ges),
+        "ift_per_ha": per_ha(total_ift),
+    }
+
+
 def compute_subsidy_per_tonne_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     subsidy = compute_subsidy_by_crop(dataset, allocation)
     production = compute_production_tonnes_by_crop(dataset, allocation)
@@ -210,6 +282,7 @@ def compute_economic_totals(
 _FACT_MEASURES = [
     "surface", "production", "sales", "subsidy", "revenue",
     "gross_margin", "labor_hours", "labor_cost", "etp",
+    "ges", "ift", "azote", "surface_cld",
 ]
 
 
@@ -238,11 +311,16 @@ def compute_facts_table(
             "subsidy": surface * rate("subsidy_per_ha_cult_annualized"),
             "gross_margin": surface * rate("margin_per_ha_cult"),
             "labor_hours": surface * rate("labor_hours_per_ha_cult"),
+            "ges": surface * rate("ges_per_ha_cult"),
+            "ift": surface * rate("ift_per_ha_cult"),
+            "azote": surface * rate("azote_per_ha_cult"),
         }
     )
     per_plot["revenue"] = per_plot["sales"] + per_plot["subsidy"]
     per_plot["labor_cost"] = per_plot["labor_hours"] * cost_per_hour
     per_plot["etp"] = per_plot["labor_hours"] / hours_per_etp
+    # Chlordécone-exposed surface: the plot's own surface when the crop x soil rule flags it.
+    per_plot["surface_cld"] = surface * _cld_at_risk_mask(dataset, allocation).to_numpy()
 
     grouped = per_plot.groupby(["crop", "region"], as_index=False).agg(
         {"island": "first", **{measure: "sum" for measure in _FACT_MEASURES}}

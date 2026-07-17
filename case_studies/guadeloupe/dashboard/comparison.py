@@ -227,6 +227,51 @@ def positive_floor(pivots: list[pd.DataFrame]) -> float:
     return min(positives) if positives else 1.0
 
 
+# Direction of each scalar indicator for the composite score: "benefit" (higher is
+# better) or "cost" (lower is better -> inverted before averaging). Anything not listed
+# defaults to "benefit".
+INDICATOR_DIRECTION: dict[str, str] = {
+    "total_production_tonnes": "benefit",
+    "total_revenue": "benefit",
+    "total_gross_margin": "benefit",
+    "total_net_revenue": "benefit",
+    "total_etp": "benefit",
+    "total_subsidy": "cost",
+    "total_labor_cost": "cost",
+    "gini_revenue_by_farm": "cost",
+    "total_ges": "cost",
+    "total_ift": "cost",
+    "total_azote": "cost",
+    "surface_cld": "cost",
+}
+
+
+def compute_composite_scores(raw: pd.DataFrame, weights: dict[str, float]) -> pd.Series:
+    """Weighted composite score in [0,1] per series (scenario), one row of `raw` each.
+
+    Each column is min-max normalized across the rows so 1 = best of the compared set;
+    "cost" indicators (INDICATOR_DIRECTION) are inverted so lower raw = higher score. A
+    constant column (or a single scenario) scores 0.5 (nothing to rank). The score is the
+    weighted mean over columns that are present in `raw` and carry a strictly positive
+    weight; with no such column every series scores 0.5."""
+    usable = [c for c in raw.columns if weights.get(c, 0.0) > 0.0]
+    if not usable:
+        return pd.Series(0.5, index=raw.index)
+
+    normalized = pd.DataFrame(index=raw.index)
+    for col in usable:
+        values = raw[col].astype(float)
+        lo, hi = values.min(), values.max()
+        if hi == lo:
+            normalized[col] = 0.5
+            continue
+        benefit = (values - lo) / (hi - lo)
+        normalized[col] = 1.0 - benefit if INDICATOR_DIRECTION.get(col) == "cost" else benefit
+
+    w = pd.Series({c: weights[c] for c in usable}, dtype=float)
+    return (normalized[usable] * w).sum(axis=1) / w.sum()
+
+
 def series_label(display_name: str, side: str) -> str:
     """Base label for a (run, side) series in legends and pickers: the run's display
     name (its recap `run_name`, or folder name) plus the side. Not guaranteed unique --

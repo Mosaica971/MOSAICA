@@ -42,6 +42,20 @@ région** pour les familles région-codées (CS, CF, BC) plutôt qu'un seul repr
 RESULTATS.txt:1853) à porter comme représentatives officielles.
 _Constaté le 2026-07-09, reformulé et adressé le 2026-07-13._
 
+### Mineur — Indicateur GES : magnitude élevée (fidèle au GAMS, unités source à surveiller)
+Le GES/ha porté (`environment.compute_ges_per_ha_cult`, chantier B) reproduit **à
+l'identique** la formule GAMS (`OPTIMISATION.txt:118-127`), terme surfacique `GES_SURF` +
+terme production `GES_Q·Rdt` sur les opérations non-amorties, le tout `/COEFF_C_CO2` (0.272).
+Sur vraies données le max atteint ~1.6e5 « t CO₂/ha/an », dominé par `COND_EXP_ME`
+(conditionnement-export melon, `GES_Q=2156.8` — fret aérien, réellement très carboné) et des
+`GES_SURF` jusqu'à 2769. Ces valeurs viennent **des données sources** (`Data_OTK.txt`), pas
+d'un bug : le GAMS produirait les mêmes. L'unité annoncée « t CO₂ » est probablement
+incohérente avec l'échelle réelle des colonnes (kg ?), mais **corriger dévierait de la
+parité**. Le score composite normalise en min-max → l'échelle absolue ne fausse pas le
+classement. **À faire si besoin d'un GES physiquement interprétable** : clarifier l'unité de
+`GES_SURF`/`GES_Q` avec la source et documenter un facteur d'échelle explicite (hors parité).
+_Constaté le 2026-07-17._
+
 ### Mineur — `REGION` vs `REGION_CODE` potentiellement redondants
 `Data_Parc_Gwad_2017.txt` a une colonne `REGION`, et `data_pipeline.py`
 calcule en plus `REGION_CODE` via la jointure avec `REG_PARC_2017.set`. Pas

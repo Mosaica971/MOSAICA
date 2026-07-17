@@ -12,6 +12,11 @@ from case_studies.guadeloupe.economics import (
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
+from case_studies.guadeloupe.environment import (
+    compute_azote_per_ha_cult,
+    compute_ges_per_ha_cult,
+    compute_ift_per_ha_cult,
+)
 from case_studies.guadeloupe.farm_typology import (
     compute_avers,
     compute_base_crop_group,
@@ -37,6 +42,7 @@ CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
 
 DEFAULT_YEAR = "2017"
 DEFAULT_SCENARIO = "RESTIT"
+DEFAULT_COEFF_C_CO2 = 0.272
 
 
 def _available_years() -> list[str]:
@@ -100,6 +106,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     econ_cfg: dict[str, Any] = config.get("economic_overrides") or {}
     price_multipliers = econ_cfg.get("price_multipliers")
     subsidy_multipliers = econ_cfg.get("subsidy_multipliers")
+
+    # Carbon->CO2 conversion for the GES indicator (GAMS COEFF_C_CO2 = 0.272).
+    env_cfg: dict[str, Any] = (config.get("reporting") or {}).get("environment") or {}
+    coeff_c_co2 = float(env_cfg.get("coeff_c_co2", DEFAULT_COEFF_C_CO2))
 
     sets = {
         "crops": read_flat_set(SETS_DIR / "CULT_2017.set"),
@@ -233,6 +243,29 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_plant_cult=duree_plant_cult,
         duree_cycle_cult=duree_cycle_cult,
     )
+    azote_per_ha_cult = compute_azote_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+    ges_per_ha_cult = compute_ges_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+        rdt_cult=rdt_cult,
+        coeff_c_co2=coeff_c_co2,
+    )
+    ift_per_ha_cult = compute_ift_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+    # Chlordécone uptake class per crop (Data_Cult["CLD"], 1=high..4=none), for the crop x
+    # soil at-risk-surface indicator in reporting.
+    cld_uptake_cult = data_cult.loc["CLD"]
 
     parameters = {
         "expl_parc": expl_parc,
@@ -256,6 +289,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "sales_per_ha_cult": sales_per_ha_cult,
         "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
         "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
+        "azote_per_ha_cult": azote_per_ha_cult,
+        "ges_per_ha_cult": ges_per_ha_cult,
+        "ift_per_ha_cult": ift_per_ha_cult,
+        "cld_uptake_cult": cld_uptake_cult,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

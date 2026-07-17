@@ -111,6 +111,51 @@ def test_series_labels_suffixes_only_colliding_labels_with_folder():
     ]
 
 
+def test_composite_score_normalizes_benefit_and_cost_indicators():
+    raw = pd.DataFrame(
+        {"total_revenue": [100.0, 200.0], "total_ges": [5.0, 1.0]},
+        index=["S1", "S2"],
+    )
+    # revenue (benefit): S1=0, S2=1 ; ges (cost, inverted): S1=0, S2=1 ; equal weights
+    scores = comparison.compute_composite_scores(
+        raw, {"total_revenue": 1.0, "total_ges": 1.0}
+    )
+    assert scores["S1"] == pytest.approx(0.0)
+    assert scores["S2"] == pytest.approx(1.0)
+
+
+def test_composite_score_constant_column_scores_half():
+    raw = pd.DataFrame(
+        {"total_revenue": [100.0, 200.0], "total_ges": [3.0, 3.0]},
+        index=["S1", "S2"],
+    )
+    scores = comparison.compute_composite_scores(
+        raw, {"total_revenue": 1.0, "total_ges": 1.0}
+    )
+    assert scores["S1"] == pytest.approx(0.25)  # (0 + 0.5) / 2
+    assert scores["S2"] == pytest.approx(0.75)  # (1 + 0.5) / 2
+
+
+def test_composite_score_ignores_zero_weight_columns():
+    raw = pd.DataFrame(
+        {"total_revenue": [100.0, 200.0], "total_ges": [5.0, 1.0]},
+        index=["S1", "S2"],
+    )
+    scores = comparison.compute_composite_scores(
+        raw, {"total_revenue": 1.0, "total_ges": 0.0}
+    )
+    assert scores["S1"] == pytest.approx(0.0)  # only revenue counts
+    assert scores["S2"] == pytest.approx(1.0)
+
+
+def test_composite_score_single_scenario_is_half():
+    raw = pd.DataFrame({"total_revenue": [100.0], "total_ges": [5.0]}, index=["S1"])
+    scores = comparison.compute_composite_scores(
+        raw, {"total_revenue": 1.0, "total_ges": 1.0}
+    )
+    assert scores["S1"] == pytest.approx(0.5)
+
+
 def test_build_grouped_bar_figure_stacked_and_unstacked_return_figures():
     import matplotlib
 
@@ -223,6 +268,8 @@ def _dataset() -> Dataset:
             "ILE": [1, 2],
             "cult_2016": [6, 6],
             "cult_2017": [6, 6],
+            "RISQUE_CLD": [2, 5],
+            "TYPE_SOL": [4, 1],
         },
         index=["P1", "P2"],
     )
@@ -237,6 +284,10 @@ def _dataset() -> Dataset:
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
             "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
             "margin_per_ha_cult": pd.Series({"CS": 1500.0, "ME": 2000.0}),
+            "azote_per_ha_cult": pd.Series({"CS": 100.0, "ME": 50.0}),
+            "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
+            "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
+            "cld_uptake_cult": pd.Series({"CS": 4, "ME": 3}),
         },
         scalars={},
     )

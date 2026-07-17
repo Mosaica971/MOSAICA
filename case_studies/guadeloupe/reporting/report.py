@@ -71,6 +71,10 @@ def generate_report(
     )
     delta_econ = {key: output_econ[key] - input_econ[key] for key in output_econ}
 
+    output_env = indicators.compute_environmental_totals(dataset, output_allocation)
+    input_env = indicators.compute_environmental_totals(dataset, input_representative)
+    delta_env = {key: output_env[key] - input_env[key] for key in output_env}
+
     recap = _build_recap(
         dataset=dataset,
         config=config,
@@ -82,6 +86,7 @@ def generate_report(
         delta_summary=delta_summary,
         gini_revenue_by_farm=gini_revenue_by_farm,
         economics={"input": input_econ, "output": output_econ, "delta": delta_econ},
+        environment={"input": input_env, "output": output_env, "delta": delta_env},
     )
     # Full CULT_2017 universe (every fine crop the model could pick, allocated or not) so the
     # dashboard can show an exhaustive crop/subculture axis including never-chosen crops.
@@ -235,6 +240,7 @@ def _build_recap(
     delta_summary: dict[str, Any],
     gini_revenue_by_farm: float,
     economics: dict[str, Any],
+    environment: dict[str, Any],
 ) -> dict[str, Any]:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
@@ -266,6 +272,7 @@ def _build_recap(
         "output": output_summary,
         "delta": delta_summary,
         "economics": economics,
+        "environment": environment,
         "gini_revenue_by_farm": gini_revenue_by_farm,
         "total_plots": int(len(dataset.parameters["data_parc"])),
         "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),

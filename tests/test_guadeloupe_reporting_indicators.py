@@ -20,6 +20,11 @@ def _small_dataset() -> Dataset:
             "ILE": [1, 1, 2, 2, 1, 2],
             "cult_2016": [6, 6, 13, 14, 6, 13],
             "cult_2017": [6, 6, 13, 14, 6, 13],
+            # Chlordécone: parcel soil risk (1=worst..5=none) and soil type. Tuned so that,
+            # for the {P1:CS, P2:CS, P3:ME} allocation used across tests, only P3 (ME,
+            # uptake class 3, r=2, soil 4) is flagged at-risk.
+            "RISQUE_CLD": [5, 5, 2, 1, 5, 5],
+            "TYPE_SOL": [1, 1, 4, 3, 1, 2],
         },
         index=["P1", "P2", "P3", "P4", "P5", "P6"],
     )
@@ -34,6 +39,10 @@ def _small_dataset() -> Dataset:
     subsidy_per_ha_cult_annualized = pd.Series({"CS": 500.0, "ME": 200.0})
     labor_hours_per_ha_cult = pd.Series({"CS": 400.0, "ME": 800.0})
     margin_per_ha_cult = pd.Series({"CS": 1500.0, "ME": 2000.0})
+    azote_per_ha_cult = pd.Series({"CS": 100.0, "ME": 50.0})
+    ges_per_ha_cult = pd.Series({"CS": 2.0, "ME": 1.0})
+    ift_per_ha_cult = pd.Series({"CS": 3.0, "ME": 6.0})
+    cld_uptake_cult = pd.Series({"CS": 4, "ME": 3})  # CS no uptake, ME class 3
     return Dataset(
         sets={},
         parameters={
@@ -44,6 +53,10 @@ def _small_dataset() -> Dataset:
             "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
             "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
             "margin_per_ha_cult": margin_per_ha_cult,
+            "azote_per_ha_cult": azote_per_ha_cult,
+            "ges_per_ha_cult": ges_per_ha_cult,
+            "ift_per_ha_cult": ift_per_ha_cult,
+            "cld_uptake_cult": cld_uptake_cult,
         },
         scalars={},
     )
@@ -204,6 +217,83 @@ def test_compute_economic_totals_sums_production_subsidy_revenue_and_etp():
     assert totals["total_etp"] == pytest.approx(2.8)                   # (800+1200+800)/1000
 
 
+def test_compute_azote_by_crop_multiplies_surface_by_rate():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_azote_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(500.0)   # 5 ha * 100
+    assert result["ME"] == pytest.approx(50.0)     # 1 ha * 50
+
+
+def test_compute_ges_by_crop_multiplies_surface_by_rate():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_ges_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(10.0)     # 5 ha * 2
+    assert result["ME"] == pytest.approx(1.0)      # 1 ha * 1
+
+
+def test_compute_ift_by_crop_multiplies_surface_by_rate():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    result = indicators.compute_ift_by_crop(dataset, allocation)
+
+    assert result["CS"] == pytest.approx(15.0)     # 5 ha * 3
+    assert result["ME"] == pytest.approx(6.0)      # 1 ha * 6
+
+
+def _cld_dataset() -> Dataset:
+    """Six plots covering every branch of the chlordécone crop×soil rule."""
+    data_parc = pd.DataFrame(
+        {
+            "SURF_HA": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            "RISQUE_CLD": [3, 4, 2, 1, 2, 1],
+            "TYPE_SOL": [1, 1, 1, 3, 1, 1],
+        },
+        index=["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"],
+    )
+    cld_uptake_cult = pd.Series({"A": 1, "B": 2, "C": 3, "D": 4})
+    return Dataset(
+        sets={},
+        parameters={"data_parc": data_parc, "cld_uptake_cult": cld_uptake_cult},
+        scalars={},
+    )
+
+
+def test_compute_cld_at_risk_surface_applies_crop_soil_rule():
+    dataset = _cld_dataset()
+    allocation = pd.Series(
+        {"Q1": "A", "Q2": "A", "Q3": "B", "Q4": "C", "Q5": "C", "Q6": "D"}
+    )
+    # Q1 A(c1) r=3<=3 -> risk ; Q2 A r=4 -> no ; Q3 B(c2) r=2<=2 -> risk ;
+    # Q4 C(c3) r=1 soil3 in {1,3,5} -> risk ; Q5 C r=2 soil1 not in {2,4} -> no ;
+    # Q6 D(c4) -> never. At-risk surface = Q1+Q3+Q4 = 3.0
+    result = indicators.compute_cld_at_risk_surface(dataset, allocation)
+
+    assert result == pytest.approx(3.0)
+
+
+def test_compute_environmental_totals_sums_rates_and_cld_surface():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    totals = indicators.compute_environmental_totals(dataset, allocation)
+
+    assert totals["total_azote"] == pytest.approx(550.0)   # 500 + 50
+    assert totals["total_ges"] == pytest.approx(11.0)      # 10 + 1
+    assert totals["total_ift"] == pytest.approx(21.0)      # 15 + 6
+    assert totals["surface_cld"] == pytest.approx(1.0)     # P3 only
+    # per-ha averages over cultivated surface (6 ha)
+    assert totals["azote_per_ha"] == pytest.approx(550.0 / 6.0)
+    assert totals["ges_per_ha"] == pytest.approx(11.0 / 6.0)
+    assert totals["ift_per_ha"] == pytest.approx(21.0 / 6.0)
+
+
 def test_compute_gross_margin_by_crop_multiplies_surface_by_margin_rate():
     dataset = _small_dataset()
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
@@ -285,6 +375,7 @@ def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures
     assert list(facts.columns) == [
         "crop", "region", "island", "surface", "production", "sales", "subsidy",
         "revenue", "gross_margin", "labor_hours", "labor_cost", "etp",
+        "ges", "ift", "azote", "surface_cld",
     ]
     # P1+P2 = CS in R1 (island 1); P3 = ME in R2 (island 2)
     assert set(zip(facts["crop"], facts["region"])) == {("CS", "R1"), ("ME", "R2")}
@@ -299,10 +390,18 @@ def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures
     assert cs["labor_hours"] == pytest.approx(2000.0)   # 5 * 400
     assert cs["labor_cost"] == pytest.approx(20000.0)   # 2000 * 10
     assert cs["etp"] == pytest.approx(2.0)              # 2000 / 1000
+    assert cs["ges"] == pytest.approx(10.0)             # 5 * 2
+    assert cs["ift"] == pytest.approx(15.0)             # 5 * 3
+    assert cs["azote"] == pytest.approx(500.0)          # 5 * 100
+    assert cs["surface_cld"] == pytest.approx(0.0)      # CS uptake class 4 -> never at risk
     me = facts[facts["crop"] == "ME"].iloc[0]
     assert me["island"] == 2
     assert me["labor_cost"] == pytest.approx(8000.0)    # 800 * 10
     assert me["etp"] == pytest.approx(0.8)
+    assert me["ges"] == pytest.approx(1.0)              # 1 * 1
+    assert me["ift"] == pytest.approx(6.0)              # 1 * 6
+    assert me["azote"] == pytest.approx(50.0)           # 1 * 50
+    assert me["surface_cld"] == pytest.approx(1.0)      # P3: ME(c3), r=2, soil 4 -> at risk
 
 
 def test_compute_facts_table_splits_same_crop_across_regions():

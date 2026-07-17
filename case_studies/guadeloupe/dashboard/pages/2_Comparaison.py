@@ -16,6 +16,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
@@ -25,8 +26,8 @@ from case_studies.guadeloupe.dashboard import comparison, loaders
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"
 SIDES = ("output", "input")
 
-# Per-run scalar indicators for the development profile: economics totals (per side) plus the
-# run's Gini (output-based, same for every side of a run).
+# Per-run scalar indicators for the development profile: economics totals (per side), the
+# run's Gini (output-based, same for every side), and environmental totals (per side).
 _ECON_INDICATORS = {
     "total_production_tonnes": "Production (t)",
     "total_revenue": "Revenu (€)",
@@ -36,8 +37,27 @@ _ECON_INDICATORS = {
     "total_labor_cost": "Coût MO (€)",
     "total_etp": "Emploi (ETP)",
 }
+_ENV_INDICATORS = {
+    "total_ges": "GES (t CO₂)",
+    "total_ift": "IFT (total)",
+    "total_azote": "Azote (kg N)",
+    "surface_cld": "Surface chlordécone (ha)",
+}
 _GINI_KEY = "gini_revenue_by_farm"
-_INDICATOR_LABELS = {**_ECON_INDICATORS, _GINI_KEY: "Gini (revenu/exploit.)"}
+_INDICATOR_LABELS = {
+    **_ECON_INDICATORS, **_ENV_INDICATORS, _GINI_KEY: "Gini (revenu/exploit.)"
+}
+
+
+def _indicator_value(recap: dict, side: str, indicator: str):
+    """Scalar value of an indicator for one (run, side): Gini from the run root,
+    environmental totals from recap['environment'][side], everything else from
+    recap['economics'][side]. Missing blocks (older runs) yield None."""
+    if indicator == _GINI_KEY:
+        return recap.get(_GINI_KEY)
+    if indicator in _ENV_INDICATORS:
+        return (recap.get("environment") or {}).get(side, {}).get(indicator)
+    return (recap.get("economics") or {}).get(side, {}).get(indicator)
 
 st.set_page_config(page_title="MOSAICA -- Comparaison", layout="wide")
 st.title("Comparaison de scénarios")
@@ -192,11 +212,7 @@ else:
     for lbl in selected:
         recap = series_catalog[lbl]["recap"]
         side = series_catalog[lbl]["side"]
-        econ = (recap.get("economics") or {}).get(side, {})
-        rows[lbl] = {
-            ind: (recap.get(_GINI_KEY) if ind == _GINI_KEY else econ.get(ind))
-            for ind in chosen
-        }
+        rows[lbl] = {ind: _indicator_value(recap, side, ind) for ind in chosen}
     raw = pd.DataFrame.from_dict(rows, orient="index")[chosen].dropna(axis=1, how="any")
     if raw.shape[1] < 1:
         st.warning("Indicateurs indisponibles pour ces séries (runs trop anciens ?).")
@@ -210,3 +226,30 @@ else:
             "Coordonnées parallèles : un axe vertical par indicateur, chacun à son échelle "
             "native (pas de normalisation). Une ligne = un scénario (couleur choisie ci-dessus)."
         )
+
+        # -------------------------------------------------- Composite score
+        st.subheader("Score agrégé")
+        st.caption(
+            "Chaque indicateur est normalisé (min-max) sur les séries affichées, 1 = meilleur "
+            "du lot ; les indicateurs « coût » (GES, IFT, azote, chlordécone, subvention, coût "
+            "MO, Gini) sont inversés. Score = moyenne pondérée. Réglez les poids ci-dessous."
+        )
+        weights: dict[str, float] = {}
+        weight_cols = st.columns(min(len(raw.columns), 4))
+        for idx, ind in enumerate(raw.columns):
+            weights[ind] = weight_cols[idx % len(weight_cols)].slider(
+                _INDICATOR_LABELS[ind], min_value=0.0, max_value=1.0, value=1.0, step=0.05,
+                key=f"weight_{ind}",
+            )
+        scores = comparison.compute_composite_scores(raw, weights).sort_values()
+        score_colors = [series_colors.get(lbl) for lbl in scores.index]
+        fig, ax = plt.subplots(figsize=(7, 0.5 * len(scores) + 1))
+        ax.barh(range(len(scores)), scores.to_numpy(), color=score_colors)
+        ax.set_yticks(range(len(scores)))
+        ax.set_yticklabels(list(scores.index))
+        ax.set_xlim(0, 1)
+        ax.set_xlabel("Score agrégé (0–1)")
+        for y, value in enumerate(scores.to_numpy()):
+            ax.text(min(value + 0.01, 0.98), y, f"{value:.2f}", va="center", fontsize=8)
+        fig.tight_layout()
+        st.pyplot(fig)
