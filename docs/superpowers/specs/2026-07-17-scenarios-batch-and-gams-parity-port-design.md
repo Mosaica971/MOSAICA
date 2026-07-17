@@ -222,8 +222,9 @@ séries économiques, ajouter les 10 codes à l'éligibilité, porter les 6 règ
 `Eq_CF_T0..T8`, et la contrainte `Eq_CF_MIN` (via `territory_production_bound` `ge` avec le seuil
 `Q_CF_MIN`). CF n'est pertinent qu'en **scénario SMART** (RESTIT interdit CF, `Eq_CF_SUPP`).
 
-C'est un **sous-projet à part entière** ; il est séquencé **en dernier** et pourrait justifier son
-propre plan d'implémentation. Sequençable indépendamment des lots 1/2/5.
+C'est un **sous-projet à part entière**. **Décision utilisateur (2026-07-17)** : CF fait l'objet
+d'un **plan/session séparé**, exécuté **après** les lots 1-2-5. Le premier plan d'implémentation
+couvre donc **lots 1, 2, 5 uniquement**.
 
 ---
 
