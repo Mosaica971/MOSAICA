@@ -43,20 +43,43 @@ _ENV_INDICATORS = {
     "total_azote": "Azote (kg N)",
     "surface_cld": "Surface chlordécone (ha)",
 }
+# Food self-sufficiency ratios (crop-only variant), all benefit (higher = more autonomous).
+# The limiting nutrient is the headline autonomy score; per-nutrient keys map to
+# recap['food_autonomy'][side]['crop_only'][<nutrient>].
+_AUTONOMY_INDICATORS = {
+    "autonomy_limiting": "Autonomie (nutriment limitant)",
+    "autonomy_kcal": "Autonomie énergie (Kcal)",
+    "autonomy_prot": "Autonomie protéines",
+    "autonomy_lip": "Autonomie lipides",
+    "autonomy_glu": "Autonomie glucides",
+    "autonomy_fibres": "Autonomie fibres",
+    "autonomy_ca": "Autonomie calcium",
+    "autonomy_p": "Autonomie phosphore",
+    "autonomy_mg": "Autonomie magnésium",
+    "autonomy_k": "Autonomie potassium",
+    "autonomy_fe": "Autonomie fer",
+}
 _GINI_KEY = "gini_revenue_by_farm"
 _INDICATOR_LABELS = {
-    **_ECON_INDICATORS, **_ENV_INDICATORS, _GINI_KEY: "Gini (revenu/exploit.)"
+    **_ECON_INDICATORS, **_ENV_INDICATORS, **_AUTONOMY_INDICATORS,
+    _GINI_KEY: "Gini (revenu/exploit.)",
 }
 
 
 def _indicator_value(recap: dict, side: str, indicator: str):
     """Scalar value of an indicator for one (run, side): Gini from the run root,
-    environmental totals from recap['environment'][side], everything else from
-    recap['economics'][side]. Missing blocks (older runs) yield None."""
+    environmental totals from recap['environment'][side], food-autonomy ratios (crop-only)
+    from recap['food_autonomy'][side], everything else from recap['economics'][side].
+    Missing blocks (older runs) yield None."""
     if indicator == _GINI_KEY:
         return recap.get(_GINI_KEY)
     if indicator in _ENV_INDICATORS:
         return (recap.get("environment") or {}).get(side, {}).get(indicator)
+    if indicator in _AUTONOMY_INDICATORS:
+        auto = (recap.get("food_autonomy") or {}).get(side, {})
+        if indicator == "autonomy_limiting":
+            return auto.get("limiting_crop_only")
+        return auto.get("crop_only", {}).get(indicator[len("autonomy_"):])
     return (recap.get("economics") or {}).get(side, {}).get(indicator)
 
 st.set_page_config(page_title="MOSAICA -- Comparaison", layout="wide")
@@ -253,3 +276,47 @@ else:
             ax.text(min(value + 0.01, 0.98), y, f"{value:.2f}", va="center", fontsize=8)
         fig.tight_layout()
         st.pyplot(fig)
+
+# ---------------------------------------------------- Food self-sufficiency panel
+st.header("Autonomie alimentaire")
+_autonomy = {
+    lbl: (series_catalog[lbl]["recap"].get("food_autonomy") or {}).get(
+        series_catalog[lbl]["side"], {}
+    )
+    for lbl in selected
+}
+_autonomy = {lbl: auto for lbl, auto in _autonomy.items() if auto}
+if not _autonomy:
+    st.info(
+        "Aucune série sélectionnée ne porte le bloc `food_autonomy` (runs antérieurs à cette "
+        "fonctionnalité). Relancez `python main.py` pour un run comparable."
+    )
+else:
+    variant_label = st.radio(
+        "Variante", ["Cultures seules", "Avec pêche"], horizontal=True
+    )
+    variant = "with_fishing" if variant_label == "Avec pêche" else "crop_only"
+    frame = comparison.autonomy_ratios_frame(_autonomy, variant)
+    st.caption(
+        "Ratio production locale / besoin de la population, par nutriment. Une valeur ≥ 1 "
+        "(ligne pointillée) = auto-suffisance pour ce nutriment. Le nutriment le plus bas "
+        "borne l'autonomie globale."
+    )
+    fig_auto, ax_auto = plt.subplots(figsize=(9, 4))
+    nutrients = list(frame.index)
+    x = range(len(nutrients))
+    n_series = max(len(frame.columns), 1)
+    width = 0.8 / n_series
+    for s_idx, lbl in enumerate(frame.columns):
+        offsets = [i + (s_idx - (n_series - 1) / 2) * width for i in x]
+        ax_auto.bar(
+            offsets, frame[lbl].to_numpy(), width=width,
+            color=series_colors.get(lbl), label=lbl,
+        )
+    ax_auto.axhline(1.0, color="grey", linestyle="--", linewidth=1)
+    ax_auto.set_xticks(list(x))
+    ax_auto.set_xticklabels(nutrients, rotation=45, ha="right")
+    ax_auto.set_ylabel("Ratio production / besoin")
+    ax_auto.legend(fontsize=8)
+    fig_auto.tight_layout()
+    st.pyplot(fig_auto)

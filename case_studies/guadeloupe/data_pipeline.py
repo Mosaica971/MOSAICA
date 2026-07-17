@@ -129,6 +129,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
     data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
     matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt")
+    # Nutrition tables for the food self-sufficiency indicators (per-tonne content by crop;
+    # per-individual annual needs + population + fishing contribution).
+    nutri_cult = read_wide_table(TABLES_DIR / "Nutri_Cult.txt")
+    nutri_alim = read_wide_table(TABLES_DIR / "Nutri_Alim.txt")
     prix_cult = apply_crop_multipliers(
         read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[year], price_multipliers
     )
@@ -293,6 +297,8 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "ges_per_ha_cult": ges_per_ha_cult,
         "ift_per_ha_cult": ift_per_ha_cult,
         "cld_uptake_cult": cld_uptake_cult,
+        "nutri_cult": nutri_cult,
+        "nutri_alim": nutri_alim,
     }
 
     return Dataset(sets=sets, parameters=parameters, scalars={})

@@ -272,6 +272,17 @@ def compute_composite_scores(raw: pd.DataFrame, weights: dict[str, float]) -> pd
     return (normalized[usable] * w).sum(axis=1) / w.sum()
 
 
+def autonomy_ratios_frame(
+    autonomy_by_series: dict[str, dict], variant: str
+) -> pd.DataFrame:
+    """Nutrient (rows) x series (cols) self-sufficiency ratios for one variant
+    ('crop_only' or 'with_fishing'), from each series' recap food_autonomy[side] dict.
+    Backs the dedicated autonomy panel's grouped bars."""
+    return pd.DataFrame(
+        {label: auto.get(variant, {}) for label, auto in autonomy_by_series.items()}
+    )
+
+
 def series_label(display_name: str, side: str) -> str:
     """Base label for a (run, side) series in legends and pickers: the run's display
     name (its recap `run_name`, or folder name) plus the side. Not guaranteed unique --

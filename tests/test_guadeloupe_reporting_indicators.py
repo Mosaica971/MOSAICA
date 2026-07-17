@@ -43,6 +43,15 @@ def _small_dataset() -> Dataset:
     ges_per_ha_cult = pd.Series({"CS": 2.0, "ME": 1.0})
     ift_per_ha_cult = pd.Series({"CS": 3.0, "ME": 6.0})
     cld_uptake_cult = pd.Series({"CS": 4, "ME": 3})  # CS no uptake, ME class 3
+    # Nutrition: content per tonne (nutrient x crop) and per-individual annual needs +
+    # population (Q_Tot x Ind_Moy = 100) + fishing (Q_Tot x peche = 5 t).
+    nutri_cult = pd.DataFrame(
+        {"CS": [10.0, 2.0], "ME": [100.0, 5.0]}, index=["Kcal", "Prot"]
+    )
+    nutri_alim = pd.DataFrame(
+        {"Ind_Moy": [100.0, 20.0, 6.0], "peche": [5.0, 8.0, 2.0]},
+        index=["Q_Tot", "Kcal", "Prot"],
+    )
     return Dataset(
         sets={},
         parameters={
@@ -57,6 +66,8 @@ def _small_dataset() -> Dataset:
             "ges_per_ha_cult": ges_per_ha_cult,
             "ift_per_ha_cult": ift_per_ha_cult,
             "cld_uptake_cult": cld_uptake_cult,
+            "nutri_cult": nutri_cult,
+            "nutri_alim": nutri_alim,
         },
         scalars={},
     )
@@ -292,6 +303,48 @@ def test_compute_environmental_totals_sums_rates_and_cld_surface():
     assert totals["azote_per_ha"] == pytest.approx(550.0 / 6.0)
     assert totals["ges_per_ha"] == pytest.approx(11.0 / 6.0)
     assert totals["ift_per_ha"] == pytest.approx(21.0 / 6.0)
+
+
+def test_compute_nutrient_production_sums_tonnes_times_content():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+    # production tonnes: CS 5ha*80=400, ME 1ha*20=20
+    result = indicators.compute_nutrient_production(dataset, allocation, include_fishing=False)
+    assert result["Kcal"] == pytest.approx(6000.0)  # 400*10 + 20*100
+    assert result["Prot"] == pytest.approx(900.0)    # 400*2 + 20*5
+
+
+def test_compute_nutrient_production_adds_fishing_when_requested():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+    # fishing = content_peche * tonnage_peche(5): Kcal 8*5=40, Prot 2*5=10
+    result = indicators.compute_nutrient_production(dataset, allocation, include_fishing=True)
+    assert result["Kcal"] == pytest.approx(6040.0)
+    assert result["Prot"] == pytest.approx(910.0)
+
+
+def test_compute_self_sufficiency_ratios_divides_production_by_population_need():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+    # need = Ind_Moy * population(100): Kcal 20*100=2000, Prot 6*100=600
+    ratios = indicators.compute_self_sufficiency_ratios(dataset, allocation, include_fishing=False)
+    assert ratios["Kcal"] == pytest.approx(6000.0 / 2000.0)  # 3.0
+    assert ratios["Prot"] == pytest.approx(900.0 / 600.0)    # 1.5
+
+
+def test_compute_food_autonomy_totals_reports_both_variants_and_limiting():
+    dataset = _small_dataset()
+    allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
+
+    totals = indicators.compute_food_autonomy_totals(dataset, allocation)
+
+    assert totals["population"] == pytest.approx(100.0)
+    assert totals["crop_only"]["kcal"] == pytest.approx(3.0)
+    assert totals["crop_only"]["prot"] == pytest.approx(1.5)
+    assert totals["with_fishing"]["kcal"] == pytest.approx(6040.0 / 2000.0)
+    assert totals["with_fishing"]["prot"] == pytest.approx(910.0 / 600.0)
+    assert totals["limiting_crop_only"] == pytest.approx(1.5)          # Prot binds
+    assert totals["limiting_with_fishing"] == pytest.approx(910.0 / 600.0)
 
 
 def test_compute_gross_margin_by_crop_multiplies_surface_by_margin_rate():

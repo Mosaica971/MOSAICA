@@ -46,6 +46,13 @@ def _tiny_dataset() -> Dataset:
             "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
             "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
             "cld_uptake_cult": pd.Series({"CS": 4, "ME": 3}),
+            "nutri_cult": pd.DataFrame(
+                {"CS": [10.0, 2.0], "ME": [100.0, 5.0]}, index=["Kcal", "Prot"]
+            ),
+            "nutri_alim": pd.DataFrame(
+                {"Ind_Moy": [100.0, 20.0, 6.0], "peche": [5.0, 8.0, 2.0]},
+                index=["Q_Tot", "Kcal", "Prot"],
+            ),
         },
         scalars={},
     )
@@ -212,6 +219,21 @@ def test_generate_report_writes_additional_indicators(tmp_path):
 
     facts_output = pd.read_csv(output_dir / "csv" / "facts_output.csv")
     assert {"ges", "ift", "azote", "surface_cld"} <= set(facts_output.columns)
+
+    # Food-autonomy block. Output = both ME (100 t): Kcal ratio 10000/2000=5.0, Prot
+    # 500/600=0.833 (limiting). Input = both CS (400 t): Kcal 4000/2000=2.0.
+    auto = recap["food_autonomy"]
+    assert set(auto) == {"input", "output", "delta"}
+    assert auto["output"]["population"] == pytest.approx(100.0)
+    assert auto["output"]["crop_only"]["kcal"] == pytest.approx(5.0)
+    assert auto["output"]["crop_only"]["prot"] == pytest.approx(500.0 / 600.0)
+    assert auto["output"]["limiting_crop_only"] == pytest.approx(500.0 / 600.0)
+    assert auto["output"]["with_fishing"]["kcal"] == pytest.approx(10040.0 / 2000.0)
+    assert auto["input"]["crop_only"]["kcal"] == pytest.approx(2.0)
+    assert auto["delta"]["limiting_crop_only"] == pytest.approx(
+        auto["output"]["limiting_crop_only"] - auto["input"]["limiting_crop_only"]
+    )
+    assert auto["delta"]["crop_only"]["kcal"] == pytest.approx(5.0 - 2.0)
 
     etp_by_region = pd.read_csv(output_dir / "csv" / "etp_by_region_output.csv")
     assert list(etp_by_region.columns) == ["region", "etp"]

@@ -173,6 +173,65 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
     }
 
 
+def _nutrients(dataset: Dataset) -> list[str]:
+    """Nutrient row labels of nutri_alim, excluding the Q_Tot (quantity/population) row."""
+    return [n for n in dataset.parameters["nutri_alim"].index if n != "Q_Tot"]
+
+
+def compute_nutrient_production(
+    dataset: Dataset, allocation: pd.Series, include_fishing: bool
+) -> pd.Series:
+    """Nutrients produced territory-wide for one allocation (index = nutrient): crop
+    production in tonnes x per-tonne content (Nutri_Cult), optionally plus the fixed fishing
+    contribution (Nutri_Alim[nutrient, 'peche'] x tonnage Nutri_Alim['Q_Tot', 'peche']).
+    Faithful to OPTIMISATION.txt:1953-1959 (NUTRI_Gwad)."""
+    nutri_cult = dataset.parameters["nutri_cult"]
+    nutri_alim = dataset.parameters["nutri_alim"]
+    nutrients = _nutrients(dataset)
+    production_tonnes = compute_production_tonnes_by_crop(dataset, allocation)
+    content = nutri_cult.reindex(index=nutrients, columns=production_tonnes.index).fillna(0.0)
+    result = content.dot(production_tonnes)
+    if include_fishing:
+        fishing = nutri_alim.loc[nutrients, "peche"] * nutri_alim.loc["Q_Tot", "peche"]
+        result = result + fishing
+    return result
+
+
+def compute_self_sufficiency_ratios(
+    dataset: Dataset, allocation: pd.Series, include_fishing: bool
+) -> pd.Series:
+    """Food self-sufficiency ratio per nutrient (production / population need). 1.0 means the
+    territory produces exactly the population's annual need of that nutrient. Need =
+    Nutri_Alim[nutrient, 'Ind_Moy'] x population (Nutri_Alim['Q_Tot', 'Ind_Moy']). Faithful to
+    RATIO_PROD_BESOIN, OPTIMISATION.txt:1962-1975."""
+    nutri_alim = dataset.parameters["nutri_alim"]
+    nutrients = _nutrients(dataset)
+    production = compute_nutrient_production(dataset, allocation, include_fishing)
+    population = nutri_alim.loc["Q_Tot", "Ind_Moy"]
+    need = nutri_alim.loc[nutrients, "Ind_Moy"] * population
+    return (production / need).replace([np.inf, -np.inf], np.nan)
+
+
+def compute_food_autonomy_totals(dataset: Dataset, allocation: pd.Series) -> dict[str, Any]:
+    """Food self-sufficiency summary for one allocation: per-nutrient ratios in two variants
+    (crop-only and with the fishing contribution), each variant's limiting (minimum) ratio,
+    and the population. Nutrient keys are lower-cased for stable recap keys."""
+    nutri_alim = dataset.parameters["nutri_alim"]
+    crop = compute_self_sufficiency_ratios(dataset, allocation, include_fishing=False)
+    fish = compute_self_sufficiency_ratios(dataset, allocation, include_fishing=True)
+
+    def by_nutrient(ratios: pd.Series) -> dict[str, float]:
+        return {str(k).lower(): float(v) for k, v in ratios.items()}
+
+    return {
+        "population": float(nutri_alim.loc["Q_Tot", "Ind_Moy"]),
+        "crop_only": by_nutrient(crop),
+        "with_fishing": by_nutrient(fish),
+        "limiting_crop_only": float(crop.min()),
+        "limiting_with_fishing": float(fish.min()),
+    }
+
+
 def compute_subsidy_per_tonne_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     subsidy = compute_subsidy_by_crop(dataset, allocation)
     production = compute_production_tonnes_by_crop(dataset, allocation)

@@ -156,6 +156,19 @@ def test_composite_score_single_scenario_is_half():
     assert scores["S1"] == pytest.approx(0.5)
 
 
+def test_autonomy_ratios_frame_pivots_nutrient_by_series_for_a_variant():
+    autonomy_by_series = {
+        "S1": {"crop_only": {"kcal": 2.0, "prot": 1.3}, "with_fishing": {"kcal": 2.1, "prot": 1.4}},
+        "S2": {"crop_only": {"kcal": 5.0, "prot": 0.8}, "with_fishing": {"kcal": 5.1, "prot": 0.9}},
+    }
+    frame = comparison.autonomy_ratios_frame(autonomy_by_series, "crop_only")
+
+    assert list(frame.columns) == ["S1", "S2"]
+    assert set(frame.index) == {"kcal", "prot"}
+    assert frame.loc["kcal", "S2"] == pytest.approx(5.0)
+    assert frame.loc["prot", "S1"] == pytest.approx(1.3)
+
+
 def test_build_grouped_bar_figure_stacked_and_unstacked_return_figures():
     import matplotlib
 
@@ -288,6 +301,13 @@ def _dataset() -> Dataset:
             "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
             "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
             "cld_uptake_cult": pd.Series({"CS": 4, "ME": 3}),
+            "nutri_cult": pd.DataFrame(
+                {"CS": [10.0, 2.0], "ME": [100.0, 5.0]}, index=["Kcal", "Prot"]
+            ),
+            "nutri_alim": pd.DataFrame(
+                {"Ind_Moy": [100.0, 20.0, 6.0], "peche": [5.0, 8.0, 2.0]},
+                index=["Q_Tot", "Kcal", "Prot"],
+            ),
         },
         scalars={},
     )

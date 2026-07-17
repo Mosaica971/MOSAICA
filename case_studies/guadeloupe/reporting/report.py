@@ -75,6 +75,10 @@ def generate_report(
     input_env = indicators.compute_environmental_totals(dataset, input_representative)
     delta_env = {key: output_env[key] - input_env[key] for key in output_env}
 
+    output_auto = indicators.compute_food_autonomy_totals(dataset, output_allocation)
+    input_auto = indicators.compute_food_autonomy_totals(dataset, input_representative)
+    delta_auto = _numeric_delta(output_auto, input_auto)
+
     recap = _build_recap(
         dataset=dataset,
         config=config,
@@ -87,6 +91,7 @@ def generate_report(
         gini_revenue_by_farm=gini_revenue_by_farm,
         economics={"input": input_econ, "output": output_econ, "delta": delta_econ},
         environment={"input": input_env, "output": output_env, "delta": delta_env},
+        food_autonomy={"input": input_auto, "output": output_auto, "delta": delta_auto},
     )
     # Full CULT_2017 universe (every fine crop the model could pick, allocated or not) so the
     # dashboard can show an exhaustive crop/subculture axis including never-chosen crops.
@@ -228,6 +233,19 @@ def _write_allocation_csv(dataset: Dataset, allocation: pd.Series, path: Path) -
     frame.to_csv(path, index=False)
 
 
+def _numeric_delta(output: dict[str, Any], baseline: dict[str, Any]) -> dict[str, Any]:
+    """Recursive output-minus-baseline over a nested dict of numbers (one level of nested
+    dicts, e.g. food_autonomy's crop_only/with_fishing sub-dicts)."""
+    delta: dict[str, Any] = {}
+    for key, out_value in output.items():
+        base_value = baseline[key]
+        if isinstance(out_value, dict):
+            delta[key] = _numeric_delta(out_value, base_value)
+        else:
+            delta[key] = out_value - base_value
+    return delta
+
+
 def _build_recap(
     *,
     dataset: Dataset,
@@ -241,6 +259,7 @@ def _build_recap(
     gini_revenue_by_farm: float,
     economics: dict[str, Any],
     environment: dict[str, Any],
+    food_autonomy: dict[str, Any],
 ) -> dict[str, Any]:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
@@ -273,6 +292,7 @@ def _build_recap(
         "delta": delta_summary,
         "economics": economics,
         "environment": environment,
+        "food_autonomy": food_autonomy,
         "gini_revenue_by_farm": gini_revenue_by_farm,
         "total_plots": int(len(dataset.parameters["data_parc"])),
         "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),
