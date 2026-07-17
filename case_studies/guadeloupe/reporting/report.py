@@ -244,6 +244,9 @@ def _build_recap(
     enabled_objective = next(entry for entry in config["objectives"] if entry.get("enable", False))
     data_cfg = config.get("data", {})
     return {
+        # Set by the scenario batch runner (scripts/run_scenarios.py); None for a plain
+        # single run via main.py. Lets the dashboard label runs by their scenario name.
+        "run_name": config.get("run_name"),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "solve_duration_seconds": duration,
         "termination_condition": str(results.solver.termination_condition),
@@ -274,6 +277,7 @@ def _render_recap_markdown(recap: dict[str, Any]) -> str:
     lines = [
         "# Recap de simulation",
         "",
+        *([f"- Scenario : {recap['run_name']}"] if recap.get("run_name") else []),
         f"- Horodatage : {recap['timestamp']}",
         f"- Duree de resolution : {recap['solve_duration_seconds']:.2f}s",
         f"- Condition de terminaison : {recap['termination_condition']}",

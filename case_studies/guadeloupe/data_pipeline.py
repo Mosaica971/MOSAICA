@@ -4,6 +4,7 @@ from typing import Any
 import pandas as pd
 
 from case_studies.guadeloupe.economics import (
+    apply_crop_multipliers,
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
     compute_labor_hours_per_ha_cult,
@@ -93,6 +94,13 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     scenario: str = data_cfg.get("scenario", DEFAULT_SCENARIO)
     _validate_data_selection(year, scenario)
 
+    # Optional per-crop economic shocks (price / subsidy multipliers). Absent => no-op,
+    # so the baseline economics are unchanged. Used by scenario batches (scenarios.yaml)
+    # to model targeted price / subsidy changes without new data tables.
+    econ_cfg: dict[str, Any] = config.get("economic_overrides") or {}
+    price_multipliers = econ_cfg.get("price_multipliers")
+    subsidy_multipliers = econ_cfg.get("subsidy_multipliers")
+
     sets = {
         "crops": read_flat_set(SETS_DIR / "CULT_2017.set"),
         "soils": read_flat_set(SETS_DIR / "SOL.set"),
@@ -111,7 +119,9 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
     data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
     matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt")
-    prix_cult = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[year]
+    prix_cult = apply_crop_multipliers(
+        read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[year], price_multipliers
+    )
     rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[year]
     var_rdt_cult = read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"]
     bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[year]
@@ -198,6 +208,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_cycle_cult=duree_cycle_cult,
         duree_plant_cult=duree_plant_cult,
     )
+    subsidy_per_ha_cult = apply_crop_multipliers(subsidy_per_ha_cult, subsidy_multipliers)
     sales_per_ha_cult = compute_sales_per_ha_cult(
         rdt_cult=rdt_cult,
         prix_cult=prix_cult,

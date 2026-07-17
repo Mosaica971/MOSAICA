@@ -2,12 +2,41 @@ import pandas as pd
 import pytest
 
 from case_studies.guadeloupe.economics import (
+    apply_crop_multipliers,
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
     compute_labor_hours_per_ha_cult,
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
+
+
+def test_apply_crop_multipliers_none_is_noop():
+    series = pd.Series({"BA": 100.0, "CS": 50.0})
+    result = apply_crop_multipliers(series, None)
+    pd.testing.assert_series_equal(result, series)
+
+
+def test_apply_crop_multipliers_scales_only_listed_crops():
+    series = pd.Series({"BA": 100.0, "CS": 50.0, "IG": 30.0})
+    result = apply_crop_multipliers(series, [{"crops": ["BA"], "factor": 1.2}])
+    assert result["BA"] == pytest.approx(120.0)
+    assert result["CS"] == pytest.approx(50.0)  # untouched
+    assert result["IG"] == pytest.approx(30.0)
+
+
+def test_apply_crop_multipliers_stacks_overlapping_rules_cumulatively():
+    series = pd.Series({"BA": 100.0})
+    result = apply_crop_multipliers(
+        series, [{"crops": ["BA"], "factor": 1.2}, {"crops": ["BA"], "factor": 0.5}]
+    )
+    assert result["BA"] == pytest.approx(60.0)  # 100 * 1.2 * 0.5
+
+
+def test_apply_crop_multipliers_ignores_unknown_crops():
+    series = pd.Series({"BA": 100.0})
+    result = apply_crop_multipliers(series, [{"crops": ["NOPE", "BA"], "factor": 0.0}])
+    assert result["BA"] == pytest.approx(0.0)  # BA scaled, unknown NOPE silently skipped
 
 
 def test_compute_labor_hours_per_ha_cult_weights_otk_by_mo_expl():

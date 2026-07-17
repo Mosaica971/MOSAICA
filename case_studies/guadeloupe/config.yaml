@@ -9,6 +9,19 @@ data:
   year: "2017"        # economic-table column: 2017..2022, or init/calib
   scenario: "RESTIT"  # RESTIT | SMART
 
+# Optional targeted economic shocks, applied on top of the year/scenario economics.
+# Each list holds {crops: [...], factor: <float>} entries; the factor multiplies every
+# listed crop (entries stack when crop lists overlap), crops not listed keep factor 1.0.
+# price_multipliers scale prix_cult (sale price/ha, flows into sales + gross product);
+# subsidy_multipliers scale the total subsidy/ha per crop. Absent (as here) = no shock,
+# i.e. baseline economics. Meant primarily for scenario batches (scenarios.yaml), e.g. a
+# +20% export-banana price or a -50% sugarcane subsidy, without new data tables.
+# economic_overrides:
+#   price_multipliers:
+#     - {crops: [BA, BA_INT, BA_IRR, BA_PER, BA_SINT], factor: 1.2}
+#   subsidy_multipliers:
+#     - {crops: [CS, CS_BT_NISM, CS_BT_NIM], factor: 0.5}
+
 # MILP solver. `name` is the Pyomo solver interface (appsi_highs = HiGHS via Pyomo's
 # persistent APPSI wrapper); `args` passes extra HiGHS options (e.g. mip_rel_gap, threads).
 # See core/model/solver.py.

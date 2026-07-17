@@ -1,0 +1,121 @@
+# Scenario batch spec -- consumed by scripts/run_scenarios.py.
+#
+# Each entry under `runs:` is one solve. A run only lists what it CHANGES relative to
+# the reference config.yaml (in this folder); everything else is inherited. Runs never
+# affect one another -- overrides are applied on a fresh deep-copy of config.yaml each
+# time. Each run writes its own outputs/output_N/ folder, tagged with `name` in recap.json
+# (visible in the dashboard).
+#
+# Three edit channels per run:
+#   overrides: {dotted.path: value}
+#       Set a scalar / dict / whole key by dotted path. Replaces the value entirely.
+#       e.g.  data.year: "2020"        solver.args.mip_rel_gap: 0.01
+#             zone_filter: {include: {islands: [1]}}
+#   enable / disable: [token, ...]
+#       Flip `enable:` on any constraint/objective/rule matched by its `label` (preferred,
+#       unique) or its `name` (matches ALL entries with that name). Use to swap objectives
+#       or toggle a constraint on/off.
+#   set_args: [{label: <label>, args: {...}}, ...]
+#       Shallow-merge `args` into the entry carrying that `label` -- e.g. change a
+#       threshold, max_share, or ratio without retyping the whole entry.
+#
+# One extra field fans a single entry into many runs:
+#   matrix: {dotted.path: [v1, v2, ...], other.path: [...]}
+#       Cartesian product of the listed values -> one run per combination, each folded
+#       into `overrides`. Names get a `__key=value` suffix per dimension.
+#
+# The batch always writes outputs/batch_summary_<timestamp>.csv/.md comparing every run,
+# and by default keeps going if a run fails/infeasible (pass --stop-on-error to abort).
+#
+# Run with:  .venv/Scripts/python scripts/run_scenarios.py
+# Each run launches a real HiGHS solve (~30s on the full dataset). Add a zone_filter
+# override to shrink runs while iterating.
+
+# NOTE: the model is STATIC and the economic-table columns after 2017 are a full copy of
+# 2017 -- varying data.year is meaningless, so no scenario here touches it (all stay 2017).
+# Targeted price/subsidy shocks use data.scenario (RESTIT/SMART) or economic_overrides
+# (per-crop price/subsidy multipliers; see config.yaml).
+
+# Crop groups reused by the economic-shock runs below (YAML anchors; the leading `_` key
+# is ignored by run_scenarios.py, which only reads `runs:`).
+_crop_groups:
+  banane_export: &G_BANANE [BA, BA_INT, BA_IRR, BA_PER, BA_SINT]
+  canne: &G_CANNE
+    [CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
+     CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM, CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM,
+     CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NISM, CS_MG_NIM, CS_MG_IM]
+  maraichage: &G_MARAICHAGE
+    [MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA,
+     MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI, MA_BAG_FER_I, MA_BAG_FER_NI,
+     MA_BAG_NON_I, MA_BAG_NON_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
+     MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI, MA_PAI_BIO_I, MA_PAI_BIO_NI,
+     MA_PAI_VEG_I, MA_PAI_VEG_NI, MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
+
+runs:
+  # --- Contrôle -----------------------------------------------------------------
+  - name: baseline
+    description: "Config de référence inchangée -- run de contrôle pour comparaison."
+
+  # --- Subventions / prix (leviers globaux) -------------------------------------
+  - name: politique_smart
+    description: "Politique SMART : matrice de coûts OTK + subvention compost MAE version SMART."
+    overrides:
+      data.scenario: SMART
+
+  # --- Chocs prix / subvention ciblés par filière -------------------------------
+  - name: prix_banane_plus20
+    description: "Prix de la banane export +20% -- la filière gagne-t-elle des surfaces ?"
+    overrides:
+      economic_overrides.price_multipliers:
+        - {crops: *G_BANANE, factor: 1.2}
+
+  - name: subv_canne_moins50
+    description: "Subvention canne à sucre -50% -- robustesse de la canne à une baisse d'aide."
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: *G_CANNE, factor: 0.5}
+
+  - name: choc_prix_maraichage_moins30
+    description: "Prix maraîchage -30% -- effet sur le respect du plancher légumes."
+    overrides:
+      economic_overrides.price_multipliers:
+        - {crops: *G_MARAICHAGE, factor: 0.7}
+
+  # --- Interdictions / quotas ---------------------------------------------------
+  - name: interdiction_banane_export
+    description: "Plafond de production banane export ramené à 0 -- bannit la filière du territoire."
+    set_args:
+      - {label: ba_quota_max, args: {threshold: 0}}
+
+  - name: canne_plafond_bas
+    description: "Plafond sucre divisé ~par 3 (107k -> 30k t) -- resserre fortement la canne."
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 30000}}
+
+  - name: libre_friche
+    description: "Lève le verrou jachère 2015-17 (friche_lock) -- rend les parcelles bloquées jouables."
+    disable: [friche_lock]
+
+  - name: melon_libre
+    description: "Lève les restrictions sol/région/île du melon (reste soumis à l'irrigation)."
+    disable: [melon_soil_restriction, region_crop_forbidden]
+
+  - name: sans_planchers_production
+    description: "Retire tous les planchers/objectifs de production -- optimum 'pur marge' sans obligations."
+    disable:
+      - bc_prod_min
+      - ig_prod_min
+      - ma_prod_min
+      - an_prod_min
+      - plu_prod_min
+      - me_prod_min
+      - pn_prod_min
+      - leg_prod_obj
+      - fru_prod_obj
+      - pat_surf_obj
+
+  # --- Objectif -----------------------------------------------------------------
+  - name: aversion_risque
+    description: "Bascule sur l'objectif Markowitz (marge ajustée du risque) au lieu de la marge brute."
+    enable: [maximize_risk_adjusted_gross_margin]
+    disable: [maximize_gross_margin]

@@ -1,4 +1,27 @@
+from typing import Any
+
 import pandas as pd
+
+
+def apply_crop_multipliers(
+    series: pd.Series, rules: list[dict[str, Any]] | None
+) -> pd.Series:
+    """Scale a per-crop economic Series (e.g. prix_cult, subsidy_per_ha_cult) by
+    crop-group multipliers, for price-shock / subsidy-cut scenarios without new data.
+
+    `rules` is a list of ``{crops: [...], factor: <float>}`` entries. Each entry
+    multiplies the factor into every listed crop present in the Series; entries stack
+    cumulatively when their crop lists overlap. A None/empty `rules` is a no-op that
+    returns the Series unchanged (so a config without economic_overrides reproduces the
+    baseline economics exactly). Crop codes not present in the Series index are ignored.
+    """
+    if not rules:
+        return series
+    factors = pd.Series(1.0, index=series.index)
+    for rule in rules:
+        present = [c for c in rule["crops"] if c in factors.index]
+        factors.loc[present] *= rule["factor"]
+    return series * factors
 
 
 def compute_variable_cost_per_ha_cult(
