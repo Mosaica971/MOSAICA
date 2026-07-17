@@ -49,22 +49,24 @@ if not runs:
 
 
 def _discover_series() -> dict[str, dict]:
-    """Label -> {run_dir, side, recap} for every (run, side) that has a facts table."""
-    found: dict[str, dict] = {}
+    """Label -> {run_dir, side, recap} for every (run, side) that has a facts table.
+    Runs are labelled by their recap `run_name` (folder name as fallback); a base label
+    shared by two runs (same run_name and side) is disambiguated with the folder name."""
+    entries: list[dict] = []
+    base_rows: list[tuple[str, str]] = []
     for run_dir in runs:
         try:
             recap = loaders.load_recap(run_dir)
         except (OSError, ValueError):
             recap = {}
-        data = recap.get("data", {})
+        display_name = loaders.run_display_name(run_dir, recap)
         for side in SIDES:
             if loaders.load_facts(run_dir, side) is None:
                 continue
-            label = comparison.series_label(
-                run_dir.name, side, data.get("year", "?"), data.get("scenario", "?")
-            )
-            found[label] = {"run_dir": run_dir, "side": side, "recap": recap}
-    return found
+            entries.append({"run_dir": run_dir, "side": side, "recap": recap})
+            base_rows.append((comparison.series_label(display_name, side), run_dir.name))
+    labels = comparison.series_labels(base_rows)
+    return {label: entry for label, entry in zip(labels, entries)}
 
 
 series_catalog = _discover_series()

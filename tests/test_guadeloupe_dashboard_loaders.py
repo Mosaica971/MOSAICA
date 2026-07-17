@@ -53,3 +53,15 @@ def test_load_csv_returns_none_when_missing(tmp_path):
     run_dir.mkdir()
 
     assert loaders.load_csv(run_dir, "missing.csv") is None
+
+
+def test_run_display_name_prefers_run_name(tmp_path):
+    run_dir = tmp_path / "output_7"
+    assert loaders.run_display_name(run_dir, {"run_name": "choc_prix"}) == "choc_prix"
+
+
+def test_run_display_name_falls_back_to_folder_when_absent_or_empty(tmp_path):
+    run_dir = tmp_path / "output_1"
+    assert loaders.run_display_name(run_dir, {}) == "output_1"
+    assert loaders.run_display_name(run_dir, {"run_name": ""}) == "output_1"
+    assert loaders.run_display_name(run_dir, {"run_name": None}) == "output_1"

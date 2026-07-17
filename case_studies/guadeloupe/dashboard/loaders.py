@@ -28,6 +28,12 @@ def load_recap(run_dir: Path) -> dict[str, Any]:
     return json.loads((run_dir / "recap.json").read_text())
 
 
+def run_display_name(run_dir: Path, recap: dict[str, Any]) -> str:
+    """Human label for a run: its recap `run_name`, or the folder name as fallback
+    (runs made before the run_name field, e.g. output_1/output_2)."""
+    return recap.get("run_name") or run_dir.name
+
+
 def load_facts(run_dir: Path, side: str) -> pd.DataFrame | None:
     """Tidy (crop x region) fact table for one side ('output'/'input'), or None if the run
     predates the facts table (older output folders)."""

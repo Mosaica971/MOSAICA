@@ -30,8 +30,19 @@ if not runs:
     st.info("Aucun run trouve dans `outputs/` -- lancez `python main.py` d'abord.")
     st.stop()
 
-run_dir = st.selectbox("Run", runs, format_func=lambda path: path.name)
-recap = loaders.load_recap(run_dir)
+# Preload recaps so the selectbox can label each run by its recap `run_name` (folder name
+# as fallback). An unreadable recap degrades to {} -> folder-name fallback.
+_recaps: dict[Path, dict] = {}
+for _run in runs:
+    try:
+        _recaps[_run] = loaders.load_recap(_run)
+    except (OSError, ValueError):
+        _recaps[_run] = {}
+
+run_dir = st.selectbox(
+    "Run", runs, format_func=lambda path: loaders.run_display_name(path, _recaps[path])
+)
+recap = _recaps[run_dir]
 
 st.header("Recap")
 col1, col2, col3 = st.columns(3)

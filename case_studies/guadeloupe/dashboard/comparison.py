@@ -227,10 +227,26 @@ def positive_floor(pivots: list[pd.DataFrame]) -> float:
     return min(positives) if positives else 1.0
 
 
-def series_label(run_name: str, side: str, year: object, scenario: object) -> str:
-    """Stable, human label for a (run, side) series in legends and pickers."""
+def series_label(display_name: str, side: str) -> str:
+    """Base label for a (run, side) series in legends and pickers: the run's display
+    name (its recap `run_name`, or folder name) plus the side. Not guaranteed unique --
+    two runs sharing a run_name collide; series_labels() disambiguates a full list."""
     side_fr = {"output": "sortie", "input": "entrée"}.get(side, side)
-    return f"{run_name} · {side_fr} ({year}/{scenario})"
+    return f"{display_name} · {side_fr}"
+
+
+def series_labels(rows: list[tuple[str, str]]) -> list[str]:
+    """Disambiguated series labels, aligned with `rows` = [(base_label, folder_name), ...].
+    A base_label shared by several rows (two runs with the same run_name and side) gets
+    ` (folder_name)` appended so dashboard series keys stay unique; unique labels pass
+    through untouched. Two series of one run never collide (their side differs)."""
+    counts: dict[str, int] = {}
+    for base_label, _ in rows:
+        counts[base_label] = counts.get(base_label, 0) + 1
+    return [
+        f"{base_label} ({folder})" if counts[base_label] > 1 else base_label
+        for base_label, folder in rows
+    ]
 
 
 def _stratum_colors(strata: list[object]) -> dict[object, object]:

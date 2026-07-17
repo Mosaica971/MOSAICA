@@ -85,13 +85,30 @@ def test_positive_floor_is_smallest_strictly_positive_stratum():
     assert comparison.positive_floor([]) == 1.0
 
 
-def test_series_label_is_human_readable():
-    assert comparison.series_label("output_4", "output", 2017, "RESTIT") == (
-        "output_4 · sortie (2017/RESTIT)"
-    )
-    assert comparison.series_label("output_4", "input", 2020, "SMART") == (
-        "output_4 · entrée (2020/SMART)"
-    )
+def test_series_label_is_run_name_plus_side():
+    assert comparison.series_label("baseline", "output") == "baseline · sortie"
+    assert comparison.series_label("baseline", "input") == "baseline · entrée"
+
+
+def test_series_labels_leaves_unique_base_labels_untouched():
+    rows = [("baseline · sortie", "output_3"), ("melon_libre · sortie", "output_11")]
+    assert comparison.series_labels(rows) == [
+        "baseline · sortie",
+        "melon_libre · sortie",
+    ]
+
+
+def test_series_labels_suffixes_only_colliding_labels_with_folder():
+    rows = [
+        ("baseline · sortie", "output_3"),
+        ("baseline · sortie", "output_9"),
+        ("melon_libre · sortie", "output_11"),
+    ]
+    assert comparison.series_labels(rows) == [
+        "baseline · sortie (output_3)",
+        "baseline · sortie (output_9)",
+        "melon_libre · sortie",
+    ]
 
 
 def test_build_grouped_bar_figure_stacked_and_unstacked_return_figures():
