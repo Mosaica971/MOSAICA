@@ -22,10 +22,53 @@ Décisions utilisateur (brainstorming du 2026-07-17) :
 - Périmètre code : **les 3 briques maintenant** + **tout porter** (ITK CS/CF/région,
   `Eq_MO_MAX_Expl`, `cost_multipliers`).
 
-Ce chantier est volumineux et multi-sous-systèmes. Il est **décomposé en 5 lots séquencés** ;
-chaque lot est autonome, testé, et peut être commité indépendamment. Les lots 3 et 4 portent des
-**risques de disponibilité de données** explicités ci-dessous — s'ils se confirment bloquants, le
-lot bascule en « documenté / différé » sans compromettre les lots précédents.
+Ce chantier est volumineux et multi-sous-systèmes. Il est **décomposé en lots séquencés** ;
+chaque lot est autonome, testé, et peut être commité indépendamment.
+
+---
+
+## Verdict de disponibilité des données (investigation `data/` du 2026-07-17)
+
+Sur demande utilisateur, inspection de `data/` **avant** planification, pour ne garder que ce qui
+repose sur des données **existantes**.
+
+### Régions — ambiguïté tranchée
+Deux référentiels **distincts**, tous deux présents :
+- **`Data_Parc_Gwad_2017.txt["REGION"]`** : entier **1–7**, macro-régions agro
+  (NGT=3, EGT=2, CGT=1, SBT=5, BT=4/6, …). C'est **exactement** le `Data_Parc_Gwad(SP,"REGION")`
+  des équations GAMS d'interdiction ITK (canne, canne-fibre, vergers). Le pipeline Python **charge
+  déjà cette colonne** (`data_parc["REGION"]`) mais ne l'utilise dans **aucune** règle. → à câbler
+  au lot 2.
+- **`REG_PARC_2017.set`** : codes **R0–R27** (« petites régions » ≈ 27 communes), source du
+  `REGION_CODE` recalculé en Python. C'est le set `R` de GAMS (`Eq_ME_Reg`, ban melon par commune).
+  La règle `region_crop_forbidden` (melon) l'utilise **déjà correctement**.
+
+Vérif croisée données : parcelle commune 97102 → `REGION`=3 (NGT, cohérent avec la liste communale
+de `Eq_CS_NGT`), `ILE`=2. Encodage `ILE` confirmé par les équations : **1=Basse-Terre,
+2=Grande-Terre, 3=Marie-Galante**. Toutes les colonnes du lot 2 (`SOL_COURT`, `CONFORM`,
+`IRRIG_PARC`, `ALTITUDE`, `PLUVIO_PARC`, `COMMUNE`, `RISQUE_CLD`, `TYPE_SOL`) sont présentes.
+→ **Le point ouvert « REGION vs REGION_CODE » de `VIGILANCE.md` est résolu** (à déplacer en « Résolu »).
+
+### Verdict par lot
+
+| Lot | Donnée requise | Statut | Décision |
+|---|---|---|---|
+| 1 — Leviers | aucune nouvelle | — | **IN** |
+| 2 — Bans ITK géo | `REGION`(1–7)/`COMMUNE`/`ILE`/`SOL_COURT`/`CONFORM`/`IRRIG`/`ALTITUDE`/`PLUVIO` | tous présents | **IN** (régions résolues) |
+| 3 — `Eq_MO_MAX_Expl` | `MO_Expl_init` ← allocation **fine** 2017 par ferme | **inexistante** | **MIS DE CÔTÉ** |
+| 4 — Bloc CF | OTK/Data_Cult/`Prix_Cult_CF`/`Rdt_Cult_CF` (10 codes fins) + `Q_CF_MIN` | tout présent | **IN** (gros câblage) |
+| 5 — Scénarios/nettoyage/inventaire | aucune | — | **IN** |
+
+**Lot 3 mis de côté — justification données.** `MO_Expl_init(E)=Σ_plots surf·Matrice_Parc_Cult(plot,SC)·MO_Ha_Cult_init(SC)`
+(`ENTREES.txt:466-469`). Or `Matrice_Parc_Cult` ne mappe les parcelles que vers des **codes
+agrégats**, et il est vérifié que **les colonnes OTK des agrégats sont vides** (AN/BA/BC/CS/IG/MA/PN/VE :
+0 opération) ⇒ `MO_Ha_Cult_init(agrégat)=0` ⇒ `MO_Expl_init=0` pour **toute** ferme ⇒ contrainte
+`Σ MO ≤ 0` infaisable. Reproduire un `MO_Expl_init` réaliste exigerait l'**allocation fine 2017**
+(inexistante, cf. point ouvert VIGILANCE) ou des valeurs MO/ferme manuelles (le GAMS a un
+`*MO_Expl_init("E1")=5000;` commenté, trace d'un réglage manuel non documenté). Conforme à la
+consigne « laisser de côté ce qui nécessite des données inexistantes » : **lot 3 non implémenté**,
+seulement consigné dans l'inventaire + VIGILANCE comme différé (réactivable si l'on assume
+l'approximation par cultures représentantes du point 4 pour le RHS).
 
 ---
 
@@ -134,13 +177,11 @@ couvrent les patrons observés, et les instancier depuis `config.yaml` :
 - Sous-groupes `SC_CS_MECA/IRRIG/BT/SBT/NGT/CGT/EGT/MG` : transcrits depuis `SETS.txt:122-170`
   vers des ancres YAML `crop_families`.
 
-### ⚠️ Risque bloquant : ambiguïté `REGION` vs `REGION_CODE`
-Point ouvert **Mineur** de `VIGILANCE.md`. Le GAMS lit tantôt `Data_Parc_Gwad("REGION")`, tantôt
-`Data_RPG_Gwad("REGION")` (numériques 1–6). Le Python a `data_parc["REGION"]` **et** un
-`REGION_CODE` recalculé (`R0`…`R27`, jointure `REG_PARC_2017.set`). **Avant** de porter ces règles,
-il faut trancher quelle colonne correspond au `REGION` numérique du GAMS et confirmer l'encodage
-`ILE` (1=Basse-Terre, 2=Grande-Terre, 3=Marie-Galante, déduit des équations). C'est la **première
-tâche** du lot 2, gate pour le reste. Sans cette résolution, le port serait faux silencieusement.
+### Régions — résolu (voir « Verdict de disponibilité des données » ci-dessus)
+Les bans ITK utilisent la colonne **`data_parc["REGION"]` (entier 1–7)** — déjà chargée, jamais
+utilisée en règle — et **`data_parc["COMMUNE"]`** / **`data_parc["ILE"]`** (1=BT, 2=GT, 3=MG).
+**Ne PAS** confondre avec `REGION_CODE` (R0–R27, petites régions), réservé au ban melon. Point
+`VIGILANCE.md` « REGION vs REGION_CODE » résolu.
 
 ### Tests lot 2
 Data-free : masque d'éligibilité sur mini-`data_parc` synthétique (quelques parcelles aux
@@ -150,47 +191,39 @@ les paires éligibles avant/après le port et vérifier une baisse cohérente (p
 
 ---
 
-## Lot 3 — Port `Eq_MO_MAX_Expl` (plafond main-d'œuvre par exploitation)
+## Lot 3 — `Eq_MO_MAX_Expl` (plafond MO par ferme) — MIS DE CÔTÉ (données inexistantes)
 
-`MODELE.txt:368` :
-```
-Eq_MO_MAX_Expl(SE).. sum(SP∈E, sum(SC, X(SP,SC) * MO_Ha_Cult_init(SC))) =l= MO_Expl_init(SE);
-```
-Contrainte par ferme : les heures de MO mobilisées (au barème **init**) ≤ MO disponible initiale de
-la ferme. Nouvelle contrainte `farm_labor_max` (patron `farm_area_share_max`, garde booléen trivial).
-
-### ⚠️ Risque : disponibilité des données `init`
-Nécessite `MO_Ha_Cult_init` (heures/ha par culture, colonne `init`) et `MO_Expl_init` (MO dispo par
-ferme). `MO_Ha_Cult` est déjà calculé (colonne `year`) ; la variante `init` et surtout
-`MO_Expl_init` (par exploitation) doivent être **localisées dans `data/`** avant implémentation.
-**Première tâche du lot** : confirmer l'existence/format de ces tables. Si `MO_Expl_init` n'existe
-pas, le lot bascule en « documenté / différé » (la contrainte est codée + testée data-free, mais
-laissée `enable: false` avec commentaire, faute de données).
-
-### Intérêt scénarios
-Oppose « mise en commun » (plafond MO désactivé / mutualisé) vs contrainte par ferme réaliste.
+**Non implémenté cette session** (verdict données ci-dessus : `MO_Expl_init` dépend de l'allocation
+fine 2017 inexistante ⇒ vaudrait 0 partout ⇒ contrainte infaisable). Consigné dans l'inventaire GAMS
+et `VIGILANCE.md` comme différé, avec la piste de réactivation (assumer les cultures représentantes
+du point 4 pour le RHS — approximation, non fidèle GAMS). La contrainte MILP elle-même
+(`farm_labor_max`, patron `farm_area_share_max`) est triviale à coder si les données arrivent.
 
 ---
 
-## Lot 4 — Port du bloc canne-fibre (CF) — le plus lourd, gate données
+## Lot 4 — Port du bloc canne-fibre (CF) — data-complet, le plus lourd (câblage pipeline)
 
-Bloc `Eq_CF_*` (`MODELE.txt` / `SETS.txt:274-282`, `434`) : restrictions ITK CF (SOL_SQUE, CONFORM,
-région BT/SBT/NGT/CGT/EGT/MG), plancher `Eq_CF_MIN` (`Σ X·RDT_Cult_CF ≥ Q_CF_MIN`), interdiction sur
-non-cultivé `Eq_CF_NC`, et bans par type d'exploitation `Eq_CF_T0..T8` (CF interdit selon
-`MATRICE_TYPE_EXPL`).
+Bloc `Eq_CF_*` (`MODELE.txt`/`SETS.txt:274-282`, `434`) : restrictions ITK CF (SOL_SQUE, CONFORM,
+région BT/SBT/NGT/CGT/EGT/MG via `data_parc["REGION"]`), plancher `Eq_CF_MIN`
+(`Σ X·RDT_Cult_CF ≥ Q_CF_MIN`), interdiction sur non-cultivé `Eq_CF_NC`, bans par type
+d'exploitation `Eq_CF_T0..T8` (via `MATRICE_TYPE_EXPL`, i.e. `type_expl` déjà calculé en Python).
 
-### ⚠️ Risque bloquant : données CF non chargées
-`VIGILANCE.md` note déjà que `Prix_Cult_CF_{RESTIT,SMART}` et `Rdt_Cult_CF_{RESTIT,SMART}` **ne sont
-pas chargés** par le pipeline, et `Q_CF_MIN` / `MATRICE_TYPE_EXPL` restent à câbler. Les cultures CF
-apparaissent aujourd'hui dans `friche_lock` et les ratios de rotation, mais **sans économie ni
-éligibilité propres**. Porter le bloc CF complet = travail de **data-pipeline** (charger les tables
-CF, les brancher dans l'économie) + les règles/contraintes.
+### Données : présentes (vérifié)
+Les 10 codes CF fins (`CF_NBT_NISM`…`CF_EGT_NIM`) ont : colonnes dans `Matrice_OTK_Cult_{RESTIT,SMART}`
+(coût/MO/azote/GES/IFT dérivables comme les autres), lignes dans `Data_Cult` (bornes d'éligibilité),
+prix/rendement dans `Prix_Cult_CF_{RESTIT,SMART}` / `Rdt_Cult_CF_{RESTIT,SMART}`. `Q_CF_MIN` est un
+scalaire de `DONNEES.txt` (valeur à extraire lors de l'implémentation). **Rien d'inexistant.**
 
-**Recommandation** : traiter le lot 4 en **dernier**, précédé d'une tâche de confirmation des
-données CF. Les restrictions ITK CF (région/sol) réutilisent les règles génériques du lot 2 — peu
-coûteuses une fois le lot 2 fait. Mais `Eq_CF_MIN` et l'économie CF dépendent des tables. Si les
-données manquent, porter **seulement** les restrictions ITK CF (règles catégorielles) et **différer**
-`Eq_CF_MIN` + économie CF, documenté dans `VIGILANCE.md`.
+### Travail réel = câblage pipeline
+Le pipeline ne **charge pas** encore les tables CF ni ne calcule l'économie CF (les codes CF
+n'apparaissent aujourd'hui que dans `friche_lock` et les ratios de rotation, sans prix/rdt propres).
+À faire : charger `Prix_Cult_CF`/`Rdt_Cult_CF` (pilotés par `scenario`), les fusionner dans les
+séries économiques, ajouter les 10 codes à l'éligibilité, porter les 6 règles ITK CF + `Eq_CF_NC` +
+`Eq_CF_T0..T8`, et la contrainte `Eq_CF_MIN` (via `territory_production_bound` `ge` avec le seuil
+`Q_CF_MIN`). CF n'est pertinent qu'en **scénario SMART** (RESTIT interdit CF, `Eq_CF_SUPP`).
+
+C'est un **sous-projet à part entière** ; il est séquencé **en dernier** et pourrait justifier son
+propre plan d'implémentation. Sequençable indépendamment des lots 1/2/5.
 
 ---
 
@@ -213,8 +246,9 @@ scénario documenté (`name` + `description`). Familles :
 
 Les scénarios « contraints » (`cap_intensif`, `bio_contraint`, `bio_fort`) reposent sur
 `crop_share_bound` (lot 1.4) ; `choc_petrole` sur `cost_multipliers` (lot 1.2) ; les chocs
-climatiques sur `yield_multipliers` (1.1) + `forbid_crops` (1.3) ; `mise_en_commun` désactive
-`an_agro_max_expl` / `ig_agro_max_expl` / (si lot 3 abouti) `farm_labor_max`.
+climatiques sur `yield_multipliers` (1.1) + `forbid_crops` (1.3) ; `mise_en_commun` désactive les
+plafonds de rotation par exploitation `an_agro_max_expl` / `ig_agro_max_expl` (le plafond MO/ferme
+`farm_labor_max` étant mis de côté, lot 3).
 
 ### 5.2 Nettoyage
 - `tub_prod_obj` (désactivé, seuil 0, no-op) : commenter explicitement comme placeholder ou retirer.
@@ -234,9 +268,10 @@ items traités en « Résolu », consigner les différés (CF économie, MO_Expl
 
 ## Séquencement et non-goals
 
-**Ordre** : Lot 1 (débloque les scénarios) → Lot 2 (parité ITK, gate REGION) → Lot 5 partiel
-(scénarios exprimables) → Lot 3 (MO_MAX, gate données) → Lot 4 (CF, gate données) → Lot 5 final
-(inventaire + VIGILANCE). Chaque lot = commit(s) autonome(s).
+**Ordre** : Lot 1 (débloque les scénarios) → Lot 2 (parité ITK, régions résolues) → Lot 5 partiel
+(scénarios exprimables + nettoyage) → Lot 4 (CF, câblage pipeline, séparable) → Lot 5 final
+(inventaire + VIGILANCE). **Lot 3 (MO_MAX) mis de côté** (données inexistantes). Chaque lot =
+commit(s) autonome(s).
 
 **Non-goals** :
 - **Aucun solve lancé** cette session (ni `main.py`, ni `run_scenarios.py`). Livraison = fichiers +
@@ -245,6 +280,7 @@ items traités en « Résolu », consigner les différés (CF économie, MO_Expl
   indicateurs existants ; à vérifier au fil de l'eau, pas un objectif).
 - Pas de redimensionnement des quotas territoriaux pour les chocs (choix assumé, cf. VIGILANCE).
 
-**Dépendances externes à confirmer (gates)** : encodage `REGION`/`ILE` (lot 2), tables
-`MO_*_init` (lot 3), tables/plancher CF (lot 4). Chaque gate non satisfait ⇒ le lot est codé+testé
-data-free mais laissé désactivé + documenté, sans bloquer les autres.
+**Dépendances de données — toutes tranchées (investigation 2026-07-17)** : régions résolues
+(lot 2, `data_parc["REGION"]` 1–7), CF data-complet (lot 4, juste non câblé), MO_MAX écarté faute
+de l'allocation fine 2017. Aucun gate résiduel ; le périmètre implémenté est entièrement adossé à
+des données existantes.
