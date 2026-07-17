@@ -6,7 +6,7 @@ venv/
 *.egg-info/
 /data/
 mosaica_solve_history.json
-/outputs/
+#/outputs/
 .worktrees/
 .claude/*.lock
 Rapport technique variables MOSAICA_v2.docx
