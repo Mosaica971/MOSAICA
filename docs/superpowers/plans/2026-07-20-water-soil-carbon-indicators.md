@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - **Reporting seul.** Aucune contrainte, aucun objectif, aucune modification du modèle Pyomo. L'allocation ne change pas.
-- **Tests sans `data/`.** Convention du repo : configs minuscules montées à la main (cf. `tests/test_guadeloupe_constraints.py`). Aucun test de ce lot ne lit `data/` ni ne résout de MILP.
+- **Tests de logique sans `data/`.** Convention du repo : configs minuscules montées à la main (cf. `tests/test_guadeloupe_constraints.py`). Toute la logique de calcul (Tasks 1, 2, 4, 5) se teste ainsi. **Seule exception :** `tests/test_guadeloupe_pipeline.py` (Task 3) construit le vrai dataset via `build_dataset(CONFIG)` — c'est la convention déjà établie de ce fichier, et le seul moyen de vérifier que les paramètres sont bien enregistrés. Aucun test de ce lot ne résout de MILP.
 - **Ne jamais lancer `main.py` ni `scripts/run_scenarios.py`.** Solves réels, ~30–55 min, réservés à une demande explicite de l'utilisateur en fin de journée.
 - **Mapping des types de sol par nom, jamais par position.** `1→VERTISOL, 2→FERRALSOL, 3→ANDOSOL, 4→NITISOL, 5→AUTRES`. L'ordre de `SOL.set` et des colonnes de `Data_Sol.txt` est différent (`NITISOL, ANDOSOL, FERRALSOL, AUTRES, VERTISOL`) : indexer par position produit des coefficients faux mais plausibles.
 - **Conversion eau :** 1 mm sur 1 ha = 10 m³. Constante nommée `M3_PER_MM_PER_HA = 10.0`.
@@ -431,7 +431,7 @@ git commit -m "feat(indicateurs): bilan de carbone organique du sol"
 
 **Files:**
 - Modify: `case_studies/guadeloupe/data_pipeline.py` (lecture de `Data_Sol.txt`, calcul des taux, enregistrement dans `parameters`)
-- Test: `tests/test_guadeloupe_pipeline_rates.py` (créer)
+- Modify: `tests/test_guadeloupe_pipeline.py` (étendre — ce fichier lit `data/` via `build_dataset`, c'est la convention établie pour les tests de pipeline)
 
 **Interfaces:**
 - Consumes: Task 1 (`water.compute_water_need_per_ha_cult`, `water.compute_monthly_water_need_per_ha_cult`), Task 2 (`soil_carbon.compute_carbon_input_per_ha_cult`).
@@ -445,48 +445,46 @@ Note : `read_wide_table` (`core/data/readers.py`) lit déjà n'importe quelle ta
 
 - [ ] **Step 1: Write the failing test**
 
-Créer `tests/test_guadeloupe_pipeline_rates.py` :
+Ajouter à la fin de `tests/test_guadeloupe_pipeline.py` (qui construit déjà le vrai dataset
+via `build_dataset(CONFIG)` en tête de fichier) :
 
 ```python
-"""Vérifie que les nouveaux paramètres sont enregistrés, sans lire data/."""
+def test_build_dataset_registers_water_and_carbon_rates():
+    """Les nouveaux taux sont enregistrés, indexés par culture, et non dégénérés."""
+    dataset = build_dataset(CONFIG)
+    crops = dataset.sets["crops"]
 
-import pandas as pd
+    water_need = dataset.parameters["water_need_per_ha_cult"]
+    carbon_input = dataset.parameters["carbon_input_per_ha_cult"]
+    monthly = dataset.parameters["monthly_water_need_per_ha_cult"]
 
-from case_studies.guadeloupe import soil_carbon, water
+    assert set(water_need.index) == set(crops)
+    assert set(carbon_input.index) == set(crops)
+    assert list(monthly.index) == [f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]
+    # Le total annuel est bien la somme des 12 mois.
+    assert water_need.sum() == pytest.approx(monthly.to_numpy().sum())
+    # Non dégénéré: au moins une culture a un besoin en eau et un apport carbone non nuls.
+    assert (water_need > 0).any()
+    assert (carbon_input > 0).any()
 
 
-def test_water_and_carbon_rates_compose_into_crop_indexed_series():
-    """Contrat attendu par data_pipeline: des Series indexées par culture, prêtes à être
-    reindexées sur une allocation."""
-    data_cult = pd.DataFrame(
-        {
-            **{f"BESOIN_EAU_{m:02d}": [5.0, 1.0] for m in range(1, 13)},
-            "BIOM_AER": [10.0, 1.0],
-            "RAC": [0.5, 0.0],
-            "CARB": [0.4, 0.4],
-            "HRES": [0.5, 0.5],
-            "KCROP": [1.0, 1.0],
-        },
-        index=["CROP_A", "CROP_B"],
-    ).T
-    data_otk = pd.DataFrame(
-        {"DOSE": [2.0], "HUM": [0.5], "CARB": [0.3], "FHUM": [1.0]}, index=["COMPOST"]
-    )
-    matrice = pd.DataFrame({"CROP_A": [1.0], "CROP_B": [0.0]}, index=["COMPOST"])
+def test_build_dataset_loads_soil_table_with_all_five_soils():
+    dataset = build_dataset(CONFIG)
+    data_sol = dataset.parameters["data_sol"]
 
-    annual_water = water.compute_water_need_per_ha_cult(data_cult)
-    carbon_input = soil_carbon.compute_carbon_input_per_ha_cult(data_cult, data_otk, matrice)
-
-    assert list(annual_water.index) == ["CROP_A", "CROP_B"]
-    assert annual_water["CROP_A"] == 60.0  # 12 mois x 5 mm
-    assert list(carbon_input.index) == ["CROP_A", "CROP_B"]
-    assert carbon_input["CROP_A"] == 3.3  # residus 3.0 + amendement 0.3
+    assert set(data_sol.index) >= {"KAER", "DENS", "PROF"}
+    assert set(data_sol.columns) == {
+        "NITISOL", "ANDOSOL", "FERRALSOL", "AUTRES", "VERTISOL"
+    }
+    # Les coefficients de minéralisation diffèrent entre sols -- sinon le choix du sol
+    # n'aurait aucun effet sur le bilan carbone.
+    assert data_sol.loc["KAER"].nunique() > 1
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `.venv/Scripts/python -m pytest tests/test_guadeloupe_pipeline_rates.py -v`
-Expected: PASS immédiatement (le test ne fait que verrouiller le contrat des Tasks 1–2). Si FAIL, une signature de Task 1 ou 2 a dérivé — corriger avant de continuer.
+Run: `.venv/Scripts/python -m pytest tests/test_guadeloupe_pipeline.py::test_build_dataset_registers_water_and_carbon_rates tests/test_guadeloupe_pipeline.py::test_build_dataset_loads_soil_table_with_all_five_soils -v`
+Expected: FAIL — `KeyError: 'water_need_per_ha_cult'`
 
 - [ ] **Step 3: Wire the pipeline**
 
@@ -523,7 +521,7 @@ Enfin, dans le dict `parameters`, après `"ift_per_ha_cult": ift_per_ha_cult,` :
 
 - [ ] **Step 4: Verify the pipeline still imports and the suite is green**
 
-Run: `.venv/Scripts/python -m pytest tests/test_guadeloupe_pipeline_rates.py tests/test_guadeloupe_water.py tests/test_guadeloupe_soil_carbon.py -v`
+Run: `.venv/Scripts/python -m pytest tests/test_guadeloupe_pipeline.py tests/test_guadeloupe_water.py tests/test_guadeloupe_soil_carbon.py -v`
 Expected: PASS — 12 passed
 
 Puis vérifier que le module s'importe sans erreur de syntaxe :
@@ -533,7 +531,7 @@ Expected: aucune sortie, code de retour 0
 - [ ] **Step 5: Commit**
 
 ```bash
-git add case_studies/guadeloupe/data_pipeline.py tests/test_guadeloupe_pipeline_rates.py
+git add case_studies/guadeloupe/data_pipeline.py tests/test_guadeloupe_pipeline.py
 git commit -m "feat(indicateurs): lecture de Data_Sol et enregistrement des taux eau/carbone"
 ```
 
@@ -575,6 +573,7 @@ def _dataset() -> Dataset:
             "TYPE_SOL": [1, 4],
             "SURF_HA": [2.0, 3.0],
             "IRRIG_PARC": [1, 0],  # P2 non irrigable -> 0 en eau
+            "RISQUE_CLD": [5, 5],  # requis par compute_environmental_totals (aucun risque)
         },
         index=["P1", "P2"],
     )
@@ -616,6 +615,12 @@ def _dataset() -> Dataset:
         "water_need_per_ha_cult": monthly.sum(axis=0),
         "monthly_water_need_per_ha_cult": monthly,
         "carbon_input_per_ha_cult": pd.Series({"CROP_A": 3.0, "CROP_B": 3.0}),
+        # Requis par compute_environmental_totals, neutralisés à 0 : ce test porte sur
+        # l'eau et le carbone, pas sur les indicateurs préexistants.
+        "azote_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
+        "ges_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
+        "ift_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
+        "cld_uptake_cult": pd.Series({"CROP_A": 4.0, "CROP_B": 4.0}),
     }
     return Dataset(sets={}, parameters=parameters, scalars={})
 
@@ -655,16 +660,6 @@ def test_existing_environmental_keys_are_preserved():
                 "soil_carbon_balance", "soil_carbon_mineralization"):
         assert key in totals
 ```
-
-Note : ce test fournit un `dataset` réduit qui ne contient pas les paramètres azote/GES/IFT. Si `compute_environmental_totals` échoue faute de ceux-ci, ajouter au dict `parameters` du test :
-
-```python
-        "azote_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
-        "ges_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
-        "ift_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
-        "cld_uptake_cult": pd.Series({"CROP_A": 4.0, "CROP_B": 4.0}),
-```
-et les colonnes `RISQUE_CLD` (valeur `5`) à `data_parc`.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -935,7 +930,7 @@ Relire les entrées du 2026-07-20 dans `VIGILANCE.md` et confirmer que les cinq 
 
 - [ ] **Step 4: Lancer les tests du lot une dernière fois**
 
-Run: `.venv/Scripts/python -m pytest tests/test_guadeloupe_water.py tests/test_guadeloupe_soil_carbon.py tests/test_guadeloupe_reporting_water_carbon.py tests/test_guadeloupe_pipeline_rates.py -v`
+Run: `.venv/Scripts/python -m pytest tests/test_guadeloupe_water.py tests/test_guadeloupe_soil_carbon.py tests/test_guadeloupe_reporting_water_carbon.py tests/test_guadeloupe_pipeline.py -v`
 Expected: PASS — 13 passed
 
 - [ ] **Step 5: Commit**
@@ -951,7 +946,7 @@ git commit -m "docs(indicateurs): consigner le lot eau/carbone et ses ecarts GAM
 
 Le lot est terminé quand :
 
-1. `.venv/Scripts/python -m pytest tests/test_guadeloupe_water.py tests/test_guadeloupe_soil_carbon.py tests/test_guadeloupe_reporting_water_carbon.py tests/test_guadeloupe_pipeline_rates.py -v` passe intégralement.
+1. `.venv/Scripts/python -m pytest tests/test_guadeloupe_water.py tests/test_guadeloupe_soil_carbon.py tests/test_guadeloupe_reporting_water_carbon.py tests/test_guadeloupe_pipeline.py -v` passe intégralement.
 2. `.venv/Scripts/python -m pytest tests/test_guadeloupe_reporting_indicators.py tests/test_readers.py -v` ne montre aucune régression.
 3. `.venv/Scripts/python -c "import case_studies.guadeloupe.data_pipeline"` retourne 0.
 
