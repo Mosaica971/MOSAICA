@@ -109,6 +109,12 @@ the YAML, not the builder.
    (`core/reporting/run_folder.py`) with a recap, CSVs, YAML, and charts. The dashboard
    (`case_studies/guadeloupe/dashboard/`) is a read-only viewer over those folders.
 
+Les indicateurs environnementaux vivent dans trois modules par culture — `environment.py`
+(azote/GES/IFT), `water.py` (besoin en eau) et `soil_carbon.py` (bilan de carbone organique) —
+tous calculés dans `data_pipeline` puis appliqués à l'allocation par `reporting/indicators.py`.
+Le carbone est le seul à dépendre de la **parcelle** (via `TYPE_SOL` → `Data_Sol.txt`) et non
+seulement de la culture : il ne passe donc pas par l'helper `rate()` de `compute_facts_table`.
+
 **Eligibility** is a boolean plot×crop matrix: numeric attribute bounds (altitude, slope,
 rainfall, plot size) intersected with `categorical_rules` (irrigation, soil type, region
 bans, `friche_lock` fallow history, etc.). Only eligible `(plot, crop)` pairs become

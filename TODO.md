@@ -14,8 +14,9 @@ scénario n'est infaisable sur les données réelles, puis ajuster les seuils qu
 
 **Chantier « indicateurs d'impact » — cadré le 2026-07-20, 3 specs.** Périmètre commun :
 reporting seul, aucun effet sur l'allocation, donc aucun solve réel nécessaire pour valider.
-1. **Eau + carbone organique du sol** — spec écrite :
-   `docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md`. À planifier.
+1. **Eau + carbone organique du sol** — **livré le 2026-07-20**. Spec :
+   `docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md`.
+   Validation unitaire seulement (aucun solve réel lancé).
 2. **Score de stabilité / résilience** — variance de la marge du portefeuille via
    `Var_Rdt_Cult` (CV de rendement par culture, déjà chargé), bornes indépendant / choc
    commun, puis variante choc de prix. Pas encore cadré.
