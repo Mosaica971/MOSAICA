@@ -42,6 +42,12 @@ _ENV_INDICATORS = {
     "total_ift": "IFT (total)",
     "total_azote": "Azote (kg N)",
     "surface_cld": "Surface chlordécone (ha)",
+    "total_water_need_m3": "Besoin en eau (m³)",
+    # soil_carbon_balance et soil_carbon_mineralization sont fortement corrélés (bilan =
+    # entrées - minéralisation, entrées quasi constantes) : les sélectionner tous les deux
+    # revient à peu près à doubler le poids du carbone du sol dans le score composite.
+    "soil_carbon_balance": "Bilan carbone du sol (t C)",
+    "soil_carbon_mineralization": "Minéralisation du carbone (t C)",
 }
 # Food self-sufficiency ratios (crop-only variant), all benefit (higher = more autonomous).
 # The limiting nutrient is the headline autonomy score; per-nutrient keys map to

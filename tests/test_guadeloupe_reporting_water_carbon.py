@@ -92,12 +92,19 @@ def test_carbon_balance_and_mineralization_scale_with_surface():
     assert totals["soil_carbon_balance"] == pytest.approx(-115.0)
 
 
-def test_existing_environmental_keys_are_preserved():
-    """Le lot ne doit rien retirer des indicateurs existants."""
+def test_pre_existing_environmental_keys_are_preserved():
+    """Le lot eau/carbone ne doit rien casser des indicateurs préexistants (azote, GES, IFT,
+    CLD). La fixture neutralise les taux azote/GES/IFT à 0.0 et met cld_uptake_cult à 4.0
+    (classe « aucun risque ») pour les deux cultures, donc tous les totaux et moyennes/ha
+    attendus sont nuls, et aucune parcelle n'est signalée à risque chlordécone."""
     totals = indicators.compute_environmental_totals(_dataset(), _allocation())
-    for key in ("total_water_need_m3", "water_need_peak_month_m3",
-                "soil_carbon_balance", "soil_carbon_mineralization"):
-        assert key in totals
+    assert totals["total_azote"] == pytest.approx(0.0)
+    assert totals["total_ges"] == pytest.approx(0.0)
+    assert totals["total_ift"] == pytest.approx(0.0)
+    assert totals["surface_cld"] == pytest.approx(0.0)
+    assert totals["azote_per_ha"] == pytest.approx(0.0)
+    assert totals["ges_per_ha"] == pytest.approx(0.0)
+    assert totals["ift_per_ha"] == pytest.approx(0.0)
 
 
 def test_facts_table_carries_water_and_carbon_measures():

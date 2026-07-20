@@ -53,11 +53,6 @@ def generate_report(
         indicators.compute_facts_table(dataset, allocation, hours_per_etp, cost_per_hour).to_csv(
             _csv_path(output_dir, f"facts_{side}.csv"), index=False
         )
-        indicators.compute_monthly_water_need_m3(dataset, allocation).to_csv(
-            _csv_path(output_dir, f"water_need_monthly_{side}.csv"),
-            header=["water_need_m3"],
-            index_label="month",
-        )
     _write_etp_indicators(dataset, output_allocation, hours_per_etp, output_dir, "output")
     _write_etp_indicators(dataset, input_representative, hours_per_etp, output_dir, "input")
 

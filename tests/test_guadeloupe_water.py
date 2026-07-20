@@ -12,7 +12,11 @@ def _data_cult() -> pd.DataFrame:
 
 def test_monthly_water_need_returns_twelve_rows_in_calendar_order():
     monthly = water.compute_monthly_water_need_per_ha_cult(_data_cult())
-    assert list(monthly.index) == water.MONTHLY_WATER_ROWS
+    assert list(monthly.index) == [
+        "BESOIN_EAU_01", "BESOIN_EAU_02", "BESOIN_EAU_03", "BESOIN_EAU_04",
+        "BESOIN_EAU_05", "BESOIN_EAU_06", "BESOIN_EAU_07", "BESOIN_EAU_08",
+        "BESOIN_EAU_09", "BESOIN_EAU_10", "BESOIN_EAU_11", "BESOIN_EAU_12",
+    ]
     assert len(monthly.index) == 12
     assert monthly.loc["BESOIN_EAU_01", "CROP_A"] == 10.0
     assert monthly.loc["BESOIN_EAU_12", "CROP_A"] == 120.0

@@ -173,7 +173,13 @@ def compute_water_need_m3_by_plot(dataset: Dataset, allocation: pd.Series) -> pd
 
 
 def compute_monthly_water_need_m3(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    """Territory-wide water need (m3) for each of the 12 months, in calendar order."""
+    """Territory-wide water need (m3) for each of the 12 months, in calendar order.
+
+    Currently only consumed internally, to derive the (degenerate) peak-month scalar in
+    compute_environmental_totals -- not exported as a report CSV, because BESOIN_EAU_01..12
+    are flat across all 12 months for every crop in the real data, so the 12-row series would
+    read as a genuine seasonal curve when it carries no seasonal information at all. Kept as-is
+    (and still tested) for when a real monthly profile is supplied."""
     monthly_rate = dataset.parameters["monthly_water_need_per_ha_cult"]
     surface = _irrigable_surface(dataset, allocation)
     if allocation.empty:
@@ -245,6 +251,11 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
         "ges_per_ha": per_ha(total_ges),
         "ift_per_ha": per_ha(total_ift),
         "total_water_need_m3": total_water,
+        # Degenerate on the real dataset: BESOIN_EAU_01..12 are identical across all 12
+        # months for every crop (see VIGILANCE.md), so the peak month is always exactly
+        # total_water / 12 -- it carries no information beyond the annual total and is
+        # deliberately excluded from the dashboard's composite score (comparison.py). Kept
+        # in the recap; will become meaningful once a genuine monthly profile is supplied.
         "water_need_peak_month_m3": float(monthly_water.max()) if len(monthly_water) else 0.0,
         "soil_carbon_balance": float(
             compute_soil_carbon_balance_by_plot(dataset, allocation).sum()

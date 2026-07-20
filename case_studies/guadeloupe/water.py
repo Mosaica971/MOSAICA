@@ -3,7 +3,9 @@
 Faithful to OPTIMISATION.txt:2489-2560, with two documented departures (see VIGILANCE.md):
 rainfall is never deducted (the monthly PLUVIO_*_PARC columns do not exist in the data), so
 this is a *gross crop water need*, not a net irrigation need; and the mm -> m3 conversion
-factor the GAMS omits is applied explicitly here.
+factor the GAMS omits is applied explicitly here. GAMS also divides its (factor-less) result
+by 1e6 (OPTIMISATION.txt:2559); this module does not replicate that division, so the values
+here are plain m3, not GAMS' millions-of-(unlabeled-unit).
 """
 
 import pandas as pd
