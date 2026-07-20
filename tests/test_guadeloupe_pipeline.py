@@ -381,3 +381,35 @@ def test_cost_multiplier_scales_variable_cost_in_dataset():
     assert shocked.parameters["variable_cost_per_ha_cult"]["CS_MG_NISM"] == (
         base.parameters["variable_cost_per_ha_cult"]["CS_MG_NISM"] * 1.3
     )
+
+
+def test_build_dataset_registers_water_and_carbon_rates():
+    """Les nouveaux taux sont enregistrés, indexés par culture, et non dégénérés."""
+    dataset = build_dataset(CONFIG)
+    crops = dataset.sets["crops"]
+
+    water_need = dataset.parameters["water_need_per_ha_cult"]
+    carbon_input = dataset.parameters["carbon_input_per_ha_cult"]
+    monthly = dataset.parameters["monthly_water_need_per_ha_cult"]
+
+    assert set(water_need.index) == set(crops)
+    assert set(carbon_input.index) == set(crops)
+    assert list(monthly.index) == [f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]
+    # Le total annuel est bien la somme des 12 mois.
+    assert water_need.sum() == pytest.approx(monthly.to_numpy().sum())
+    # Non dégénéré: au moins une culture a un besoin en eau et un apport carbone non nuls.
+    assert (water_need > 0).any()
+    assert (carbon_input > 0).any()
+
+
+def test_build_dataset_loads_soil_table_with_all_five_soils():
+    dataset = build_dataset(CONFIG)
+    data_sol = dataset.parameters["data_sol"]
+
+    assert set(data_sol.index) >= {"KAER", "DENS", "PROF"}
+    assert set(data_sol.columns) == {
+        "NITISOL", "ANDOSOL", "FERRALSOL", "AUTRES", "VERTISOL"
+    }
+    # Les coefficients de minéralisation diffèrent entre sols -- sinon le choix du sol
+    # n'aurait aucun effet sur le bilan carbone.
+    assert data_sol.loc["KAER"].nunique() > 1

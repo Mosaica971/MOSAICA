@@ -243,6 +243,9 @@ INDICATOR_DIRECTION: dict[str, str] = {
     "total_ift": "cost",
     "total_azote": "cost",
     "surface_cld": "cost",
+    "total_water_need_m3": "cost",
+    "soil_carbon_balance": "benefit",
+    "soil_carbon_mineralization": "cost",
 }
 
 

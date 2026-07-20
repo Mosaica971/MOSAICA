@@ -147,6 +147,18 @@ Inventaire au 2026-07-20 de ce qui traîne dans `data/` sans être chargé :
 - `Avers.txt` — délibérément ignoré (stub uniforme), cf. commentaire `config.yaml:122`.
 _2026-07-20._
 
+### Mineur — `BESOIN_EAU_01`..`12` sont plates : tout indicateur mensuel de l'eau est dégénéré
+Vérification sur `Data_Cult.txt` (revue finale de la branche `indicateurs-eau-carbone`,
+2026-07-20) : les 12 colonnes mensuelles `BESOIN_EAU_01`..`BESOIN_EAU_12` sont **identiques
+pour les 84 cultures** — la table ne porte qu'un chiffre mensuel plat, pas un vrai profil
+saisonnier. Conséquence : le mois de pointe (`water_need_peak_month_m3`, ajouté par ce lot)
+vaut toujours exactement le total annuel / 12, donc aucune information au-delà du total —
+c'est pourquoi il reste dans le recap mais est exclu du score composite du dashboard
+(`INDICATOR_DIRECTION` / `_ENV_INDICATORS`). Le CSV mensuel par côté envisagé pour le
+dashboard a été abandonné pour la même raison (12 lignes identiques se liraient comme une
+vraie courbe). Un futur indicateur mensuel de l'eau (saisonnalité, pic de tension) restera
+dégénéré tant qu'un vrai profil `BESOIN_EAU_*` mensuel n'est pas fourni en amont. _2026-07-20._
+
 ### Mineur — `Eq_ME_MG` et la règle melon `REGION_CODE` se recouvrent peut-être
 `Eq_ME_MG` interdit ME en `REGION = 7` (macro-région) ; la règle `region_crop_forbidden`
 préexistante interdit ME dans 18 `REGION_CODE` (petites régions). Référentiels distincts,

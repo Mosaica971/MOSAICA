@@ -25,6 +25,10 @@ def _small_dataset() -> Dataset:
             # uptake class 3, r=2, soil 4) is flagged at-risk.
             "RISQUE_CLD": [5, 5, 2, 1, 5, 5],
             "TYPE_SOL": [1, 1, 4, 3, 1, 2],
+            # Water/carbon indicators (added alongside compute_environmental_totals's
+            # water+carbon keys): all plots irrigable, uniform initial carbon fraction.
+            "IRRIG_PARC": [1, 1, 1, 1, 1, 1],
+            "PART_C_INIT": [4.0, 4.0, 4.0, 4.0, 4.0, 4.0],
         },
         index=["P1", "P2", "P3", "P4", "P5", "P6"],
     )
@@ -52,6 +56,35 @@ def _small_dataset() -> Dataset:
         {"Ind_Moy": [100.0, 20.0, 6.0], "peche": [5.0, 8.0, 2.0]},
         index=["Q_Tot", "Kcal", "Prot"],
     )
+    # Water/carbon: only touched by compute_environmental_totals's new keys, not asserted
+    # on by value here (see test_guadeloupe_reporting_water_carbon.py for that coverage) --
+    # just enough shape to not KeyError.
+    data_sol = pd.DataFrame(
+        {
+            "VERTISOL": [0.5, 1.0, 0.25],
+            "FERRALSOL": [0.3, 1.0, 0.25],
+            "ANDOSOL": [0.2, 1.0, 0.25],
+            "NITISOL": [0.1, 1.0, 0.25],
+            "AUTRES": [0.4, 1.0, 0.25],
+        },
+        index=["KAER", "DENS", "PROF"],
+    )
+    data_cult = pd.DataFrame(
+        {
+            **{f"BESOIN_EAU_{m:02d}": [5.0, 5.0] for m in range(1, 13)},
+            "BIOM_AER": [10.0, 10.0],
+            "RAC": [0.5, 0.5],
+            "CARB": [0.4, 0.4],
+            "HRES": [0.5, 0.5],
+            "KCROP": [1.0, 1.0],
+        },
+        index=["CS", "ME"],
+    ).T
+    monthly_water_need_per_ha_cult = data_cult.loc[
+        [f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]
+    ]
+    water_need_per_ha_cult = monthly_water_need_per_ha_cult.sum(axis=0)
+    carbon_input_per_ha_cult = pd.Series({"CS": 3.0, "ME": 3.0})
     return Dataset(
         sets={},
         parameters={
@@ -68,6 +101,11 @@ def _small_dataset() -> Dataset:
             "cld_uptake_cult": cld_uptake_cult,
             "nutri_cult": nutri_cult,
             "nutri_alim": nutri_alim,
+            "data_sol": data_sol,
+            "data_cult": data_cult,
+            "water_need_per_ha_cult": water_need_per_ha_cult,
+            "monthly_water_need_per_ha_cult": monthly_water_need_per_ha_cult,
+            "carbon_input_per_ha_cult": carbon_input_per_ha_cult,
         },
         scalars={},
     )
@@ -429,6 +467,7 @@ def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures
         "crop", "region", "island", "surface", "production", "sales", "subsidy",
         "revenue", "gross_margin", "labor_hours", "labor_cost", "etp",
         "ges", "ift", "azote", "surface_cld",
+        "water_need_m3", "soil_carbon_balance",
     ]
     # P1+P2 = CS in R1 (island 1); P3 = ME in R2 (island 2)
     assert set(zip(facts["crop"], facts["region"])) == {("CS", "R1"), ("ME", "R2")}

@@ -100,8 +100,7 @@ des cinq entrées contre les lignes GAMS correspondantes.
 ### Intégration au reporting
 
 Quatre scalaires ajoutés à `compute_environmental_totals` (`reporting/indicators.py`) puis à
-`INDICATOR_DIRECTION` (`dashboard/comparison.py`), qui les intègre alors automatiquement au
-score composite :
+`INDICATOR_DIRECTION` (`dashboard/comparison.py`) :
 
 | Indicateur | Direction |
 |---|---|
@@ -110,10 +109,26 @@ score composite :
 | `soil_carbon_balance` | `benefit` |
 | `soil_carbon_mineralization` | `cost` |
 
-Le **mois de pointe** est retenu en plus du total annuel parce que c'est lui qui dimensionne
-la ressource et l'infrastructure : deux scénarios de même total annuel n'ont pas la même
-tension si l'un concentre son besoin sur deux mois. Le détail des 12 mois part dans
-`output_N/csv/water_need_monthly_<side>.csv` pour le dashboard, sans entrer dans le score.
+**Correction post-revue (2026-07-20) :** `INDICATOR_DIRECTION` ne fait qu'annoter le sens
+d'un indicateur déjà présent ailleurs ; il ne confère aucune appartenance au score composite.
+Le sélecteur du dashboard (`pages/2_Comparaison.py`) est piloté par `_ECON_INDICATORS` /
+`_ENV_INDICATORS` / `_AUTONOMY_INDICATORS`, et c'est **cette** liste (`_ENV_INDICATORS`) qui
+rend un indicateur sélectionnable et donc atteignable par `compute_composite_scores`. Ajouter
+une clé à `INDICATOR_DIRECTION` sans l'ajouter aussi à `_ENV_INDICATORS` la laisse invisible
+du picker — c'est ce qui s'est produit ici avant correction.
+
+Le **mois de pointe** (`water_need_peak_month_m3`) devait initialement dimensionner la
+ressource et l'infrastructure : deux scénarios de même total annuel n'auraient pas la même
+tension si l'un concentrait son besoin sur deux mois. Ce raisonnement est **caduc sur ce
+jeu de données** : les lignes `BESOIN_EAU_01`..`BESOIN_EAU_12` de `Data_Cult.txt` sont
+identiques pour les 84 cultures, donc le mois de pointe vaut toujours exactement
+total_annuel / 12 -- aucune information au-delà du total, et une colonne colinéaire qui
+doublerait le poids de l'eau dans le score. Décision post-revue : `water_need_peak_month_m3`
+reste dans le recap (utile si un jour une vraie saisonnalité arrive) mais est retiré de
+`INDICATOR_DIRECTION` et n'a jamais été ajouté à `_ENV_INDICATORS` -- il n'entre pas dans le
+score composite. Le CSV mensuel par côté (`output_N/csv/water_need_monthly_<side>.csv`)
+initialement prévu pour le dashboard a été supprimé pour la même raison : aucun lecteur ne le
+consommait, et 12 lignes identiques s'y liraient comme une vraie courbe saisonnière.
 
 Comme pour les indicateurs existants, tout est décliné **entrée** (baseline via
 `baseline_representative_crops`) et **sortie** (allocation optimisée).
@@ -140,9 +155,12 @@ série pluviométrique mensuelle par parcelle, qui n'existe pas aujourd'hui.
 pluie, pas la soustraction : quand le besoin est inférieur à la pluie, l'expression vaut
 `BESOIN − 0 = BESOIN` au lieu de `0`. L'intention était clairement `max(0, ·)`. Décision :
 porter le comportement réel (mandat de parité, cohérent avec la décision du 2026-07-20 sur
-`Eq_VE_*`), avec la variante corrigée disponible en `enable: false` juste à côté dans
-`config.yaml`. À noter : tant que la pluie mensuelle est absente, les deux variantes donnent
-le **même** résultat — le choix ne devient visible que si les données mensuelles arrivent.
+`Eq_VE_*`). **Correction post-revue :** aucune variante corrigée en `enable: false` n'a été
+construite dans `config.yaml` -- et il n'y a pas lieu d'en construire une tant que la pluie
+mensuelle est absente : sans elle, `besoin − pluie` vaut toujours `besoin` (pluie = 0), donc
+le bug et sa correction `max(0, ·)` produisent exactement le **même** résultat numérique, et
+un toggle n'aurait rien à faire varier. Le choix ne devient observable, et donc utile à
+exposer en config, que si une série pluviométrique mensuelle par parcelle est un jour fournie.
 
 **4. Les amendements ne sont pas annualisés.** `C_ENTREE_AMDT` n'est divisé ni par
 `Duree_Cycle_Cult` ni par `Duree_Plant_Cult`, contrairement à azote, GES et aux coûts, qui
