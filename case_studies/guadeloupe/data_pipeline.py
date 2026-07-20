@@ -22,6 +22,7 @@ from case_studies.guadeloupe.farm_typology import (
     compute_base_crop_group,
     compute_type_expl,
 )
+from case_studies.guadeloupe import soil_carbon, water
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
@@ -130,6 +131,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     data_rpg = read_wide_table(TABLES_DIR / "Data_RPG_Gwad_2017.txt")
     data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
     data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
+    data_sol = read_wide_table(TABLES_DIR / "Data_Sol.txt")
     matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt")
     # Nutrition tables for the food self-sufficiency indicators (per-tonne content by crop;
     # per-individual annual needs + population + fishing contribution).
@@ -276,6 +278,11 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_plant_cult=duree_plant_cult,
         duree_cycle_cult=duree_cycle_cult,
     )
+    water_need_per_ha_cult = water.compute_water_need_per_ha_cult(data_cult)
+    monthly_water_need_per_ha_cult = water.compute_monthly_water_need_per_ha_cult(data_cult)
+    carbon_input_per_ha_cult = soil_carbon.compute_carbon_input_per_ha_cult(
+        data_cult, data_otk, matrice_otk_cult
+    )
     # Chlordécone uptake class per crop (Data_Cult["CLD"], 1=high..4=none), for the crop x
     # soil at-risk-surface indicator in reporting.
     cld_uptake_cult = data_cult.loc["CLD"]
@@ -306,6 +313,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "azote_per_ha_cult": azote_per_ha_cult,
         "ges_per_ha_cult": ges_per_ha_cult,
         "ift_per_ha_cult": ift_per_ha_cult,
+        "data_sol": data_sol,
+        "water_need_per_ha_cult": water_need_per_ha_cult,
+        "monthly_water_need_per_ha_cult": monthly_water_need_per_ha_cult,
+        "carbon_input_per_ha_cult": carbon_input_per_ha_cult,
         "cld_uptake_cult": cld_uptake_cult,
         "nutri_cult": nutri_cult,
         "nutri_alim": nutri_alim,
