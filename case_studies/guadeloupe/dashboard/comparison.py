@@ -246,6 +246,12 @@ INDICATOR_DIRECTION: dict[str, str] = {
     "total_water_need_m3": "cost",
     "soil_carbon_balance": "benefit",
     "soil_carbon_mineralization": "cost",
+    # Exposure indicators: for each, higher = more fragile.
+    "climate_margin_at_risk": "cost",
+    "climate_margin_at_risk_ratio": "cost",
+    "revenue_concentration_hhi": "cost",
+    "price_shock_margin_loss": "cost",
+    "price_shock_margin_loss_ratio": "cost",
 }
 
 

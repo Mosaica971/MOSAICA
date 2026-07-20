@@ -249,6 +249,37 @@ def test_build_indicator_parallel_axes_figure_returns_figure_with_native_axes():
     assert comparison._axis_range(np.array([5.0, 5.0]))[0] < 5.0
 
 
+_RESILIENCE_KEYS = (
+    "climate_margin_at_risk",
+    "climate_margin_at_risk_ratio",
+    "revenue_concentration_hhi",
+    "price_shock_margin_loss",
+    "price_shock_margin_loss_ratio",
+)
+
+
+def test_resilience_indicators_are_selectable_in_the_dashboard_picker():
+    """Garde-fou: etre dans INDICATOR_DIRECTION ne suffit PAS a atteindre le score
+    composite -- c'est l'appartenance a _INDICATOR_LABELS qui rend un indicateur
+    selectionnable. La spec 1 a livre 4 indicateurs en code mort faute de ce test."""
+    import importlib
+
+    page = importlib.import_module(
+        "case_studies.guadeloupe.dashboard.pages.2_Comparaison"
+    )
+    for key in _RESILIENCE_KEYS:
+        assert key in page._INDICATOR_LABELS, f"{key} absent du selecteur"
+
+
+def test_resilience_indicators_have_a_composite_direction():
+    from case_studies.guadeloupe.dashboard import comparison
+
+    for key in _RESILIENCE_KEYS:
+        assert comparison.INDICATOR_DIRECTION.get(key) == "cost", (
+            f"{key} devrait etre 'cost': plus haut = plus fragile"
+        )
+
+
 def test_recap_carries_crop_universe(tmp_path):
     """generate_report persists the full crop set so the dashboard axis can show zero crops."""
     dataset = _dataset()

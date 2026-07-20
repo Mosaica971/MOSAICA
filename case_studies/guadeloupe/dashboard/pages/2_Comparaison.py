@@ -65,9 +65,21 @@ _AUTONOMY_INDICATORS = {
     "autonomy_k": "Autonomie potassium",
     "autonomy_fe": "Autonomie fer",
 }
+# Exposure of a fixed allocation to shocks -- nothing is re-optimized, so this is exposure,
+# not adaptive capacity. Note: each absolute value and its ratio are near-collinear
+# (same numerator), so selecting both roughly doubles that axis's weight in the composite
+# score. Same trap that got the water peak-month indicator dropped in spec 1.
+_RESILIENCE_INDICATORS = {
+    "climate_margin_at_risk": "Marge à risque climatique (€)",
+    "climate_margin_at_risk_ratio": "Marge à risque climatique (part)",
+    "revenue_concentration_hhi": "Concentration du revenu (HHI)",
+    "price_shock_margin_loss": "Perte sous choc de prix (€)",
+    "price_shock_margin_loss_ratio": "Perte sous choc de prix (part)",
+}
 _GINI_KEY = "gini_revenue_by_farm"
 _INDICATOR_LABELS = {
     **_ECON_INDICATORS, **_ENV_INDICATORS, **_AUTONOMY_INDICATORS,
+    **_RESILIENCE_INDICATORS,
     _GINI_KEY: "Gini (revenu/exploit.)",
 }
 
@@ -75,12 +87,14 @@ _INDICATOR_LABELS = {
 def _indicator_value(recap: dict, side: str, indicator: str):
     """Scalar value of an indicator for one (run, side): Gini from the run root,
     environmental totals from recap['environment'][side], food-autonomy ratios (crop-only)
-    from recap['food_autonomy'][side], everything else from recap['economics'][side].
-    Missing blocks (older runs) yield None."""
+    from recap['food_autonomy'][side], exposure indicators from recap['resilience'][side],
+    everything else from recap['economics'][side]. Missing blocks (older runs) yield None."""
     if indicator == _GINI_KEY:
         return recap.get(_GINI_KEY)
     if indicator in _ENV_INDICATORS:
         return (recap.get("environment") or {}).get(side, {}).get(indicator)
+    if indicator in _RESILIENCE_INDICATORS:
+        return (recap.get("resilience") or {}).get(side, {}).get(indicator)
     if indicator in _AUTONOMY_INDICATORS:
         auto = (recap.get("food_autonomy") or {}).get(side, {})
         if indicator == "autonomy_limiting":
