@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
-from case_studies.guadeloupe import soil_carbon, water
+from case_studies.guadeloupe import resilience, soil_carbon, water
 from case_studies.guadeloupe.farm_typology import compute_base_crop_group
 from core.data.dataset import Dataset
 
@@ -263,6 +263,46 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
         "soil_carbon_mineralization": float(
             compute_soil_carbon_mineralization_by_plot(dataset, allocation).sum()
         ),
+    }
+
+
+def compute_resilience_totals(
+    dataset: Dataset, allocation: pd.Series, price_shock_delta: float
+) -> dict[str, float]:
+    """Exposure of one allocation to climatic and economic shocks: gross margin at risk in a
+    bad year, revenue concentration, and margin lost under a relative price shock.
+
+    These measure a *fixed* allocation's exposure -- nothing is re-optimized, so this is not
+    adaptive capacity. See the design spec and VIGILANCE.md.
+    """
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    total_margin = float(compute_gross_margin_by_crop(dataset, allocation).sum())
+
+    at_risk_rate = resilience.compute_climate_margin_at_risk_per_ha_cult(
+        dataset.parameters["margin_per_ha_cult"], dataset.parameters["crop_variance_per_ha"]
+    )
+    shock_rate = resilience.compute_price_shock_loss_per_ha_cult(
+        dataset.parameters["rdt_cult"],
+        dataset.parameters["prix_cult"],
+        dataset.parameters["duree_cycle_cult"],
+        price_shock_delta,
+    )
+
+    at_risk = float((surface_by_crop * at_risk_rate.reindex(surface_by_crop.index)).sum())
+    shock_loss = float((surface_by_crop * shock_rate.reindex(surface_by_crop.index)).sum())
+    hhi = resilience.compute_revenue_concentration_hhi(
+        compute_total_revenue_by_crop(dataset, allocation)
+    )
+
+    def ratio(value: float) -> float:
+        return value / total_margin if total_margin else 0.0
+
+    return {
+        "climate_margin_at_risk": at_risk,
+        "climate_margin_at_risk_ratio": ratio(at_risk),
+        "revenue_concentration_hhi": hhi,
+        "price_shock_margin_loss": shock_loss,
+        "price_shock_margin_loss_ratio": ratio(shock_loss),
     }
 
 

@@ -298,6 +298,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "matrice_otk_cult": matrice_otk_cult,
         "prix_cult": prix_cult,
         "rdt_cult": rdt_cult,
+        "duree_cycle_cult": duree_cycle_cult,
         "crop_variance_per_ha": var_rdt_cult,
         "farm_risk_aversion": farm_risk_aversion,
         "farm_surface_ha": farm_surface_ha,

@@ -413,3 +413,12 @@ def test_build_dataset_loads_soil_table_with_all_five_soils():
     # Les coefficients de minéralisation diffèrent entre sols -- sinon le choix du sol
     # n'aurait aucun effet sur le bilan carbone.
     assert data_sol.loc["KAER"].nunique() > 1
+
+
+def test_build_dataset_registers_duree_cycle_cult():
+    dataset = build_dataset(CONFIG)
+    duree = dataset.parameters["duree_cycle_cult"]
+
+    assert set(duree.index) == set(dataset.sets["crops"])
+    # Une duree de cycle nulle ferait exploser l'annualisation du choc de prix.
+    assert (duree > 0).all()
