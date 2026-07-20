@@ -36,12 +36,16 @@ Full end-to-end solve (builds data → model → solves with HiGHS → writes `o
 .venv/Scripts/python main.py
 ```
 
-**Do NOT run `main.py` casually.** The full solve is slow (~half a minute+ on the real
-dataset; the real bottleneck is Pyomo→HiGHS model translation, not the solver — see
+**Do NOT run `main.py` casually.** The full solve is slow (~30–55 min on the real dataset,
+with large run-to-run variance; the bottleneck is the branch-and-bound search itself — see
 `VIGILANCE.md`). Per standing user preference, only run the full solve at end-of-day and
 only when asked; iterate with targeted pytest instead. For scaled-down experiments use
 `zone_filter` in `config.yaml` (restrict to one island/region/farm) or
 `scripts/profile_solver.py` (phase-timed run on a zone subset).
+
+Scenario batch (same pipeline as `main.py`, one `output_N/` per scenario + a batch summary;
+spec in `case_studies/guadeloupe/scenarios.yaml`): `.venv/Scripts/python scripts/run_scenarios.py`.
+Same caveat as `main.py` — real solves, don't run casually.
 
 Read-only Streamlit dashboard over past runs: `streamlit run case_studies/guadeloupe/dashboard/app.py`.
 
@@ -123,12 +127,13 @@ decision variables, which keeps the MILP tractable.
   but disabled because enabling them causes a genuine (GAMS-matching) infeasibility on the
   real 2017 data, or diverges from the chosen default. Read the comment before flipping an
   `enable:` flag.
-- `VIGILANCE.md` (in French) is the **cross-session log of open issues, deferred work, and
-  known data gaps** — read it at the start of substantive work and move resolved items to
-  its "Résolu" section rather than deleting them.
+- `VIGILANCE.md` (French) is the **cross-session log of open issues and known data gaps**
+  (the *why*); `TODO.md` is what remains **to implement** (the *what next*). Read both at
+  the start of substantive work; move resolved VIGILANCE items to its "Résolu" section as
+  one-liners rather than deleting them. User-facing commands live in `PRISE_EN_MAIN.md`.
 - `docs/superpowers/specs/` (design docs) and `docs/superpowers/plans/` (implementation
-  plans) hold the reasoning behind each feature (`zone_filter`, dashboard, reporting,
-  phase-2 objectives, …). Check these for intent before changing a subsystem.
+  plans) hold the reasoning behind each feature. Only **unexecuted** plans are kept —
+  executed ones are deleted, their rationale surviving in the matching spec.
 - Tests exercise builders in isolation with tiny hand-built configs and `plot_surface_ha`/
   `eligible_pairs` dicts (see `tests/test_guadeloupe_constraints.py`) — they do not read
   `data/`. Follow that style for new model logic so tests stay fast and data-free.
