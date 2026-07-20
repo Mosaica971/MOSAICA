@@ -424,6 +424,7 @@ _FACT_MEASURES = [
     "surface", "production", "sales", "subsidy", "revenue",
     "gross_margin", "labor_hours", "labor_cost", "etp",
     "ges", "ift", "azote", "surface_cld",
+    "water_need_m3", "soil_carbon_balance",
 ]
 
 
@@ -462,6 +463,12 @@ def compute_facts_table(
     per_plot["etp"] = per_plot["labor_hours"] / hours_per_etp
     # Chlordécone-exposed surface: the plot's own surface when the crop x soil rule flags it.
     per_plot["surface_cld"] = surface * _cld_at_risk_mask(dataset, allocation).to_numpy()
+    # L'eau est un taux par culture, mais le carbone dépend du type de sol de la parcelle :
+    # il ne peut pas passer par rate() et vient des fonctions par parcelle.
+    per_plot["water_need_m3"] = compute_water_need_m3_by_plot(dataset, allocation).to_numpy()
+    per_plot["soil_carbon_balance"] = compute_soil_carbon_balance_by_plot(
+        dataset, allocation
+    ).to_numpy()
 
     grouped = per_plot.groupby(["crop", "region"], as_index=False).agg(
         {"island": "first", **{measure: "sum" for measure in _FACT_MEASURES}}

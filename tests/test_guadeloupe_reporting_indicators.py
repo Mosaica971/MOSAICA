@@ -467,6 +467,7 @@ def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures
         "crop", "region", "island", "surface", "production", "sales", "subsidy",
         "revenue", "gross_margin", "labor_hours", "labor_cost", "etp",
         "ges", "ift", "azote", "surface_cld",
+        "water_need_m3", "soil_carbon_balance",
     ]
     # P1+P2 = CS in R1 (island 1); P3 = ME in R2 (island 2)
     assert set(zip(facts["crop"], facts["region"])) == {("CS", "R1"), ("ME", "R2")}

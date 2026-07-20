@@ -98,3 +98,28 @@ def test_existing_environmental_keys_are_preserved():
     for key in ("total_water_need_m3", "water_need_peak_month_m3",
                 "soil_carbon_balance", "soil_carbon_mineralization"):
         assert key in totals
+
+
+def test_facts_table_carries_water_and_carbon_measures():
+    dataset = _dataset()
+    dataset.parameters["data_parc"]["REGION"] = [1, 1]
+    dataset.parameters["data_parc"]["ILE"] = [1, 1]
+    for name in ("rdt_cult", "sales_per_ha_cult", "subsidy_per_ha_cult_annualized",
+                 "margin_per_ha_cult", "labor_hours_per_ha_cult"):
+        dataset.parameters[name] = pd.Series({"CROP_A": 0.0, "CROP_B": 0.0})
+
+    facts = indicators.compute_facts_table(
+        dataset, _allocation(), hours_per_etp=1607.0, cost_per_hour=0.0
+    )
+    assert "water_need_m3" in facts.columns
+    assert "soil_carbon_balance" in facts.columns
+    # Les deux parcelles sont dans la meme (culture, region) -> une ligne agregee.
+    assert facts["water_need_m3"].sum() == pytest.approx(2100.0)
+    assert facts["soil_carbon_balance"].sum() == pytest.approx(-115.0)
+
+
+def test_monthly_water_csv_series_has_twelve_calendar_rows():
+    monthly = indicators.compute_monthly_water_need_m3(_dataset(), _allocation())
+    assert len(monthly) == 12
+    assert list(monthly.index)[0] == "BESOIN_EAU_01"
+    assert list(monthly.index)[-1] == "BESOIN_EAU_12"
