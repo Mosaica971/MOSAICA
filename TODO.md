@@ -12,15 +12,30 @@ contrainte `crop_share_bound`, canal `enable_add`, ~24 bans ITK câblés, 25 sc�
 → Reste à faire : lancer `scripts/run_scenarios.py` en fin de journée pour vérifier qu'aucun
 scénario n'est infaisable sur les données réelles, puis ajuster les seuils qui coincent.
 
+**Chantier « indicateurs d'impact » — cadré le 2026-07-20, 3 specs.** Périmètre commun :
+reporting seul, aucun effet sur l'allocation, donc aucun solve réel nécessaire pour valider.
+1. **Eau + carbone organique du sol** — spec écrite :
+   `docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md`. À planifier.
+2. **Score de stabilité / résilience** — variance de la marge du portefeuille via
+   `Var_Rdt_Cult` (CV de rendement par culture, déjà chargé), bornes indépendant / choc
+   commun, puis variante choc de prix. Pas encore cadré.
+3. **Rpest (Tixier)** — risque de pollution de l'eau par les pesticides. Le plus lourd
+   (7 sous-indicateurs, niveau parcelle) ; module GAMS dédié `R_PEST_NEW.txt`. Pas encore
+   cadré. Données **complètes** (`Data_OTK` : `DT50`/`GUS`/`ADI`/`AQUATOX`/`QMA`/`KOC` ;
+   `Data_Parc` : `RUI_PARC`/`DRAI_PARC`/`PENTE` ; `Data_Cult` : `COUV_SOL`/`PROF_SILLONS` ;
+   `R_Tixier.txt` : 14 seuils).
+
 ## Différé (cadré, en attente d'une décision ou de données)
 
 - **`Eq_AN_PA`** — `AN_PA` interdit si `Surf_Expl_Parc_init < AN_SURF_EXPL_MIN` : porte sur
   une taille d'**exploitation**, pas un attribut de parcelle, donc hors de portée de
   `attribute_forbidden`. Demande une règle catégorielle indexée par exploitation.
 
-- **Bloc CF (canne fourragère)** — sorti du plan ci-dessus, à replanifier séparément.
-  Inclut le chargement des fichiers scénario-dépendants `Prix_Cult_CF_{RESTIT,SMART}.txt`
-  et `Rdt_Cult_CF_{RESTIT,SMART}.txt`, présents en données mais jamais lus par le pipeline.
+- **Bloc CF (canne fibre)** — sorti du plan ci-dessus, à replanifier séparément. Porte les
+  équations `Eq_CF_*` uniquement : les 10 cultures `CF_*` sont **déjà** dans le modèle et
+  valorisées via `Prix_Cult.txt`. Les fichiers `indice_H/{Prix,Rdt}_Cult_CF_{RESTIT,SMART}.txt`
+  sont des variantes **territoire entier**, pas des tables CF — leur sens est à trancher avec
+  la source avant câblage (cf. `VIGILANCE.md`) : c'est le vrai point bloquant du lot.
 - **Contrainte `MO_MAX`** (plafond main d'œuvre) — hors plan Lot 3, à cadrer.
 - **Part de bio (C2)** — bloqué : le bio n'est pas identifiable proprement dans les
   données, demande un arbitrage utilisateur.
@@ -51,6 +66,18 @@ scénario n'est infaisable sur les données réelles, puis ajuster les seuils qu
   entrée (baseline 2017) et en sortie (allocation optimisée), côte à côte. Bloqué par
   l'absence de géométrie : nécessite un jeu de parcelles (cadastre, RPG…) joint sur `ident`.
   Remplacerait les placeholders « non disponible » du dashboard.
+- **Agrégats de restitution Nord Basse-Terre** — sets `EXPL_NBT`/`PARC_NBT` non portés ; côté
+  GAMS ils alimentent des assolements par commune du NBT (`ASSOL_NBT*`). Reporting territorial
+  plus fin, sans effet sur l'optimum.
+
+- **Phosphore / potasse** — `Data_OTK` n'a qu'une colonne `AZOTE`, mais les engrais sont nommés
+  par leur formule NPK (`08_20_20`, `11_11_33`, `DAP_18_46`, `KNO3`, `K2SO4`). P et K sont
+  récupérables via une table de correspondance nom → NPK. Bricolage assumé, à cadrer.
+
+- **Énergie / mix électrique** — **bloqué faute de données**. Aucune colonne carburant ou
+  consommation dans `Data_OTK` ; demanderait des facteurs énergétiques par opération, à
+  collecter. Seul indicateur d'impact de la liste initiale qui n'est pas calculable.
+
 - **`REGION` vs `REGION_CODE`** — vérifier l'équivalence, documenter ou fusionner.
 - **Unité GES** — clarifier l'échelle de `GES_SURF`/`GES_Q` avec la source et documenter un
   facteur explicite (hors parité GAMS ; sans effet sur le score composite min-max).
