@@ -99,7 +99,7 @@ des cinq entrées contre les lignes GAMS correspondantes.
 
 ### Intégration au reporting
 
-Trois scalaires ajoutés à `compute_environmental_totals` (`reporting/indicators.py`) puis à
+Quatre scalaires ajoutés à `compute_environmental_totals` (`reporting/indicators.py`) puis à
 `INDICATOR_DIRECTION` (`dashboard/comparison.py`), qui les intègre alors automatiquement au
 score composite :
 
