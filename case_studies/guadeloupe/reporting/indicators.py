@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
+from case_studies.guadeloupe import soil_carbon, water
 from case_studies.guadeloupe.farm_typology import compute_base_crop_group
 from core.data.dataset import Dataset
 
@@ -150,9 +151,79 @@ def compute_cld_at_risk_surface(dataset: Dataset, allocation: pd.Series) -> floa
     return float(surface[mask].sum())
 
 
+def _irrigable_surface(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Plot surface (ha), zeroed on plots that cannot be irrigated (IRRIG_PARC = 0) and
+    therefore draw nothing from the resource. Faithful to OPTIMISATION.txt:2540-2542."""
+    data_parc = dataset.parameters["data_parc"]
+    surface = data_parc["SURF_HA"].reindex(allocation.index)
+    irrigable = data_parc["IRRIG_PARC"].reindex(allocation.index) == 1
+    return surface.where(irrigable, 0.0)
+
+
+def compute_water_need_m3_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Annual gross crop water need (m3) per allocated plot. Gross, not net of rainfall --
+    the monthly PLUVIO_*_PARC columns do not exist in the data (see VIGILANCE.md)."""
+    if allocation.empty:
+        return pd.Series(dtype=float)
+    rate = dataset.parameters["water_need_per_ha_cult"]
+    per_ha = pd.Series(
+        rate.reindex(allocation.to_numpy()).to_numpy(), index=allocation.index
+    )
+    return per_ha * _irrigable_surface(dataset, allocation) * water.M3_PER_MM_PER_HA
+
+
+def compute_monthly_water_need_m3(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Territory-wide water need (m3) for each of the 12 months, in calendar order."""
+    monthly_rate = dataset.parameters["monthly_water_need_per_ha_cult"]
+    surface = _irrigable_surface(dataset, allocation)
+    if allocation.empty:
+        return pd.Series(0.0, index=monthly_rate.index)
+    per_month = {}
+    for month in monthly_rate.index:
+        per_ha = pd.Series(
+            monthly_rate.loc[month].reindex(allocation.to_numpy()).to_numpy(),
+            index=allocation.index,
+        )
+        per_month[month] = float((per_ha * surface * water.M3_PER_MM_PER_HA).sum())
+    return pd.Series(per_month)
+
+
+def compute_soil_carbon_mineralization_by_plot(
+    dataset: Dataset, allocation: pd.Series
+) -> pd.Series:
+    """Carbon mineralized (t C) per allocated plot: per-ha rate times plot surface."""
+    if allocation.empty:
+        return pd.Series(dtype=float)
+    data_parc = dataset.parameters["data_parc"]
+    initial = soil_carbon.compute_initial_soil_carbon_per_ha_plot(
+        data_parc, dataset.parameters["data_sol"]
+    )
+    per_ha = soil_carbon.compute_mineralization_per_ha_plot(
+        allocation, data_parc, dataset.parameters["data_sol"],
+        dataset.parameters["data_cult"], initial,
+    )
+    return per_ha * data_parc["SURF_HA"].reindex(allocation.index)
+
+
+def compute_soil_carbon_balance_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Net annual carbon balance (t C) per allocated plot. Negative = soil depletion."""
+    if allocation.empty:
+        return pd.Series(dtype=float)
+    data_parc = dataset.parameters["data_parc"]
+    inputs_by_crop = dataset.parameters["carbon_input_per_ha_cult"]
+    inputs_per_ha = pd.Series(
+        inputs_by_crop.reindex(allocation.to_numpy()).to_numpy(), index=allocation.index
+    )
+    inputs = inputs_per_ha * data_parc["SURF_HA"].reindex(allocation.index)
+    return inputs - compute_soil_carbon_mineralization_by_plot(dataset, allocation)
+
+
 def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
     """Headline environmental totals for one allocation: nitrogen (kg N), GES (t CO2), IFT,
-    chlordécone-exposed surface (ha), plus per-ha averages over the cultivated surface."""
+    chlordécone-exposed surface (ha), plus per-ha averages over the cultivated surface.
+    Also: gross annual water need (m3, not net of rainfall) both territory-wide and for the
+    single peak month, and the net annual soil organic carbon balance and mineralization
+    flux (t C, see soil_carbon.py)."""
     surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
     total_surface = float(surface.sum())
     total_azote = float(compute_azote_by_crop(dataset, allocation).sum())
@@ -162,6 +233,9 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
     def per_ha(value: float) -> float:
         return value / total_surface if total_surface else 0.0
 
+    monthly_water = compute_monthly_water_need_m3(dataset, allocation)
+    total_water = float(compute_water_need_m3_by_plot(dataset, allocation).sum())
+
     return {
         "total_azote": total_azote,
         "total_ges": total_ges,
@@ -170,6 +244,14 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
         "azote_per_ha": per_ha(total_azote),
         "ges_per_ha": per_ha(total_ges),
         "ift_per_ha": per_ha(total_ift),
+        "total_water_need_m3": total_water,
+        "water_need_peak_month_m3": float(monthly_water.max()) if len(monthly_water) else 0.0,
+        "soil_carbon_balance": float(
+            compute_soil_carbon_balance_by_plot(dataset, allocation).sum()
+        ),
+        "soil_carbon_mineralization": float(
+            compute_soil_carbon_mineralization_by_plot(dataset, allocation).sum()
+        ),
     }
 
 
