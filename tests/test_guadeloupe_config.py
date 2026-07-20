@@ -36,6 +36,9 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
         "exact_risk_value",
         "region_crop_forbidden",
         "friche_lock",
+        # GAMS geographic/soil/irrigation ITK bans, ported 2026-07-20.
+        "attribute_forbidden",
+        "forbid_crops",
     }
 
 
@@ -61,3 +64,27 @@ def test_ba_rota_numerator_crops_match_sc_cs_anchor_plus_ja_and_canne_fibre():
 
     assert set(ba_rota["args"]["numerator_crops"]) == expected
     assert len(ba_rota["args"]["numerator_crops"]) == len(expected)
+
+
+def test_itk_bans_confine_regional_sugarcane():
+    from pathlib import Path
+
+    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from core.config import load_config
+
+    cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))
+    cfg["zone_filter"] = {"include": {"islands": [3]}}  # Marie-Galante only
+    ds = build_dataset(cfg)
+    eligible_crops = {crop for _, crop in ds.parameters["eligible_pairs"]}
+
+    # On Marie-Galante (ILE=3): NGT/CGT/EGT/BT/SBT sugarcane systems must be absent...
+    for crop in ["CS_NGT_NISM", "CS_CGT_NISM", "CS_EGT_NISM", "CS_BT_NISM", "CS_SBT_NISM"]:
+        assert crop not in eligible_crops, crop
+    # ...and irrigated sugarcane (Eq_CS_IRR) is disabled everywhere.
+    for crop in ["CS_MG_IM", "CS_BT_IM"]:
+        assert crop not in eligible_crops, crop
+    # Eq_AG_BT (citrus only on Basse-Terre) and the faithful Eq_VE_PLUIE ban.
+    assert "AG" not in eligible_crops
+    assert "VE_PLUIE" not in eligible_crops
+    # Marie-Galante's own non-irrigated non-mechanised system stays available.
+    assert "CS_MG_NISM" in eligible_crops

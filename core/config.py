@@ -65,6 +65,16 @@ def apply_overrides(base_config: dict[str, Any], run_spec: dict[str, Any]) -> di
     for patch in run_spec.get("set_args") or []:
         _patch_args(config, patch["label"], patch.get("args") or {})
 
+    # enable_add appends a brand-new entry that does not exist in the base config -- the
+    # enable/disable/set_args channels can only touch entries already declared there.
+    # `section` says which config list to append to (default: constraints); a scenario
+    # adding an eligibility cut passes section: categorical_rules.
+    for entry in run_spec.get("enable_add") or []:
+        entry = copy.deepcopy(entry)
+        section = entry.pop("section", "constraints")
+        entry["enable"] = True
+        config.setdefault(section, []).append(entry)
+
     return config
 
 

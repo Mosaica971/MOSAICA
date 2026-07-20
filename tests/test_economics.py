@@ -172,3 +172,15 @@ def test_compute_gross_margin_per_ha_cult_subtracts_variable_cost_from_gross_pro
     )
 
     assert result["C1"] == pytest.approx(3803.0)
+
+
+def test_apply_crop_multipliers_scales_yield_for_a_climate_shock():
+    import pandas as pd
+    from case_studies.guadeloupe.economics import apply_crop_multipliers
+
+    rdt = pd.Series({"BA_INT": 100.0, "CS_NGT_NISM": 80.0, "ME": 40.0})
+    shocked = apply_crop_multipliers(rdt, [{"crops": ["BA_INT", "CS_NGT_NISM"], "factor": 0.6}])
+
+    assert shocked["BA_INT"] == 60.0
+    assert shocked["CS_NGT_NISM"] == 48.0
+    assert shocked["ME"] == 40.0  # untouched

@@ -123,6 +123,43 @@ def rule_friche_lock(
     return crops, condition
 
 
+@register_categorical_rule("forbid_crops")
+def rule_forbid_crops(data_parc: pd.DataFrame, *, crops: list[str]) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` on every plot (unconditional). Used by climate/sanitary shock
+    scenarios (drought disables irrigated crops, disease disables a filiere) and by the
+    GAMS Eq_CS_IRR ban (irrigated sugarcane disabled everywhere)."""
+    condition = pd.Series(True, index=data_parc.index)
+    return crops, condition
+
+
+_COMPARATORS: dict[str, Callable[[pd.Series, Any], pd.Series]] = {
+    "eq": lambda s, v: s == v,
+    "ne": lambda s, v: s != v,
+    "in": lambda s, v: s.isin(v),
+    "not_in": lambda s, v: ~s.isin(v),
+    "lt": lambda s, v: s < v,
+    "le": lambda s, v: s <= v,
+    "gt": lambda s, v: s > v,
+    "ge": lambda s, v: s >= v,
+}
+
+
+@register_categorical_rule("attribute_forbidden")
+def rule_attribute_forbidden(
+    data_parc: pd.DataFrame, *, crops: list[str], conditions: list[dict[str, Any]]
+) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` on plots where ALL `conditions` hold (logical AND). Each condition is
+    {column, op, value} with op in eq/ne/in/not_in/lt/le/gt/ge. Express an OR across columns
+    with several rule entries (each forbids its subset; the mask keeps the union forbidden).
+    Ports the GAMS geographic/soil/irrigation ITK bans (Eq_CS_*, Eq_IG_*_ILE, Eq_BA_*,
+    Eq_BC_*, Eq_AG_*, Eq_VE_*)."""
+    condition = pd.Series(True, index=data_parc.index)
+    for spec in conditions:
+        comparator = _COMPARATORS[spec["op"]]
+        condition &= comparator(data_parc[spec["column"]], spec["value"])
+    return crops, condition
+
+
 def attribute_bounds_from_config(entries: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
     return {
         entry["args"]["attribute"]: (entry["args"]["min_col"], entry["args"]["max_col"])

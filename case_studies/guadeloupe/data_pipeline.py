@@ -106,6 +106,8 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     econ_cfg: dict[str, Any] = config.get("economic_overrides") or {}
     price_multipliers = econ_cfg.get("price_multipliers")
     subsidy_multipliers = econ_cfg.get("subsidy_multipliers")
+    yield_multipliers = econ_cfg.get("yield_multipliers")
+    cost_multipliers = econ_cfg.get("cost_multipliers")
 
     # Carbon->CO2 conversion for the GES indicator (GAMS COEFF_C_CO2 = 0.272).
     env_cfg: dict[str, Any] = (config.get("reporting") or {}).get("environment") or {}
@@ -136,7 +138,11 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     prix_cult = apply_crop_multipliers(
         read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[year], price_multipliers
     )
-    rdt_cult = read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[year]
+    # yield_multipliers (climate shock) scale rdt at source so the shock propagates to
+    # variable cost, subsidy (POSEI_Q), sales, GES, and the yield-based territory quotas.
+    rdt_cult = apply_crop_multipliers(
+        read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[year], yield_multipliers
+    )
     var_rdt_cult = read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"]
     bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[year]
     duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[year]
@@ -207,6 +213,9 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         cout_transp_cult=cout_transp_cult,
         rdt_cult=rdt_cult,
     )
+    # cost_multipliers (input/fuel shock) scale the variable cost only -- margin moves,
+    # production/tonnage does not.
+    variable_cost_per_ha_cult = apply_crop_multipliers(variable_cost_per_ha_cult, cost_multipliers)
     subsidy_per_ha_cult = compute_subsidy_per_ha_cult(
         posei_surf_cult=posei_surf_cult,
         posei_q_cult=posei_q_cult,
@@ -290,6 +299,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
         "margin_per_ha_cult": margin_per_ha_cult,
+        "variable_cost_per_ha_cult": variable_cost_per_ha_cult,
         "sales_per_ha_cult": sales_per_ha_cult,
         "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
         "labor_hours_per_ha_cult": labor_hours_per_ha_cult,

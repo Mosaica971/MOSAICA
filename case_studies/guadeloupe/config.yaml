@@ -83,6 +83,19 @@ crop_families:
     [CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM,
      CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM, CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM,
      CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NISM, CS_MG_NIM, CS_MG_IM]
+  # Sugarcane sub-groups used by the GAMS ITK bans (MODELE.txt:254-319). The regional ones
+  # (bt/sbt/ngt/cgt/egt/mg) mirror the GAMS SC_CS_* sets (SETS.txt:122-180); irrig/meca are
+  # the technical-system cuts (IM = irrigated+mechanised, NIM = non-irrigated+mechanised).
+  cs_irrig: &SC_CS_IRRIG [CS_BT_IM, CS_SBT_IM, CS_NGT_IM, CS_CGT_IM, CS_EGT_IM, CS_MG_IM]
+  cs_meca: &SC_CS_MECA
+    [CS_BT_NIM, CS_BT_IM, CS_SBT_NIM, CS_SBT_IM, CS_NGT_NIM, CS_NGT_IM,
+     CS_CGT_NIM, CS_CGT_IM, CS_EGT_NIM, CS_EGT_IM, CS_MG_NIM, CS_MG_IM]
+  cs_bt: &SC_CS_BT [CS_BT_NISM, CS_BT_NIM, CS_BT_IM]
+  cs_sbt: &SC_CS_SBT [CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM]
+  cs_ngt: &SC_CS_NGT [CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM]
+  cs_cgt: &SC_CS_CGT [CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM]
+  cs_egt: &SC_CS_EGT [CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM]
+  cs_mg: &SC_CS_MG [CS_MG_NISM, CS_MG_NIM, CS_MG_IM]
   ban_ex: &SC_BAN_EX [BA, BA_INT, BA_IRR, BA_PER, BA_SINT]  # export banana (banane export)
   bc: &SC_BC [BC, BC_BT, BC_GTMG]         # plantain/creole banana (banane plantain)
   ma: &SC_MA                              # market gardening (maraichage): all mulch/fertiliser/irrigation combos
@@ -365,6 +378,130 @@ categorical_rules:
       crops: [ME]
       region_column: REGION_CODE
       forbidden_regions: [R0, R1, R3, R4, R5, R6, R7, R9, R10, R12, R13, R14, R17, R19, R21, R25, R26, R27]
+  # --- GAMS geographic/soil/irrigation ITK bans (MODELE.txt:243-319), ported 2026-07-20.
+  # Uses data_parc["REGION"] (1-7 macro agro-region), COMMUNE (INSEE), ILE (1=BT,2=GT,3=MG).
+  # NOT REGION_CODE (R0-R27 petites-regions), which only drives the melon rule above.
+  # Eq_CS_IRR: irrigated sugarcane disabled everywhere (condition IRRIG in {0,1} = all plots).
+  - name: forbid_crops
+    enable: true
+    args: {crops: *SC_CS_IRRIG}
+  # Eq_CS_SOL_SQUE: mechanized sugarcane forbidden on skeletal soil (SOL_COURT = 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_MECA, conditions: [{column: SOL_COURT, op: eq, value: 1}]}
+  # Eq_CS_CONFORM: mechanized sugarcane forbidden on ill-shaped plots (CONFORM > 1500).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_MECA, conditions: [{column: CONFORM, op: gt, value: 1500}]}
+  # Eq_CS_BT: Basse-Terre sugarcane forbidden where ILE != 1 AND REGION != 5.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_BT, conditions: [{column: ILE, op: ne, value: 1}, {column: REGION, op: ne, value: 5}]}
+  # Eq_CS_SBT: South Basse-Terre sugarcane forbidden where REGION != 5.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_SBT, conditions: [{column: REGION, op: ne, value: 5}]}
+  # Eq_CS_NGT: North Grande-Terre sugarcane forbidden outside its communes.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_NGT, conditions: [{column: COMMUNE, op: not_in, value: [97102, 97119, 97122]}]}
+  # Eq_CS_CGT: Centre Grande-Terre sugarcane forbidden outside its communes.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_CGT, conditions: [{column: COMMUNE, op: not_in, value: [97116, 97113, 97101]}]}
+  # Eq_CS_EGT: East Grande-Terre sugarcane forbidden outside its communes.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_EGT, conditions: [{column: COMMUNE, op: not_in, value: [97117, 97128, 97125]}]}
+  # Eq_CS_MG: Marie-Galante sugarcane forbidden where ILE != 3.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: *SC_CS_MG, conditions: [{column: ILE, op: ne, value: 3}]}
+  # Eq_MA_TO_CHOU_JA_LOC: forbidden where ILE != 1 AND not irrigated.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [MA_TO_CHOU_JA], conditions: [{column: ILE, op: ne, value: 1}, {column: IRRIG_PARC, op: eq, value: 0}]}
+  # Eq_ME_MG: melon forbidden in REGION 7. Distinct from the REGION_CODE melon rule above
+  # (different referential); both are restrictive, so the intersection is safe. See
+  # docs/gams_port_inventory.md for the open question on whether they overlap by design.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [ME], conditions: [{column: REGION, op: eq, value: 7}]}
+  # Eq_IG_PLA_ILE: flat-yam forbidden in Basse-Terre (ILE = 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [IG_PLA], conditions: [{column: ILE, op: eq, value: 1}]}
+  # Eq_IG_TUT_ILE: staked-yam forbidden outside Basse-Terre (ILE != 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [IG_TUT], conditions: [{column: ILE, op: ne, value: 1}]}
+  # Eq_BA_IRR: irrigated banana forbidden on non-irrigated plots (IRRIG_PARC = 0).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [BA_IRR], conditions: [{column: IRRIG_PARC, op: eq, value: 0}]}
+  # Eq_BA_IRR_BT: irrigated banana forbidden in Basse-Terre (ILE = 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [BA_IRR], conditions: [{column: ILE, op: eq, value: 1}]}
+  # Eq_BC_BT: Basse-Terre plantain forbidden outside Basse-Terre (ILE != 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [BC_BT], conditions: [{column: ILE, op: ne, value: 1}]}
+  # Eq_BC_GTMG: GT/MG plantain forbidden in Basse-Terre (ILE = 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [BC_GTMG], conditions: [{column: ILE, op: eq, value: 1}]}
+  # Eq_BC_IRR_BT: Basse-Terre plantain forbidden where PLUVIO < 2300 AND not irrigated.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [BC_BT], conditions: [{column: PLUVIO_PARC, op: lt, value: 2300}, {column: IRRIG_PARC, op: eq, value: 0}]}
+  # Eq_BC_IRR_GTMG: GT/MG plantain forbidden where ILE != 1 AND not irrigated.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [BC_GTMG], conditions: [{column: ILE, op: ne, value: 1}, {column: IRRIG_PARC, op: eq, value: 0}]}
+  # Eq_AG_IRR: citrus (AG) forbidden where not irrigated AND altitude < 400.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [AG], conditions: [{column: IRRIG_PARC, op: eq, value: 0}, {column: ALTITUDE, op: lt, value: 400}]}
+  # Eq_AG_BT: citrus (AG) forbidden outside Basse-Terre (ILE > 1).
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [AG], conditions: [{column: ILE, op: gt, value: 1}]}
+  # Eq_VE_IRR: VE_BTGT forbidden where PLUVIO < 2700 AND not irrigated.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [VE_BTGT], conditions: [{column: PLUVIO_PARC, op: lt, value: 2700}, {column: IRRIG_PARC, op: eq, value: 0}]}
+  #
+  # /!\ GAMS BUG PORTED FAITHFULLY -- Eq_VE_BTGT and Eq_VE_PLUIE (MODELE.txt:305-307) query
+  # Data_RPG_Gwad on columns REGION / ILE that DO NOT EXIST in that table (it only holds
+  # ident + cult_2012..cult_2017). GAMS silently returns 0 for such lookups, so:
+  #   Eq_VE_BTGT: "Data_Parc.REGION=4 OR Data_RPG.REGION=5" -> 2nd term always false
+  #               -> effective ban is REGION = 4 only (NOT {4,5}).
+  #   Eq_VE_PLUIE: "Data_RPG.REGION=6 OR Data_RPG.ILE<>1" -> 1st false, 2nd is 0<>1 = ALWAYS
+  #               TRUE -> VE_PLUIE is effectively banned on every plot.
+  # Decision 2026-07-20: port the real GAMS behaviour (parity mandate). The intended-reading
+  # variants are written below as enable: false -- flip the pairs to switch. See VIGILANCE.md.
+  # Eq_VE_BTGT (faithful): VE_BTGT forbidden where REGION = 4.
+  - name: attribute_forbidden
+    enable: true
+    args: {crops: [VE_BTGT], conditions: [{column: REGION, op: eq, value: 4}]}
+  # Eq_VE_BTGT (intended reading): REGION in {4, 5}.
+  - name: attribute_forbidden
+    enable: false
+    args: {crops: [VE_BTGT], conditions: [{column: REGION, op: in, value: [4, 5]}]}
+  # Eq_VE_PLUIE (faithful): banned everywhere.
+  - name: forbid_crops
+    enable: true
+    args: {crops: [VE_PLUIE]}
+  # Eq_VE_PLUIE (intended reading): REGION = 6 (part 1 of the OR).
+  - name: attribute_forbidden
+    enable: false
+    args: {crops: [VE_PLUIE], conditions: [{column: REGION, op: eq, value: 6}]}
+  # Eq_VE_PLUIE (intended reading): ILE != 1 (part 2 of the OR).
+  - name: attribute_forbidden
+    enable: false
+    args: {crops: [VE_PLUIE], conditions: [{column: ILE, op: ne, value: 1}]}
+  #
   # friche_lock: plots left fallow (fallow_codes) across every year of history_columns are
   # locked out of the listed crops -- the GAMS Eq_FRICHE rule. crops list = CULT_NON_NC set.
   - name: friche_lock

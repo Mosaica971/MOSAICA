@@ -337,3 +337,47 @@ def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
     # = 18658.0. Unlike AG (subsidy=0), this exercises the annualization
     # division/multiplication against a meaningfully nonzero subsidy.
     assert subsidy_annualized["BA_INT"] == pytest.approx(18658.0, abs=0.01)
+
+
+def test_yield_multiplier_scales_rdt_in_dataset():
+    from copy import deepcopy
+    from pathlib import Path
+
+    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from core.config import load_config
+
+    cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))
+    cfg["zone_filter"] = {"include": {"islands": [3]}}  # Marie-Galante: smallest, fast
+    base = build_dataset(cfg)
+
+    shocked_cfg = deepcopy(cfg)
+    shocked_cfg["economic_overrides"] = {
+        "yield_multipliers": [{"crops": ["CS_MG_NISM"], "factor": 0.5}]
+    }
+    shocked = build_dataset(shocked_cfg)
+
+    assert shocked.parameters["rdt_cult"]["CS_MG_NISM"] == (
+        base.parameters["rdt_cult"]["CS_MG_NISM"] * 0.5
+    )
+
+
+def test_cost_multiplier_scales_variable_cost_in_dataset():
+    from copy import deepcopy
+    from pathlib import Path
+
+    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from core.config import load_config
+
+    cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))
+    cfg["zone_filter"] = {"include": {"islands": [3]}}
+    base = build_dataset(cfg)
+
+    shocked_cfg = deepcopy(cfg)
+    shocked_cfg["economic_overrides"] = {
+        "cost_multipliers": [{"crops": ["CS_MG_NISM"], "factor": 1.3}]
+    }
+    shocked = build_dataset(shocked_cfg)
+
+    assert shocked.parameters["variable_cost_per_ha_cult"]["CS_MG_NISM"] == (
+        base.parameters["variable_cost_per_ha_cult"]["CS_MG_NISM"] * 1.3
+    )

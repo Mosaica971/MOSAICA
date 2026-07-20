@@ -179,3 +179,47 @@ def test_rule_friche_lock_matches_plots_fallow_for_every_listed_year():
     assert crops == ["AG", "CS"]
     # P1: 14,14,10 -- all fallow codes, locked. P2/P3: one year has a real crop (5).
     assert condition.tolist() == [True, False, False]
+
+
+def test_forbid_crops_forbids_listed_crops_on_all_plots():
+    import pandas as pd
+    from core.data.eligibility import CATEGORICAL_RULE_REGISTRY
+
+    data_parc = pd.DataFrame({"ILE": [1, 2, 3]}, index=["P1", "P2", "P3"])
+    rule = CATEGORICAL_RULE_REGISTRY["forbid_crops"]
+    crops, condition = rule(data_parc, crops=["ME", "BA_IRR"])
+
+    assert crops == ["ME", "BA_IRR"]
+    assert condition.all()  # forbidden on every plot
+    assert list(condition.index) == ["P1", "P2", "P3"]
+
+
+def test_attribute_forbidden_single_and_multi_condition():
+    import pandas as pd
+    from core.data.eligibility import CATEGORICAL_RULE_REGISTRY
+
+    data_parc = pd.DataFrame(
+        {"ILE": [1, 2, 3, 2], "REGION": [5, 3, 1, 5], "COMMUNE": [97110, 97102, 97130, 97117]},
+        index=["P1", "P2", "P3", "P4"],
+    )
+    rule = CATEGORICAL_RULE_REGISTRY["attribute_forbidden"]
+
+    # Single condition: forbid where COMMUNE not in the Nord-Grande-Terre commune list
+    crops, cond = rule(
+        data_parc,
+        crops=["CS_NGT_NISM"],
+        conditions=[{"column": "COMMUNE", "op": "not_in", "value": [97102, 97119, 97122]}],
+    )
+    assert crops == ["CS_NGT_NISM"]
+    assert cond.tolist() == [True, False, True, True]  # only P2 (97102) allowed
+
+    # AND of two conditions: forbid CS_BT where ILE != 1 AND REGION != 5
+    _, cond2 = rule(
+        data_parc,
+        crops=["CS_BT_NISM"],
+        conditions=[
+            {"column": "ILE", "op": "ne", "value": 1},
+            {"column": "REGION", "op": "ne", "value": 5},
+        ],
+    )
+    assert cond2.tolist() == [False, True, True, False]

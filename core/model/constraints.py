@@ -135,3 +135,57 @@ def build_farm_area_ratio_min_constraint(
         return numerator_area >= ratio * denominator_area
 
     setattr(model, label, pyo.Constraint(model.FARMS, denominator_crops, rule=_rule))
+
+
+@register_constraint("crop_share_bound")
+def build_crop_share_bound_constraint(
+    model: pyo.ConcreteModel,
+    inputs: ModelInputs,
+    *,
+    label: str,
+    numerator_crops: list[str],
+    denominator_crops: list[str],
+    sense: str,
+    share: float,
+    **_args: Any,
+) -> None:
+    """Territory-wide share bound: area(numerator) {ge|le} share * area(denominator),
+    summed over all plots. Used for a minimum bio share (numerator = bio variants,
+    denominator = whole filiere, ge) or a maximum intensification share (numerator =
+    intensive variants, le)."""
+    if sense not in ("le", "ge"):
+        raise ValueError(f"Unknown sense {sense!r}, expected 'le' or 'ge'")
+
+    numerator_set = set(numerator_crops)
+    denominator_set = set(denominator_crops)
+    numerator_area = 0
+    denominator_area = 0
+    for plot, crop in inputs.eligible_pairs:
+        if crop in numerator_set:
+            numerator_area += model.Y[plot, crop] * inputs.plot_surface_ha[plot]
+        if crop in denominator_set:
+            denominator_area += model.Y[plot, crop] * inputs.plot_surface_ha[plot]
+
+    # Both sides may be a plain 0 (no eligible pairs) -- guard the trivial Boolean, as in
+    # territory_production_bound.
+    if isinstance(numerator_area, (int, float)) and isinstance(denominator_area, (int, float)):
+        satisfied = (
+            numerator_area >= share * denominator_area
+            if sense == "ge"
+            else numerator_area <= share * denominator_area
+        )
+        setattr(
+            model,
+            label,
+            pyo.Constraint(
+                expr=pyo.Constraint.Feasible if satisfied else pyo.Constraint.Infeasible
+            ),
+        )
+        return
+
+    expr = (
+        numerator_area >= share * denominator_area
+        if sense == "ge"
+        else numerator_area <= share * denominator_area
+    )
+    setattr(model, label, pyo.Constraint(expr=expr))
