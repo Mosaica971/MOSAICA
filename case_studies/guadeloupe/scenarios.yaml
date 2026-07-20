@@ -18,6 +18,11 @@
 #   set_args: [{label: <label>, args: {...}}, ...]
 #       Shallow-merge `args` into the entry carrying that `label` -- e.g. change a
 #       threshold, max_share, or ratio without retyping the whole entry.
+#   enable_add: [{name: <builder>, args: {...}, section: <config list>}, ...]
+#       Append a BRAND-NEW entry that does not exist in config.yaml (enable/disable and
+#       set_args can only touch entries already declared there). `section` defaults to
+#       `constraints`; pass `section: categorical_rules` to add an eligibility cut.
+#       e.g. a minimum bio share, or a crop banned for a sanitary scenario.
 #
 # One extra field fans a single entry into many runs:
 #   matrix: {dotted.path: [v1, v2, ...], other.path: [...]}
@@ -38,6 +43,8 @@
 
 # Crop groups reused by the economic-shock runs below (YAML anchors; the leading `_` key
 # is ignored by run_scenarios.py, which only reads `runs:`).
+# NOTE: YAML anchors do not cross files, so these groups intentionally mirror
+# `config.yaml crop_families` -- the two must be kept in sync by hand.
 _crop_groups:
   banane_export: &G_BANANE [BA, BA_INT, BA_IRR, BA_PER, BA_SINT]
   canne: &G_CANNE
@@ -50,72 +57,197 @@ _crop_groups:
      MA_BAG_NON_I, MA_BAG_NON_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
      MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI, MA_PAI_BIO_I, MA_PAI_BIO_NI,
      MA_PAI_VEG_I, MA_PAI_VEG_NI, MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
+  bio_maraichage: &G_BIO_MA
+    [MA_PLBIO, MA_MOBIO, MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI,
+     MA_PAI_BIO_I, MA_PAI_BIO_NI]
+  # Intensification de la canne = les systemes MECANISES qui existent encore. Les variantes
+  # irriguees CS_*_IM sont bannies partout par Eq_CS_IRR (cf. config.yaml), donc un groupe
+  # bati sur elles serait vide et rendrait toute contrainte de part infaisable.
+  intensif_canne: &G_INTENSIF_CS
+    [CS_BT_NIM, CS_SBT_NIM, CS_NGT_NIM, CS_CGT_NIM, CS_EGT_NIM, CS_MG_NIM]
 
 runs:
   # --- Contrôle -----------------------------------------------------------------
   - name: baseline
     description: "Config de référence inchangée -- run de contrôle pour comparaison."
 
-  # --- Subventions / prix (leviers globaux) -------------------------------------
-  - name: politique_smart
-    description: "Politique SMART : matrice de coûts OTK + subvention compost MAE version SMART."
+  # --- Fuite en avant / intensification -----------------------------------------
+  - name: intensif_max
+    description: "Subventions canne + banane +30%, plafonds de production canne/banane levés."
     overrides:
-      data.scenario: SMART
-
-  # --- Chocs prix / subvention ciblés par filière -------------------------------
-  - name: prix_banane_plus20
-    description: "Prix de la banane export +20% -- la filière gagne-t-elle des surfaces ?"
+      economic_overrides.subsidy_multipliers:
+        - {crops: *G_CANNE, factor: 1.3}
+        - {crops: *G_BANANE, factor: 1.3}
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 100000000}}
+      - {label: ba_quota_max, args: {threshold: 100000000}}
+  - name: marge_pure
+    description: "Retire tous les planchers/objectifs de production -- optimum marge pure."
+    disable: [bc_prod_min, ig_prod_min, ma_prod_min, an_prod_min, plu_prod_min, me_prod_min,
+              pn_prod_min, leg_prod_obj, fru_prod_obj, pat_surf_obj]
+  - name: export_roi
+    description: "Prix banane +20% & canne +20%, canne mécanisée forcée >= 50% de la filière canne."
     overrides:
       economic_overrides.price_multipliers:
         - {crops: *G_BANANE, factor: 1.2}
+        - {crops: *G_CANNE, factor: 1.2}
+    enable_add:
+      - name: crop_share_bound
+        args: {label: intensif_min, numerator_crops: *G_INTENSIF_CS,
+               denominator_crops: *G_CANNE, sense: ge, share: 0.5}
+  - name: plafonds_leves
+    description: "Lève les plafonds de production canne et banane, sans toucher aux subventions."
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 100000000}}
+      - {label: ba_quota_max, args: {threshold: 100000000}}
 
-  - name: subv_canne_moins50
-    description: "Subvention canne à sucre -50% -- robustesse de la canne à une baisse d'aide."
+  # --- Agroécologie --------------------------------------------------------------
+  - name: agroeco_smart
+    description: "Scénario SMART (matrice OTK + subvention compost MAE version SMART)."
+    overrides: {data.scenario: SMART}
+  - name: cap_intensif
+    description: "Plafond d'intensification : canne mécanisée <= 20% de la filière canne."
+    enable_add:
+      - name: crop_share_bound
+        args: {label: intensif_cap, numerator_crops: *G_INTENSIF_CS,
+               denominator_crops: *G_CANNE, sense: le, share: 0.2}
+  - name: rotations_plus
+    description: "Rotations renforcées : jachère >= 40% de la banane export (défaut 0.25)."
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.4}}
+  - name: mae_compost_boost
+    description: "SMART + subvention maraîchage +25% (proxy d'incitation agroécologique)."
+    overrides:
+      data.scenario: SMART
+      economic_overrides.subsidy_multipliers:
+        - {crops: *G_MARAICHAGE, factor: 1.25}
+
+  # --- Bio ------------------------------------------------------------------------
+  - name: bio_incitatif
+    description: "Subvention +50% sur les variantes maraîchage bio (incitation, sans contrainte)."
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: *G_BIO_MA, factor: 1.5}
+  - name: bio_contraint
+    description: "Part bio dure : >= 30% du maraîchage en variantes bio, sans incitation."
+    enable_add:
+      - name: crop_share_bound
+        args: {label: bio_min, numerator_crops: *G_BIO_MA,
+               denominator_crops: *G_MARAICHAGE, sense: ge, share: 0.3}
+  - name: bio_fort
+    description: "Part bio 50% + subvention bio +50% (contrainte et incitation cumulées)."
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: *G_BIO_MA, factor: 1.5}
+    enable_add:
+      - name: crop_share_bound
+        args: {label: bio_min, numerator_crops: *G_BIO_MA,
+               denominator_crops: *G_MARAICHAGE, sense: ge, share: 0.5}
+
+  # --- Mise en commun -------------------------------------------------------------
+  - name: mise_en_commun
+    description: "Allocation poolée : désactive les plafonds de rotation par exploitation."
+    disable: [an_agro_max_expl, ig_agro_max_expl]
+  - name: commun_bio
+    description: "Mise en commun + part bio 30% (coopérative agroécologique)."
+    disable: [an_agro_max_expl, ig_agro_max_expl]
+    enable_add:
+      - name: crop_share_bound
+        args: {label: bio_min, numerator_crops: *G_BIO_MA,
+               denominator_crops: *G_MARAICHAGE, sense: ge, share: 0.3}
+
+  # --- Chocs économiques ----------------------------------------------------------
+  - name: choc_prix_banane
+    description: "Prix banane export -30%."
+    overrides:
+      economic_overrides.price_multipliers:
+        - {crops: *G_BANANE, factor: 0.7}
+  - name: choc_subv_canne
+    description: "Subvention canne -50%."
     overrides:
       economic_overrides.subsidy_multipliers:
         - {crops: *G_CANNE, factor: 0.5}
-
-  - name: choc_prix_maraichage_moins30
-    description: "Prix maraîchage -30% -- effet sur le respect du plancher légumes."
+  - name: choc_prix_maraichage
+    description: "Prix maraîchage -30% (met à l'épreuve le plancher légumes)."
     overrides:
       economic_overrides.price_multipliers:
         - {crops: *G_MARAICHAGE, factor: 0.7}
+  - name: choc_petrole
+    description: "Choc intrants/carburant : coûts variables +40% sur canne, banane, maraîchage."
+    overrides:
+      economic_overrides.cost_multipliers:
+        - {crops: *G_CANNE, factor: 1.4}
+        - {crops: *G_BANANE, factor: 1.4}
+        - {crops: *G_MARAICHAGE, factor: 1.4}
 
-  # --- Interdictions / quotas ---------------------------------------------------
-  - name: interdiction_banane_export
-    description: "Plafond de production banane export ramené à 0 -- bannit la filière du territoire."
+  # --- Chocs climatiques et sanitaires ---------------------------------------------
+  - name: cyclone
+    description: "Cyclone : rendement banane & canne -40%."
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: *G_BANANE, factor: 0.6}
+        - {crops: *G_CANNE, factor: 0.6}
+  - name: secheresse
+    description: "Sécheresse : rendement -30% (canne/banane/maraîchage) + cultures irriguées bannies."
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: *G_CANNE, factor: 0.7}
+        - {crops: *G_BANANE, factor: 0.7}
+        - {crops: *G_MARAICHAGE, factor: 0.7}
+    enable_add:
+      # Eligibility cut, not a MILP constraint -- hence the explicit section.
+      - name: forbid_crops
+        section: categorical_rules
+        args: {crops: [BA_IRR, ME, MA_ROTA]}
+  - name: maladie_cercosporiose
+    description: "Cercosporiose noire : rendement banane -50%."
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: *G_BANANE, factor: 0.5}
+
+  # --- Mixes politiques -------------------------------------------------------------
+  - name: transition_sous_cyclone
+    description: "Agroécologie (SMART + bio 30%) frappée par un cyclone (rdt banane/canne -40%)."
+    overrides:
+      data.scenario: SMART
+      economic_overrides.yield_multipliers:
+        - {crops: *G_BANANE, factor: 0.6}
+        - {crops: *G_CANNE, factor: 0.6}
+    enable_add:
+      - name: crop_share_bound
+        args: {label: bio_min, numerator_crops: *G_BIO_MA,
+               denominator_crops: *G_MARAICHAGE, sense: ge, share: 0.3}
+  - name: fuite_en_avant_secheresse
+    description: "Intensif (subv canne/banane +30%, plafonds levés) frappé par la sécheresse."
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: *G_CANNE, factor: 1.3}
+        - {crops: *G_BANANE, factor: 1.3}
+      economic_overrides.yield_multipliers:
+        - {crops: *G_CANNE, factor: 0.7}
+        - {crops: *G_BANANE, factor: 0.7}
     set_args:
-      - {label: ba_quota_max, args: {threshold: 0}}
-
-  - name: canne_plafond_bas
-    description: "Plafond sucre divisé ~par 3 (107k -> 30k t) -- resserre fortement la canne."
+      - {label: cs_quota_max, args: {threshold: 100000000}}
+      - {label: ba_quota_max, args: {threshold: 100000000}}
+  - name: bio_commun_choc
+    description: "Bio 40% + mise en commun + prix maraîchage -20%."
+    disable: [an_agro_max_expl, ig_agro_max_expl]
+    overrides:
+      economic_overrides.price_multipliers:
+        - {crops: *G_MARAICHAGE, factor: 0.8}
+    enable_add:
+      - name: crop_share_bound
+        args: {label: bio_min, numerator_crops: *G_BIO_MA,
+               denominator_crops: *G_MARAICHAGE, sense: ge, share: 0.4}
+  - name: resilience_agroeco
+    description: "Bio 30% + rotations renforcées (jachère 40%) sous cyclone banane/canne -40%."
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: *G_BANANE, factor: 0.6}
+        - {crops: *G_CANNE, factor: 0.6}
     set_args:
-      - {label: cs_quota_max, args: {threshold: 30000}}
-
-  - name: libre_friche
-    description: "Lève le verrou jachère 2015-17 (friche_lock) -- rend les parcelles bloquées jouables."
-    disable: [friche_lock]
-
-  - name: melon_libre
-    description: "Lève les restrictions sol/région/île du melon (reste soumis à l'irrigation)."
-    disable: [melon_soil_restriction, region_crop_forbidden]
-
-  - name: sans_planchers_production
-    description: "Retire tous les planchers/objectifs de production -- optimum 'pur marge' sans obligations."
-    disable:
-      - bc_prod_min
-      - ig_prod_min
-      - ma_prod_min
-      - an_prod_min
-      - plu_prod_min
-      - me_prod_min
-      - pn_prod_min
-      - leg_prod_obj
-      - fru_prod_obj
-      - pat_surf_obj
-
-  # --- Objectif -----------------------------------------------------------------
-  - name: aversion_risque
-    description: "Bascule sur l'objectif Markowitz (marge ajustée du risque) au lieu de la marge brute."
-    enable: [maximize_risk_adjusted_gross_margin]
-    disable: [maximize_gross_margin]
+      - {label: ba_ja, args: {ratio: 0.4}}
+    enable_add:
+      - name: crop_share_bound
+        args: {label: bio_min, numerator_crops: *G_BIO_MA,
+               denominator_crops: *G_MARAICHAGE, sense: ge, share: 0.3}

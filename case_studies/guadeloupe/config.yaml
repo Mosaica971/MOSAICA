@@ -285,7 +285,11 @@ constraints:
   - name: territory_production_bound
     enable: false
     args:
-      label: tub_prod_obj  # tuber target (disabled; threshold 0 = no-op)
+      # tub_prod_obj: documented PLACEHOLDER kept for GAMS traceability (Eq_TUB_PROD_OBJ).
+      # Intentionally enable: false with threshold 0, which would be a no-op even if
+      # enabled (`sum >= 0` always holds). Do NOT enable it without setting a real target
+      # first -- flipping the flag alone changes nothing and only adds a dead constraint.
+      label: tub_prod_obj
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 0

@@ -4,17 +4,19 @@ Ce qui reste à faire. Les limites connues et non planifiées sont dans `VIGILAN
 
 ## En cours / prêt à coder
 
-**Batch de scénarios + parité ITK géographique** — plan complet, aucune tâche faite.
-Plan : `docs/superpowers/plans/2026-07-17-scenarios-batch-and-itk-parity.md`.
-Spec : `docs/superpowers/specs/2026-07-17-scenarios-batch-and-gams-parity-port-design.md`.
-- Lot 1 : leviers `yield_multipliers` / `cost_multipliers` (chocs climat & intrants),
-  règle catégorielle `forbid_crops`, contrainte `crop_share_bound` (part min/max territoriale).
-- Lot 2 : règle générique `attribute_forbidden` + câblage de **tous** les bans ITK
-  géographiques GAMS non portés dans `config.yaml`.
-- Lot 5 : écrire les ~22 scénarios de trajectoire politique, nettoyage config,
-  `docs/gams_port_inventory.md` (statut de portage équation par équation), MAJ VIGILANCE.
+**Batch de scénarios + parité ITK géographique — livré le 2026-07-20** (lots 1, 2, 5).
+Leviers `yield_multipliers`/`cost_multipliers`, règles `forbid_crops`/`attribute_forbidden`,
+contrainte `crop_share_bound`, canal `enable_add`, ~24 bans ITK câblés, 25 scénarios,
+`docs/gams_port_inventory.md`. **Aucun solve n'a été lancé** : la validation est unitaire
+(`tests/test_scenario_overrides.py` résout les 25 scénarios sans résoudre le MILP).
+→ Reste à faire : lancer `scripts/run_scenarios.py` en fin de journée pour vérifier qu'aucun
+scénario n'est infaisable sur les données réelles, puis ajuster les seuils qui coincent.
 
 ## Différé (cadré, en attente d'une décision ou de données)
+
+- **`Eq_AN_PA`** — `AN_PA` interdit si `Surf_Expl_Parc_init < AN_SURF_EXPL_MIN` : porte sur
+  une taille d'**exploitation**, pas un attribut de parcelle, donc hors de portée de
+  `attribute_forbidden`. Demande une règle catégorielle indexée par exploitation.
 
 - **Bloc CF (canne fourragère)** — sorti du plan ci-dessus, à replanifier séparément.
   Inclut le chargement des fichiers scénario-dépendants `Prix_Cult_CF_{RESTIT,SMART}.txt`
