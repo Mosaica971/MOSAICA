@@ -19,14 +19,17 @@ def _data_cult() -> pd.DataFrame:
 
 
 def _data_sol() -> pd.DataFrame:
-    """Colonnes dans l'ordre de la vraie table, DIFFERENT de l'ordre TYPE_SOL 1..5."""
+    """Colonnes dans l'ordre de la vraie table, DIFFERENT de l'ordre TYPE_SOL 1..5.
+    DENS reprend les vraies valeurs de data/tables/Data_Sol.txt (elles different toutes
+    d'un sol a l'autre) precisement pour qu'une indexation par position -- au lieu de
+    par nom -- fasse echouer les tests qui en dependent."""
     return pd.DataFrame(
         {
-            "NITISOL": [0.10, 1.0, 0.25, 3.0],
-            "ANDOSOL": [0.20, 1.0, 0.25, 17.5],
-            "FERRALSOL": [0.30, 1.0, 0.25, 10.0],
+            "NITISOL": [0.10, 0.9, 0.25, 3.0],
+            "ANDOSOL": [0.20, 0.8, 0.25, 17.5],
+            "FERRALSOL": [0.30, 1.05, 0.25, 10.0],
             "AUTRES": [0.40, 1.0, 0.25, 0.0],
-            "VERTISOL": [0.50, 1.0, 0.25, 0.0],
+            "VERTISOL": [0.50, 1.1, 0.25, 0.0],
         },
         index=["KAER", "DENS", "PROF", "KOC"],
     )
@@ -80,11 +83,14 @@ def test_amendment_carbon_sums_over_itk_operations():
 
 
 def test_initial_soil_carbon_maps_soil_type_by_name():
-    # P1: TYPE_SOL 1 -> VERTISOL. 4/100 * DENS 1.0 * PROF 0.25 * 10000 = 100.
-    # P2: TYPE_SOL 4 -> NITISOL,  meme DENS/PROF ici -> 100 aussi.
+    # P1: TYPE_SOL 1 -> VERTISOL. 4/100 * DENS 1.1 * PROF 0.25 * 10000 = 110.
+    # P2: TYPE_SOL 4 -> NITISOL.  4/100 * DENS 0.9 * PROF 0.25 * 10000 = 90.
+    # DENS differs per soil here, so a regression to positional indexing (which would
+    # grab NITISOL's DENS 0.9 for P1's TYPE_SOL=1 and AUTRES's DENS 1.0 for P2's
+    # TYPE_SOL=4, giving 90/100 instead) is caught by this test.
     initial = soil_carbon.compute_initial_soil_carbon_per_ha_plot(_data_parc(), _data_sol())
-    assert initial["P1"] == pytest.approx(100.0)
-    assert initial["P2"] == pytest.approx(100.0)
+    assert initial["P1"] == pytest.approx(110.0)
+    assert initial["P2"] == pytest.approx(90.0)
 
 
 def test_mineralization_uses_the_plot_soil_kaer_not_a_fixed_one():
@@ -113,10 +119,11 @@ def test_carbon_balance_drops_when_switching_to_a_low_residue_crop():
         pd.Series(["CROP_LOW"], index=["P2"]),
         data_parc, data_sol, data_cult, data_otk, matrice,
     )
-    # HIGH: entrees 3.0 + 0.3 = 3.3, sorties 100 * 0.10 * 1.0 = 10 -> -6.7
-    assert high["P2"] == pytest.approx(-6.7)
-    # LOW: entrees 0.2 + 0.0 = 0.2, sorties 10 -> -9.8
-    assert low["P2"] == pytest.approx(-9.8)
+    # P2 = NITISOL: initial carbon 4/100 * DENS 0.9 * PROF 0.25 * 10000 = 90.
+    # HIGH: entrees 3.0 + 0.3 = 3.3, sorties 90 * KAER 0.10 * KCROP 1.0 = 9 -> -5.7
+    assert high["P2"] == pytest.approx(-5.7)
+    # LOW: entrees 0.2 + 0.0 = 0.2, sorties 9 -> -8.8
+    assert low["P2"] == pytest.approx(-8.8)
     assert low["P2"] < high["P2"]
 
 
