@@ -9,6 +9,7 @@ import pandas as pd
 import pyomo.environ as pyo
 import yaml
 
+from case_studies.guadeloupe import resilience
 from case_studies.guadeloupe.data_pipeline import DEFAULT_SCENARIO, DEFAULT_YEAR
 from case_studies.guadeloupe.reporting import indicators, plots
 from core.data.dataset import Dataset
@@ -79,6 +80,17 @@ def generate_report(
     input_auto = indicators.compute_food_autonomy_totals(dataset, input_representative)
     delta_auto = _numeric_delta(output_auto, input_auto)
 
+    price_shock_delta = (config.get("resilience") or {}).get(
+        "price_shock_delta", resilience.DEFAULT_PRICE_SHOCK_DELTA
+    )
+    output_res = indicators.compute_resilience_totals(
+        dataset, output_allocation, price_shock_delta
+    )
+    input_res = indicators.compute_resilience_totals(
+        dataset, input_representative, price_shock_delta
+    )
+    delta_res = {key: output_res[key] - input_res[key] for key in output_res}
+
     recap = _build_recap(
         dataset=dataset,
         config=config,
@@ -92,6 +104,7 @@ def generate_report(
         economics={"input": input_econ, "output": output_econ, "delta": delta_econ},
         environment={"input": input_env, "output": output_env, "delta": delta_env},
         food_autonomy={"input": input_auto, "output": output_auto, "delta": delta_auto},
+        resilience={"input": input_res, "output": output_res, "delta": delta_res},
     )
     # Full CULT_2017 universe (every fine crop the model could pick, allocated or not) so the
     # dashboard can show an exhaustive crop/subculture axis including never-chosen crops.
@@ -260,6 +273,7 @@ def _build_recap(
     economics: dict[str, Any],
     environment: dict[str, Any],
     food_autonomy: dict[str, Any],
+    resilience: dict[str, Any],
 ) -> dict[str, Any]:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
@@ -293,6 +307,7 @@ def _build_recap(
         "economics": economics,
         "environment": environment,
         "food_autonomy": food_autonomy,
+        "resilience": resilience,
         "gini_revenue_by_farm": gini_revenue_by_farm,
         "total_plots": int(len(dataset.parameters["data_parc"])),
         "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),

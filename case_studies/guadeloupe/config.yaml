@@ -41,6 +41,15 @@ labor:
   hours_per_etp: 1607
   cost_per_hour: 15.5
 
+# Exposure indicators (reporting only -- no effect on the allocation). The price shock is
+# applied *after* the solve to a fixed allocation, which is NOT what the scenario levers
+# economics.price_multipliers / yield_multipliers do: those shock the inputs before the
+# solve, so the optimizer adapts to them. Both are useful; they answer different questions.
+resilience:
+  # Relative shock on prix_cult, e.g. 0.20 = a 20% market price drop. Subsidies, variable
+  # costs and the bagasse by-product are deliberately left untouched.
+  price_shock_delta: 0.20
+
 # Reporting-only knobs (no effect on the optimization itself).
 reporting:
   environment:

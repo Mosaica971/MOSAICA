@@ -74,6 +74,12 @@ def _tiny_dataset() -> Dataset:
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
             "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
             "margin_per_ha_cult": pd.Series({"CS": 1500.0, "ME": 2000.0}),
+            # Resilience (Task 3): fractional yield-loss margin variance, market price
+            # (EUR/t) and cycle duration (months) -- only touched by
+            # compute_resilience_totals, not asserted on by value in the pre-existing tests.
+            "crop_variance_per_ha": pd.Series({"CS": 0.1, "ME": 0.15}),
+            "prix_cult": pd.Series({"CS": 37.5, "ME": 250.0}),
+            "duree_cycle_cult": pd.Series({"CS": 12.0, "ME": 12.0}),
             "azote_per_ha_cult": pd.Series({"CS": 100.0, "ME": 50.0}),
             "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
             "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
@@ -277,3 +283,33 @@ def test_generate_report_writes_additional_indicators(tmp_path):
 
     surface_by_region_output = pd.read_csv(output_dir / "csv" / "surface_by_region_output.csv")
     assert "region" in surface_by_region_output.columns
+
+
+def test_recap_carries_resilience_block_for_both_sides(tmp_path):
+    """Le recap expose les indicateurs d'exposition, cote entree comme sortie."""
+    import json
+
+    dataset = _tiny_dataset()
+    model = build_crop_allocation_model(
+        plot_surface_ha={"P1": 2.0, "P2": 3.0},
+        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        config=_CONFIG,
+    )
+    results = solve_model(model, _CONFIG)
+    output_dir = report.generate_report(
+        dataset, _CONFIG, model, results, duration=1.23, outputs_root=tmp_path
+    )
+    recap = json.loads((output_dir / "recap.json").read_text())
+
+    assert "resilience" in recap
+    for side in ("input", "output", "delta"):
+        assert side in recap["resilience"]
+    for key in (
+        "climate_margin_at_risk",
+        "climate_margin_at_risk_ratio",
+        "revenue_concentration_hhi",
+        "price_shock_margin_loss",
+        "price_shock_margin_loss_ratio",
+    ):
+        assert key in recap["resilience"]["output"]

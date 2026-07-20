@@ -329,6 +329,11 @@ def _dataset() -> Dataset:
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
             "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
             "margin_per_ha_cult": pd.Series({"CS": 1500.0, "ME": 2000.0}),
+            # Resilience (Task 3): only touched by compute_resilience_totals, not asserted
+            # on by value in the pre-existing tests here.
+            "crop_variance_per_ha": pd.Series({"CS": 0.1, "ME": 0.15}),
+            "prix_cult": pd.Series({"CS": 37.5, "ME": 250.0}),
+            "duree_cycle_cult": pd.Series({"CS": 12.0, "ME": 12.0}),
             "azote_per_ha_cult": pd.Series({"CS": 100.0, "ME": 50.0}),
             "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
             "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
