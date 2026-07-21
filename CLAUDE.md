@@ -115,6 +115,14 @@ tous calculés dans `data_pipeline` puis appliqués à l'allocation par `reporti
 Le carbone est le seul à dépendre de la **parcelle** (via `TYPE_SOL` → `Data_Sol.txt`) et non
 seulement de la culture : il ne passe donc pas par l'helper `rate()` de `compute_facts_table`.
 
+`resilience.py` ajoute trois indicateurs d'**exposition** (marge à risque climatique via
+`Var_Rdt_Cult`, concentration du revenu, perte sous choc de prix), agrégés par
+`compute_resilience_totals` et stockés dans `recap["resilience"]`. Attention : exposer un
+indicateur au score composite demande **deux** ajouts — `INDICATOR_DIRECTION`
+(`dashboard/comparison.py`) pour le sens, et un groupe de `_INDICATOR_LABELS`
+(`dashboard/pages/2_Comparaison.py`) pour l'appartenance au sélecteur. Le premier seul ne
+branche rien.
+
 **Eligibility** is a boolean plot×crop matrix: numeric attribute bounds (altitude, slope,
 rainfall, plot size) intersected with `categorical_rules` (irrigation, soil type, region
 bans, `friche_lock` fallow history, etc.). Only eligible `(plot, crop)` pairs become

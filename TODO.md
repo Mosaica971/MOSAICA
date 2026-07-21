@@ -17,9 +17,10 @@ reporting seul, aucun effet sur l'allocation, donc aucun solve réel nécessaire
 1. **Eau + carbone organique du sol** — **livré le 2026-07-20**. Spec :
    `docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md`.
    Validation unitaire seulement (aucun solve réel lancé).
-2. **Score de stabilité / résilience** — variance de la marge du portefeuille via
-   `Var_Rdt_Cult` (CV de rendement par culture, déjà chargé), bornes indépendant / choc
-   commun, puis variante choc de prix. Pas encore cadré.
+2. **Score de stabilité / résilience** — **livré le 2026-07-20**. Spec :
+   `docs/superpowers/specs/2026-07-20-resilience-stability-score-design.md`.
+   Marge à risque climatique, concentration du revenu (HHI), perte sous choc de prix
+   (δ configurable). Validation unitaire seulement (aucun solve réel lancé).
 3. **Rpest (Tixier)** — risque de pollution de l'eau par les pesticides. Le plus lourd
    (7 sous-indicateurs, niveau parcelle) ; module GAMS dédié `R_PEST_NEW.txt`. Pas encore
    cadré. Données **complètes** (`Data_OTK` : `DT50`/`GUS`/`ADI`/`AQUATOX`/`QMA`/`KOC` ;

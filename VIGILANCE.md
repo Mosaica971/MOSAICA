@@ -171,6 +171,29 @@ la canne à sucre et la banane export (aucun min-quota ne les force). Résultat 
 pas un bug de couverture — mais à garder en tête. Les 84 cultures de `CULT_2017.set` ont bien
 toutes des données économiques et une entrée d'éligibilité. _2026-07-13._
 
+### Majeur — Le score de stabilité mesure l'exposition, pas l'adaptation
+Les indicateurs de `resilience.py` (marge à risque, HHI, choc de prix) portent sur une
+allocation **figée** : rien n'est ré-optimisé. Ils répondent à « si l'aléa tombe une fois les
+assolements décidés, qu'est-ce qui est exposé ? », pas à « de combien l'optimum se dégrade-t-il
+sous contrainte choquée ». À ne pas lire comme de la résilience. Une vraie mesure d'adaptation
+demanderait de ré-optimiser sous choc — autre projet. À ne pas confondre non plus avec les
+leviers `price_multipliers` / `yield_multipliers` de `config.yaml`, qui eux choquent les
+entrées **avant** le solve et laissent l'optimiseur s'adapter. _2026-07-20._
+
+### Mineur — `crop_variance_per_ha` porte un nom trompeur
+Le paramètre contient `Var_Rdt_Cult`, qui est une **fraction de perte de marge**, pas une
+variance ni un coefficient de variation (`OPTIMISATION.txt:70`, `MODELE.txt:427`). Non renommé
+parce qu'il est consommé par l'objectif Markovitz et ses tests de la phase 2. Piège classique
+pour qui voudrait bâtir un calcul de variance dessus : la perte est **linéaire** en surface,
+sans carré ni covariance. _2026-07-20._
+
+### Mineur — `NC` porte `Var_Rdt = 1,0`
+« Non cultivé » affecté d'une perte de 100 % est un artefact du tableau source. Sans effet sur
+le choc de prix (`Prix_Cult = 0` et `Rdt_Cult = 0`, vérifié), mais sa contribution à la marge à
+risque vaut `marge_NC × 1,0`, et sa marge n'est pas mécaniquement nulle (`subventions − coûts`).
+À mesurer sur un vrai run : si la contribution est significative, l'exclure explicitement. Le
+GAMS maintient d'ailleurs un set dédié `CULT_NON_NC_2017`. _2026-07-20._
+
 ## Résolu
 
 - **`REGION` vs `REGION_CODE`** (2026-07-20) — deux référentiels bien **distincts**, pas une
