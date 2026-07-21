@@ -5,8 +5,11 @@ venv/
 .pytest_cache/
 *.egg-info/
 /data/
-mosaica_solve_history.json
-#/outputs/
+# Historique des durees de solve : local, derive des runs de cette machine.
+# Le point initial compte -- ".mosaica_solve_history.json" sans lui n'ignore rien.
+.mosaica_solve_history.json
+# Resultats de runs : derives de data/ (lui-meme local) et volumineux.
+/outputs/
 .worktrees/
 .claude/*.lock
 Rapport technique variables MOSAICA_v2.docx
