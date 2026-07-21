@@ -71,15 +71,15 @@ def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint()
         "bc_prod_min", "ig_prod_min", "ma_prod_min", "an_prod_min",
         "plu_prod_min", "me_prod_min", "pn_prod_min",
         "leg_prod_obj", "fru_prod_obj", "pat_surf_obj",
-        # Calibration anchors, enabled 2026-07-21. cs_gfa carries
-        # skip_when_no_eligible_area, without which 3 real GFA farms whose plots are all
-        # fallow-locked make the whole solve infeasible.
-        "cs_gfa", "mo_max_expl",
+        # Calibration anchor, enabled 2026-07-21.
+        "mo_max_expl",
     ]:
         assert hasattr(model, label), f"expected constraint '{label}' to be built"
 
+    # cs_gfa is off again: combined with mo_max_expl it is infeasible on 7 GFA farms.
     for disabled_label in [
         "me_quota_max", "an_quota_max", "ig_quota_max", "bc_quota_max", "tub_prod_obj",
+        "cs_gfa",
     ]:
         assert not hasattr(model, disabled_label)
 

@@ -205,8 +205,18 @@ constraints:
   # constraint entirely, because it is one of the few mechanisms that keeps sugarcane on the
   # map -- it pins 5286 ha of GFA land against 12813 ha of observed cane.
   # See docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
+  # RE-DISABLED the same day, 2026-07-21, on a second and independent infeasibility found
+  # by an analytic pre-check: 7 GFA farms (E1551, E2026, E2551, E4043, E4570, E4595, E660)
+  # need MORE labour to satisfy the 60% cane requirement than farm_labor_hours_max grants
+  # them. E2026 is the starkest: 0.8 ha of cane = 10 h against a 3 h budget. Both
+  # constraints are individually faithful to GAMS; their combination is not satisfiable on
+  # this data, which says the observed 2017 plan of those farms already held less than 60%
+  # of their GFA area in cane. Kept off because it is the weakest of the five calibration
+  # levers (5286 ha of GFA against 12813 ha of observed cane, 41% coverage) and the only
+  # one in conflict with the strongest. Re-open by settling the tension, not by relaxing
+  # the labour cap: a slack big enough to clear E2026 would be 3.3x and would gut the cap.
   - name: cs_gfa_minimum_share
-    enable: true
+    enable: false
     args:  # sugarcane >= 60% of each GFA farm's area
       label: cs_gfa
       crops: *SC_CS
