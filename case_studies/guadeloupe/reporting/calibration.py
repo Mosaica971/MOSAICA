@@ -120,3 +120,130 @@ def pad_by_crop(
     frame = _pad_frame(observed, simulated, thresholds.regional_pad_max)
     frame.index.name = "crop"
     return frame
+
+
+def _surface_by_group_and_key(
+    dataset: Dataset, groups: pd.Series, key: pd.Series
+) -> pd.Series:
+    """Allocated surface totalled by (key, group), for a plot-keyed grouping Series."""
+    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(groups.index)
+    keys = key.reindex(groups.index)
+    return surface.groupby([keys, groups]).sum()
+
+
+def pad_by_crop_and_region(
+    dataset: Dataset, output_allocation: pd.Series, thresholds: CalibrationThresholds
+) -> pd.DataFrame:
+    """Sub-regional scale, Chopin et al. Fig. 5: acreage per crop within each of the seven
+    areas of homogeneous soil and climate conditions. One TOTAL row per region; the
+    territory-wide total lives in pad_by_crop."""
+    region = indicators.plot_to_region(dataset)
+    observed = _surface_by_group_and_key(dataset, observed_groups(dataset), region)
+    simulated = _surface_by_group_and_key(
+        dataset, simulated_groups(dataset, output_allocation), region
+    )
+    # .unique() before .union(): both level-value Indexes carry one entry per (region, crop)
+    # pair, and Index.union over duplicated inputs is a multiset union -- it would yield a
+    # region as many times as its busiest side has crops, and emit that many blocks.
+    regions = (
+        observed.index.get_level_values(0)
+        .unique()
+        .union(simulated.index.get_level_values(0).unique())
+    )
+
+    def slice_for(totals: pd.Series, region_key: Any) -> pd.Series:
+        """The (crop -> hectares) sub-series of one region, empty when it has none.
+        Series.get on a MultiIndex is ambiguous, hence the explicit cross-section."""
+        if region_key not in totals.index.get_level_values(0):
+            return pd.Series(dtype=float)
+        return totals.xs(region_key, level=0)
+
+    blocks = []
+    for region_key in sorted(regions, key=str):
+        frame = _pad_frame(
+            slice_for(observed, region_key),
+            slice_for(simulated, region_key),
+            thresholds.subregional_pad_max,
+        )
+        frame.index = pd.MultiIndex.from_product(
+            [[region_key], frame.index], names=["region", "crop"]
+        )
+        blocks.append(frame)
+    return pd.concat(blocks)
+
+
+def pad_by_farm(
+    dataset: Dataset, output_allocation: pd.Series, thresholds: CalibrationThresholds
+) -> pd.DataFrame:
+    """Farm scale: the article states a 20% threshold "in the sub-regions and farms"
+    without publishing the table. One row per farm, the deviation summed over its crops."""
+    farm = indicators.plot_to_farm(dataset)
+    observed = _surface_by_group_and_key(dataset, observed_groups(dataset), farm)
+    simulated = _surface_by_group_and_key(
+        dataset, simulated_groups(dataset, output_allocation), farm
+    )
+    keys = observed.index.union(simulated.index)
+    observed = observed.reindex(keys, fill_value=0.0)
+    simulated = simulated.reindex(keys, fill_value=0.0)
+
+    by_farm = pd.DataFrame(
+        {
+            "observed_ha": observed.groupby(level=0).sum(),
+            "simulated_ha": simulated.groupby(level=0).sum(),
+            "abs_deviation_ha": (simulated - observed).abs().groupby(level=0).sum(),
+        }
+    )
+    pad = 100.0 * by_farm["abs_deviation_ha"] / by_farm["observed_ha"].where(
+        by_farm["observed_ha"] > 0
+    )
+    by_farm["pad_pct"] = pad
+    by_farm["within_threshold"] = (
+        pad.le(thresholds.farm_pad_max).where(pad.notna()).astype("boolean")
+    )
+    by_farm.index.name = "farm"
+    return by_farm
+
+
+def field_match_rate(dataset: Dataset, output_allocation: pd.Series) -> pd.DataFrame:
+    """Field scale, Chopin et al. Table 5: share of plots -- and of hectares -- where the
+    simulated crop equals the observed one, per sub-region and overall.
+
+    The universe is the union of the two sides: a plot cultivated on one side only counts
+    as a miss, but a plot non-cultivated on both is outside the comparison entirely.
+    """
+    observed = observed_groups(dataset)
+    simulated = simulated_groups(dataset, output_allocation)
+    plots = observed.index.union(simulated.index)
+
+    data_parc = dataset.parameters["data_parc"]
+    surface = data_parc["SURF_HA"].reindex(plots).astype(float)
+    region = indicators.plot_to_region(dataset).reindex(plots)
+    matched = observed.reindex(plots).eq(simulated.reindex(plots))
+
+    frame = pd.DataFrame(
+        {
+            "matched_plots": matched.groupby(region).sum().astype(int),
+            "total_plots": matched.groupby(region).size().astype(int),
+            "matched_ha": surface.where(matched, 0.0).groupby(region).sum(),
+            "total_ha": surface.groupby(region).sum(),
+        }
+    )
+    frame.loc[TOTAL_KEY] = {
+        "matched_plots": int(matched.sum()),
+        "total_plots": int(len(plots)),
+        "matched_ha": float(surface.where(matched, 0.0).sum()),
+        "total_ha": float(surface.sum()),
+    }
+    frame["plot_match_pct"] = 100.0 * frame["matched_plots"] / frame["total_plots"]
+    frame["area_match_pct"] = 100.0 * frame["matched_ha"] / frame["total_ha"]
+    frame.index.name = "region"
+    return frame[
+        [
+            "matched_plots",
+            "total_plots",
+            "plot_match_pct",
+            "matched_ha",
+            "total_ha",
+            "area_match_pct",
+        ]
+    ]
