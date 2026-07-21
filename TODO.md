@@ -4,6 +4,30 @@ Ce qui reste à faire. Les limites connues et non planifiées sont dans `VIGILAN
 
 ## En cours / prêt à coder
 
+**Calibration & validation — livré le 2026-07-21.** Spec :
+`docs/superpowers/specs/2026-07-21-calibration-validation-design.md`, plan :
+`docs/superpowers/plans/2026-07-21-calibration-validation.md`. PAD territorial,
+sous-régional et par exploitation, matrice de confusion des 8 types, taux de correspondance
+parcellaire, d'après Chopin et al. (2015) §2.6. Écrit dans chaque run et rejouable sur les
+runs passés avec `scripts/evaluate_calibration.py`. Reporting seul, aucun solve.
+→ **Le diagnostic est mauvais et c'est l'information utile** : PAD territorial 193 %, 7,3 %
+des types d'exploitation reproduits, 7 % des parcelles. Chiffres et lecture dans
+`VIGILANCE.md`, entrée « Le modèle ne reproduit pas la Guadeloupe observée ».
+→ Suite naturelle, **non planifiée**, à cadrer avec l'utilisateur. Deux leviers, dans cet
+ordre de probabilité :
+1. **porter `Eq_MO_MAX_Expl`**, le plafond de main-d'œuvre par exploitation (Eq. 5 de
+   l'article). C'est le suspect n°1 : le maraîchage est ~60× plus intensif en travail que la
+   canne mécanisée, et rien ne le freine aujourd'hui. Point dur connu : `MO_Expl_init`
+   suppose l'allocation fine 2017, qui n'a jamais existé — la voie de contournement passe
+   par `baseline_representative_crops`, au prix d'une hypothèse supplémentaire
+   (cf. `VIGILANCE.md`) ;
+2. **activer `maximize_risk_adjusted_gross_margin`**, dont les coefficients Ø sont déjà ceux
+   de la Table 2 de l'article (au détail près du type 4, que le GAMS scinde en 41/42 avec
+   0.50/1.60 là où l'article publie 1.4 — écart à arbitrer).
+Chaque levier demande un solve réel (~30-55 min) pour être mesuré, puis un
+`scripts/evaluate_calibration.py` sur le run produit. C'est la première fois qu'on dispose
+d'une métrique pour trancher entre deux hypothèses de modélisation : l'utiliser.
+
 **Refactor transverse — livré le 2026-07-21.** Spec :
 `docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md`.
 Arborescence `guadeloupe/` par rôle (`pipeline/`, `domain/`, `model/`), fusion des helpers

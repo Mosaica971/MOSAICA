@@ -325,6 +325,9 @@ def _dataset() -> Dataset:
         index=["P1", "P2"],
     )
     expl_parc = pd.DataFrame({"farm": ["E1", "E2"], "plot": ["P1", "P2"]})
+    # farm_plots is consumed by calibration.farm_type_confusion, which generate_report runs
+    # on every allocation; it recomputes the farm typology through compute_type_expl.
+    farm_plots = {"E1": ["P1"], "E2": ["P2"]}
     # Water/carbon: only touched by compute_environmental_totals's new keys, not asserted
     # on by value here -- just enough shape to not KeyError.
     data_sol = pd.DataFrame(
@@ -358,6 +361,7 @@ def _dataset() -> Dataset:
         parameters={
             "data_parc": data_parc,
             "expl_parc": expl_parc,
+            "farm_plots": farm_plots,
             "rdt_cult": pd.Series({"CS": 80.0, "ME": 20.0}),
             "sales_per_ha_cult": pd.Series({"CS": 3000.0, "ME": 5000.0}),
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),

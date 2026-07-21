@@ -9,6 +9,47 @@ Sévérités : **Critique** (fausse un résultat) / **Majeur** (limite fonctionn
 
 ## Points ouverts
 
+### Critique — Le modèle ne reproduit pas la Guadeloupe observée (chiffré le 2026-07-21)
+`reporting/calibration.py` note désormais chaque run contre l'assolement réellement observé
+en 2017, aux quatre échelles de Chopin et al. (2015) §2.6. Verdict sur `outputs/output_12` :
+
+| Métrique | Obtenu | Article | Seuil |
+|---|---|---|---|
+| PAD territorial | **193 %** | < 15 % sur 8 usages/10 | 15 % |
+| Cultures sous seuil | **0 / 11** | 8 / 10 | — |
+| Types d'exploitation reproduits | **7,3 %** | 81 % | 80 % |
+| Parcelles bien simulées | **7,0 %** | 66 % | — |
+| Surface bien simulée | **4,5 %** | 77 % | — |
+
+Dix des onze cultures observées disparaissent **entièrement** (12 813 ha de canne, 6 109 ha
+de prairie, 1 921 ha de banane → 0), et le maraîchage passe de 1 087 à 24 155 ha (PAD
+2 122 %). La matrice de confusion montre neuf types d'exploitation s'effondrant sur trois,
+presque tous vers « Maraîchers ».
+
+Deux causes probables, toutes deux cohérentes avec l'article :
+1. l'objectif actif est `maximize_gross_margin`, pas l'utilité de Markowitz où le
+   coefficient Ø freine chaque type d'exploitation. `maximize_risk_adjusted_gross_margin`
+   existe et porte déjà les Ø de la Table 2, mais reste `enable: false` ;
+2. `Eq_MO_MAX_Expl` (Eq. 5 de l'article) n'est pas portée — cf. l'entrée dédiée plus bas.
+   Le maraîchage demande 990 à 1 560 h/ha contre 15 h/ha pour la canne mécanisée (Table 1
+   de l'article) : sans plafond de main-d'œuvre par exploitation, rien ne limite la bascule.
+
+**Ne pas lire un PAD élevé comme une régression du reporting** : c'est son diagnostic. La
+suite est cadrée dans `TODO.md`. Spec :
+`docs/superpowers/specs/2026-07-21-calibration-validation-design.md`. _2026-07-21._
+
+### Mineur — Reconstruction typologique et parcelles `NC`
+`compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
+`NC` : une parcelle non cultivée **diminue** le dénominateur et remonte toutes les parts
+`PART_*`. `calibration.farm_type_confusion` recalcule donc les groupes de base depuis
+`data_parc` sur l'univers complet, et non depuis `allocation_input.csv` qui écarte les `NC`.
+Côté simulé, une parcelle que le solveur laisse sans culture compte comme `NC`. Conséquence :
+`scripts/evaluate_calibration.py` **doit** reconstruire le `Dataset` (7 s), il ne peut pas
+travailler sur les seuls CSV d'un run. Le script superpose d'ailleurs le config du run au
+`config.yaml` courant au lieu de le reprendre tel quel : un run ancien peut nommer un
+composant retiré du registre (`output_12` référence `melon_soil_restriction`, supprimée le
+2026-07-21) et `build_dataset` lèverait. _2026-07-21._
+
 ### Majeur — Pas de données géographiques
 Aucun shapefile/GeoJSON, et `Data_Parc_Gwad_2017.txt` n'a ni lat/long ni identifiant de
 géométrie. Pas de vraie carte des cultures possible : le reporting spatial s'agrège par
