@@ -18,8 +18,8 @@ from typing import Any
 # case_studies/core imports below would fail. Prepend the repo root ourselves.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from case_studies.guadeloupe.data_pipeline import build_dataset
-from case_studies.guadeloupe.model import build_model
+from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
+from case_studies.guadeloupe.model.model import build_model
 from core.config import load_config
 from core.model.solver import solve_model
 from core.model.timing import time_phases

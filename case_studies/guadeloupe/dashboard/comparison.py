@@ -16,7 +16,7 @@ import matplotlib.ticker
 import numpy as np
 import pandas as pd
 
-from case_studies.guadeloupe.crop_labels import label_for
+from case_studies.guadeloupe.domain.crop_labels import label_for
 
 # Measures available on the y-axis, in display order, with French labels.
 MEASURE_LABELS: dict[str, str] = {

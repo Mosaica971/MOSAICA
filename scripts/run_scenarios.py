@@ -32,8 +32,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pyomo.environ as pyo
 
-from case_studies.guadeloupe.data_pipeline import build_dataset
-from case_studies.guadeloupe.model import build_model
+from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
+from case_studies.guadeloupe.model.model import build_model
 from case_studies.guadeloupe.reporting.report import generate_report
 from core.config import apply_overrides, expand_runs, load_config
 from core.model.progress import solve_with_progress

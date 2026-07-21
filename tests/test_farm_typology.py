@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 
-from case_studies.guadeloupe.farm_typology import compute_avers, compute_base_crop_group, compute_type_expl
+from case_studies.guadeloupe.domain.farm_typology import compute_avers, compute_base_crop_group, compute_type_expl
 
 
 def test_compute_base_crop_group_maps_rpg_codes_to_base_groups():

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
-from case_studies.guadeloupe.crop_labels import CROP_LABELS
+from case_studies.guadeloupe.domain.crop_labels import CROP_LABELS
 from case_studies.guadeloupe.dashboard import comparison, loaders
 
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"

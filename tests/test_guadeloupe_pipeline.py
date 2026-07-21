@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe.data_pipeline import (
+from case_studies.guadeloupe.pipeline.data_pipeline import (
     INDICE_H_DIR,
     TABLES_DIR,
     build_dataset,
@@ -80,7 +80,7 @@ def test_build_dataset_computes_gross_margin_per_ha_cult():
 
     # AG: PB=rdt*prix=20*700=14000 (no subsidies/bagasse for citrus), CV~8001.31
     # from OTK variable costs -- hand-verified via a one-off script using
-    # case_studies.guadeloupe.economics against the real data tables.
+    # case_studies.guadeloupe.domain.economics against the real data tables.
     assert margin_per_ha_cult["AG"] == pytest.approx(5998.69, abs=0.01)
 
 
@@ -272,7 +272,7 @@ def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     dataset = build_dataset(CONFIG)
 
     data_parc = dataset.parameters["data_parc"]
-    from case_studies.guadeloupe.farm_typology import compute_base_crop_group
+    from case_studies.guadeloupe.domain.farm_typology import compute_base_crop_group
 
     base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
 
@@ -332,7 +332,7 @@ def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
     # BA_INT (intensive banana): subsidy_per_ha_cult=18658.0 (POSEI + national aid,
     # dominated by Aide_Indus_Cult/POSEI_Q_Cult), duree_cycle_cult=12 --
     # hand-verified via a one-off script calling
-    # case_studies.guadeloupe.economics.compute_subsidy_per_ha_cult against the
+    # case_studies.guadeloupe.domain.economics.compute_subsidy_per_ha_cult against the
     # real data tables, giving subsidy_per_ha_cult_annualized = 18658.0 / 12 * 12
     # = 18658.0. Unlike AG (subsidy=0), this exercises the annualization
     # division/multiplication against a meaningfully nonzero subsidy.
@@ -343,7 +343,7 @@ def test_yield_multiplier_scales_rdt_in_dataset():
     from copy import deepcopy
     from pathlib import Path
 
-    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
     from core.config import load_config
 
     cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))
@@ -365,7 +365,7 @@ def test_cost_multiplier_scales_variable_cost_in_dataset():
     from copy import deepcopy
     from pathlib import Path
 
-    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
     from core.config import load_config
 
     cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))

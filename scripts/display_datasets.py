@@ -11,7 +11,7 @@ from pathlib import Path
 # case_studies/core imports below would fail. Prepend the repo root ourselves.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from case_studies.guadeloupe.data_pipeline import build_dataset
+from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
 from core.config import load_config
 from core.data.dataset import build_registry
 

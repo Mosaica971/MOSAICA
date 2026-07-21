@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
-from case_studies.guadeloupe import resilience, soil_carbon, water
-from case_studies.guadeloupe.farm_typology import compute_base_crop_group
+from case_studies.guadeloupe.domain import resilience, soil_carbon, water
+from case_studies.guadeloupe.domain.farm_typology import compute_base_crop_group
 from core.data.dataset import Dataset
 
 _NON_CULTIVATED_GROUP = "NC"

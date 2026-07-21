@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 
-from case_studies.guadeloupe.data_pipeline import CONFIG_PATH, build_dataset
+from case_studies.guadeloupe.pipeline.data_pipeline import CONFIG_PATH, build_dataset
 from case_studies.guadeloupe.reporting import indicators
 from core.config import load_config
 from core.data.dataset import Dataset

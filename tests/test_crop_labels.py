@@ -1,4 +1,4 @@
-from case_studies.guadeloupe.crop_labels import CROP_LABELS, label_for
+from case_studies.guadeloupe.domain.crop_labels import CROP_LABELS, label_for
 
 
 def test_label_for_returns_explicit_name_for_known_codes():

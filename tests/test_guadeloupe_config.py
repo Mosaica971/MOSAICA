@@ -69,7 +69,7 @@ def test_ba_rota_numerator_crops_match_sc_cs_anchor_plus_ja_and_canne_fibre():
 def test_itk_bans_confine_regional_sugarcane():
     from pathlib import Path
 
-    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
     from core.config import load_config
 
     cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))

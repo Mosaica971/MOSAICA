@@ -8,7 +8,7 @@ compute_variable_cost_per_ha_cult; formulas are OPTIMISATION.txt lines 98-127.
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe import environment
+from case_studies.guadeloupe.domain import environment
 
 
 def _otk_fixture():

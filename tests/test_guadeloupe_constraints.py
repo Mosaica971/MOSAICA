@@ -1,7 +1,7 @@
 import pyomo.environ as pyo
 import pytest
 
-from case_studies.guadeloupe import constraints as _guadeloupe_constraints  # noqa: F401
+from case_studies.guadeloupe.model import constraints as _guadeloupe_constraints  # noqa: F401
 from core.model.builder import build_crop_allocation_model
 
 
