@@ -19,5 +19,9 @@ def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
         crop_yield_per_ha=dataset.parameters.get("rdt_cult", {}),
         crop_variance_per_ha=dataset.parameters.get("crop_variance_per_ha", {}),
         farm_risk_aversion=dataset.parameters.get("farm_risk_aversion", {}),
+        crop_labor_hours_per_ha=dataset.parameters.get("labor_hours_per_ha_cult", {}),
+        # GAMS MO_Expl_init (ENTREES.txt:466-469): the labour the farm's OBSERVED 2017
+        # cropping plan required, which Eq_MO_MAX_Expl then treats as its budget.
+        farm_labor_capacity_hours=dataset.parameters.get("farm_labor_capacity_hours", {}),
     )
     return build_crop_allocation_model(inputs, config)

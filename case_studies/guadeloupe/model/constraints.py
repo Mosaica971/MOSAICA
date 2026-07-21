@@ -14,8 +14,18 @@ def build_cs_gfa_minimum_share_constraint(
     label: str,
     crops: list[str],
     min_share: float,
+    skip_when_no_eligible_area: bool = False,
     **_args,
 ) -> None:
+    """Sugarcane must cover at least `min_share` of each farm's land-tenure-restricted area
+    (GAMS Eq_CS_GFA, MODELE.txt:349).
+
+    `skip_when_no_eligible_area` is a DELIBERATE DEVIATION from GAMS, off by default. On the
+    real 2017 data three farms (E1471, E273, E3955) have every plot fallow-locked by
+    friche_lock, so no plot can carry sugarcane while the rule demands 60% of it: genuinely
+    infeasible, and GAMS would be infeasible too. With the flag on, such a farm is skipped
+    instead of sinking the whole solve. Scope: 3 farms out of 4588. See VIGILANCE.md.
+    """
     crop_set = set(crops)
     plot_crops = defaultdict(list)
     for plot, crop in inputs.eligible_pairs:
@@ -41,7 +51,13 @@ def build_cs_gfa_minimum_share_constraint(
         # infeasibility for the same equation -- that should surface as a solver
         # infeasibility, not a Python crash, which is exactly what this achieves.
         if isinstance(area, (int, float)):
-            return pyo.Constraint.Feasible if area >= requirement else pyo.Constraint.Infeasible
+            if area >= requirement:
+                return pyo.Constraint.Feasible
+            return (
+                pyo.Constraint.Feasible
+                if skip_when_no_eligible_area
+                else pyo.Constraint.Infeasible
+            )
         return area >= requirement
 
     setattr(model, label, pyo.Constraint(eligible_farms, rule=_rule))

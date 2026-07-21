@@ -20,3 +20,8 @@ class ModelInputs:
     crop_yield_per_ha: Mapping[str, float] = field(default_factory=dict)
     crop_variance_per_ha: Mapping[str, float] = field(default_factory=dict)
     farm_risk_aversion: Mapping[str, float] = field(default_factory=dict)
+    # Labour a crop demands per hectare-year, and the labour a farm is assumed to have.
+    # The capacity is a *stock* the case study derives from its own observed baseline; core
+    # only reads it. A farm absent from the mapping is simply not capped.
+    crop_labor_hours_per_ha: Mapping[str, float] = field(default_factory=dict)
+    farm_labor_capacity_hours: Mapping[str, float] = field(default_factory=dict)

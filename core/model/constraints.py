@@ -189,3 +189,47 @@ def build_crop_share_bound_constraint(
         else numerator_area <= share * denominator_area
     )
     setattr(model, label, pyo.Constraint(expr=expr))
+
+
+@register_constraint("farm_labor_hours_max")
+def build_farm_labor_hours_max_constraint(
+    model: pyo.ConcreteModel,
+    inputs: ModelInputs,
+    *,
+    label: str,
+    slack: float = 1.0,
+    **_args,
+) -> None:
+    """Each farm's allocation may not demand more labour than the farm is assumed to have.
+
+    The capacity is a stock supplied by the case study -- typically derived from the farm's
+    observed baseline cropping plan, which is what makes this an anchor to reality rather
+    than a generic resource limit. `slack` scales every cap uniformly (1.0 = the cap as
+    given); it exists so the assumption can be relaxed from config without touching code.
+
+    A farm with no capacity entry is left unconstrained: the mapping is optional like every
+    other ModelInputs field, and defaulting a missing farm to zero would silently freeze it.
+    """
+    rates = inputs.crop_labor_hours_per_ha
+    capacities = inputs.farm_labor_capacity_hours
+    plot_crops = defaultdict(list)
+    for plot, crop in inputs.eligible_pairs:
+        if rates.get(crop, 0.0):
+            plot_crops[plot].append(crop)
+
+    def _rule(model, farm):
+        if farm not in capacities:
+            return pyo.Constraint.Feasible
+        hours = sum(
+            model.Y[plot, crop] * inputs.plot_surface_ha[plot] * rates[crop]
+            for plot in inputs.farm_plots.get(farm, [])
+            for crop in plot_crops.get(plot, [])
+        )
+        limit = slack * capacities[farm]
+        # A farm whose eligible crops all have a zero labour rate sums to a plain 0, not a
+        # Pyomo expression -- see the note in territory_production_bound above.
+        if isinstance(hours, (int, float)):
+            return pyo.Constraint.Feasible if hours <= limit else pyo.Constraint.Infeasible
+        return hours <= limit
+
+    setattr(model, label, pyo.Constraint(model.FARMS, rule=_rule))

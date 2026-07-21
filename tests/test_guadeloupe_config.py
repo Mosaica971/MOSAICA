@@ -25,8 +25,13 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     assert enabled_constraints.count("farm_area_share_max") == 2
     assert enabled_constraints.count("farm_area_ratio_min") == 2
     assert enabled_constraints.count("territory_production_bound") == 12
-    assert "cs_gfa_minimum_share" not in enabled_constraints
-    assert len(enabled_constraints) == 17
+    # Both re-enabled 2026-07-21 as calibration anchors; cs_gfa carries the documented
+    # skip_when_no_eligible_area deviation without which 3 real farms make it infeasible.
+    cs_gfa = next(e for e in config["constraints"] if e["name"] == "cs_gfa_minimum_share")
+    assert cs_gfa["enable"] is True
+    assert cs_gfa["args"]["skip_when_no_eligible_area"] is True
+    assert "farm_labor_hours_max" in enabled_constraints
+    assert len(enabled_constraints) == 19
     assert {
         e["args"]["attribute"] for e in config["eligibility_criteria"] if e["enable"]
     } == {"ALTITUDE", "PENTE", "PLUVIO_PARC", "SURF_HA"}

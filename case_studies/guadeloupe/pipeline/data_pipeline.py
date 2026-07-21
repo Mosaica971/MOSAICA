@@ -90,6 +90,33 @@ def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) ->
     return merged.groupby("farm")["surface"].sum()
 
 
+def compute_farm_labor_capacity_hours(
+    *,
+    base_crop_group: pd.Series,
+    plot_surface: pd.Series,
+    expl_parc: pd.DataFrame,
+    labor_hours_per_ha_cult: pd.Series,
+    representative_crops: dict[str, str],
+) -> pd.Series:
+    """Labour (h/year) each farm's OBSERVED 2017 cropping plan required -- GAMS MO_Expl_init
+    (ENTREES.txt:466-469), the budget Eq_MO_MAX_Expl caps the farm's allocation against.
+
+    GAMS reads the labour rate straight off Matrice_Parc_Cult, which holds the AGGREGATE RPG
+    codes. Nine of those twelve have no ITK line at all (Matrice_OTK_Cult's AN/BA/BC/CS/IG/
+    MA/NC/PN/VE columns are entirely zero; only AG, JA and ME, the families with no fine
+    variant, are filled). Taken literally the cap would be ~0 for most farms and the model
+    would allocate nothing. We therefore price each observed family through its
+    representative fine variant -- the same documented assumption the input-side indicators
+    use, extended here to a constraint that *shapes the allocation*. See VIGILANCE.md and
+    docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
+    """
+    fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
+    rate = labor_hours_per_ha_cult.reindex(fine.to_numpy()).to_numpy()
+    hours_by_plot = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
+    farm_of_plot = expl_parc.set_index("plot")["farm"]
+    return hours_by_plot.groupby(farm_of_plot.reindex(hours_by_plot.index)).sum()
+
+
 def build_dataset(config: dict[str, Any]) -> Dataset:
     # `year` selects the economic time-series column (2017..2022, or init/calib); the plot/
     # farm structure stays pinned to 2017 (no other year's structural data exists). `scenario`
@@ -258,6 +285,13 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_plant_cult=duree_plant_cult,
         duree_cycle_cult=duree_cycle_cult,
     )
+    farm_labor_capacity_hours = compute_farm_labor_capacity_hours(
+        base_crop_group=base_crop_group,
+        plot_surface=plot_surface,
+        expl_parc=expl_parc,
+        labor_hours_per_ha_cult=labor_hours_per_ha_cult,
+        representative_crops=config.get("baseline_representative_crops") or {},
+    )
     azote_per_ha_cult = compute_azote_per_ha_cult(
         data_otk=data_otk,
         matrice_otk_cult=matrice_otk_cult,
@@ -304,6 +338,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "farm_surface_ha": farm_surface_ha,
         "farm_plots": farm_plots,
         "farm_gfa_surface_ha": farm_gfa_surface_ha,
+        "farm_labor_capacity_hours": farm_labor_capacity_hours,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
         "margin_per_ha_cult": margin_per_ha_cult,

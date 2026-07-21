@@ -63,10 +63,15 @@ def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
 
     mask = dataset.parameters["eligibility_mask"]
 
-    # P1: altitude 23, pente 1, pluvio 1483 -- within CS's bounds (alti<=250, pente<=20)
-    assert mask.loc["P1", "CS"] == True  # noqa: E712
-    # P2483: altitude 301 -- exceeds CS's ALTI_MAX of 250
-    assert mask.loc["P2483", "CS"] == False  # noqa: E712
+    # Probes fine cane variants, not the aggregate CS: since 2026-07-21 the aggregate codes
+    # are suppressed outright by Eq_CS_SUPP, so they say nothing about the numeric agronomic
+    # bounds this test is about. Each probe is the variant its plot's own region allows, so
+    # the verdict turns on altitude/slope rather than on an ITK geographic ban.
+    # P1: region 3, altitude 23, pente 1 -- within bounds (alti<=250, pente<=20).
+    assert mask.loc["P1", "CS_NGT_NISM"] == True  # noqa: E712
+    # P2483: region 5, altitude 301 -- exceeds ALTI_MAX of 250. CS_SBT_NIM is otherwise
+    # available in region 5 (601 plots carry it), so altitude is what excludes it here.
+    assert mask.loc["P2483", "CS_SBT_NIM"] == False  # noqa: E712
 
     eligible_pairs = dataset.parameters["eligible_pairs"]
     total_pairs = mask.shape[0] * mask.shape[1]
