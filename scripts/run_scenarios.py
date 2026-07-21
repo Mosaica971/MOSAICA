@@ -38,10 +38,7 @@ from case_studies.guadeloupe.reporting.report import generate_report
 from core.config import apply_overrides, expand_runs, load_config
 from core.model.progress import solve_with_progress
 
-ROOT = Path(__file__).resolve().parent.parent
-CONFIG_PATH = ROOT / "case_studies" / "guadeloupe" / "config.yaml"
-SCENARIOS_PATH = ROOT / "case_studies" / "guadeloupe" / "scenarios.yaml"
-OUTPUTS_ROOT = ROOT / "outputs"
+from scripts._common import CONFIG_PATH, OUTPUTS_ROOT, SCENARIOS_PATH
 
 _FIELDS = ["name", "status", "objective", "allocated_plots", "duration_s", "output_dir", "error"]
 

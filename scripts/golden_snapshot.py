@@ -33,7 +33,9 @@ from case_studies.guadeloupe.reporting import indicators
 from core.config import load_config
 from core.data.dataset import Dataset
 
-SNAPSHOT_PATH = Path(__file__).resolve().parent.parent / ".golden" / "snapshot.json"
+from scripts._common import ROOT
+
+SNAPSHOT_PATH = ROOT / ".golden" / "snapshot.json"
 
 # Enough decimals to catch a real change, few enough to absorb float re-association
 # (summing in a different order can move the last bits).
@@ -103,15 +105,51 @@ def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, 
     return snapshot
 
 
-def build_snapshot() -> dict[str, Any]:
+def _snapshot_model(config: dict[str, Any]) -> dict[str, Any]:
+    """Signature of the built (never solved) model on a reduced zone: variable and
+    constraint counts, which constraints were registered, and a checksum of the objective's
+    linear coefficients. Catches a lost registry import or a mis-wired ModelInputs field,
+    neither of which shows up in the indicator checksums.
+
+    Territory quotas are dropped: they are sized for the whole territory and a subset
+    cannot satisfy them (see VIGILANCE.md).
+    """
+    import pyomo.environ as pyo
+    from pyomo.core.expr import decompose_term
+
+    from case_studies.guadeloupe.model.model import build_model
+
+    zone_config = {
+        **config,
+        "zone_filter": {"include": {"islands": [2]}},
+        "constraints": [
+            c for c in config["constraints"] if c["name"] != "territory_production_bound"
+        ],
+    }
+    model = build_model(build_dataset(zone_config), zone_config)
+    _ok, terms = decompose_term(model.objective.expr)
+    coeffs = sorted((str(var), _round(coeff)) for coeff, var in terms if var is not None)
+    return {
+        "variables": sum(1 for _ in model.Y),
+        "constraint_rows": sum(len(c) for c in model.component_objects(pyo.Constraint)),
+        "constraint_names": sorted(c.name for c in model.component_objects(pyo.Constraint)),
+        "objective_terms": len(coeffs),
+        "objective_sha256": hashlib.sha256(repr(coeffs).encode("utf-8")).hexdigest()[:16],
+    }
+
+
+def build_snapshot(include_model: bool = False) -> dict[str, Any]:
     config = load_config(CONFIG_PATH)
     dataset = build_dataset(config)
-    return {
+    snapshot = {
         "sets": {name: len(value) for name, value in sorted(dataset.sets.items())},
         "scalars": {name: _round(value) for name, value in sorted(dataset.scalars.items())},
         "parameters": _snapshot_parameters(dataset),
         "indicators": _snapshot_indicators(dataset, config),
     }
+    if include_model:
+        snapshot["model"] = _snapshot_model(config)
+    return snapshot
 
 
 def _flatten_for_diff(node: Any, prefix: str = "") -> dict[str, Any]:
@@ -140,11 +178,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="Record the current behaviour.")
     parser.add_argument("--check", action="store_true", help="Fail on any drift.")
+    parser.add_argument(
+        "--model",
+        action="store_true",
+        help="Also build the model on a reduced zone (~1 min) and check its signature.",
+    )
     args = parser.parse_args(argv)
     if args.write == args.check:
         parser.error("pass exactly one of --write / --check")
 
-    snapshot = build_snapshot()
+    snapshot = build_snapshot(include_model=args.model)
 
     if args.write:
         SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -155,7 +198,14 @@ def main(argv: list[str] | None = None) -> int:
     if not SNAPSHOT_PATH.exists():
         print(f"no reference at {SNAPSHOT_PATH}; run --write first", file=sys.stderr)
         return 2
-    diffs = check(json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8")), snapshot)
+    reference = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    if not args.model:
+        # Reference may carry a model block we deliberately did not recompute.
+        reference.pop("model", None)
+    elif "model" not in reference:
+        print("reference has no model block; re-run --write --model", file=sys.stderr)
+        return 2
+    diffs = check(reference, snapshot)
     if diffs:
         print(f"DRIFT: {len(diffs)} difference(s)", file=sys.stderr)
         print("\n".join(diffs[:40]), file=sys.stderr)

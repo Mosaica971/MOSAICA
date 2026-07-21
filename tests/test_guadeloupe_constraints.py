@@ -3,6 +3,7 @@ import pytest
 
 from case_studies.guadeloupe.model import constraints as _guadeloupe_constraints  # noqa: F401
 from core.model.builder import build_crop_allocation_model
+from core.model.model_inputs import ModelInputs
 
 
 def test_cs_gfa_minimum_share_constraint_only_applies_to_farms_with_gfa_surface():
@@ -18,12 +19,14 @@ def test_cs_gfa_minimum_share_constraint_only_applies_to_farms_with_gfa_surface(
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 10.0, "P2": 4.0},
-        crop_margin_per_ha={"CS": 50.0, "OTHER": 100.0},
-        eligible_pairs=[("P1", "CS"), ("P1", "OTHER"), ("P2", "CS")],
-        config=config,
-        farm_plots={"E1": ["P1"], "E2": ["P2"]},
-        farm_gfa_surface_ha={"E1": 10.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 10.0, "P2": 4.0},
+            crop_margin_per_ha={"CS": 50.0, "OTHER": 100.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "OTHER"), ("P2", "CS")],
+            farm_plots={"E1": ["P1"], "E2": ["P2"]},
+            farm_gfa_surface_ha={"E1": 10.0},
+        ),
+        config,
     )
     model.Y["P1", "CS"].fix(1)
 
@@ -48,12 +51,14 @@ def test_cs_gfa_minimum_share_constraint_handles_gfa_farm_with_no_eligible_cs_pl
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 4.0},
-        crop_margin_per_ha={"OTHER": 50.0},
-        eligible_pairs=[("P1", "OTHER")],
-        config=config,
-        farm_plots={"E1": ["P1"]},
-        farm_gfa_surface_ha={"E1": 4.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 4.0},
+            crop_margin_per_ha={"OTHER": 50.0},
+            eligible_pairs=[("P1", "OTHER")],
+            farm_plots={"E1": ["P1"]},
+            farm_gfa_surface_ha={"E1": 4.0},
+        ),
+        config,
     )
 
     # 0.6 * 4.0ha = 2.4ha required, but 0ha CS-eligible -- genuinely infeasible,
@@ -91,17 +96,19 @@ def test_crop_share_bound_ge_enforces_minimum_bio_share():
         "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
     }
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 10.0, "P2": 10.0},
-        crop_margin_per_ha={"MA_PLBIO": 100.0, "MA_ROTA": 100.0},
-        eligible_pairs=[
+        ModelInputs(
+            plot_surface_ha={"P1": 10.0, "P2": 10.0},
+            crop_margin_per_ha={"MA_PLBIO": 100.0, "MA_ROTA": 100.0},
+            eligible_pairs=[
             ("P1", "MA_PLBIO"),
             ("P1", "MA_ROTA"),
             ("P2", "MA_PLBIO"),
             ("P2", "MA_ROTA"),
         ],
-        config=config,
-        farm_plots={"E1": ["P1", "P2"]},
-        farm_gfa_surface_ha={},
+            farm_plots={"E1": ["P1", "P2"]},
+            farm_gfa_surface_ha={},
+        ),
+        config,
     )
     # P1 bio (10 ha), P2 non-bio (10 ha) -> bio area 10, total 20.
     model.Y["P1", "MA_PLBIO"].fix(1)
@@ -135,11 +142,13 @@ def test_crop_share_bound_empty_terms_are_guarded():
         "objectives": [{"name": "maximize_gross_margin", "enable": True, "args": {}}],
     }
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 5.0},
-        crop_margin_per_ha={"MA_PLBIO": 50.0},
-        eligible_pairs=[("P1", "MA_PLBIO")],  # neither BA_INT nor MA_ROTA eligible
-        config=config,
-        farm_plots={"E1": ["P1"]},
-        farm_gfa_surface_ha={},
+        ModelInputs(
+            plot_surface_ha={"P1": 5.0},
+            crop_margin_per_ha={"MA_PLBIO": 50.0},
+            eligible_pairs=[("P1", "MA_PLBIO")],  # neither BA_INT nor MA_ROTA eligible
+            farm_plots={"E1": ["P1"]},
+            farm_gfa_surface_ha={},
+        ),
+        config,
     )
     assert model.intensif_cap is not None  # built via guard (Constraint.Feasible)

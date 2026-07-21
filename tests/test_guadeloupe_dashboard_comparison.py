@@ -6,6 +6,7 @@ from case_studies.guadeloupe.dashboard import comparison, loaders
 from case_studies.guadeloupe.reporting import report
 from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
+from core.model.model_inputs import ModelInputs
 from core.model.solver import solve_model
 
 
@@ -285,10 +286,12 @@ def test_recap_carries_crop_universe(tmp_path):
     dataset = _dataset()
     dataset.sets["crops"] = ["ME", "CS"]
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0, "P2": 3.0},
-        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
-        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
-        config=_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 3.0},
+            crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        ),
+        _CONFIG,
     )
     results = solve_model(model, _CONFIG)
     run_dir = report.generate_report(dataset, _CONFIG, model, results, duration=1.0, outputs_root=tmp_path)
@@ -391,10 +394,12 @@ def test_facts_csv_written_by_report_round_trips_through_comparison_helpers(tmp_
     (column names match, pivots/figures build)."""
     dataset = _dataset()
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0, "P2": 3.0},
-        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
-        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
-        config=_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 3.0},
+            crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        ),
+        _CONFIG,
     )
     results = solve_model(model, _CONFIG)
     run_dir = report.generate_report(dataset, _CONFIG, model, results, duration=1.0, outputs_root=tmp_path)

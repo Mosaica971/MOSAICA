@@ -4,6 +4,7 @@ import pytest
 from case_studies.guadeloupe.reporting import indicators
 from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
+from core.model.model_inputs import ModelInputs
 
 _MINIMAL_CONFIG = {
     "solver": {"name": "appsi_highs", "args": {}},
@@ -123,10 +124,12 @@ def test_decode_baseline_allocation_maps_rpg_codes_to_groups_and_drops_non_culti
 
 def test_decode_output_allocation_reads_selected_pairs_from_solved_model():
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0, "P2": 1.0},
-        crop_margin_per_ha={"C1": 10.0, "C2": 20.0},
-        eligible_pairs=[("P1", "C1"), ("P1", "C2"), ("P2", "C1")],
-        config=_MINIMAL_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0, "P2": 1.0},
+            crop_margin_per_ha={"C1": 10.0, "C2": 20.0},
+            eligible_pairs=[("P1", "C1"), ("P1", "C2"), ("P2", "C1")],
+        ),
+        _MINIMAL_CONFIG,
     )
     model.Y["P1", "C1"].set_value(0)
     model.Y["P1", "C2"].set_value(1)

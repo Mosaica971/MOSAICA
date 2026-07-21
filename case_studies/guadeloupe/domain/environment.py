@@ -9,21 +9,7 @@ OPTIMISATION.txt lines 98-127.
 
 import pandas as pd
 
-
-def _otk_annual_rate_per_ha_cult(
-    matrice_otk_cult: pd.DataFrame,
-    per_application: pd.Series,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
-    amortized: pd.Series,
-) -> pd.Series:
-    """Annual per-ha rate: sum of per-application values over a crop's operations, with
-    amortized ops spread over Duree_Plant_Cult, then / Duree_Cycle_Cult * 12. `amortized`,
-    `per_application` are OTK-indexed (matrice rows); the durees are crop-indexed (columns)."""
-    otk = matrice_otk_cult.multiply(per_application, axis=0)
-    otk_amortized = otk.mul(amortized.astype(float), axis=0).div(duree_plant_cult, axis=1)
-    otk_upfront = otk.mul((~amortized).astype(float), axis=0)
-    return (otk_upfront + otk_amortized).sum(axis=0) / duree_cycle_cult * 12
+from case_studies.guadeloupe.domain.itk import annual_rate_per_ha_cult
 
 
 def compute_azote_per_ha_cult(
@@ -36,7 +22,7 @@ def compute_azote_per_ha_cult(
     DOSE * AZOTE."""
     amortized = data_otk["AMORTI"] == 1
     per_application = data_otk["DOSE"] * data_otk["AZOTE"]
-    return _otk_annual_rate_per_ha_cult(
+    return annual_rate_per_ha_cult(
         matrice_otk_cult, per_application, duree_plant_cult, duree_cycle_cult, amortized
     )
 
@@ -51,7 +37,7 @@ def compute_ift_per_ha_cult(
     (not scaled by DOSE, unlike azote/cost)."""
     amortized = data_otk["AMORTI"] == 1
     per_application = data_otk["IFT"]
-    return _otk_annual_rate_per_ha_cult(
+    return annual_rate_per_ha_cult(
         matrice_otk_cult, per_application, duree_plant_cult, duree_cycle_cult, amortized
     )
 
@@ -70,7 +56,7 @@ def compute_ges_per_ha_cult(
       - production term GES_Q * Rdt_Cult, on one-off (AMORTI=0) operations only.
     """
     amortized = data_otk["AMORTI"] == 1
-    surface_rate = _otk_annual_rate_per_ha_cult(
+    surface_rate = annual_rate_per_ha_cult(
         matrice_otk_cult, data_otk["GES_SURF"], duree_plant_cult, duree_cycle_cult, amortized
     )
     # Production-linked emissions apply to upfront operations only.

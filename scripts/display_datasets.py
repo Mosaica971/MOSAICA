@@ -15,9 +15,7 @@ from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
 from core.config import load_config
 from core.data.dataset import build_registry
 
-CONFIG_PATH = (
-    Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
-)
+from scripts._common import CONFIG_PATH
 
 
 def main() -> None:

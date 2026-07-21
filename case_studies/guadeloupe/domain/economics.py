@@ -2,6 +2,8 @@ from typing import Any
 
 import pandas as pd
 
+from case_studies.guadeloupe.domain.itk import annual_rate_per_ha_cult
+
 
 def apply_crop_multipliers(
     series: pd.Series, rules: list[dict[str, Any]] | None
@@ -39,17 +41,13 @@ def compute_variable_cost_per_ha_cult(
     operations (AMORTI=1, e.g. plantation) are spread over the plantation
     lifetime (Duree_Plant_Cult); one-off operations (AMORTI=0) are not.
     """
-    cost_per_application = data_otk["DOSE"] * data_otk["PRIX_UNIT"]
-    otk_cost = matrice_otk_cult.multiply(cost_per_application, axis=0)
-
-    amortized = data_otk["AMORTI"] == 1
-    otk_cost_amortized = otk_cost.mul(amortized.astype(float), axis=0).div(
-        duree_plant_cult, axis=1
+    cost_from_otk = annual_rate_per_ha_cult(
+        matrice_otk_cult,
+        data_otk["DOSE"] * data_otk["PRIX_UNIT"],
+        duree_plant_cult,
+        duree_cycle_cult,
+        data_otk["AMORTI"] == 1,
     )
-    otk_cost_upfront = otk_cost.mul((~amortized).astype(float), axis=0)
-
-    cost_from_otk = (otk_cost_upfront + otk_cost_amortized).sum(axis=0) / duree_cycle_cult * 12
-
     return cost_from_otk + (cout_recolte_cult + cout_transp_cult) * rdt_cult
 
 
@@ -67,16 +65,13 @@ def compute_labor_hours_per_ha_cult(
     plantation) are spread over the plantation lifetime; one-off operations are not.
     Unlike cost, there is no harvest/transport term -- labor is entirely in the OTK.
     """
-    labor_per_application = data_otk["DOSE"] * data_otk["MO_EXPL"]
-    otk_labor = matrice_otk_cult.multiply(labor_per_application, axis=0)
-
-    amortized = data_otk["AMORTI"] == 1
-    otk_labor_amortized = otk_labor.mul(amortized.astype(float), axis=0).div(
-        duree_plant_cult, axis=1
+    return annual_rate_per_ha_cult(
+        matrice_otk_cult,
+        data_otk["DOSE"] * data_otk["MO_EXPL"],
+        duree_plant_cult,
+        duree_cycle_cult,
+        data_otk["AMORTI"] == 1,
     )
-    otk_labor_upfront = otk_labor.mul((~amortized).astype(float), axis=0)
-
-    return (otk_labor_upfront + otk_labor_amortized).sum(axis=0) / duree_cycle_cult * 12
 
 
 def compute_subsidy_per_ha_cult(

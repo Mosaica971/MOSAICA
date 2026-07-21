@@ -24,9 +24,7 @@ from core.config import load_config
 from core.model.solver import solve_model
 from core.model.timing import time_phases
 
-CONFIG_PATH = (
-    Path(__file__).resolve().parent.parent / "case_studies" / "guadeloupe" / "config.yaml"
-)
+from scripts._common import CONFIG_PATH
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

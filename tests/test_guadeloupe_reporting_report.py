@@ -7,6 +7,7 @@ import yaml
 from case_studies.guadeloupe.reporting import report
 from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
+from core.model.model_inputs import ModelInputs
 from core.model.solver import solve_model
 
 _CONFIG = {
@@ -104,10 +105,12 @@ def _tiny_dataset() -> Dataset:
 def test_generate_report_writes_full_output_folder(tmp_path):
     dataset = _tiny_dataset()
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0, "P2": 3.0},
-        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
-        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
-        config=_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 3.0},
+            crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        ),
+        _CONFIG,
     )
     results = solve_model(model, _CONFIG)
 
@@ -169,10 +172,12 @@ def test_generate_report_writes_full_output_folder(tmp_path):
 def test_generate_report_writes_additional_indicators(tmp_path):
     dataset = _tiny_dataset()
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0, "P2": 3.0},
-        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
-        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
-        config=_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 3.0},
+            crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        ),
+        _CONFIG,
     )
     results = solve_model(model, _CONFIG)
 
@@ -291,10 +296,12 @@ def test_recap_carries_resilience_block_for_both_sides(tmp_path):
 
     dataset = _tiny_dataset()
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0, "P2": 3.0},
-        crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
-        eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
-        config=_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 3.0},
+            crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        ),
+        _CONFIG,
     )
     results = solve_model(model, _CONFIG)
     output_dir = report.generate_report(
