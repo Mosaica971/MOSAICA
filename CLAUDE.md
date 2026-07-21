@@ -150,6 +150,18 @@ rainfall, plot size) intersected with `categorical_rules` (irrigation, soil type
 bans, `friche_lock` fallow history, etc.). Only eligible `(plot, crop)` pairs become
 decision variables, which keeps the MILP tractable.
 
+A categorical rule receives the plot table as `plot_attributes` and returns
+`(crops, condition)`; `forbid_where` then clears those crops on the matching plots. Since
+each rule forbids its own subset and the mask keeps the **union** forbidden, a single
+`attribute_forbidden` entry ANDs its conditions and an **OR is expressed as several
+entries** (that is how the ME soil/island ban is written in `config.yaml`).
+
+**`core/` speaks no Guadeloupe.** It reasons about plots, crops and farms only: no
+`data_parc`, no `ILE`, no GFA. `ModelInputs.farm_restricted_surface_ha` is the generic name
+for "surface of the farm's plots flagged as subject to a land-tenure scheme" — the case
+study maps its `farm_gfa_surface_ha` parameter onto it in `model/model.py`. Keep it that
+way: case-study vocabulary belongs in `case_studies/`, where it anchors GAMS parity.
+
 ## Conventions & gotchas
 
 - **`territory_production_bound` and the "trivial Boolean" trap.** When a constraint's

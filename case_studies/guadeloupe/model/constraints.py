@@ -23,7 +23,7 @@ def build_cs_gfa_minimum_share_constraint(
             plot_crops[plot].append(crop)
 
     eligible_farms = [
-        farm for farm in inputs.farm_plots if inputs.farm_gfa_surface_ha.get(farm, 0.0) > 0
+        farm for farm in inputs.farm_plots if inputs.farm_restricted_surface_ha.get(farm, 0.0) > 0
     ]
 
     def _rule(model, farm):
@@ -32,7 +32,7 @@ def build_cs_gfa_minimum_share_constraint(
             for plot in inputs.farm_plots.get(farm, [])
             for crop in plot_crops.get(plot, [])
         )
-        requirement = min_share * inputs.farm_gfa_surface_ha[farm]
+        requirement = min_share * inputs.farm_restricted_surface_ha[farm]
         # A GFA farm with zero eligible SC crop plots sums to a plain 0 -- see the
         # note in territory_production_bound above. Note this can legitimately
         # resolve to Constraint.Infeasible (not just Feasible): a farm required to

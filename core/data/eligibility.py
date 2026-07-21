@@ -47,88 +47,72 @@ def register_categorical_rule(name: str) -> Callable:
 
 @register_categorical_rule("irrigation_required")
 def rule_irrigation_required(
-    data_parc: pd.DataFrame, *, crops: list[str], irrigation_column: str
+    plot_attributes: pd.DataFrame, *, crops: list[str], irrigation_column: str
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[irrigation_column] == 0
+    condition = plot_attributes[irrigation_column] == 0
     return crops, condition
 
 
 @register_categorical_rule("soil_type_forbidden")
 def rule_soil_type_forbidden(
-    data_parc: pd.DataFrame,
+    plot_attributes: pd.DataFrame,
     *,
     crops: list[str],
     soil_column: str,
     forbidden_soil_types: list[int],
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[soil_column].isin(forbidden_soil_types)
-    return crops, condition
-
-
-@register_categorical_rule("melon_soil_restriction")
-def rule_melon_soil_restriction(
-    data_parc: pd.DataFrame,
-    *,
-    crops: list[str],
-    soil_column: str,
-    forbidden_soil_types: list[int],
-    island_column: str,
-    forbidden_island: int,
-) -> tuple[list[str], pd.Series]:
-    condition = data_parc[soil_column].isin(forbidden_soil_types) | (
-        data_parc[island_column] == forbidden_island
-    )
+    condition = plot_attributes[soil_column].isin(forbidden_soil_types)
     return crops, condition
 
 
 @register_categorical_rule("region_crop_forbidden")
 def rule_region_crop_forbidden(
-    data_parc: pd.DataFrame,
+    plot_attributes: pd.DataFrame,
     *,
     crops: list[str],
     region_column: str,
     forbidden_regions: list[str],
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[region_column].isin(forbidden_regions)
+    condition = plot_attributes[region_column].isin(forbidden_regions)
     return crops, condition
 
 
 @register_categorical_rule("max_risk_threshold")
 def rule_max_risk_threshold(
-    data_parc: pd.DataFrame, *, crops: list[str], risk_column: str, max_allowed: float
+    plot_attributes: pd.DataFrame, *, crops: list[str], risk_column: str, max_allowed: float
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[risk_column] <= max_allowed
+    condition = plot_attributes[risk_column] <= max_allowed
     return crops, condition
 
 
 @register_categorical_rule("exact_risk_value")
 def rule_exact_risk_value(
-    data_parc: pd.DataFrame, *, crops: list[str], risk_column: str, allowed_value: float
+    plot_attributes: pd.DataFrame, *, crops: list[str], risk_column: str, allowed_value: float
 ) -> tuple[list[str], pd.Series]:
-    condition = data_parc[risk_column] == allowed_value
+    condition = plot_attributes[risk_column] == allowed_value
     return crops, condition
 
 
 @register_categorical_rule("friche_lock")
 def rule_friche_lock(
-    data_parc: pd.DataFrame,
+    plot_attributes: pd.DataFrame,
     *,
     crops: list[str],
     history_columns: list[str],
     fallow_codes: list[int],
 ) -> tuple[list[str], pd.Series]:
-    condition = pd.Series(True, index=data_parc.index)
+    condition = pd.Series(True, index=plot_attributes.index)
     for column in history_columns:
-        condition &= data_parc[column].isin(fallow_codes)
+        condition &= plot_attributes[column].isin(fallow_codes)
     return crops, condition
 
 
 @register_categorical_rule("forbid_crops")
-def rule_forbid_crops(data_parc: pd.DataFrame, *, crops: list[str]) -> tuple[list[str], pd.Series]:
+def rule_forbid_crops(plot_attributes: pd.DataFrame, *, crops: list[str]) -> tuple[list[str], pd.Series]:
     """Forbid `crops` on every plot (unconditional). Used by climate/sanitary shock
     scenarios (drought disables irrigated crops, disease disables a filiere) and by the
     GAMS Eq_CS_IRR ban (irrigated sugarcane disabled everywhere)."""
-    condition = pd.Series(True, index=data_parc.index)
+    condition = pd.Series(True, index=plot_attributes.index)
     return crops, condition
 
 
@@ -146,17 +130,17 @@ _COMPARATORS: dict[str, Callable[[pd.Series, Any], pd.Series]] = {
 
 @register_categorical_rule("attribute_forbidden")
 def rule_attribute_forbidden(
-    data_parc: pd.DataFrame, *, crops: list[str], conditions: list[dict[str, Any]]
+    plot_attributes: pd.DataFrame, *, crops: list[str], conditions: list[dict[str, Any]]
 ) -> tuple[list[str], pd.Series]:
     """Forbid `crops` on plots where ALL `conditions` hold (logical AND). Each condition is
     {column, op, value} with op in eq/ne/in/not_in/lt/le/gt/ge. Express an OR across columns
     with several rule entries (each forbids its subset; the mask keeps the union forbidden).
     Ports the GAMS geographic/soil/irrigation ITK bans (Eq_CS_*, Eq_IG_*_ILE, Eq_BA_*,
     Eq_BC_*, Eq_AG_*, Eq_VE_*)."""
-    condition = pd.Series(True, index=data_parc.index)
+    condition = pd.Series(True, index=plot_attributes.index)
     for spec in conditions:
         comparator = _COMPARATORS[spec["op"]]
-        condition &= comparator(data_parc[spec["column"]], spec["value"])
+        condition &= comparator(plot_attributes[spec["column"]], spec["value"])
     return crops, condition
 
 

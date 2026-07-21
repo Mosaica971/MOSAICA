@@ -24,7 +24,7 @@ def test_cs_gfa_minimum_share_constraint_only_applies_to_farms_with_gfa_surface(
             crop_margin_per_ha={"CS": 50.0, "OTHER": 100.0},
             eligible_pairs=[("P1", "CS"), ("P1", "OTHER"), ("P2", "CS")],
             farm_plots={"E1": ["P1"], "E2": ["P2"]},
-            farm_gfa_surface_ha={"E1": 10.0},
+            farm_restricted_surface_ha={"E1": 10.0},
         ),
         config,
     )
@@ -56,7 +56,7 @@ def test_cs_gfa_minimum_share_constraint_handles_gfa_farm_with_no_eligible_cs_pl
             crop_margin_per_ha={"OTHER": 50.0},
             eligible_pairs=[("P1", "OTHER")],
             farm_plots={"E1": ["P1"]},
-            farm_gfa_surface_ha={"E1": 4.0},
+            farm_restricted_surface_ha={"E1": 4.0},
         ),
         config,
     )
@@ -106,7 +106,7 @@ def test_crop_share_bound_ge_enforces_minimum_bio_share():
             ("P2", "MA_ROTA"),
         ],
             farm_plots={"E1": ["P1", "P2"]},
-            farm_gfa_surface_ha={},
+            farm_restricted_surface_ha={},
         ),
         config,
     )
@@ -147,7 +147,7 @@ def test_crop_share_bound_empty_terms_are_guarded():
             crop_margin_per_ha={"MA_PLBIO": 50.0},
             eligible_pairs=[("P1", "MA_PLBIO")],  # neither BA_INT nor MA_ROTA eligible
             farm_plots={"E1": ["P1"]},
-            farm_gfa_surface_ha={},
+            farm_restricted_surface_ha={},
         ),
         config,
     )
