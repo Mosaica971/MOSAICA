@@ -40,6 +40,13 @@ def load_facts(run_dir: Path, side: str) -> pd.DataFrame | None:
     return load_csv(run_dir, f"facts_{side}.csv")
 
 
+def load_calibration(run_dir: Path, name: str) -> pd.DataFrame | None:
+    """One calibration block ('pad_by_crop', 'pad_by_crop_and_region', 'pad_by_farm',
+    'farm_type_confusion', 'field_match'), or None for a run scored before the calibration
+    reporting existed."""
+    return load_csv(run_dir, f"calibration_{name}.csv")
+
+
 def load_csv(run_dir: Path, name: str) -> pd.DataFrame | None:
     # CSVs now live in run_dir/csv/; fall back to the run root for older output folders
     # written before that reorg.

@@ -65,3 +65,24 @@ def test_run_display_name_falls_back_to_folder_when_absent_or_empty(tmp_path):
     assert loaders.run_display_name(run_dir, {}) == "output_1"
     assert loaders.run_display_name(run_dir, {"run_name": ""}) == "output_1"
     assert loaders.run_display_name(run_dir, {"run_name": None}) == "output_1"
+
+
+def test_load_calibration_reads_a_block(tmp_path):
+    run_dir = tmp_path / "output_1"
+    (run_dir / "csv").mkdir(parents=True)
+    (run_dir / "csv" / "calibration_pad_by_crop.csv").write_text(
+        "crop,observed_ha,simulated_ha,abs_deviation_ha,pad_pct,within_threshold\n"
+        "CS,5.0,2.0,3.0,60.0,False\n"
+        "TOTAL,5.0,2.0,3.0,60.0,False\n"
+    )
+
+    frame = loaders.load_calibration(run_dir, "pad_by_crop")
+
+    assert list(frame["crop"]) == ["CS", "TOTAL"]
+
+
+def test_load_calibration_returns_none_for_a_run_without_the_block(tmp_path):
+    run_dir = tmp_path / "output_2"
+    (run_dir / "csv").mkdir(parents=True)
+
+    assert loaders.load_calibration(run_dir, "pad_by_crop") is None
