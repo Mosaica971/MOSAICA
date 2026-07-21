@@ -249,3 +249,45 @@ def test_farm_type_confusion_is_diagonal_when_the_simulation_reproduces_the_base
     confusion = calibration.farm_type_confusion(dataset, identical)
     summary = calibration.farm_type_match_summary(confusion)
     assert summary["match_pct"] == pytest.approx(100.0)
+
+
+def test_evaluate_returns_every_block():
+    dataset = _small_dataset()
+    result = calibration.evaluate(dataset, _simulated(), {})
+    assert result.pad_by_crop.loc["CS", "pad_pct"] == pytest.approx(60.0)
+    assert result.pad_by_crop_and_region.loc[("R2", "IG"), "pad_pct"] == pytest.approx(100.0)
+    assert result.pad_by_farm.loc["E2", "pad_pct"] == pytest.approx(0.0)
+    assert result.farm_type_confusion.loc[3, 5] == 1
+    assert result.field_match.loc[calibration.TOTAL_KEY, "plot_match_pct"] == pytest.approx(60.0)
+    assert result.thresholds.regional_pad_max == 15.0
+
+
+def test_summary_is_json_serialisable_and_carries_the_verdicts():
+    import json
+
+    dataset = _small_dataset()
+    summary = calibration.evaluate(dataset, _simulated(), {}).summary()
+
+    json.dumps(summary)  # must not raise: no numpy scalars, no pandas NA
+
+    assert summary["thresholds"]["regional_pad_max"] == 15.0
+    assert summary["regional_pad_pct"] == pytest.approx(70.0)
+    assert summary["regional_within_threshold"] is False
+    assert summary["crops_evaluated"] == 4      # CS, IG, ME, PN -- MA has no observed base
+    assert summary["crops_within_threshold"] == 2  # ME and PN
+    assert summary["farms_evaluated"] == 3
+    assert summary["farms_within_threshold"] == 1
+    assert summary["farm_type_match_pct"] == pytest.approx(200.0 / 3)
+    assert summary["farm_type_within_threshold"] is False
+    assert summary["plot_match_pct"] == pytest.approx(60.0)
+    assert summary["area_match_pct"] == pytest.approx(60.0)
+
+
+def test_summary_verdicts_are_all_green_on_a_perfect_reproduction():
+    dataset = _small_dataset()
+    identical = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME", "P5": "PN", "P6": "IG"})
+    summary = calibration.evaluate(dataset, identical, {}).summary()
+    assert summary["regional_pad_pct"] == pytest.approx(0.0)
+    assert summary["regional_within_threshold"] is True
+    assert summary["farm_type_within_threshold"] is True
+    assert summary["plot_match_pct"] == pytest.approx(100.0)

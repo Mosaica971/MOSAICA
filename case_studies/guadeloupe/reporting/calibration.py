@@ -14,7 +14,7 @@ Reporting only -- nothing here influences the allocation, and no solve is needed
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any
 
 import pandas as pd
@@ -306,3 +306,86 @@ def farm_type_match_summary(confusion: pd.DataFrame) -> dict[str, Any]:
             if count > 0
         },
     }
+
+
+def _optional_float(value: Any) -> float | None:
+    """JSON has no NaN: an undefined metric is None, not a float that json.dumps emits as
+    the invalid literal NaN."""
+    if value is None or pd.isna(value):
+        return None
+    return float(value)
+
+
+@dataclass(frozen=True)
+class CalibrationResult:
+    """Every block of Chopin et al. §2.6 for one run, plus the thresholds they are read
+    against. Frames are for CSV and figures; summary() is what goes into recap.json."""
+
+    thresholds: CalibrationThresholds
+    pad_by_crop: pd.DataFrame
+    pad_by_crop_and_region: pd.DataFrame
+    pad_by_farm: pd.DataFrame
+    farm_type_confusion: pd.DataFrame
+    field_match: pd.DataFrame
+
+    def summary(self) -> dict[str, Any]:
+        crops = self.pad_by_crop.drop(index=TOTAL_KEY)
+        total = self.pad_by_crop.loc[TOTAL_KEY]
+        subregional = self.pad_by_crop_and_region[
+            self.pad_by_crop_and_region.index.get_level_values("crop") != TOTAL_KEY
+        ]
+        farms = self.pad_by_farm
+        field_total = self.field_match.loc[TOTAL_KEY]
+        farm_type = farm_type_match_summary(self.farm_type_confusion)
+
+        # Verdicts are recomputed from the numeric PAD rather than read off the
+        # within_threshold column: that column is a nullable BooleanDtype whose scalars do
+        # not compare cleanly with `is True`, and bool(pd.NA) raises outright.
+        regional_pad = _optional_float(total["pad_pct"])
+        farm_type_pct = _optional_float(farm_type["match_pct"])
+
+        def _count_true(column: pd.Series) -> int:
+            return int(column.fillna(False).astype(bool).sum())
+
+        return {
+            "thresholds": asdict(self.thresholds),
+            "regional_pad_pct": regional_pad,
+            "regional_within_threshold": (
+                regional_pad is not None and regional_pad <= self.thresholds.regional_pad_max
+            ),
+            "crops_evaluated": int(crops["within_threshold"].notna().sum()),
+            "crops_within_threshold": _count_true(crops["within_threshold"]),
+            "subregional_cells_evaluated": int(subregional["within_threshold"].notna().sum()),
+            "subregional_cells_within_threshold": _count_true(subregional["within_threshold"]),
+            "farms_evaluated": int(farms["within_threshold"].notna().sum()),
+            "farms_within_threshold": _count_true(farms["within_threshold"]),
+            "farm_type_match_pct": farm_type_pct,
+            "farm_type_within_threshold": (
+                farm_type_pct is not None
+                and farm_type_pct >= self.thresholds.farm_type_match_min
+            ),
+            "farm_type_recall_by_type": {
+                label: float(value) for label, value in farm_type["recall_by_type"].items()
+            },
+            "matched_plots": int(field_total["matched_plots"]),
+            "total_plots": int(field_total["total_plots"]),
+            "plot_match_pct": _optional_float(field_total["plot_match_pct"]),
+            "matched_ha": float(field_total["matched_ha"]),
+            "total_ha": float(field_total["total_ha"]),
+            "area_match_pct": _optional_float(field_total["area_match_pct"]),
+        }
+
+
+def evaluate(
+    dataset: Dataset, output_allocation: pd.Series, config: dict[str, Any]
+) -> CalibrationResult:
+    """Every calibration metric for one solved allocation. No solve, no file written."""
+    thresholds = thresholds_from_config(config)
+    return CalibrationResult(
+        thresholds=thresholds,
+        pad_by_crop=pad_by_crop(dataset, output_allocation, thresholds),
+        pad_by_crop_and_region=pad_by_crop_and_region(dataset, output_allocation, thresholds),
+        pad_by_farm=pad_by_farm(dataset, output_allocation, thresholds),
+        farm_type_confusion=farm_type_confusion(dataset, output_allocation),
+        field_match=field_match_rate(dataset, output_allocation),
+    )
