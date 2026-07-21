@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 
 from case_studies.guadeloupe.pipeline.data_pipeline import CONFIG_PATH, build_dataset
-from case_studies.guadeloupe.reporting import indicators
+from case_studies.guadeloupe.reporting import calibration, indicators
 from core.config import load_config
 from core.data.dataset import Dataset
 
@@ -102,6 +102,19 @@ def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, 
 
     facts = indicators.compute_facts_table(dataset, allocation, hours_per_etp, cost_per_hour)
     snapshot["facts"] = _summarise_frame(facts)
+
+    # Calibration blocks. The allocation here is the representative baseline, which folds
+    # back onto its own observed families, so every PAD is 0 and the confusion matrix is
+    # diagonal. That is the point: this checksum guards the round-trip between config's
+    # baseline_representative_crops and crop_families.base_group_for. Drift in the
+    # arithmetic is caught by tests/test_guadeloupe_reporting_calibration.py instead.
+    calib = calibration.evaluate(dataset, allocation, config)
+    snapshot.update(flatten("calib", calib.summary()))
+    snapshot["calib_pad_by_crop"] = _summarise_frame(calib.pad_by_crop)
+    snapshot["calib_pad_by_region"] = _summarise_frame(calib.pad_by_crop_and_region)
+    snapshot["calib_pad_by_farm"] = _summarise_frame(calib.pad_by_farm)
+    snapshot["calib_confusion"] = _summarise_frame(calib.farm_type_confusion)
+    snapshot["calib_field_match"] = _summarise_frame(calib.field_match)
     return snapshot
 
 
