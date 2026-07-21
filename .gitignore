@@ -10,3 +10,5 @@ mosaica_solve_history.json
 .worktrees/
 .claude/*.lock
 Rapport technique variables MOSAICA_v2.docx
+# Golden snapshot de refactor : derive de data/, reste local
+.golden/
