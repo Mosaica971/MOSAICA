@@ -11,7 +11,7 @@ import yaml
 
 from case_studies.guadeloupe.domain import resilience
 from case_studies.guadeloupe.pipeline.data_pipeline import DEFAULT_SCENARIO, DEFAULT_YEAR
-from case_studies.guadeloupe.reporting import indicators, plots
+from case_studies.guadeloupe.reporting import calibration, indicators, plots
 from core.data.dataset import Dataset
 from core.reporting.run_folder import create_output_folder
 
@@ -60,6 +60,9 @@ def generate_report(
     gini_revenue_by_farm = _write_output_only_indicators(dataset, output_allocation, output_dir)
     _write_shannon_and_surface_by_key(dataset, input_allocation, output_allocation, output_dir)
 
+    calibration_result = calibration.evaluate(dataset, output_allocation, config)
+    write_calibration(calibration_result, output_dir)
+
     output_summary = indicators.compute_aggregate_summary(dataset, output_allocation)
     input_summary = indicators.compute_aggregate_summary(dataset, input_allocation)
     delta_summary = {key: output_summary[key] - input_summary[key] for key in output_summary}
@@ -105,6 +108,7 @@ def generate_report(
         environment={"input": input_env, "output": output_env, "delta": delta_env},
         food_autonomy={"input": input_auto, "output": output_auto, "delta": delta_auto},
         resilience={"input": input_res, "output": output_res, "delta": delta_res},
+        calibration_summary=calibration_result.summary(),
     )
     # Full CULT_2017 universe (every fine crop the model could pick, allocated or not) so the
     # dashboard can show an exhaustive crop/subculture axis including never-chosen crops.
@@ -230,6 +234,30 @@ def _write_shannon_and_surface_by_key(
         )
 
 
+def write_calibration(result: calibration.CalibrationResult, output_dir: Path) -> None:
+    """Persist the observed-vs-simulated calibration blocks (Chopin et al. 2015 §2.6).
+
+    Public because scripts/evaluate_calibration.py writes the same files into a past run's
+    folder. Reporting only: these numbers grade the run, they never feed back into it.
+    """
+    result.pad_by_crop.to_csv(_csv_path(output_dir, "calibration_pad_by_crop.csv"))
+    result.pad_by_crop_and_region.to_csv(
+        _csv_path(output_dir, "calibration_pad_by_crop_and_region.csv")
+    )
+    result.pad_by_farm.to_csv(_csv_path(output_dir, "calibration_pad_by_farm.csv"))
+    result.farm_type_confusion.to_csv(
+        _csv_path(output_dir, "calibration_farm_type_confusion.csv")
+    )
+    result.field_match.to_csv(_csv_path(output_dir, "calibration_field_match.csv"))
+
+    plots.plot_calibration_regional(
+        result.pad_by_crop, output_dir / "plots" / "calibration_regional.png"
+    )
+    plots.plot_calibration_pad_heatmap(
+        result.pad_by_crop_and_region, output_dir / "plots" / "calibration_pad_heatmap.png"
+    )
+
+
 def _write_allocation_csv(dataset: Dataset, allocation: pd.Series, path: Path) -> None:
     data_parc = dataset.parameters["data_parc"]
     farm = indicators.plot_to_farm(dataset).reindex(allocation.index)
@@ -274,6 +302,7 @@ def _build_recap(
     environment: dict[str, Any],
     food_autonomy: dict[str, Any],
     resilience: dict[str, Any],
+    calibration_summary: dict[str, Any],
 ) -> dict[str, Any]:
     enabled_constraints = [
         {"name": entry["name"], "args": entry.get("args") or {}}
@@ -308,6 +337,9 @@ def _build_recap(
         "environment": environment,
         "food_autonomy": food_autonomy,
         "resilience": resilience,
+        # How close this run's allocation lands to the observed 2017 land use
+        # (Chopin et al. 2015 §2.6) -- a report card, never an input to the model.
+        "calibration": calibration_summary,
         "gini_revenue_by_farm": gini_revenue_by_farm,
         "total_plots": int(len(dataset.parameters["data_parc"])),
         "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),
@@ -367,5 +399,36 @@ def _render_recap_markdown(recap: dict[str, Any]) -> str:
         f"{econ['output']['total_net_revenue']:,.0f} (delta {econ['delta']['total_net_revenue']:+,.0f})",
         f"- Emploi (ETP) : {econ['input']['total_etp']:,.1f} -> "
         f"{econ['output']['total_etp']:,.1f} (delta {econ['delta']['total_etp']:+,.1f})",
+    ]
+
+    calib = recap["calibration"]
+
+    def _verdict(passed: bool) -> str:
+        return "OK" if passed else "HORS SEUIL"
+
+    def _pct(value: float | None) -> str:
+        return "n/a" if value is None else f"{value:,.1f}%"
+
+    lines += [
+        "",
+        "## Calibration (observe 2017 vs simule)",
+        "_Ecart mesure au niveau des 12 groupes RPG observes. Seuils : Chopin et al. 2015"
+        " section 2.6. Voir docs/superpowers/specs/2026-07-21-calibration-validation-design.md._",
+        f"- PAD territorial : {_pct(calib['regional_pad_pct'])} "
+        f"(seuil {calib['thresholds']['regional_pad_max']:.0f}%) "
+        f"-> {_verdict(calib['regional_within_threshold'])}",
+        f"- Cultures sous seuil : {calib['crops_within_threshold']} / {calib['crops_evaluated']}",
+        f"- Cellules sous-regionales sous seuil : "
+        f"{calib['subregional_cells_within_threshold']} / {calib['subregional_cells_evaluated']} "
+        f"(seuil {calib['thresholds']['subregional_pad_max']:.0f}%)",
+        f"- Exploitations sous seuil : {calib['farms_within_threshold']} / "
+        f"{calib['farms_evaluated']} (seuil {calib['thresholds']['farm_pad_max']:.0f}%)",
+        f"- Types d'exploitation correctement simules : {_pct(calib['farm_type_match_pct'])} "
+        f"(seuil {calib['thresholds']['farm_type_match_min']:.0f}%) "
+        f"-> {_verdict(calib['farm_type_within_threshold'])}",
+        f"- Parcelles avec la bonne culture : {_pct(calib['plot_match_pct'])} "
+        f"({calib['matched_plots']} / {calib['total_plots']})",
+        f"- Surface avec la bonne culture : {_pct(calib['area_match_pct'])} "
+        f"({calib['matched_ha']:,.0f} / {calib['total_ha']:,.0f} ha)",
     ]
     return "\n".join(lines) + "\n"

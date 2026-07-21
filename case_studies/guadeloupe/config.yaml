@@ -56,6 +56,17 @@ reporting:
     # Carbon -> CO2 conversion for the GES indicator (GAMS COEFF_C_CO2). Default 0.272.
     coeff_c_co2: 0.272
 
+  # Calibration thresholds, from Chopin et al. (2015) section 2.6: percentage of absolute
+  # deviation (PAD) between the observed 2017 acreage and the simulated one. The article
+  # takes these values from Kanellopoulos et al. (2010), Hazell and Norton (1986) and
+  # Janssen and van Ittersum (2007) -- they are review conventions, not model constraints,
+  # and changing them changes only the verdicts printed in the recap.
+  calibration:
+    regional_pad_max: 15       # PAD (%) tolerated per crop over the whole territory
+    subregional_pad_max: 20    # PAD (%) tolerated per crop within a sub-region
+    farm_pad_max: 20           # PAD (%) tolerated per farm
+    farm_type_match_min: 80    # minimum share (%) of farms simulated in their observed type
+
 # Representative fine crop per aggregate baseline family (see VIGILANCE.md "point 4").
 # The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",
 # not which technical system), and the aggregate codes carry no economics of their own.

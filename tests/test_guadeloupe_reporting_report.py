@@ -37,6 +37,9 @@ def _tiny_dataset() -> Dataset:
         index=["P1", "P2"],
     )
     expl_parc = pd.DataFrame({"farm": ["E1", "E1"], "plot": ["P1", "P2"]})
+    # farm_plots is consumed by calibration.farm_type_confusion, which recomputes the farm
+    # typology on both sides through farm_typology.compute_type_expl.
+    farm_plots = {"E1": ["P1", "P2"]}
     # Water/carbon: only touched by compute_environmental_totals's new keys, not asserted
     # on by value here -- just enough shape to not KeyError.
     data_sol = pd.DataFrame(
@@ -70,6 +73,7 @@ def _tiny_dataset() -> Dataset:
         parameters={
             "data_parc": data_parc,
             "expl_parc": expl_parc,
+            "farm_plots": farm_plots,
             "rdt_cult": pd.Series({"CS": 80.0, "ME": 20.0}),
             "sales_per_ha_cult": pd.Series({"CS": 3000.0, "ME": 5000.0}),
             "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
@@ -320,3 +324,40 @@ def test_recap_carries_resilience_block_for_both_sides(tmp_path):
         "price_shock_margin_loss_ratio",
     ):
         assert key in recap["resilience"]["output"]
+
+
+def test_generate_report_writes_the_calibration_block(tmp_path):
+    dataset = _tiny_dataset()
+    model = build_crop_allocation_model(
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 3.0},
+            crop_margin_per_ha={"CS": 100.0, "ME": 200.0},
+            eligible_pairs=[("P1", "CS"), ("P1", "ME"), ("P2", "CS"), ("P2", "ME")],
+        ),
+        _CONFIG,
+    )
+    results = solve_model(model, _CONFIG)
+
+    output_dir = report.generate_report(
+        dataset, _CONFIG, model, results, duration=1.23, outputs_root=tmp_path
+    )
+
+    for name in (
+        "calibration_pad_by_crop.csv",
+        "calibration_pad_by_crop_and_region.csv",
+        "calibration_pad_by_farm.csv",
+        "calibration_farm_type_confusion.csv",
+        "calibration_field_match.csv",
+    ):
+        assert (output_dir / "csv" / name).exists(), name
+
+    assert (output_dir / "plots" / "calibration_regional.png").exists()
+    assert (output_dir / "plots" / "calibration_pad_heatmap.png").exists()
+
+    recap = json.loads((output_dir / "recap.json").read_text())
+    assert "calibration" in recap
+    assert recap["calibration"]["thresholds"]["regional_pad_max"] == 15.0
+    assert "regional_pad_pct" in recap["calibration"]
+    assert "plot_match_pct" in recap["calibration"]
+
+    assert "## Calibration" in (output_dir / "recap.md").read_text()
