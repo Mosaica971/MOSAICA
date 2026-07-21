@@ -18,6 +18,16 @@ import pandas as pd
 
 from case_studies.guadeloupe.domain.crop_labels import label_for
 
+# Region / island codes -> human names. Defined in domain/zones.py because reporting/ needs
+# them too and reporting/ must not import dashboard/; re-exported here under their
+# historical names for this module's callers (pages/2_Comparaison.py).
+from case_studies.guadeloupe.domain.zones import (  # noqa: F401
+    ISLAND_CODES,
+    ISLAND_LABELS,
+    REGION_CODES,
+    REGION_LABELS,
+)
+
 # Measures available on the y-axis, in display order, with French labels.
 MEASURE_LABELS: dict[str, str] = {
     "surface": "Surface (ha)",
@@ -59,27 +69,6 @@ _CANE_COMBO_LABELS = {
 }
 
 X_DIMENSIONS = ("culture", "subculture", "region", "island")
-
-# Region / island codes -> human names (GAMS source: DESCRIPTION_SETS.txt). The facts tables
-# store the raw numeric codes; these turn "1, 2, ..." into readable axis/legend labels.
-REGION_LABELS: dict[str, str] = {
-    "1": "CGT · Centre Grande-Terre",
-    "2": "EGT · Est Grande-Terre",
-    "3": "NGT · Nord Grande-Terre",
-    "4": "NBT · Nord Basse-Terre",
-    "5": "SEBT · Sud-Est Basse-Terre",
-    "6": "SOBT · Sud-Ouest Basse-Terre",
-    "7": "MG · Marie-Galante",
-}
-ISLAND_LABELS: dict[str, str] = {
-    "1": "Basse-Terre",
-    "2": "Grande-Terre",
-    "3": "Marie-Galante",
-}
-# Full universe of region / island codes, so an exhaustive axis can include codes absent from
-# a given allocation (as zero-height bars).
-REGION_CODES: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7)
-ISLAND_CODES: tuple[int, ...] = (1, 2, 3)
 
 # Stable per-scenario colors (matplotlib tab10, as hex) used as the default value of the
 # per-scenario color pickers and as the figure fallback when no override is supplied.
