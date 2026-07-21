@@ -21,9 +21,14 @@ Use `zone_filter` overrides in your scenarios to shrink runs while iterating.
 """
 
 import csv
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+# Running this file directly puts scripts/ on sys.path, not the repo root, so the
+# case_studies/core imports below would fail. Prepend the repo root ourselves.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pyomo.environ as pyo
 

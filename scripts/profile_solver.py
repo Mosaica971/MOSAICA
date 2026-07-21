@@ -10,8 +10,13 @@ Usage:
 """
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Any
+
+# Running this file directly puts scripts/ on sys.path, not the repo root, so the
+# case_studies/core imports below would fail. Prepend the repo root ourselves.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from case_studies.guadeloupe.data_pipeline import build_dataset
 from case_studies.guadeloupe.model import build_model

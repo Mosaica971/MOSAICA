@@ -40,5 +40,11 @@
       "size": 1683058,
       "duration": 48.75
     }
+  ],
+  "test_case_default_history": [
+    {
+      "size": 2,
+      "duration": 0.014999999984866008
+    }
   ]
 }

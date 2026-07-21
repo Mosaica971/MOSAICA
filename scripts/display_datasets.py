@@ -4,7 +4,12 @@ its category, type and size) for a quick sanity check of what build_dataset prod
     python scripts/display_datasets.py
 """
 
+import sys
 from pathlib import Path
+
+# Running this file directly puts scripts/ on sys.path, not the repo root, so the
+# case_studies/core imports below would fail. Prepend the repo root ourselves.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from case_studies.guadeloupe.data_pipeline import build_dataset
 from core.config import load_config
