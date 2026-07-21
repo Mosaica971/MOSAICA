@@ -125,3 +125,24 @@ def test_type_expl_labels_cover_the_eight_article_types_plus_the_edge_codes():
     assert set(TYPE_EXPL_LABELS) == {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8}
     # Every type carrying a risk-aversion coefficient must be named.
     assert set(_AVERS_BY_TYPE_EXPL) <= set(TYPE_EXPL_LABELS)
+
+
+def test_avers_falls_back_to_the_type_4_base_value_when_bis_is_unset():
+    """GAMS sets AVERS=1.40 for type 4 (OPTIMISATION.txt:1748) before the Bis cascade
+    overwrites it. The real data always sets Bis, but an unset Bis must not yield NaN --
+    a single NaN would make the Markowitz objective undefined for the whole territory."""
+    import numpy as np
+    import pandas as pd
+
+    from case_studies.guadeloupe.domain.farm_typology import compute_avers
+
+    type_expl = pd.Series({"E1": 4, "E2": 4, "E3": 4, "E4": 6})
+    type_expl_bis = pd.Series({"E1": 41.0, "E2": 42.0, "E3": np.nan, "E4": np.nan})
+
+    avers = compute_avers(type_expl, type_expl_bis)
+
+    assert avers["E1"] == 0.50
+    assert avers["E2"] == 1.60
+    assert avers["E3"] == 1.40  # fallback, not NaN
+    assert avers["E4"] == 2.40
+    assert avers.notna().all()

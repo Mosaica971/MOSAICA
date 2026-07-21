@@ -48,8 +48,12 @@ _FAMILIES_BY_BASE_GROUP: dict[str, tuple[str, ...]] = {
 _FAMILIES = ("can", "pat", "ban", "mar", "plu", "bc", "tt", "non")
 
 # old_code_gms_format_now_txt/OPTIMISATION.txt:1744-1758.
+# Type 4 carries 1.40 in GAMS (OPTIMISATION.txt:1748), which is then overwritten by the
+# TYPE_EXPL_Bis cascade below -- on the real data every type-4 farm gets a 41/42 value, so
+# 1.40 never survives. It is kept here as an explicit fallback: without it, a type-4 farm
+# with an unset Bis would map to NaN and propagate an undefined objective.
 _AVERS_BY_TYPE_EXPL: dict[int, float] = {
-    1: 1.30, 2: 1.20, 3: 0.30, 5: 0.55, 6: 2.40, 7: 0.00, 8: 2.30,
+    1: 1.30, 2: 1.20, 3: 0.30, 4: 1.40, 5: 0.55, 6: 2.40, 7: 0.00, 8: 2.30,
 }
 _AVERS_BY_TYPE_EXPL_BIS: dict[int, float] = {41: 0.50, 42: 1.60}
 
@@ -145,7 +149,13 @@ def compute_type_expl(
 
 
 def compute_avers(type_expl: pd.Series, type_expl_bis: pd.Series) -> pd.Series:
+    """Risk-aversion coefficient per farm, from its OBSERVED type -- GAMS indexes AVERS on
+    STOCK_TYPE_EXPL("init") (OPTIMISATION.txt:1745), not on any re-derived typology.
+
+    Type 4 goes through the Bis sub-cascade; its 1.40 base value only shows through if Bis
+    is unset, which the real data never produces but which must not yield NaN.
+    """
     avers = type_expl.map(_AVERS_BY_TYPE_EXPL).fillna(0.0)
     is_type_4 = type_expl == 4
-    avers = avers.where(~is_type_4, type_expl_bis.map(_AVERS_BY_TYPE_EXPL_BIS))
-    return avers
+    bis_avers = type_expl_bis.map(_AVERS_BY_TYPE_EXPL_BIS)
+    return avers.where(~is_type_4, bis_avers.fillna(_AVERS_BY_TYPE_EXPL[4]))

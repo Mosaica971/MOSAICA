@@ -81,7 +81,7 @@ baseline_representative_crops:
   CS: CS_NGT_NISM  # canne a sucre Nord Grande-Terre, non irriguee, semi-mecanisee
   IG: IG_PLA       # igname a plat
   MA: MA_ROTA      # maraichage en rotation
-  PN: PN_TOUR      # prairie avec paturage tournant
+  PN: PN_PIQ       # prairie avec elevage au piquet -- PN_TOUR est supprimee par Eq_PN_TOUR_SUPP
   VE: VE_BTGT      # vergers Basse-Terre & Grande-Terre
 
 # Optional: restrict the optimization to a subset of plots (island/region/farm/plot),
@@ -129,20 +129,25 @@ crop_families:
 
 # Objective functions. Exactly one must be enabled; the builder is selected by `name`.
 objectives:
-  - name: maximize_gross_margin          # default: maximise sum(margin/ha x plot surface)
-    enable: true
+  # Disabled since 2026-07-21: maximising plain gross margin ignores risk, and risk is the
+  # only thing separating the crops -- MA_ROTA yields 27929 EUR/ha at Var_Rdt 0.65 against
+  # CS_NGT_NISM's 1521 at 0.20 and PN_PIQ's 1602 at 0.00. Without the risk term the model
+  # puts market gardening on every plot in the territory (PAD 193%, see VIGILANCE.md).
+  - name: maximize_gross_margin          # maximise sum(margin/ha x plot surface)
+    enable: false
     args: {}
 
-  # Disabled by default: GAMS's own real solves (CALIB, SCENARIO) always maximize this
-  # risk-adjusted objective rather than plain gross margin
-  # (OPTIMISATION.txt:174-185), but this codebase keeps maximize_gross_margin as the
-  # default per 2026-07-08 user review -- see docs/superpowers/specs/
-  # 2026-07-08-gams-parity-phase2-markovitz-itk-design.md. AVERS is computed in-memory
-  # from the TYPE_EXPL/TYPE_EXPL_Bis cascade (case_studies/guadeloupe/farm_typology.py)
-  # rather than read from data/tables/Avers.txt (a uniform, unvalidated stub) -- flagged
-  # for later verification against a real GAMS run if one becomes available.
+  # GAMS's own real solves (CALIB and SCENARIO) both maximize this risk-adjusted objective
+  # (MODELE.txt:426-428, Eq_REV_MARKOVITZ), and it is what the article's calibration rests
+  # on. Enabled 2026-07-21 -- see docs/superpowers/specs/
+  # 2026-07-21-calibration-levers-design.md. Beyond AVERS ~1.48 sugarcane overtakes market
+  # gardening, which covers 54% of farms; for breeders (AVERS 2.40) market gardening turns
+  # outright negative and pasture (Var_Rdt 0) wins, exactly the article's mechanism.
+  # AVERS is computed in-memory from the TYPE_EXPL/TYPE_EXPL_Bis cascade
+  # (domain/farm_typology.py) rather than read from data/tables/Avers.txt (a uniform,
+  # unvalidated stub); its eight coefficients match OPTIMISATION.txt:1745-1754 exactly.
   - name: maximize_risk_adjusted_gross_margin  # Markowitz: margin minus AVERS-weighted yield variance
-    enable: false
+    enable: true
     args: {}
 
 # Model constraints, each built by the registered function in `name`. The same builder may
@@ -365,6 +370,41 @@ eligibility_criteria:
 # condition (irrigation, soil, region, risk, fallow history). Intersected with the numeric
 # bounds above. See core/data/eligibility.py + case_studies/guadeloupe/constraints.py.
 categorical_rules:
+  # ---------------------------------------------------------------------------------
+  # Eq_*_SUPP (MODELE.txt:324-340) -- activities GAMS suppresses outright, present in
+  # both the CALIB and SCENARIO equation lists. Ported 2026-07-21; before that every one
+  # of these was selectable here, and the solver did pick TH on 528 plots. Removing them
+  # also drops ~350 000 decision variables out of 1.68 M, so solves get faster.
+  # See docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
+  #
+  # The eight aggregate codes exist only to ENCODE THE OBSERVED 2017 BASELINE
+  # (Matrice_Parc_Cult, ENTREES.txt:58-102). They carry no ITK and no economics, so they
+  # were never going to be chosen -- but they must not be decision variables either.
+  - name: forbid_crops                   # Eq_AN/BA/BC/CS/IG/MA/PN/VE_SUPP
+    enable: true
+    args: {crops: [AN, BA, BC, CS, IG, MA, PN, VE]}
+  # Eq_TH_SUPP: tomato is described in the activity database but not offered to farmers.
+  - name: forbid_crops
+    enable: true
+    args: {crops: [TH]}
+  # Eq_PN_TOUR_SUPP: rotational grazing suppressed -- PN_PIQ is the only pasture activity,
+  # and it is the one Eq_PN_PROD_MIN targets.
+  - name: forbid_crops
+    enable: true
+    args: {crops: [PN_TOUR]}
+  # Eq_CF_SUPP: the whole fibre-cane block is suppressed in both models. The Eq_CF_* wiring
+  # left in TODO.md concerns the SCENARIO variants, not this baseline suppression.
+  - name: forbid_crops
+    enable: true
+    args: {crops: [CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM,
+                   CF_NGT_NIM, CF_CGT_NISM, CF_CGT_NIM, CF_EGT_NISM, CF_EGT_NIM]}
+  # Eq_CS_SBT_NISM_supp / Eq_CS_MG_NIM_supp: two cane technical systems suppressed
+  # individually, unlike the rest of the CS family.
+  - name: forbid_crops
+    enable: true
+    args: {crops: [CS_SBT_NISM, CS_MG_NIM]}
+  # ---------------------------------------------------------------------------------
+
   - name: irrigation_required            # ME, MA_ROTA only on irrigated plots (IRRIG_PARC true)
     enable: true
     args:

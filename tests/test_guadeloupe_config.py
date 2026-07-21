@@ -11,8 +11,10 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     config = load_config(CONFIG_PATH)
 
     assert config["solver"]["name"] == "appsi_highs"
+    # Markowitz since 2026-07-21: it is what GAMS's own CALIB/SCENARIO solves maximize, and
+    # plain gross margin ignores the risk term that is the only thing separating the crops.
     assert [e["name"] for e in config["objectives"] if e["enable"]] == [
-        "maximize_gross_margin"
+        "maximize_risk_adjusted_gross_margin"
     ]
     assert {e["name"] for e in config["objectives"]} == {
         "maximize_gross_margin",
@@ -87,3 +89,36 @@ def test_itk_bans_confine_regional_sugarcane():
     assert "VE_PLUIE" not in eligible_crops
     # Marie-Galante's own non-irrigated non-mechanised system stays available.
     assert "CS_MG_NISM" in eligible_crops
+
+
+def test_eq_supp_suppressions_are_wired():
+    """The Eq_*_SUPP family (MODELE.txt:324-340) removes activities from both GAMS models.
+    Every one of these was selectable here before 2026-07-21, and the solver did pick TH."""
+    config = load_config(CONFIG_PATH)
+
+    forbidden = {
+        crop
+        for entry in config["categorical_rules"]
+        if entry["name"] == "forbid_crops" and entry["enable"]
+        for crop in entry["args"]["crops"]
+    }
+
+    # The eight aggregate codes exist only to encode the observed baseline.
+    assert {"AN", "BA", "BC", "CS", "IG", "MA", "PN", "VE"} <= forbidden
+    assert {"TH", "PN_TOUR", "CS_SBT_NISM", "CS_MG_NIM"} <= forbidden
+    assert {f"CF_{zone}_{harvest}"
+            for zone in ("NBT", "SBT", "NGT", "CGT", "EGT")
+            for harvest in ("NISM", "NIM")} <= forbidden
+    # The fine variants of the suppressed aggregates must NOT be caught: forbid_crops
+    # matches exact codes, and suppressing e.g. every CS_* would empty the model.
+    assert "CS_NGT_NISM" not in forbidden
+    assert "MA_ROTA" not in forbidden
+    assert "PN_PIQ" not in forbidden
+
+
+def test_pasture_representative_is_the_activity_gams_keeps():
+    """PN_TOUR is suppressed by Eq_PN_TOUR_SUPP, so it cannot stand for observed pasture --
+    PN_PIQ is the surviving activity, and the one Eq_PN_PROD_MIN targets."""
+    config = load_config(CONFIG_PATH)
+
+    assert config["baseline_representative_crops"]["PN"] == "PN_PIQ"
