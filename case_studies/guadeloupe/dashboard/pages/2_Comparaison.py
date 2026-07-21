@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
-from case_studies.guadeloupe.crop_labels import CROP_LABELS
+from case_studies.guadeloupe.domain.crop_labels import CROP_LABELS
 from case_studies.guadeloupe.dashboard import comparison, loaders
 
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"
@@ -43,9 +43,8 @@ _ENV_INDICATORS = {
     "total_azote": "Azote (kg N)",
     "surface_cld": "Surface chlordécone (ha)",
     "total_water_need_m3": "Besoin en eau (m³)",
-    # soil_carbon_balance et soil_carbon_mineralization sont fortement corrélés (bilan =
-    # entrées - minéralisation, entrées quasi constantes) : les sélectionner tous les deux
-    # revient à peu près à doubler le poids du carbone du sol dans le score composite.
+    # These two are strongly correlated (balance = inputs - mineralization, and inputs are
+    # near-constant), so selecting both roughly doubles soil carbon's weight in the score.
     "soil_carbon_balance": "Bilan carbone du sol (t C)",
     "soil_carbon_mineralization": "Minéralisation du carbone (t C)",
 }

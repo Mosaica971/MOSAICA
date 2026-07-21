@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe import resilience
+from case_studies.guadeloupe.domain import resilience
 
 
 def test_climate_margin_at_risk_is_margin_times_loss_fraction():

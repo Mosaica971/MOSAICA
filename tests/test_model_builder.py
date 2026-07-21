@@ -3,6 +3,7 @@ import pyomo.environ as pyo
 import pytest
 
 from core.model.builder import build_crop_allocation_model
+from core.model.model_inputs import ModelInputs
 
 CONFIG = {
     "constraints": [{"name": "at_most_one_crop_per_plot", "enable": True, "args": {}}],
@@ -14,10 +15,12 @@ def test_build_model_creates_binary_variable_only_for_eligible_pairs():
     eligible_pairs = [("P1", "C1"), ("P1", "C2"), ("P2", "C1")]
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0, "P2": 2.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=eligible_pairs,
-        config=CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0, "P2": 2.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=eligible_pairs,
+        ),
+        CONFIG,
     )
 
     assert set(model.Y.keys()) == set(eligible_pairs)
@@ -29,10 +32,12 @@ def test_solving_model_picks_most_profitable_eligible_crop_per_plot():
     eligible_pairs = [("P1", "C1"), ("P1", "C2"), ("P2", "C1")]
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0, "P2": 2.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=eligible_pairs,
-        config=CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0, "P2": 2.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=eligible_pairs,
+        ),
+        CONFIG,
     )
 
     solver = pyo.SolverFactory("appsi_highs")
@@ -48,10 +53,12 @@ def test_at_most_one_crop_per_plot_constraint_rejects_two_crops_at_once():
     eligible_pairs = [("P1", "C1"), ("P1", "C2")]
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=eligible_pairs,
-        config=CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=eligible_pairs,
+        ),
+        CONFIG,
     )
 
     constraint = model.at_most_one_crop_per_plot["P1"]
@@ -69,10 +76,12 @@ def test_build_model_skips_disabled_constraints():
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
-        config=config,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        ),
+        config,
     )
 
     assert not hasattr(model, "at_most_one_crop_per_plot")
@@ -86,10 +95,12 @@ def test_build_model_raises_when_no_objective_enabled():
 
     with pytest.raises(ValueError, match="exactly one enabled objective"):
         build_crop_allocation_model(
-            plot_surface_ha={"P1": 1.0},
-            crop_margin_per_ha={"C1": 100.0},
-            eligible_pairs=[("P1", "C1")],
-            config=config,
+            ModelInputs(
+                plot_surface_ha={"P1": 1.0},
+                crop_margin_per_ha={"C1": 100.0},
+                eligible_pairs=[("P1", "C1")],
+            ),
+            config,
         )
 
 
@@ -104,10 +115,12 @@ def test_build_model_raises_when_multiple_objectives_enabled():
 
     with pytest.raises(ValueError, match="exactly one enabled objective"):
         build_crop_allocation_model(
-            plot_surface_ha={"P1": 1.0},
-            crop_margin_per_ha={"C1": 100.0},
-            eligible_pairs=[("P1", "C1")],
-            config=config,
+            ModelInputs(
+                plot_surface_ha={"P1": 1.0},
+                crop_margin_per_ha={"C1": 100.0},
+                eligible_pairs=[("P1", "C1")],
+            ),
+            config,
         )
 
 
@@ -119,20 +132,24 @@ def test_build_model_raises_for_unknown_constraint_name():
 
     with pytest.raises(KeyError, match="not_a_real_constraint"):
         build_crop_allocation_model(
-            plot_surface_ha={"P1": 1.0},
-            crop_margin_per_ha={"C1": 100.0},
-            eligible_pairs=[("P1", "C1")],
-            config=config,
+            ModelInputs(
+                plot_surface_ha={"P1": 1.0},
+                crop_margin_per_ha={"C1": 100.0},
+                eligible_pairs=[("P1", "C1")],
+            ),
+            config,
         )
 
 
 def test_build_model_creates_farms_set_from_farm_plots():
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0, "P2": 2.0},
-        crop_margin_per_ha={"C1": 100.0},
-        eligible_pairs=[("P1", "C1"), ("P2", "C1")],
-        config=CONFIG,
-        farm_plots={"E1": ["P1", "P2"]},
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0, "P2": 2.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1"), ("P2", "C1")],
+            farm_plots={"E1": ["P1", "P2"]},
+        ),
+        CONFIG,
     )
 
     assert set(model.FARMS) == {"E1"}
@@ -140,10 +157,12 @@ def test_build_model_creates_farms_set_from_farm_plots():
 
 def test_build_model_defaults_to_empty_farms_set_when_farm_plots_omitted():
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0},
-        eligible_pairs=[("P1", "C1")],
-        config=CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1")],
+        ),
+        CONFIG,
     )
 
     assert list(model.FARMS) == []
@@ -151,13 +170,15 @@ def test_build_model_defaults_to_empty_farms_set_when_farm_plots_omitted():
 
 def test_build_model_accepts_pandas_series_for_farm_level_parameters():
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0},
-        eligible_pairs=[("P1", "C1")],
-        config=CONFIG,
-        farm_plots={"E1": ["P1"]},
-        farm_surface_ha=pd.Series({"E1": 1.0}),
-        crop_yield_per_ha=pd.Series({"C1": 2.0}),
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1")],
+            farm_plots={"E1": ["P1"]},
+            farm_surface_ha=pd.Series({"E1": 1.0}),
+            crop_yield_per_ha=pd.Series({"C1": 2.0}),
+        ),
+        CONFIG,
     )
 
     assert set(model.FARMS) == {"E1"}
@@ -181,11 +202,13 @@ def test_territory_production_bound_constraint_limits_total_yield_le_threshold()
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0, "P2": 2.0},
-        crop_margin_per_ha={"C1": 100.0},
-        eligible_pairs=[("P1", "C1"), ("P2", "C1")],
-        config=config,
-        crop_yield_per_ha={"C1": 2.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0, "P2": 2.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1"), ("P2", "C1")],
+            crop_yield_per_ha={"C1": 2.0},
+        ),
+        config,
     )
     model.Y["P1", "C1"].fix(1)
     model.Y["P2", "C1"].fix(1)
@@ -215,10 +238,12 @@ def test_territory_production_bound_constraint_supports_area_only_groups():
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 3.0},
-        crop_margin_per_ha={"PN_PIQ": 10.0},
-        eligible_pairs=[("P1", "PN_PIQ")],
-        config=config,
+        ModelInputs(
+            plot_surface_ha={"P1": 3.0},
+            crop_margin_per_ha={"PN_PIQ": 10.0},
+            eligible_pairs=[("P1", "PN_PIQ")],
+        ),
+        config,
     )
     model.Y["P1", "PN_PIQ"].fix(1)
 
@@ -247,11 +272,13 @@ def test_territory_production_bound_constraint_sums_multiple_groups():
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0, "P2": 1.0},
-        crop_margin_per_ha={"C1": 10.0, "C2": 10.0},
-        eligible_pairs=[("P1", "C1"), ("P2", "C2")],
-        config=config,
-        crop_yield_per_ha={"C1": 4.0, "C2": 4.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0, "P2": 1.0},
+            crop_margin_per_ha={"C1": 10.0, "C2": 10.0},
+            eligible_pairs=[("P1", "C1"), ("P2", "C2")],
+            crop_yield_per_ha={"C1": 4.0, "C2": 4.0},
+        ),
+        config,
     )
     model.Y["P1", "C1"].fix(1)
     model.Y["P2", "C2"].fix(1)
@@ -279,10 +306,12 @@ def test_territory_production_bound_constraint_raises_for_unknown_sense():
 
     with pytest.raises(ValueError, match="Unknown sense"):
         build_crop_allocation_model(
-            plot_surface_ha={"P1": 1.0},
-            crop_margin_per_ha={"C1": 10.0},
-            eligible_pairs=[("P1", "C1")],
-            config=config,
+            ModelInputs(
+                plot_surface_ha={"P1": 1.0},
+                crop_margin_per_ha={"C1": 10.0},
+                eligible_pairs=[("P1", "C1")],
+            ),
+            config,
         )
 
 
@@ -308,10 +337,12 @@ def test_territory_production_bound_constraint_handles_no_matching_eligible_pair
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 10.0},
-        eligible_pairs=[("P1", "C1")],
-        config=config,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 10.0},
+            eligible_pairs=[("P1", "C1")],
+        ),
+        config,
     )
 
     assert model.empty_group.expr()
@@ -330,12 +361,14 @@ def test_farm_area_share_max_constraint_limits_crop_family_area_per_farm():
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 4.0, "P2": 6.0},
-        crop_margin_per_ha={"AN": 100.0, "OTHER": 50.0},
-        eligible_pairs=[("P1", "AN"), ("P2", "OTHER")],
-        config=config,
-        farm_plots={"E1": ["P1", "P2"]},
-        farm_surface_ha={"E1": 10.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 4.0, "P2": 6.0},
+            crop_margin_per_ha={"AN": 100.0, "OTHER": 50.0},
+            eligible_pairs=[("P1", "AN"), ("P2", "OTHER")],
+            farm_plots={"E1": ["P1", "P2"]},
+            farm_surface_ha={"E1": 10.0},
+        ),
+        config,
     )
     model.Y["P1", "AN"].fix(1)
     model.Y["P2", "OTHER"].fix(1)
@@ -360,12 +393,14 @@ def test_farm_area_share_max_constraint_handles_farm_with_no_eligible_crop_famil
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 4.0},
-        crop_margin_per_ha={"OTHER": 50.0},
-        eligible_pairs=[("P1", "OTHER")],
-        config=config,
-        farm_plots={"E1": ["P1"]},
-        farm_surface_ha={"E1": 4.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 4.0},
+            crop_margin_per_ha={"OTHER": 50.0},
+            eligible_pairs=[("P1", "OTHER")],
+            farm_plots={"E1": ["P1"]},
+            farm_surface_ha={"E1": 4.0},
+        ),
+        config,
     )
 
     assert model.an_cap["E1"].expr()
@@ -389,11 +424,13 @@ def test_farm_area_ratio_min_constraint_forces_fallow_proportional_to_target_cro
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 5.0, "P2": 1.0},
-        crop_margin_per_ha={"BA_INT": 100.0, "JA": 1.0},
-        eligible_pairs=[("P1", "BA_INT"), ("P1", "JA"), ("P2", "BA_INT"), ("P2", "JA")],
-        config=config,
-        farm_plots={"E1": ["P1", "P2"]},
+        ModelInputs(
+            plot_surface_ha={"P1": 5.0, "P2": 1.0},
+            crop_margin_per_ha={"BA_INT": 100.0, "JA": 1.0},
+            eligible_pairs=[("P1", "BA_INT"), ("P1", "JA"), ("P2", "BA_INT"), ("P2", "JA")],
+            farm_plots={"E1": ["P1", "P2"]},
+        ),
+        config,
     )
 
     solver = pyo.SolverFactory("appsi_highs")
@@ -425,11 +462,13 @@ def test_farm_area_ratio_min_constraint_builds_one_instance_per_denominator_crop
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"BA_INT": 10.0},
-        eligible_pairs=[("P1", "BA_INT")],
-        config=config,
-        farm_plots={"E1": ["P1"]},
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"BA_INT": 10.0},
+            eligible_pairs=[("P1", "BA_INT")],
+            farm_plots={"E1": ["P1"]},
+        ),
+        config,
     )
 
     assert set(model.fallow_ratio.keys()) == {("E1", "BA_INT"), ("E1", "BA_IRR")}
@@ -445,13 +484,15 @@ def test_risk_adjusted_objective_penalizes_risky_crop_on_averse_farm():
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0, "P2": 1.0},
-        crop_margin_per_ha={"C1": 100.0},
-        eligible_pairs=eligible_pairs,
-        config=config,
-        farm_plots={"FARM_AVERSE": ["P1"], "FARM_NEUTRAL": ["P2"]},
-        crop_variance_per_ha={"C1": 0.4},
-        farm_risk_aversion={"FARM_AVERSE": 1.30, "FARM_NEUTRAL": 0.0},
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0, "P2": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=eligible_pairs,
+            farm_plots={"FARM_AVERSE": ["P1"], "FARM_NEUTRAL": ["P2"]},
+            crop_variance_per_ha={"C1": 0.4},
+            farm_risk_aversion={"FARM_AVERSE": 1.30, "FARM_NEUTRAL": 0.0},
+        ),
+        config,
     )
     for plot, crop in eligible_pairs:
         model.Y[plot, crop].fix(1)
@@ -470,11 +511,13 @@ def test_risk_adjusted_objective_defaults_to_zero_variance_and_aversion():
     }
 
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 2.0},
-        crop_margin_per_ha={"C1": 50.0},
-        eligible_pairs=eligible_pairs,
-        config=config,
-        farm_plots={"FARM1": ["P1"]},
+        ModelInputs(
+            plot_surface_ha={"P1": 2.0},
+            crop_margin_per_ha={"C1": 50.0},
+            eligible_pairs=eligible_pairs,
+            farm_plots={"FARM1": ["P1"]},
+        ),
+        config,
     )
     model.Y["P1", "C1"].fix(1)
 

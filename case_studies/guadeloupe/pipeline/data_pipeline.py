@@ -3,7 +3,7 @@ from typing import Any
 
 import pandas as pd
 
-from case_studies.guadeloupe.economics import (
+from case_studies.guadeloupe.domain.economics import (
     apply_crop_multipliers,
     compute_gross_margin_per_ha_cult,
     compute_gross_product_per_ha_cult,
@@ -12,17 +12,17 @@ from case_studies.guadeloupe.economics import (
     compute_subsidy_per_ha_cult,
     compute_variable_cost_per_ha_cult,
 )
-from case_studies.guadeloupe.environment import (
+from case_studies.guadeloupe.domain.environment import (
     compute_azote_per_ha_cult,
     compute_ges_per_ha_cult,
     compute_ift_per_ha_cult,
 )
-from case_studies.guadeloupe.farm_typology import (
+from case_studies.guadeloupe.domain.farm_typology import (
     compute_avers,
     compute_base_crop_group,
     compute_type_expl,
 )
-from case_studies.guadeloupe import soil_carbon, water
+from case_studies.guadeloupe.domain import soil_carbon, water
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
@@ -35,11 +35,11 @@ from core.data.eligibility import (
 from core.data.readers import read_flat_set, read_mapping_set, read_wide_table
 from core.data.zone_filter import resolve_kept_plots
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 SETS_DIR = DATA_DIR / "sets"
 TABLES_DIR = DATA_DIR / "tables"
 INDICE_H_DIR = TABLES_DIR / "indice_H"
-CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
+CONFIG_PATH = Path(__file__).resolve().parents[1] / "config.yaml"
 
 DEFAULT_YEAR = "2017"
 DEFAULT_SCENARIO = "RESTIT"

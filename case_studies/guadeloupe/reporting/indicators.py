@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
-from case_studies.guadeloupe import resilience, soil_carbon, water
-from case_studies.guadeloupe.farm_typology import compute_base_crop_group
+from case_studies.guadeloupe.domain import resilience, soil_carbon, water
+from case_studies.guadeloupe.domain.farm_typology import compute_base_crop_group
 from core.data.dataset import Dataset
 
 _NON_CULTIVATED_GROUP = "NC"
@@ -56,13 +56,34 @@ def plot_to_island(dataset: Dataset) -> pd.Series:
     return dataset.parameters["data_parc"]["ILE"]
 
 
+def _plot_surface(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Surface (ha) of each allocated plot, aligned on the allocation index."""
+    return dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+
+
+def _by_crop(dataset: Dataset, allocation: pd.Series, param_name: str) -> pd.Series:
+    """Allocated surface times a crop-indexed per-ha rate, totalled by crop."""
+    surface_by_crop = compute_surface_by_key(dataset, allocation)
+    rate = dataset.parameters[param_name]
+    return surface_by_crop * rate.reindex(surface_by_crop.index)
+
+
+def _per_plot_rate(dataset: Dataset, allocation: pd.Series, param_name: str) -> pd.Series:
+    """Broadcast a crop-indexed per-ha rate onto an allocation's plot index."""
+    return _broadcast_rate(dataset.parameters[param_name], allocation)
+
+
+def _broadcast_rate(rate: pd.Series, allocation: pd.Series) -> pd.Series:
+    """Look a crop-indexed rate up per allocated plot, keeping the plot index."""
+    return pd.Series(rate.reindex(allocation.to_numpy()).to_numpy(), index=allocation.index)
+
+
 def compute_surface_by_key(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    return surface.groupby(allocation).sum()
+    return _plot_surface(dataset, allocation).groupby(allocation).sum()
 
 
 def compute_aggregate_summary(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    surface = _plot_surface(dataset, allocation)
     farms = plot_to_farm(dataset).reindex(allocation.index)
     return {
         "total_surface_ha": float(surface.sum()),
@@ -72,21 +93,15 @@ def compute_aggregate_summary(dataset: Dataset, allocation: pd.Series) -> dict[s
 
 
 def compute_production_tonnes_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    rdt_cult = dataset.parameters["rdt_cult"]
-    return surface_by_crop * rdt_cult.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "rdt_cult")
 
 
 def compute_sales_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    sales_per_ha_cult = dataset.parameters["sales_per_ha_cult"]
-    return surface_by_crop * sales_per_ha_cult.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "sales_per_ha_cult")
 
 
 def compute_subsidy_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    subsidy_per_ha_cult = dataset.parameters["subsidy_per_ha_cult_annualized"]
-    return surface_by_crop * subsidy_per_ha_cult.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "subsidy_per_ha_cult_annualized")
 
 
 def compute_total_revenue_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
@@ -97,31 +112,23 @@ def compute_gross_margin_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.
     """Gross margin (EUR) by crop: surface x margin_per_ha_cult (gross product minus variable
     input costs, the same per-ha margin the objective maximizes). Labor is NOT priced in here
     -- that is compute_labor_cost_by_crop, subtracted separately for the net revenue."""
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    margin_per_ha_cult = dataset.parameters["margin_per_ha_cult"]
-    return surface_by_crop * margin_per_ha_cult.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "margin_per_ha_cult")
 
 
 def compute_azote_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Nitrogen applied (kg N) by crop: surface x azote_per_ha_cult."""
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    rate = dataset.parameters["azote_per_ha_cult"]
-    return surface_by_crop * rate.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "azote_per_ha_cult")
 
 
 def compute_ges_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Greenhouse-gas emissions (t CO2) by crop: surface x ges_per_ha_cult."""
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    rate = dataset.parameters["ges_per_ha_cult"]
-    return surface_by_crop * rate.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "ges_per_ha_cult")
 
 
 def compute_ift_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Pesticide treatment-frequency index (IFT, summed over ha) by crop:
     surface x ift_per_ha_cult."""
-    surface_by_crop = compute_surface_by_key(dataset, allocation)
-    rate = dataset.parameters["ift_per_ha_cult"]
-    return surface_by_crop * rate.reindex(surface_by_crop.index)
+    return _by_crop(dataset, allocation, "ift_per_ha_cult")
 
 
 def _cld_at_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
@@ -132,10 +139,7 @@ def _cld_at_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     data_parc = dataset.parameters["data_parc"]
     r = data_parc["RISQUE_CLD"].reindex(allocation.index)
     s = data_parc["TYPE_SOL"].reindex(allocation.index)
-    c = pd.Series(
-        dataset.parameters["cld_uptake_cult"].reindex(allocation.to_numpy()).to_numpy(),
-        index=allocation.index,
-    )
+    c = _per_plot_rate(dataset, allocation, "cld_uptake_cult")
     return (
         ((c == 1) & (r <= 3))
         | ((c == 2) & (r <= 2))
@@ -147,17 +151,14 @@ def _cld_at_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
 def compute_cld_at_risk_surface(dataset: Dataset, allocation: pd.Series) -> float:
     """Cultivated surface (ha) flagged at chlordécone risk by the crop x soil rule."""
     mask = _cld_at_risk_mask(dataset, allocation)
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    return float(surface[mask].sum())
+    return float(_plot_surface(dataset, allocation)[mask].sum())
 
 
 def _irrigable_surface(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Plot surface (ha), zeroed on plots that cannot be irrigated (IRRIG_PARC = 0) and
     therefore draw nothing from the resource. Faithful to OPTIMISATION.txt:2540-2542."""
-    data_parc = dataset.parameters["data_parc"]
-    surface = data_parc["SURF_HA"].reindex(allocation.index)
-    irrigable = data_parc["IRRIG_PARC"].reindex(allocation.index) == 1
-    return surface.where(irrigable, 0.0)
+    irrigable = dataset.parameters["data_parc"]["IRRIG_PARC"].reindex(allocation.index) == 1
+    return _plot_surface(dataset, allocation).where(irrigable, 0.0)
 
 
 def compute_water_need_m3_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
@@ -165,10 +166,7 @@ def compute_water_need_m3_by_plot(dataset: Dataset, allocation: pd.Series) -> pd
     the monthly PLUVIO_*_PARC columns do not exist in the data (see VIGILANCE.md)."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    rate = dataset.parameters["water_need_per_ha_cult"]
-    per_ha = pd.Series(
-        rate.reindex(allocation.to_numpy()).to_numpy(), index=allocation.index
-    )
+    per_ha = _per_plot_rate(dataset, allocation, "water_need_per_ha_cult")
     return per_ha * _irrigable_surface(dataset, allocation) * water.M3_PER_MM_PER_HA
 
 
@@ -186,10 +184,7 @@ def compute_monthly_water_need_m3(dataset: Dataset, allocation: pd.Series) -> pd
         return pd.Series(0.0, index=monthly_rate.index)
     per_month = {}
     for month in monthly_rate.index:
-        per_ha = pd.Series(
-            monthly_rate.loc[month].reindex(allocation.to_numpy()).to_numpy(),
-            index=allocation.index,
-        )
+        per_ha = _broadcast_rate(monthly_rate.loc[month], allocation)
         per_month[month] = float((per_ha * surface * water.M3_PER_MM_PER_HA).sum())
     return pd.Series(per_month)
 
@@ -208,19 +203,15 @@ def compute_soil_carbon_mineralization_by_plot(
         allocation, data_parc, dataset.parameters["data_sol"],
         dataset.parameters["data_cult"], initial,
     )
-    return per_ha * data_parc["SURF_HA"].reindex(allocation.index)
+    return per_ha * _plot_surface(dataset, allocation)
 
 
 def compute_soil_carbon_balance_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Net annual carbon balance (t C) per allocated plot. Negative = soil depletion."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    data_parc = dataset.parameters["data_parc"]
-    inputs_by_crop = dataset.parameters["carbon_input_per_ha_cult"]
-    inputs_per_ha = pd.Series(
-        inputs_by_crop.reindex(allocation.to_numpy()).to_numpy(), index=allocation.index
-    )
-    inputs = inputs_per_ha * data_parc["SURF_HA"].reindex(allocation.index)
+    inputs_per_ha = _per_plot_rate(dataset, allocation, "carbon_input_per_ha_cult")
+    inputs = inputs_per_ha * _plot_surface(dataset, allocation)
     return inputs - compute_soil_carbon_mineralization_by_plot(dataset, allocation)
 
 
@@ -230,8 +221,7 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
     Also: gross annual water need (m3, not net of rainfall) both territory-wide and for the
     single peak month, and the net annual soil organic carbon balance and mineralization
     flux (t C, see soil_carbon.py)."""
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    total_surface = float(surface.sum())
+    total_surface = float(_plot_surface(dataset, allocation).sum())
     total_azote = float(compute_azote_by_crop(dataset, allocation).sum())
     total_ges = float(compute_ges_by_crop(dataset, allocation).sum())
     total_ift = float(compute_ift_by_crop(dataset, allocation).sum())
@@ -378,13 +368,10 @@ def compute_subsidy_per_euro_sold_by_crop(dataset: Dataset, allocation: pd.Serie
 
 
 def compute_revenue_by_farm(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    sales_per_ha = dataset.parameters["sales_per_ha_cult"].reindex(allocation.values)
-    subsidy_per_ha = dataset.parameters["subsidy_per_ha_cult_annualized"].reindex(allocation.values)
-    revenue_per_plot = pd.Series(
-        surface.to_numpy() * (sales_per_ha.to_numpy() + subsidy_per_ha.to_numpy()),
-        index=allocation.index,
+    revenue_per_ha = _per_plot_rate(dataset, allocation, "sales_per_ha_cult") + _per_plot_rate(
+        dataset, allocation, "subsidy_per_ha_cult_annualized"
     )
+    revenue_per_plot = _plot_surface(dataset, allocation) * revenue_per_ha
     farms = plot_to_farm(dataset).reindex(allocation.index)
     return revenue_per_plot.groupby(farms).sum()
 
@@ -411,9 +398,9 @@ def compute_labor_hours_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.S
     Only meaningful for a fine-crop allocation (the solver output): the 12-RPG-group
     baseline has no labor rate at that resolution, so ETP is an output-only indicator
     (see VIGILANCE.md, same limitation as the other per-crop indicators)."""
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    labor_per_ha = dataset.parameters["labor_hours_per_ha_cult"].reindex(allocation.to_numpy())
-    return pd.Series(surface.to_numpy() * labor_per_ha.to_numpy(), index=allocation.index)
+    return _plot_surface(dataset, allocation) * _per_plot_rate(
+        dataset, allocation, "labor_hours_per_ha_cult"
+    )
 
 
 def compute_total_etp(dataset: Dataset, allocation: pd.Series, hours_per_etp: float) -> float:
@@ -488,7 +475,7 @@ def compute_facts_table(
     dimension). ETP is labor_hours / hours_per_etp, which stays additive across rows."""
     data_parc = dataset.parameters["data_parc"]
     crops = allocation.to_numpy()
-    surface = data_parc["SURF_HA"].reindex(allocation.index).to_numpy()
+    surface = _plot_surface(dataset, allocation).to_numpy()
 
     def rate(name: str) -> "np.ndarray":
         return dataset.parameters[name].reindex(crops).to_numpy()
@@ -514,8 +501,8 @@ def compute_facts_table(
     per_plot["etp"] = per_plot["labor_hours"] / hours_per_etp
     # Chlordécone-exposed surface: the plot's own surface when the crop x soil rule flags it.
     per_plot["surface_cld"] = surface * _cld_at_risk_mask(dataset, allocation).to_numpy()
-    # L'eau est un taux par culture, mais le carbone dépend du type de sol de la parcelle :
-    # il ne peut pas passer par rate() et vient des fonctions par parcelle.
+    # Water is a per-crop rate, but soil carbon depends on the plot's soil type: it cannot
+    # go through rate() and comes from the per-plot functions instead.
     per_plot["water_need_m3"] = compute_water_need_m3_by_plot(dataset, allocation).to_numpy()
     per_plot["soil_carbon_balance"] = compute_soil_carbon_balance_by_plot(
         dataset, allocation
@@ -540,12 +527,11 @@ def compute_gini(values: pd.Series) -> float:
 def compute_shannon_diversity(
     dataset: Dataset, allocation: pd.Series, grouping: pd.Series
 ) -> pd.Series:
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
     frame = pd.DataFrame(
         {
             "group_key": grouping.reindex(allocation.index),
             "crop": allocation,
-            "surface": surface,
+            "surface": _plot_surface(dataset, allocation),
         }
     )
 
@@ -557,19 +543,27 @@ def compute_shannon_diversity(
     return frame.groupby("group_key").apply(_shannon)
 
 
-def compute_surface_by_region_and_key(dataset: Dataset, allocation: pd.Series) -> pd.DataFrame:
-    region = plot_to_region(dataset).reindex(allocation.index)
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    frame = pd.DataFrame({"region": region, "crop": allocation, "surface": surface})
+def _surface_by_dimension_and_key(
+    dataset: Dataset, allocation: pd.Series, dimension: pd.Series, name: str
+) -> pd.DataFrame:
+    """Allocated surface (ha) pivoted as `name` (rows) x crop (columns)."""
+    frame = pd.DataFrame({
+        name: dimension.reindex(allocation.index),
+        "crop": allocation,
+        "surface": _plot_surface(dataset, allocation),
+    })
     return frame.pivot_table(
-        index="region", columns="crop", values="surface", aggfunc="sum", fill_value=0.0
+        index=name, columns="crop", values="surface", aggfunc="sum", fill_value=0.0
+    )
+
+
+def compute_surface_by_region_and_key(dataset: Dataset, allocation: pd.Series) -> pd.DataFrame:
+    return _surface_by_dimension_and_key(
+        dataset, allocation, plot_to_region(dataset), "region"
     )
 
 
 def compute_surface_by_island_and_key(dataset: Dataset, allocation: pd.Series) -> pd.DataFrame:
-    island = plot_to_island(dataset).reindex(allocation.index)
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
-    frame = pd.DataFrame({"island": island, "crop": allocation, "surface": surface})
-    return frame.pivot_table(
-        index="island", columns="crop", values="surface", aggfunc="sum", fill_value=0.0
+    return _surface_by_dimension_and_key(
+        dataset, allocation, plot_to_island(dataset), "island"
     )

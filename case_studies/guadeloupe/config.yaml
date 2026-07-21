@@ -365,14 +365,21 @@ categorical_rules:
       crops: [AN_NU, AN_PA]
       soil_column: TYPE_SOL
       forbidden_soil_types: [2]
-  - name: melon_soil_restriction        # ME forbidden on soil types 2/3/4 and on island 1
+  # ME forbidden on soil types 2/3/4 OR on island 1. Two entries rather than one rule:
+  # each forbids its own subset and the mask keeps the union forbidden, which is how an OR
+  # is expressed here (a single attribute_forbidden entry ANDs its conditions).
+  - name: attribute_forbidden           # ME forbidden on soil types 2/3/4
     enable: true
     args:
       crops: [ME]
-      soil_column: TYPE_SOL
-      forbidden_soil_types: [2, 3, 4]
-      island_column: ILE
-      forbidden_island: 1
+      conditions:
+        - {column: TYPE_SOL, op: in, value: [2, 3, 4]}
+  - name: attribute_forbidden           # ME forbidden on island 1
+    enable: true
+    args:
+      crops: [ME]
+      conditions:
+        - {column: ILE, op: eq, value: 1}
   - name: max_risk_threshold            # IG_TUT only where black-leaf-streak risk RISQUE_CLD <= 3
     enable: true
     args:

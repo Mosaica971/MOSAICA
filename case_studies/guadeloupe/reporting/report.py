@@ -9,8 +9,8 @@ import pandas as pd
 import pyomo.environ as pyo
 import yaml
 
-from case_studies.guadeloupe import resilience
-from case_studies.guadeloupe.data_pipeline import DEFAULT_SCENARIO, DEFAULT_YEAR
+from case_studies.guadeloupe.domain import resilience
+from case_studies.guadeloupe.pipeline.data_pipeline import DEFAULT_SCENARIO, DEFAULT_YEAR
 from case_studies.guadeloupe.reporting import indicators, plots
 from core.data.dataset import Dataset
 from core.reporting.run_folder import create_output_folder

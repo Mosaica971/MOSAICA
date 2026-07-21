@@ -4,7 +4,7 @@ import pandas as pd
 import pyomo.environ as pyo
 import pytest
 
-from case_studies.guadeloupe.model import build_model
+from case_studies.guadeloupe.model.model import build_model
 from core.data.dataset import Dataset
 
 CONFIG = {
@@ -54,7 +54,7 @@ def test_build_model_wires_farm_level_parameters_into_farms_set():
 
 
 def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint():
-    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
     from core.config import load_config
 
     config = load_config(

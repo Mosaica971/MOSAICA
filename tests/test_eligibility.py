@@ -5,11 +5,11 @@ from core.data.eligibility import (
     compute_eligibility_mask,
     eligible_pairs_from_mask,
     forbid_where,
+    rule_attribute_forbidden,
     rule_exact_risk_value,
     rule_friche_lock,
     rule_irrigation_required,
     rule_max_risk_threshold,
-    rule_melon_soil_restriction,
     rule_region_crop_forbidden,
     rule_soil_type_forbidden,
 )
@@ -89,22 +89,27 @@ def test_rule_soil_type_forbidden_matches_listed_soil_types():
     assert condition.tolist() == [True, False]
 
 
-def test_rule_melon_soil_restriction_matches_soil_type_or_island():
-    data_parc = pd.DataFrame(
+def test_two_attribute_forbidden_entries_express_an_or_across_columns():
+    """A single attribute_forbidden entry ANDs its conditions; an OR is expressed with one
+    entry per branch, since the mask keeps the union forbidden. This replaces the former
+    case-specific melon_soil_restriction rule -- see config.yaml's ME entries."""
+    plot_attributes = pd.DataFrame(
         {"TYPE_SOL": [2, 1, 1], "ILE": [0, 1, 0]}, index=["P1", "P2", "P3"]
     )
+    mask = pd.DataFrame(True, index=plot_attributes.index, columns=["ME", "OTHER"])
 
-    crops, condition = rule_melon_soil_restriction(
-        data_parc,
-        crops=["ME"],
-        soil_column="TYPE_SOL",
-        forbidden_soil_types=[2, 3, 4],
-        island_column="ILE",
-        forbidden_island=1,
-    )
+    for conditions in (
+        [{"column": "TYPE_SOL", "op": "in", "value": [2, 3, 4]}],
+        [{"column": "ILE", "op": "eq", "value": 1}],
+    ):
+        crops, condition = rule_attribute_forbidden(
+            plot_attributes, crops=["ME"], conditions=conditions
+        )
+        mask = forbid_where(mask, condition, crops)
 
-    assert crops == ["ME"]
-    assert condition.tolist() == [True, True, False]
+    # P1 forbidden by soil, P2 by island, P3 by neither; OTHER never touched.
+    assert mask["ME"].tolist() == [False, False, True]
+    assert mask["OTHER"].tolist() == [True, True, True]
 
 
 def test_rule_max_risk_threshold_forbids_values_at_or_below_threshold():

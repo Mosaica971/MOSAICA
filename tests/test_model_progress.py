@@ -152,6 +152,7 @@ def test_run_with_progress_runs_func_on_the_calling_thread():
 import pyomo.environ as pyo
 
 from core.model.builder import build_crop_allocation_model
+from core.model.model_inputs import ModelInputs
 from core.model.progress import solve_with_progress
 
 _SOLVE_CONFIG = {
@@ -163,10 +164,12 @@ _SOLVE_CONFIG = {
 
 def test_solve_with_progress_records_history_on_success(tmp_path):
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
-        config=_SOLVE_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        ),
+        _SOLVE_CONFIG,
     )
     history = SolveHistory(path=tmp_path / "history.json")
 
@@ -181,10 +184,12 @@ def test_solve_with_progress_records_history_on_success(tmp_path):
 
 def test_solve_with_progress_does_not_record_history_on_failure(tmp_path):
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0},
-        eligible_pairs=[("P1", "C1")],
-        config=_SOLVE_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0},
+            eligible_pairs=[("P1", "C1")],
+        ),
+        _SOLVE_CONFIG,
     )
     model.Y["P1", "C1"].fix(1)
     model.infeasible_constraint = pyo.Constraint(expr=model.Y["P1", "C1"] == 0)
@@ -198,10 +203,12 @@ def test_solve_with_progress_does_not_record_history_on_failure(tmp_path):
 
 def test_solve_with_progress_defaults_to_a_fresh_solve_history_when_none_given():
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
-        config=_SOLVE_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        ),
+        _SOLVE_CONFIG,
     )
 
     # No history= passed: solve_with_progress must construct its own SolveHistory()
@@ -213,10 +220,12 @@ def test_solve_with_progress_defaults_to_a_fresh_solve_history_when_none_given()
 
 def test_solve_with_progress_returns_results_and_duration(tmp_path):
     model = build_crop_allocation_model(
-        plot_surface_ha={"P1": 1.0},
-        crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
-        eligible_pairs=[("P1", "C1"), ("P1", "C2")],
-        config=_SOLVE_CONFIG,
+        ModelInputs(
+            plot_surface_ha={"P1": 1.0},
+            crop_margin_per_ha={"C1": 100.0, "C2": 200.0},
+            eligible_pairs=[("P1", "C1"), ("P1", "C2")],
+        ),
+        _SOLVE_CONFIG,
     )
     history = SolveHistory(path=tmp_path / "history.json")
 

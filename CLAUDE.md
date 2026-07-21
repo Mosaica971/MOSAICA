@@ -49,6 +49,19 @@ Same caveat as `main.py` — real solves, don't run casually.
 
 Read-only Streamlit dashboard over past runs: `streamlit run case_studies/guadeloupe/dashboard/app.py`.
 
+**Invariance check before/after a refactor** — `scripts/golden_snapshot.py` builds the full
+real dataset and every indicator block on a real allocation (~7s, **no MILP solve**, so it is
+exactly reproducible) and serialises ~500 numeric checksums:
+
+```bash
+.venv/Scripts/python scripts/golden_snapshot.py --write   # record current behavior
+.venv/Scripts/python scripts/golden_snapshot.py --check   # non-zero exit + diff on any drift
+```
+
+Use it whenever touching `pipeline/`, `domain/`, `core/data/` or `reporting/indicators.py`:
+it catches numeric drift that the (deliberately synthetic, data-free) unit tests cannot. The
+reference lands in `.golden/`, gitignored because it derives from the local `data/`.
+
 ## Data is not in the repo
 
 `/data/` is **gitignored** — the `.set` and `.txt` input tables live locally only, as do
@@ -61,6 +74,13 @@ reporting is aggregated by `ILE`/`REGION`/`COMMUNE` only.
 
 Two-layer design: a **case-study-agnostic `core/`** and a **`case_studies/guadeloupe/`**
 that supplies the concrete data pipeline, GAMS-specific rules, and reporting.
+
+`case_studies/guadeloupe/` is organized by role — `pipeline/` (`data_pipeline.py`),
+`domain/` (per-crop science: `economics`, `environment`, `water`, `soil_carbon`,
+`resilience`, `farm_typology`, `crop_labels`), `model/` (`model.py`, `constraints.py`),
+`reporting/`, `dashboard/`. Note `model/model.py`: the module is `case_studies.guadeloupe.model.model`,
+and importing only the *package* does not register the case-study constraints (see below).
+`config.yaml` and `scenarios.yaml` stay at the case-study root.
 
 **Config-driven registry pattern (the central idea).** Constraints, objectives,
 eligibility criteria, and categorical rules are all Python functions registered by name
@@ -78,15 +98,17 @@ the YAML, not the builder.
   `from core.model import constraints as _constraints  # noqa: F401`). If a builder isn't
   imported somewhere on the path to `build_crop_allocation_model`, its name won't be in
   the registry and config referencing it raises `KeyError`. `core/model/builder.py`
-  imports the core builders; `case_studies/guadeloupe/model.py` additionally imports
-  `case_studies.guadeloupe.constraints` to register case-specific ones.
+  imports the core builders; `case_studies/guadeloupe/model/model.py` additionally imports
+  `case_studies.guadeloupe.model.constraints` to register case-specific ones. Import the
+  *module* (`case_studies.guadeloupe.model.model`), never just the package — the package
+  `__init__.py` is empty, so `import case_studies.guadeloupe.model` registers nothing.
 
 **Data flow** (`main.py` orchestrates):
 1. `load_config(config.yaml)` → dict.
-2. `build_dataset(config)` (`case_studies/guadeloupe/data_pipeline.py`) reads the `.set`/
+2. `build_dataset(config)` (`case_studies/guadeloupe/pipeline/data_pipeline.py`) reads the `.set`/
    `.txt` tables, applies the `zone_filter`, computes economics
-   (`economics.py`: margin/sales/subsidy per ha per crop), farm typology
-   (`farm_typology.py`: base crop group → `TYPE_EXPL` → risk aversion `AVERS`), and the
+   (`domain/economics.py`: margin/sales/subsidy per ha per crop), farm typology
+   (`domain/farm_typology.py`: base crop group → `TYPE_EXPL` → risk aversion `AVERS`), and the
    plot×crop **eligibility mask** (`core/data/eligibility.py` numeric bounds +
    `categorical_rules`). Returns a `Dataset(sets, parameters, scalars)`.
 3. `build_model(dataset, config)` → `build_crop_allocation_model(...)` creates the Pyomo
@@ -109,13 +131,13 @@ the YAML, not the builder.
    (`core/reporting/run_folder.py`) with a recap, CSVs, YAML, and charts. The dashboard
    (`case_studies/guadeloupe/dashboard/`) is a read-only viewer over those folders.
 
-Les indicateurs environnementaux vivent dans trois modules par culture — `environment.py`
-(azote/GES/IFT), `water.py` (besoin en eau) et `soil_carbon.py` (bilan de carbone organique) —
+Les indicateurs environnementaux vivent dans trois modules par culture de `domain/` —
+`environment.py` (azote/GES/IFT), `water.py` (besoin en eau) et `soil_carbon.py` (carbone organique) —
 tous calculés dans `data_pipeline` puis appliqués à l'allocation par `reporting/indicators.py`.
 Le carbone est le seul à dépendre de la **parcelle** (via `TYPE_SOL` → `Data_Sol.txt`) et non
 seulement de la culture : il ne passe donc pas par l'helper `rate()` de `compute_facts_table`.
 
-`resilience.py` ajoute trois indicateurs d'**exposition** (marge à risque climatique via
+`domain/resilience.py` ajoute trois indicateurs d'**exposition** (marge à risque climatique via
 `Var_Rdt_Cult`, concentration du revenu, perte sous choc de prix), agrégés par
 `compute_resilience_totals` et stockés dans `recap["resilience"]`. Attention : exposer un
 indicateur au score composite demande **deux** ajouts — `INDICATOR_DIRECTION`
@@ -127,6 +149,18 @@ branche rien.
 rainfall, plot size) intersected with `categorical_rules` (irrigation, soil type, region
 bans, `friche_lock` fallow history, etc.). Only eligible `(plot, crop)` pairs become
 decision variables, which keeps the MILP tractable.
+
+A categorical rule receives the plot table as `plot_attributes` and returns
+`(crops, condition)`; `forbid_where` then clears those crops on the matching plots. Since
+each rule forbids its own subset and the mask keeps the **union** forbidden, a single
+`attribute_forbidden` entry ANDs its conditions and an **OR is expressed as several
+entries** (that is how the ME soil/island ban is written in `config.yaml`).
+
+**`core/` speaks no Guadeloupe.** It reasons about plots, crops and farms only: no
+`data_parc`, no `ILE`, no GFA. `ModelInputs.farm_restricted_surface_ha` is the generic name
+for "surface of the farm's plots flagged as subject to a land-tenure scheme" — the case
+study maps its `farm_gfa_surface_ha` parameter onto it in `model/model.py`. Keep it that
+way: case-study vocabulary belongs in `case_studies/`, where it anchors GAMS parity.
 
 ## Conventions & gotchas
 

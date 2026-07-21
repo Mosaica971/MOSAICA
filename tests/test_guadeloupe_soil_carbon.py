@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe import soil_carbon
+from case_studies.guadeloupe.domain import soil_carbon
 
 
 def _data_cult() -> pd.DataFrame:

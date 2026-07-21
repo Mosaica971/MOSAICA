@@ -1,5 +1,4 @@
 from collections import defaultdict
-from collections.abc import Mapping, Sequence
 from typing import Any
 
 import pyomo.environ as pyo
@@ -12,45 +11,24 @@ from core.model.registry import CONSTRAINT_REGISTRY, OBJECTIVE_REGISTRY
 
 
 def build_crop_allocation_model(
-    plot_surface_ha: Mapping[str, float],
-    crop_margin_per_ha: Mapping[str, float],
-    eligible_pairs: Sequence[tuple[str, str]],
-    config: dict[str, Any],
-    farm_plots: Mapping[str, Sequence[str]] | None = None,
-    farm_surface_ha: Mapping[str, float] | None = None,
-    farm_gfa_surface_ha: Mapping[str, float] | None = None,
-    crop_yield_per_ha: Mapping[str, float] | None = None,
-    crop_variance_per_ha: Mapping[str, float] | None = None,
-    farm_risk_aversion: Mapping[str, float] | None = None,
+    inputs: ModelInputs, config: dict[str, Any]
 ) -> pyo.ConcreteModel:
+    """Binary crop-allocation model: Y[plot, crop] over the eligible pairs, plus every
+    constraint and the single objective enabled in `config`.
+
+    Optional inputs default to empty mappings via ModelInputs' field defaults; a builder
+    that needs one it was not given will simply find nothing to constrain.
+    """
     model = pyo.ConcreteModel()
-    farm_plots = {} if farm_plots is None else farm_plots
-    farm_surface_ha = {} if farm_surface_ha is None else farm_surface_ha
-    farm_gfa_surface_ha = {} if farm_gfa_surface_ha is None else farm_gfa_surface_ha
-    crop_yield_per_ha = {} if crop_yield_per_ha is None else crop_yield_per_ha
-    crop_variance_per_ha = {} if crop_variance_per_ha is None else crop_variance_per_ha
-    farm_risk_aversion = {} if farm_risk_aversion is None else farm_risk_aversion
 
     plots_to_crops = defaultdict(list)
-    for plot, crop in eligible_pairs:
+    for plot, crop in inputs.eligible_pairs:
         plots_to_crops[plot].append(crop)
 
-    model.PAIRS = pyo.Set(initialize=list(eligible_pairs), dimen=2)
+    model.PAIRS = pyo.Set(initialize=list(inputs.eligible_pairs), dimen=2)
     model.PLOTS = pyo.Set(initialize=list(plots_to_crops.keys()))
-    model.FARMS = pyo.Set(initialize=list(farm_plots.keys()))
+    model.FARMS = pyo.Set(initialize=list(inputs.farm_plots.keys()))
     model.Y = pyo.Var(model.PAIRS, within=pyo.Binary)
-
-    inputs = ModelInputs(
-        plot_surface_ha=plot_surface_ha,
-        crop_margin_per_ha=crop_margin_per_ha,
-        eligible_pairs=eligible_pairs,
-        farm_plots=farm_plots,
-        farm_surface_ha=farm_surface_ha,
-        farm_gfa_surface_ha=farm_gfa_surface_ha,
-        crop_yield_per_ha=crop_yield_per_ha,
-        crop_variance_per_ha=crop_variance_per_ha,
-        farm_risk_aversion=farm_risk_aversion,
-    )
 
     for build_constraint, args in resolve_enabled(config["constraints"], CONSTRAINT_REGISTRY):
         build_constraint(model, inputs, **args)

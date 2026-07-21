@@ -31,7 +31,6 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     assert {e["name"] for e in config["categorical_rules"] if e["enable"]} == {
         "irrigation_required",
         "soil_type_forbidden",
-        "melon_soil_restriction",
         "max_risk_threshold",
         "exact_risk_value",
         "region_crop_forbidden",
@@ -69,7 +68,7 @@ def test_ba_rota_numerator_crops_match_sc_cs_anchor_plus_ja_and_canne_fibre():
 def test_itk_bans_confine_regional_sugarcane():
     from pathlib import Path
 
-    from case_studies.guadeloupe.data_pipeline import build_dataset
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
     from core.config import load_config
 
     cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))

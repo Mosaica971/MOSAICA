@@ -158,7 +158,7 @@ def test_apply_overrides_enable_add_routes_to_an_explicit_section():
 def test_every_scenario_resolves_without_solving():
     from pathlib import Path
 
-    import case_studies.guadeloupe.model  # noqa: F401 -- registers case constraints/rules
+    import case_studies.guadeloupe.model.model  # noqa: F401 -- registers case constraints/rules
     from core.config import apply_overrides, expand_runs, load_config, resolve_enabled
     from core.data.eligibility import CATEGORICAL_RULE_REGISTRY
     from core.model.registry import CONSTRAINT_REGISTRY, OBJECTIVE_REGISTRY

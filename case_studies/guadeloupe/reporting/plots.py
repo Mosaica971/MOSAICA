@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.ticker import FuncFormatter
 
-from case_studies.guadeloupe.crop_labels import label_for
+from case_studies.guadeloupe.domain.crop_labels import label_for
 
 _BAR_COLOR = "#4C72B0"
 _FIGSIZE = (11, 6.5)

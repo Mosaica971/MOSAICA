@@ -1,6 +1,6 @@
 import pandas as pd
 
-from case_studies.guadeloupe import water
+from case_studies.guadeloupe.domain import water
 
 
 def _data_cult() -> pd.DataFrame:
