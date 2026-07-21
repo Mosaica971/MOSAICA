@@ -13,20 +13,25 @@ runs passés avec `scripts/evaluate_calibration.py`. Reporting seul, aucun solve
 → **Le diagnostic est mauvais et c'est l'information utile** : PAD territorial 193 %, 7,3 %
 des types d'exploitation reproduits, 7 % des parcelles. Chiffres et lecture dans
 `VIGILANCE.md`, entrée « Le modèle ne reproduit pas la Guadeloupe observée ».
-→ Suite naturelle, **non planifiée**, à cadrer avec l'utilisateur. Deux leviers, dans cet
-ordre de probabilité :
-1. **porter `Eq_MO_MAX_Expl`**, le plafond de main-d'œuvre par exploitation (Eq. 5 de
-   l'article). C'est le suspect n°1 : le maraîchage est ~60× plus intensif en travail que la
-   canne mécanisée, et rien ne le freine aujourd'hui. Point dur connu : `MO_Expl_init`
-   suppose l'allocation fine 2017, qui n'a jamais existé — la voie de contournement passe
-   par `baseline_representative_crops`, au prix d'une hypothèse supplémentaire
-   (cf. `VIGILANCE.md`) ;
-2. **activer `maximize_risk_adjusted_gross_margin`**, dont les coefficients Ø sont déjà ceux
-   de la Table 2 de l'article (au détail près du type 4, que le GAMS scinde en 41/42 avec
-   0.50/1.60 là où l'article publie 1.4 — écart à arbitrer).
-Chaque levier demande un solve réel (~30-55 min) pour être mesuré, puis un
-`scripts/evaluate_calibration.py` sur le run produit. C'est la première fois qu'on dispose
-d'une métrique pour trancher entre deux hypothèses de modélisation : l'utiliser.
+**Leviers de calibration — codés le 2026-07-21, PAS ENCORE MESURÉS.** Spec :
+`docs/superpowers/specs/2026-07-21-calibration-levers-design.md`. L'enquête GAMS a établi que
+le modèle résolu n'était pas celui que l'article évalue : `CALIB` (`MODELE.txt:450-565`)
+contient cinq mécanismes qui manquaient. Les cinq sont portés :
+1. objectif de **Markowitz** activé (`maximize_gross_margin` désactivé) ;
+2. les **14 suppressions `Eq_*_SUPP`** — 8 codes agrégés, `TH`, `PN_TOUR`, 10 `CF_*`,
+   2 systèmes canniers. Effet mesuré : 1 271 780 → 904 121 variables (−29 %) ;
+3. prairie représentante `PN_TOUR` → **`PN_PIQ`** (`PN_TOUR` est justement supprimée) ;
+4. **`Eq_MO_MAX_Expl`** porté (`farm_labor_hours_max`, générique dans `core/`), plafond
+   calculé sur les cultures représentantes — lire `VIGILANCE.md` avant d'y toucher ;
+5. **`Eq_CS_GFA`** réactivée avec `skip_when_no_eligible_area` (déviation assumée, 3 fermes).
+
+→ **Reste à faire, et c'est le point bloquant : lancer un solve réel puis
+`scripts/evaluate_calibration.py` sur le run produit.** Tant que ce n'est pas fait, on ne sait
+pas si le PAD a baissé. Toute l'analyse qui a mené à ces cinq leviers est analytique.
+→ Si le PAD reste élevé, regarder d'abord les **canniers spécialisés** (`AVERS` 0,30, 1 371
+fermes) : ni l'aversion au risque ni le GFA ne les retiennent, seul le plafond de main d'œuvre
+les gèle. Les `Eq_*_PROD_MIN` ne sont **pas** une piste : elles sont dans `SCENARIO`, pas
+`CALIB`.
 
 **Refactor transverse — livré le 2026-07-21.** Spec :
 `docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md`.

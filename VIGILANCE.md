@@ -34,9 +34,17 @@ Deux causes probables, toutes deux cohérentes avec l'article :
    Le maraîchage demande 990 à 1 560 h/ha contre 15 h/ha pour la canne mécanisée (Table 1
    de l'article) : sans plafond de main-d'œuvre par exploitation, rien ne limite la bascule.
 
-**Ne pas lire un PAD élevé comme une régression du reporting** : c'est son diagnostic. La
-suite est cadrée dans `TODO.md`. Spec :
-`docs/superpowers/specs/2026-07-21-calibration-validation-design.md`. _2026-07-21._
+**Ne pas lire un PAD élevé comme une régression du reporting** : c'est son diagnostic. Spec :
+`docs/superpowers/specs/2026-07-21-calibration-validation-design.md`.
+
+**Traité le même jour, en attente de mesure.** L'enquête dans le source GAMS a montré que le
+modèle résolu n'était pas celui que l'article évalue : `MODELE.txt:443-695` déclare trois
+modèles — `INIT`, `CALIB`, `SCENARIO` — l'article évalue `CALIB` (§3.1), et cinq de ses
+mécanismes manquaient. Les cinq sont portés (spec `2026-07-21-calibration-levers-design.md`) :
+objectif de Markowitz, 14 suppressions `Eq_*_SUPP`, prairie représentante `PN_PIQ`, plafond de
+main d'œuvre, `Eq_CS_GFA`. **Aucun solve réel n'a encore été lancé** : le PAD résultant est
+inconnu. Les chiffres de 193 % ci-dessus datent d'avant ces cinq leviers ; ils ne décrivent
+plus l'état du modèle, ils servent de point de comparaison. _2026-07-21._
 
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
@@ -67,7 +75,10 @@ Les indicateurs d'entrée et les écarts entrée/sortie reposent donc sur cette 
 documentée et configurable. _2026-07-09, adressé le 2026-07-13._
 
 ### Majeur — Le run complet reste lent (~30–55 min), avec une variance énorme
-1 683 058 variables ; historique pour cette taille : 1622s, 2600s, 3132s, 3310s, 3442s (×2,1
+**Mise à jour 2026-07-21** : le portage des suppressions `Eq_*_SUPP` fait tomber le problème
+de 1 271 780 à **904 121 variables** (−29 %). Les durées ci-dessous sont donc pessimistes, et
+le chiffre historique de 1 683 058 datait d'avant les bans ITK du 2026-07-20.
+Historique pour l'ancienne taille : 1622s, 2600s, 3132s, 3310s, 3442s (×2,1
 pour un problème identique). Le goulot est la **recherche branch-and-bound**, pas l'enveloppe
 Pyomo→HiGHS (~15s, négligeable) : le profilage brique D avait conclu l'inverse parce que le
 sous-ensemble testé se résolvait entièrement au presolve (0 nœud B&B). Confirmé par le revert
@@ -98,12 +109,29 @@ paires suffit. **Conséquence : `VE_PLUIE` n'apparaîtra jamais en sortie.** Si 
 compare à des données observées de vergers, c'est le premier suspect.
 Détail : `docs/gams_port_inventory.md`. _2026-07-20._
 
-### Majeur — `Eq_MO_MAX_Expl` (plafond main d'œuvre) non porté
-`MO_Expl_init` suppose l'allocation fine 2017 par parcelle, qui n'a jamais existé (cf. le
-point sur la baseline agrégée) : les codes agrégats portent des OTK/MO nuls, donc le plafond
-serait calculé sur une base vide. Voie de réactivation : approximer via les cultures
-représentantes (`baseline_representative_crops`), au prix d'une hypothèse supplémentaire.
-Cf. `docs/gams_port_inventory.md`. _2026-07-20._
+### Majeur — Le plafond de main d'œuvre repose sur les cultures représentantes
+`Eq_MO_MAX_Expl` est porté depuis le 2026-07-21 (`farm_labor_hours_max`), mais **pas avec la
+formule GAMS littérale**. Celle-ci (`ENTREES.txt:466-469`) calcule `MO_Expl_init` sur
+`Matrice_Parc_Cult`, qui porte les codes **agrégés** — et 9 des 12 n'ont aucune ligne ITK
+(colonnes `AN/BA/BC/CS/IG/MA/NC/PN/VE` de `Matrice_OTK_Cult` entièrement nulles ; seules
+`AG`, `JA` et `ME`, les familles sans variante fine, sont renseignées). Le plafond littéral
+serait donc quasi nul et le modèle GAMS lui-même n'allouerait rien.
+`data_pipeline.compute_farm_labor_capacity_hours` valorise chaque famille observée via sa
+variante représentante. **Conséquence à ne pas perdre de vue** : l'hypothèse
+`baseline_representative_crops`, jusque-là cantonnée au reporting, **influence désormais
+l'allocation**. Changer une représentante change le plafond, donc l'optimum. Les 50 fermes à
+plafond nul sont exactement celles sans surface cultivée observée, ce qui est correct.
+_2026-07-21._
+
+### Majeur — Déviation assumée du GAMS sur `Eq_CS_GFA`
+`cs_gfa_minimum_share` est réactivée avec `skip_when_no_eligible_area: true`. Trois fermes
+(`E1471`, `E273`, `E3955`) ont toutes leurs parcelles verrouillées en friche par
+`friche_lock` : la contrainte exige 60 % de canne sur une exploitation qui ne peut en porter
+aucune. C'est **algébriquement infaisable, et le GAMS le serait aussi**. Nous choisissons de
+perdre 3 fermes sur 4 588 (0,07 %) plutôt que la contrainte entière, parce qu'elle est l'un
+des rares mécanismes qui retiennent la canne (5 286 ha sous GFA face à 12 813 ha observés).
+Le drapeau est à `false` par défaut dans le builder : le comportement fidèle reste
+l'option par défaut pour qui ne le demande pas. _2026-07-21._
 
 ### Majeur — Bloc canne fourragère (CF) non câblé
 Toutes les équations `Eq_CF_*` (bans géographiques, `Eq_CF_MIN`, `Eq_CF_T0..T8`) restent hors
@@ -211,6 +239,11 @@ Au run complet, l'objectif marge-max ne retient que ~9 cultures et laisse tomber
 la canne à sucre et la banane export (aucun min-quota ne les force). Résultat d'optimisation,
 pas un bug de couverture — mais à garder en tête. Les 84 cultures de `CULT_2017.set` ont bien
 toutes des données économiques et une entrée d'éligibilité. _2026-07-13._
+**Suite (2026-07-21)** : c'était le symptôme, la cause est identifiée. `maximize_gross_margin`
+ignore `Var_Rdt`, or c'est la seule chose qui sépare les cultures — MA_ROTA 27 929 €/ha à
+`Var_Rdt` 0,65 contre CS_NGT_NISM 1 521 à 0,20 et PN_PIQ 1 602 à 0,00. L'objectif actif est
+désormais `maximize_risk_adjusted_gross_margin`. Cette entrée décrit donc l'**ancien** défaut ;
+elle est conservée pour qui rebasculerait sur la marge brute pure.
 
 ### Majeur — Le score de stabilité mesure l'exposition, pas l'adaptation
 Les indicateurs de `resilience.py` (marge à risque, HHI, choc de prix) portent sur une
