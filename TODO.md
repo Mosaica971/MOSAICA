@@ -4,6 +4,23 @@ Ce qui reste à faire. Les limites connues et non planifiées sont dans `VIGILAN
 
 ## En cours / prêt à coder
 
+**Refactor transverse — livré le 2026-07-21.** Spec :
+`docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md`.
+Arborescence `guadeloupe/` par rôle (`pipeline/`, `domain/`, `model/`), fusion des helpers
+dupliqués (indicateurs, bloc ITK ×3, signature du builder, chemins des scripts), et
+abstraction du vocabulaire case-study hors de `core/`. Aucun changement de comportement :
+validé par `scripts/golden_snapshot.py` (511 sommes de contrôle sur les vraies données,
+sans solve MILP) et la suite pytest.
+→ Reste à faire : **aucun solve réel complet n'a été relancé de bout en bout** (`main.py`,
+`run_scenarios.py`). Le golden couvre le pipeline, les indicateurs et la construction du
+modèle, pas la chaîne solve → `generate_report` → écriture d'`outputs/output_N/`. À faire
+lors du prochain run de fin de journée, qui vaudra confirmation.
+→ Piste non retenue, à rouvrir si utile : 5 règles catégorielles de `core/`
+(`soil_type_forbidden`, `region_crop_forbidden`, `max_risk_threshold`, `exact_risk_value`,
+`irrigation_required`) sont des cas particuliers d'`attribute_forbidden`. Elles ont été
+conservées car leurs noms sont génériques et lisibles dans le YAML — seule
+`melon_soil_restriction`, au nom spécifique à une culture, a été supprimée.
+
 **Batch de scénarios + parité ITK géographique — livré le 2026-07-20** (lots 1, 2, 5).
 Leviers `yield_multipliers`/`cost_multipliers`, règles `forbid_crops`/`attribute_forbidden`,
 contrainte `crop_share_bound`, canal `enable_add`, ~24 bans ITK câblés, 25 scénarios,
