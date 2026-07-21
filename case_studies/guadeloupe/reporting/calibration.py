@@ -20,6 +20,11 @@ from typing import Any
 import pandas as pd
 
 from case_studies.guadeloupe.domain import crop_families
+from case_studies.guadeloupe.domain.farm_typology import (
+    TYPE_EXPL_LABELS,
+    compute_base_crop_group,
+    compute_type_expl,
+)
 from case_studies.guadeloupe.reporting import indicators
 from core.data.dataset import Dataset
 
@@ -247,3 +252,57 @@ def field_match_rate(dataset: Dataset, output_allocation: pd.Series) -> pd.DataF
             "area_match_pct",
         ]
     ]
+
+
+def _type_expl(dataset: Dataset, groups: pd.Series) -> pd.Series:
+    """farm -> TYPE_EXPL, for a plot -> base-group Series covering the full plot universe."""
+    plot_surface = dataset.parameters["data_parc"]["SURF_HA"]
+    type_expl, _bis = compute_type_expl(
+        dataset.parameters["farm_plots"], groups, plot_surface
+    )
+    return type_expl
+
+
+def farm_type_confusion(dataset: Dataset, output_allocation: pd.Series) -> pd.DataFrame:
+    """Farm scale, Chopin et al. Table 4: observed farm type x simulated farm type.
+
+    Both sides go through compute_type_expl, which needs the FULL plot universe: NC plots
+    feed surf_non, which is subtracted from the denominator of every PART_* share. Dropping
+    them -- as the NC-free baseline allocation does -- would shift the shares and could flip
+    a farm's type, so the observed side is recomputed here from data_parc and a plot the
+    solver left unallocated counts as NC, its agronomic meaning.
+
+    One asymmetry is deliberate: compute_base_crop_group returns NaN for an RPG code it
+    does not map, and compute_type_expl drops those rows. That is what the pipeline already
+    does for the observed side, so it is reproduced rather than "fixed" here.
+    """
+    data_parc = dataset.parameters["data_parc"]
+    observed = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+
+    simulated = pd.Series(crop_families.NON_CULTIVATED, index=data_parc.index)
+    simulated.update(crop_families.base_groups_for(output_allocation))
+
+    codes = sorted(TYPE_EXPL_LABELS)
+    confusion = pd.crosstab(_type_expl(dataset, observed), _type_expl(dataset, simulated))
+    confusion = confusion.reindex(index=codes, columns=codes, fill_value=0).astype(int)
+    confusion.index.name = "type_observe"
+    confusion.columns.name = "type_simule"
+    return confusion
+
+
+def farm_type_match_summary(confusion: pd.DataFrame) -> dict[str, Any]:
+    """Diagonal share of a confusion matrix, plus per-type recall for the types actually
+    present in the observed data (a type nobody starts in has no recall to report)."""
+    total = int(confusion.to_numpy().sum())
+    matched = int(sum(confusion.loc[code, code] for code in confusion.index))
+    observed_totals = confusion.sum(axis=1)
+    return {
+        "total_farms": total,
+        "matched_farms": matched,
+        "match_pct": 100.0 * matched / total if total else float("nan"),
+        "recall_by_type": {
+            TYPE_EXPL_LABELS[code]: 100.0 * float(confusion.loc[code, code]) / float(count)
+            for code, count in observed_totals.items()
+            if count > 0
+        },
+    }

@@ -53,6 +53,23 @@ _AVERS_BY_TYPE_EXPL: dict[int, float] = {
 }
 _AVERS_BY_TYPE_EXPL_BIS: dict[int, float] = {41: 0.50, 42: 1.60}
 
+# Readable names for the TYPE_EXPL codes. The eight types are those of Chopin et al. (2015)
+# Table 2; 0 is the "no cultivated surface" short-circuit at the end of compute_type_expl,
+# and -1 is np.select's default, which the cascade's final catch-all should make
+# unreachable. ASCII only: these labels reach recap.md, which carries no accents.
+TYPE_EXPL_LABELS: dict[int, str] = {
+    -1: "Non classe",
+    0: "Sans surface cultivee",
+    1: "Arboriculteurs",
+    2: "Bananiers",
+    3: "Canniers specialises",
+    4: "Canniers diversifies",
+    5: "Diversifies",
+    6: "Eleveurs",
+    7: "Maraichers",
+    8: "Canniers-eleveurs",
+}
+
 
 def compute_type_expl(
     farm_plots: Mapping[str, Sequence[str]],

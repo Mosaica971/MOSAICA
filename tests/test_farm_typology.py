@@ -112,3 +112,16 @@ def test_compute_type_expl_returns_nan_bis_for_non_type_4_farms():
 
     assert type_expl["FARM"] == 3
     assert pd.isna(type_expl_bis["FARM"])
+
+
+def test_type_expl_labels_cover_the_eight_article_types_plus_the_edge_codes():
+    from case_studies.guadeloupe.domain.farm_typology import (
+        TYPE_EXPL_LABELS,
+        _AVERS_BY_TYPE_EXPL,
+    )
+
+    # The eight farm types of Chopin et al. (2015) Table 2, plus 0 (no cultivated surface)
+    # and -1 (the np.select default, which no condition should ever leave standing).
+    assert set(TYPE_EXPL_LABELS) == {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8}
+    # Every type carrying a risk-aversion coefficient must be named.
+    assert set(_AVERS_BY_TYPE_EXPL) <= set(TYPE_EXPL_LABELS)

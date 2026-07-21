@@ -207,3 +207,45 @@ def test_field_match_rate_is_total_when_the_simulation_reproduces_the_baseline()
     total = calibration.field_match_rate(dataset, identical).loc[calibration.TOTAL_KEY]
     assert total["plot_match_pct"] == pytest.approx(100.0)
     assert total["area_match_pct"] == pytest.approx(100.0)
+
+
+def test_farm_type_confusion_is_a_square_matrix_over_the_full_type_universe():
+    from case_studies.guadeloupe.domain.farm_typology import TYPE_EXPL_LABELS
+
+    dataset = _small_dataset()
+    confusion = calibration.farm_type_confusion(dataset, _simulated())
+    assert list(confusion.index) == sorted(TYPE_EXPL_LABELS)
+    assert list(confusion.columns) == sorted(TYPE_EXPL_LABELS)
+    assert confusion.to_numpy().sum() == 3  # one cell per farm, three farms
+
+
+def test_farm_type_confusion_tracks_the_farm_that_changed_type():
+    dataset = _small_dataset()
+    confusion = calibration.farm_type_confusion(dataset, _simulated())
+    # E1 is 100% cane observed -> "specialised cane growers" (3). Simulated it is 40% cane
+    # and 60% market gardening, which no dominance threshold catches -> "diversified" (5).
+    assert confusion.loc[3, 5] == 1
+    # E2 (melon + non-cultivated) and E3 (pasture-dominant) keep their type.
+    assert confusion.loc[5, 5] == 1
+    assert confusion.loc[6, 6] == 1
+
+
+def test_farm_type_match_summary_reports_the_diagonal_share():
+    dataset = _small_dataset()
+    confusion = calibration.farm_type_confusion(dataset, _simulated())
+    summary = calibration.farm_type_match_summary(confusion)
+    assert summary["total_farms"] == 3
+    assert summary["matched_farms"] == 2
+    assert summary["match_pct"] == pytest.approx(200.0 / 3)
+    # Per-type recall, keyed by the readable label, only for types actually observed.
+    assert summary["recall_by_type"]["Canniers specialises"] == pytest.approx(0.0)
+    assert summary["recall_by_type"]["Eleveurs"] == pytest.approx(100.0)
+    assert "Bananiers" not in summary["recall_by_type"]
+
+
+def test_farm_type_confusion_is_diagonal_when_the_simulation_reproduces_the_baseline():
+    dataset = _small_dataset()
+    identical = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME", "P5": "PN", "P6": "IG"})
+    confusion = calibration.farm_type_confusion(dataset, identical)
+    summary = calibration.farm_type_match_summary(confusion)
+    assert summary["match_pct"] == pytest.approx(100.0)
