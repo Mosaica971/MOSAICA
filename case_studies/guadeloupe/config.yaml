@@ -283,50 +283,73 @@ constraints:
       sense: le
       threshold: 107000
 
+  # ---------------------------------------------------------------------------------
+  # PRODUCTION FLOORS (sense: ge) -- ALL DISABLED 2026-07-21.
+  #
+  # Two reasons, and the first alone settles it.
+  #
+  # 1. FIDELITY. These are SCENARIO-model equations in GAMS (Eq_*_PROD_MIN and the food
+  #    objectives Eq_LEG/FRU/PAT_PROD_OBJ, MODELE.txt:682-693). The CALIB model -- the one
+  #    Chopin et al. (2015) evaluate in section 3.1, and the one we are trying to reproduce
+  #    -- does NOT contain them (see the CALIB list at MODELE.txt:450-565). Keeping them on
+  #    while calibrating was already a divergence.
+  #
+  # 2. FEASIBILITY. Combined with farm_labor_hours_max they make the model INFEASIBLE, and
+  #    main.py did fail on 2026-07-21 with exactly that. Satisfying every floor through its
+  #    cheapest eligible crop already costs 6 222 537 h against a 6 252 740 h cap -- a 0.5%
+  #    margin on a LOWER bound that ignores plots competing for the same land. And the two
+  #    are structurally mismatched: the cap is PER FARM while the floors are TERRITORIAL, so
+  #    the farms that would have to grow the market gardening are precisely the ones whose
+  #    observed cane plan leaves them no hours.
+  #
+  # Re-enable them for scenario work that needs food-security targets, but then either
+  # relax farm_labor_hours_max (its `slack` argument) or turn it off -- the two cannot both
+  # hold as written. See docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
+  # ---------------------------------------------------------------------------------
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: bc_prod_min  # plantain: floor >= 4,056 t
       groups: [{crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 4056
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: ig_prod_min  # yam: floor >= 5,125 t
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 5125
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: ma_prod_min  # market gardening: floor >= 26,404 t
       groups: [{crops: *SC_MA, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 26404
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: an_prod_min  # pineapple: floor >= 2,322 t (x0.667 edible fraction)
       groups: [{crops: *SC_AN, use_yield: true, rate_multiplier: 0.6666666666666666}]
       sense: ge
       threshold: 2322
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: plu_prod_min  # rainfed fruit/orchards: floor >= 5,879 t
       groups: [{crops: *SC_PLU, use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 5879
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: me_prod_min  # melon: floor >= 4,135 t
       groups: [{crops: [ME], use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 4135
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: pn_prod_min  # pasture (PN_PIQ): floor >= 6,096 ha (surface, use_yield false)
       groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]
@@ -334,7 +357,7 @@ constraints:
       threshold: 6096
 
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: leg_prod_obj  # vegetables/market gardening: production target >= 63,059 t
       groups: [{crops: *SC_MA, use_yield: true, rate_multiplier: 1.0}]
@@ -352,7 +375,7 @@ constraints:
       sense: ge
       threshold: 0
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: fru_prod_obj  # all fruit combined (plantain + pineapple + rainfed + melon): >= 30,789 t
       groups:
@@ -363,7 +386,7 @@ constraints:
       sense: ge
       threshold: 30789
   - name: territory_production_bound
-    enable: true
+    enable: false
     args:
       label: pat_surf_obj  # pasture surface target >= 12,193 ha
       groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]
