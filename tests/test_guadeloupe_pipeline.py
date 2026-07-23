@@ -98,8 +98,11 @@ def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
     assert mask.loc["P5", "ME"] == False  # noqa: E712
     # P78: RISQUE_CLD=3 (<=3) -- irrigated yam forbidden on CLD-polluted soils (Eq_IG_CLD)
     assert mask.loc["P78", "IG_TUT"] == False  # noqa: E712
-    # P366: TYPE_SOL=2 (calcareous) -- pineapple forbidden on calcareous soil (Eq_AN_SOL_Parc)
-    assert mask.loc["P366", "AN_NU"] == False  # noqa: E712
+    # Eq_AN_SOL_Parc (MODELE.txt:221): pineapple allowed ONLY on soil type 2, forbidden
+    # elsewhere. P366 is TYPE_SOL=2 (allowed); P1 is TYPE_SOL=1 (forbidden). This was
+    # inverted before 2026-07-23 -- see the fix in config.yaml's attribute_forbidden entry.
+    assert mask.loc["P366", "AN_NU"] == True  # noqa: E712
+    assert mask.loc["P1", "AN_NU"] == False  # noqa: E712
     # P938: region R1, a non-melon-producing commune (Eq_ME_Reg) -- otherwise
     # ME-eligible under every other rule/bound, hand-verified via a one-off
     # script against the real data tables.

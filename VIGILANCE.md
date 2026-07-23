@@ -9,9 +9,12 @@ Sévérités : **Critique** (fausse un résultat) / **Majeur** (limite fonctionn
 
 ## Points ouverts
 
-### Critique — Le modèle ne reproduit pas la Guadeloupe observée (chiffré le 2026-07-21)
-`reporting/calibration.py` note désormais chaque run contre l'assolement réellement observé
-en 2017, aux quatre échelles de Chopin et al. (2015) §2.6. Verdict sur `outputs/output_12` :
+### Majeur — Calibration : finalisée à PAD 51 % (limite reproductible fidèle au `CALIB`)
+_Chantier clos le 2026-07-23. Voir le bloc **FINALISATION** en fin d'entrée pour la décision
+et l'état retenu ; ce qui suit est l'historique du diagnostic._
+
+`reporting/calibration.py` note chaque run contre l'assolement réellement observé
+en 2017, aux quatre échelles de Chopin et al. (2015) §2.6. Verdict initial sur `output_12` :
 
 | Métrique | Obtenu | Article | Seuil |
 |---|---|---|---|
@@ -85,6 +88,36 @@ réalité de marché (débouché plantain limité) qu'aucune équation `CALIB` n
   Conclusion : la prairie sous-plantée (~3 100 ha d'écart) est le plafond dur ; la refermer
   demanderait le tuning AVERS complet de l'article contre ses données, hors de portée ici.
   _2026-07-23._
+
+**FINALISATION (2026-07-23) — retenu : PAD 51 %, coefficients d'aversion publiés (Table 2).**
+Trois voies pour descendre sous 51 % ont été instruites jusqu'au bout puis écartées, chacune
+pour une raison de fond :
+
+1. **Recalibration §2.5 de l'aversion** (descente de coordonnées sur les types 3/4/6/8,
+   minimisant le PAD) → **39,9 %**, types 69 %, prairie récupère ~1 250 ha. **Mais** les
+   coefficients trouvés sont économiquement absurdes : cannier spécialisé 0,30 → **2,50** (×8),
+   cannier diversifié 1,40 → **3,20**, éleveur 2,40 → **3,60**. Un spécialiste « très averse »
+   contredit la définition même du type (l'article les met à 0,30 *parce qu'*ils s'engagent sur
+   une culture rentable). C'est de l'overfitting : l'aversion sert de variable d'ajustement pour
+   compenser une absence structurelle (l'élevage), pas un vrai paramètre de risque.
+2. **Plafonds de marché** (plantain + ananas calés ≈ observé) → **33,6 %**, mais ils **forcent**
+   ces cultures (PAD nul par construction). Défendable pour des scénarios, pas pour de la
+   calibration.
+3. **Incorporer l'élevage** (le vrai correctif de la prairie). L'élevage est **déjà** dans la
+   marge de la prairie (bœuf inclus). Le seul ajout possible est une **contrainte** de cheptel :
+   plancher territorial de prairie (`Eq_PN_PROD_MIN`, vraie équation GAMS, seuil 6 096 ≈ observé)
+   ou minimum par ferme. **Les deux forcent** (seuil ≈ observé) **et rendent le MILP intraitable**
+   (> 10 min même à 10 % d'écart, contre 175 s sans) — testé en quatre formulations. Écarté.
+
+**Pourquoi 51 % est le bon point d'arrêt.** L'investigation a confirmé que la canne est
+**fidèlement valorisée** (rendements = Table 1, marges = Table 1, quota sucrier = GAMS et
+non-contraignant dans les deux, bans de mécanisation/pente/sol corrects) : **aucun bug de
+sur-attractivité**. L'écart résiduel — prairie, plantain, petites cultures — recoupe les limites
+que **l'article reconnaît lui-même** (« manque de données sur le maraîchage et les prairies »,
+melon à 100 % de PAD). Descendre plus bas exige de dégrader le sens des coefficients ou de
+forcer : nommer la limite est plus honnête. Les trois leviers ci-dessus restent **disponibles**
+(scripts dans l'historique, valeurs consignées ici) pour qui privilégierait un PAD bas sur la
+fidélité, mais **ne sont pas le défaut**. _2026-07-23._
 
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et

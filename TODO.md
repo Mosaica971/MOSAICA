@@ -10,28 +10,25 @@ Ce qui reste à faire. Les limites connues et non planifiées sont dans `VIGILAN
 sous-régional et par exploitation, matrice de confusion des 8 types, taux de correspondance
 parcellaire, d'après Chopin et al. (2015) §2.6. Écrit dans chaque run et rejouable sur les
 runs passés avec `scripts/evaluate_calibration.py`. Reporting seul, aucun solve.
-→ **Le diagnostic est mauvais et c'est l'information utile** : PAD territorial 193 %, 7,3 %
-des types d'exploitation reproduits, 7 % des parcelles. Chiffres et lecture dans
-`VIGILANCE.md`, entrée « Le modèle ne reproduit pas la Guadeloupe observée ».
-**Leviers de calibration — codés le 2026-07-21, PAS ENCORE MESURÉS.** Spec :
+**Leviers de calibration — livrés et mesurés le 2026-07-23.** Spec :
 `docs/superpowers/specs/2026-07-21-calibration-levers-design.md`. L'enquête GAMS a établi que
-le modèle résolu n'était pas celui que l'article évalue : `CALIB` (`MODELE.txt:450-565`)
-contient cinq mécanismes qui manquaient. Les cinq sont portés :
-1. objectif de **Markowitz** activé (`maximize_gross_margin` désactivé) ;
-2. les **14 suppressions `Eq_*_SUPP`** — 8 codes agrégés, `TH`, `PN_TOUR`, 10 `CF_*`,
-   2 systèmes canniers. Effet mesuré : 1 271 780 → 904 121 variables (−29 %) ;
-3. prairie représentante `PN_TOUR` → **`PN_PIQ`** (`PN_TOUR` est justement supprimée) ;
-4. **`Eq_MO_MAX_Expl`** porté (`farm_labor_hours_max`, générique dans `core/`), plafond
-   calculé sur les cultures représentantes — lire `VIGILANCE.md` avant d'y toucher ;
-5. **`Eq_CS_GFA`** réactivée avec `skip_when_no_eligible_area` (déviation assumée, 3 fermes).
+le modèle résolu n'était pas celui que l'article évalue (`CALIB`, `MODELE.txt:450-565`). Portés :
+objectif de **Markowitz**, 14 suppressions `Eq_*_SUPP` (−29 % de variables), prairie `PN_PIQ`,
+plafond de main d'œuvre `Eq_MO_MAX_Expl`. `Eq_CS_GFA` et les planchers de production
+**désactivés** (infaisables avec le plafond ; les planchers sont d'ailleurs `SCENARIO`, pas
+`CALIB`). Bug de sol de l'ananas corrigé (règle inversée). Écart d'optimalité solveur porté à
+1 % (`mip_rel_gap`) : l'objectif Markowitz était intraitable au gap par défaut (> 37 h → 175 s).
 
-→ **Reste à faire, et c'est le point bloquant : lancer un solve réel puis
-`scripts/evaluate_calibration.py` sur le run produit.** Tant que ce n'est pas fait, on ne sait
-pas si le PAD a baissé. Toute l'analyse qui a mené à ces cinq leviers est analytique.
-→ Si le PAD reste élevé, regarder d'abord les **canniers spécialisés** (`AVERS` 0,30, 1 371
-fermes) : ni l'aversion au risque ni le GFA ne les retiennent, seul le plafond de main d'œuvre
-les gèle. Les `Eq_*_PROD_MIN` ne sont **pas** une piste : elles sont dans `SCENARIO`, pas
-`CALIB`.
+→ **Résultat : PAD 193 % → 51 %**, types 63 %, avec les coefficients d'aversion **publiés**
+(Table 2). Canne (17-22 %) et maraîchage (18 %) bien reproduits. **Chantier clos** : voir le
+bloc FINALISATION de `VIGILANCE.md` pour la décision et les trois voies instruites puis
+écartées pour descendre plus bas (recalibration §2.5 → 40 % mais coefficients absurdes ;
+plafonds de marché → 33 % mais forçants ; contrainte de cheptel → intraitable). L'écart
+résiduel (prairie, plantain, petites cultures) recoupe les limites reconnues par l'article
+lui-même.
+→ **Piste ouverte, non planifiée** : si un jour on obtient le jeu de coefficients ou les
+résultats du vrai run GAMS, ils trancheraient le doute sur l'aversion et permettraient une
+comparaison directe. Sans eux, 51 % est la limite fidèle reproductible.
 
 **Refactor transverse — livré le 2026-07-21.** Spec :
 `docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md`.
