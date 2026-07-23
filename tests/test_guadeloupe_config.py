@@ -36,7 +36,8 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     } == {"ALTITUDE", "PENTE", "PLUVIO_PARC", "SURF_HA"}
     assert {e["name"] for e in config["categorical_rules"] if e["enable"]} == {
         "irrigation_required",
-        "soil_type_forbidden",
+        # soil_type_forbidden retired 2026-07-23: its only use (pineapple) was inverted;
+        # replaced by attribute_forbidden with op: ne (allowed only on soil type 2).
         "max_risk_threshold",
         "exact_risk_value",
         "region_crop_forbidden",

@@ -477,12 +477,17 @@ categorical_rules:
     args:
       crops: [ME, MA_ROTA]
       irrigation_column: IRRIG_PARC
-  - name: soil_type_forbidden           # pineapple AN_NU/AN_PA forbidden on soil type 2
+  # Eq_AN_SOL_Parc (MODELE.txt:221): pineapple forbidden where TYPE_SOL <> 2, i.e. allowed
+  # ONLY on soil type 2. Until 2026-07-23 this was mis-ported as soil_type_forbidden on
+  # type 2 -- the exact INVERSE, making pineapple eligible on 18045 wrong-soil plots and
+  # none of the 5286 right ones. That was the cause of the 20x pineapple over-planting in
+  # output_13 (133 ha observed -> 2765 simulated). op: ne restores the GAMS semantics.
+  - name: attribute_forbidden           # AN forbidden off soil type 2
     enable: true
     args:
-      crops: [AN_NU, AN_PA]
-      soil_column: TYPE_SOL
-      forbidden_soil_types: [2]
+      crops: [AN, AN_NU, AN_PA]
+      conditions:
+        - {column: TYPE_SOL, op: ne, value: 2}
   # ME forbidden on soil types 2/3/4 OR on island 1. Two entries rather than one rule:
   # each forbids its own subset and the mask keeps the union forbidden, which is how an OR
   # is expressed here (a single attribute_forbidden entry ANDs its conditions).
