@@ -66,6 +66,26 @@ Hypothèse restante : la calibration serrée de l'article reposait sur un jeu d'
 100 itérations (§2.5) contre **leurs** données complètes, non reconstructibles ici, ou sur une
 réalité de marché (débouché plantain limité) qu'aucune équation `CALIB` n'encode. _2026-07-23._
 
+**Investigation prairie et plantain (2026-07-23, expériences non committées).**
+- **Plantain** : bug de sol ananas corrigé (committé). Un plafond de surface territorial sur
+  plantain+ananas calés près de l'observé fait tomber le PAD à **33,6 %**, mais il **force**
+  ces cultures (PAD nul par construction, pas émergent). Débouché de marché réel, mais écart
+  assumé au `CALIB`. Non committé, à valider.
+- **Prairie** : la moitié des 6 109 ha observés part en **canne mécanisée** (marge 2 400-3 500
+  €/ha), qui bat légitimement la prairie (1 602, variance nulle). Éleveurs (AVERS 2,4) et
+  canniers-éleveurs (2,3) la gardent déjà ; la fuite vient des **canniers diversifiés**
+  (AVERS 1,4). **GAMS `CALIB` n'a AUCUNE contrainte de cheptel** (vérifié : seuls un ban
+  chlordécone `Eq_PN_PIQ_CLD` et des suppressions) : il reproduisait la prairie par la seule
+  aversion + économie. Deux tentatives de correction, toutes deux écartées :
+  - re-tuner l'AVERS du type 4 : gain marginal (~2 % de PAD, prairie +261 ha) car les
+    variantes de canne à très forte marge (jusqu'à 3 531) résistent même à AVERS 2,5 ;
+  - contrainte d'inertie de cheptel (prairie ferme ≥ fraction × prairie observée) : **rend le
+    MILP intraitable** (> 10 min même à 5 % d'écart, contre 175 s sans), en plus d'être une
+    invention hors `CALIB` ancrée sur l'observé. Non retenue.
+  Conclusion : la prairie sous-plantée (~3 100 ha d'écart) est le plafond dur ; la refermer
+  demanderait le tuning AVERS complet de l'article contre ses données, hors de portée ici.
+  _2026-07-23._
+
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
 `NC` : une parcelle non cultivée **diminue** le dénominateur et remonte toutes les parts
