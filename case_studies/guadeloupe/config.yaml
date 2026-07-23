@@ -27,7 +27,18 @@ data:
 # See core/model/solver.py.
 solver:
   name: appsi_highs
-  args: {}          # extra HiGHS options; {} = HiGHS defaults
+  args:
+    # mip_rel_gap: accept a solution proven within 1% of the optimum. ESSENTIAL with the
+    # Markowitz objective: its mix of positive and negative coefficients (margin x
+    # (1 - AVERS*Var_Rdt) goes negative for risk-averse farms on high-variance crops) makes
+    # the LP relaxation deeply fractional, and at HiGHS's default 1e-4 gap the full-territory
+    # solve did not finish in 37 h. At 1% it solves in minutes and the acreages -- all we
+    # compare for calibration -- are unaffected. Measured 2026-07-23: Grande-Terre 51s,
+    # Marie-Galante 11s (both non-terminating at the default gap). See VIGILANCE.md.
+    mip_rel_gap: 0.01
+    # Safety net: fail loudly after 1 h rather than grind for a day and a half. With the gap
+    # above the real solve is far under this, so it should never trigger.
+    time_limit: 3600
 
 # Labor: annual working hours per full-time-equivalent (ETP/UTA), used to convert the
 # estimated labor hours (surface x crop x technical itinerary x time per operation) into

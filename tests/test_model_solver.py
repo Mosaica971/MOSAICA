@@ -42,3 +42,40 @@ def test_solve_model_raises_on_infeasible_model():
 
     with pytest.raises(RuntimeError, match="optimal"):
         solve_model(model, CONFIG)
+
+
+def test_solve_model_routes_args_into_solver_options():
+    """HiGHS options must reach solver.options, not solve()'s kwargs -- the appsi_highs
+    legacy wrapper raises TypeError on an unknown solve() kwarg like mip_rel_gap, so a
+    regression here would surface as a hard crash on every real run."""
+    captured = {}
+
+    class _FakeSolver:
+        def __init__(self):
+            self.options = {}
+
+        def solve(self, model, **kwargs):
+            captured["options"] = dict(self.options)
+            captured["solve_kwargs"] = kwargs
+
+            class _R:
+                class solver:
+                    termination_condition = pyo.TerminationCondition.optimal
+
+            model.solutions = type("S", (), {"load_from": staticmethod(lambda r: None)})()
+            return _R()
+
+    original = pyo.SolverFactory
+    pyo.SolverFactory = lambda name: _FakeSolver()
+    try:
+        config = {
+            "solver": {"name": "appsi_highs", "args": {"mip_rel_gap": 0.01, "time_limit": 3600}},
+        }
+        solve_model(pyo.ConcreteModel(), config)
+    finally:
+        pyo.SolverFactory = original
+
+    assert captured["options"] == {"mip_rel_gap": 0.01, "time_limit": 3600}
+    # Only load_solutions may ride along on solve(); options must not leak there.
+    assert "mip_rel_gap" not in captured["solve_kwargs"]
+    assert captured["solve_kwargs"].get("load_solutions") is False
