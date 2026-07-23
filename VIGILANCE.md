@@ -37,14 +37,34 @@ Deux causes probables, toutes deux cohérentes avec l'article :
 **Ne pas lire un PAD élevé comme une régression du reporting** : c'est son diagnostic. Spec :
 `docs/superpowers/specs/2026-07-21-calibration-validation-design.md`.
 
-**Traité le même jour, en attente de mesure.** L'enquête dans le source GAMS a montré que le
-modèle résolu n'était pas celui que l'article évalue : `MODELE.txt:443-695` déclare trois
-modèles — `INIT`, `CALIB`, `SCENARIO` — l'article évalue `CALIB` (§3.1), et cinq de ses
-mécanismes manquaient. Les cinq sont portés (spec `2026-07-21-calibration-levers-design.md`) :
-objectif de Markowitz, 14 suppressions `Eq_*_SUPP`, prairie représentante `PN_PIQ`, plafond de
-main d'œuvre, `Eq_CS_GFA`. **Aucun solve réel n'a encore été lancé** : le PAD résultant est
-inconnu. Les chiffres de 193 % ci-dessus datent d'avant ces cinq leviers ; ils ne décrivent
-plus l'état du modèle, ils servent de point de comparaison. _2026-07-21._
+**Mesuré le 2026-07-23 : PAD 193 % → 51 %.** L'enquête GAMS a montré que le modèle résolu
+n'était pas celui que l'article évalue (`MODELE.txt` déclare `INIT`/`CALIB`/`SCENARIO`,
+l'article évalue `CALIB` §3.1). Leviers portés (spec `2026-07-21-calibration-levers-design.md`) :
+objectif de Markowitz, 14 suppressions `Eq_*_SUPP`, prairie `PN_PIQ`, plafond de main d'œuvre.
+`Eq_CS_GFA` **désactivée** (infaisable avec le plafond, cf. entrée dédiée), planchers de
+production **désactivés** (`SCENARIO`, pas `CALIB`, et infaisables avec le plafond), et bug de
+sol de l'ananas corrigé (règle inversée). État `output_13` et mesures suivantes :
+
+| Métrique | Avant | Après | Article | Seuil |
+|---|---|---|---|---|
+| PAD territorial | 193 % | **51 %** | < 15 % sur 8/10 | 15 % |
+| Types reproduits | 7,3 % | **63 %** | 81 % | 80 % |
+| Parcelles conformes | 7 % | **54 %** | 66 % | — |
+| Surface conforme | 4,5 % | **62 %** | 77 % | — |
+
+Canne (22 %) et maraîchage (18 %) sont désormais bien reproduits. **Ce qui reste bloqué :
+plantain sur-planté ~20× (147 → 2 905 ha) et prairie sous-plantée (6 109 → 2 278 ha).** Ni le
+plafond de main d'œuvre ni l'aversion au risque ne les corrigent :
+- balayage `slack` du plafond (2026-07-23) : `1.0` domine tout ; toute valeur < 1 dégrade PAD
+  ET types de façon monotone. Le plafond est optimal, ce n'est pas le levier du plantain.
+- le plantain a une marge de 11 387 €/ha (conforme Table 1 de l'article) et une variance de
+  0,25 trop faible pour qu'un éleveur (AVERS 2,4) lui préfère la prairie : ré-ajuster AVERS ne
+  peut pas l'inverser. Il est éligible sur 14 476 ha (bans géographiques `Eq_BC_*` corrects,
+  vérifiés) et **aucune contrainte de `CALIB` ne plafonne son extension** (les `*_QUOTA_MAX`
+  plantain/ananas/igname sont commentés dans le GAMS lui-même).
+Hypothèse restante : la calibration serrée de l'article reposait sur un jeu d'AVERS re-tuné en
+100 itérations (§2.5) contre **leurs** données complètes, non reconstructibles ici, ou sur une
+réalité de marché (débouché plantain limité) qu'aucune équation `CALIB` n'encode. _2026-07-23._
 
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
