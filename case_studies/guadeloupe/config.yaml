@@ -470,6 +470,22 @@ categorical_rules:
   - name: forbid_crops
     enable: true
     args: {crops: [CS_SBT_NISM, CS_MG_NIM]}
+  # Eq_MA_EXP_SUPP (MODELE.txt:332): the 25 experimental "Karusmart" market-gardening
+  # variants (SC_MAR_ESSAI_KS, SETS.txt:496-521) are suppressed in both CALIB and SCENARIO.
+  # They were live decision variables until 2026-07-23 (the solver placed 540 ha of
+  # MA_PAI_NON_NI on 607 plots). Suppressing them is a faithful parity fix; it leaves the
+  # PAD/type metrics unchanged (they fold every MA variant to one "MA" group, so the solver
+  # just picks another MA variant on the same land) but removes ~650 decision variables.
+  - name: forbid_crops
+    enable: true
+    args:
+      crops: [MA_TO_CHOU_JA,
+              MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI,
+              MA_BAG_FER_I, MA_BAG_FER_NI, MA_BAG_NON_I, MA_BAG_NON_NI,
+              MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
+              MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI,
+              MA_PAI_BIO_I, MA_PAI_BIO_NI, MA_PAI_VEG_I, MA_PAI_VEG_NI,
+              MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
   # ---------------------------------------------------------------------------------
 
   - name: irrigation_required            # ME, MA_ROTA only on irrigated plots (IRRIG_PARC true)
@@ -652,7 +668,7 @@ categorical_rules:
     args:
       history_columns: [cult_2015, cult_2016, cult_2017]
       fallow_codes: [0, 10, 14]
-      crops:
+      crops: &CULT_NON_NC  # the 83-crop CULT_NON_NC set, reused by Eq_NOCULT_NC below
         [AG, AN, AN_NU, AN_PA, BA, BA_INT, BA_IRR, BA_PER, BA_SINT, BC, BC_BT, BC_GTMG,
          CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM, CF_NGT_NIM,
          CF_CGT_NISM, CF_CGT_NIM, CF_EGT_NISM, CF_EGT_NIM,
@@ -665,3 +681,25 @@ categorical_rules:
          MA_BAG_NON_I, MA_BAG_NON_NI, MA_BRF_BIO_I, MA_BRF_BIO_NI, MA_BRF_VEG_I, MA_BRF_VEG_NI,
          MA_BRF_FER_I, MA_BRF_FER_NI, MA_BRF_NON_I, MA_BRF_NON_NI, MA_PAI_BIO_I, MA_PAI_BIO_NI,
          MA_PAI_VEG_I, MA_PAI_VEG_NI, MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
+
+  # Eq_NOCULT_NC (MODELE.txt:215): X(SP, SC_CULT_NON_NC)=0 on every plot whose OBSERVED 2017
+  # land use resolves to NC -- a non-cultivated plot stays non-cultivated. DISTINCT from
+  # friche_lock/Eq_FRICHE, which needs three fallow years (2015-2017); this fires on the
+  # single-year 2017-NC state and so locks strictly more plots. "Resolved NC" is exactly
+  # compute_base_crop_group's rule (farm_typology.py): cult_2017 == 14, OR both cult_2016 and
+  # cult_2017 in the fallow set {0,10,14}. That OR is written as two entries (house style,
+  # like the ME soil/island ban); their union is precisely the resolved-NC set, no more.
+  # Sized 2026-07-23 on output_1: locks 494 ha the solver otherwise cultivates on 502
+  # observed-NC plots (CS 204, BC 140, MA 41, BA 38, AN 22, PN 10 ha...).
+  - name: attribute_forbidden           # NC part 1: cult_2017 is itself NC (code 14)
+    enable: true
+    args:
+      crops: *CULT_NON_NC
+      conditions: [{column: cult_2017, op: eq, value: 14}]
+  - name: attribute_forbidden           # NC part 2: 2016 AND 2017 both fallow -> resolves to NC
+    enable: true
+    args:
+      crops: *CULT_NON_NC
+      conditions:
+        - {column: cult_2016, op: in, value: [0, 10, 14]}
+        - {column: cult_2017, op: in, value: [0, 10, 14]}

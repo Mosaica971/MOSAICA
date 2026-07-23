@@ -170,6 +170,23 @@ def test_pad_by_farm_scores_each_holding():
     assert bool(frame.loc["E3", "within_threshold"]) is False
 
 
+def test_pad_by_island_scores_each_island():
+    dataset = _small_dataset()
+    frame = calibration.pad_by_island(
+        dataset, _simulated(), calibration.thresholds_from_config({})
+    )
+    # Island 1 holds P1/P2/P5: observed CS 5 + PN 3 = 8 ha; simulated CS 2 + MA 3 + PN 3.
+    # Deviations CS 3 + MA 3 = 6 over 8 -> 75%.
+    assert frame.loc[1, "observed_ha"] == pytest.approx(8.0)
+    assert frame.loc[1, "pad_pct"] == pytest.approx(75.0)
+    assert bool(frame.loc[1, "within_threshold"]) is False
+    # Island 2 holds P3/P4/P6: observed ME 1 + IG 1 = 2 ha; simulated ME 1 only.
+    # Deviation IG 1 over 2 -> 50%.
+    assert frame.loc[2, "observed_ha"] == pytest.approx(2.0)
+    assert frame.loc[2, "pad_pct"] == pytest.approx(50.0)
+    assert frame.index.name == "island"
+
+
 def test_field_match_rate_counts_plots_and_hectares_per_region():
     dataset = _small_dataset()
     frame = calibration.field_match_rate(dataset, _simulated())

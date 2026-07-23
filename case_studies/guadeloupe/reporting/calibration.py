@@ -177,36 +177,59 @@ def pad_by_crop_and_region(
     return pd.concat(blocks)
 
 
-def pad_by_farm(
-    dataset: Dataset, output_allocation: pd.Series, thresholds: CalibrationThresholds
+def _pad_totals_by_key(
+    dataset: Dataset, output_allocation: pd.Series, key: pd.Series, threshold: float
 ) -> pd.DataFrame:
-    """Farm scale: the article states a 20% threshold "in the sub-regions and farms"
-    without publishing the table. One row per farm, the deviation summed over its crops."""
-    farm = indicators.plot_to_farm(dataset)
-    observed = _surface_by_group_and_key(dataset, observed_groups(dataset), farm)
+    """One row per value of `key` (farm, island, ...), the deviation summed over the crops
+    of that group. Same PAD convention as _pad_frame -- undefined where nothing was observed
+    -- but aggregated to a single figure per key rather than kept per crop."""
+    observed = _surface_by_group_and_key(dataset, observed_groups(dataset), key)
     simulated = _surface_by_group_and_key(
-        dataset, simulated_groups(dataset, output_allocation), farm
+        dataset, simulated_groups(dataset, output_allocation), key
     )
     keys = observed.index.union(simulated.index)
     observed = observed.reindex(keys, fill_value=0.0)
     simulated = simulated.reindex(keys, fill_value=0.0)
 
-    by_farm = pd.DataFrame(
+    frame = pd.DataFrame(
         {
             "observed_ha": observed.groupby(level=0).sum(),
             "simulated_ha": simulated.groupby(level=0).sum(),
             "abs_deviation_ha": (simulated - observed).abs().groupby(level=0).sum(),
         }
     )
-    pad = 100.0 * by_farm["abs_deviation_ha"] / by_farm["observed_ha"].where(
-        by_farm["observed_ha"] > 0
+    pad = 100.0 * frame["abs_deviation_ha"] / frame["observed_ha"].where(
+        frame["observed_ha"] > 0
     )
-    by_farm["pad_pct"] = pad
-    by_farm["within_threshold"] = (
-        pad.le(thresholds.farm_pad_max).where(pad.notna()).astype("boolean")
-    )
+    frame["pad_pct"] = pad
+    frame["within_threshold"] = pad.le(threshold).where(pad.notna()).astype("boolean")
+    return frame
+
+
+def pad_by_farm(
+    dataset: Dataset, output_allocation: pd.Series, thresholds: CalibrationThresholds
+) -> pd.DataFrame:
+    """Farm scale: the article states a 20% threshold "in the sub-regions and farms"
+    without publishing the table. One row per farm, the deviation summed over its crops."""
+    farm = indicators.plot_to_farm(dataset)
+    by_farm = _pad_totals_by_key(dataset, output_allocation, farm, thresholds.farm_pad_max)
     by_farm.index.name = "farm"
     return by_farm
+
+
+def pad_by_island(
+    dataset: Dataset, output_allocation: pd.Series, thresholds: CalibrationThresholds
+) -> pd.DataFrame:
+    """Island scale: one row per island, the deviation summed over its crops. Not a Chopin
+    scale (the article stops at the seven sub-regions), reported for the Guadeloupe
+    archipelago where the islands are a natural aggregation coarser than the sub-regions.
+    Read against the sub-regional 20% threshold for want of a published island figure."""
+    island = indicators.plot_to_island(dataset)
+    by_island = _pad_totals_by_key(
+        dataset, output_allocation, island, thresholds.subregional_pad_max
+    )
+    by_island.index.name = "island"
+    return by_island
 
 
 def field_match_rate(dataset: Dataset, output_allocation: pd.Series) -> pd.DataFrame:
