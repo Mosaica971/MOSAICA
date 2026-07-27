@@ -39,7 +39,8 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
         # soil_type_forbidden retired 2026-07-23: its only use (pineapple) was inverted;
         # replaced by attribute_forbidden with op: ne (allowed only on soil type 2).
         "max_risk_threshold",
-        "exact_risk_value",
+        # exact_risk_value (Eq_PN_PIQ_CLD) disabled 2026-07-27 for CALIB parity: that equation
+        # is absent from the GAMS CALIB model block (commented in SCENARIO). See config comment.
         "region_crop_forbidden",
         "friche_lock",
         # GAMS geographic/soil/irrigation ITK bans, ported 2026-07-20.

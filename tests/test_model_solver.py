@@ -40,7 +40,8 @@ def test_solve_model_raises_on_infeasible_model():
     model.Y["P1", "C1"].fix(1)
     model.infeasible_constraint = pyo.Constraint(expr=model.Y["P1", "C1"] == 0)
 
-    with pytest.raises(RuntimeError, match="optimal"):
+    # Infeasible is not in the acceptable set (optimal / maxTimeLimit), so it still raises.
+    with pytest.raises(RuntimeError, match="did not reach a usable solution"):
         solve_model(model, CONFIG)
 
 

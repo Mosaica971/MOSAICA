@@ -218,6 +218,18 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         plot_surface * data_parc["GFA_PARC"], expl_parc
     )
 
+    # Eq_AN_PA (MODELE.txt:243) forbids AN_PA on any plot whose FARM total surface
+    # (Surf_Expl_init = sum of the farm's plot SURF_HA, ENTREES.txt:116) is below
+    # AN_SURF_EXPL_MIN = 10 ha (DONNEES.txt:135). Expose that per-plot farm surface as a
+    # data_parc column so the config's generic attribute_forbidden rule can express the ban,
+    # exactly like the geographic ITK bans -- no farm-indexed rule type needed.
+    plot_farm_surface = pd.Series(
+        expl_parc["farm"].map(farm_surface_ha).to_numpy(), index=expl_parc["plot"]
+    )
+    data_parc = data_parc.assign(
+        SURF_EXPL_PARC=plot_farm_surface.reindex(data_parc.index)
+    )
+
     base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
     type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface)
     farm_risk_aversion = compute_avers(type_expl, type_expl_bis)

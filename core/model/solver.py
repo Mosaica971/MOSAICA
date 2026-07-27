@@ -16,12 +16,36 @@ def solve_model(model: pyo.ConcreteModel, config: dict[str, Any]) -> Any:
         solver.options[key] = value
     results = solver.solve(model, load_solutions=False)
 
+    # `optimal` here means "proven within mip_rel_gap of the optimum" (HiGHS reports optimal
+    # once the gap closes to the configured tolerance, not only at gap 0). A time limit hit
+    # (`maxTimeLimit`) still leaves a feasible incumbent that is strictly better than a looser
+    # gap would give, so we accept and load it -- but loudly, because it is NOT gap-proven.
+    # Any other condition (infeasible, unbounded, error) has no usable solution: raise.
     condition = results.solver.termination_condition
-    if condition != pyo.TerminationCondition.optimal:
+    acceptable = {
+        pyo.TerminationCondition.optimal,
+        pyo.TerminationCondition.maxTimeLimit,
+    }
+    if condition not in acceptable:
         raise RuntimeError(
-            f"Solver '{solver_name}' did not reach an optimal solution "
+            f"Solver '{solver_name}' did not reach a usable solution "
             f"(termination condition: {condition})"
         )
 
-    model.solutions.load_from(results)
+    try:
+        model.solutions.load_from(results)
+    except (ValueError, RuntimeError, IndexError, AttributeError) as error:
+        # maxTimeLimit before any incumbent was found -> nothing to load.
+        raise RuntimeError(
+            f"Solver '{solver_name}' terminated with '{condition}' and no loadable "
+            f"solution (no incumbent found within the time limit)"
+        ) from error
+
+    if condition != pyo.TerminationCondition.optimal:
+        print(
+            f"WARNING: solver '{solver_name}' stopped at '{condition}' (time limit) rather "
+            f"than closing the MIP gap; using the best incumbent found. Acreages may be "
+            f"slightly sub-optimal.",
+            flush=True,
+        )
     return results

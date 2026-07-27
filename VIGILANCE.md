@@ -119,6 +119,47 @@ forcer : nommer la limite est plus honnête. Les trois leviers ci-dessus restent
 (scripts dans l'historique, valeurs consignées ici) pour qui privilégierait un PAD bas sur la
 fidélité, mais **ne sont pas le défaut**. _2026-07-23._
 
+**RÉOUVERTURE 2026-07-27 — investigation de parité « pourquoi pas les résultats CALIB de
+l'article ».** Question reposée : l'article annonce CALIB à PAD <15 % / types 81 %, on obtient
+49 % / 63 % avec le même modèle. Investigation systématique source-à-source (spec
+`docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md`). **Écarté comme cause (tout
+fidèle, vérifié)** : objectif Markowitz, coefficients AVERS (l'article dit lui-même §2.5 que
+Table 2 **est** le résultat calibré des 100 itérations — donc pas à re-tuner), économie
+marge-incl-subventions (`MB_HA = PB − CV`, `PB` inclut `SUB_TOT`, OPTIMISATION.txt:41), mapping
+RPG→groupe (ENTREES.txt:60-105 identique), direction des bans chlordécone. **Trois points de
+blocage réels identifiés :**
+1. **Provenance des données** : l'article a 5336 fermes, on en a 4588 (−14 %). Distributions par
+   type différentes. Comme le mapping typologique est identique, c'est un écart de **jeu de
+   données** pur (notre `data/` est un sous-ensemble différent), non corrigeable. Plafond
+   structurel sur PAD et matrice de confusion.
+2. **Le gap MIP de 1 % noie la frontière prairie/canne.** Diagnostic parcellaire : sur les 3054 ha
+   prairie→canne, 1403 ha partent en canne **alors que la prairie était éligible ET meilleure au
+   vrai AVERS** (radj prairie 1602 vs canne 1034-1386) — impossible à l'optimum exact. Cause :
+   objectif 85,9 M€ × gap 1 % = 859 k€ de tolérance, et la frontière prairie(1602)/canne(1521-1617,
+   variantes Marie-Galante à Var_Rdt=0) est plate à <1 %. Le solveur y est indifférent, résout
+   ~3000 ha arbitrairement en canne. **Pas un bug modèle — tolérance de solveur sur frontière
+   plate.** **Resserrer le gap est un cul-de-sac, TESTÉ (output_4, gap 1e-3)** : le solve tape le
+   time_limit d'1 h avec un incumbent identique à la solution à 1 % (PAD 49,3, types 63,7 — zéro
+   prairie récupérée). Le B&B ne ferme pas cette frontière en temps traitable et les heuristiques
+   HiGHS ne trouvent pas la solution riche en prairie. `solver.py` charge désormais l'incumbent
+   sur `maxTimeLimit` (au lieu de lever) ; le gap reste à 1 % (optimum traitable). Le leak de
+   prairie est donc une **limite d'intractabilité B&B**, pas un bouton de réglage.
+3. **Petites déviations CALIB.** `Eq_PN_PIQ_CLD` était appliqué à tort (interdit la prairie sur
+   16 % des plots, RISQUE_CLD==1) alors qu'il est **absent du bloc modèle CALIB** (commenté en
+   SCENARIO ; `Eq_IG_CLD`, lui, y est). **CORRIGÉ** (désactivé `exact_risk_value`) : prairie
+   éligible 76,5 %→90 % des plots. Reste `Eq_AN_PA` non porté (ananas +488 %), `Eq_CF_*` non câblé.
+La conclusion « aucun bug de sur-attractivité » du 2026-07-23 tient (économie fidèle) ; ce qui
+change, c'est de **nommer le gap MIP et la provenance des données** comme les vraies causes, pas
+un plateau mystérieux.
+
+**Résultat des corrections fidèles (runs complets)** : baseline output_2 → output_5
+(PN_PIQ_CLD désactivé + Eq_AN_PA porté, gap 1 %) : PAD **49,3→48,4 %**, types **63,3→64,0 %**,
+parcelles **55,1→56,0 %**, surface **63,1→64,3 %**. Gains modestes mais **cohérents sur toutes les
+métriques**, uniquement par parité CALIB (retrait d'une contrainte à tort, ajout d'une vraie
+contrainte CALIB) — pas de forçage. Confirme le plateau ~48 %/64 % comme structurel (données +
+intractabilité B&B), l'article atteignant 81 %/<15 % sur SES 5336 fermes avec le même modèle.
+_2026-07-27._
+
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
 `NC` : une parcelle non cultivée **diminue** le dénominateur et remonte toutes les parts

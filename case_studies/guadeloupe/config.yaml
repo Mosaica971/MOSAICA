@@ -28,13 +28,18 @@ data:
 solver:
   name: appsi_highs
   args:
-    # mip_rel_gap: accept a solution proven within 1% of the optimum. ESSENTIAL with the
-    # Markowitz objective: its mix of positive and negative coefficients (margin x
-    # (1 - AVERS*Var_Rdt) goes negative for risk-averse farms on high-variance crops) makes
-    # the LP relaxation deeply fractional, and at HiGHS's default 1e-4 gap the full-territory
-    # solve did not finish in 37 h. At 1% it solves in minutes and the acreages -- all we
-    # compare for calibration -- are unaffected. Measured 2026-07-23: Grande-Terre 51s,
-    # Marie-Galante 11s (both non-terminating at the default gap). See VIGILANCE.md.
+    # mip_rel_gap: proven-within-gap tolerance. Markowitz's mixed-sign coefficients (margin x
+    # (1 - AVERS*Var_Rdt) goes negative for risk-averse farms on high-variance crops) make the
+    # LP relaxation deeply fractional; at HiGHS's default 1e-4 the full-territory solve did not
+    # finish in 37 h. The 2026-07-27 parity investigation found the 1% gap (859k EUR on an 86M
+    # objective) leaves the solver indifferent across the flat pasture(1602)/cane(1521-1617)
+    # margin boundary, parking ~1400 ha of pasture arbitrarily on cane (starving the "breeder"
+    # type -- see VIGILANCE + spec 2026-07-27-calib-parity-rootcause-design). BUT tightening to
+    # 0.1% was TESTED (output_4) and is a dead end: the solve hit the 1 h time_limit with an
+    # incumbent identical to the 1% one (PAD 49.3, typo 63.7 -- no pasture recovered). The B&B
+    # cannot close that boundary in tractable time and HiGHS's heuristics don't find the
+    # pasture-heavy solution. So 1% stays: it is the tractable optimum, and the residual pasture
+    # leak is a genuine B&B-intractability limit, not a tuning knob. Kept at 0.01.
     mip_rel_gap: 0.01
     # Safety net: fail loudly after 1 h rather than grind for a day and a half. With the gap
     # above the real solve is far under this, so it should never trigger.
@@ -504,6 +509,18 @@ categorical_rules:
       crops: [AN, AN_NU, AN_PA]
       conditions:
         - {column: TYPE_SOL, op: ne, value: 2}
+  # Eq_AN_PA (MODELE.txt:243, in the CALIB model block): the plastic-mulch pineapple AN_PA --
+  # the highest-margin pineapple (16363 EUR/ha) -- is forbidden on plots whose FARM total
+  # surface is below AN_SURF_EXPL_MIN = 10 ha (too small to run the mulch system). Ported
+  # 2026-07-27 via the SURF_EXPL_PARC column (data_pipeline exposes the plot's farm surface).
+  # Previously unported (differed): pineapple stays +488% over-planted (132 -> 780 ha) and AN_PA
+  # on tiny farms is a contributor.
+  - name: attribute_forbidden           # Eq_AN_PA: AN_PA forbidden on farms < 10 ha
+    enable: true
+    args:
+      crops: [AN_PA]
+      conditions:
+        - {column: SURF_EXPL_PARC, op: lt, value: 10}
   # ME forbidden on soil types 2/3/4 OR on island 1. Two entries rather than one rule:
   # each forbids its own subset and the mask keeps the union forbidden, which is how an OR
   # is expressed here (a single attribute_forbidden entry ANDs its conditions).
@@ -525,8 +542,16 @@ categorical_rules:
       crops: [IG_TUT]
       risk_column: RISQUE_CLD
       max_allowed: 3
-  - name: exact_risk_value              # PN_PIQ only where RISQUE_CLD == 1
-    enable: true
+  # Eq_PN_PIQ_CLD forbids pasture PN_PIQ where RISQUE_CLD == 1 (MODELE.txt:301). DISABLED
+  # 2026-07-27 for CALIB parity: this equation is NOT in the GAMS CALIB model block
+  # (MODELE.txt:450-561) -- it is commented (*Eq_PN_PIQ_CLD) in SCENARIO (MODELE.txt:626)
+  # and absent from CALIB, unlike its sibling Eq_IG_CLD which IS in CALIB. Applying it wrongly
+  # forbade pasture on the 3975 RISQUE_CLD==1 plots (16% of the territory) that CALIB allows,
+  # choking pasture eligibility and starving the "breeder" farm type. The rule direction was
+  # correct (forbid where ==1, matching GAMS); the error was applying it under CALIB at all.
+  # Re-enable only for a SCENARIO run that deliberately restores the chlordecone pasture ban.
+  - name: exact_risk_value              # Eq_PN_PIQ_CLD: forbid PN_PIQ where RISQUE_CLD == 1
+    enable: false
     args:
       crops: [PN_PIQ]
       risk_column: RISQUE_CLD
