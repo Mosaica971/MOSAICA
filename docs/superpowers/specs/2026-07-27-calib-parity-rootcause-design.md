@@ -3,6 +3,18 @@
 _2026-07-27._ Investigation systématique (skill `systematic-debugging`) de l'écart entre notre
 portage Python du modèle **CALIB** de MOSAICA et les résultats publiés par Chopin et al. (2015).
 
+> **⚠ Partiellement corrigé le même jour** par
+> `2026-07-27-modalites-solveur-plantain-design.md`, à lire ensuite. Ce qui tient : la fidélité
+> du portage (objectif, AVERS, économie, mapping, bans). Ce qui change :
+> - **Le blocage #2 (« gap MIP ») n'est pas une cause majeure.** Mesuré : le plan observé vaut
+>   15 % de moins que l'optimum sous notre propre objectif, et trois graines HiGHS donnent
+>   0,15 point de PAD d'écart. La frontière plate prairie/canne est réelle mais pèse ~3 %.
+> - **Le blocage #1 se précise** : l'article travaille sur **2010** (nous 2017) ; à parcelles et
+>   hectares quasi identiques il a 5 336 fermes contre nos 4 638 — de la concentration foncière,
+>   pas un échantillonnage différent.
+> - **La cause dominante manquait** : le plantain (+20,9 M€ sur un écart de 12,8 M€), et la
+>   contrainte qui le borne (`Eq_BC_QUOTA_MAX`) existe dans le GAMS comme dans l'article.
+
 ## La question
 
 L'article annonce, pour son modèle **CALIB** (celui que valide le §3.1) :

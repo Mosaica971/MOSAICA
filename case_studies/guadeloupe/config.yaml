@@ -284,13 +284,51 @@ constraints:
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: le
       threshold: 50000
+  # bc_quota_max -- ENABLED 2026-07-27, AND THE ONE DELIBERATE DEVIATION FROM THE CALIB BLOCK.
+  # Read this before touching it.
+  #
+  # Eq_BC_QUOTA_MAX (MODELE.txt:385) is commented out of BOTH GAMS model blocks (lines 551 and
+  # 668) -- so switching it on is a departure from CALIB, the first since the calibration
+  # chantier closed on 2026-07-23. It is defensible on three independent grounds:
+  #   * the ARTICLE describes it (Eq. 6): "maximum thresholds ... current consumption for
+  #     non-exported crops, such as plantain, based on the sum of production for local market
+  #     and importation (respectively 4500 and 150 tons)" -> 4650 t;
+  #   * the GAMS parameter is live at 40 000 t with the author's own computation in the comment
+  #     right under it: "140 t d'importations + 350 ha a 18 T ::: fixe a 6440";
+  #   * our OWN observed 2017 plantain output is 3827 t (147 ha x 26 t/ha) -- within 18% of the
+  #     article's 2010 market figure, from two independent sources seven years apart.
+  # Threshold set to the GAMS author's 6440 t: sourced, not fitted. See below on why the exact
+  # value does not matter.
+  #
+  # WHY IT MATTERS. Plantain was the single dominant calibration error: 74 757 t on 2875 ha
+  # against 147 ha observed, and BC alone accounted for +20.9 MEUR of the 12.8 MEUR by which
+  # the optimum beat the observed plan. The substitution is banana -> plantain (1298 ha,
+  # concentrated in South-East Basse-Terre, the only sub-region far off the article's rate).
+  # BC_BT is 11 386 EUR/ha at Var_Rdt 0.20 with no subsidy AND no rotation duty; BA_INT is
+  # better per hectare (9099 vs 7971 at AVERS 1.2) but Eq_BA_JA forces 20% fallow (116 EUR/ha),
+  # blending it down to 7602. Plantain wins by 4.9%. It is NOT the labour cap -- median
+  # saturation is 48.6% on the 138 farms that switch.
+  #
+  # WHY THIS IS NOT THE FORCING THAT WAS REJECTED ON 2026-07-23. The "market ceiling"
+  # experiments rejected then were calibrated ON the observed acreage, so the target crop's PAD
+  # fell to zero by construction. Here the threshold sweep (4650 / 6440 / 9240 / 15000 / 40000
+  # / off) shows a FLAT plateau from 4650 to 9240 t -- PAD 31.2-31.7, inside the 0.15-point
+  # solver noise -- and its optimum sits at 9240 t (x2.4 the observed tonnage), NOT at the
+  # tightest value. A fitted knob would improve monotonically towards the observed figure; this
+  # one does not. Plantain still lands at 247 ha against 147 observed.
+  #
+  # MEASURED (full solves, real dataset): PAD 48.4 -> 31.7, farm types 64.0 -> 67.0, plots
+  # 56.0 -> 59.8, area 64.3 -> 69.0, and export banana recovers from 978 to 2213 ha against
+  # 1921 observed -- without any constraint naming it. Cost: 3.7% of the objective.
+  # Set enable: false to return to strict CALIB fidelity. Full reasoning:
+  # docs/superpowers/specs/2026-07-27-modalites-solveur-plantain-design.md.
   - name: territory_production_bound
-    enable: false
+    enable: true
     args:
-      label: bc_quota_max  # plantain: cap <= 40,000 t (disabled)
+      label: bc_quota_max  # plantain: cap <= 6,440 t (market outlet -- read the block above)
       groups: [{crops: *SC_BC, use_yield: true, rate_multiplier: 1.0}]
       sense: le
-      threshold: 40000
+      threshold: 6440
   - name: territory_production_bound
     enable: true
     args:

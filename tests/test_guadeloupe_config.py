@@ -24,13 +24,20 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     assert enabled_constraints[0] == "at_most_one_crop_per_plot"
     assert enabled_constraints.count("farm_area_share_max") == 2
     assert enabled_constraints.count("farm_area_ratio_min") == 2
-    assert enabled_constraints.count("territory_production_bound") == 2
+    # 3 since 2026-07-27: ba_quota_max, cs_quota_max, and bc_quota_max -- the plantain market
+    # ceiling (Eq_BC_QUOTA_MAX / article Eq. 6), enabled at the GAMS author's 6440 t. It is the
+    # one deliberate deviation from the CALIB block; read its config comment before touching it.
+    enabled_bounds = {
+        e["args"]["label"] for e in config["constraints"]
+        if e["enable"] and e["name"] == "territory_production_bound"
+    }
+    assert enabled_bounds == {"ba_quota_max", "cs_quota_max", "bc_quota_max"}
     # cs_gfa stays off: it needs more cane labour on 7 GFA farms than farm_labor_hours_max
     # grants them, so the two together are unsatisfiable on the real data. Read the comment
     # above its config entry before flipping it.
     assert "cs_gfa_minimum_share" not in enabled_constraints
     assert "farm_labor_hours_max" in enabled_constraints
-    assert len(enabled_constraints) == 8
+    assert len(enabled_constraints) == 9
     assert {
         e["args"]["attribute"] for e in config["eligibility_criteria"] if e["enable"]
     } == {"ALTITUDE", "PENTE", "PLUVIO_PARC", "SURF_HA"}

@@ -41,6 +41,34 @@ jeu parcellaire local ; si un jour une statistique publique est disponible, la c
 23 578 ha cultivés de `reference_land_use.csv` trancherait la question du périmètre (l'article
 travaille sur 5 336 fermes, nous 4 638).
 
+**`Eq_BC_QUOTA_MAX` (plafond plantain) — instruit, mesuré et ACTIVÉ à 6 440 t le 2026-07-27.**
+Spec : `docs/superpowers/specs/2026-07-27-modalites-solveur-plantain-design.md`. Le plantain
+était **la** cause dominante de l'écart de calibration (+20,9 M€ sur un écart total de 12,8 M€ ;
+la substitution banane→plantain de 1 298 ha explique à elle seule l'effondrement du Sud-Est
+Basse-Terre, notre unique sous-région hors norme). L'équation existe dans le GAMS mais est
+commentée des deux blocs modèles ; **l'article la décrit pourtant explicitement (Éq. 6)**.
+Effet : PAD **48,4 → 31,7 %**, types **64,0 → 67,0 %**, surface **64,3 → 69,0 %**, et la banane
+export remonte de 978 à 2 213 ha contre 1 921 observés — sans qu'aucune contrainte ne la
+nomme. Coût 3,7 % d'objectif. Le balayage du seuil (4 650 → 40 000 t) montre un **palier plat**
+dont l'optimum est **loin** de l'observé : la contrainte corrige un mécanisme, elle ne recopie
+pas une réponse. Première déviation assumée au bloc `CALIB` ; `enable: false` y ramène.
+→ Reste à faire : `outputs/reference_2017/` n'a pas besoin d'être reconstruit (il ne dépend pas
+des contraintes), mais les runs **antérieurs** au 2026-07-27 ne sont plus comparables au nouveau
+défaut — le préciser si on les ressort. Et le seuil est un chiffre de **2010** : si une
+statistique de consommation de plantain plus récente apparaît, la substituer.
+
+**Pistes fermées le 2026-07-27, ne pas rouvrir sans élément neuf.**
+- *Le solveur.* Trois graines HiGHS donnent 48,44 / 48,29 / 48,31 de PAD (0,025 % d'écart
+  d'objectif) : l'arbitraire de branchement vaut 0,15 point. Et le plan observé, valorisé au
+  mieux sous notre propre objectif, est **15 % sous l'optimum** — quinze fois le gap MIP. Le
+  diagnostic « frontière plate prairie/canne » du matin reste juste mais pèse 3 % du problème.
+- *Retirer des contraintes absentes du `CALIB`.* Il n'y en a que deux (`SURF_PARC_MAX`, et
+  l'exemption d'irrigation manquante sur `PLUVIO_MIN`) et elles sont **inertes** : +0 paire
+  éligible. Le portage est propre de ce côté.
+- *Reproduire l'année de base de l'article.* Elle est **2010** ; `Data_RPG_Gwad` commence en
+  2012. Hors d'atteinte. (Au passage : leurs 5 336 fermes contre nos 4 638 sur le même nombre de
+  parcelles et d'hectares, c'est de la concentration foncière, pas un échantillonnage différent.)
+
 **Refactor transverse — livré le 2026-07-21.** Spec :
 `docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md`.
 Arborescence `guadeloupe/` par rôle (`pipeline/`, `domain/`, `model/`), fusion des helpers

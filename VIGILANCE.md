@@ -173,6 +173,114 @@ Le run `output_1` sur la machine neuve redonne exactement l'état documenté (PA
 64,0 %, parcelles 56,0 %, surface 64,3 %) : la reproductibilité est vérifiée. Le solve tient
 en **140 s** (308 847 variables après les suppressions), très loin des 30-55 min historiques.
 
+**RÉOUVERTURE 2026-07-27 (2) — modalités de l'article, impact du solveur, cause dominante.**
+Trois questions reposées, trois réponses chiffrées. Elles **invalident partiellement** le verdict
+du bloc précédent (« blocage #2 : le gap MIP ») et **identifient une cause dominante unique**.
+
+*(a) Les modalités de l'article ne sont pas celles qu'on lui prêtait.*
+1. **L'année de base de l'article est 2010, pas 2017** (« the crops grown on them in 2010 »,
+   recensement Agreste 2010) : 25 057 parcelles, 27 350 ha, 5 336 exploitations. Nous : 24 734
+   parcelles, 26 137 ha, 4 638 exploitations. **Région par région les parcelles et les hectares
+   collent à quelques % près** (CGT 1601/1540, NGT 5561/5269, NBT 4325/4251…) : c'est le **même
+   territoire et les mêmes champs**, avec 13 % d'exploitations en moins — sept ans de
+   concentration foncière (5,13 → 5,64 ha/ferme), pas « un sous-ensemble différent » comme le
+   disait le diagnostic du matin. `Data_RPG_Gwad` commençant en 2012, leur année de base est
+   **structurellement hors d'atteinte**.
+2. **Le PAD de l'article est par culture, jamais agrégé.** Éq. 7 somme sur les parcelles pour
+   **une activité** ; le seuil <15 % qualifie « 8 usages sur 10 ». Notre chiffre de tête (ligne
+   TOTAL) est une agrégation que l'article ne fait nulle part, et plus sévère. La métrique
+   comparable est `crops_within_threshold` (0/11 contre 8/10 — et leurs 10 usages fusionnent
+   vergers et agrumes). Lecture utile du 48,4 % : les totaux entrée/sortie s'équilibrant, il
+   signifie que **24,2 % de la surface observée porte la mauvaise culture** au niveau agrégé.
+3. **Table 5 compte les parcelles NC, nous les excluons.** Leur dénominateur est la base entière
+   (25 057 / 27 350 ha) et `Eq_NOCULT_NC` verrouille les NC : ce sont des accords gratuits. À
+   leur convention, `output_1` passe de 56,0 %/64,3 % à **60,5 % / 67,8 %** (2 537 parcelles /
+   2 559 ha NC des deux côtés). Quatre points relevaient de la définition.
+4. **Ni moyenne ni médiane** : Tables 4 et 5 sont des **rapports de sommes** (vérifié : la
+   moyenne de leurs 7 taux de surface donnerait 71 %, pas les 77 % publiés) — comme nos lignes
+   TOTAL. Et **l'article ne publie aucune table de PAD par exploitation** : le seuil « 20 % …
+   and farms » n'est jamais instancié, l'évaluation à l'échelle ferme *est* la matrice de types.
+   Notre médiane de 18,5 % est une métrique maison ; la statistique comparable est la part des
+   fermes sous seuil (2 312/4 588 = 50,4 %).
+5. **Six de nos sept sous-régions sont à 4–13 points de l'article** ; une seule s'effondre :
+   **Sud-Est Basse-Terre, 36,9 % contre 61,4 %** (surface 38 % contre 66 %). L'erreur est
+   localisée, pas diffuse.
+
+*(b) Le solveur est hors de cause, des deux côtés.*
+- **Le plan observé vaut 15 % de moins que l'optimum sous notre propre objectif.** Valorisé en
+  donnant à chaque parcelle la meilleure variante fine éligible de sa famille observée (borne
+  haute, contraintes de ferme ignorées) : **72,2 M€ contre 85,0 M€**. Le gap MIP est de 1 %.
+  L'écart à combler est **quinze fois** la tolérance. Le diagnostic « frontière plate
+  prairie/canne » du bloc précédent reste exact mais pèse ~0,4 M€ sur 12,8, soit **3 %**.
+- **Trois graines HiGHS** (défaut/7/42), même modèle, même gap : PAD 48,44 / 48,29 / 48,31,
+  types 64,04 / 63,97 / 63,91, objectif à 21 k€ près (0,025 %). **L'arbitraire de branchement
+  vaut 0,15 point de PAD.** Il n'y a pas de bouton solveur.
+- Le plan observé demande 5,68 M h contre un plafond de 6,25 M h : la main d'œuvre ne l'interdit
+  pas non plus.
+
+*(c) La cause dominante est le plantain, et la contrainte qui manque existe dans le GAMS.*
+Décomposition de l'écart de 12,8 M€ par groupe (objectif ajusté au risque) : **BC +20,9 M€**,
+CS +4,0, AN +3,7, MA +1,9, contre BA −9,4, PN −5,7, ME −1,5. **Le plantain vaut à lui seul plus
+que la totalité de l'écart.** Substitution dominante après prairie→canne : **banane export →
+plantain, 1 298 ha**, concentrée en Sud-Est Basse-Terre (BA 1 427 → 311 ha, BC 81 → 1 488 ha) —
+exactement la sous-région qui s'effondre. Mécanisme arithmétique : `BC_BT` 11 386 €/ha à
+`Var_Rdt` 0,20 sans subvention **et sans rotation obligatoire** ; `BA_INT` est meilleur à
+l'unité (9 099 contre 7 971 à AVERS 1,2) **mais `Eq_BA_JA` impose 20 % de jachère** (116 €/ha),
+ce qui ramène le mélange à 7 602 €/ha : **le plantain gagne de 4,9 %**. Ce n'est PAS le plafond
+de main d'œuvre (saturation médiane 48,6 % sur les 138 exploitations qui basculent).
+`Eq_BC_QUOTA_MAX` (MODELE.txt:385) est **commentée dans les deux blocs modèles** (lignes 551 et
+668) alors que **l'article la décrit, Éq. 6** : « maximum thresholds … current consumption for
+non-exported crops, such as plantain … (respectively 4500 and 150 tons) ». Le run produit
+**74 757 t** ; le paramètre GAMS vaut 40 000 t et **mord déjà**. Mesures :
+
+| Variante | PAD | Types | Parcelles | Surface | BC ha | BA ha | Objectif |
+|---|---|---|---|---|---|---|---|
+| base | 48,4 % | 64,0 % | 56,0 % | 64,3 % | 2 875 | 978 | 84,98 M€ |
+| plafond 40 000 t (paramètre GAMS) | **38,1 %** | 65,4 % | 58,7 % | 67,7 % | 1 527 | **1 993** | 84,29 M€ |
+| plafond 6 440 t (commentaire GAMS) | **31,7 %** | **67,0 %** | **59,8 %** | **69,0 %** | 247 | 2 213 | 81,79 M€ |
+| _observé_ | — | — | — | — | _147_ | _1 921_ | — |
+
+À 40 000 t la banane revient à 1 993 ha contre 1 921 observés (PAD 3,8 %, contre 49 %) pour
+**0,8 % d'objectif**. Le plantain reste à 247 ha contre 147 observés même au plafond serré :
+**la contrainte ne force pas la culture** — contrairement aux « plafonds de marché » écartés le
+2026-07-23, qui étaient calés *sur* l'observé (PAD nul par construction). Les trois valeurs
+candidates (40 000 t paramètre, 6 440 t commentaire de l'auteur, 4 650 t article) sont toutes
+**exogènes à l'assolement observé**.
+
+**Balayage du seuil — le test qui distingue une correction d'un ajustement.**
+
+| seuil (t) | 4 650 | 6 440 | 9 240 | 15 000 | 25 000 | 40 000 | désactivé |
+|---|---|---|---|---|---|---|---|
+| PAD | 31,7 | 31,7 | **31,2** | 34,4 | 36,4 | 38,1 | 48,4 |
+| types | 66,8 | 67,0 | **67,1** | 65,8 | 65,6 | 65,4 | 64,0 |
+| surface | 69,0 | 69,0 | **69,3** | 68,6 | 68,2 | 67,7 | 64,3 |
+| plantain (ha) | 179 | 247 | 355 | 577 | 960 | 1 527 | 2 875 |
+
+Deux lectures. (1) **Palier plat de 4 650 à 9 240 t** — facteur 2 sur le seuil, 0,5 point de
+PAD, soit à peine plus que le bruit de solveur mesuré (0,15) : le résultat ne dépend pas de la
+valeur, seulement de l'existence d'un plafond à l'échelle du marché. (2) **L'optimum du palier
+est à 9 240 t (×2,4 l'observé), pas au seuil le plus serré** : un paramètre servant de variable
+d'ajustement s'améliorerait de façon monotone en se rapprochant de l'observé. C'est la
+différence de fond avec les plafonds écartés le 2026-07-23.
+
+**ACTIVÉ le 2026-07-27 à 6 440 t** (chiffre de l'auteur du GAMS ; corroboré par l'Éq. 6 de
+l'article, 4 650 t, et par notre propre production observée, 3 827 t). Valeur choisie parce
+qu'elle est **sourçable**, pas parce qu'elle note le mieux — le palier rendant le choix
+indifférent au score, prendre 9 240 t pour 0,5 point serait précisément le sur-ajustement qu'on
+évite. **C'est la première déviation assumée au bloc `CALIB`** depuis la clôture du 2026-07-23 :
+`enable: false` y ramène. _2026-07-27._
+
+**Rien à retirer côté sur-contraintes.** Diff équation par équation contre la liste `CALIB`
+(MODELE.txt:450-565). Deux règles n'ont pas d'équivalent GAMS et se révèlent **inertes** :
+`SURF_PARC_MAX` (GAMS n'a que `Eq_SURF_MIN_Parc` ; la colonne vaut 1 000 ha pour les 84
+cultures) et l'absence d'exemption d'irrigation sur `PLUVIO_MIN` (`Eq_PLUVIOMIN_PARC` a
+`AND IRRIG_PARC = 0` ; mais `PLUVIO_MIN` = 0 et `PLUVIO_MAX` = 10 000 partout). Retirer les
+deux : **+0 paire éligible**, plancher de PAD inchangé à 348 ha. Le portage est propre.
+Résolu au passage : le recouvrement `Eq_ME_MG` / règle melon `REGION_CODE` (entrée « Mineur »
+plus bas) est sans enjeu — 8 647 parcelles avec les deux, 8 683 sans la seconde. Et le melon est
+éligible sur 7 721 parcelles pour 0 ha planté : son PAD de 100 % est **économique**, pas
+structurel (l'article échoue aussi sur le melon, à 100 %, pour une autre raison). _2026-07-27._
+
 **Résultat des corrections fidèles (runs complets)** : baseline output_2 → output_5
 (PN_PIQ_CLD désactivé + Eq_AN_PA porté, gap 1 %) : PAD **49,3→48,4 %**, types **63,3→64,0 %**,
 parcelles **55,1→56,0 %**, surface **63,1→64,3 %**. Gains modestes mais **cohérents sur toutes les
