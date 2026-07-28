@@ -57,6 +57,22 @@ inside `generate_report`):
 .venv/Scripts/python scripts/evaluate_calibration.py --all               # every run
 ```
 
+**The 2017 reference state** (~5s, no solve, deterministic) is the observed situation every
+run is scored against, built as a standalone artifact rather than only as a run's "input"
+side:
+
+```bash
+.venv/Scripts/python scripts/build_reference_state.py        # -> outputs/reference_2017/
+.venv/Scripts/python scripts/compare_to_reference.py outputs/output_1
+.venv/Scripts/python scripts/pad_all_scales.py outputs/output_1   # PAD at five scales
+```
+
+`outputs/reference_2017/REFERENCE.md` documents how it is built and — more usefully — what it
+cannot say: the observed side has no fine crops (hence the low/high bracket on every
+indicator), and part of the observed acreage is unreproducible by construction (a floor under
+the PAD). Rebuild it whenever `config.yaml` changes year, `zone_filter` or
+`baseline_representative_crops`.
+
 **Invariance check before/after a refactor** — `scripts/golden_snapshot.py` builds the full
 real dataset and every indicator block on a real allocation (~7s, **no MILP solve**, so it is
 exactly reproducible) and serialises ~570 numeric checksums:

@@ -195,7 +195,7 @@ def test_solve_with_progress_does_not_record_history_on_failure(tmp_path):
     model.infeasible_constraint = pyo.Constraint(expr=model.Y["P1", "C1"] == 0)
     history = SolveHistory(path=tmp_path / "history.json")
 
-    with pytest.raises(RuntimeError, match="optimal"):
+    with pytest.raises(RuntimeError, match="did not reach a usable solution"):
         solve_with_progress(model, _SOLVE_CONFIG, case_study="test_case", history=history)
 
     assert "test_case" not in history._data

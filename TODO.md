@@ -30,6 +30,17 @@ lui-même.
 résultats du vrai run GAMS, ils trancheraient le doute sur l'aversion et permettraient une
 comparaison directe. Sans eux, 51 % est la limite fidèle reproductible.
 
+**Situation de référence — livrée le 2026-07-27.** `scripts/build_reference_state.py` écrit
+`outputs/reference_2017/` (état initial observé : assolement brut/résolu, déclinaisons
+région/île/commune, typologie et AVERS, indicateurs encadrés, plancher de PAD par groupe) et
+`scripts/compare_to_reference.py` met un run en face (`comparaison_reference.md` dans le run).
+Aucun solve, déterministe. Le `REFERENCE.md` produit documente ce que la référence **ne peut
+pas** dire — c'est la partie qui compte. Reste ouvert : la référence n'a **aucune assise
+externe** (pas de recoupement Agreste/DAAF des surfaces 2017), donc elle vaut ce que vaut le
+jeu parcellaire local ; si un jour une statistique publique est disponible, la comparer aux
+23 578 ha cultivés de `reference_land_use.csv` trancherait la question du périmètre (l'article
+travaille sur 5 336 fermes, nous 4 638).
+
 **Refactor transverse — livré le 2026-07-21.** Spec :
 `docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md`.
 Arborescence `guadeloupe/` par rôle (`pipeline/`, `domain/`, `model/`), fusion des helpers
@@ -98,6 +109,13 @@ reporting seul, aucun effet sur l'allocation, donc aucun solve réel nécessaire
   (CS, CF, BC), au lieu d'un représentant global (`baseline_representative_crops`).
   Vérifier au passage s'il existe des valeurs `init` par agrégat côté GAMS
   (`STOCK_*_init`, `RESULTATS.txt:1853`) à porter comme représentantes officielles.
+  → **Chiffré le 2026-07-27** : la représentante n'est éligible que sur **31 %** des hectares
+  de canne observés, 61 % du maraîchage, 63 % du plantain (table complète dans
+  `outputs/reference_2017/csv/reference_representative_eligibility.csv`, analyse dans
+  `VIGILANCE.md`). Ce n'est plus une amélioration cosmétique : la représentante inéligible
+  fausse l'économie de la référence **et** le plafond de main d'œuvre, donc l'optimum. Le
+  correctif naturel est de choisir la représentante **par parcelle** parmi les variantes
+  éligibles (la borne « bas/haut » de `build_reference_state.py` fait déjà ce calcul).
 - **Classeur Excel à remplir, type bilan carbone** — export d'un fichier avec des cases
   vides à saisir par l'utilisateur (hypothèses, facteurs d'émission, postes non couverts par
   le modèle), réinjectable ensuite dans le reporting. À cadrer : périmètre exact des postes,

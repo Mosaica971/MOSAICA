@@ -152,6 +152,27 @@ La conclusion « aucun bug de sur-attractivité » du 2026-07-23 tient (économi
 change, c'est de **nommer le gap MIP et la provenance des données** comme les vraies causes, pas
 un plateau mystérieux.
 
+**Situation de référence formalisée + reproduction sur machine neuve (2026-07-27).** L'état
+initial observé est désormais un artefact à part entière : `scripts/build_reference_state.py`
+→ `outputs/reference_2017/` (assolement observé, typologie, indicateurs encadrés, plancher de
+PAD), et `scripts/compare_to_reference.py` met un run en face. Trois choses qu'il fallait
+nommer et qui ne l'étaient pas :
+1. **Le plancher de PAD imposé par l'éligibilité est de 1,5 %** (348 ha sur 23 578 : agrumes
+   52, vergers 167, canne 84, plantain 26…), le double si l'on compte l'excès créé ailleurs.
+   **L'écart de 48 % ne s'explique donc PAS par le masque d'éligibilité** — c'est un choix
+   d'optimisation, pas une impossibilité. Les vergers et agrumes irreproductibles le sont
+   d'ailleurs pour une raison de portage (`Eq_VE_PLUIE` interdite partout, bug GAMS fidèle),
+   pas d'agronomie.
+2. **Le PAD par exploitation a une médiane de 18,5 % pour une moyenne de 51,5 %** : la moitié
+   des fermes est sous le seuil de 20 % de l'article, l'écart est concentré sur une minorité
+   (quartiles 0 / 18,5 / 88,7). Ne pas lire « 48 % » comme un écart uniforme.
+3. **Plusieurs indicateurs du run tombent dans la fourchette d'incertitude de l'observé**
+   lui-même (subvention, revenu, azote, ETP) : l'assolement 2017 n'étant connu qu'au niveau
+   agrégé, l'écart au « central » n'y démontre rien. Cf. REFERENCE.md §4.1.
+Le run `output_1` sur la machine neuve redonne exactement l'état documenté (PAD 48,4 %, types
+64,0 %, parcelles 56,0 %, surface 64,3 %) : la reproductibilité est vérifiée. Le solve tient
+en **140 s** (308 847 variables après les suppressions), très loin des 30-55 min historiques.
+
 **Résultat des corrections fidèles (runs complets)** : baseline output_2 → output_5
 (PN_PIQ_CLD désactivé + Eq_AN_PA porté, gap 1 %) : PAD **49,3→48,4 %**, types **63,3→64,0 %**,
 parcelles **55,1→56,0 %**, surface **63,1→64,3 %**. Gains modestes mais **cohérents sur toutes les
@@ -236,6 +257,20 @@ variante représentante. **Conséquence à ne pas perdre de vue** : l'hypothèse
 l'allocation**. Changer une représentante change le plafond, donc l'optimum. Les 50 fermes à
 plafond nul sont exactement celles sans surface cultivée observée, ce qui est correct.
 _2026-07-21._
+
+**Chiffré le 2026-07-27 : la représentante est souvent une culture que le modèle lui-même
+interdirait sur la parcelle qu'elle représente.** Part de la surface observée où la
+représentante est éligible : **canne 31 %** (`CS_NGT_NISM` est le système du Nord
+Grande-Terre, cantonné à trois communes, et vaut pourtant les 12 813 ha de canne du
+territoire), maraîchage 61 % (`MA_ROTA` exige l'irrigation), plantain 63 %, banane export
+69 %, igname 71 %, vergers 46 %, agrumes 48 %. Seules prairie, melon et jachère sont à 100 %.
+Deux effets : (a) l'économie de la référence est valorisée par des systèmes techniques
+impossibles là où ils sont comptés — visible au fait que le central sort par le haut de la
+fourchette des variantes éligibles sur ventes, revenu, heures, azote, GES, IFT ; (b) le
+plafond de main d'œuvre hérite du même biais. Table complète :
+`outputs/reference_2017/csv/reference_representative_eligibility.csv`. C'est l'argument
+chiffré derrière l'entrée « cultures représentantes conscientes de la région » de `TODO.md`.
+_2026-07-27._
 
 ### Majeur — Déviation assumée du GAMS sur `Eq_CS_GFA`
 `cs_gfa_minimum_share` est réactivée avec `skip_when_no_eligible_area: true`. Trois fermes

@@ -285,7 +285,7 @@ def test_cs_gfa_stays_infeasible_by_default_for_a_farm_with_no_eligible_cane():
     # solve_model turns a non-optimal termination into a loud RuntimeError.
     model = build_crop_allocation_model(_gfa_inputs_with_no_eligible_cane(), _gfa_config())
 
-    with pytest.raises(RuntimeError, match="optimal"):
+    with pytest.raises(RuntimeError, match="did not reach a usable solution"):
         solve_model(model, _gfa_config())
 
 
