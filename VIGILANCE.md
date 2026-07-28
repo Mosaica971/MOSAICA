@@ -289,6 +289,69 @@ contrainte CALIB) — pas de forçage. Confirme le plateau ~48 %/64 % comme stru
 intractabilité B&B), l'article atteignant 81 %/<15 % sur SES 5336 fermes avec le même modèle.
 _2026-07-27._
 
+### Majeur — Le déficit de prairie : diagnostic complet (2026-07-27)
+Premier poste d'erreur depuis l'activation du plafond plantain : **6 109 ha observés → 2 980
+simulés** (`output_2`, PAD 51 %). 3 489 ha de prairie observée ne sont pas reconduits (360 ha
+de prairie apparaissent ailleurs). Analyse parcellaire, sans solve.
+
+**Où elle va.** 83 % en canne (2 881 ha), 12 % en banane (413 ha), le reste dispersé.
+Géographiquement c'est **Marie-Galante** qui s'effondre : 1 357 → 228 ha (−83 %), et la seule
+variante `CS_MG_NISM` absorbe **1 042 ha**. Par type observé, seuls les éleveurs (AVERS 2,4) et
+canniers-éleveurs (2,3) en gardent — 54 % et 32 % ; tous les autres types en perdent 78 à 100 %.
+
+**Pourquoi.** Décomposition des 3 489 ha (la prairie est éligible sur **100 %** d'entre eux) :
+1. **2 149 ha — le modèle préfère franchement autre chose** (+2,42 M€). Économie légitime.
+2. **1 258 ha — le choix est *moins bon* à l'hectare** (−0,45 M€ au total) **mais le retour à la
+   prairie est impossible à solution figée, faute d'heures.** La prairie demande 126 h/ha contre
+   12,7 pour la canne : rebasculer coûte +113 h/ha que la ferme a déjà dépensées ailleurs.
+3. **66 ha (49 k€) de résidu réellement inexpliqué.**
+
+**Ceci corrige le « blocage #2 » du 2026-07-27 matin.** Celui-ci concluait que 1 403 ha partaient
+en canne « alors que la prairie était éligible ET meilleure — impossible à l'optimum exact »,
+et l'imputait au gap MIP. Le raisonnement comparait des marges ajustées **parcelle par
+parcelle** en oubliant que l'objectif est séparable mais **pas les contraintes** :
+`Eq_MO_MAX_Expl` couple toutes les parcelles d'une exploitation. Ces hectares ne sont pas un
+artefact de solveur (les trois graines donnent PN à 2 576 / 2 581 / 2 571 ha) : ils sont
+l'optimum d'un problème couplé.
+
+**Le bloc de Marie-Galante est fragile, pas faux.** `CS_MG_NISM` vaut 1 617,1 €/ha et `PN_PIQ`
+1 602,0, tous deux à `Var_Rdt` nul : la canne gagne de **15 €/ha, soit 0,94 %, indépendamment de
+l'aversion**. 1 042 ha — 30 % du déficit — tiennent sur un écart inférieur au gap MIP et à
+toute incertitude de données plausible. Resserrer le gap ne changerait rien (la canne gagne
+vraiment) ; un point de subvention en plus ou en moins inverserait le résultat.
+
+**La main d'œuvre de la prairie diverge de la Table 1 de l'article — seule ligne dans ce cas.**
+Contrôle des six systèmes de la Table 1 : rendements et marges collent (banane −0,7 %, igname
+0,0 %, plantain 0,0 %, ananas +0,2 %, prairie +0,8 %, canne +4,6 %) et la main d'œuvre aussi
+(banane 1 558 vs 1 560, igname 991 vs 990, plantain 609 vs 620, ananas 436 vs 450, canne 12,7
+vs 15) — **sauf la prairie : 126 h/ha contre 70 publiées, +80 %**. Ce n'est **pas** un bug de
+portage : recalculée à la main depuis `Data_OTK` avec la formule `ENTREES.txt:463-465`, la
+valeur tombe exactement sur 126,0 (ABREUVEMENT 360×0,20 = 72 h, DEPLACEMENT_PIQ 180×0,25 = 45,
+SAILLIS 6, TRAITEMENT_BOV 3 ; `Duree_Cycle` = 12 donc l'annualisation est neutre). C'est une
+divergence entre les tables 2017 et l'article de 2010. Sans effet décisif de toute façon : même
+à 70 h/ha la prairie serait à 22,9 €/h contre 99-156 pour la canne.
+
+**Le vrai mécanisme manquant, nommé précisément.** Les 126 h/ha de la prairie sont **entièrement
+du travail de troupeau** — abreuvement, déplacement du piquet, saillies, traitements bovins ;
+aucune opération agronomique. Le modèle peut donc **liquider un cheptel gratuitement** et
+redéployer 126 h/ha de travail d'éleveur vers la canne (12,7 h/ha) ou les cultures. Ce qui
+manque n'est pas l'économie de l'élevage — elle est bien dans la marge de `PN_PIQ` (bœuf inclus,
+0,66 t/ha à 5 400 €/t) — mais une **variable d'état** interdisant la liquidation sans coût.
+L'article le reconnaît lui-même en §4.5.
+
+**`Eq_PN_PROD_MIN` : la raison de son rejet était la mauvaise.** Le verdict du 2026-07-23
+(« rend le MILP intraitable ») laissait croire à une infaisabilité. Vérifié : **0 exploitation
+sur 4 638** est incapable de porter sa propre prairie observée, même en mettant partout ailleurs
+la culture éligible la moins gourmande en heures. Le plancher est donc **faisable** ; il reste à
+écarter, mais pour la bonne raison — son seuil GAMS (`QUOTA_PN_PIQ_MIN` = 6 096) **est**
+l'assolement observé (6 109 ha), c'est un forçage circulaire, et il est dans le bloc `SCENARIO`,
+pas `CALIB`. Contrairement au plafond plantain, aucune source exogène ne le fonde.
+
+**Ce qu'il faudrait pour le refermer** : une statistique externe de cheptel (effectifs bovins
+Agreste/DAAF × chargement ha/UGB) donnerait un plancher de surface fourragère **exogène à
+l'assolement observé** — le seul correctif non circulaire. Donnée absente du dépôt. Cf. `TODO.md`.
+_2026-07-27._
+
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
 `NC` : une parcelle non cultivée **diminue** le dénominateur et remonte toutes les parts

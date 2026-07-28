@@ -57,6 +57,25 @@ des contraintes), mais les runs **antérieurs** au 2026-07-27 ne sont plus compa
 défaut — le préciser si on les ressort. Et le seuil est un chiffre de **2010** : si une
 statistique de consommation de plantain plus récente apparaît, la substituer.
 
+**Déficit de prairie — diagnostiqué le 2026-07-27, une seule voie reste ouverte et elle est
+bloquée sur une donnée externe.** C'est le premier poste d'erreur restant (6 109 → 2 980 ha).
+Diagnostic complet dans `VIGILANCE.md`, entrée dédiée. Résumé : 62 % du déficit est de
+l'économie légitime, 36 % l'effet de couplage du plafond de main d'œuvre (revenir à la prairie
+coûte +113 h/ha), 2 % de résidu. 30 % du total (Marie-Galante, 1 042 ha) tient sur un écart de
+**0,94 %** entre `CS_MG_NISM` (1 617 €/ha) et `PN_PIQ` (1 602) — fragile, pas faux.
+→ **À faire si la donnée arrive** : les 126 h/ha de `PN_PIQ` sont *entièrement* du travail de
+troupeau, donc le modèle liquide un cheptel gratuitement. Le seul correctif non circulaire est
+un **plancher de surface fourragère exogène** : effectifs bovins (Agreste / DAAF / recensement
+agricole) × chargement ha/UGB. `Eq_PN_PROD_MIN` existe côté GAMS et est **faisable** (vérifié :
+0 exploitation sur 4 638 en défaut d'heures — le verdict « intraitable » de juillet ne voulait
+pas dire infaisable), mais son seuil GAMS *est* l'assolement observé : le brancher tel quel
+serait le forçage circulaire qu'on refuse ailleurs. Il ne devient légitime qu'avec un seuil
+venu du cheptel.
+→ **Ne pas** re-tuner l'AVERS ni « corriger » les 126 h/ha : la main d'œuvre de la prairie
+diverge bien de la Table 1 de l'article (126 contre 70, seule ligne dans ce cas), mais elle est
+recalculée exactement depuis `Data_OTK` par la formule GAMS — ce n'est pas un bug, et même à
+70 h/ha la prairie resterait à 22,9 €/h contre 99-156 pour la canne.
+
 **Pistes fermées le 2026-07-27, ne pas rouvrir sans élément neuf.**
 - *Le solveur.* Trois graines HiGHS donnent 48,44 / 48,29 / 48,31 de PAD (0,025 % d'écart
   d'objectif) : l'arbitraire de branchement vaut 0,15 point. Et le plan observé, valorisé au
