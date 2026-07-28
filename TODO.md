@@ -57,24 +57,36 @@ des contraintes), mais les runs **antérieurs** au 2026-07-27 ne sont plus compa
 défaut — le préciser si on les ressort. Et le seuil est un chiffre de **2010** : si une
 statistique de consommation de plantain plus récente apparaît, la substituer.
 
-**Déficit de prairie — diagnostiqué le 2026-07-27, une seule voie reste ouverte et elle est
-bloquée sur une donnée externe.** C'est le premier poste d'erreur restant (6 109 → 2 980 ha).
-Diagnostic complet dans `VIGILANCE.md`, entrée dédiée. Résumé : 62 % du déficit est de
-l'économie légitime, 36 % l'effet de couplage du plafond de main d'œuvre (revenir à la prairie
-coûte +113 h/ha), 2 % de résidu. 30 % du total (Marie-Galante, 1 042 ha) tient sur un écart de
-**0,94 %** entre `CS_MG_NISM` (1 617 €/ha) et `PN_PIQ` (1 602) — fragile, pas faux.
-→ **À faire si la donnée arrive** : les 126 h/ha de `PN_PIQ` sont *entièrement* du travail de
-troupeau, donc le modèle liquide un cheptel gratuitement. Le seul correctif non circulaire est
-un **plancher de surface fourragère exogène** : effectifs bovins (Agreste / DAAF / recensement
-agricole) × chargement ha/UGB. `Eq_PN_PROD_MIN` existe côté GAMS et est **faisable** (vérifié :
-0 exploitation sur 4 638 en défaut d'heures — le verdict « intraitable » de juillet ne voulait
-pas dire infaisable), mais son seuil GAMS *est* l'assolement observé : le brancher tel quel
-serait le forçage circulaire qu'on refuse ailleurs. Il ne devient légitime qu'avec un seuil
-venu du cheptel.
-→ **Ne pas** re-tuner l'AVERS ni « corriger » les 126 h/ha : la main d'œuvre de la prairie
-diverge bien de la Table 1 de l'article (126 contre 70, seule ligne dans ce cas), mais elle est
-recalculée exactement depuis `Data_OTK` par la formule GAMS — ce n'est pas un bug, et même à
-70 h/ha la prairie resterait à 22,9 €/h contre 99-156 pour la canne.
+**Plancher de prairie — donnée trouvée et plancher ACTIVÉ le 2026-07-28.** Spec :
+`docs/superpowers/specs/2026-07-28-plancher-prairie-design.md`. La Statistique agricole annuelle
+2017 (Agreste, *Mémento Guadeloupe* éd. 2019) fournit l'assise exogène qui manquait :
+9 595 ha de surfaces toujours en herbe et 40 449 têtes de bovins (≈ 29 771 UGB), soit
+3,10 UGB/ha — exactement le chargement des recensements 2010 et 2020 (3,13 et 2,45). Le modèle
+sans plancher impliquait **9,99 UGB/ha**, agronomiquement impossible : le défaut est prouvé hors
+modèle. `pn_prod_min` activé à **6 096 ha** (paramètre GAMS, 27 % sous les 8 341 ha exogènes).
+Effet : types **67,0 → 86,9 %**, parcelles **59,8 → 67,6 %**, surface **69,0 → 77,1 %**, canne
+revenue à 12 782 ha contre 12 813 observés. Ne pas citer le PAD territorial (6,6 %) : le
+plancher épingle la prairie.
+→ **Deux points ouverts.** (a) Ce sont désormais **le périmètre parcellaire**, et non le modèle,
+qui borne la prairie : les ~3 500 ha d'herbe non déclarée sont des parcelles absentes de
+l'univers, pas des parcelles mal étiquetées (notre canne est à 98 % d'Agreste). Les récupérer
+demanderait d'élargir le jeu parcellaire. (b) Le PAD résiduel est porté par les **petites
+cultures** — ananas (461 ha contre 133), vergers (8 contre 311), melon (~0 contre 189), jachère
+(418 contre 621) : aucune n'a de plafond ou plancher sourcé à ce jour, et c'est le prochain
+gisement.
+→ **Assise externe de la référence : point clos.** Notre jeu couvre 87 % de la SAU 2017 et
+restitue la canne à 98 %, les fruits à 90 %.
+
+**Déficit de prairie — diagnostic du 2026-07-27, conservé pour l'historique.** Il portait sur
+l'état sans plancher (6 109 → 2 980 ha) ; le plancher ci-dessus l'a refermé. Détail dans
+`VIGILANCE.md`, entrée dédiée. Résumé : 62 % du déficit était de l'économie légitime, 36 %
+l'effet de couplage du plafond de main d'œuvre (revenir à la prairie coûte +113 h/ha), 2 % de
+résidu ; et 30 % du total (Marie-Galante, 1 042 ha) tenait sur un écart de **0,94 %** entre
+`CS_MG_NISM` (1 617 €/ha) et `PN_PIQ` (1 602) — fragile, pas faux.
+→ **Ne pas** re-tuner l'AVERS ni « corriger » les 126 h/ha de `PN_PIQ` : la main d'œuvre de la
+prairie diverge bien de la Table 1 de l'article (126 contre 70, seule ligne dans ce cas), mais
+elle est recalculée exactement depuis `Data_OTK` par la formule GAMS — ce n'est pas un bug, et
+même à 70 h/ha la prairie resterait à 22,9 €/h contre 99-156 pour la canne.
 
 **Pistes fermées le 2026-07-27, ne pas rouvrir sans élément neuf.**
 - *Le solveur.* Trois graines HiGHS donnent 48,44 / 48,29 / 48,31 de PAD (0,025 % d'écart

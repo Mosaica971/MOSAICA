@@ -402,8 +402,46 @@ constraints:
       groups: [{crops: [ME], use_yield: true, rate_multiplier: 1.0}]
       sense: ge
       threshold: 4135
+  # pn_prod_min -- ENABLED 2026-07-28, the SECOND deliberate deviation from the CALIB block
+  # (Eq_PN_PROD_MIN sits in SCENARIO, MODELE.txt:403). Read this before touching it.
+  #
+  # WHY A FLOOR AT ALL -- established from data OUTSIDE the model. Agreste's Statistique
+  # agricole annuelle for 2017 (Memento Guadeloupe 2019, p.5, champ "exploitations") reports
+  # 9 595 ha of "surfaces toujours en herbe des exploitations", and the 1 Dec 2017 cattle
+  # census (same source, p.10) 40 449 head ~= 29 771 UGB. That is 3.10 UGB/ha -- matching the
+  # agricultural census benchmarks exactly (RA2010: 32 056 UGB / 10 250 ha = 3.13; RA2020:
+  # 27 496 / 11 222 = 2.45). Without this floor the model allocates 2 980 ha of pasture, which
+  # would mean 9.99 UGB/ha: three to four times the attested stocking rate, agronomically
+  # impossible. The defect is therefore proven physically, from outside the model, not merely
+  # by disagreement with our own RPG baseline.
+  #
+  # WHY 6 096 AND NOT THE AGRESTE FIGURE. 6096 is the GAMS parameter (QUOTA_PN_PIQ_MIN) and it
+  # happens to sit 13 ha from our observed 6 109 -- which looked circular until the external
+  # figure showed it to be 27% BELOW the exogenous 8 341 ha (9 595 scaled to our 87% SAU
+  # coverage). The sweep settles the rest: raising the floor towards the Agreste figure makes
+  # everything worse, including outside pasture (PAD ex-pasture 14.9 -> 18.5 -> 24.0% at
+  # 7218/8341/9595 ha), because it takes land from sugarcane -- the crop our RPG measures BEST
+  # (12 813 ha against Agreste's 13 066, i.e. 98%, while overall coverage is only 87%). The
+  # ~3 500 ha of grassland missing from the RPG are plots absent from the universe, not cane
+  # plots mislabelled. So the right floor is the pasture observable within OUR perimeter.
+  #
+  # WHY THIS IS NOT SELF-FULFILLING. The floor pins pasture, so the pasture PAD is ~0 by
+  # construction and the headline territorial PAD (31.7 -> 6.6%) is NOT a claim worth making.
+  # The metrics the floor does not touch are, and they hold across the whole exogenous range
+  # (floors 6096 -> 9595 ha): farm types 86.9 -> 82.0%, plots 67.6 -> 65.2%, area 77.1 -> 72.2%
+  # -- all at or above Chopin et al.'s published 81% / 66% / 77%. In particular sugarcane
+  # returns to 12 782 ha against 12 813 observed (PAD 0.24%, was 20.4%) with no constraint
+  # naming it.
+  #
+  # MEASURED at 6096 ha: farm types 67.0 -> 86.9%, plots 59.8 -> 67.6%, area 69.0 -> 77.1%,
+  # in 170 s. Cost 0.7% of the objective. July 2026 called this floor "intractable" -- that
+  # verdict predates the Eq_*_SUPP suppressions (900k+ variables then, 309k now) and is wrong;
+  # it is also FEASIBLE (checked: 0 of 4588 farms lacks the labour hours for its own observed
+  # pasture). Note solve time balloons to ~1 h at intermediate floors (7218, 8341 ha).
+  # Set enable: false to return to strict CALIB fidelity. Full reasoning:
+  # docs/superpowers/specs/2026-07-28-plancher-prairie-design.md.
   - name: territory_production_bound
-    enable: false
+    enable: true
     args:
       label: pn_prod_min  # pasture (PN_PIQ): floor >= 6,096 ha (surface, use_yield false)
       groups: [{crops: [PN_PIQ], use_yield: false, rate_multiplier: 1.0}]

@@ -24,20 +24,29 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     assert enabled_constraints[0] == "at_most_one_crop_per_plot"
     assert enabled_constraints.count("farm_area_share_max") == 2
     assert enabled_constraints.count("farm_area_ratio_min") == 2
-    # 3 since 2026-07-27: ba_quota_max, cs_quota_max, and bc_quota_max -- the plantain market
-    # ceiling (Eq_BC_QUOTA_MAX / article Eq. 6), enabled at the GAMS author's 6440 t. It is the
-    # one deliberate deviation from the CALIB block; read its config comment before touching it.
+    # Two deliberate deviations from the CALIB block live here, both grounded in sources
+    # outside the model and both reversible with enable: false -- read their config comments
+    # before touching them. bc_quota_max (2026-07-27): the plantain market ceiling, GAMS
+    # Eq_BC_QUOTA_MAX / article Eq. 6, at the GAMS author's 6440 t. pn_prod_min (2026-07-28):
+    # the forage floor, GAMS Eq_PN_PROD_MIN at its own 6096 ha -- 27% below what Agreste's 2017
+    # statistics attest, and needed because without it the allocation implies 9.99 UGB/ha
+    # against the 2.45-3.13 of two agricultural censuses.
     enabled_bounds = {
         e["args"]["label"] for e in config["constraints"]
         if e["enable"] and e["name"] == "territory_production_bound"
     }
-    assert enabled_bounds == {"ba_quota_max", "cs_quota_max", "bc_quota_max"}
+    assert enabled_bounds == {
+        "ba_quota_max",
+        "cs_quota_max",
+        "bc_quota_max",
+        "pn_prod_min",
+    }
     # cs_gfa stays off: it needs more cane labour on 7 GFA farms than farm_labor_hours_max
     # grants them, so the two together are unsatisfiable on the real data. Read the comment
     # above its config entry before flipping it.
     assert "cs_gfa_minimum_share" not in enabled_constraints
     assert "farm_labor_hours_max" in enabled_constraints
-    assert len(enabled_constraints) == 9
+    assert len(enabled_constraints) == 10
     assert {
         e["args"]["attribute"] for e in config["eligibility_criteria"] if e["enable"]
     } == {"ALTITUDE", "PENTE", "PLUVIO_PARC", "SURF_HA"}

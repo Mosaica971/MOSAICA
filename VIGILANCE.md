@@ -352,6 +352,64 @@ Agreste/DAAF × chargement ha/UGB) donnerait un plancher de surface fourragère 
 l'assolement observé** — le seul correctif non circulaire. Donnée absente du dépôt. Cf. `TODO.md`.
 _2026-07-27._
 
+**DONNÉE TROUVÉE ET PLANCHER ACTIVÉ — 2026-07-28.** Spec :
+`docs/superpowers/specs/2026-07-28-plancher-prairie-design.md`. La Statistique agricole annuelle
+**2017** (Agreste, *Mémento Guadeloupe* éd. 2019, champ « exploitations ») donne notre année
+exacte.
+
+*Assise externe de la référence — point ouvert de `TODO.md` désormais clos.* Notre jeu
+parcellaire couvre **87 %** de la SAU 2017 (26 137 ha contre 30 066) et restitue la **canne à
+98 %** (12 813 contre 13 066), les fruits à 90 %, les légumes à 76 %. La référence n'est plus
+« ce que vaut le jeu parcellaire local ».
+
+*Le RPG sous-déclare la prairie — 64 % (6 109 contre 9 595 ha) contre une couverture générale de
+87 %.* Ce n'est pas un problème d'étiquetage : si les ~3 500 ha manquants étaient des parcelles
+de notre univers classées en canne, notre canne dépasserait Agreste — elle est à 98 %. **Ce sont
+des parcelles absentes de l'univers parcellaire.** Conséquence : ces hectares ne sont pas
+récupérables *dans* notre périmètre, et c'est le périmètre — plus le modèle — qui borne
+désormais la prairie.
+
+*Preuve physique du défaut.* Cheptel bovin au 1ᵉʳ décembre 2017 : 40 449 têtes ≈ **29 771 UGB**
+(ratio RA2020/SAA2019). Chargement implicite : sur les 9 595 ha d'Agreste **3,10 UGB/ha**, ce qui
+tombe pile sur les repères des recensements (RA2010 32 056/10 250 = 3,13 ; RA2020 27 496/11 222 =
+2,45) ; sur les **2 980 ha du modèle sans plancher, 9,99 UGB/ha** — trois à quatre fois le réel,
+agronomiquement impossible. Le défaut est donc prouvé **hors modèle**, pas par désaccord avec
+notre propre référence.
+
+*Balayage du plancher* (PAD / types / parcelles / surface / canne) :
+
+| plancher | PAD | PAD hors PN | types | parcelles | surface | canne |
+|---|---|---|---|---|---|---|
+| aucun | 31,7 % | — | 67,0 % | 59,8 % | 69,0 % | 15 425 |
+| **6 096 ha** | 6,6 % | — | **86,9 %** | **67,6 %** | **77,1 %** | **12 782** |
+| 7 218 ha | 15,7 % | 14,9 % | 84,2 % | 66,2 % | 75,0 % | 11 633 |
+| 8 341 ha | 23,2 % | 18,5 % | 84,3 % | 67,0 % | 74,6 % | 11 121 |
+| 9 595 ha | 32,6 % | 24,0 % | 82,0 % | 65,2 % | 72,2 % | 10 530 |
+
+_(observé : canne 12 813 ha. Le point 7 218 a tapé la limite d'1 h, son incumbent est
+prouvablement sous-optimal — 77,77 M€ quand 8 341, plus contraint, atteint 78,99. Ne pas
+surinterpréter.)_ Les métriques que le plancher **ne contraint pas** tiennent sur toute la plage
+exogène — types 82-87 %, parcelles 65-68 %, surface 72-77 %, au niveau ou au-dessus des 81 % /
+66 % / 77 % de l'article — donc le gain n'est pas un artefact du seuil. En revanche tout se
+dégrade en montant, y compris hors prairie, parce que la canne y descend sous son niveau
+**attesté** : forcer la prairie au-delà de l'observable revient à la prendre à la culture la
+mieux mesurée.
+
+**ACTIVÉ à 6 096 ha** (paramètre GAMS `QUOTA_PN_PIQ_MIN`), **27 % SOUS** les 8 341 ha exogènes
+(9 595 × 87 %) : conservateur, et sa proximité avec l'observé (13 ha) n'est pas de la
+circularité mais le même raisonnement fait par l'auteur du GAMS. **Seconde déviation assumée au
+bloc `CALIB`** (`Eq_PN_PROD_MIN` est dans `SCENARIO`).
+
+**À ne PAS revendiquer** : le PAD territorial de 6,6 %. Le plancher épingle la prairie, dont le
+PAD est nul par construction. Les chiffres à citer sont **types 86,9 %, parcelles 67,6 %,
+surface 77,1 %**, et surtout la **canne revenue à 12 782 ha contre 12 813 observés** (PAD 0,24 %
+contre 20,4 %) sans qu'aucune contrainte ne la nomme.
+
+**Deux verdicts antérieurs corrigés** : « plancher intraitable » (2026-07-23) est **faux** — il
+datait du modèle à 900 000+ variables, le solve prend **170 s** à 309 000 (mais ~1 h aux seuils
+intermédiaires) ; « plancher circulaire » (mon objection du 2026-07-27) est **levée** par la
+statistique externe. _2026-07-28._
+
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
 `NC` : une parcelle non cultivée **diminue** le dénominateur et remonte toutes les parts

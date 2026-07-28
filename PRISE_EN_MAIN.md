@@ -54,24 +54,40 @@ La méthode et les seuils viennent de l'article de référence (Chopin et al. 20
 > instancié. Enfin son année de base est **2010** (25 057 parcelles, 5 336 exploitations), la
 > nôtre 2017 (24 734 parcelles, 4 638 exploitations) : même foncier, sept ans de concentration.
 
-⚠ **Le modèle reste hors de ces seuils** : PAD territorial **31,7 %**, types d'exploitation
-**67 %**, parcelles 59,8 %, surface 69,0 % (`output_2`, 2026-07-27, après activation du plafond
-plantain — c'était 48 % / 64 % / 56 % / 64 % avant). Ce n'est ni un bug du reporting ni un
-réglage oublié. Quatre précisions avant de conclure quoi que ce soit :
+**État au 2026-07-28** (`output_3`), après activation du plafond plantain et du plancher de
+prairie — deux contraintes fondées sur des sources extérieures au modèle :
 
-- l'éligibilité n'explique que **1,5 %** de l'écart (plancher de PAD, cf. la référence) ;
-- **le solveur n'y est pour rien** : trois graines HiGHS ne déplacent le PAD que de 0,15 point,
+| Métrique | 2026-07-26 | `output_2` | **`output_3`** | Seuil / article |
+|---|---:|---:|---:|---:|
+| Types d'exploitation reproduits | 64,0 % | 67,0 % | **86,9 %** | 80 % (article : 81 %) |
+| Parcelles bien simulées | 56,0 % | 59,8 % | **67,6 %** | article : 66 % |
+| Surface bien simulée | 64,3 % | 69,0 % | **77,1 %** | article : 77 % |
+| Cultures sous seuil | 0/11 | 2/11 | **4/11** | 8/10 |
+| PAD territorial | 48,4 % | 31,7 % | 6,6 % | 15 % |
+
+Le modèle **atteint désormais la qualité de calibration publiée** sur les types, les parcelles
+et la surface. Trois précautions de lecture, dans l'ordre d'importance :
+
+- ⚠ **Ne pas citer le PAD territorial de 6,6 %.** Le plancher épingle la prairie, dont le PAD
+  est nul par construction ; le total en hérite. Les chiffres solides sont les trois premières
+  lignes, et surtout la **canne revenue à 12 782 ha contre 12 813 observés** (PAD 0,2 %, contre
+  20 %) sans qu'aucune contrainte ne la nomme.
+- **Le solveur n'y est pour rien** : trois graines HiGHS ne déplacent le PAD que de 0,15 point,
   et le plan observé de 2017 vaut 15 % de moins que l'optimum sous notre propre objectif —
-  quinze fois la tolérance du solveur. Le modèle préfère franchement autre chose ;
-- la **médiane** du PAD par exploitation est de 18,5 % — la moitié des fermes est sous le
-  seuil, l'écart est concentré, pas diffus ;
-- plusieurs indicateurs du run tombent **dans la fourchette d'incertitude de l'observé**
-  lui-même (l'assolement 2017 n'est connu qu'au niveau agrégé).
+  quinze fois la tolérance du solveur.
+- Plusieurs indicateurs tombent **dans la fourchette d'incertitude de l'observé** lui-même
+  (l'assolement 2017 n'est connu qu'au niveau agrégé), et l'éligibilité impose un plancher
+  irréductible de 1,5 % de PAD.
 
-Ce qui reste, par ordre de poids : la **prairie** sous-plantée (6 109 → 2 980 ha), faute
-d'élevage dans le modèle — limite que l'article reconnaît lui-même (§4.5) ; la **canne**
-sur-plantée de 2 612 ha, dont le quota sucrier GAMS (107 000 t) ne mord pas et que l'auteur
-avait lui-même signalé comme non calé ; puis les petites cultures (ananas, melon, vergers).
+Ce qui reste, par ordre de poids : les **petites cultures** — ananas 461 ha contre 133 observés,
+vergers 8 contre 311, melon 4 contre 189, jachère 418 contre 621. Aucune n'a de plafond ou de
+plancher sourcé à ce jour.
+
+**La référence a désormais une assise externe.** Recoupée avec la Statistique agricole annuelle
+2017 (Agreste), notre jeu parcellaire couvre 87 % de la SAU et restitue la canne à **98 %**
+(12 813 ha contre 13 066) et les cultures fruitières à 90 %. La prairie, elle, n'est déclarée
+qu'à 64 % : ~3 500 ha d'herbe manquent à l'univers parcellaire, ce qui borne désormais le modèle
+par les données et non par ses équations.
 
 Lire `VIGILANCE.md`, entrée « Calibration », avant d'interpréter un résultat.
 
