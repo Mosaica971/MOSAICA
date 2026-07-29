@@ -84,14 +84,22 @@ def solve_with_progress(
     *,
     case_study: str,
     history: SolveHistory | None = None,
+    warm_start: bool = False,
 ) -> tuple[Any, float]:
     history = history or SolveHistory()
     problem_size = sum(1 for _ in model.component_data_objects(pyo.Var))
     estimate = history.estimate_seconds(case_study, problem_size)
 
+    # A warm-started solve is not comparable to a cold one, so it is labelled -- and the
+    # duration is still recorded, because what the ETA should predict is the run you are
+    # actually about to do.
+    label = f"Solving [{case_study}, {problem_size} vars]"
+    if warm_start:
+        label += " [warm start]"
+
     results, duration = run_with_progress(
-        lambda: solve_model(model, config),
-        label=f"Solving [{case_study}, {problem_size} vars]",
+        lambda: solve_model(model, config, warm_start=warm_start),
+        label=label,
         estimate_seconds=estimate,
     )
 

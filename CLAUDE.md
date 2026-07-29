@@ -139,6 +139,18 @@ the YAML, not the builder.
    `ConcreteModel`: binary var `model.Y[plot, crop]` over eligible `PAIRS`, then runs every
    enabled constraint/objective builder against a `ModelInputs` bundle
    (`core/model/model_inputs.py`).
+3b. **Optional warm start.** `core/model/warm_start.py` writes a past run's allocation into
+   `model.Y` (`apply_allocation`) and — the part that matters — **audits it against the
+   model's own constraints before solving** (`constraint_violations`). HiGHS discards an
+   infeasible MIP start silently, so without the audit a run looks warm-started and behaves
+   exactly like a cold one. Driven by `solver.warm_start_from` in `config.yaml` (a run
+   folder); `main.py` loads, applies, audits, and only then passes `warm_start=True` down to
+   `solve_model`, which maps it onto Pyomo's `warmstart` kwarg → `Highs.setSolution`.
+   A warm start changes only how fast the optimum is **proven**, never what it is. It became
+   necessary past ~309 000 binaries, where HiGHS stops finding good incumbents unaided
+   (2026-07-29: two constraints each hit the 1 h limit 5.5% below a hand-built solution).
+   Measured: 720 s cold → 209 s warm, identical objective. To seed a run that adds a new
+   constraint the old allocation must be repaired first — `scripts/repair_allocation.py`.
 4. `solve_with_progress(model, config, case_study=...)` (`core/model/progress.py`) runs
    `solve_model` (`core/model/solver.py`, `SolverFactory('appsi_highs')` → HiGHS)
    **synchronously on the main thread**, printing a static ETA before and the real

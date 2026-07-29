@@ -3,7 +3,18 @@ from typing import Any
 import pyomo.environ as pyo
 
 
-def solve_model(model: pyo.ConcreteModel, config: dict[str, Any]) -> Any:
+def solve_model(
+    model: pyo.ConcreteModel, config: dict[str, Any], *, warm_start: bool = False
+) -> Any:
+    """Solve `model` with the solver named in `config['solver']`.
+
+    `warm_start=True` hands HiGHS the values currently held by the model's variables as a
+    MIP start (see core/model/warm_start.py for how to put them there and why it matters).
+    It is a search hint only: the optimum, and the gap it is proven to, are unchanged.
+    Pyomo's legacy APPSI wrapper maps the `warmstart` kwarg onto `config.warmstart`, which
+    the Highs interface turns into `setSolution` (pyomo/contrib/appsi/solvers/highs.py).
+    Passing it with no values set is harmless -- the interface checks and skips.
+    """
     solver_config = config["solver"]
     solver_name = solver_config["name"]
     args = solver_config.get("args") or {}
@@ -14,7 +25,7 @@ def solve_model(model: pyo.ConcreteModel, config: dict[str, Any]) -> Any:
     # option names are HiGHS's own (mip_rel_gap, time_limit, threads, ...).
     for key, value in args.items():
         solver.options[key] = value
-    results = solver.solve(model, load_solutions=False)
+    results = solver.solve(model, load_solutions=False, warmstart=warm_start)
 
     # `optimal` here means "proven within mip_rel_gap of the optimum" (HiGHS reports optimal
     # once the gap closes to the configured tolerance, not only at gap 0). A time limit hit

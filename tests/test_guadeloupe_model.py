@@ -70,17 +70,22 @@ def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint()
         "ba_quota_max", "cs_quota_max",
         # Calibration anchor, enabled 2026-07-21.
         "mo_max_expl",
+        # The two deliberate deviations from the CALIB block, both grounded in sources
+        # outside the model: the plantain market ceiling (2026-07-27, GAMS Eq_BC_QUOTA_MAX /
+        # article Eq. 6) and the forage floor (2026-07-28, GAMS Eq_PN_PROD_MIN, 27% below what
+        # Agreste's 2017 statistics attest). Read their config.yaml comments before touching.
+        "bc_quota_max", "pn_prod_min",
     ]:
         assert hasattr(model, label), f"expected constraint '{label}' to be built"
 
-    # cs_gfa is off (infeasible with mo_max_expl on 7 GFA farms), and so is the whole
+    # cs_gfa is off (infeasible with mo_max_expl on 7 GFA farms), and so is the rest of the
     # production-floor family: those are SCENARIO equations, absent from the CALIB model we
     # reproduce, and infeasible against the per-farm labour cap. Read config.yaml's block.
     for disabled_label in [
-        "me_quota_max", "an_quota_max", "ig_quota_max", "bc_quota_max", "tub_prod_obj",
+        "me_quota_max", "an_quota_max", "ig_quota_max", "tub_prod_obj",
         "cs_gfa",
         "bc_prod_min", "ig_prod_min", "ma_prod_min", "an_prod_min",
-        "plu_prod_min", "me_prod_min", "pn_prod_min",
+        "plu_prod_min", "me_prod_min",
         "leg_prod_obj", "fru_prod_obj", "pat_surf_obj",
     ]:
         assert not hasattr(model, disabled_label)

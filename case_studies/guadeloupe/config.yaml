@@ -27,6 +27,21 @@ data:
 # See core/model/solver.py.
 solver:
   name: appsi_highs
+  # warm_start_from: seed the solve with a past run's allocation (its allocation_output.csv).
+  # A warm start changes only how fast the optimum is PROVEN, never what it is -- HiGHS still
+  # reports the same gap against the same bound. It matters here because past ~309 000
+  # binaries HiGHS no longer finds a good incumbent unaided: on 2026-07-29 an orchard floor
+  # and a pineapple ceiling each hit the 1 h limit 5.5% below a solution repaired by hand in
+  # seconds. Measured on the output_3 configuration seeded with its own solution: 720 s cold
+  # -> 209 s warm, identical objective.
+  # main.py AUDITS the seed before using it and refuses (loudly) if it is infeasible, because
+  # HiGHS discards an infeasible start silently -- the run would look warm and behave cold.
+  # To seed a run that adds a new constraint, repair the old allocation first:
+  #   python scripts/repair_allocation.py outputs/output_3 --crops AG,VE_BTGT,VE_PLUIE \
+  #       --min-surface 335 --out outputs/_warmstart_plu --freeze PN_PIQ,JA,BA_INT,BA_SINT,BA_PER,BA_IRR
+  # Left unset by default: a stale seed (eligibility changed, crops renamed) is worse than
+  # none, and the audit would reject it anyway. Set it deliberately, per run.
+  # warm_start_from: outputs/output_3
   args:
     # mip_rel_gap: proven-within-gap tolerance. Markowitz's mixed-sign coefficients (margin x
     # (1 - AVERS*Var_Rdt) goes negative for risk-averse farms on high-variance crops) make the

@@ -487,11 +487,38 @@ solution **faisable pour toutes les contraintes** valant :
 
 Une solution construite en quelques secondes bat de **4,45 M€ (5,5 %)** ce que HiGHS trouve en
 une heure. **L'incumbent est donc prouvablement sous-optimal, ce n'est plus une présomption.**
-Corollaire : le plancher arboricole coûte en réalité ~1 % d'objectif, du même ordre que le
-plafond plantain (3,7 %) et le plancher de prairie (0,7 %) — **le levier est bon marché, c'est
-le solveur qui échoue**. Aucun run portant ces contraintes n'est exploitable en l'état : je n'en
-ai donc adopté aucune. Le déblocage est un **warm start**, et l'heuristique de réparation
-ci-dessus en fournit un directement. Cf. `TODO.md`.
+
+**RÉSOLU le 2026-07-29 par le warm start** (`core/model/warm_start.py`, cf. `TODO.md`). Le
+plancher arboricole réamorcé depuis une allocation réparée :
+
+| | à froid | à chaud |
+|---|---|---|
+| plancher | 200 ha (le plus facile) | **335 ha** (le plus dur) |
+| durée | 3 613 s — limite atteinte | **642 s — convergé** |
+| objectif | 76,46 M€ | **81,12 M€** |
+| PAD / types | 8,14 % / 84,91 % | **6,54 % / 86,83 %** |
+
+Contrainte plus serrée, cinq fois plus vite, objectif 4,7 M€ meilleur : **c'était bien le
+solveur**. Le coût réel du plancher arboricole n'est d'ailleurs que de **0,13 %** d'objectif
+(81,222 → 81,117 M€), et non le ~1 % que suggérait ma réparation gloutonne — le solveur trouve
+bien moins cher qu'elle.
+
+**Effet du plancher arboricole, et pourquoi il n'est PAS adopté.** Il est **neutre sur le
+score** (PAD 6,60 → 6,54 %, types 86,89 → 86,83 %, surface 77,10 → 76,84 %) tout en portant
+l'arboriculture de 18 à 335 ha. Deux raisons de s'arrêter là : (a) ce serait une **déviation de
+forme** et non plus seulement de seuil — `Eq_PLU_PROD_MIN` existe en **tonnes** côté GAMS, pas
+en surface ; (b) le gain de réalisme ne se lit pas dans le PAD, qui se mesure contre le RPG.
+Variante mieux formée à tester si on y revient : le même plancher **en tonnes**, à 1 848 t
+(Agreste 2017 : 1 467 t d'agrumes + 657 t d'autres fruits, × notre couverture de 87 %), ce qui
+respecterait la forme GAMS *et* la source exogène.
+
+**Découverte incidente : sur l'arboriculture, le modèle est plus proche d'Agreste que notre
+propre référence.** Le RPG donne AG 101 ha / VE 311 ha ; Agreste donne agrumes 283 / autres
+fruits 102 — soit à peu près l'inverse. Sous le seul plancher **agrégé** (aucune contrainte ne
+distingue les deux), le modèle répartit **228 / 107**, c'est-à-dire la répartition d'Agreste.
+Cela suggère que la ventilation agrumes/vergers du RPG est douteuse, et que le PAD la concernant
+mesure une erreur de la référence autant qu'une erreur du modèle. À garder en tête avant de
+chasser le PAD de ces deux groupes.
 
 **LEVIERS ÉCARTÉS, avec la raison.** *Igname* : 259 ha simulés contre 227 attestés (114 %), et le
 plafond de l'auteur (4 600 t) mordrait juste au niveau produit (4 604 t) — gain nul. *Melon* :

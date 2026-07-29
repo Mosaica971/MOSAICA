@@ -27,7 +27,25 @@ python -m venv .venv                                # NE PAS copier le .venv d'u
 | `python scripts/build_reference_state.py` | (Re)construire la **situation de référence 2017** dans `outputs/reference_2017/` : assolement observé, typologie, indicateurs encadrés, plancher de PAD. ~5 s, aucun solve, déterministe. À relancer si `config.yaml` change (année, `zone_filter`, cultures représentantes). |
 | `python scripts/compare_to_reference.py outputs\output_1` | Mettre un run **face à la référence** : verdicts, assolement observé/simulé par groupe, indicateurs comparés à la fourchette d'incertitude de l'observé, types d'exploitation. Écrit `comparaison_reference.md` dans le run. ~1 s, lit les CSV déjà produits. |
 | `python scripts/pad_all_scales.py outputs\output_1` | Le PAD aux **cinq échelles** (territoire, île, région, exploitation, parcelle). ~7 s, reconstruit le dataset. |
+| `python scripts\repair_allocation.py outputs\output_3 --crops AG,VE_BTGT,VE_PLUIE --min-surface 335 --out outputs\_warmstart_plu` | Réparer l'allocation d'un run pour qu'elle satisfasse un nouveau **plancher de surface**, et en faire un point de départ (*warm start*). Audite le résultat et refuse de le présenter comme faisable s'il ne l'est pas. `--freeze` protège les cultures qu'une autre contrainte fixe. |
 | `streamlit run case_studies\guadeloupe\dashboard\app.py` | Dashboard **lecture seule** sur les runs passés (ne résout ni n'écrit rien). |
+
+## Accélérer un solve : le *warm start*
+
+Au-delà de ~309 000 variables binaires, HiGHS ne trouve plus de bonne solution initiale tout
+seul : il explore à l'aveugle faute d'*incumbent* à comparer. Lui en fournir un change
+**uniquement la vitesse à laquelle l'optimum est prouvé**, jamais l'optimum lui-même — le
+solveur garantit toujours le même écart de 1 % à la même borne.
+
+Mesuré sur la configuration d'`output_3` réamorcée par sa propre solution : **720 s à froid,
+209 s à chaud**, objectif identique.
+
+1. Renseigner `solver.warm_start_from: outputs/output_3` dans `config.yaml`.
+2. `main.py` charge, applique et **audite** le départ. S'il viole une contrainte, il le dit et
+   repart à froid — parce que HiGHS ignore un départ infaisable *en silence*, et qu'un run
+   paraîtrait alors réamorcé tout en se comportant comme à froid.
+3. Pour amorcer un run qui **ajoute** une contrainte, réparer d'abord l'ancienne allocation
+   avec `scripts/repair_allocation.py` (voir le tableau ci-dessus).
 
 ## Calibration : le modèle colle-t-il à la réalité ?
 

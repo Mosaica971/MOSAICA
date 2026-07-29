@@ -91,14 +91,15 @@ causer). Une solution **faisable** construite à la main en quelques secondes de
 est de 4,45 M€, soit 5,5 %. Le coût réel du plancher arboricole est de **0,39 % à 200 ha et
 1,19 % à 335 ha**, du même ordre que les deux contraintes déjà adoptées. **Rien n'a été adopté :
 aucun run portant ces contraintes n'est exploitable en l'état.**
-→ **PROCHAINE ÉTAPE, bien cadrée : le warm start.** C'est désormais LE goulot du modèle. L'idée
-est acquise et testée : partir de l'allocation d'un run précédent, la réparer gloutonnement pour
-satisfaire la nouvelle contrainte, et la fournir à HiGHS comme solution initiale. Points à
-instruire : (a) comment passer un MIP start via `appsi_highs` sous Pyomo — attention au conflit
-`capture_output(capture_fd=True)` documenté dans
-`docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md` ; (b) généraliser
-l'heuristique de réparation (aujourd'hui écrite pour le seul plancher arboricole) ; (c) vérifier
-qu'un warm start ne biaise pas le résultat — il ne doit qu'accélérer la preuve d'optimalité.
+→ **Warm start — LIVRÉ le 2026-07-29.** `core/model/warm_start.py` (écriture de l'allocation
+dans `model.Y` + **audit de faisabilité avant solve**), `core/reporting/run_folder.read_allocation`,
+`solver.warm_start_from` en config, `scripts/repair_allocation.py` pour réparer une allocation
+face à un nouveau plancher de surface. 7 tests sans données (`tests/test_warm_start.py`).
+Mesuré : **720 s à froid → 209 s à chaud**, objectif identique, sur la configuration d'`output_3`
+réamorcée par sa propre solution. Le point non évident : HiGHS **jette un départ infaisable en
+silence**, donc l'audit n'est pas un confort — sans lui un run paraît réamorcé et se comporte
+comme à froid. Vérifié en vrai : la réparation par défaut cassait `Eq_BA_JA` sur 318
+exploitations, l'audit l'a attrapée.
 → **Données pour le levier B, déjà réunies** : Agreste 2017 atteste 385 ha de fruitiers (283
 agrumes + 102 autres) contre 18 ha simulés ; à notre couverture de 87 %, **335 ha**. **Nuance à
 documenter si on l'adopte** : `Eq_PLU_PROD_MIN` existe côté GAMS **en tonnes**, pas en surface —
