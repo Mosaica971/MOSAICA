@@ -77,6 +77,37 @@ gisement.
 → **Assise externe de la référence : point clos.** Notre jeu couvre 87 % de la SAU 2017 et
 restitue la canne à 98 %, les fruits à 90 %.
 
+**PAD résiduel — diagnostiqué le 2026-07-29, deux leviers instruits.** Détail complet dans
+`VIGILANCE.md`, entrée « Le PAD résiduel ». Le résultat de fond est que **les rendements du
+modèle valent 2 à 4 fois ceux du territoire** (ananas 34 contre 12,3 t/ha, plantain 26 contre
+9,0, maraîchage 43,9 contre 10,8, agrumes 20 contre 5,2 ; seul le melon tombe juste) : la marge
+de ces cultures est surestimée en amont, ce qui explique qu'il faille des plafonds de marché.
+Rendements = `Rdt_Cult` = Table 1 de l'article, donc **intouchables sous mandat de parité**.
+→ **Les deux leviers sont BLOQUÉS PAR LE SOLVEUR, pas par la modélisation — et c'est prouvé.**
+Plafond ananas à 7 000 t et plancher arboricole à 200 ha : les deux tapent la limite d'1 h avec
+un incumbent incohérent (canne et banane reculent, ce qu'aucune de ces contraintes ne peut
+causer). Une solution **faisable** construite à la main en quelques secondes depuis `output_3`
+(script de réparation, cf. `VIGILANCE.md`) vaut **80,91 M€** contre les 76,46 de HiGHS : l'écart
+est de 4,45 M€, soit 5,5 %. Le coût réel du plancher arboricole est de **0,39 % à 200 ha et
+1,19 % à 335 ha**, du même ordre que les deux contraintes déjà adoptées. **Rien n'a été adopté :
+aucun run portant ces contraintes n'est exploitable en l'état.**
+→ **PROCHAINE ÉTAPE, bien cadrée : le warm start.** C'est désormais LE goulot du modèle. L'idée
+est acquise et testée : partir de l'allocation d'un run précédent, la réparer gloutonnement pour
+satisfaire la nouvelle contrainte, et la fournir à HiGHS comme solution initiale. Points à
+instruire : (a) comment passer un MIP start via `appsi_highs` sous Pyomo — attention au conflit
+`capture_output(capture_fd=True)` documenté dans
+`docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md` ; (b) généraliser
+l'heuristique de réparation (aujourd'hui écrite pour le seul plancher arboricole) ; (c) vérifier
+qu'un warm start ne biaise pas le résultat — il ne doit qu'accélérer la preuve d'optimalité.
+→ **Données pour le levier B, déjà réunies** : Agreste 2017 atteste 385 ha de fruitiers (283
+agrumes + 102 autres) contre 18 ha simulés ; à notre couverture de 87 %, **335 ha**. **Nuance à
+documenter si on l'adopte** : `Eq_PLU_PROD_MIN` existe côté GAMS **en tonnes**, pas en surface —
+la forme surface existe dans l'idiome GAMS (`Eq_PN_PROD_MIN`) mais ce serait une déviation de
+forme, pas seulement de seuil, donc un cran de plus que les deux précédentes.
+→ **Écartés, avec la raison** : igname (259 ha simulés contre 227 attestés, le plafond de
+l'auteur mordrait à peine) ; melon (sous-planté, et échec reconnu de l'article lui-même, cause
+hors modèle) ; jachère (aucune source externe).
+
 **Déficit de prairie — diagnostic du 2026-07-27, conservé pour l'historique.** Il portait sur
 l'état sans plancher (6 109 → 2 980 ha) ; le plancher ci-dessus l'a refermé. Détail dans
 `VIGILANCE.md`, entrée dédiée. Résumé : 62 % du déficit était de l'économie légitime, 36 %

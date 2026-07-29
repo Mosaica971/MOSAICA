@@ -410,6 +410,95 @@ datait du modèle à 900 000+ variables, le solve prend **170 s** à 309 000 (ma
 intermédiaires) ; « plancher circulaire » (mon objection du 2026-07-27) est **levée** par la
 statistique externe. _2026-07-28._
 
+### Majeur — Le PAD résiduel : les rendements du modèle sont 2 à 4× ceux du territoire
+_2026-07-29._ Après le plafond plantain et le plancher de prairie, le PAD résiduel d'`output_3`
+vaut 1 556 ha de déviation, portée par les petites cultures. La Statistique agricole annuelle
+2017 (Agreste, *Mémento Guadeloupe* éd. 2019, p. 16-17 : superficie **et production** par
+culture) permet pour la première fois de les confronter à une source externe.
+
+| | Agreste 2017 | observé (RPG) | simulé | sim / Agreste |
+|---|---|---|---|---|
+| Canne | 13 066 ha | 12 813 | 12 782 | **98 %** |
+| Prairie | 9 595 | 6 109 | 6 096 | 64 % |
+| Maraîchage | 1 946 | 1 087 | 1 149 | 59 % |
+| Melon | 294 | 189 | 4 | **1 %** |
+| Agrumes | 283 | 101 | 10 | **4 %** |
+| Igname | 227 | 145 | 259 | 114 % |
+| Ananas | 183 | 133 | **461** | **252 %** |
+| Plantain | 120 | 147 | 247 | **206 %** |
+| Autres fruits | 102 | 311 | 8 | 8 % |
+
+**LA CAUSE COMMUNE — les rendements.** Agreste donne production ET surface, donc un rendement
+territorial observé. Confronté au nôtre :
+
+| | rdt Agreste | rdt modèle | | | rdt Agreste | rdt modèle |
+|---|---|---|---|---|---|---|
+| Ananas | 12,3 t/ha | **34,0** | | Agrumes | 5,2 | **20,0** |
+| Plantain | 9,0 | **26,0** | | Igname | 10,0 | 17,8 |
+| Maraîchage | 10,8 | **43,9** | | Vergers | 6,4 | 14,5 |
+| | | | | **Melon** | 19,9 | **20,0** ✓ |
+
+Une part de l'écart est légitime — Agreste moyenne tous les producteurs, nos `Rdt_Cult`
+décrivent des itinéraires techniques spécifiés — mais un facteur 3 à 4 ne s'explique pas par
+cela seul, et le melon, lui, tombe juste. **Conséquence directe : la marge de ces cultures est
+mécaniquement surestimée, donc le modèle en couvre l'île dès qu'aucun débouché ne les borne.**
+C'est la cause commune du plantain (2026-07-27), de l'ananas et de l'igname. Les rendements
+viennent de `Rdt_Cult` et correspondent à la Table 1 de l'article : **sous mandat de parité on
+n'y touche pas**, mais ils expliquent *pourquoi* des plafonds de marché sont nécessaires — ce
+ne sont pas des béquilles, ils compensent une productivité surévaluée en amont.
+
+**POURQUOI L'ARBORICULTURE DISPARAÎT (−394 ha, le plus gros écart restant).** Pas l'éligibilité :
+`VE_BTGT` est possible sur 11 060 parcelles et `AG` sur 3 154. C'est le **rendement horaire** —
+canne mécanisée 179-204 €/h, ananas paillé 33, plantain 17,3, igname 14,7, maraîchage 13,6,
+**vergers 11,0 et agrumes 11,1**. Les fruitiers sont le pire €/h de toutes les cultures
+intensives : sous plafond de main d'œuvre ils sortent les premiers. Sur les 405 ha
+d'arboriculture observée perdus, 137 vont à mieux, 102 à moins bon **dont 99 ha bloqués faute
+d'heures** — mécanisme de couplage identique à celui de la prairie. À noter : **136 ha d'anciens
+vergers partent en prairie**, effet de bord du plancher activé la veille, qui se sert en partie
+sur les terres arboricoles.
+
+**L'ANANAS est concentré sur `AN_PA`** (430 des 461 ha), la variante paillage plastique à
+16 363 €/ha et 33 €/h — meilleur rendement horaire de toutes les cultures intensives. Elle est
+plantée chez des **bananiers (137 ha), canniers diversifiés (108) et canniers spécialisés
+(106)**, presque nulle part chez des arboriculteurs : 430 ha d'ananas intensif surgissant chez
+des canniers est en soi un signal d'implausibilité.
+
+**TRACTABILITÉ — le modèle a atteint sa limite, et c'est PROUVÉ.** Les deux leviers testés
+échouent de la même façon : le solve tape la limite d'une heure et rend un incumbent incohérent.
+
+| | objectif incumbent (1 h) | canne | banane |
+|---|---|---|---|
+| `output_3` (référence) | 81,22 M€ | 12 782 | 2 047 |
+| + plafond ananas 7 000 t | 74,26 M€ | 12 340 | 1 725 |
+| + plancher arboricole 200 ha | 76,46 M€ | 12 361 | 1 741 |
+
+Une contrainte sur l'ananas ou les vergers n'a aucune raison de faire reculer la canne et la
+banane : signature classique d'un branch-and-bound perdu. **Démonstration formelle** (script de
+réparation, sans solve) : en partant de l'allocation d'`output_3` et en basculant vers le
+meilleur fruitier éligible les parcelles où cela coûte le moins — en respectant le plafond de
+main d'œuvre ferme par ferme et sans toucher aux cultures déjà contraintes (prairie sous
+plancher, jachère et banane liées par `Eq_BA_JA`, plantain sous plafond) — on obtient une
+solution **faisable pour toutes les contraintes** valant :
+
+| plancher | solution réparée (faisable) | incumbent HiGHS | coût réel du levier |
+|---|---|---|---|
+| 200 ha | **80,91 M€** | 76,46 M€ | **0,39 %** de l'objectif |
+| 335 ha | **80,26 M€** | (non convergé) | **1,19 %** |
+
+Une solution construite en quelques secondes bat de **4,45 M€ (5,5 %)** ce que HiGHS trouve en
+une heure. **L'incumbent est donc prouvablement sous-optimal, ce n'est plus une présomption.**
+Corollaire : le plancher arboricole coûte en réalité ~1 % d'objectif, du même ordre que le
+plafond plantain (3,7 %) et le plancher de prairie (0,7 %) — **le levier est bon marché, c'est
+le solveur qui échoue**. Aucun run portant ces contraintes n'est exploitable en l'état : je n'en
+ai donc adopté aucune. Le déblocage est un **warm start**, et l'heuristique de réparation
+ci-dessus en fournit un directement. Cf. `TODO.md`.
+
+**LEVIERS ÉCARTÉS, avec la raison.** *Igname* : 259 ha simulés contre 227 attestés (114 %), et le
+plafond de l'auteur (4 600 t) mordrait juste au niveau produit (4 604 t) — gain nul. *Melon* :
+sous-planté, un plafond n'y peut rien ; l'article échoue aussi à 100 % sur cette culture, pour
+une raison hors modèle (terres louées à un exportateur). *Jachère* (418 contre 621 ha) : aucune
+source externe.
+
 ### Mineur — Reconstruction typologique et parcelles `NC`
 `compute_type_expl` calcule `denom = surf_cultiv - surf_non`, où `surf_non` agrège `JA` et
 `NC` : une parcelle non cultivée **diminue** le dénominateur et remonte toutes les parts
