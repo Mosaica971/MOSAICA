@@ -214,9 +214,9 @@ Trois outils, dans cet ordre.
 
 ```bash
 python scripts/build_reference_state.py            # → outputs/reference_2017/ (~5 s, aucun solve)
-python scripts/compare_to_reference.py outputs/output_1
-python scripts/evaluate_calibration.py outputs/output_1     # ~7 s, --all pour tous les runs
-python scripts/pad_all_scales.py outputs/output_1           # PAD aux cinq échelles
+python scripts/compare_to_reference.py outputs/calib_retenu
+python scripts/evaluate_calibration.py outputs/calib_retenu   # ~7 s, --all pour tous les runs
+python scripts/pad_all_scales.py outputs/calib_retenu         # PAD aux cinq échelles
 ```
 
 1. **`build_reference_state.py`** construit la situation observée 2017, indépendante de tout run.

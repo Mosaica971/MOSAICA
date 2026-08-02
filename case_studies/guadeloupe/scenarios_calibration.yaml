@@ -1,10 +1,15 @@
-# Les deux runs de calibration de référence -- consommé par scripts/run_scenarios.py.
+# Les trois runs de calibration de référence -- consommé par scripts/run_scenarios.py.
 #
 # POURQUOI UN SPEC À PART. `scenarios.yaml` explore des politiques, `scenarios_prospective.yaml`
-# croise politiques et forçages. Ces deux runs-ci ne sont ni l'un ni l'autre : ce sont les
+# croise politiques et forçages. Ces trois runs-ci ne sont ni l'un ni l'autre : ce sont les
 # **points fixes** du projet, ceux que `references.yaml` déclare et contre lesquels tout le
 # reste se lit. Les tenir dans leur propre fichier permet de les régénérer en une commande
 # quand le reporting gagne un bloc, sans relancer un batch entier.
+#
+# ILS SE LISENT COMME UNE SÉRIE, pas comme trois runs indépendants : zéro déviation
+# (`calib_gams_parite`), une seule (`calib_bc_seul`), les deux (`calib_retenu`). C'est cet
+# ordre qui attribue le gain de calibration à chaque déviation ; `references.yaml` ne déclare
+# que les deux bornes, le palier du milieu n'existe que pour l'attribution.
 #
 # Ils portent un `name:` explicite, donc leur dossier de sortie s'appelle
 # `outputs/calib_gams_parite/` et `outputs/calib_retenu/` -- pas `output_7`.
@@ -33,6 +38,25 @@ runs:
       # modèles du GAMS, donc hors CALIB -- même si l'article la décrit (Éq. 6).
       - bc_quota_max
       # Eq_PN_PROD_MIN : plancher de surface fourragère. Vit dans le bloc SCENARIO, pas CALIB.
+      - pn_prod_min
+
+  # --------------------------------------------------------------------------------------
+  - name: calib_bc_seul
+    description: >-
+      Le palier INTERMÉDIAIRE : `bc_quota_max` seule, sans le plancher fourrager. Il n'a
+      d'intérêt qu'à trois, entre `calib_gams_parite` et `calib_retenu`, parce que c'est lui
+      qui répartit le gain de calibration entre les deux déviations -- PAD territorial
+      48,4 % -> 31,7 % -> 6,6 %, types 64,0 % -> 67,0 % -> 86,9 %. Autrement dit : le plafond
+      de marché du plantain fait un tiers du chemin, le plancher de prairie fait le reste.
+      Sans ce point on ne peut attribuer le résultat ni à l'une ni à l'autre.
+      Attendu (mesuré le 2026-07-28, dossier alors nommé `output_2`) : objectif 81,79 M€,
+      PAD territorial 31,69 %, types 66,97 %.
+      MÊME MISE EN GARDE que `calib_retenu` sur le PAD : dès que `pn_prod_min` est active le
+      PAD de la prairie est nul par construction -- ici elle ne l'est PAS, donc le 31,7 %
+      est, lui, un PAD honnête.
+    disable:
+      # Seule Eq_PN_PROD_MIN est retirée : on garde le plafond plantain pour mesurer ce
+      # qu'il apporte à lui seul.
       - pn_prod_min
 
   # --------------------------------------------------------------------------------------

@@ -145,8 +145,8 @@ side:
 
 ```bash
 .venv/Scripts/python scripts/build_reference_state.py        # -> outputs/reference_2017/
-.venv/Scripts/python scripts/compare_to_reference.py outputs/output_1
-.venv/Scripts/python scripts/pad_all_scales.py outputs/output_1   # PAD at five scales
+.venv/Scripts/python scripts/compare_to_reference.py outputs/calib_retenu
+.venv/Scripts/python scripts/pad_all_scales.py outputs/calib_retenu   # PAD at five scales
 ```
 
 `outputs/reference_2017/REFERENCE.md` documents how it is built and — more usefully — what it

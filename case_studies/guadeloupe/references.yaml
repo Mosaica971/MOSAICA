@@ -55,7 +55,8 @@ references:
       chiffres de l'article (PAD <15 %, types 81 %) tient à la provenance des données — 4 638
       exploitations contre 5 336, année de base 2010 hors d'atteinte — et non à un défaut de
       portage : l'enquête source-à-source du 2026-07-27 a écarté une à une les causes de
-      modélisation. Régénéré le 2026-08-01, identique au chiffre près à `output_1`.
+      modélisation. Régénéré le 2026-08-01, identique au chiffre près au run d'origine
+      (`output_1`, supprimé le 2026-08-02 comme doublon exact).
     tolerance_pct: 5.0
     expect:
       objective.value: 84978687
@@ -77,7 +78,11 @@ references:
       agricole annuelle 2017). Types 86,9 %, parcelles 67,6 %, surface 77,1 %, et la canne
       revenue à 12 782 ha contre 12 813 observés sans qu'aucune contrainte ne la nomme.
       NE PAS citer son PAD territorial de 6,6 % : le plancher épingle la prairie, dont le PAD
-      est nul par construction. Régénéré le 2026-08-01, identique au chiffre près à `output_3`.
+      est nul par construction. Régénéré le 2026-08-01, identique au chiffre près au run
+      d'origine (`output_3`, supprimé le 2026-08-02 comme doublon exact).
+      Le palier intermédiaire entre cette entrée et `gams_parity` -- `bc_quota_max` seule --
+      vit dans `outputs/calib_bc_seul/` et se régénère par le même spec ; il n'est pas déclaré
+      ici parce qu'il ne sert pas de point de comparaison, seulement d'attribution.
     tolerance_pct: 5.0
     expect:
       objective.value: 81222224
