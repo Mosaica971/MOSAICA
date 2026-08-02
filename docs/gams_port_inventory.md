@@ -1,6 +1,6 @@
 # Inventaire de portage GAMS → Python
 
-État équation par équation du portage de MOSAICA depuis `old_code_gms_format_now_txt/`.
+État équation par équation du portage de MOSAICA depuis `context/gams/`.
 Référence : `MODELE.txt` (équations), `SETS.txt` (appartenances), `ENTREES.txt` (données),
 `OPTIMISATION.txt` (indicateurs).
 

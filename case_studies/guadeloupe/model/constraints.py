@@ -24,7 +24,7 @@ def build_cs_gfa_minimum_share_constraint(
     real 2017 data three farms (E1471, E273, E3955) have every plot fallow-locked by
     friche_lock, so no plot can carry sugarcane while the rule demands 60% of it: genuinely
     infeasible, and GAMS would be infeasible too. With the flag on, such a farm is skipped
-    instead of sinking the whole solve. Scope: 3 farms out of 4588. See VIGILANCE.md.
+    instead of sinking the whole solve. Scope: 3 farms out of 4588. See docs/04-vigilance.md.
     """
     crop_set = set(crops)
     plot_crops = defaultdict(list)

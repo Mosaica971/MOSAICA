@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 
-from case_studies.guadeloupe.dashboard import loaders
+from apps.dashboard import loaders
 
 
 def _make_run(outputs_root, number, recap: dict | None = None) -> None:

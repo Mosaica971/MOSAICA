@@ -1,0 +1,387 @@
+# CATALOGUE DES POLITIQUES -- ce qu'une puissance publique DECIDE.
+#
+# Dix decisions publiques (quotas, subventions, interdictions, plafonds environnementaux,
+# politique de l'emploi), ordonnees le long d'un axe qui va de l'intensification
+# accelerationniste a la rupture agroecologique, plus une (P9) deliberement hors axe.
+#
+# CE FICHIER NE LANCE RIEN. C'est un catalogue : il declare des politiques disponibles, et
+# c'est `plan.yaml` qui dit lesquelles sont jouees et sous quels forcages. Le pendant de ce
+# fichier est `scenarios_forcages.yaml` (ce que le climat et les marches IMPOSENT) ; les
+# groupes de cultures qu'il cite viennent de `crop_groups.yaml` et de `crop_families` de
+# `config.yaml`.
+#
+# Il reste utilisable seul, sans plan, pour rejouer une politique :
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios <ce fichier> --policies P8_transition_agroecologique
+#
+# ---------------------------------------------------------------------------------------
+# ORDRES DE GRANDEUR DE REFERENCE -- chaque seuil ci-dessous en est un pourcentage, et c'est
+# la seule raison pour laquelle les chiffres ne sont pas arbitraires. Mesures sur
+# outputs/output_3, c.-a-d. le config.yaml par defaut resolu sur le jeu de donnees 2017 reel :
+#
+#   marge brute      98 632 983 EUR        subventions     71 805 112 EUR
+#   emploi           3 503 ETP             surface allouee 23 481 ha
+#   azote            1 930 903 kg N        (82,2 kg N/ha)
+#   IFT              66 946                (2,85 /ha)
+#   GES              142 733 204 u         (unite du modele, cf. TODO.md)
+#   eau              34 660 000 m3         (surface irrigable seulement, cf. plot_weight)
+#   autonomie kcal   10,1 %                (limitante: lipides, 2,8 %)
+#
+# LA MAIN D'OEUVRE EST LA CONTRAINTE MORDANTE ET LA PREMIERE CAUSE D'INFAISABILITE.
+# Eq_MO_MAX_Expl plafonne chaque exploitation au travail qu'exigeait son assolement 2017
+# observe ; a l'echelle du territoire cela fait 6 252 740 h = 3 891 ETP a slack 1.0, contre
+# 5 629 390 h reellement utilisees. Donc :
+#   * un PLANCHER d'emploi au-dessus de 3 891 ETP est infaisable a moins de relever le slack
+#     de `mo_max_expl` dans le meme scenario -- slack 1.5 achete 5 837 ETP, slack 2.0 en
+#     achete 7 782 ;
+#   * les planchers vivriers (bc/ig/ma/an/me/plu_prod_min) reclament 6 222 537 h par leurs
+#     cultures les moins cheres, soit 0,5 % de marge sur une borne inferieure qui ignore la
+#     concurrence pour le foncier, et ils SONT infaisables contre le plafond a slack 1.0
+#     (main.py a echoue dessus, 2026-07-21). Toute politique qui les active releve le slack
+#     dans le meme mouvement.
+# L'auteur de GAMS a fait le meme geste : les multiplicateurs "x 1.7 pour S1, x 1.3 pour S2,
+# x 10 pour S3" sont en commentaire sous la formule dans MODELE.txt.
+#
+# ET RELEVER LE SLACK NE SUFFIT PAS. P10 a d'abord ete ecrite avec un plancher de 6 000 ETP
+# sous un slack de 2.2, qui accorde 8 561 ETP de budget -- et elle etait INFAISABLE. Le
+# controle LP l'a trouve, et maximiser le travail sous les autres contraintes de chaque
+# politique a donne le vrai plafond :
+#
+#   P8_transition_agroecologique    max 4 875 ETP        P10_bifurcation   max 4 975 ETP
+#
+# Ce qui limite l'emploi n'est pas le budget d'heures mais les CULTURES capables de les
+# absorber une fois les plafonds environnementaux en vigueur. Une bissection a exclu tout
+# plafond isole comme cause (retirer l'IFT, l'azote ou les GES laissait l'infaisabilite), donc
+# c'est la combinaison, plus la forme par exploitation du plafond de main d'oeuvre. Les
+# planchers ci-dessous sont poses a ~86-88 % de ces maxima mesures, pour laisser la place au
+# saut d'integralite que la LP ignore. Re-mesurer avant d'en relever un.
+#
+# COUT SOLVEUR -- a lire avant de lancer.
+#   * AUCUNE POLITIQUE NE ROUVRE `ma_exp_supp`, et c'est delibere : les 25 variantes de
+#     maraichage paille sont des copies identiques d'une meme activite conventionnelle (voir
+#     l'entree `bio_maraichage` de crop_groups.yaml). Les rouvrir coute 548 000 binaires de
+#     pure symetrie et rend la part bio inoperante. Toute politique d'ici reste donc dans le
+#     regime ~310-335 000 binaires.
+#   * P9 et P10 portent un plancher de surface arboricole, et le 2026-07-29 a etabli que
+#     cette contrainte atteint la limite de temps avec un incumbent incoherent quand elle est
+#     resolue a froid (docs/04-vigilance.md, "Le PAD residuel"). Elles gardent un
+#     `solver.args.time_limit` releve.
+# L'attenuation est deja dans le depot : warm start depuis une allocation reparee
+# (scripts/repair_allocation.py, puis solver.warm_start_from). Au-dela de ~309 000 binaires
+# HiGHS ne trouve plus de bon incumbent seul. run_scenarios.py chaine aussi les warm starts
+# a l'interieur d'un batch croise -- voir --warm-start-chain.
+# ---------------------------------------------------------------------------------------
+
+# Rend le catalogue autonome : `--scenarios <ce fichier> --policies P8` doit marcher sans
+# passer par un plan, donc les groupes de cultures doivent etre resolus ici aussi.
+include:
+  crop_groups: crop_groups.yaml
+
+policies:
+
+  # --- Pole accelerationniste ----------------------------------------------------------
+
+  - name: P1_deregulation_totale
+    description: >-
+      BORNE EXTREME. Le marche seul: plus aucune subvention, plus aucun quota, plus aucune
+      obligation agronomique, et un exploitant suppose neutre au risque. Politiquement
+      improbable; sert de borne superieure de ce que la marge pure peut extraire du
+      territoire, et de mesure de ce que toutes les regles cumulees coutent.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.0}          # 1. fin de toute aide publique
+    enable:
+      - maximize_gross_margin                 # 2. objectif marge brute pure (sans aversion)
+    disable:
+      # ATTENTION -- P1 est la SEULE politique a changer d'objectif, et sa colonne
+      # `objective` du batch_summary n'est donc PAS comparable aux autres : ce n'est pas la
+      # meme fonction. Comparer P1 aux autres se fait sur les colonnes physiques et
+      # economiques (marge_brute, etp, azote_kg, ift, eau_m3...), qui sont calculees a
+      # l'identique quel que soit l'objectif.
+      - maximize_risk_adjusted_gross_margin
+      - ba_quota_max                          # 3. plus de plafond banane
+      - cs_quota_max                          # 4. plus de plafond sucre
+      - bc_quota_max                          # 5. plus de plafond plantain
+      - pn_prod_min                           # 6. plus de plancher de prairie
+      - ba_ja                                 # 7. plus de jachere obligatoire
+      - ba_rota                               # 8. plus de rotation obligatoire
+      - an_agro_max_expl                      # 9. plus de plafond agronomique par ferme
+      - ig_agro_max_expl
+      - cs_irrig_ban                          # 10. canne irriguee autorisee
+      - friche                                # 11. friches remises en culture
+      - nocult_nc_1
+      - nocult_nc_2
+    set_args:
+      - {label: mo_max_expl, args: {slack: 3.0}}   # 12. salariat sans limite de fait
+
+  - name: P2_accelerationnisme_industriel
+    description: >-
+      Etat developpeur au service des filieres d'export: on paie, on deplafonne, on
+      mecanise, on irrigue. La main d'oeuvre se contracte (slack < 1), ce qui evince
+      mecaniquement les cultures intensives en travail au profit du mecanisable.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: canne}, factor: 1.5}          # 1. soutien massif a la canne
+        - {crops: {group: banane_export}, factor: 1.4}  # 2. soutien massif a la banane
+    disable:
+      - cs_irrig_ban                          # 3. canne irriguee autorisee
+      - friche                                # 4. friches remises en culture
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 100000000}}   # 5. plafond sucre leve
+      - {label: ba_quota_max, args: {threshold: 100000000}}   # 6. plafond banane leve
+      - {label: bc_quota_max, args: {threshold: 40000}}       # 7. plantain quasi deplafonne
+      - {label: ba_ja, args: {ratio: 0.10}}                   # 8. jachere reduite de moitie
+      - {label: ba_rota, args: {ratio: 0.10}}
+      - {label: pn_prod_min, args: {threshold: 3000}}         # 9. elevage marginalise
+      - {label: mo_max_expl, args: {slack: 0.85}}             # 10. contraction du travail
+    enable_add:
+      - name: crop_share_bound                                # 11. mecanisation imposee
+        args: {label: cs_meca_min, numerator_crops: {group: intensif_canne},
+               denominator_crops: {group: canne}, sense: ge, share: 0.60}
+      - name: territory_indicator_bound                       # 12. l'argent public n'est
+        args: {label: budget_subventions, indicator: subvention,   #    pas infini pour autant
+               sense: le, threshold: 95000000}
+
+  - name: P3_intensification_moderee
+    description: >-
+      La trajectoire productiviste credible a 10 ans: on relache les plafonds de 30 %, on
+      soutient un peu, on mecanise a la marge, et on assume une transition graduelle
+      (inertie 40 %). Le point du spectre le plus proche d'une reforme POSEI reellement
+      envisageable.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: canne}, factor: 1.20}           # 1.
+        - {crops: {group: banane_export}, factor: 1.15}   # 2.
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 139100}}   # 3. +30 % de sucre
+      - {label: ba_quota_max, args: {threshold: 101240}}   # 4. +30 % de banane
+      - {label: bc_quota_max, args: {threshold: 15000}}    # 5. plantain elargi
+      - {label: ba_ja, args: {ratio: 0.15}}                # 6. jachere allegee
+      - {label: mo_max_expl, args: {slack: 1.10}}          # 7. un peu de main d'oeuvre en plus
+    enable_add:
+      - name: crop_share_bound                             # 8. mecanisation encouragee
+        args: {label: cs_meca_min, numerator_crops: {group: intensif_canne},
+               denominator_crops: {group: canne}, sense: ge, share: 0.40}
+      - name: territory_indicator_bound                    # 9. enveloppe publique bornee
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 85000000}
+      - name: baseline_inertia_min                         # 10. transition graduelle
+        args: {label: inertie, min_share: 0.40}
+
+  # --- Statu quo -----------------------------------------------------------------------
+
+  - name: P4_statu_quo
+    description: >-
+      Le statu quo comme POLITIQUE et non comme absence de politique: les quotas, les aides
+      et les regles restent ou ils sont, on gele l'enveloppe publique et on interdit la
+      degradation environnementale (plafonds poses au niveau constate), et le territoire
+      change lentement (inertie 70 %). C'est le point de comparaison de tous les autres.
+    set_args:
+      - {label: mo_max_expl, args: {slack: 1.0}}           # 1. main d'oeuvre inchangee
+    enable_add:
+      - name: baseline_inertia_min                         # 2. 70 % des hectares ne bougent pas
+        args: {label: inertie, min_share: 0.70}
+      - name: territory_indicator_bound                    # 3. enveloppe gelee au niveau 2017
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 72000000}
+      - name: territory_indicator_bound                    # 4. pas de degradation phyto
+        args: {label: plafond_ift, indicator: ift, sense: le, threshold: 67000}
+      - name: territory_indicator_bound                    # 5. pas de degradation azote
+        args: {label: plafond_azote, indicator: azote, sense: le, threshold: 1950000}
+      - name: territory_indicator_bound                    # 6. maintien de l'emploi agricole
+        args: {label: plancher_emploi, indicator: travail, sense: ge,
+               threshold: 3400, scale: 0.00062228}          # 1/1607 h par ETP
+
+  - name: P5_austerite_budgetaire
+    description: >-
+      Le statu quo prive d'argent public: l'enveloppe tombe de 40 %, les aides couplees a la
+      canne sont les premieres rabotees, et rien ne vient compenser. Teste ce que la
+      geographie agricole doit aux subventions plutot qu'a l'agronomie.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.60}                  # 1. coupe generale
+        - {crops: {group: canne}, factor: 0.80}       # 2. coupe supplementaire sur la canne
+                                                      #    (0,48 au total)
+    set_args:
+      - {label: mo_max_expl, args: {slack: 0.90}}   # 3. moins d'installations, moins d'actifs
+    enable_add:
+      - name: territory_indicator_bound              # 4. plafond budgetaire dur
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 43000000}
+      - name: baseline_inertia_min                   # 5. le territoire ne se reconfigure pas vite
+        args: {label: inertie, min_share: 0.60}
+
+  # --- Pole agroecologique -------------------------------------------------------------
+
+  - name: P6_verdissement_incitatif
+    description: >-
+      L'agroecologie par la carotte seule: aucune interdiction nouvelle, on paie les
+      pratiques et on rouvre les systemes qui les permettent (paillage bagasse/BRF,
+      fertilisation organique, paturage tournant). Mesure ce que l'incitation obtient sans
+      contrainte -- la question de politique publique la plus frequemment posee.
+    overrides:
+      data.scenario: SMART                     # 1. matrice OTK + MAE compost version SMART
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: maraichage}, factor: 1.30}      # 2. soutien au maraichage
+        - {crops: {group: bio_maraichage}, factor: 1.60}  # 3. surprime bio (MA_PLBIO/MA_MOBIO)
+    disable:
+      - pn_tour_supp                           # 4. paturage tournant rouvert
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.25}}    # 5. jachere legerement renforcee
+      - {label: mo_max_expl, args: {slack: 1.20}}   # 6. un peu de main d'oeuvre supplementaire
+    enable_add:
+      - name: crop_share_bound                  # 7. incitation doublee d'une part bio modeste
+        args: {label: bio_min, numerator_crops: {group: bio_maraichage},
+               denominator_crops: {group: maraichage}, sense: ge, share: 0.10}
+      - name: territory_indicator_bound         # 8. l'incitation a un cout borne
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 85000000}
+      - name: baseline_inertia_min              # 9.
+        args: {label: inertie, min_share: 0.50}
+
+  - name: P7_ecophyto_reglementaire
+    description: >-
+      L'agroecologie par le baton seul: des plafonds environnementaux fermes, aucune aide
+      supplementaire. Le pendant exact de P6 -- les deux se lisent ensemble, et l'ecart
+      entre eux est la reponse a "faut-il payer ou interdire ?".
+    enable:
+      - pn_piq_cld                             # 1. prairie interdite sur sols chlordecones (sante)
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.30}}    # 2. jachere renforcee
+    enable_add:
+      - name: territory_indicator_bound        # 3. IFT -30 % (trajectoire Ecophyto)
+        args: {label: plafond_ift, indicator: ift, sense: le, threshold: 46862}
+      - name: territory_indicator_bound        # 4. azote -20 %
+        args: {label: plafond_azote, indicator: azote, sense: le, threshold: 1544722}
+      - name: zone_indicator_bound             # 5. directive nitrates: 170 kgN/ha par ferme
+        args: {label: nitrates_ferme, zone: farms, indicator: azote, sense: le,
+               threshold_per_ha: 170}
+      - name: baseline_inertia_min             # 6.
+        args: {label: inertie, min_share: 0.50}
+
+  - name: P8_transition_agroecologique
+    description: >-
+      Le paquet complet et coherent: plafonds environnementaux, redeploiement des aides de
+      l'export vers l'agroecologie, et une politique d'installation qui desserre le plafond
+      de main d'oeuvre (slack 1,5) pour rendre le travail supplementaire possible. C'est le
+      scenario agroecologique "serieux", par opposition a la borne P10.
+    overrides:
+      data.scenario: SMART                     # 1.
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: bio_maraichage}, factor: 1.80}  # 2. redeploiement vers le bio
+        - {crops: {group: maraichage}, factor: 1.30}      # 3.
+        - {crops: {group: canne}, factor: 0.80}           # 4. ... finance par l'export
+    disable:
+      - pn_tour_supp                           # 5. paturage tournant rouvert
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.35}}    # 6. rotations franchement renforcees
+      - {label: mo_max_expl, args: {slack: 1.50}}  # 7. politique d'installation (cf. en-tete)
+    enable_add:
+      - name: territory_indicator_bound        # 9. IFT -40 %
+        args: {label: plafond_ift, indicator: ift, sense: le, threshold: 40168}
+      - name: territory_indicator_bound        # 10. azote -30 %
+        args: {label: plafond_azote, indicator: azote, sense: le, threshold: 1351632}
+      - name: zone_indicator_bound             # 11. 150 kgN/ha par ferme
+        args: {label: nitrates_ferme, zone: farms, indicator: azote, sense: le,
+               threshold_per_ha: 150}
+      - name: territory_indicator_bound        # 12. eau -20 % (surface irrigable seulement)
+        args: {label: plafond_eau, indicator: eau, sense: le, threshold: 27700000,
+               scale: 10.0, plot_weight: irrigable}
+      - name: territory_indicator_bound        # 13. plancher d'emploi : +20 % contre 3 503
+        args: {label: plancher_emploi, indicator: travail, sense: ge,   #  ETP de reference.
+               threshold: 4200, scale: 0.00062228}  # 86 % du maximum mesure (4 875 ETP)
+      - name: crop_share_bound                 # 14. 25 % du maraichage en bio
+        args: {label: bio_min, numerator_crops: {group: bio_maraichage},
+               denominator_crops: {group: maraichage}, sense: ge, share: 0.25}
+      - name: territory_indicator_bound        # 15. enveloppe publique bornee
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 80000000}
+      - name: baseline_inertia_min             # 16.
+        args: {label: inertie, min_share: 0.40}
+
+  - name: P9_souverainete_alimentaire
+    description: >-
+      HORS AXE. Ni intensif ni agroecologique: nourrir le territoire. Les planchers de
+      production vivriere du bloc SCENARIO de GAMS sont reactives, l'export est desserre
+      pour liberer du foncier, et les aides basculent vers le local. Attention: les
+      planchers de production sont infaisables sans desserrer le plafond de main d'oeuvre
+      (cf. en-tete), d'ou le slack 1,6. RISQUE SOLVEUR: contient un plancher arboricole.
+    overrides:
+      solver.args.time_limit: 7200             # plancher arboricole (cf. en-tete)
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: vivrier}, factor: 1.50}         # 1. bascule vers le vivrier
+        - {crops: {group: banane_export}, factor: 0.70}   # 2. ... financee par l'export
+        - {crops: {group: canne}, factor: 0.80}           # 3.
+    enable:
+      - bc_prod_min                            # 4. plancher plantain (4 056 t)
+      - ig_prod_min                            # 5. plancher igname (5 125 t)
+      - ma_prod_min                            # 6. plancher maraichage (26 404 t)
+      - an_prod_min                            # 7. plancher ananas (2 322 t)
+      - me_prod_min                            # 8. plancher melon (4 135 t)
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 80000}}   # 9. canne reduite, foncier libere
+      - {label: bc_quota_max, args: {threshold: 20000}}   # 10. debouche plantain elargi
+      - {label: mo_max_expl, args: {slack: 1.60}}         # 11. INDISPENSABLE (cf. en-tete)
+    enable_add:
+      - name: territory_production_bound       # 13. plancher arboricole en SURFACE (200 ha).
+        args: {label: arbo_surf_min,           #     Ordre de grandeur externe: Agreste 2017
+               groups: [{crops: {group: arboriculture}, use_yield: false,
+                         rate_multiplier: 1.0}],
+               sense: ge, threshold: 200}      #     atteste 385 ha, soit 335 a notre couverture.
+      - name: territory_indicator_bound        # 14. emploi : 73 % du maximum mesure
+        args: {label: plancher_emploi, indicator: travail, sense: ge,   #  (5 734 ETP) -- le
+               threshold: 4200, scale: 0.00062228}   # plus confortable des trois planchers,
+                                                     # faute de plafond phytosanitaire ici.
+      - name: territory_indicator_bound        # 15.
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 80000000}
+      - name: baseline_inertia_min             # 16. rupture partielle assumee
+        args: {label: inertie, min_share: 0.30}
+
+  - name: P10_bifurcation_agroecologique
+    description: >-
+      BORNE EXTREME agroecologique, symetrique de P1. Ecophyto tenu (-50 % d'IFT), azote
+      -40 %, eau -30 %, GES -25 %, souverainete alimentaire, moitie du maraichage en bio,
+      export divise par deux, et aucune inertie: la rupture est assumee. Improbable a 10
+      ans; sert de borne et de mesure du cout de la contrainte maximale. RISQUE SOLVEUR
+      (plancher arboricole + empilement de plafonds): warm start recommande.
+    overrides:
+      data.scenario: SMART                     # 1.
+      solver.args.time_limit: 7200             # plancher arboricole (cf. en-tete)
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: bio_maraichage}, factor: 2.00}  # 2.
+        - {crops: {group: maraichage}, factor: 1.50}      # 3.
+        - {crops: {group: vivrier}, factor: 1.30}         # 4.
+        - {crops: {group: canne}, factor: 0.60}           # 5.
+        - {crops: {group: banane_export}, factor: 0.50}   # 6.
+    enable:
+      - bc_prod_min                            # 7. planchers vivriers
+      - ig_prod_min
+      - ma_prod_min
+      - an_prod_min
+      - me_prod_min
+    disable:
+      - pn_tour_supp                           # 8. paturage tournant rouvert
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 70000}}   # 10. canne -35 %
+      - {label: ba_quota_max, args: {threshold: 40000}}   # 11. banane export -49 %
+      - {label: bc_quota_max, args: {threshold: 20000}}   # 12.
+      - {label: ba_ja, args: {ratio: 0.40}}               # 13.
+      - {label: mo_max_expl, args: {slack: 1.80}}         # 14. politique d'installation forte
+    enable_add:
+      - name: territory_indicator_bound        # 15. IFT -50 % (cible Ecophyto)
+        args: {label: plafond_ift, indicator: ift, sense: le, threshold: 33473}
+      - name: territory_indicator_bound        # 16. azote -40 %
+        args: {label: plafond_azote, indicator: azote, sense: le, threshold: 1158542}
+      - name: zone_indicator_bound             # 17. 120 kgN/ha par ferme
+        args: {label: nitrates_ferme, zone: farms, indicator: azote, sense: le,
+               threshold_per_ha: 120}
+      - name: territory_indicator_bound        # 18. GES -25 % (unite du modele)
+        args: {label: plafond_ges, indicator: ges, sense: le, threshold: 107049903}
+      - name: territory_indicator_bound        # 19. eau -30 %
+        args: {label: plafond_eau, indicator: eau, sense: le, threshold: 24262000,
+               scale: 10.0, plot_weight: irrigable}
+      - name: territory_indicator_bound        # 20. emploi +26 % contre 3 503 ETP de reference.
+        args: {label: plancher_emploi, indicator: travail, sense: ge,   #  88 % du maximum
+               threshold: 4400, scale: 0.00062228}   # mesure (4 975 ETP) -- lire l'en-tete
+      - name: crop_share_bound                 # 21. moitie du maraichage en bio
+        args: {label: bio_min, numerator_crops: {group: bio_maraichage},
+               denominator_crops: {group: maraichage}, sense: ge, share: 0.50}
+      - name: territory_production_bound       # 22. plancher arboricole a la valeur Agreste
+        args: {label: arbo_surf_min,
+               groups: [{crops: {group: arboriculture}, use_yield: false,
+                         rate_multiplier: 1.0}],
+               sense: ge, threshold: 335}

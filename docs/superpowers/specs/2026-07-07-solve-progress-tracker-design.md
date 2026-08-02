@@ -29,7 +29,7 @@ variables) — nearest-size historical runs are averaged to produce the estimate
 successful solve is appended back into that history, so the estimate self-improves over
 repeated runs.
 
-### New module: `core/model/progress.py`
+### New module: `core/solve/progress.py`
 
 - `SolveHistory`
   - `__init__(self, path: Path = DEFAULT_HISTORY_PATH)` — loads existing JSON (or starts

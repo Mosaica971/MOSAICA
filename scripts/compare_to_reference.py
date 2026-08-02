@@ -32,7 +32,7 @@ import yaml
 
 from case_studies.guadeloupe.domain.farm_typology import TYPE_EXPL_LABELS
 
-from scripts._common import OUTPUTS_ROOT, ROOT
+from scripts._common import OUTPUTS_ROOT, ROOT, format_number as _n
 
 REFERENCE_DIR_NAME = "reference_2017"
 TOTAL_KEY = "TOTAL"
@@ -65,12 +65,6 @@ def _relative(path: Path) -> str:
         return resolved.relative_to(ROOT).as_posix()
     except ValueError:
         return resolved.as_posix()
-
-
-def _n(value: Any, decimals: int = 0) -> str:
-    if value is None or pd.isna(value):
-        return "-"
-    return f"{value:,.{decimals}f}".replace(",", " ")
 
 
 def _run_side(recap: dict[str, Any], name: str) -> float | None:

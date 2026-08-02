@@ -21,7 +21,7 @@ coefficient (`Var_Rdt_Cult`).
 
 ## What Eq_REV_MARKOVITZ actually computes
 
-Verbatim from `old_code_gms_format_now_txt/MODELE.txt:424-430`:
+Verbatim from `context/gams/MODELE.txt:424-430`:
 
 ```
 Eq_REV_MARKOVITZ(SE)..   sum(SP$Expl_Parc(SE,SP), sum(SC, X(SP,SC)*MB_Ha_Cult(SC)                         ))
@@ -55,7 +55,7 @@ policy-relevant run should know GAMS's own real answer was Markovitz, not plain 
 
 `OPTIMISATION.txt:74-82` computes nine farm-type-specific alternate margin measures
 (`MB_Ha_Cult_Marko_ARBORICULTEUR`, `_BANANIER`, etc.). Grepped every file in
-`old_code_gms_format_now_txt/` — none of these parameters are referenced anywhere else
+`context/gams/` — none of these parameters are referenced anywhere else
 in the model or its outputs. This is a superseded, abandoned approach to the same idea,
 left in the source. Do not port it.
 
@@ -149,7 +149,7 @@ plan-writing, superseding an earlier, incomplete pass over this section):
    ten — `1.40` is excluded per the correction above).
 
 **Exact crop-group set membership** (re-verified directly against
-`old_code_gms_format_now_txt/SETS.txt` during plan-writing; only `SC_BC`, `SC_IG`,
+`context/gams/SETS.txt` during plan-writing; only `SC_BC`, `SC_IG`,
 `SC_BAN_EX` already existed as `config.yaml` anchors from Phase 1 and need no changes —
 `SC_CAN`, `SC_PAT`, `SC_NON`, `SC_MAR`, `SC_CULTIV` are new and must be added):
 

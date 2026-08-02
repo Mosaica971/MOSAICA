@@ -12,7 +12,7 @@ travers un résultat de simulation. Trois conséquences :
 
 - impossible de dire ce que vaut la référence sans lancer un solve ;
 - ses hypothèses (cultures représentantes, règle de continuité de friche, exclusion des NC)
-  étaient dispersées dans le code et dans `VIGILANCE.md`, jamais réunies en un endroit ;
+  étaient dispersées dans le code et dans `docs/04-vigilance.md`, jamais réunies en un endroit ;
 - un écart observé/simulé était systématiquement lu comme un défaut du **modèle**, alors
   qu'une partie tient à ce que la référence ne peut pas dire.
 
@@ -42,7 +42,7 @@ Ce choix a produit le résultat le plus utile du lot : **le central sort de la f
 le haut** sur ventes, revenu, heures, azote, GES et IFT — parce que la représentante n'est
 souvent pas éligible là où elle est comptée (canne 31 %, maraîchage 61 %). Un encadrement
 symétrique autour du central aurait masqué exactement ce que l'on cherchait. Détail et
-conséquences sur le plafond de main d'œuvre : `VIGILANCE.md`.
+conséquences sur le plafond de main d'œuvre : `docs/04-vigilance.md`.
 
 **4. Le plancher de PAD appartient à la référence, pas au run.** Une parcelle n'est
 reproductible que si au moins une variante fine de sa famille observée y est éligible ; ce qui

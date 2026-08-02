@@ -61,7 +61,7 @@ Facteur 6. `Eq_MO_MAX_Expl` (`MODELE.txt:368`, Eq. 5 de l'article) plafonne chaq
 exploitation au travail qu'exigeait son assolement observé. Une ferme cannière dispose de
 12,7 h/ha ; le maraîchage en demande 1 653.
 
-**Le point qui avait fait différer ce portage est plus nuancé que ne le dit `VIGILANCE.md`.**
+**Le point qui avait fait différer ce portage est plus nuancé que ne le dit `docs/04-vigilance.md`.**
 La formule GAMS littérale (`ENTREES.txt:463-469`) calcule le plafond sur `Matrice_Parc_Cult`,
 qui pointe sur les codes **agrégés** — et 9 des 12 n'ont aucune ligne ITK
 (`Matrice_OTK_Cult` : colonnes AN/BA/BC/CS/IG/MA/NC/PN/VE entièrement nulles ; seules AG, JA
@@ -130,7 +130,7 @@ Le plafond est calculé dans `data_pipeline` : pour chaque parcelle, sa surface 
 la MO/ha de la **culture représentante** de son groupe observé, sommé par exploitation. La
 substitution par les représentantes est la même hypothèse, déjà documentée, que celle des
 indicateurs d'entrée — elle est ici étendue à une contrainte qui **influence l'allocation**,
-ce qui est un changement de nature à consigner dans `VIGILANCE.md`.
+ce qui est un changement de nature à consigner dans `docs/04-vigilance.md`.
 
 `slack` (défaut 1.0) mirroir des multiplicateurs de scénario que GAMS garde en commentaire
 juste sous la formule (`ENTREES.txt:470-472` : « x 1.7 pour S1, x 1.3 pour S2, x 10 pour S3 »).

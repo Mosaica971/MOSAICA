@@ -1,0 +1,75 @@
+# Groupes de cultures nommes, partages par tous les fichiers de scenarios.
+#
+# POURQUOI CE FICHIER EXISTE. Les ancres YAML (&G_CANNE / *G_CANNE) ne traversent pas les
+# fichiers. Tant que politiques et forcages vivaient dans un seul document, ils pouvaient se
+# partager un bloc `_crop_groups` ; les separer aurait impose de recopier chaque liste dans
+# les deux, et une copie derive. Un catalogue nomme fait le meme travail sans la copie : un
+# scenario ecrit `crops: {group: canne}` et le chargeur substitue la liste
+# (`core/config.load_batch_spec` -> `resolve_crop_groups`).
+#
+# CE FICHIER NE REDIT PAS CE QUE LE MODELE SAIT DEJA. Le catalogue effectif est
+# `crop_families` de `config.yaml` PLUS ce fichier, ce dernier gagnant en cas de collision.
+# Donc `{group: cs}`, `{group: ma}`, `{group: ban_ex}` marchent sans etre declares ici : ce
+# sont les familles du modele. On ne trouve ci-dessous que (a) des alias lisibles vers ces
+# familles et (b) les regroupements qui n'ont de sens qu'en prospective.
+#
+# Un membre prefixe de `@` est une reference a un autre groupe, resolue recursivement
+# (doublons supprimes, cycle detecte). C'est ce qui permet de composer `vivrier` sans
+# recopier onze codes culture.
+#
+# `tests/test_crop_group_sync.py` verifie que chaque code cite ici existe bien dans
+# CULT_2017.set et que les alias pointent sur la bonne famille. Une faute de frappe est
+# sinon SILENCIEUSE : le code ne matche rien, le groupe est plus etroit qu'ecrit, et le run
+# a l'air normal.
+
+# --- Alias lisibles vers les familles de config.yaml ------------------------------------
+# Pure lisibilite : `{group: canne}` plutot que `{group: cs}` dans un fichier que lira
+# quelqu'un qui ne connait pas les abreviations GAMS.
+canne: ["@cs"]
+banane_export: ["@ban_ex"]
+plantain: ["@bc"]
+igname: ["@ig"]
+ananas: ["@an"]
+maraichage: ["@ma"]
+arboriculture: ["@plu"]        # AG + vergers, pluvial
+
+# --- Regroupements propres a la prospective ---------------------------------------------
+
+# LES DEUX SEULS SYSTEMES BIO REELS DU JEU DE DONNEES. Lire ceci avant d'allonger la liste.
+#
+# Les 25 variantes "Karusmart" MA_{BAG,BRF,PAI}_{BIO,VEG,FER,NON}_{I,NI} RESSEMBLENT aux
+# systemes bio/paillage et n'en sont pas : mesure sur les donnees reelles (2026-07-31), les 25
+# sont identiques a MA_TO_CO_JA sur tous les parametres que le modele lit -- marge
+# 20 825 EUR/ha, rendement 36 t/ha, 1 128 h/ha, 75,6 kg N/ha, IFT 10, meme empreinte
+# d'eligibilite. La distinction BIO / VEG / FER / NON ne porte AUCUNE donnee. Ce sont 25
+# copies d'une meme activite conventionnelle, d'ou la suppression du bloc par GAMS
+# (Eq_MA_EXP_SUPP) et le `ma_exp_supp` maintenu actif dans config.yaml.
+#
+# Deux consequences, qui ont toutes deux mordu avant la mesure :
+#   * les rouvrir ajoute 548 000 binaires de PURE SYMETRIE (879 162 contre 331 044) -- des
+#     copies interchangeables sont le pire cas du branch-and-bound, qui explore alors les
+#     permutations equivalentes d'une meme solution ;
+#   * une part bio batie dessus est un NO-OP : le solveur satisfait "25 % de bio" en
+#     choisissant la copie nommee _BIO_ d'une activite identique, a cout exactement nul. Une
+#     contrainte qui a l'air agroecologique et ne contraint rien.
+# MA_PLBIO et MA_MOBIO, a l'inverse, sont reellement distinctes et reellement bio :
+# 0 kg N/ha et IFT 0, pour 3 882 / 3 498 EUR/ha contre 27 929 pour MA_ROTA a 277 kg N et
+# IFT 15. C'est un vrai arbitrage, et c'est ce que la part bio achete.
+bio_maraichage: [MA_PLBIO, MA_MOBIO]
+
+# Le maraichage effectivement distinct, c.-a-d. `ma` prive des 25 copies ci-dessus.
+maraichage_reel: [MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA]
+
+# Tout ce que le marche local mange, par opposition aux deux filieres d'export.
+vivrier:
+  - "@plantain"
+  - "@igname"
+  - "@ananas"
+  - ME
+  - "@arboriculture"
+  - "@maraichage_reel"
+
+# Canne mecanisee : l'intensification reellement disponible. Les variantes irriguees CS_*_IM
+# sont interdites par `cs_irrig_ban`, si bien qu'une contrainte de part batie sur elles seules
+# serait vide et infaisable -- sauf si le scenario leve l'interdiction, ce que font P1 et P2.
+intensif_canne: [CS_BT_NIM, CS_SBT_NIM, CS_NGT_NIM, CS_CGT_NIM, CS_EGT_NIM, CS_MG_NIM]

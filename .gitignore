@@ -12,6 +12,9 @@ venv/
 /outputs/
 .worktrees/
 .claude/*.lock
-Rapport technique variables MOSAICA_v2.docx
 # Golden snapshot de refactor : derive de data/, reste local
 .golden/
+# Sources externes (context/). Le GAMS d'origine et l'article de reference SONT versionnes :
+# le premier est la reference de parite, le second celle de la methode de calibration. Le
+# rapport technique ne l'est pas (binaire volumineux, non diffable).
+context/Rapport technique variables MOSAICA_v2.docx

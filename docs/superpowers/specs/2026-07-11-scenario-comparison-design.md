@@ -38,7 +38,7 @@ Deep-merge rules (to design precisely, but the intent):
 `build_dataset → build_model → solve → generate_report`, and tag the recap with
 `scenario_name` + the applied overrides. Each scenario writes its own `outputs/output_N/`.
 
-Because a full solve is ~30–55 min (see VIGILANCE.md, the bottleneck is the MILP search),
+Because a full solve is ~30–55 min (see docs/04-vigilance.md, the bottleneck is the MILP search),
 running several scenarios at full scale is expensive. Recommend developing/validating
 scenarios `zone_filter`-scoped first, then a deliberate full-scale batch.
 
@@ -65,7 +65,7 @@ scenarios `zone_filter`-scoped first, then a deliberate full-scale batch.
 2. **Full-scale comparison cost.** N scenarios × ~45 min. Options: accept it (overnight
    batch), or restrict full runs to a shortlist and use zone-scoped runs for exploration.
 3. **Baseline resolution.** Cross-scenario per-crop *input* comparisons inherit the
-   12-RPG-group limitation (VIGILANCE.md); scenario-vs-scenario *output* comparisons are
+   12-RPG-group limitation (docs/04-vigilance.md); scenario-vs-scenario *output* comparisons are
    at full fine-crop resolution and unaffected.
 
 ## Non-goals

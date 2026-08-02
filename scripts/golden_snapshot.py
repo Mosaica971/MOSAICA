@@ -28,12 +28,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 
-from case_studies.guadeloupe.pipeline.data_pipeline import CONFIG_PATH, build_dataset
+from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
 from case_studies.guadeloupe.reporting import calibration, indicators
 from core.config import load_config
 from core.data.dataset import Dataset
 
-from scripts._common import ROOT
+from scripts._common import CONFIG_PATH, ROOT
 
 SNAPSHOT_PATH = ROOT / ".golden" / "snapshot.json"
 
@@ -125,7 +125,7 @@ def _snapshot_model(config: dict[str, Any]) -> dict[str, Any]:
     neither of which shows up in the indicator checksums.
 
     Territory quotas are dropped: they are sized for the whole territory and a subset
-    cannot satisfy them (see VIGILANCE.md).
+    cannot satisfy them (see docs/04-vigilance.md).
     """
     import pyomo.environ as pyo
     from pyomo.core.expr import decompose_term

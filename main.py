@@ -1,16 +1,29 @@
+"""One full solve: build the dataset, build the model, solve it, write a run folder.
+
+Everything else is configuration. Which case study runs comes from `--case-study` (or
+$MOSAICA_CASE_STUDY, default `guadeloupe`); what it does comes from that case study's
+`config.yaml`. There are no other options on purpose -- a run must be reproducible from its
+`config_used.yaml` alone.
+
+    .venv/Scripts/python main.py
+    .venv/Scripts/python main.py --case-study guadeloupe
+
+SLOW: 30-55 min on the full Guadeloupe dataset, with large run-to-run variance (the
+bottleneck is the branch-and-bound search). Use `zone_filter` in the config, or
+`scripts/profile_solver.py`, to iterate.
+"""
+
+import argparse
 from pathlib import Path
 
 import pyomo.environ as pyo
 
-from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
-from case_studies.guadeloupe.model.model import build_model
-from case_studies.guadeloupe.reporting.report import generate_report
+from core.case_study import CaseStudy, add_argument, load
 from core.config import load_config
-from core.model.progress import solve_with_progress
-from core.model.warm_start import apply_allocation, constraint_violations, objective_value
 from core.reporting.run_folder import read_allocation
+from core.solve.progress import solve_with_progress
+from core.solve.warm_start import apply_allocation, constraint_violations, objective_value
 
-CONFIG_PATH = Path(__file__).resolve().parent / "case_studies" / "guadeloupe" / "config.yaml"
 OUTPUTS_ROOT = Path(__file__).resolve().parent / "outputs"
 
 _MAX_VIOLATIONS_SHOWN = 5
@@ -49,16 +62,19 @@ def _apply_warm_start(model, config: dict, outputs_root: Path) -> bool:
     return True
 
 
-def main(outputs_root: Path = OUTPUTS_ROOT) -> None:
-    config = load_config(CONFIG_PATH)
-    dataset = build_dataset(config)
-    model = build_model(dataset, config)
+def main(outputs_root: Path = OUTPUTS_ROOT, case_study: CaseStudy | str | None = None) -> None:
+    case = case_study if isinstance(case_study, CaseStudy) else load(case_study)
+    config = load_config(case.config_path)
+    dataset = case.build_dataset(config)
+    model = case.build_model(dataset, config)
     warm_start = _apply_warm_start(model, config, outputs_root)
     results, duration = solve_with_progress(
-        model, config, case_study=CONFIG_PATH.parent.name, warm_start=warm_start
+        model, config, case_study=case.name, warm_start=warm_start
     )
 
-    output_dir = generate_report(dataset, config, model, results, duration, outputs_root=outputs_root)
+    output_dir = case.generate_report(
+        dataset, config, model, results, duration, outputs_root=outputs_root
+    )
 
     total_revenue = pyo.value(model.objective)
     allocated_plots = sum(1 for index in model.Y if pyo.value(model.Y[index]) > 0.5)
@@ -70,4 +86,6 @@ def main(outputs_root: Path = OUTPUTS_ROOT) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    add_argument(parser)
+    main(case_study=parser.parse_args().case_study)

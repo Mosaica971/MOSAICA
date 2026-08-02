@@ -2,7 +2,7 @@
 
 _2026-07-21 — d'après Chopin, P., Blazy, J-M., Guindé, L., Doré, T., 2015. « MOSAICA: A
 multi-scale bioeconomic model for the design and ex ante assessment of cropping system
-mosaics », Agricultural Systems 140, 26-39 (`Chopin et al 2015 pour Hal.pdf`, racine du
+mosaics », Agricultural Systems 140, 26-39 (`context/Chopin et al 2015 pour Hal.pdf`, racine du
 dépôt), §2.5, §2.6 et §3.1._
 
 ## Contexte
@@ -80,7 +80,7 @@ Une bonne part des briques existe.
 | 8 types d'exploitation + algorithme if-then | `domain/farm_typology.compute_type_expl()` |
 | Coefficients Ø calibrés (Table 2) | `farm_typology._AVERS_BY_TYPE_EXPL` |
 | Objectif Markowitz (Eq. 1) | `maximize_risk_adjusted_gross_margin`, présent mais `enable: false` |
-| Plafond de main-d'œuvre par ferme (Eq. 5) | **non porté** (`VIGILANCE.md`, `Eq_MO_MAX_Expl`) |
+| Plafond de main-d'œuvre par ferme (Eq. 5) | **non porté** (`docs/04-vigilance.md`, `Eq_MO_MAX_Expl`) |
 | PAD, matrice de confusion, taux parcellaire | **rien** — objet de cette spec |
 
 ### Les Ø portés correspondent à la Table 2, à une exception près
@@ -104,7 +104,7 @@ pas une action — aucune des deux valeurs n'est à corriger sans arbitrage.
 
 La situation observée n'existe qu'au niveau **agrégat RPG** : 12 groupes
 (`farm_typology._RPG_CODE_TO_BASE_GROUP`). La variante technique de 2017 n'a jamais été
-relevée — le GAMS faisait pareil, ce n'est pas un portage manquant (`VIGILANCE.md`, point sur
+relevée — le GAMS faisait pareil, ce n'est pas un portage manquant (`docs/04-vigilance.md`, point sur
 la baseline agrégée). La sortie du solveur, elle, est en 84 cultures fines.
 
 La comparaison se fait donc en **agrégeant le simulé vers les 12 groupes observés**. C'est
@@ -276,7 +276,7 @@ côté valant surface nulle pour la culture concernée.
 
 ### `VE_PLUIE` n'apparaîtra jamais
 
-`VIGILANCE.md` documente un bug GAMS porté fidèlement : `Eq_VE_PLUIE` interdit la culture sur
+`docs/04-vigilance.md` documente un bug GAMS porté fidèlement : `Eq_VE_PLUIE` interdit la culture sur
 **toute** parcelle. Si le PAD des vergers ressort mauvais, c'est le premier suspect, et ce
 n'est pas un défaut du module d'évaluation.
 
@@ -332,10 +332,10 @@ figures comme les autres. Un test de `zones.py` vérifie la ré-export depuis `c
 
 ## Documentation à mettre à jour
 
-- `VIGILANCE.md` — entrée « ces métriques évaluent un modèle non calibré », avec les deux
+- `docs/04-vigilance.md` — entrée « ces métriques évaluent un modèle non calibré », avec les deux
   causes probables et le renvoi à cette spec ; note sur le traitement des `NC` dans la
   reconstruction typologique.
 - `TODO.md` — le chantier suivant : activer l'objectif Markowitz et porter `Eq_MO_MAX_Expl`,
   puis relancer l'évaluation pour mesurer le gain.
-- `PRISE_EN_MAIN.md` — la commande `scripts/evaluate_calibration.py`.
+- `docs/01-utilisation.md` — la commande `scripts/evaluate_calibration.py`.
 - `CLAUDE.md` — une ligne sur le nouveau module dans la description de `reporting/`.

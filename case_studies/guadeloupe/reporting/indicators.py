@@ -7,6 +7,7 @@ import pandas as pd
 import pyomo.environ as pyo
 
 from case_studies.guadeloupe.domain import resilience, soil_carbon, water
+from case_studies.guadeloupe.domain.crop_families import base_group_for
 from case_studies.guadeloupe.domain.farm_typology import compute_base_crop_group
 from core.data.dataset import Dataset
 
@@ -35,7 +36,7 @@ def decode_baseline_representative_allocation(dataset: Dataset, config: dict[str
     crops, so the fine-crop economics indicators (production/subsidy/revenue/ETP) apply to
     the input side. The observed baseline is only known at aggregate/RPG resolution and the
     aggregate codes carry no economics of their own; `config['baseline_representative_crops']`
-    substitutes a representative fine variant per family (an assumption -- see VIGILANCE.md
+    substitutes a representative fine variant per family (an assumption -- see docs/04-vigilance.md
     "point 4"). Real single-crop families (AG/ME/JA) map to themselves; NC is already
     dropped by decode_baseline_allocation."""
     baseline = decode_baseline_allocation(dataset)
@@ -120,6 +121,120 @@ def compute_azote_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     return _by_crop(dataset, allocation, "azote_per_ha_cult")
 
 
+def compute_rpest_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Rpest score (0-10) of each allocated plot, for the crop it carries."""
+    table = dataset.parameters.get("rpest_by_pair")
+    if table is None or allocation.empty:
+        return pd.Series(dtype=float)
+    plots = [p for p in allocation.index if p in table.index]
+    crops = allocation.reindex(plots)
+    valid = crops[crops.isin(table.columns)]
+    if valid.empty:
+        return pd.Series(dtype=float)
+    values = table.reindex(index=valid.index).to_numpy()[
+        range(len(valid)), [table.columns.get_loc(c) for c in valid]
+    ]
+    return pd.Series(values, index=valid.index)
+
+
+def compute_rpest_totals(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
+    """Territorial pesticide-risk summary.
+
+    The headline is GAMS's own: the SURFACE whose score exceeds 6, i.e. the land where the
+    risk is judged high. A mean score would hide it -- a few very exposed hectares matter
+    more to a catchment than a slightly raised average everywhere.
+    """
+    scores = compute_rpest_by_plot(dataset, allocation)
+    if scores.empty:
+        return {"rpest_mean": 0.0, "rpest_surface_at_risk_ha": 0.0,
+                "rpest_surface_at_risk_share": 0.0, "rpest_max": 0.0}
+    surface = _plot_surface(dataset, allocation).reindex(scores.index)
+    total = float(surface.sum())
+    at_risk = float(surface[scores > 6.0].sum())
+    weighted_mean = float((scores * surface).sum() / total) if total else 0.0
+    return {
+        "rpest_mean": weighted_mean,
+        "rpest_surface_at_risk_ha": at_risk,
+        "rpest_surface_at_risk_share": at_risk / total if total else 0.0,
+        "rpest_max": float(scores.max()),
+    }
+
+
+def compute_agroecology_totals(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
+    """Reach of the agri-environmental measures, and organic area.
+
+    Reported apart from one another on purpose: an MAE pays for a named practice (green
+    harvest, sanitary fallow, compost) and covers conventional crops doing it, while the
+    organic figure counts itineraries that use an organic-only operation. Adding the two
+    would file green-harvest cane as organic. See domain/agroecology.py.
+    """
+    surface = _plot_surface(dataset, allocation)
+    total_surface = float(surface.sum())
+
+    def area_where(parameter: str) -> float:
+        if parameter not in dataset.parameters:
+            return 0.0
+        rate = _broadcast_rate(dataset.parameters[parameter], allocation)
+        return float((surface * rate).sum())
+
+    mae_area = area_where("under_mae_cult")
+    organic_area = area_where("organic_cult")
+    mae_spend = float(_optional_by_crop(dataset, allocation, "mae_per_ha_cult").sum())
+
+    # Pasture qualifies as organic through the PROC_BIO_BOVIN operation of its itinerary,
+    # which is faithful to the data but swamps the figure: on output_3 the whole 6 096 ha of
+    # organic area IS the pasture floor. Reported separately so "organic share" is never read
+    # as a statement about cropland when it is a statement about grass.
+    if "organic_cult" in dataset.parameters and not allocation.empty:
+        organic_rate = _broadcast_rate(dataset.parameters["organic_cult"], allocation)
+        is_pasture = allocation.map(
+            lambda crop: _safe_base_group(crop) == "PN"
+        ).astype(float)
+        organic_cropland = float((surface * organic_rate * (1.0 - is_pasture)).sum())
+    else:
+        organic_cropland = 0.0
+
+    def share(value: float) -> float:
+        return value / total_surface if total_surface else 0.0
+
+    return {
+        "surface_mae_ha": mae_area,
+        "surface_mae_share": share(mae_area),
+        "mae_spending": mae_spend,
+        "surface_bio_ha": organic_area,
+        "surface_bio_share": share(organic_area),
+        "surface_bio_hors_prairie_ha": organic_cropland,
+        "surface_bio_hors_prairie_share": share(organic_cropland),
+    }
+
+
+def _safe_base_group(crop: str) -> str | None:
+    try:
+        return base_group_for(crop)
+    except KeyError:
+        return None
+
+
+def _optional_by_crop(dataset: Dataset, allocation: pd.Series, parameter: str) -> pd.Series:
+    """`_by_crop`, but yielding nothing when the parameter is absent.
+
+    Reporting runs against datasets built by older code and by tests that supply only the
+    parameters they exercise; a newly added rate must not make the whole environmental block
+    unavailable.
+    """
+    if parameter not in dataset.parameters:
+        return pd.Series(dtype=float)
+    return _by_crop(dataset, allocation, parameter)
+
+
+def compute_phosphore_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    return _optional_by_crop(dataset, allocation, "phosphore_per_ha_cult")
+
+
+def compute_potasse_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    return _optional_by_crop(dataset, allocation, "potasse_per_ha_cult")
+
+
 def compute_ges_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Greenhouse-gas emissions (t CO2) by crop: surface x ges_per_ha_cult."""
     return _by_crop(dataset, allocation, "ges_per_ha_cult")
@@ -163,7 +278,7 @@ def _irrigable_surface(dataset: Dataset, allocation: pd.Series) -> pd.Series:
 
 def compute_water_need_m3_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Annual gross crop water need (m3) per allocated plot. Gross, not net of rainfall --
-    the monthly PLUVIO_*_PARC columns do not exist in the data (see VIGILANCE.md)."""
+    the monthly PLUVIO_*_PARC columns do not exist in the data (see docs/04-vigilance.md)."""
     if allocation.empty:
         return pd.Series(dtype=float)
     per_ha = _per_plot_rate(dataset, allocation, "water_need_per_ha_cult")
@@ -233,7 +348,12 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
     total_water = float(compute_water_need_m3_by_plot(dataset, allocation).sum())
 
     return {
+        **compute_rpest_totals(dataset, allocation),
         "total_azote": total_azote,
+        # Mineral P/K only -- organic amendments declare no grade, see
+        # domain/environment.nutrient_grades.
+        "total_phosphore": float(compute_phosphore_by_crop(dataset, allocation).sum()),
+        "total_potasse": float(compute_potasse_by_crop(dataset, allocation).sum()),
         "total_ges": total_ges,
         "total_ift": total_ift,
         "surface_cld": compute_cld_at_risk_surface(dataset, allocation),
@@ -242,7 +362,7 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
         "ift_per_ha": per_ha(total_ift),
         "total_water_need_m3": total_water,
         # Degenerate on the real dataset: BESOIN_EAU_01..12 are identical across all 12
-        # months for every crop (see VIGILANCE.md), so the peak month is always exactly
+        # months for every crop (see docs/04-vigilance.md), so the peak month is always exactly
         # total_water / 12 -- it carries no information beyond the annual total and is
         # deliberately excluded from the dashboard's composite score (comparison.py). Kept
         # in the recap; will become meaningful once a genuine monthly profile is supplied.
@@ -263,7 +383,7 @@ def compute_resilience_totals(
     bad year, revenue concentration, and margin lost under a relative price shock.
 
     These measure a *fixed* allocation's exposure -- nothing is re-optimized, so this is not
-    adaptive capacity. See the design spec and VIGILANCE.md.
+    adaptive capacity. See the design spec and docs/04-vigilance.md.
     """
     surface_by_crop = compute_surface_by_key(dataset, allocation)
     total_margin = float(compute_gross_margin_by_crop(dataset, allocation).sum())
@@ -397,7 +517,7 @@ def compute_labor_hours_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.S
 
     Only meaningful for a fine-crop allocation (the solver output): the 12-RPG-group
     baseline has no labor rate at that resolution, so ETP is an output-only indicator
-    (see VIGILANCE.md, same limitation as the other per-crop indicators)."""
+    (see docs/04-vigilance.md, same limitation as the other per-crop indicators)."""
     return _plot_surface(dataset, allocation) * _per_plot_rate(
         dataset, allocation, "labor_hours_per_ha_cult"
     )
@@ -541,6 +661,78 @@ def compute_shannon_diversity(
         return float(-(shares * np.log(shares)).sum())
 
     return frame.groupby("group_key").apply(_shannon)
+
+
+def compute_shannon_total(dataset: Dataset, allocation: pd.Series) -> float:
+    """Shannon diversity of the whole allocated area, over crops.
+
+    compute_shannon_diversity already does this per region and per island, but a territorial
+    scalar is what a scenario comparison needs: cropping diversity is an agroecological
+    outcome in its own right, and a per-region series cannot be put on a comparison axis.
+    """
+    surface = _plot_surface(dataset, allocation)
+    shares = surface.groupby(allocation).sum()
+    shares = shares[shares > 0]
+    total = shares.sum()
+    if total <= 0:
+        return 0.0
+    shares = shares / total
+    return float(-(shares * np.log(shares)).sum())
+
+
+def _ratio(numerator: float, denominator: float) -> float | None:
+    """numerator/denominator, or None when the denominator is zero.
+
+    None rather than 0.0 on purpose: "no hectares allocated" is not "zero euros per hectare",
+    and a 0 would be averaged into a composite score as if it were a measurement.
+    """
+    if not denominator:
+        return None
+    return float(numerator) / float(denominator)
+
+
+def compute_intensity_totals(
+    economics: dict[str, float], environment: dict[str, float], surface_ha: float
+) -> dict[str, float | None]:
+    """Intensity and public-spending-efficiency ratios, derived from totals already computed.
+
+    Two reasons these matter more than the totals in a scenario comparison:
+
+    * scenarios do not allocate the same number of hectares (a policy that leaves land idle
+      shows a lower nitrogen TOTAL while being no cleaner per hectare), so a comparison on
+      totals alone confuses scale with intensity;
+    * the spending-efficiency ratios are the evaluation metric a public policy is actually
+      judged on -- euros of subsidy per tonne, per full-time job, per euro of margin. They
+      are what separates paying for a result from paying for an activity, which is exactly
+      the question P6 (incentive only) and P7 (regulation only) were written to pose.
+
+    Pure arithmetic on the two totals dicts, so it needs no dataset and is trivially testable.
+    """
+    production = economics.get("total_production_tonnes") or 0.0
+    subsidy = economics.get("total_subsidy") or 0.0
+    margin = economics.get("total_gross_margin") or 0.0
+    etp = economics.get("total_etp") or 0.0
+    azote = environment.get("total_azote") or 0.0
+    ift = environment.get("total_ift") or 0.0
+
+    return {
+        # Land intensity
+        "gross_margin_per_ha": _ratio(margin, surface_ha),
+        "etp_per_ha": _ratio(etp, surface_ha),
+        "production_per_ha": _ratio(production, surface_ha),
+        # Labour productivity -- the other side of etp_per_ha: a policy can raise employment
+        # by making each job less productive, and only this ratio shows it.
+        "gross_margin_per_etp": _ratio(margin, etp),
+        # Environmental intensity per unit produced, not per hectare: feeding the territory
+        # with less nitrogen per tonne is a different claim from farming fewer hectares.
+        "azote_per_tonne": _ratio(azote, production),
+        "ift_per_tonne": _ratio(ift, production),
+        # Public spending efficiency
+        "subsidy_per_tonne": _ratio(subsidy, production),
+        "subsidy_per_etp": _ratio(subsidy, etp),
+        "subsidy_per_euro_margin": _ratio(subsidy, margin),
+        "subsidy_per_ha": _ratio(subsidy, surface_ha),
+    }
 
 
 def _surface_by_dimension_and_key(

@@ -1,6 +1,6 @@
 # Plancher de surface fourragère — assise externe et décision
 
-_2026-07-28._ Fait suite au diagnostic du déficit de prairie (`VIGILANCE.md`, entrée dédiée du
+_2026-07-28._ Fait suite au diagnostic du déficit de prairie (`docs/04-vigilance.md`, entrée dédiée du
 2026-07-27) qui concluait : « le seul correctif non circulaire est un plancher exogène, donnée
 absente du dépôt ». La donnée a été trouvée.
 

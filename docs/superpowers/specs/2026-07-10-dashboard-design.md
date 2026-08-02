@@ -18,18 +18,18 @@ Decisions actees avec l'utilisateur (2026-07-10) :
 - Lecture seule sur `outputs/output_N/` : aucun bouton "lancer un run" dans
   l'app ; lancer `main.py` reste une action manuelle, separee.
 - Trous de donnees connus (ETP, vraie carte geo) : placeholder "non
-  disponible" + reference a `VIGILANCE.md`, pas de portage de donnees avant B.
+  disponible" + reference a `docs/04-vigilance.md`, pas de portage de donnees avant B.
 
 ## Non-goals
 
-- Pas de carte geographique reelle (bloque, cf. `VIGILANCE.md` "Pas de
+- Pas de carte geographique reelle (bloque, cf. `docs/04-vigilance.md` "Pas de
   donnees geographiques") : remplace par une repartition ILE/REGION/COMMUNE.
-- Pas de revenu/ETP (bloque, cf. `VIGILANCE.md` "Donnees de main d'oeuvre non
+- Pas de revenu/ETP (bloque, cf. `docs/04-vigilance.md` "Donnees de main d'oeuvre non
   portees") : affiche "non disponible".
 - Pas d'indicateurs `*_by_crop` (production/vente/subvention/revenu par
   culture) cote entree : la baseline (`cult_2017`) n'est connue qu'a la
   resolution des 12 groupes RPG, qui n'ont pas de rendement/prix propres
-  (cf. `VIGILANCE.md` "Comparaison entree/sortie limitee a la resolution du
+  (cf. `docs/04-vigilance.md` "Comparaison entree/sortie limitee a la resolution du
   groupe RPG"). Cote entree, seuls les indicateurs bases sur la seule surface
   (surface/nombre de parcelles/diversite par groupe, repartition geo) sont
   affiches.
@@ -57,11 +57,11 @@ d'allocation existants) :
   au `surface_by_region_*` deja fait).
 
 **B2 — app Streamlit read-only.**
-`case_studies/guadeloupe/dashboard/app.py` :
+`apps/dashboard/app.py` :
 1. Liste les dossiers `outputs/output_*/`, trie par numero, `st.selectbox`
    pour choisir un run (par defaut le plus recent).
 2. Charge `recap.json` + tous les CSV du dossier choisi (fonctions pures
-   dans `case_studies/guadeloupe/dashboard/loaders.py`, testables sans
+   dans `apps/dashboard/loaders.py`, testables sans
    Streamlit).
 3. Rend, en sections Streamlit (`st.tabs` ou `st.expander`) :
    - **Recap** : objectif/valeur, solveur, contraintes actives + args,
@@ -69,7 +69,7 @@ d'allocation existants) :
    - **Entree** (baseline `cult_2017`) : surface/parcelles/exploitations
      actives, surface par groupe RPG (`allocation_input.csv`), repartition
      ILE/REGION, diversite de Shannon. Bandeau "revenu/ETP : non disponible
-     (voir VIGILANCE.md)" et "carte des cultures : non disponible (pas de
+     (voir docs/04-vigilance.md)" et "carte des cultures : non disponible (pas de
      donnees geo), repartition ILE/REGION affichee a la place".
    - **Sortie** : memes indicateurs de surface/parcelles + production
      (tonnes), subvention (€, €/tonne, €/€ vendu), revenu total et par
@@ -92,7 +92,7 @@ outputs/output_N/{recap.json, allocation_input.csv, allocation_output.csv,
                   surface_by_island_*.csv, plots/*.png}
         |
         v  (loaders.py: pure functions, path -> DataFrame/dict)
-case_studies/guadeloupe/dashboard/app.py (Streamlit widgets only, no computation)
+apps/dashboard/app.py (Streamlit widgets only, no computation)
 ```
 
 `loaders.py` contient toute la logique testable (parsing JSON/CSV, jointures

@@ -47,7 +47,7 @@ Vérif croisée données : parcelle commune 97102 → `REGION`=3 (NGT, cohérent
 de `Eq_CS_NGT`), `ILE`=2. Encodage `ILE` confirmé par les équations : **1=Basse-Terre,
 2=Grande-Terre, 3=Marie-Galante**. Toutes les colonnes du lot 2 (`SOL_COURT`, `CONFORM`,
 `IRRIG_PARC`, `ALTITUDE`, `PLUVIO_PARC`, `COMMUNE`, `RISQUE_CLD`, `TYPE_SOL`) sont présentes.
-→ **Le point ouvert « REGION vs REGION_CODE » de `VIGILANCE.md` est résolu** (à déplacer en « Résolu »).
+→ **Le point ouvert « REGION vs REGION_CODE » de `docs/04-vigilance.md` est résolu** (à déplacer en « Résolu »).
 
 ### Verdict par lot
 
@@ -181,7 +181,7 @@ couvrent les patrons observés, et les instancier depuis `config.yaml` :
 Les bans ITK utilisent la colonne **`data_parc["REGION"]` (entier 1–7)** — déjà chargée, jamais
 utilisée en règle — et **`data_parc["COMMUNE"]`** / **`data_parc["ILE"]`** (1=BT, 2=GT, 3=MG).
 **Ne PAS** confondre avec `REGION_CODE` (R0–R27, petites régions), réservé au ban melon. Point
-`VIGILANCE.md` « REGION vs REGION_CODE » résolu.
+`docs/04-vigilance.md` « REGION vs REGION_CODE » résolu.
 
 ### Tests lot 2
 Data-free : masque d'éligibilité sur mini-`data_parc` synthétique (quelques parcelles aux
@@ -195,7 +195,7 @@ les paires éligibles avant/après le port et vérifier une baisse cohérente (p
 
 **Non implémenté cette session** (verdict données ci-dessus : `MO_Expl_init` dépend de l'allocation
 fine 2017 inexistante ⇒ vaudrait 0 partout ⇒ contrainte infaisable). Consigné dans l'inventaire GAMS
-et `VIGILANCE.md` comme différé, avec la piste de réactivation (assumer les cultures représentantes
+et `docs/04-vigilance.md` comme différé, avec la piste de réactivation (assumer les cultures représentantes
 du point 4 pour le RHS — approximation, non fidèle GAMS). La contrainte MILP elle-même
 (`farm_labor_max`, patron `farm_area_share_max`) est triviale à coder si les données arrivent.
 
@@ -261,7 +261,7 @@ plafonds de rotation par exploitation `an_agro_max_expl` / `ig_agro_max_expl` (l
 Fichier `docs/gams_port_inventory.md` : tableau exhaustif équation GAMS → statut (porté /
 non-porté / implicite / différé) → localisation Python. Sert de référence de parité vivante.
 
-### 5.4 `VIGILANCE.md`
+### 5.4 `docs/04-vigilance.md`
 Mettre à jour : résoudre le point « REGION vs REGION_CODE » (si tranché au lot 2), déplacer les
 items traités en « Résolu », consigner les différés (CF économie, MO_Expl_init si absent).
 

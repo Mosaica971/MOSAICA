@@ -21,7 +21,7 @@ indicateur ne change de valeur. C'est la propriété centrale à garantir, et la
 ## Non-goals
 
 - **Aucun renommage dans `case_studies/guadeloupe/`.** Les noms `rdt_cult`, `prix_cult`,
-  `MB_Ha_Cult`, `Matrice_OTK_Cult` sont la clé de traçabilité vers `old_code_gms_format_now_txt/`,
+  `MB_Ha_Cult`, `Matrice_OTK_Cult` sont la clé de traçabilité vers `context/gams/`,
   que `CLAUDE.md` désigne comme source de vérité pour la parité. Les abstraire couperait le lien
   entre une ligne de Python et la ligne de `OPTIMISATION.txt` qu'elle porte — précisément ce qui
   permet aujourd'hui de vérifier une formule. Et ça n'aide pas à généraliser : un futur case
@@ -31,7 +31,7 @@ indicateur ne change de valeur. C'est la propriété centrale à garantir, et la
   `outputs/output_N/` **passés** : renommer une clé casserait la comparaison avec l'historique.
 - **Aucun solve réel n'est lancé** pour ce chantier (voir « Vérification »).
 - Pas de nouvelle fonctionnalité, pas de correction de bug de fond, pas de traitement des points
-  ouverts de `VIGILANCE.md`.
+  ouverts de `docs/04-vigilance.md`.
 
 ## Vérification : le snapshot déterministe
 
@@ -45,7 +45,7 @@ vraies données pourrait passer.
 L'idée naturelle — figer un run complet avant/après et comparer les `recap.json` — est à la fois
 **trop lente et non fiable** :
 
-- le solve réel coûte 30 à 55 min avec une variance ×2,1 (`VIGILANCE.md`) ;
+- le solve réel coûte 30 à 55 min avec une variance ×2,1 (`docs/04-vigilance.md`) ;
 - surtout, il n'est **pas déterministe au sens qui nous intéresse** : sur un MILP dégénéré, deux
   optima de valeur identique peuvent être retournés indifféremment. Un écart d'allocation entre
   deux runs ne prouverait rien, et masquerait les vrais écarts.
@@ -75,7 +75,7 @@ l'optimum est sans importance — on compare deux versions du code sur la *même
 
 Le build complet du modèle coûte 188 s (mesuré), trop lent pour boucler dessus : G2 le fait sur
 un `zone_filter` réduit, avec `territory_production_bound` désactivé (les quotas territoriaux ne
-s'appliquent pas à un sous-ensemble — `VIGILANCE.md`, et `profile_solver.disable_territory_bounds`
+s'appliquent pas à un sous-ensemble — `docs/04-vigilance.md`, et `profile_solver.disable_territory_bounds`
 fait déjà exactement ça).
 
 ### Outillage
@@ -175,7 +175,7 @@ quel — c'est une contrainte *case study*, pas du `core`, et son nom est un poi
 
 ### Lot 4 — Commentaires
 
-Uniformisation en anglais (les docs projet — `VIGILANCE.md`, `TODO.md`, `PRISE_EN_MAIN.md` —
+Uniformisation en anglais (les docs projet — `docs/04-vigilance.md`, `TODO.md`, `docs/01-utilisation.md` —
 restent en français), docstrings verbeuses resserrées de 8-10 lignes à 3-4, suppression des
 commentaires qui paraphrasent le code.
 
@@ -197,5 +197,5 @@ un commentaire qui explique *pourquoi* il le fait ainsi, ou d'où vient un coeff
 
 ## Ce qui reste après
 
-`TODO.md` et `VIGILANCE.md` ne changent pas de contenu de fond ; `CLAUDE.md` est mis à jour au
+`TODO.md` et `docs/04-vigilance.md` ne changent pas de contenu de fond ; `CLAUDE.md` est mis à jour au
 lot 1 (arborescence) et au lot 3 (vocabulaire de `core/`), puisqu'il documente les deux.

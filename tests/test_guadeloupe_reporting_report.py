@@ -8,7 +8,7 @@ from case_studies.guadeloupe.reporting import report
 from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
 from core.model.model_inputs import ModelInputs
-from core.model.solver import solve_model
+from core.solve.solver import solve_model
 
 _CONFIG = {
     "solver": {"name": "appsi_highs", "args": {}},

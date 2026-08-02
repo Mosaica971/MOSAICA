@@ -135,7 +135,7 @@ Comme pour les indicateurs existants, tout est décliné **entrée** (baseline v
 
 ## Écarts au GAMS, assumés et documentés
 
-Chacun sera reporté dans `VIGILANCE.md`.
+Chacun sera reporté dans `docs/04-vigilance.md`.
 
 **1. Carbone : flux annuel, pas trajectoire de stock.** Le GAMS itère
 `C_ORG = C_ORG + (entrées − sorties)` sur plusieurs années (`NB_BOUCLE`,

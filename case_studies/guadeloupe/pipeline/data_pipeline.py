@@ -16,13 +16,15 @@ from case_studies.guadeloupe.domain.environment import (
     compute_azote_per_ha_cult,
     compute_ges_per_ha_cult,
     compute_ift_per_ha_cult,
+    compute_phosphore_per_ha_cult,
+    compute_potasse_per_ha_cult,
 )
 from case_studies.guadeloupe.domain.farm_typology import (
     compute_avers,
     compute_base_crop_group,
     compute_type_expl,
 )
-from case_studies.guadeloupe.domain import soil_carbon, water
+from case_studies.guadeloupe.domain import agroecology, rpest, soil_carbon, water
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
@@ -107,7 +109,7 @@ def compute_farm_labor_capacity_hours(
     variant, are filled). Taken literally the cap would be ~0 for most farms and the model
     would allocate nothing. We therefore price each observed family through its
     representative fine variant -- the same documented assumption the input-side indicators
-    use, extended here to a constraint that *shapes the allocation*. See VIGILANCE.md and
+    use, extended here to a constraint that *shapes the allocation*. See docs/04-vigilance.md and
     docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
     """
     fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
@@ -136,6 +138,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     subsidy_multipliers = econ_cfg.get("subsidy_multipliers")
     yield_multipliers = econ_cfg.get("yield_multipliers")
     cost_multipliers = econ_cfg.get("cost_multipliers")
+    variance_multipliers = econ_cfg.get("variance_multipliers")
 
     # Carbon->CO2 conversion for the GES indicator (GAMS COEFF_C_CO2 = 0.272).
     env_cfg: dict[str, Any] = (config.get("reporting") or {}).get("environment") or {}
@@ -172,7 +175,15 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     rdt_cult = apply_crop_multipliers(
         read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[year], yield_multipliers
     )
-    var_rdt_cult = read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"]
+    # variance_multipliers scale the yield variance Var_Rdt_Cult, which is what the Markowitz
+    # objective weighs against margin. It is the lever for climate INSTABILITY as distinct
+    # from a yield LOSS: a hotter, more erratic climate raises the variance of a crop without
+    # necessarily lowering its mean, and under the risk-adjusted objective that alone shifts
+    # risk-averse farms towards low-variance activities. Deliberately kept on the `init`
+    # column like the unshocked series -- the shock is a scenario assumption, not a year.
+    var_rdt_cult = apply_crop_multipliers(
+        read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"], variance_multipliers
+    )
     bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[year]
     duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[year]
     duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[year]
@@ -205,7 +216,14 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         },
         config,
     )
+    # Share of the territory's hectares the filter retains, measured BEFORE the cut. It is
+    # what `zone_filter.scale_territorial_bounds` multiplies the territorial thresholds by,
+    # so a reduced run is a miniature of the real one instead of an infeasible fragment.
+    full_surface_ha = float(data_parc["SURF_HA"].sum())
     data_parc = data_parc.loc[kept_plots]
+    zone_surface_fraction = (
+        float(data_parc["SURF_HA"].sum()) / full_surface_ha if full_surface_ha else 1.0
+    )
     expl_parc = expl_parc[expl_parc["plot"].isin(kept_plots)]
     bv_parc = bv_parc[bv_parc["plot"].isin(kept_plots)]
     reg_parc = reg_parc[reg_parc["plot"].isin(kept_plots)]
@@ -273,6 +291,14 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_plant_cult=duree_plant_cult,
     )
     subsidy_per_ha_cult = apply_crop_multipliers(subsidy_per_ha_cult, subsidy_multipliers)
+    # The agri-environmental component on its own. Folded into the subsidy total above, but
+    # a scenario that wants to steer agroecology needs to see it apart from POSEI and
+    # national aid -- see domain/agroecology.py on what it does and does not identify.
+    mae_per_ha_cult = agroecology.compute_mae_per_ha_cult(
+        mae_recolte_vert_cult, mae_jachere_sol_nu_cult, mae_compost_cult
+    )
+    under_mae_cult = agroecology.compute_under_mae_cult(mae_per_ha_cult)
+    organic_cult = agroecology.compute_organic_cult(matrice_otk_cult)
     sales_per_ha_cult = compute_sales_per_ha_cult(
         rdt_cult=rdt_cult,
         prix_cult=prix_cult,
@@ -318,11 +344,33 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         rdt_cult=rdt_cult,
         coeff_c_co2=coeff_c_co2,
     )
+    phosphore_per_ha_cult = compute_phosphore_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
+    potasse_per_ha_cult = compute_potasse_per_ha_cult(
+        data_otk=data_otk,
+        matrice_otk_cult=matrice_otk_cult,
+        duree_plant_cult=duree_plant_cult,
+        duree_cycle_cult=duree_cycle_cult,
+    )
     ift_per_ha_cult = compute_ift_per_ha_cult(
         data_otk=data_otk,
         matrice_otk_cult=matrice_otk_cult,
         duree_plant_cult=duree_plant_cult,
         duree_cycle_cult=duree_cycle_cult,
+    )
+    # Rpest (Tixier): pesticide risk to water, per (plot, crop) -- it needs the plot's runoff
+    # and drainage as well as the crop's products, so unlike every other environmental rate
+    # it cannot be a per-crop series. See domain/rpest.py.
+    r_tixier = read_wide_table(TABLES_DIR / "R_Tixier.txt")
+    rpest_crop_properties = rpest.compute_crop_properties(
+        data_otk, matrice_otk_cult, duree_plant_cult, duree_cycle_cult
+    )
+    rpest_by_pair = rpest.compute_rpest_by_pair(
+        rpest_crop_properties, data_parc, r_tixier, list(matrice_otk_cult.columns)
     )
     water_need_per_ha_cult = water.compute_water_need_per_ha_cult(data_cult)
     monthly_water_need_per_ha_cult = water.compute_monthly_water_need_per_ha_cult(data_cult)
@@ -346,6 +394,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "rdt_cult": rdt_cult,
         "duree_cycle_cult": duree_cycle_cult,
         "crop_variance_per_ha": var_rdt_cult,
+        # Each plot's OBSERVED 2017 use, folded onto the 12 RPG groups. Already computed for
+        # the farm typology; exposed because the inertia constraint and the calibration
+        # reporting both need to know what a plot was before the solver touched it.
+        "base_crop_group": base_crop_group,
         "farm_risk_aversion": farm_risk_aversion,
         "farm_surface_ha": farm_surface_ha,
         "farm_plots": farm_plots,
@@ -359,6 +411,16 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
         "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
         "azote_per_ha_cult": azote_per_ha_cult,
+        # Mineral P/K, read off the fertiliser names (domain/environment.nutrient_grades).
+        "phosphore_per_ha_cult": phosphore_per_ha_cult,
+        "potasse_per_ha_cult": potasse_per_ha_cult,
+        # Agroecology as the data defines it: MAE payments (a policy's reach) and organic
+        # itineraries (a production method). Kept apart on purpose -- see domain/agroecology.
+        "rpest_by_pair": rpest_by_pair,
+        "rpest_crop_properties": rpest_crop_properties,
+        "mae_per_ha_cult": mae_per_ha_cult,
+        "under_mae_cult": under_mae_cult,
+        "organic_cult": organic_cult,
         "ges_per_ha_cult": ges_per_ha_cult,
         "ift_per_ha_cult": ift_per_ha_cult,
         "data_sol": data_sol,
@@ -370,7 +432,11 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "nutri_alim": nutri_alim,
     }
 
-    return Dataset(sets=sets, parameters=parameters, scalars={})
+    return Dataset(
+        sets=sets,
+        parameters=parameters,
+        scalars={"zone_surface_fraction": zone_surface_fraction},
+    )
 
 
 if __name__ == "__main__":

@@ -3,14 +3,14 @@ from collections.abc import Mapping, Sequence
 import numpy as np
 import pandas as pd
 
-# old_code_gms_format_now_txt/ENTREES.txt:62-103 -- RPG cult_2017 code -> base crop group.
+# context/gams/ENTREES.txt:62-103 -- RPG cult_2017 code -> base crop group.
 _RPG_CODE_TO_BASE_GROUP: dict[int, str] = {
     1: "AG", 2: "AN", 3: "BC", 4: "BA", 5: "VE", 6: "CS", 7: "PN", 8: "MA",
     9: "MA", 10: "JA", 11: "MA", 12: "MA", 13: "ME", 14: "NC", 15: "MA",
     16: "PN", 17: "PN", 18: "IG", 19: "VE", 20: "VE",
 }
 
-# old_code_gms_format_now_txt/ENTREES.txt:49-57 -- if a plot's cult_2016 and cult_2017
+# context/gams/ENTREES.txt:49-57 -- if a plot's cult_2016 and cult_2017
 # are both in this set, cult_2017 is forced to 14 (Non cultivé) before mapping. The
 # source's own comment describes a 3-year (cult_2015/2016/2017) rule, but the
 # cult_2015 clause of the actual IF condition is commented out (`*` in column 1) --
@@ -26,7 +26,7 @@ def compute_base_crop_group(cult_2016: pd.Series, cult_2017: pd.Series) -> pd.Se
     return resolved_2017.map(_RPG_CODE_TO_BASE_GROUP)
 
 
-# old_code_gms_format_now_txt/OPTIMISATION.txt:1467-1498 -- which base crop groups feed
+# context/gams/OPTIMISATION.txt:1467-1498 -- which base crop groups feed
 # which SURF_*/PART_* family aggregate. A base group may feed more than one family (e.g.
 # IG counts toward both "mar" and "tt"); "cultiv" is handled separately below since every
 # group except NC counts toward it.
@@ -47,7 +47,7 @@ _FAMILIES_BY_BASE_GROUP: dict[str, tuple[str, ...]] = {
 
 _FAMILIES = ("can", "pat", "ban", "mar", "plu", "bc", "tt", "non")
 
-# old_code_gms_format_now_txt/OPTIMISATION.txt:1744-1758.
+# context/gams/OPTIMISATION.txt:1744-1758.
 # Type 4 carries 1.40 in GAMS (OPTIMISATION.txt:1748), which is then overwritten by the
 # TYPE_EXPL_Bis cascade below -- on the real data every type-4 farm gets a 41/42 value, so
 # 1.40 never survives. It is kept here as an explicit fallback: without it, a type-4 farm
@@ -114,7 +114,7 @@ def compute_type_expl(
     part_mar, part_plu = part("mar"), part("plu")
     part_bc, part_tt = part("bc"), part("tt")
 
-    # old_code_gms_format_now_txt/OPTIMISATION.txt:1542-1552 -- the second, authoritative
+    # context/gams/OPTIMISATION.txt:1542-1552 -- the second, authoritative
     # cascade (the first one at :1530-1540 is dead code, unconditionally overwritten
     # before anything reads it; see the design spec for the full justification).
     conditions = [
@@ -135,7 +135,7 @@ def compute_type_expl(
     ).astype(int)
     type_expl[surf_cultiv == 0] = 0
 
-    # old_code_gms_format_now_txt/OPTIMISATION.txt:1557-1561 -- sub-split for
+    # context/gams/OPTIMISATION.txt:1557-1561 -- sub-split for
     # TYPE_EXPL=4 farms. Both conditions are evaluated in GAMS's written order (41 then
     # 42); whichever is true last wins, so the 42 assignment below is applied after 41.
     type_expl_bis = pd.Series(np.nan, index=farms)

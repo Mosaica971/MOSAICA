@@ -26,15 +26,24 @@ REGION_CODES: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7)
 ISLAND_CODES: tuple[int, ...] = (1, 2, 3)
 
 
-def _code_key(value: object) -> str:
-    """Normalise a region/island code to its label-dict key: 3, 3.0 and "3" all give "3"."""
-    text = str(value)
-    return text[:-2] if text.endswith(".0") else text
+def code_key(value: object) -> str:
+    """Normalise a region/island code to its label-dict key.
+
+    3, 3.0, "3", "3.0" and numpy's int64(3) all give "3"; anything not numeric (the "TOTAL"
+    row of a calibration table, say) passes through as its own string so the callers below
+    can fall back on it. Numeric codes reach here from three places with three types -- a
+    CSV read by pandas gives floats, a set file gives strings, a groupby key gives numpy
+    scalars -- which is why the conversion goes through float rather than string surgery.
+    """
+    try:
+        return str(int(float(value)))  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return str(value)
 
 
 def region_label(value: object) -> str:
-    return REGION_LABELS.get(_code_key(value), str(value))
+    return REGION_LABELS.get(code_key(value), str(value))
 
 
 def island_label(value: object) -> str:
-    return ISLAND_LABELS.get(_code_key(value), str(value))
+    return ISLAND_LABELS.get(code_key(value), str(value))

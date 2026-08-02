@@ -56,7 +56,7 @@ from case_studies.guadeloupe.reporting import indicators
 from core.config import load_config
 from core.data.dataset import Dataset
 
-from scripts._common import CONFIG_PATH, OUTPUTS_ROOT
+from scripts._common import CONFIG_PATH, OUTPUTS_ROOT, format_number as _n
 
 DEFAULT_DIR_NAME = "reference_2017"
 
@@ -563,14 +563,6 @@ def _summary(reference: Reference) -> dict[str, Any]:
     }
 
 
-def _n(value: Any, decimals: int = 0) -> str:
-    """Thousands separated by spaces, French style. Applied to ONE number: running
-    .replace(",", " ") over a whole sentence eats its punctuation."""
-    if value is None or pd.isna(value):
-        return "-"
-    return f"{value:,.{decimals}f}".replace(",", " ")
-
-
 def _above_bracket(indicator_frame: pd.DataFrame) -> str:
     """Names the indicators whose central estimate sits above the high bound -- the visible
     symptom of a representative crop that is not itself eligible on the plots it stands for.
@@ -612,7 +604,7 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
         "parcellaire disponible localement. Chopin et al. (2015) travaillent sur 5 336",
         f"exploitations, ce jeu en porte {_n(universe['exploitations'])} : les deux ne",
         "decrivent pas le meme perimetre",
-        "(cf. VIGILANCE.md, entree de reouverture du 2026-07-27). Toute",
+        "(cf. docs/04-vigilance.md, entree de reouverture du 2026-07-27). Toute",
         "comparaison observe/simule doit donc rester **interne** a cet univers -- ce que fait",
         "le PAD, qui compare les deux cotes sur les memes parcelles.",
         "",
@@ -697,7 +689,7 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
         "**Consequence a ne pas perdre de vue** : cette hypothese ne reste pas dans le",
         "reporting. `farm_labor_hours_max` (Eq_MO_MAX_Expl) plafonne chaque exploitation a la",
         "main d'oeuvre de son assolement observe, calculee via ces memes representantes :",
-        "changer une representante change le plafond, donc l'optimum. Cf. VIGILANCE.md et",
+        "changer une representante change le plafond, donc l'optimum. Cf. docs/04-vigilance.md et",
         "l'entree « cultures representantes conscientes de la region » de TODO.md, que ce",
         "tableau chiffre.",
         "",

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Port the remaining GAMS equations from `old_code_gms_format_now_txt/MODELE.txt` that are
+Port the remaining GAMS equations from `context/gams/MODELE.txt` that are
 not yet in the Python model, so the Guadeloupe crop-allocation model matches what the
 reference GAMS `SCENARIO` solve actually optimizes: farm-level area/labor/production
 caps, territory-wide quota ceilings and production floors, the banana fallow/rotation

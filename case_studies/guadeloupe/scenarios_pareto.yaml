@@ -1,0 +1,94 @@
+# CATALOGUE DES BALAYAGES DE PARETO -- fronts par epsilon-contrainte.
+#
+# CE QUE CA CHANGE. Un scenario repond « avec ce plafond d'azote, la marge vaut X ». Il ne dit
+# pas ce que coute le kilo suivant. Un front de Pareto le dit : on fixe l'objectif (marge
+# ajustee au risque), on serre un indicateur cran par cran, et la courbe obtenue EST
+# l'arbitrage -- c'est-a-dire l'objet meme d'un modele d'aide a la decision publique. Le prix
+# dual de `shadow_prices.py` donne la pente locale ; le front donne la courbe entiere, y
+# compris les decrochements que le dual ne peut pas voir (il est local par construction).
+#
+# COMMENT CA MARCHE. Un balayage est un run ordinaire portant un bloc `matrix:`, que
+# `core/config.expand_runs` deplie en produit cartesien : une valeur = un run = un vrai solve
+# MILP. La cle `args:<label>.<argument>` vise l'ARGUMENT de la contrainte portant ce label,
+# et non un chemin pointe de la config -- parce qu'un seuil de contrainte ne vit a aucun
+# chemin pointe. C'est aussi pourquoi `azote_max` et `emploi_min` existent en `enable: false`
+# dans `config.yaml` : `set_args` ne sait que patcher une entree DEJA declaree, si bien que
+# ces deux coquilles vides n'ont d'autre raison d'etre que de donner prise au balayage.
+#
+# DEUX FACONS DE S'EN SERVIR.
+#   * seul, contre la config de reference -- le front du modele courant :
+#       python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_pareto.yaml
+#   * attache a une politique, depuis `plan.yaml` -- le front SOUS cette politique, qui est
+#     l'objet interessant : le cout marginal de l'azote n'est pas le meme quand l'inertie est
+#     a 70 % et quand elle est a 30 %. Le run porte alors les trois coordonnees
+#     (politique / forcage / balayage) dans son recap.
+#
+# LES SEUILS SONT DES PARTS DU MESURE, PAS DES CHIFFRES CHOISIS. Chaque valeur ci-dessous est
+# un pourcentage du total realise par `calib_retenu` -- 1 930 903 kg N. Le premier point du
+# balayage vaut donc 100 % : la contrainte y est inactive et la marge doit y egaler celle de
+# la calibration retenue. C'EST LE CONTROLE A FAIRE EN PREMIER -- si elle en differe, ce n'est
+# pas le front qui est faux, c'est que le solveur n'a pas converge au meme endroit.
+# ATTENTION : sous une politique, ce controle ne tient plus tel quel -- le point a 100 % doit
+# alors egaler la politique NON balayee, pas `calib_retenu`.
+#
+# COUT, ET POURQUOI LES POINTS NE SORTENT PAS DANS L'ORDRE ECRIT. Un point = un vrai solve
+# MILP, donc 7 pour le balayage ci-dessous, et NE PAS lancer ca sans intention.
+# `core/config.order_sweep_points` reordonne le balayage AVANT de le lancer, du seuil le plus
+# SERRE vers le plus lache -- l'inverse de l'ordre de lecture ci-dessous. La raison est une
+# implication a sens unique : une allocation faisable a 55 % d'azote l'est encore a 100 %, la
+# reciproque est fausse. Dans le sens ecrit, chaque graine serait infaisable et le front
+# retomberait a 7 solves a froid SANS LE DIRE (HiGHS jette une MIP start infaisable en
+# silence). Dans le bon sens, chaque point amorce le suivant : 1 solve a froid (le plus serre,
+# donc aussi le plus lent) et 6 a chaud.
+# La regle vaut pour `sense: le` ; pour `sense: ge` (un plancher) elle s'inverse, le plus serre
+# etant le plus haut. Le reordonnancement le deduit du `sense` de la contrainte, et s'abstient
+# des qu'il n'en est pas sur (balayage a deux dimensions, argument qui n'est pas le niveau de
+# la borne comme `scale`, contrainte sans `sense`). `--no-warm-start-chain` le desactive.
+#
+#   python scripts/run_scenarios.py --scenarios <ce fichier> --dry-run
+#   python scripts/check_scenario_feasibility.py --scenarios <ce fichier>
+#
+# La page **Pareto** du dashboard lit ces runs et trace le front (points domines grises).
+
+sweeps:
+  # ---------------------------------------------------------------- marge x azote
+  - name: pareto_azote
+    description: >-
+      Front marge brute ajustee au risque × azote mineral total. Sept points, de 100 % a 55 %
+      de l'azote realise par la calibration retenue. L'axe environnemental le plus direct :
+      l'azote est lu sur les itineraires techniques, il n'y a aucune hypothese de conversion
+      entre le plafond et l'indicateur rapporte (contrairement a l'eau, ou il faut le poids
+      `irrigable`, ou au carbone, dont le bilan depend aussi du type de sol de la parcelle).
+      A lire avec le bloc `intensity` : un plafond d'azote se satisfait aussi en cultivant
+      MOINS d'hectares, ce qui n'est pas la meme politique que produire plus proprement.
+      L'azote PAR TONNE distingue les deux.
+    enable: [azote_max]
+    matrix:
+      args:azote_max.threshold:
+        - 1930903   # 100 % -- contrainte inactive, doit redonner `calib_retenu`
+        - 1834358   #  95 %
+        - 1737813   #  90 %
+        - 1544722   #  80 %
+        - 1351632   #  70 %
+        - 1158542   #  60 %
+        - 1061997   #  55 %
+
+  # ---------------------------------------------------------------- marge x emploi
+  # DESACTIVE PAR DEFAUT -- lire avant d'enlever le commentaire. Un plancher d'emploi
+  # au-dessus de ce que le plafond de main d'oeuvre autorise est infaisable, et desserrer le
+  # `slack` NE SUFFIT PAS : P10 s'est revele infaisable a 6 000 ETP alors que son slack en
+  # autorisait 8 561, parce que ce ne sont pas les heures qui manquaient mais les cultures
+  # capables de les absorber sous les plafonds environnementaux. Le maximum atteignable
+  # mesure en relaxation LP est ~4 875-4 975 ETP contre 3 503 realises. Un balayage qui
+  # depasse ce plafond produit des runs infaisables, pas un front.
+  # Verifier avec `check_scenario_feasibility.py` AVANT de lancer.
+  #
+  # - name: pareto_emploi
+  #   description: Front marge × emploi, du realise (3 503 ETP) vers 4 500 ETP.
+  #   enable: [emploi_min]
+  #   matrix:
+  #     args:emploi_min.threshold:
+  #       - 5629321   # 3 503 ETP -- contrainte inactive
+  #       - 6027000   # 3 750 ETP
+  #       - 6428000   # 4 000 ETP
+  #       - 6830000   # 4 250 ETP  (au-dessus du plafond MO a slack 1.0 : desserrer aussi)

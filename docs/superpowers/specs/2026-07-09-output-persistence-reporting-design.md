@@ -14,10 +14,10 @@ not-yet-designed piece) will read from.
 - No interactive dashboard / web UI — a later, separate design.
 - No real geographic map — no parcel geometry exists in the repo (no
   shapefile/GeoJSON, no lat/lon in `Data_Parc_Gwad_2017.txt`); indicators use
-  `ILE`/`REGION`/`COMMUNE` breakdowns instead. Tracked in `VIGILANCE.md`.
+  `ILE`/`REGION`/`COMMUNE` breakdowns instead. Tracked in `docs/04-vigilance.md`.
 - No revenue/ETP indicator — the legacy GAMS model computes labor
   (`MO_Ha_Cult_init`) but it was never ported to `data/tables/`. Tracked in
-  `VIGILANCE.md`.
+  `docs/04-vigilance.md`.
 - No zone-exclusion / sub-scoping — a separate, not-yet-designed piece.
 - No config changes to make `YEAR`/`SCENARIO` selectable — tracked as a minor
   vigilance item, out of scope here.
@@ -25,7 +25,7 @@ not-yet-designed piece) will read from.
   (`cult_2017`) only resolves crops to 12 coarse RPG groups
   (`farm_typology._RPG_CODE_TO_BASE_GROUP`), while the solver allocates among
   ~84 fine crops with per-crop economics — there is no validated mapping
-  between the two (tracked in `VIGILANCE.md`). Economic indicators (production,
+  between the two (tracked in `docs/04-vigilance.md`). Economic indicators (production,
   subsidy, revenue) are therefore computed at full fine-crop resolution for
   the *output* only; the *input* gets surface/plot-count/diversity indicators
   at RPG-group resolution; deltas are limited to resolution-independent
@@ -69,7 +69,7 @@ not-yet-designed piece) will read from.
   returns `output_<max(N)+1>` (or `output_1` if none exist). `outputs_root`
   is a parameter (not hardcoded) so tests point it at `tmp_path`.
 
-### Modified: `core/model/progress.py`
+### Modified: `core/solve/progress.py`
 
 `solve_with_progress` already computes `duration` internally but only uses it
 to call `history.record(...)` before discarding it. Changes its return type

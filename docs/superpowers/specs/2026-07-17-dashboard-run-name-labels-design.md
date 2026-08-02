@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Le dashboard (brique B, `case_studies/guadeloupe/dashboard/`) identifie aujourd'hui
+Le dashboard (brique B, `apps/dashboard/`) identifie aujourd'hui
 chaque run par le nom de son dossier (`output_N`), parfois enrichi de
 `année/scénario` (ex. `output_1 · sortie (2017/RESTIT)`). Or `recap.json` porte
 désormais un champ `run_name` bien plus parlant, positionné par le batch runner

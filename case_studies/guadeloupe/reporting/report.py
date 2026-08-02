@@ -13,6 +13,8 @@ from case_studies.guadeloupe.domain import resilience
 from case_studies.guadeloupe.pipeline.data_pipeline import DEFAULT_SCENARIO, DEFAULT_YEAR
 from case_studies.guadeloupe.reporting import calibration, indicators, plots
 from core.data.dataset import Dataset
+from core.solve.shadow_prices import by_label as shadow_prices_by_label
+from core.solve.shadow_prices import compute_shadow_prices
 from core.reporting.run_folder import create_output_folder
 
 
@@ -33,14 +35,16 @@ def generate_report(
     *,
     outputs_root: Path = Path("outputs"),
 ) -> Path:
-    output_dir = create_output_folder(outputs_root)
+    # A run that knows its name gets a folder named after it (see run_folder.slugify);
+    # `main.py` sets no run_name, so an ad-hoc solve still lands in outputs/output_N.
+    output_dir = create_output_folder(outputs_root, config.get("run_name"))
     hours_per_etp = indicators.hours_per_etp_from_config(config)
     cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
 
     output_allocation = indicators.decode_output_allocation(model)
     input_allocation = indicators.decode_baseline_allocation(dataset)
     # Input economics use a representative fine crop per aggregate baseline family, since
-    # the observed 2017 baseline is only known at aggregate resolution (see VIGILANCE.md
+    # the observed 2017 baseline is only known at aggregate resolution (see docs/04-vigilance.md
     # "point 4"). Surface/diversity below stay on the raw aggregate baseline.
     input_representative = indicators.decode_baseline_representative_allocation(dataset, config)
 
@@ -94,6 +98,42 @@ def generate_report(
     )
     delta_res = {key: output_res[key] - input_res[key] for key in output_res}
 
+    # Intensity / spending-efficiency ratios, derived from the totals above rather than
+    # recomputed from the allocation -- they are arithmetic on those totals by definition,
+    # and deriving them keeps them consistent with the numbers displayed next to them.
+    output_intensity = indicators.compute_intensity_totals(
+        output_econ, output_env, output_summary["total_surface_ha"]
+    )
+    input_intensity = indicators.compute_intensity_totals(
+        input_econ, input_env, input_summary["total_surface_ha"]
+    )
+    delta_intensity = _numeric_delta(output_intensity, input_intensity)
+
+    # Territorial cropping diversity. The baseline side uses the RAW aggregate allocation
+    # (like the per-region Shannon written below), not the representative-crop substitution:
+    # substituting one fine variant per family would collapse diversity by construction.
+    diversity = {
+        "output": {"shannon": indicators.compute_shannon_total(dataset, output_allocation)},
+        "input": {"shannon": indicators.compute_shannon_total(dataset, input_allocation)},
+    }
+    diversity["delta"] = {
+        "shannon": diversity["output"]["shannon"] - diversity["input"]["shannon"]
+    }
+
+    output_agro = indicators.compute_agroecology_totals(dataset, output_allocation)
+    input_agro = indicators.compute_agroecology_totals(dataset, input_representative)
+    agroecology = {
+        "output": output_agro,
+        "input": input_agro,
+        "delta": _numeric_delta(output_agro, input_agro),
+    }
+
+    # Marginal value of each named constraint, from the LP that fixes the integers at this
+    # solution. Best-effort: a run must not be lost because a bonus diagnostic failed.
+    shadow_prices = shadow_prices_by_label(
+        compute_shadow_prices(model, config), config
+    )
+
     recap = _build_recap(
         dataset=dataset,
         config=config,
@@ -108,6 +148,12 @@ def generate_report(
         environment={"input": input_env, "output": output_env, "delta": delta_env},
         food_autonomy={"input": input_auto, "output": output_auto, "delta": delta_auto},
         resilience={"input": input_res, "output": output_res, "delta": delta_res},
+        intensity={
+            "input": input_intensity, "output": output_intensity, "delta": delta_intensity
+        },
+        diversity=diversity,
+        agroecology=agroecology,
+        shadow_prices=shadow_prices,
         calibration_summary=calibration_result.summary(),
     )
     # Full CULT_2017 universe (every fine crop the model could pick, allocated or not) so the
@@ -276,12 +322,19 @@ def _write_allocation_csv(dataset: Dataset, allocation: pd.Series, path: Path) -
 
 def _numeric_delta(output: dict[str, Any], baseline: dict[str, Any]) -> dict[str, Any]:
     """Recursive output-minus-baseline over a nested dict of numbers (one level of nested
-    dicts, e.g. food_autonomy's crop_only/with_fishing sub-dicts)."""
+    dicts, e.g. food_autonomy's crop_only/with_fishing sub-dicts).
+
+    A None on either side yields None: the intensity ratios are undefined when their
+    denominator is zero (no hectares allocated, no tonnes produced), and a delta computed
+    against an undefined value would be a fabricated number.
+    """
     delta: dict[str, Any] = {}
     for key, out_value in output.items():
         base_value = baseline[key]
         if isinstance(out_value, dict):
             delta[key] = _numeric_delta(out_value, base_value)
+        elif out_value is None or base_value is None:
+            delta[key] = None
         else:
             delta[key] = out_value - base_value
     return delta
@@ -302,6 +355,10 @@ def _build_recap(
     environment: dict[str, Any],
     food_autonomy: dict[str, Any],
     resilience: dict[str, Any],
+    intensity: dict[str, Any],
+    diversity: dict[str, Any],
+    agroecology: dict[str, Any],
+    shadow_prices: dict[str, Any],
     calibration_summary: dict[str, Any],
 ) -> dict[str, Any]:
     enabled_constraints = [
@@ -315,6 +372,16 @@ def _build_recap(
         # Set by the scenario batch runner (scripts/run_scenarios.py); None for a plain
         # single run via main.py. Lets the dashboard label runs by their scenario name.
         "run_name": config.get("run_name"),
+        # Grid coordinates when this run came from a policy x forcing batch (set by
+        # scripts/run_scenarios.py). None for a plain run. The prospective dashboard page
+        # groups on these rather than parsing the run name, which would break the moment a
+        # scenario name contains the separator.
+        "run_policy": config.get("run_policy"),
+        "run_forcing": config.get("run_forcing"),
+        # Which Pareto sweep this run is a point of, when it is one. Same reasoning as above,
+        # and more acute: a front traced under a policy is named `<policy>__<sweep>__<point>`,
+        # so the name prefix identifies the POLICY, not the sweep.
+        "run_sweep": config.get("run_sweep"),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "solve_duration_seconds": duration,
         "termination_condition": str(results.solver.termination_condition),
@@ -337,6 +404,18 @@ def _build_recap(
         "environment": environment,
         "food_autonomy": food_autonomy,
         "resilience": resilience,
+        # Ratios derived from the blocks above: intensity per hectare / per tonne, and euros
+        # of public money per unit of result. Scenarios that allocate different areas are not
+        # comparable on totals alone.
+        "intensity": intensity,
+        "diversity": diversity,
+        # Area under an agri-environmental measure, and organic area -- two different
+        # claims, deliberately not summed. See domain/agroecology.py.
+        "agroecology": agroecology,
+        # Marginal value of each named constraint, per label: what one more unit of the
+        # bound would be worth to the objective. LOCAL and conditional on this allocation --
+        # see core/solve/shadow_prices.py before quoting one.
+        "shadow_prices": shadow_prices,
         # How close this run's allocation lands to the observed 2017 land use
         # (Chopin et al. 2015 §2.6) -- a report card, never an input to the model.
         "calibration": calibration_summary,
@@ -381,7 +460,7 @@ def _render_recap_markdown(recap: dict[str, Any]) -> str:
         f"(delta {recap['delta']['farm_count']:+d})",
         "",
         "## Entree vs sortie (economie)",
-        "_Entree = baseline 2017 a economie representative par famille (voir VIGILANCE.md point 4)._",
+        "_Entree = baseline 2017 a economie representative par famille (voir docs/04-vigilance.md point 4)._",
         f"- Production (t) : {econ['input']['total_production_tonnes']:,.0f} -> "
         f"{econ['output']['total_production_tonnes']:,.0f} "
         f"(delta {econ['delta']['total_production_tonnes']:+,.0f})",

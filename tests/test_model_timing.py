@@ -1,6 +1,6 @@
 import pytest
 
-from core.model.timing import time_phases
+from core.solve.timing import time_phases
 
 
 def test_time_phases_chains_results_and_returns_duration_per_phase():

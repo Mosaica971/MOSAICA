@@ -1,6 +1,6 @@
 """Annual soil organic carbon balance: crop residues + organic amendments - mineralization.
 
-Faithful to OPTIMISATION.txt:2880-2947, with two documented departures (see VIGILANCE.md):
+Faithful to OPTIMISATION.txt:2880-2947, with two documented departures (see docs/04-vigilance.md):
 the GAMS iterates the stock over years (C_ORG = C_ORG + flux, NB_BOUCLE loop) while this
 model is single-year, so only the *annual flux* is ported; and the amendment term is not
 annualized by Duree_Cycle/Duree_Plant, unlike azote/GES/costs -- that is what the GAMS does

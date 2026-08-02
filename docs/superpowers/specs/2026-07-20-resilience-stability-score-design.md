@@ -188,7 +188,7 @@ composite — le même piège de colinéarité qui a fait retirer le mois de poi
 Comme pour tous les indicateurs, tout est décliné **entrée** (baseline via
 `baseline_representative_crops`) et **sortie** (allocation optimisée).
 
-## Limites, à reporter dans `VIGILANCE.md`
+## Limites, à reporter dans `docs/04-vigilance.md`
 
 **1. Exposition, pas adaptation.** Aucun de ces indicateurs ne ré-optimise. Voir la section
 « Ce que ces indicateurs mesurent ».

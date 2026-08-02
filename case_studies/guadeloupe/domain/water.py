@@ -1,6 +1,6 @@
 """Per-ha water need by crop, from the monthly BESOIN_EAU rows of Data_Cult.
 
-Faithful to OPTIMISATION.txt:2489-2560, with two documented departures (see VIGILANCE.md):
+Faithful to OPTIMISATION.txt:2489-2560, with two documented departures (see docs/04-vigilance.md):
 rainfall is never deducted (the monthly PLUVIO_*_PARC columns do not exist in the data), so
 this is a *gross crop water need*, not a net irrigation need; and the mm -> m3 conversion
 factor the GAMS omits is applied explicitly here. GAMS also divides its (factor-less) result

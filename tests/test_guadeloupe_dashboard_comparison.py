@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe.dashboard import comparison, loaders
+from apps.dashboard import comparison, loaders
 from case_studies.guadeloupe.reporting import report
 from core.data.dataset import Dataset
 from core.model.builder import build_crop_allocation_model
 from core.model.model_inputs import ModelInputs
-from core.model.solver import solve_model
+from core.solve.solver import solve_model
 
 
 def _facts() -> pd.DataFrame:
@@ -266,14 +266,14 @@ def test_resilience_indicators_are_selectable_in_the_dashboard_picker():
     import importlib
 
     page = importlib.import_module(
-        "case_studies.guadeloupe.dashboard.pages.2_Comparaison"
+        "apps.dashboard.pages.2_Comparaison"
     )
     for key in _RESILIENCE_KEYS:
         assert key in page._INDICATOR_LABELS, f"{key} absent du selecteur"
 
 
 def test_resilience_indicators_have_a_composite_direction():
-    from case_studies.guadeloupe.dashboard import comparison
+    from apps.dashboard import comparison
 
     for key in _RESILIENCE_KEYS:
         assert comparison.INDICATOR_DIRECTION.get(key) == "cost", (

@@ -1,0 +1,59 @@
+# Les deux runs de calibration de référence -- consommé par scripts/run_scenarios.py.
+#
+# POURQUOI UN SPEC À PART. `scenarios.yaml` explore des politiques, `scenarios_prospective.yaml`
+# croise politiques et forçages. Ces deux runs-ci ne sont ni l'un ni l'autre : ce sont les
+# **points fixes** du projet, ceux que `references.yaml` déclare et contre lesquels tout le
+# reste se lit. Les tenir dans leur propre fichier permet de les régénérer en une commande
+# quand le reporting gagne un bloc, sans relancer un batch entier.
+#
+# Ils portent un `name:` explicite, donc leur dossier de sortie s'appelle
+# `outputs/calib_gams_parite/` et `outputs/calib_retenu/` -- pas `output_7`.
+#
+# Régénérer les deux :
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration.yaml
+# Contrôler avant de lancer (secondes) :
+#   python scripts/run_scenarios.py --scenarios ... --dry-run
+#   python scripts/check_scenario_feasibility.py --scenarios ...
+
+runs:
+  # --------------------------------------------------------------------------------------
+  - name: calib_gams_parite
+    description: >-
+      Le bloc CALIB porté à l'identique, SANS aucune des deux déviations assumées. C'est la
+      référence de PARITÉ : ce que le modèle GAMS d'origine produit sur nos données, et donc
+      le point de comparaison honnête pour juger ce que les deux déviations apportent.
+      Attendu (mesuré sur output_1 le 2026-07-27) : PAD territorial 48,4 %, types 64,0 %,
+      parcelles 56,0 %, surface 64,3 %, objectif 84,98 M€.
+      Son écart aux chiffres de l'article (PAD <15 %, types 81 %) tient à la provenance des
+      données -- 4 638 exploitations contre 5 336, année de base 2010 hors d'atteinte -- et
+      non à un défaut de portage : l'enquête source-à-source du 2026-07-27 a écarté une à une
+      les causes de modélisation.
+    disable:
+      # Eq_BC_QUOTA_MAX : plafond de marché du plantain. Commentée dans les deux blocs
+      # modèles du GAMS, donc hors CALIB -- même si l'article la décrit (Éq. 6).
+      - bc_quota_max
+      # Eq_PN_PROD_MIN : plancher de surface fourragère. Vit dans le bloc SCENARIO, pas CALIB.
+      - pn_prod_min
+
+  # --------------------------------------------------------------------------------------
+  - name: calib_retenu
+    description: >-
+      La calibration de travail : le CALIB plus les deux seules déviations assumées, toutes
+      deux adossées à une source EXOGÈNE à l'assolement observé (c'est ce qui les distingue
+      des plafonds de marché écartés le 2026-07-23, qui étaient calés SUR l'observé et dont
+      le PAD était donc nul par construction).
+        * bc_quota_max = 6 440 t de plantain -- chiffre de l'auteur du GAMS, corroboré par
+          l'Éq. 6 de l'article (4 650 t). Le balayage 4 650 -> 40 000 t montre un palier plat
+          dont l'optimum (9 240 t) est LOIN de l'observé : la contrainte corrige un mécanisme,
+          elle ne recopie pas une réponse.
+        * pn_prod_min = 6 096 ha de prairie -- paramètre GAMS QUOTA_PN_PIQ_MIN, soit 27 % SOUS
+          les 8 341 ha qu'implique la Statistique agricole annuelle 2017. Sans lui le modèle
+          impliquait 9,99 UGB/ha, trois à quatre fois le chargement réel : le défaut est
+          prouvé hors modèle.
+      Attendu (mesuré sur output_3 le 2026-07-28) : types 86,9 %, parcelles 67,6 %, surface
+      77,1 %, canne 12 782 ha contre 12 813 observés sans qu'aucune contrainte ne la nomme.
+      NE PAS citer son PAD territorial de 6,6 % : le plancher épingle la prairie, dont le PAD
+      est nul par construction.
+    # Aucun override : c'est config.yaml tel quel. L'entrée existe pour que le run porte un
+    # nom, une justification, et un dossier de sortie lisible.
+    overrides: {}

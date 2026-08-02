@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 import yaml
 
-from case_studies.guadeloupe.dashboard.loaders import list_output_runs
+from apps.dashboard.loaders import list_output_runs
 from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
 from case_studies.guadeloupe.reporting import calibration
 from case_studies.guadeloupe.reporting.report import write_calibration

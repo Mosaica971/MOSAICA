@@ -4,7 +4,7 @@
 # the only year whose structural data exists. `scenario` (RESTIT | SMART) selects the OTK
 # cost matrix (Matrice_OTK_Cult_<scenario>) and the MAE-compost subsidy table
 # (MAE_Compost_Cult_<scenario>). Note: it does NOT yet drive the CF crop files
-# (Prix_Cult_CF_*, Rdt_Cult_CF_*), which the pipeline does not load -- see VIGILANCE.md.
+# (Prix_Cult_CF_*, Rdt_Cult_CF_*), which the pipeline does not load -- see docs/04-vigilance.md.
 data:
   year: "2017"        # economic-table column: 2017..2022, or init/calib
   scenario: "RESTIT"  # RESTIT | SMART
@@ -13,7 +13,12 @@ data:
 # Each list holds {crops: [...], factor: <float>} entries; the factor multiplies every
 # listed crop (entries stack when crop lists overlap), crops not listed keep factor 1.0.
 # price_multipliers scale prix_cult (sale price/ha, flows into sales + gross product);
-# subsidy_multipliers scale the total subsidy/ha per crop. Absent (as here) = no shock,
+# subsidy_multipliers scale the total subsidy/ha per crop; yield_multipliers scale rdt_cult
+# at source (so a climate shock propagates to cost, POSEI_Q subsidy, sales, GES and the
+# tonnage quotas); cost_multipliers scale the variable cost only; variance_multipliers scale
+# Var_Rdt_Cult, the yield VARIANCE the Markowitz objective weighs -- the lever for climate
+# INSTABILITY as opposed to a yield loss, since a crop can keep its mean and become riskier.
+# Absent (as here) = no shock,
 # i.e. baseline economics. Meant primarily for scenario batches (scenarios.yaml), e.g. a
 # +20% export-banana price or a -50% sugarcane subsidy, without new data tables.
 # economic_overrides:
@@ -98,7 +103,7 @@ reporting:
     farm_pad_max: 20           # PAD (%) tolerated per farm
     farm_type_match_min: 80    # minimum share (%) of farms simulated in their observed type
 
-# Representative fine crop per aggregate baseline family (see VIGILANCE.md "point 4").
+# Representative fine crop per aggregate baseline family (see docs/04-vigilance.md "point 4").
 # The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",
 # not which technical system), and the aggregate codes carry no economics of their own.
 # To compute input-side production/subsidy/revenue/ETP (and input-vs-output deltas) we
@@ -119,11 +124,23 @@ baseline_representative_crops:
 # for faster small-scale test runs or local policy-transition scenarios. See
 # docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md. Absent (as here)
 # means no restriction -- every plot is in play.
+#
+# `scale_territorial_bounds: true` multiplies every ABSOLUTE territorial threshold
+# (territory_production_bound, territory_indicator_bound, zone_indicator_bound's absolute
+# forms) by the share of the territory's hectares the filter keeps. Without it a reduced run
+# is not merely smaller, it is INFEASIBLE: the territorial constraints still demand the whole
+# territory's 6 096 ha of pasture from whatever slice was kept. Measured on Marie-Galante
+# (14.4 % of the surface): LP infeasible without, optimal in 5 s with.
+# Ratios and per-farm budgets are deliberately left alone -- share, max_share, min_share,
+# ratio, slack and threshold_per_ha already describe an intensity, not a quantity.
+# Opt-in on purpose: a threshold is a policy statement, and rewriting one silently would
+# change what the run means. A scaled run is a MINIATURE, never a substitute for the real one.
 # zone_filter:
 #   include:
 #     islands: [1]
 #   exclude:
 #     farms: [E1471]
+#   scale_territorial_bounds: true
 
 # Named crop groups reused by the constraints below via YAML anchors (&SC_*), referenced
 # with *SC_* aliases. Each groups a base aggregate code with its fine technical variants.
@@ -163,7 +180,7 @@ objectives:
   # Disabled since 2026-07-21: maximising plain gross margin ignores risk, and risk is the
   # only thing separating the crops -- MA_ROTA yields 27929 EUR/ha at Var_Rdt 0.65 against
   # CS_NGT_NISM's 1521 at 0.20 and PN_PIQ's 1602 at 0.00. Without the risk term the model
-  # puts market gardening on every plot in the territory (PAD 193%, see VIGILANCE.md).
+  # puts market gardening on every plot in the territory (PAD 193%, see docs/04-vigilance.md).
   - name: maximize_gross_margin          # maximise sum(margin/ha x plot surface)
     enable: false
     args: {}
@@ -500,6 +517,33 @@ constraints:
       sense: ge
       threshold: 12193
 
+  # --------------------------------------------------------------------------------------
+  # EPSILON-CONSTRAINT LEVERS -- declared here, disabled, so a sweep can vary their
+  # threshold. `matrix: {args:<label>.<argument>: [...]}` folds into `set_args`, which can
+  # only touch an entry that already EXISTS in this file; declaring the lever here is what
+  # makes `scenarios_pareto.yaml` a dozen lines instead of a dozen copied scenarios.
+  #
+  # Both are OFF by default and change nothing until a scenario enables them. Thresholds
+  # below are the measured totals of the retained calibration, i.e. the point where the
+  # constraint costs exactly zero -- a sweep starts there and tightens.
+  - name: territory_indicator_bound
+    enable: false
+    args:
+      label: azote_max      # nitrogen ceiling, kg N/an (calib retenu measured 1 930 903)
+      indicator: azote
+      sense: le
+      threshold: 1930903
+  - name: territory_indicator_bound
+    enable: false
+    args:
+      label: emploi_min     # employment floor, in HOURS (scale converts to ETP-equivalent)
+      indicator: travail
+      sense: ge
+      # 3 503 ETP x 1 607 h. Careful: `farm_labor_hours_max` grants 6 252 740 h (3 891 ETP)
+      # at slack 1.0, so a floor above that is infeasible unless the same scenario raises
+      # the slack -- and raising it is not sufficient either (VIGILANCE, entree prospective).
+      threshold: 5629321
+
 # Numeric eligibility bounds: a (plot, crop) pair is eligible only if the plot's `attribute`
 # lies within the crop's [min_col, max_col] range (columns read from Data_Cult). All four
 # criteria are intersected. See core/data/eligibility.py.
@@ -532,6 +576,14 @@ eligibility_criteria:
 # Categorical eligibility rules: each forbids a set of crops on plots matching a categorical
 # condition (irrigation, soil, region, risk, fallow history). Intersected with the numeric
 # bounds above. See core/data/eligibility.py + case_studies/guadeloupe/constraints.py.
+#
+# `label:` on a rule is inert for the model and exists so a scenario batch can target ONE
+# entry: `disable: [<label>]` lifts that ban and nothing else. Matching on the rule `name`
+# instead would hit every entry sharing it -- there are six separate forbid_crops entries,
+# and disabling them all would put the eight aggregate baseline codes back in play. Labels
+# are on the rules a prospective scenario has a legitimate reason to reopen (irrigated cane,
+# rotational grazing, the experimental agroecological market-gardening systems, fibre cane,
+# fallow locks); the purely geographic ITK bans are left unlabelled on purpose.
 categorical_rules:
   # ---------------------------------------------------------------------------------
   # Eq_*_SUPP (MODELE.txt:324-340) -- activities GAMS suppresses outright, present in
@@ -551,15 +603,19 @@ categorical_rules:
     enable: true
     args: {crops: [TH]}
   # Eq_PN_TOUR_SUPP: rotational grazing suppressed -- PN_PIQ is the only pasture activity,
-  # and it is the one Eq_PN_PROD_MIN targets.
+  # and it is the one Eq_PN_PROD_MIN targets. Labelled: rotational grazing is a textbook
+  # agroecological practice, so a prospective scenario may legitimately reopen it
+  # (disable: [pn_tour_supp]). Note it then competes with PN_PIQ for the pasture floor,
+  # which counts PN_PIQ only.
   - name: forbid_crops
     enable: true
-    args: {crops: [PN_TOUR]}
+    args: {label: pn_tour_supp, crops: [PN_TOUR]}
   # Eq_CF_SUPP: the whole fibre-cane block is suppressed in both models. The Eq_CF_* wiring
   # left in TODO.md concerns the SCENARIO variants, not this baseline suppression.
   - name: forbid_crops
     enable: true
-    args: {crops: [CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM,
+    args: {label: cf_supp,
+           crops: [CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM,
                    CF_NGT_NIM, CF_CGT_NISM, CF_CGT_NIM, CF_EGT_NISM, CF_EGT_NIM]}
   # Eq_CS_SBT_NISM_supp / Eq_CS_MG_NIM_supp: two cane technical systems suppressed
   # individually, unlike the rest of the CS family.
@@ -575,6 +631,7 @@ categorical_rules:
   - name: forbid_crops
     enable: true
     args:
+      label: ma_exp_supp
       crops: [MA_TO_CHOU_JA,
               MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI,
               MA_BAG_FER_I, MA_BAG_FER_NI, MA_BAG_NON_I, MA_BAG_NON_NI,
@@ -644,6 +701,7 @@ categorical_rules:
   - name: exact_risk_value              # Eq_PN_PIQ_CLD: forbid PN_PIQ where RISQUE_CLD == 1
     enable: false
     args:
+      label: pn_piq_cld
       crops: [PN_PIQ]
       risk_column: RISQUE_CLD
       allowed_value: 1
@@ -657,9 +715,12 @@ categorical_rules:
   # Uses data_parc["REGION"] (1-7 macro agro-region), COMMUNE (INSEE), ILE (1=BT,2=GT,3=MG).
   # NOT REGION_CODE (R0-R27 petites-regions), which only drives the melon rule above.
   # Eq_CS_IRR: irrigated sugarcane disabled everywhere (condition IRRIG in {0,1} = all plots).
+  # Labelled: lifting it (disable: [cs_irrig_ban]) is the single most intensifying move
+  # available on cane, and it is a real policy question in Grande-Terre. Note the six
+  # CS_*_IM variants only become eligible where the plot is irrigated anyway.
   - name: forbid_crops
     enable: true
-    args: {crops: *SC_CS_IRRIG}
+    args: {label: cs_irrig_ban, crops: *SC_CS_IRRIG}
   # Eq_CS_SOL_SQUE: mechanized sugarcane forbidden on skeletal soil (SOL_COURT = 1).
   - name: attribute_forbidden
     enable: true
@@ -755,7 +816,7 @@ categorical_rules:
   #   Eq_VE_PLUIE: "Data_RPG.REGION=6 OR Data_RPG.ILE<>1" -> 1st false, 2nd is 0<>1 = ALWAYS
   #               TRUE -> VE_PLUIE is effectively banned on every plot.
   # Decision 2026-07-20: port the real GAMS behaviour (parity mandate). The intended-reading
-  # variants are written below as enable: false -- flip the pairs to switch. See VIGILANCE.md.
+  # variants are written below as enable: false -- flip the pairs to switch. See docs/04-vigilance.md.
   # Eq_VE_BTGT (faithful): VE_BTGT forbidden where REGION = 4.
   - name: attribute_forbidden
     enable: true
@@ -782,6 +843,7 @@ categorical_rules:
   - name: friche_lock
     enable: true
     args:
+      label: friche
       history_columns: [cult_2015, cult_2016, cult_2017]
       fallow_codes: [0, 10, 14]
       crops: &CULT_NON_NC  # the 83-crop CULT_NON_NC set, reused by Eq_NOCULT_NC below
@@ -810,11 +872,13 @@ categorical_rules:
   - name: attribute_forbidden           # NC part 1: cult_2017 is itself NC (code 14)
     enable: true
     args:
+      label: nocult_nc_1
       crops: *CULT_NON_NC
       conditions: [{column: cult_2017, op: eq, value: 14}]
   - name: attribute_forbidden           # NC part 2: 2016 AND 2017 both fallow -> resolves to NC
     enable: true
     args:
+      label: nocult_nc_2
       crops: *CULT_NON_NC
       conditions:
         - {column: cult_2016, op: in, value: [0, 10, 14]}

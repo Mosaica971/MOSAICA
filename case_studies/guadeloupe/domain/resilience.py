@@ -2,7 +2,7 @@
 
 These indicators measure what is *at stake* if a shock lands after the cropping decisions
 are locked in. They do NOT re-optimize, so they are not a measure of adaptive capacity --
-see the design spec and VIGILANCE.md. The `price_multipliers` / `yield_multipliers` config
+see the design spec and docs/04-vigilance.md. The `price_multipliers` / `yield_multipliers` config
 levers do the other thing: they shock the inputs *before* the solve, letting the optimizer
 adapt.
 

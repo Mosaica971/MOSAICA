@@ -1,8 +1,184 @@
 # TODO — idées à implémenter
 
-Ce qui reste à faire. Les limites connues et non planifiées sont dans `VIGILANCE.md`.
+Ce qui reste à faire. Les limites connues et non planifiées sont dans `docs/04-vigilance.md`.
 
 ## En cours / prêt à coder
+
+**Documentation, portabilité et arborescence — livré le 2026-08-01.** Le dépôt a désormais une
+documentation destinée à quelqu'un qui débarque, indépendante de Claude Code : `docs/README.md`
+plus cinq fichiers numérotés — utilisation, arborescence, comment modifier, **vigilance**,
+créer un nouveau cas d'étude. `PRISE_EN_MAIN.md` y est fondu et `VIGILANCE.md` (1 016 lignes)
+est devenu `docs/archives/journal-vigilance.md`, dont `04-vigilance.md` est la synthèse
+actionnable. Rangements associés : `SIG_data/` → `data/gis/`, et l'article + le rapport
+technique + le GAMS d'origine regroupés dans `context/` (`context/gams/`).
+Côté code, **le nom du cas d'étude n'est plus câblé dans les imports** : `core/case_study.py`
+résout les trois fonctions du contrat par nom, et `main.py`, `run_scenarios.py`,
+`profile_solver.py`, `display_datasets.py` prennent `--case-study` (ou `$MOSAICA_CASE_STUDY`).
+→ **Reste à faire** pour un second cas d'étude : (a) le dashboard importe encore
+`case_studies.guadeloupe.domain` pour les libellés et la géométrie — à généraliser quand un
+second cas existera, pas avant ; (b) décider si la méthode de calibration se factorise (elle
+est générique dans son principe — PAD, matrice de confusion — mais pas dans son vocabulaire,
+les 12 groupes RPG étant guadeloupéens).
+
+**Estimateur de durée de solve — corrigé le 2026-08-01.** `.mosaica_solve_history.json` était
+lu par un estimateur **mesurablement trompeur** : erreur relative médiane **75 %** (max 195 %),
+parce qu'il (a) renvoyait un point là où la dispersion réelle à taille constante est de 155 à
+1 007 s (CV 64 %), (b) prenait les 3 entrées les plus **anciennes** sur une égalité de taille
+— tri stable — donc n'apprenait plus rien après le 3ᵉ run, (c) mélangeait warm et cold (720 s
+contre 209 s), (d) répondait 456 s aussi bien pour 200 000 que pour 331 044 variables.
+`SolveHistory.estimate_range` renvoie désormais une **fourchette** sur les runs récents
+comparables (taille ±20 %, même mode), et **None** hors de la bande.
+→ **Verdict sur l'intérêt du fichier** : le garder. L'enregistrement est le seul relevé
+empirique du coût de résolution du dépôt, et une fourchette répond à la vraie question (« trois
+minutes ou trois heures ? »). Mais aucune estimation ponctuelle ne sera jamais fiable ici :
+la dispersion est le branch-and-bound lui-même, pas du bruit de mesure.
+
+**Lecture des résultats : trois références et le diff de configuration — livré le 2026-08-01.**
+Le dashboard s'ouvre désormais sur une page **Synthèse** (`apps/dashboard/app.py`) qui répond en
+un écran — solve convergé ou non, les quatre verdicts de calibration contre leurs seuils, où se
+concentre l'écart (classé en **hectares**, pas en PAD), et surtout les **pièges de lecture qui
+s'appliquent à ce run précis**, dérivés du recap par `synthesis.run_alerts`. Trois runs de
+référence sont déclarés dans `case_studies/guadeloupe/references.yaml` avec la justification de
+chaque choix — observé 2017, calib parité GAMS (`output_1`), calib retenu (`output_3`) — et la
+page Comparaison les charge d'un bouton. `apps/dashboard/config_diff.py` met en regard les
+`config_used.yaml` de deux runs : sur `output_1` → `output_3` il sort exactement les deux
+déviations documentées (`bc_quota_max` activée, seuil 40 000 → 6 440 t ; `pn_prod_min` activée).
+Validation : 42 tests sans données, plus l'exécution du diff sur les vrais `config_used.yaml`.
+→ **Reste à faire** : la page Synthèse n'a été exercée que sur cinq runs, pas sur une grille
+de 110.
+
+**Runs de référence régénérés et gardés — 2026-08-01.** Le point (c) ci-dessus est clos : les
+deux calibrations ont été relancées depuis `scenarios_calibration.yaml` sous les noms
+`calib_gams_parite` et `calib_retenu`, portent les cinq blocs de recap, et reproduisent leurs
+valeurs documentées au chiffre près. Un run peut désormais **nommer son dossier** de sortie
+(`run_folder.create_output_folder(root, name)`), la découverte se faisant sur la présence d'un
+`recap.json`. `scripts/check_references.py` garde ces chiffres contre la dérive silencieuse.
+→ **Reste à faire** : brancher `check_references.py` sur un hook de pre-commit si le rythme de
+modification du modèle le justifie ; aujourd'hui c'est une commande à lancer à la main.
+
+**Diff d'allocation — livré le 2026-08-01.** `apps/dashboard/allocation_diff.py`, câblé sous le
+diff de configuration dans la page Comparaison. Matrice de transition, flux dominants, bilan net,
+part de surface et de parcelles inchangées, filtrable par région, aux deux résolutions. Le
+contrôle qui compte : il retrouve seul trois chiffres établis par des enquêtes séparées de
+`docs/04-vigilance.md`.
+→ **Reste à faire** : la matrice de transition complète est calculée mais pas affichée (12×12 se
+lirait bien en carte de chaleur ; 84×84 non). À ajouter si le besoin se présente.
+
+**Fronts de Pareto par ε-contrainte — livré le 2026-08-01.** `scenarios_pareto.yaml` (balayage
+azote à 7 points), `apps/dashboard/pareto.py`, page **Pareto** (front, points dominés signalés,
+tableau de coût marginal). Deux leviers `enable: false` ajoutés à `config.yaml` — `azote_max`,
+`emploi_min` — parce que `set_args` ne sait toucher qu'une entrée déjà déclarée. Golden inchangé.
+→ **Reste à faire** : **aucun balayage n'a été lancé** (7 solves, ~3 min chacun). Le module et la
+page sont validés par 10 tests sans données, la chaîne complète ne l'est pas. Et le front emploi
+reste commenté : le plafond LP mesuré est de ~4 875-4 975 ETP, un balayage qui le dépasse produit
+des infaisabilités et non un front — passer par `check_scenario_feasibility.py` d'abord.
+
+**Catalogues + plan de scénarios — livré le 2026-08-01.** `scenarios_prospective.yaml` est scindé
+en trois catalogues (`scenarios_politiques.yaml`, `scenarios_forcages.yaml`,
+`scenarios_pareto.yaml`) et un **plan** (`plan.yaml`) qui déclare, politique par politique, les
+forçages traversés et les fronts tracés — au lieu du produit complet moins ce qu'on pense à
+exclure. Support dans `core/config.py` : `load_batch_spec` (include multi-fichiers), un catalogue
+de groupes de cultures `{group: canne}` adossé à `crop_families` (les ancres YAML ne traversant
+pas les fichiers), la branche `scenarios:` de `compose_runs`, la coordonnée `sweep` portée
+jusqu'au recap. Le découpage a été vérifié **identité exacte** : les 10 politiques et 12 forçages
+résolvent au même dictionnaire qu'avant. 22 tests neufs.
+→ **Reste à faire** : le plan livré (29 runs) n'a **pas été lancé**.
+
+**Chaînage de warm start le long d'un balayage — livré le 2026-08-01.**
+`core/config.order_sweep_points` réordonne chaque front du seuil le plus serré vers le plus
+lâche avant de lancer le batch (l'implication de faisabilité est à sens unique : faisable à
+55 % d'azote ⇒ faisable à 100 %, jamais l'inverse), et `run_scenarios.seed_candidates` propose
+au run le **point précédent du même front** avant l'allocation nominale de sa politique. Sur les
+7 points du balayage azote : 1 solve à froid au lieu de 7. Le sens se déduit du `sense` de la
+contrainte et s'abstient dès qu'il n'est pas sûr (matrice à deux dimensions, contrainte sans
+`sense`, argument qui n'est pas le niveau de la borne — `scale` inverse la direction).
+→ **Reste à faire** : **mesuré nulle part**. Le gain annoncé (720 s → 209 s) vient du warm start
+en général, pas de ce chaînage-ci ; 12 tests couvrent l'ordre et le choix de graine, aucun ne
+couvre le solve. À chiffrer au premier front lancé, en lisant les lignes `warm start depuis …`
+du journal de batch.
+
+
+**Lot « ce qui manquait » — livré le 2026-08-01.** Huit chantiers, dont plusieurs étaient
+listés « bloqués » plus bas et ne l'étaient pas.
+- **Phosphore et potasse** : lus sur les noms d'engrais de `Data_OTK`. Validé contre la colonne
+  `AZOTE` existante — sur les 15 triplets NPK l'azote déduit du nom l'égale au millième près,
+  ce qui fonde la lecture de P₂O₅ et K₂O sur la convention du fichier lui-même.
+- **Cartographie** : `data/gis/` contient le RPG parcellaire. Lecteur de shapefile en Python
+  pur (`core/data/shapefile.py`, aucune dépendance GDAL), jointure par signature d'exploitation
+  à **99,4 %** (`domain/geometry.py`), page **Carte** (observé / simulé / changements).
+- **Bio et agroécologie** : `domain/agroecology.py`. Les MAE (récolte en vert, jachère sol nu,
+  compost) donnent une définition **sourcée** de « sous mesure agro-environnementale » — 14 502 ha
+  et 2,18 M€ sur `output_3` — et les opérations `FERTI_MA_*BIO` / `PROC_BIO_BOVIN` identifient
+  les itinéraires bio. Les deux sont rapportés séparément : les additionner classerait la canne
+  en récolte verte comme bio.
+- **Rpest (Tixier)** : `domain/rpest.py`, arbre flou complet (4 sous-scores, surface/profondeur).
+  Banane intensive 8,81, maraîchage 6,05, canne 5,66 ; 2 655 ha à risque élevé sur `output_3`.
+- **Prix duaux** : `core/solve/shadow_prices.py`. Un point d'IFT vaut 286 €, un kg d'azote 9,81 €,
+  une heure de travail 12,50 € sur l'exploitation la plus contrainte.
+- **`zone_filter` qui met les bornes territoriales à l'échelle** : un run Marie-Galante passe
+  d'**infaisable à optimal en 5 s**. Le développement de scénarios devient testable en secondes.
+- **Balayages de seuils** : `matrix:` accepte `args:<label>.<argument>`, ce qui rend les fronts
+  de Pareto par ε-contrainte écrivables sans recopier N scénarios.
+- **Forçage d'artificialisation** : règle `land_take`, retire une part ciblée de la SAU
+  (8 % mesurés à 7,97 %, altitude médiane des parcelles retirées 3 m contre 42 m).
+- **Test de synchronisation des groupes de cultures** entre `config.yaml` et les deux specs.
+→ **Reste à faire** : aucun solve complet n'a été relancé depuis ces ajouts (le recap porte
+quatre blocs de plus). Et le **modèle multi-périodes** reste non fait — voir ci-dessous.
+
+**Modèle multi-périodes — cadré, non commencé.** C'est le seul point de la liste du 2026-07-31
+qui n'a pas été traité, et délibérément : le modèle est **statique**, donc un scénario décrit un
+*état* et jamais une *trajectoire*. `baseline_inertia_min` en est un proxy grossier — il dit
+« 70 % des hectares ne bougent pas » sans dire en combien de temps ni à quel coût. Un vrai
+multi-périodes demande : un index de temps sur `Y`, un coût de reconversion par hectare et par
+couple de cultures, l'immobilisation des pérennes sur leur durée de plantation, des contraintes
+territoriales par pas de temps, et un objectif actualisé. C'est un changement de nature du
+modèle (la taille est multipliée par le nombre de pas), pas un ajout d'indicateur. À cadrer
+comme sous-projet avec sa propre spec.
+
+**Scénarios prospectifs (politiques × forçages) — livrés le 2026-07-31.** Spec :
+`docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md`. Trois contraintes
+génériques (`territory_indicator_bound`, `zone_indicator_bound`, `baseline_inertia_min`) qui
+rendent enfin *bornables* les indicateurs jusqu'ici cantonnés au reporting — azote, IFT, GES,
+eau, carbone — plus l'enveloppe budgétaire de subventions et le plancher d'emploi, qui sont le
+même builder avec un autre indicateur. Ajouts connexes : `ModelInputs.plot_weights` (l'eau ne se
+prélève que sur les parcelles irrigables), le canal `variance_multipliers` (instabilité
+climatique ≠ perte de rendement), `crops: "*"`, des `label:` sur les règles d'éligibilité pour
+qu'un scénario puisse lever *une* interdiction, et la composition politique × forçage
+(`merge_run_specs` / `compose_runs`) qui **concatène** les listes de multiplicateurs au lieu de
+les écraser. 10 politiques × 12 forçages, seuils tous calibrés en pourcentage des totaux mesurés
+d'`output_3`. *(Scindé le 2026-08-01 en catalogues + `plan.yaml` — voir l'entrée dédiée.)*
+→ **Aucun solve MILP complet lancé.** Validation : 46 tests sans données + relaxation LP
+(`scripts/check_scenario_feasibility.py`, ~2 min/scénario contre 30-55 min), **10/10 politiques
+faisables**. Le contrôle LP a déjà servi : il a établi que P10 était infaisable tel qu'écrit, et
+la mesure de l'emploi maximal atteignable (P8 → 4 875 ETP, P9 → 5 734, P10 → 4 975, contre
+3 503 réalisés) a permis de recalibrer les planchers sur des mesures et non sur des chiffres
+choisis (cf. `docs/04-vigilance.md`).
+→ **Temps de calcul — traité le 2026-07-31.** La cause n'était pas le solveur : cinq politiques
+rouvraient `ma_exp_supp`, or les 25 variantes concernées sont **identiques au bit près** (cf.
+`docs/04-vigilance.md`, entrée Critique). Correction : plus aucune réouverture, `bio_maraichage` réduit
+aux deux vraies cultures bio. **879 162 → 331 044 binaires**, LP 40 % plus rapide, bornes
+inchangées. Ajouts : détection des groupes de cultures indistinguables dans le contrôle avant
+vol, et **chaînage automatique du warm start** dans un batch croisé (chaque run forcé amorcé par
+l'allocation non forcée de sa politique, audit compris).
+→ **Reste à faire** : (a) lancer le batch des 10 politiques ; (b) le croisement complet
+(110 runs) n'a de sens qu'une fois les politiques seules validées ; (c) le gain réel du warm
+start sur le **territoire complet** n'est pas mesuré — il l'est sur une grille 2×2 réduite
+(24,7 → 15,5 s) et sur `output_3` en 2026-07-29 (720 → 209 s), pas sur ces scénarios-là.
+
+**Lecture de la grille — livrée le 2026-07-31.** Même spec, section « Lire la grille ».
+`core/reporting/robustness.py` (pire cas, rétention, CV, regret de Savage, viabilité de Starr),
+bloc `intensity` dans le recap (marge/ha, emploi/ha, azote et IFT **par tonne**, et l'efficience
+de la dépense publique : subvention par tonne / par ETP / par € de marge), Shannon territorial,
+`run_policy`/`run_forcing` dans le recap, page dashboard **Prospective** (carte de chaleur à
+trois lectures, nuage performance-robustesse, tornado, tableau), et deux corrections de méthode
+du score composite : pondération **par famille** (les 11 ratios d'autonomie pesaient 11 fois les
+GES) et **signalement des indicateurs fixés par une contrainte** (les noter est circulaire).
+→ Validé par 46 tests sans données + une vraie grille 2×2 sur Marie-Galante (4 solves) qui a
+exercé toute la chaîne. Suite complète : 424 tests verts.
+→ **Reste à faire** : la page n'a pas encore été ouverte sur une **grande** grille — le cache
+`@st.cache_data` ne lit que les `recap.json`, mais 110 fichiers n'ont pas été mesurés. Et le
+seuil de viabilité est saisi à la main : s'il devient un usage courant, le mémoriser par
+indicateur.
 
 **Calibration & validation — livré le 2026-07-21.** Spec :
 `docs/superpowers/specs/2026-07-21-calibration-validation-design.md`, plan :
@@ -21,7 +197,7 @@ plafond de main d'œuvre `Eq_MO_MAX_Expl`. `Eq_CS_GFA` et les planchers de produ
 
 → **Résultat : PAD 193 % → 51 %**, types 63 %, avec les coefficients d'aversion **publiés**
 (Table 2). Canne (17-22 %) et maraîchage (18 %) bien reproduits. **Chantier clos** : voir le
-bloc FINALISATION de `VIGILANCE.md` pour la décision et les trois voies instruites puis
+bloc FINALISATION de `docs/04-vigilance.md` pour la décision et les trois voies instruites puis
 écartées pour descendre plus bas (recalibration §2.5 → 40 % mais coefficients absurdes ;
 plafonds de marché → 33 % mais forçants ; contrainte de cheptel → intraitable). L'écart
 résiduel (prairie, plantain, petites cultures) recoupe les limites reconnues par l'article
@@ -78,7 +254,7 @@ gisement.
 restitue la canne à 98 %, les fruits à 90 %.
 
 **PAD résiduel — diagnostiqué le 2026-07-29, deux leviers instruits.** Détail complet dans
-`VIGILANCE.md`, entrée « Le PAD résiduel ». Le résultat de fond est que **les rendements du
+`docs/04-vigilance.md`, entrée « Le PAD résiduel ». Le résultat de fond est que **les rendements du
 modèle valent 2 à 4 fois ceux du territoire** (ananas 34 contre 12,3 t/ha, plantain 26 contre
 9,0, maraîchage 43,9 contre 10,8, agrumes 20 contre 5,2 ; seul le melon tombe juste) : la marge
 de ces cultures est surestimée en amont, ce qui explique qu'il faille des plafonds de marché.
@@ -87,11 +263,11 @@ Rendements = `Rdt_Cult` = Table 1 de l'article, donc **intouchables sous mandat 
 Plafond ananas à 7 000 t et plancher arboricole à 200 ha : les deux tapent la limite d'1 h avec
 un incumbent incohérent (canne et banane reculent, ce qu'aucune de ces contraintes ne peut
 causer). Une solution **faisable** construite à la main en quelques secondes depuis `output_3`
-(script de réparation, cf. `VIGILANCE.md`) vaut **80,91 M€** contre les 76,46 de HiGHS : l'écart
+(script de réparation, cf. `docs/04-vigilance.md`) vaut **80,91 M€** contre les 76,46 de HiGHS : l'écart
 est de 4,45 M€, soit 5,5 %. Le coût réel du plancher arboricole est de **0,39 % à 200 ha et
 1,19 % à 335 ha**, du même ordre que les deux contraintes déjà adoptées. **Rien n'a été adopté :
 aucun run portant ces contraintes n'est exploitable en l'état.**
-→ **Warm start — LIVRÉ le 2026-07-29.** `core/model/warm_start.py` (écriture de l'allocation
+→ **Warm start — LIVRÉ le 2026-07-29.** `core/solve/warm_start.py` (écriture de l'allocation
 dans `model.Y` + **audit de faisabilité avant solve**), `core/reporting/run_folder.read_allocation`,
 `solver.warm_start_from` en config, `scripts/repair_allocation.py` pour réparer une allocation
 face à un nouveau plancher de surface. 7 tests sans données (`tests/test_warm_start.py`).
@@ -111,7 +287,7 @@ hors modèle) ; jachère (aucune source externe).
 
 **Déficit de prairie — diagnostic du 2026-07-27, conservé pour l'historique.** Il portait sur
 l'état sans plancher (6 109 → 2 980 ha) ; le plancher ci-dessus l'a refermé. Détail dans
-`VIGILANCE.md`, entrée dédiée. Résumé : 62 % du déficit était de l'économie légitime, 36 %
+`docs/04-vigilance.md`, entrée dédiée. Résumé : 62 % du déficit était de l'économie légitime, 36 %
 l'effet de couplage du plafond de main d'œuvre (revenir à la prairie coûte +113 h/ha), 2 % de
 résidu ; et 30 % du total (Marie-Galante, 1 042 ha) tenait sur un écart de **0,94 %** entre
 `CS_MG_NISM` (1 617 €/ha) et `PN_PIQ` (1 602) — fragile, pas faux.
@@ -182,7 +358,7 @@ reporting seul, aucun effet sur l'allocation, donc aucun solve réel nécessaire
   équations `Eq_CF_*` uniquement : les 10 cultures `CF_*` sont **déjà** dans le modèle et
   valorisées via `Prix_Cult.txt`. Les fichiers `indice_H/{Prix,Rdt}_Cult_CF_{RESTIT,SMART}.txt`
   sont des variantes **territoire entier**, pas des tables CF — leur sens est à trancher avec
-  la source avant câblage (cf. `VIGILANCE.md`) : c'est le vrai point bloquant du lot.
+  la source avant câblage (cf. `docs/04-vigilance.md`) : c'est le vrai point bloquant du lot.
 - **Contrainte `MO_MAX`** (plafond main d'œuvre) — hors plan Lot 3, à cadrer.
 - **Part de bio (C2)** — bloqué : le bio n'est pas identifiable proprement dans les
   données, demande un arbitrage utilisateur.
@@ -203,7 +379,7 @@ reporting seul, aucun effet sur l'allocation, donc aucun solve réel nécessaire
   → **Chiffré le 2026-07-27** : la représentante n'est éligible que sur **31 %** des hectares
   de canne observés, 61 % du maraîchage, 63 % du plantain (table complète dans
   `outputs/reference_2017/csv/reference_representative_eligibility.csv`, analyse dans
-  `VIGILANCE.md`). Ce n'est plus une amélioration cosmétique : la représentante inéligible
+  `docs/04-vigilance.md`). Ce n'est plus une amélioration cosmétique : la représentante inéligible
   fausse l'économie de la référence **et** le plafond de main d'œuvre, donc l'optimum. Le
   correctif naturel est de choisir la représentante **par parcelle** parmi les variantes
   éligibles (la borne « bas/haut » de `build_reference_state.py` fait déjà ce calcul).

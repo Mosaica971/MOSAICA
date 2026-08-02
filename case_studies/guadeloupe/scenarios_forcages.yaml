@@ -1,0 +1,173 @@
+# CATALOGUE DES FORCAGES -- ce que le climat et les marches IMPOSENT, quelle que soit la
+# politique decidee.
+#
+# CE FICHIER NE LANCE RIEN, et un forcage ne se joue jamais seul : il n'a de sens que
+# compose avec une politique de `scenarios_politiques.yaml`. C'est `plan.yaml` qui dit quelle
+# politique passe par quel forcage. Le croisement EST le resultat : la politique qui parait
+# la meilleure sans forcage n'est pas necessairement celle qui tient sous un cyclone ou un
+# effondrement des prix, et cet ecart est ce qu'on cherche a mesurer.
+#
+# F0_nominal est le temoin neutre. Le garder en tete de liste n'est pas cosmetique :
+# run_scenarios.py conserve la PREMIERE allocation resolue de chaque politique comme graine
+# de warm start pour ses autres cellules, et l'allocation non forcee est la graine la plus
+# largement faisable.
+#
+# UN FORCAGE CHANGE DES COEFFICIENTS, PAS L'ENSEMBLE FAISABLE -- c'est ce qui rend le
+# chainage des warm starts legitime. Les exceptions sont reelles mais rares : F2 interdit des
+# cultures, F11 retire du foncier. L'audit de `core/solve/warm_start.py` les attrape et le run
+# repart a froid.
+#
+# Les groupes de cultures cites viennent de `crop_groups.yaml` et de `crop_families` de
+# `config.yaml`.
+
+include:
+  crop_groups: crop_groups.yaml
+
+forcings:
+
+  - name: F0_nominal
+    description: "Aucun forcage -- la politique seule, conditions 2017."
+
+  # --- Climat --------------------------------------------------------------------------
+
+  - name: F1_cyclone_majeur
+    description: >-
+      Cyclone de categorie 4-5. Les cultures perennes hautes paient le plus (banane,
+      plantain, vergers), la canne se releve mieux. La variance des rendements monte:
+      sous objectif de Markowitz, cela deplace en soi les fermes averses au risque.
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: {group: banane_export}, factor: 0.55}
+        - {crops: {group: plantain}, factor: 0.60}
+        - {crops: {group: arboriculture}, factor: 0.50}
+        - {crops: {group: canne}, factor: 0.65}
+        - {crops: {group: maraichage}, factor: 0.75}
+      economic_overrides.variance_multipliers:
+        - {crops: "*", factor: 1.30}
+
+  - name: F2_secheresse_severe
+    description: >-
+      Secheresse pluriannuelle: rendements en baisse, cultures dependantes de l'irrigation
+      rendues impraticables, et un plafond de prelevement impose sur la ressource (-30 %).
+      C'est le forcage qui met a l'epreuve la dependance a l'eau plutot que le revenu.
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: {group: canne}, factor: 0.70}
+        - {crops: {group: maraichage}, factor: 0.65}
+        - {crops: {group: banane_export}, factor: 0.75}
+        - {crops: {group: plantain}, factor: 0.70}
+      economic_overrides.variance_multipliers:
+        - {crops: "*", factor: 1.40}
+    enable_add:
+      - name: forbid_crops
+        section: categorical_rules
+        args: {label: secheresse_irrig, crops: [BA_IRR, ME, MA_ROTA]}
+      - name: territory_indicator_bound
+        args: {label: restriction_eau, indicator: eau, sense: le, threshold: 24262000,
+               scale: 10.0, plot_weight: irrigable}
+
+  - name: F3_derive_climatique
+    description: >-
+      Pas un evenement mais une derive: -12 % de rendement partout, et surtout une variance
+      qui augmente de 60 %. Teste specifiquement le canal du RISQUE, distinct de celui de la
+      perte moyenne -- une culture peut garder son rendement moyen et devenir intenable.
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: "*", factor: 0.88}
+      economic_overrides.variance_multipliers:
+        - {crops: "*", factor: 1.60}
+
+  - name: F4_choc_sanitaire
+    description: >-
+      Cercosporiose noire installee: la banane export perd la moitie de son rendement et
+      son cout de protection augmente d'un quart; le plantain est touche plus legerement.
+      Choc de filiere, non de territoire.
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: {group: banane_export}, factor: 0.50}
+        - {crops: {group: plantain}, factor: 0.70}
+      economic_overrides.cost_multipliers:
+        - {crops: {group: banane_export}, factor: 1.25}
+
+  # --- Economie ------------------------------------------------------------------------
+
+  - name: F5_effondrement_prix_export
+    description: >-
+      Fin des preferences commerciales et sucre mondial deprime: -35 % sur la banane,
+      -25 % sur la canne. Les deux piliers de l'export cedent en meme temps.
+    overrides:
+      economic_overrides.price_multipliers:
+        - {crops: {group: banane_export}, factor: 0.65}
+        - {crops: {group: canne}, factor: 0.75}
+
+  - name: F6_choc_intrants
+    description: >-
+      Energie et engrais: +45 % sur les couts variables de toutes les cultures. Frappe
+      d'autant plus fort que le systeme est intensif -- c'est le forcage qui devrait le plus
+      separer le pole accelerationniste du pole agroecologique.
+    overrides:
+      economic_overrides.cost_multipliers:
+        - {crops: "*", factor: 1.45}
+
+  - name: F7_inflation_alimentaire
+    description: >-
+      Rupture des chaines d'importation: le prix du vivrier local bondit de 40 % tandis que
+      les prix d'export ne bougent pas. Forcage FAVORABLE a la relocalisation -- il teste si
+      une politique d'export tient quand le marche, lui, revient au local.
+    overrides:
+      economic_overrides.price_multipliers:
+        - {crops: {group: vivrier}, factor: 1.40}
+
+  - name: F8_retrait_posei
+    description: >-
+      Les aides europeennes specifiques a l'outre-mer sont ramenees a 40 % de leur niveau.
+      Choc purement budgetaire, sans rien changer a l'agronomie ni aux marches.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.40}
+
+  # --- Combinaisons --------------------------------------------------------------------
+
+  - name: F9_crise_systemique
+    description: >-
+      Tout en meme temps: rendements -20 %, prix d'export -25 %, couts +30 %, subventions
+      -40 %, variance +50 %. Le pire des cas plausible, pour departager les politiques sur
+      leur robustesse plutot que sur leur performance nominale.
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: "*", factor: 0.80}
+      economic_overrides.price_multipliers:
+        - {crops: {group: banane_export}, factor: 0.75}
+        - {crops: {group: canne}, factor: 0.75}
+      economic_overrides.cost_multipliers:
+        - {crops: "*", factor: 1.30}
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.60}
+      economic_overrides.variance_multipliers:
+        - {crops: "*", factor: 1.50}
+
+  - name: F10_conjoncture_favorable
+    description: >-
+      Borne haute symetrique de F9: +10 % de rendement, +15 % de prix, -10 % de couts,
+      variance -20 %. Sans elle, on ne sait pas si l'ecart entre politiques tient au
+      forcage ou a la politique -- c'est le temoin par le haut.
+    overrides:
+      economic_overrides.yield_multipliers:
+        - {crops: "*", factor: 1.10}
+      economic_overrides.price_multipliers:
+        - {crops: "*", factor: 1.15}
+      economic_overrides.cost_multipliers:
+        - {crops: "*", factor: 0.90}
+      economic_overrides.variance_multipliers:
+        - {crops: "*", factor: 0.80}
+
+  - name: F11_artificialisation
+    description: >-
+      Perte de foncier agricole : 8 % de la SAU sortent de la production, pris en priorite
+      sur les terres de basse altitude -- celles qui bordent les communes et s'urbanisent en
+      premier. Le seul forcage qui retire de la TERRE plutot que de changer un coefficient,
+      et le seul qui laisse les objectifs de production inchanges sur une surface reduite.
+    enable_add:
+      - name: land_take
+        section: categorical_rules
+        args: {label: artificialisation, crops: "*", share: 0.08, order_by: ALTITUDE}

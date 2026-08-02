@@ -17,7 +17,7 @@ optimized on its own").
   which plots exist; existing quota thresholds stay as configured. A user testing a
   small subset is expected to `enable: false` the territory constraints that no longer
   make sense, the same way they already toggle any other constraint entry today. This
-  will be documented in `VIGILANCE.md`.
+  will be documented in `docs/04-vigilance.md`.
 - No change to eligibility/categorical-rule semantics — this is a new, earlier filter
   stage, not a replacement for them.
 - No integration with the (separate, on-hold) output-persistence-reporting work — noted

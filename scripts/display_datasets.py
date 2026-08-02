@@ -2,8 +2,10 @@
 its category, type and size) for a quick sanity check of what build_dataset produces.
 
     python scripts/display_datasets.py
+    python scripts/display_datasets.py --case-study guadeloupe
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -11,16 +13,15 @@ from pathlib import Path
 # case_studies/core imports below would fail. Prepend the repo root ourselves.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
+from core.case_study import add_argument, load
 from core.config import load_config
 from core.data.dataset import build_registry
 
-from scripts._common import CONFIG_PATH
 
-
-def main() -> None:
-    config = load_config(CONFIG_PATH)
-    dataset = build_dataset(config)
+def main(case_study: str | None = None) -> None:
+    case = load(case_study)
+    config = load_config(case.config_path)
+    dataset = case.build_dataset(config)
     registry = build_registry(dataset)
 
     for row in registry:
@@ -28,4 +29,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    add_argument(parser)
+    main(parser.parse_args().case_study)

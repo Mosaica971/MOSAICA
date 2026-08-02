@@ -16,12 +16,20 @@ def apply_crop_multipliers(
     cumulatively when their crop lists overlap. A None/empty `rules` is a no-op that
     returns the Series unchanged (so a config without economic_overrides reproduces the
     baseline economics exactly). Crop codes not present in the Series index are ignored.
+
+    ``crops: "*"`` means every crop in the Series -- for the territory-wide shocks a
+    prospective scenario needs (abolishing all subsidies, a general price collapse) which
+    would otherwise have to enumerate all 84 codes and would silently miss any added later.
     """
     if not rules:
         return series
     factors = pd.Series(1.0, index=series.index)
     for rule in rules:
-        present = [c for c in rule["crops"] if c in factors.index]
+        crops = rule["crops"]
+        if crops == "*":
+            factors *= rule["factor"]
+            continue
+        present = [c for c in crops if c in factors.index]
         factors.loc[present] *= rule["factor"]
     return series * factors
 

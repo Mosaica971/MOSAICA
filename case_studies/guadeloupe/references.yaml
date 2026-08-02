@@ -1,0 +1,87 @@
+# Les runs de référence du dashboard : quel dossier de `outputs/` joue quel rôle.
+#
+# POURQUOI CE FICHIER EXISTE. La page Comparaison sait afficher n'importe quelle série
+# (run × côté), mais trois d'entre elles ne sont pas des scénarios parmi d'autres : ce sont
+# les points fixes contre lesquels tout le reste se lit. Les nommer ici plutôt que de les
+# redemander à chaque ouverture du dashboard rend le choix explicite, versionné et
+# justifiable — et le `note:` de chaque entrée porte la justification.
+#
+# COMMENT LES RÉGÉNÉRER. Les deux runs de calibration sont décrits dans
+# `scenarios_calibration.yaml` et se relancent en une commande :
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration.yaml
+# Leurs dossiers portent leur nom (`outputs/calib_retenu/`), pas un numéro.
+#
+# COMMENT LE METTRE À JOUR. Après un run qui change la référence retenue, remplacer le
+# `run:`, réécrire le `note:` ET les valeurs `expect:`. Un `run:` qui ne correspond à aucun
+# dossier n'est pas une erreur fatale : la page signale la référence manquante et continue.
+#
+# CE QUE « side » VEUT DIRE. Chaque run porte deux côtés. `input` est l'assolement 2017
+# observé (identique d'un run à l'autre, à config de données constante) ; `output` est
+# l'allocation optimisée. L'observé est donc le côté `input` d'un run quelconque, et non un
+# dossier à part. (`outputs/reference_2017/` est un artefact séparé et plus riche — il porte
+# l'encadrement bas/haut des indicateurs — mais il n'a pas de table de faits, donc il ne peut
+# pas alimenter les graphiques comparatifs.)
+#
+# À QUOI SERT `expect:`. `scripts/check_references.py` compare ces valeurs à ce que le
+# dossier contient réellement et sort en erreur au-delà de `tolerance_pct`. C'est le seul
+# garde-fou du dépôt sur le SOLVE : les tests unitaires sont sans données par choix, et
+# `golden_snapshot.py` couvre le pipeline et les indicateurs, pas la résolution.
+# La tolérance est à 5 % parce que le bruit de branch-and-bound mesuré vaut 0,15 point de PAD
+# (trois graines HiGHS : 48,44 / 48,29 / 48,31), soit 2,3 % en relatif sur la plus petite
+# valeur gardée ici. Une garde à l'égalité exacte échouerait sur un simple re-run.
+
+references:
+  - id: observed
+    run: calib_retenu
+    side: input
+    label: "Observé 2017 (RPG)"
+    note: >-
+      L'assolement réellement déclaré en 2017, tel que le pipeline le reconstruit. Le côté
+      `input` de n'importe quel run donne la même chose à config de données constante.
+      ATTENTION : l'allocation FINE de 2017 n'a jamais été observée — seuls les 12 groupes
+      RPG le sont — donc les indicateurs économiques de cette série reposent sur l'hypothèse
+      `baseline_representative_crops`, et cette hypothèse est fragile : la culture
+      représentante n'est éligible que sur 31 % des hectares de canne observés, 61 % du
+      maraîchage. Les surfaces par groupe, elles, sont observées.
+
+  - id: gams_parity
+    run: calib_gams_parite
+    side: output
+    label: "Calib parité GAMS"
+    note: >-
+      Le bloc CALIB porté à l'identique, sans aucune déviation assumée. C'est la référence de
+      PARITÉ : ce que le modèle GAMS d'origine produit sur nos données, et donc le point de
+      comparaison honnête pour juger ce que les deux déviations apportent. Son écart aux
+      chiffres de l'article (PAD <15 %, types 81 %) tient à la provenance des données — 4 638
+      exploitations contre 5 336, année de base 2010 hors d'atteinte — et non à un défaut de
+      portage : l'enquête source-à-source du 2026-07-27 a écarté une à une les causes de
+      modélisation. Régénéré le 2026-08-01, identique au chiffre près à `output_1`.
+    tolerance_pct: 5.0
+    expect:
+      objective.value: 84978687
+      calibration.regional_pad_pct: 48.44
+      calibration.farm_type_match_pct: 64.04
+      calibration.plot_match_pct: 55.99
+      calibration.area_match_pct: 64.28
+
+  - id: retained
+    run: calib_retenu
+    side: output
+    label: "Calib retenu"
+    note: >-
+      La calibration de travail, avec les deux seules déviations assumées au bloc CALIB,
+      toutes deux adossées à une source EXOGÈNE à l'assolement observé : le plafond de marché
+      du plantain `bc_quota_max` à 6 440 t (chiffre de l'auteur du GAMS, corroboré par l'Éq. 6
+      de l'article à 4 650 t) et le plancher de surface fourragère `pn_prod_min` à 6 096 ha
+      (paramètre GAMS QUOTA_PN_PIQ_MIN, 27 % SOUS les 8 341 ha que donne la Statistique
+      agricole annuelle 2017). Types 86,9 %, parcelles 67,6 %, surface 77,1 %, et la canne
+      revenue à 12 782 ha contre 12 813 observés sans qu'aucune contrainte ne la nomme.
+      NE PAS citer son PAD territorial de 6,6 % : le plancher épingle la prairie, dont le PAD
+      est nul par construction. Régénéré le 2026-08-01, identique au chiffre près à `output_3`.
+    tolerance_pct: 5.0
+    expect:
+      objective.value: 81222224
+      calibration.regional_pad_pct: 6.60
+      calibration.farm_type_match_pct: 86.89
+      calibration.plot_match_pct: 67.58
+      calibration.area_match_pct: 77.10

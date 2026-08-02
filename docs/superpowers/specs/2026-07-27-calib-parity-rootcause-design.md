@@ -28,8 +28,8 @@ identique. **Où sont les points de blocage ?**
 
 ## Méthode
 
-Comparaison source-à-source : GAMS (`old_code_gms_format_now_txt/`) et l'article
-(`Chopin et al 2015 pour Hal.pdf`) contre notre pipeline, sans jamais se fier à la mémoire de
+Comparaison source-à-source : GAMS (`context/gams/`) et l'article
+(`context/Chopin et al 2015 pour Hal.pdf`) contre notre pipeline, sans jamais se fier à la mémoire de
 session. Diagnostics parcellaires sur `output_2` (sans solve).
 
 ## Ce qui est CONFIRMÉ FIDÈLE (écarté comme cause)
@@ -136,4 +136,4 @@ est fidèle** (objectif, AVERS, économie, mapping, bans tous vérifiés exacts)
 économiquement plate que le B&B ne tranche pas comme la leur** — pas de bug de portage. Les
 corrections de parité (#3) rapprochent sans dévier, mais le plateau ~49 %/64 % est structurel.
 
-Mesures dans VIGILANCE.md (entrée calibration) et la mémoire `project_calibration_workstream`.
+Mesures dans docs/04-vigilance.md (entrée calibration) et la mémoire `project_calibration_workstream`.

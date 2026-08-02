@@ -18,13 +18,10 @@ from typing import Any
 # case_studies/core imports below would fail. Prepend the repo root ourselves.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
-from case_studies.guadeloupe.model.model import build_model
+from core.case_study import add_argument, load
 from core.config import load_config
-from core.model.solver import solve_model
-from core.model.timing import time_phases
-
-from scripts._common import CONFIG_PATH
+from core.solve.solver import solve_model
+from core.solve.timing import time_phases
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -33,6 +30,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--region", action="append", default=[])
     parser.add_argument("--farm", action="append", default=[])
     parser.add_argument("--plot", action="append", default=[])
+    add_argument(parser)
     return parser.parse_args(argv)
 
 
@@ -51,7 +49,7 @@ def build_zone_filter_from_args(args: argparse.Namespace) -> dict[str, Any] | No
 
 def disable_territory_bounds(config: dict[str, Any]) -> dict[str, Any]:
     """Drop territory_production_bound constraints (whole-Guadeloupe quotas that a
-    zone_filter subset can't satisfy -- see VIGILANCE.md's "zone_filter ne
+    zone_filter subset can't satisfy -- see docs/04-vigilance.md's "zone_filter ne
     redimensionne pas les quotas territoriaux"). Only meant for profiling runs."""
     return {
         **config,
@@ -63,19 +61,20 @@ def disable_territory_bounds(config: dict[str, Any]) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
-    config = load_config(CONFIG_PATH)
+    case = load(getattr(args, "case_study", None))
+    config = load_config(case.config_path)
     zone_filter = build_zone_filter_from_args(args)
     if zone_filter is not None:
         config = {**config, "zone_filter": zone_filter}
         config = disable_territory_bounds(config)
         print(
             "zone_filter active: territory_production_bound constraints disabled "
-            "(whole-territory quotas don't apply to a subset -- see VIGILANCE.md)."
+            "(whole-territory quotas don't apply to a subset -- see docs/04-vigilance.md)."
         )
 
     _dataset, _model, _results, timings = time_phases(
-        lambda: build_dataset(config),
-        lambda dataset: build_model(dataset, config),
+        lambda: case.build_dataset(config),
+        lambda dataset: case.build_model(dataset, config),
         lambda model: solve_model(model, config),
     )
 

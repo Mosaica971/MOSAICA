@@ -3,7 +3,7 @@
 import pyomo.environ as pyo
 import pytest
 
-from core.model.warm_start import (
+from core.solve.warm_start import (
     apply_allocation,
     constraint_violations,
     objective_value,

@@ -21,7 +21,7 @@ SCENARIO = "RESTIT"
 
 Coder ces deux dimensions en dur empêche toute comparaison multi-années / multi-scénarios
 et bloque la brique C (comparaison de scénarios, conçue séparément). Ce point est déjà
-tracé dans `VIGILANCE.md` (« `YEAR`/`SCENARIO` codés en dur », sévérité mineure).
+tracé dans `docs/04-vigilance.md` (« `YEAR`/`SCENARIO` codés en dur », sévérité mineure).
 
 ## Portée (décidée avec l'utilisateur)
 
@@ -42,7 +42,7 @@ tracé dans `VIGILANCE.md` (« `YEAR`/`SCENARIO` codés en dur », sévérité m
 - Parcellaire multi-années (données inexistantes).
 - Fichiers CF scénario-spécifiques (`Prix_Cult_CF_*`, `Rdt_Cult_CF_*`) : présents en
   données mais **jamais chargés** par le pipeline actuel → hors périmètre, noté comme
-  écart connu dans `VIGILANCE.md`.
+  écart connu dans `docs/04-vigilance.md`.
 - Comparaison multi-runs / orchestration de scénarios : c'est la brique C, un
   sous-projet distinct. Ce design se contente de rendre chaque run paramétrable, ce qui
   débloque la brique C sans la réaliser.
@@ -146,7 +146,7 @@ quels** ; l'inline ne les remplace pas.
 - **`CLAUDE.md`** : retirer la mention « `YEAR = "2017"` et `SCENARIO = "RESTIT"` sont
   des constantes de module codées en dur » ; documenter la section `data:` et le fait que
   `year` ne pilote que l'économie.
-- **`VIGILANCE.md`** : déplacer le point mineur « `YEAR`/`SCENARIO` codés en dur » vers
+- **`docs/04-vigilance.md`** : déplacer le point mineur « `YEAR`/`SCENARIO` codés en dur » vers
   « Résolu » ; ajouter/mettre à jour l'écart connu « `scenario` ne pilote pas encore les
   fichiers CF ».
 

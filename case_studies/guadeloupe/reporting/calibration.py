@@ -6,7 +6,7 @@ four nested scales: region, sub-region, farm and field. This module computes tho
 the per-farm PAD the article states a threshold for without publishing its table.
 
 Everything is compared at the resolution of the 12 observed RPG groups: the observed 2017
-land use has no finer resolution (see VIGILANCE.md on the aggregate baseline), so the
+land use has no finer resolution (see docs/04-vigilance.md on the aggregate baseline), so the
 simulated fine crops are folded back with domain/crop_families.
 
 Reporting only -- nothing here influences the allocation, and no solve is needed.

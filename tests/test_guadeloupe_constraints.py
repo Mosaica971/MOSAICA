@@ -4,7 +4,7 @@ import pytest
 from case_studies.guadeloupe.model import constraints as _guadeloupe_constraints  # noqa: F401
 from core.model.builder import build_crop_allocation_model
 from core.model.model_inputs import ModelInputs
-from core.model.solver import solve_model
+from core.solve.solver import solve_model
 
 
 def test_cs_gfa_minimum_share_constraint_only_applies_to_farms_with_gfa_surface():

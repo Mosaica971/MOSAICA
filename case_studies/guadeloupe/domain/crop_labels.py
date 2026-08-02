@@ -1,11 +1,11 @@
 """Human-readable French labels for the fine crop codes in CULT_2017.set.
 
-Ported from old_code_gms_format_now_txt/DESCRIPTION_SETS.txt (GAMS source of
+Ported from context/gams/DESCRIPTION_SETS.txt (GAMS source of
 truth). Figures and exports use these instead of raw codes. The 24 MA_<mulch>_*
 maraichage subtypes are not individually described in the GAMS source: mulch
 (BAG=bagasse/BRF/PAI=paille) and irrigation (I/NI) are decoded; the middle
 fertilisation token (BIO/VEG/FER/NON) is kept literal (meaning undocumented --
-see VIGILANCE.md). label_for() falls back to the raw code for anything unmapped.
+see docs/04-vigilance.md). label_for() falls back to the raw code for anything unmapped.
 """
 
 CROP_LABELS: dict[str, str] = {

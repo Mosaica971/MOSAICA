@@ -12,7 +12,7 @@ _2026-07-27, seconde investigation de la journée._ Fait suite à
    arbitraires) ?
 
 Aucun résultat ci-dessous ne repose sur la mémoire de session : article relu depuis le PDF,
-GAMS relu depuis `old_code_gms_format_now_txt/`, tout le reste mesuré.
+GAMS relu depuis `context/gams/`, tout le reste mesuré.
 
 ## 1. Les modalités — nos chiffres et les leurs ne mesuraient pas la même chose
 

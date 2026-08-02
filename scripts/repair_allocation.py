@@ -3,7 +3,7 @@
 Why this exists: past ~309 000 binaries, HiGHS no longer finds a good incumbent unaided. On
 2026-07-29 an orchard floor and a pineapple ceiling each hit the one-hour limit with an
 incumbent 5.5% below a solution repaired by hand in seconds. Supplying that repair as a warm
-start is the fix (core/model/warm_start.py); this script produces it.
+start is the fix (core/solve/warm_start.py); this script produces it.
 
     python scripts/repair_allocation.py outputs/output_3 \
         --crops AG,VE_BTGT,VE_PLUIE --min-surface 335 --out outputs/_warmstart_plu
@@ -34,7 +34,7 @@ from case_studies.guadeloupe.model.model import build_model
 from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
 from case_studies.guadeloupe.reporting import indicators
 from core.config import load_config
-from core.model.warm_start import apply_allocation, constraint_violations, objective_value
+from core.solve.warm_start import apply_allocation, constraint_violations, objective_value
 from core.reporting.run_folder import read_allocation
 
 from scripts._common import CONFIG_PATH

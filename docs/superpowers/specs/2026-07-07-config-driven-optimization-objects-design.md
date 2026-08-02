@@ -126,7 +126,7 @@ more than one enabled entry in `objectives` raises `ValueError`.
     - resolves `config["objectives"]`, asserts exactly one enabled entry, calls
       `fn(model, inputs, **args)`.
 
-- `core/model/solver.py`
+- `core/solve/solver.py`
   - `solve_model(model: pyo.ConcreteModel, config: dict) -> Any` replaces the
     `solver_name: str = "appsi_highs"` parameter. Reads `config["solver"]["name"]` and
     `config["solver"].get("args", {})`, passes `name` to `pyo.SolverFactory` (already a

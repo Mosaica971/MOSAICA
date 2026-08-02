@@ -33,7 +33,7 @@ def test_compute_base_crop_group_covers_every_rpg_code():
 
 def test_compute_base_crop_group_applies_fallow_continuity_override():
     # cult_2016 and cult_2017 both in {0, 10, 14} -> cult_2017 forced to 14 (NC), per
-    # the executable condition in old_code_gms_format_now_txt/ENTREES.txt:49-57 (only
+    # the executable condition in context/gams/ENTREES.txt:49-57 (only
     # cult_2016/cult_2017 are checked -- the cult_2015 clause is commented out in GAMS).
     cult_2016 = pd.Series([0], index=["P1"])
     cult_2017 = pd.Series([10], index=["P1"])  # would otherwise map to JA
@@ -53,7 +53,7 @@ def test_compute_base_crop_group_does_not_override_when_2016_is_not_fallow():
 
 
 # Each scenario is a farm made of (base_group, area_ha) plots, hand-computed against
-# the PART_* share formulas and threshold cascade at old_code_gms_format_now_txt/
+# the PART_* share formulas and threshold cascade at context/gams/
 # OPTIMISATION.txt:1467-1561, and the AVERS lookup at :1744-1758.
 _TYPE_EXPL_SCENARIOS = {
     # PART_CAN = 8.34/8.34 = 1.0 >= 0.939 -> type 3 (Canniers) -> AVERS 0.30

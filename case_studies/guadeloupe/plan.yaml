@@ -1,0 +1,91 @@
+# LE PLAN -- quels croisements sont effectivement resolus.
+#
+# Les trois fichiers inclus sont des CATALOGUES : ils declarent ce qui existe, ils ne lancent
+# rien. Ce fichier-ci dit ce qu'on lance. C'est le seul a editer pour changer un batch, et le
+# seul a lire pour savoir ce qu'un batch a fait.
+#
+#   scenarios_politiques.yaml   ce qu'une puissance publique DECIDE   (P1..P10)
+#   scenarios_forcages.yaml     ce que le climat et les marches IMPOSENT (F0..F11)
+#   scenarios_pareto.yaml       les balayages par epsilon-contrainte   (pareto_azote)
+#
+# GRAMMAIRE D'UNE CELLULE. Quatre ecritures equivalentes, de la plus breve a la plus explicite :
+#
+#   P1_deregulation_totale:                       # la politique seule, non forcee
+#   P4_statu_quo: [F0_nominal, F9_crise_systemique]        # raccourci pour `forcings:`
+#   P5_austerite_budgetaire: {forcings: "*"}      # tous les forcages du catalogue
+#   P8_transition_agroecologique:
+#     forcings: [F0_nominal, F9_crise_systemique]
+#     sweeps:
+#       - pareto_azote                            # front trace sur la politique seule
+#       - {name: pareto_azote, forcings: [F9_crise_systemique]}   # ... et sous le choc
+#
+# UN BALAYAGE N'EST PAS CROISE AVEC LES FORCAGES DE SA CELLULE. C'est delibere : un front
+# coute un solve par point, et le multiplier par une liste de forcages est la facon dont un
+# apres-midi devient une semaine. Pour un front sous forcage, le nommer explicitement.
+#
+# COMPTER AVANT DE LANCER. Une cellule coute (nombre de forcages, ou 1 si aucun) + (nombre de
+# points de chaque balayage). Le plan ci-dessous fait 29 runs -- 15 cellules et 2 fronts de
+# 7 points -- soit une nuit ou deux. `--no-sweeps` le ramene a 15. `--dry-run` les enumere en
+# quelques secondes et c'est LE reflexe apres avoir edite ce fichier :
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml --dry-run
+#   python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan.yaml
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml --no-sweeps
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml
+#
+# `--policies P8_transition_agroecologique` restreint le plan a une politique,
+# `--forcings F9_crise_systemique` a une colonne, `--no-sweeps` laisse tomber les fronts --
+# c'est ainsi qu'on etage un batch trop gros pour une nuit.
+
+include:
+  crop_groups: crop_groups.yaml
+  policies:    scenarios_politiques.yaml
+  forcings:    scenarios_forcages.yaml
+  sweeps:      scenarios_pareto.yaml
+
+scenarios:
+
+  # --- Les bornes, non forcees -----------------------------------------------------------
+  # P1 et P10 encadrent l'axe. On les veut d'abord seules : leur role est de borner ce que le
+  # territoire peut donner, pas de tenir sous un choc. Et P1 change d'objectif, donc sa
+  # colonne `objective` n'est comparable a rien (cf. scenarios_politiques.yaml).
+  P1_deregulation_totale:
+  P10_bifurcation_agroecologique:
+
+  # --- Le point de comparaison -----------------------------------------------------------
+  # Le statu quo passe par les quatre forcages qui separent le mieux les politiques : le
+  # temoin neutre, le choc physique, le choc de couts (celui qui devrait le plus separer les
+  # deux poles), et le pire cas plausible.
+  P4_statu_quo:
+    forcings: [F0_nominal, F1_cyclone_majeur, F6_choc_intrants, F9_crise_systemique]
+
+  # --- Payer ou interdire ? --------------------------------------------------------------
+  # P6 et P7 sont le meme objectif par deux instruments opposes ; ils ne se lisent qu'ensemble
+  # et sous les MEMES forcages, sinon l'ecart entre eux melange l'instrument et le choc.
+  P6_verdissement_incitatif:
+    forcings: [F0_nominal, F6_choc_intrants]
+  P7_ecophyto_reglementaire:
+    forcings: [F0_nominal, F6_choc_intrants]
+
+  # --- Le scenario agroecologique serieux, et son cout marginal --------------------------
+  # La seule cellule qui porte des fronts : c'est sous P8 que la question « que coute le
+  # prochain kilo d'azote » se pose reellement, puisque c'est la politique qu'on envisagerait
+  # de mettre en oeuvre. Le second front dit si ce cout marginal tient sous crise -- 14 solves
+  # a eux deux, c'est la moitie du plan.
+  P8_transition_agroecologique:
+    forcings: [F0_nominal, F9_crise_systemique]
+    sweeps:
+      - pareto_azote
+      - {name: pareto_azote, forcings: [F9_crise_systemique]}
+
+  # --- Hors axe --------------------------------------------------------------------------
+  # P9 se juge sur le forcage qui lui est favorable (le marche revient au local) autant que
+  # sur le nominal : une politique de souverainete evaluee seulement en conditions 2017 est
+  # jugee sur le monde qu'elle cherche precisement a quitter.
+  P9_souverainete_alimentaire:
+    forcings: [F0_nominal, F7_inflation_alimentaire, F9_crise_systemique]
+
+  # --- Non retenues dans ce plan ---------------------------------------------------------
+  # P2, P3 et P5 restent au catalogue et ne sont pas jouees ici : P2 et P3 sont deux points
+  # d'un meme axe deja borne par P1, et P5 est un choc budgetaire que F8_retrait_posei produit
+  # sur n'importe quelle politique. Les rouvrir = deux lignes.
