@@ -73,6 +73,78 @@ sweeps:
         - 1158542   #  60 %
         - 1061997   #  55 %
 
+  # ---------------------------------------------------------------- marge x subvention
+  # CE BALAYAGE N'EST PAS AUTONOME, contrairement a `pareto_azote`. `azote_max` a une coquille
+  # `enable: false` dans `config.yaml` ; `budget_subventions` n'en a pas, parce que chaque
+  # politique pose la sienne par `enable_add`. `set_args` ne patchant qu'une entree DEJA
+  # declaree, ce front ne peut se tracer que SOUS une politique qui porte ce label -- P2, P3,
+  # P4, P5, P6, P8, P9. Lance seul, il leve `KeyError: set_args label 'budget_subventions'
+  # matched no entry`, et c'est la bonne erreur : un front d'enveloppe contre une config qui
+  # n'a pas d'enveloppe ne veut rien dire.
+  #
+  # ET LE CHOIX DE L'HOTE SE MESURE, IL NE SE DEVINE PAS. Un front n'a d'interet que la ou le
+  # plafond MORD. Releve sur les runs existants :
+  #   P4 nominal   plafond 72 M -- realise 71,20 M, dual 0,056, is_binding: true
+  #   P8 nominal   plafond 80 M -- realise 39,05 M, soit 41 M de mou
+  # Sous P8 les cinq premiers points rendraient la meme allocation : cinq solves pour une
+  # droite horizontale. P8 rabote la canne a 0,80 et redeploie vers un maraichage bio peu
+  # gourmand en hectares, donc elle depense spontanement la moitie de son enveloppe. C'est
+  # pourquoi ce front est accroche a P4 dans `plan.yaml` et pas a P8, alors que P8 porte deja
+  # les deux autres.
+  #
+  # LE PIEGE DU SCORE COMPOSITE NE S'APPLIQUE PAS ICI, ET C'EST LE SEUL CAS. Le dashboard
+  # signale `subvention` comme indicateur FIXE par une contrainte (`comparison.bound_indicators`),
+  # donc non attribuable a la politique. Sur un front c'est l'inverse : la borne EST l'abscisse,
+  # posee expres et balayee. L'avertissement reste juste pour une cellule ordinaire.
+  - name: pareto_subventions
+    description: >-
+      Front marge brute ajustee au risque × enveloppe de subvention publique, sous P4. Sept
+      points, de 125 % a 50 % des 71,8 M EUR verses en 2017. Repond a « ce que le territoire
+      perd par euro public retire, si on laisse le modele choisir ou couper » -- a distinguer
+      de P5_austerite_budgetaire, qui coupe la MEME enveloppe a 43 M mais decide d'avance ou
+      (aides x 0,60, canne x 0,48). ATTENTION A CE QU'ON LIT DANS CET ECART : P5 ne differe
+      pas QUE par la facon de couper -- elle porte aussi le travail a 0,90 et l'inertie a 0,60.
+      La difference melange donc le ciblage, la contraction du travail et une reconfiguration
+      plus libre ; elle ne mesure PAS le cout du ciblage seul. Ce chiffre-la demanderait un P5
+      aligne sur P4 partout ailleurs -- un solve de plus, qui s'ajoute APRES coup sans avoir a
+      retracer le front.
+      DEUX CONTROLES. (1) Le point a 90 M doit etre inactif : si la subvention realisee y
+      touche 90 M, ce n'est pas le premier point du front, il faut monter le seuil. (2) Le
+      point a 72 M doit reproduire `p4_statu_quo_f0_nominal` -- au bruit de branch-and-bound
+      pres seulement, ce run ayant fini en `maxTimeLimit`. Les deux passent deja en LP : de
+      72 a 90 M, 18 M d'argent public de plus n'achetent que 32 k EUR de marge (0,002 EUR/EUR,
+      contre 0,118 entre 64,6 et 72 M), et le point a 72 M rend exactement la borne de P4 nue
+      (82 547 378).
+      RISQUE ATTENDU, MESURE ET ECARTE EN LP (2026-08-05) : l'inertie a 70 % de P4 epingle 70 %
+      des hectares dans leur groupe 2017, qui emportent leurs subventions avec eux -- d'ou la
+      crainte d'un PLANCHER structurel sous l'enveloppe qui rendrait les points bas
+      infaisables. Les sept points passent la relaxation, le plus bas compris. Reserve : c'est
+      precisement sur l'inertie que la LP est la plus permissive (elle la satisfait en
+      fractions de parcelle), donc une infaisabilite MILP a 35,9 M n'est pas exclue.
+    overrides:
+      # P4 nominal a deja touche la limite d'1 h a froid ; un plafond budgetaire serre par
+      # dessus est plus dur, pas moins. Pire cas 7 x 2 h -- baisser a 3600 si le batch doit
+      # tenir dans une nuit, au prix de points non prouves optimaux.
+      solver.args.time_limit: 7200
+    # ORDRE CROISSANT -- A L'INVERSE DE `pareto_azote`, ET C'EST DELIBERE. Le
+    # reordonnancement automatique NE S'APPLIQUE PAS ici : `order_sweep_points` lit le `sense`
+    # de la contrainte dans `config.yaml` (`_bound_senses`, core/config.py:274), or
+    # `budget_subventions` n'y figure pas -- il est pose par `enable_add` de la politique.
+    # Faute de `sense`, la fonction s'abstient et garde l'ordre ECRIT. Il faut donc l'ecrire
+    # deja trie du plus serre au plus lache, sans quoi chaque graine serait infaisable et le
+    # front retomberait a sept solves a froid EN SILENCE (HiGHS jette une MIP start
+    # infaisable sans le dire). Plafond => le plus serre est le plus BAS.
+    # Ne pas re-trier ce bloc pour le faire ressembler au precedent.
+    matrix:
+      args:budget_subventions.threshold:
+        - 35900000   #  50 %
+        - 43000000   #  60 % -- exactement le plafond de P5_austerite_budgetaire
+        - 50300000   #  70 %
+        - 57400000   #  80 %
+        - 64600000   #  90 %
+        - 72000000   # 100 % -- le gel de P4, doit redonner p4_statu_quo_f0_nominal
+        - 90000000   # 125 % -- plafond inactif : l'optimum de P4 sans enveloppe
+
   # ---------------------------------------------------------------- marge x emploi
   # DESACTIVE PAR DEFAUT -- lire avant d'enlever le commentaire. Un plancher d'emploi
   # au-dessus de ce que le plafond de main d'oeuvre autorise est infaisable, et desserrer le

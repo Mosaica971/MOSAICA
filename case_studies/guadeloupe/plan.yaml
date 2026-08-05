@@ -24,9 +24,15 @@
 # apres-midi devient une semaine. Pour un front sous forcage, le nommer explicitement.
 #
 # COMPTER AVANT DE LANCER. Une cellule coute (nombre de forcages, ou 1 si aucun) + (nombre de
-# points de chaque balayage). Le plan ci-dessous fait 29 runs -- 15 cellules et 2 fronts de
-# 7 points -- soit une nuit ou deux. `--no-sweeps` le ramene a 15. `--dry-run` les enumere en
+# points de chaque balayage). Le plan ci-dessous fait 37 runs -- 16 cellules et 3 fronts de
+# 7 points -- soit deux nuits. `--no-sweeps` le ramene a 16. `--dry-run` les enumere en
 # quelques secondes et c'est LE reflexe apres avoir edite ce fichier :
+#
+# CE PLAN EST LA CAMPAGNE COMPLETE, PAS LE PROCHAIN BATCH. Le relancer tel quel rejoue des
+# cellules deja resolues et cree des DOUBLONS aux memes coordonnees (create_output_folder
+# suffixe au lieu d'ecraser), ce qui trouble la grille Prospective du dashboard. Pour ne
+# lancer que le travail neuf, ecrire un spec d'etape -- voir `plan_budget.yaml`. Et noter que
+# `--forcings` n'y aide PAS : il ecarte les balayages non forces (core/config.py:545-548).
 #
 #   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml --dry-run
 #   python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan.yaml
@@ -56,8 +62,12 @@ scenarios:
   # Le statu quo passe par les quatre forcages qui separent le mieux les politiques : le
   # temoin neutre, le choc physique, le choc de couts (celui qui devrait le plus separer les
   # deux poles), et le pire cas plausible.
+  # Il porte aussi le front budgetaire, et c'est un choix MESURE : sous P4 le plafond de
+  # subvention mord (71,20 M realises contre 72 M, dual 0,056), sous P8 il ne mord pas
+  # (39,05 M contre 80 M). Un front sous P8 rendrait cinq fois la meme allocation.
   P4_statu_quo:
     forcings: [F0_nominal, F1_cyclone_majeur, F6_choc_intrants, F9_crise_systemique]
+    sweeps: [pareto_subventions]
 
   # --- Payer ou interdire ? --------------------------------------------------------------
   # P6 et P7 sont le meme objectif par deux instruments opposes ; ils ne se lisent qu'ensemble
@@ -68,15 +78,25 @@ scenarios:
     forcings: [F0_nominal, F6_choc_intrants]
 
   # --- Le scenario agroecologique serieux, et son cout marginal --------------------------
-  # La seule cellule qui porte des fronts : c'est sous P8 que la question « que coute le
+  # Les fronts ENVIRONNEMENTAUX sont ici : c'est sous P8 que la question « que coute le
   # prochain kilo d'azote » se pose reellement, puisque c'est la politique qu'on envisagerait
-  # de mettre en oeuvre. Le second front dit si ce cout marginal tient sous crise -- 14 solves
-  # a eux deux, c'est la moitie du plan.
+  # de mettre en oeuvre. Le second dit si ce cout marginal tient sous crise -- 14 solves a eux
+  # deux. Le front BUDGETAIRE est sous P4 et pas ici, faute d'enveloppe mordante (cf. P4).
   P8_transition_agroecologique:
     forcings: [F0_nominal, F9_crise_systemique]
     sweeps:
       - pareto_azote
       - {name: pareto_azote, forcings: [F9_crise_systemique]}
+
+  # --- Le contrefactuel du front budgetaire ----------------------------------------------
+  # P5 plafonne l'enveloppe a 43 M, soit EXACTEMENT un point du front trace sur P4. Mais elle
+  # decide d'avance OU couper (aides x 0,60, canne x 0,48 au total), la ou le front laisse le
+  # modele repartir l'enveloppe qui retrecit. L'ecart entre les deux ne mesure donc pas le
+  # cout de l'austerite -- le front le donne deja -- mais celui du CIBLAGE. Sans elle le front
+  # est une courbe sans contrefactuel, et c'est sa seule raison d'etre ici : non forcee, un
+  # seul solve. (Elle abaisse aussi le slack de main d'oeuvre a 0,90 et l'inertie a 60 %,
+  # donc l'ecart n'est pas imputable au seul ciblage des aides -- a dire en le lisant.)
+  P5_austerite_budgetaire:
 
   # --- Hors axe --------------------------------------------------------------------------
   # P9 se juge sur le forcage qui lui est favorable (le marche revient au local) autant que
@@ -86,6 +106,9 @@ scenarios:
     forcings: [F0_nominal, F7_inflation_alimentaire, F9_crise_systemique]
 
   # --- Non retenues dans ce plan ---------------------------------------------------------
-  # P2, P3 et P5 restent au catalogue et ne sont pas jouees ici : P2 et P3 sont deux points
-  # d'un meme axe deja borne par P1, et P5 est un choc budgetaire que F8_retrait_posei produit
-  # sur n'importe quelle politique. Les rouvrir = deux lignes.
+  # P2 et P3 restent au catalogue et ne sont pas jouees ici : ce sont deux points d'un meme
+  # axe deja borne par P1. Les rouvrir = deux lignes.
+  # (P5 y figurait jusqu'ici, ecartee au motif que F8_retrait_posei produit le meme choc
+  # budgetaire sur n'importe quelle politique. Elle est reintegree ci-dessus pour une autre
+  # raison : servir de contrefactuel au front `pareto_subventions`, ce qu'un forcage ne fait
+  # pas -- F8 coupe les aides, il ne les REDEPLOIE pas.)

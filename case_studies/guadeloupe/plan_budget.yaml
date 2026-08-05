@@ -1,0 +1,63 @@
+# SPEC D'ETAPE -- le front budgetaire et son contrefactuel, rien d'autre.
+#
+# `plan.yaml` reste le fichier de reference : il decrit la campagne COMPLETE, et c'est lui
+# qu'on lit pour savoir ce que le projet a resolu. Ce fichier-ci ne decrit qu'un batch, celui
+# du 2026-08-05, et il existe pour une seule raison : lancer `plan.yaml` tel quel rejouerait
+# les quatre cellules forcees de P4 qui sont deja dans `outputs/`, et
+# `create_output_folder` suffixe au lieu d'ecraser -- on obtiendrait
+# `p4_statu_quo_f0_nominal_2` aux memes coordonnees (politique, forcage) que l'original, ce
+# sur quoi la grille Prospective du dashboard groupe. Quatre solves perdus et une grille
+# ambigue.
+#
+# ET `--forcings` NE REGLE PAS LE PROBLEME. Filtrer les colonnes ecarte aussi les balayages
+# non forces (`core/config.py:545-548`) : `--policies P4 --forcings F0_nominal` supprimerait
+# precisement le front qu'on veut tracer. D'ou ce spec plutot qu'un jeu de drapeaux.
+#
+# CE QU'IL LANCE -- 9 solves.
+#   P4 non forcee             1 point (voir ci-dessous : le grammaire l'impose)
+#   P4 + pareto_subventions   7 points, de 35,9 a 90 M EUR (1 a froid, 6 a chaud par chainage)
+#   P5_austerite_budgetaire   1 point, le contrefactuel a 43 M
+#
+# LE PREMIER FAIT DOUBLON AVEC LE POINT A 72 M, ET C'EST ASSUME. Une cellule sans `forcings:`
+# produit toujours le run nominal de sa politique (`core/config.py:526-530`) : il n'y a pas
+# d'ecriture qui declare « ce balayage, et pas la politique nue ». Or P4 nue EST le point a
+# 72 M du front, au caractere pres. Plutot que d'oter ce point du balayage -- ce qui
+# trouerait la chaine de warm start et sortirait le temoin du groupe que `pareto.sweep_of`
+# lit -- on garde les deux : le meme MILP resolu une fois A FROID (la cellule) et une fois A
+# CHAUD (le point, amorce depuis 64,6 M). L'ecart entre les deux objectifs mesure directement
+# le bruit de branch-and-bound sur cette configuration, et vaut controle du chainage.
+# C'est un solve paye pour une mesure, pas un solve perdu.
+#
+# Les cellules forcees de P4 sont volontairement absentes : elles existent deja
+# (`p4_statu_quo_f0_nominal`, `_f1_cyclone_majeur`, `_f6_choc_intrants`,
+# `_f9_crise_systemique`). Celle sous F0 a fini en `maxTimeLimit` -- c'est elle qui sert de
+# temoin au point a 72 M du front, et l'egalite ne peut donc etre attendue qu'au bruit de
+# branch-and-bound pres.
+#
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_budget.yaml --dry-run
+#   .venv/Scripts/python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan_budget.yaml
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_budget.yaml
+#
+# Le controle de faisabilite n'etait pas optionnel ici : l'inertie a 70 % de P4 epingle 70 % des
+# hectares dans leur groupe 2017, qui emportent leurs subventions. Il y a donc un plancher
+# structurel sous l'enveloppe, et les points bas du front pouvaient etre infaisables.
+# FAIT LE 2026-08-05 : 9/9 passent la LP, y compris le point a 35,9 M, en ~43 min au total.
+# La reserve d'usage tient -- la LP satisfait l'inertie en fractions de parcelle, ce que le
+# MILP ne peut pas -- mais aucun point n'est infaisable de facon certaine.
+#
+# Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
+
+include:
+  crop_groups: crop_groups.yaml
+  policies:    scenarios_politiques.yaml
+  forcings:    scenarios_forcages.yaml
+  sweeps:      scenarios_pareto.yaml
+
+scenarios:
+
+  # Le front seul -- pas de `forcings:`, donc aucune cellule forcee n'est rejouee.
+  P4_statu_quo:
+    sweeps: [pareto_subventions]
+
+  # Le contrefactuel : meme enveloppe a 43 M, mais la coupe est decidee d'avance.
+  P5_austerite_budgetaire:
