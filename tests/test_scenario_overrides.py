@@ -205,6 +205,46 @@ def test_apply_overrides_enable_add_routes_to_an_explicit_section():
     ]
 
 
+def test_set_args_can_patch_an_entry_added_by_enable_add():
+    # The composition an epsilon-constraint front needs: the policy POSES the bound through
+    # enable_add (it is nowhere in config.yaml), the sweep MOVES it through set_args. Applying
+    # set_args first raised "label matched no entry" on every point of pareto_subventions.
+    from core.config import apply_overrides, merge_run_specs
+
+    policy = {
+        "enable_add": [
+            {
+                "name": "territory_indicator_bound",
+                "args": {"label": "budget", "indicator": "subvention",
+                         "sense": "le", "threshold": 72_000_000},
+            }
+        ]
+    }
+    sweep = {"set_args": [{"label": "budget", "args": {"threshold": 43_000_000}}]}
+
+    merged = apply_overrides({"constraints": []}, merge_run_specs(policy, sweep))
+    assert merged["constraints"] == [
+        {
+            "name": "territory_indicator_bound",
+            "enable": True,
+            "args": {"label": "budget", "indicator": "subvention",
+                     "sense": "le", "threshold": 43_000_000},
+        }
+    ]
+
+
+def test_disable_can_switch_off_an_entry_added_by_enable_add():
+    # Same ordering, other channel: what one spec adds, another can still switch off.
+    from core.config import apply_overrides
+
+    run = {
+        "enable_add": [{"name": "territory_indicator_bound", "args": {"label": "budget"}}],
+        "disable": ["budget"],
+    }
+    merged = apply_overrides({"constraints": []}, run)
+    assert merged["constraints"][0]["enable"] is False
+
+
 def test_merge_run_specs_concatenates_overlapping_multiplier_lists():
     # The case the whole composer exists for: a policy and a forcing both shock subsidies.
     # A plain dict update would drop the policy's entry and the run would silently model

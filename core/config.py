@@ -617,16 +617,12 @@ def apply_overrides(base_config: dict[str, Any], run_spec: dict[str, Any]) -> di
     for path, value in (run_spec.get("overrides") or {}).items():
         _set_dotted(config, path, value)
 
-    for token in run_spec.get("enable") or []:
-        _set_enable(config, token, True)
-    for token in run_spec.get("disable") or []:
-        _set_enable(config, token, False)
-
-    for patch in run_spec.get("set_args") or []:
-        _patch_args(config, patch["label"], patch.get("args") or {})
-
-    # enable_add appends a brand-new entry that does not exist in the base config -- the
-    # enable/disable/set_args channels can only touch entries already declared there.
+    # enable_add appends a brand-new entry that does not exist in the base config; the
+    # enable/disable/set_args channels can only touch entries ALREADY declared. It therefore
+    # runs FIRST, so that what one spec adds another can still patch -- which is exactly what
+    # a Pareto sweep needs: `budget_subventions` is posed by the policy's enable_add, and the
+    # front's `matrix: {args:budget_subventions.threshold: [...]}` becomes a set_args on it.
+    # Patch-then-add would raise "set_args label matched no entry" on every point.
     # `section` says which config list to append to (default: constraints); a scenario
     # adding an eligibility cut passes section: categorical_rules.
     for entry in run_spec.get("enable_add") or []:
@@ -634,6 +630,14 @@ def apply_overrides(base_config: dict[str, Any], run_spec: dict[str, Any]) -> di
         section = entry.pop("section", "constraints")
         entry["enable"] = True
         config.setdefault(section, []).append(entry)
+
+    for token in run_spec.get("enable") or []:
+        _set_enable(config, token, True)
+    for token in run_spec.get("disable") or []:
+        _set_enable(config, token, False)
+
+    for patch in run_spec.get("set_args") or []:
+        _patch_args(config, patch["label"], patch.get("args") or {})
 
     return config
 
