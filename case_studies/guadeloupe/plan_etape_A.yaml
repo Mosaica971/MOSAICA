@@ -1,0 +1,76 @@
+# SPEC D'ETAPE A -- les deux cellules du plan qui n'ont jamais tourne.
+#
+# `plan.yaml` reste la campagne de reference. Ce fichier-ci ne decrit qu'un batch, celui du
+# 2026-08-09, et il existe pour la meme raison que `plan_budget.yaml` : relancer `plan.yaml`
+# rejouerait les 26 cellules deja dans `outputs/`, et `create_output_folder` SUFFIXE au lieu
+# d'ecraser -- on obtiendrait des doublons aux memes coordonnees (politique, forcage), ce sur
+# quoi la grille Prospective du dashboard groupe.
+#
+# CE QU'IL LANCE -- 2 solves.
+#   P5_austerite_budgetaire    le contrefactuel de ciblage du front budgetaire
+#   P10_bifurcation_agroeco.   la borne agroecologique de l'axe
+#
+# POURQUOI P5. Le front `pareto_subventions` fait varier l'enveloppe en laissant le modele
+# choisir OU couper. P5 coupe la meme enveloppe a 43 M -- exactement un point du front -- mais
+# decide d'avance ou (aides x 0,60, canne x 0,48 au total). L'ecart entre les deux ne mesure
+# donc pas le cout de l'austerite, que le front donne deja, mais celui du CIBLAGE. Sans elle
+# le front est une courbe sans contrefactuel. Reserve a redire en le lisant : P5 abaisse aussi
+# le slack de main d'oeuvre a 0,90 et l'inertie a 60 %, donc l'ecart ne lui est pas imputable
+# en entier.
+#
+# POURQUOI P10, ET CE QUI L'A FAIT ECHOUER. Elle est la borne symetrique de P1 : sans elle
+# l'axe accelerationnisme <-> bifurcation n'est borne que d'un cote. Au batch du 2026-08-03
+# elle est sortie en `RuntimeError: maxTimeLimit and no loadable solution (no incumbent
+# found)` -- pas infaisable, INTRAITABLE : HiGHS n'a trouve aucune solution entiere en 7 200 s.
+# C'est la signature decrite dans docs/04-vigilance.md B.2, et le correctif connu est le warm
+# start. ATTENTION : l'infaisabilite de P10 documentee en B.4 est un AUTRE episode (plancher
+# d'emploi a 6 000 ETP, depuis ramene a 4 400) -- ne pas confondre les deux.
+#
+# LE WARM START DE P10 N'EST PAS ACQUIS. `repair_allocation.py` ne repare qu'un plancher de
+# SURFACE, or P10 ajoute par-dessus P8 : un plafond GES (-25 %), cinq planchers vivriers, un
+# plafond azote a 1 158 542 et un IFT a 33 473 -- tous deux SOUS ce que P8 realise (1 351 623
+# et 40 168). Une graine P8 viole donc au moins deux plafonds, et HiGHS jette une MIP start
+# infaisable EN SILENCE. Auditer la graine avant de lancer (core/solve/warm_start.py), et si
+# l'audit dit non, ne pas lancer P10 : le run couterait deux heures pour reproduire l'echec.
+#
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_A.yaml --dry-run
+#   .venv/Scripts/python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan_etape_A.yaml
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_A.yaml
+#
+# Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
+
+include:
+  crop_groups: crop_groups.yaml
+  policies:    scenarios_politiques.yaml
+  forcings:    scenarios_forcages.yaml
+
+scenarios:
+
+  # Non forcee : un seul solve. C'est sa seule raison d'etre ici.
+  P5_austerite_budgetaire:
+
+  # P10 EST RETIREE -- audit du 2026-08-09, ne pas la reactiver sans lire ce qui suit.
+  #
+  # Elle etait ici pour boucler l'axe P1 <-> P10. Trois mesures convergent pour dire que le
+  # solve ne rendrait rien :
+  #   1. la tentative du 2026-08-03 a fini en `maxTimeLimit` SANS AUCUN INCUMBENT en 7 200 s ;
+  #   2. `scripts/audit_warm_start_seed.py` rejette les trois graines les plus proches --
+  #      124 contraintes violees par le point azote le plus serre (IFT depasse de 26 316 sur
+  #      un plafond a 33 473, soit ~1,8x), 156 par le suivant, 407 par P8 nominale (GES
+  #      depasses de 63,4 M). Aucune allocation jamais produite par ce modele n'est a
+  #      distance de REPARATION de ses plafonds cumules, et `repair_allocation.py` ne sait de
+  #      toute facon reparer qu'un plancher de surface, pas un empilement
+  #      GES x IFT x azote x nitrates x planchers vivriers ;
+  #   3. relancer a froid reproduirait donc exactement l'echec, pour deux heures de machine.
+  #
+  # CE QU'ON SAIT QUAND MEME DIRE, ET QUI SUFFIT. La relaxation LP de P10 est FAISABLE et
+  # borne l'objectif a 46 311 985 EUR, contre 80,8 M pour P8. Meme en autorisant les
+  # fractions de parcelle, la bifurcation agroecologique coute au moins 43 % de l'objectif.
+  # C'est une borne superieure valide, obtenue en 81 s, et elle est plus solide que ce qu'un
+  # incumbent non prouve aurait donne. L'axe reste unilateral : a dire explicitement.
+  #
+  # POUR LA ROUVRIR il faudrait construire une solution faisable par autre chose qu'une
+  # reparation locale -- par exemple resoudre une suite de MILP relachant les plafonds un a
+  # un. C'est un projet, pas un run.
+  #
+  # P10_bifurcation_agroecologique:

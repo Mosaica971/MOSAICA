@@ -1,0 +1,143 @@
+# SPEC D'ETAPE B+C -- les fronts azote SOUS P8, nominal puis sous crise.
+#
+# CE QUE CA CORRIGE. Cinq runs `pareto_azote_threshold_*` existent deja dans `outputs/`, mais
+# leur `run_policy` est VIDE : ils ont ete traces contre la config de reference, pas sous une
+# politique. Ce n'est pas l'objet que `plan.yaml` concoit, et l'ecart n'est pas cosmetique --
+# le cout marginal du kilo d'azote n'est pas le meme quand l'inertie est a 70 % et quand elle
+# est a 30 %, ni quand la canne est raboteee a 0,80 et quand elle ne l'est pas. Le front
+# interessant est celui de la politique qu'on envisagerait de mettre en oeuvre.
+# Les cinq runs existants restent valables comme front DU MODELE COURANT ; ils ne repondent
+# simplement pas a la meme question. Ne pas les melanger dans une meme lecture.
+#
+# CE QU'IL LANCE -- 15 solves, soit deux nuits.
+#   P8 nue                          1 solve   (voir ci-dessous : la grammaire l'impose, et ici
+#                                              c'est une bonne nouvelle)
+#   P8 + pareto_azote               7 points  (1 a froid, 6 a chaud par chainage)
+#   P8 + pareto_azote sous F9       7 points
+#
+# LE RUN NOMINAL DE P8 N'EST PAS UN DOUBLON, CONTRAIREMENT AU CAS P4. Une cellule sans
+# `forcings:` emet toujours le run nominal de sa politique (core/config.py:526-530). Ici cela
+# tombe bien : `p8_transition_agroecologique_f0_nominal` existe mais a fini en `maxTimeLimit`,
+# donc son incumbent est PROUVABLEMENT sous-optimal (04-vigilance.md B.2) -- et c'est pourtant
+# lui qui sert de temoin au point a 100 % du front. Le run nue, non force, porte des
+# coordonnees differentes (forcage = aucun, et non F0), donc aucune collision de nom, et il
+# donne au front un ancrage propre.
+#   -> C'est LUI, et non `calib_retenu`, qui est le temoin du point a 1 930 903 kg. Sous une
+#      politique, le controle « seuil inactif => marge egale au run non balaye » se fait contre
+#      la politique, pas contre la calibration.
+#
+# POURQUOI LES SEUILS NE SONT PAS CEUX DU CATALOGUE -- LE POINT IMPORTANT DE CE FICHIER.
+# `scenarios_pareto.yaml` cale ses sept seuils sur les 1 930 903 kg realises par
+# `calib_retenu`. C'est le bon reglage pour un front trace contre la config de reference. Sous
+# P8 il ne l'est plus : la politique plafonne DEJA l'azote a 1 351 632 (-30 %), si bien que
+# cinq des sept points du catalogue -- 1 930 903, 1 834 358, 1 737 813, 1 544 722 et 1 351 632
+# lui-meme -- sont au-dessus ou egaux a la borne que P8 pose. Ils rendent tous la MEME
+# allocation, bornee par la politique et non par le balayage.
+#
+# MESURE, PAS SUPPOSITION (LP, 2026-08-09) : P8 nue rend une borne de 71 065 297, et le point
+# du catalogue a 1 930 903 rend 71 065 297. Au centime. Sept solves pour trois points
+# distincts, dont un palier de cinq.
+#
+# LA REGLE GENERALE, ET ELLE VAUT POUR TOUT FRONT SOUS POLITIQUE : les points d'un balayage
+# par epsilon-contrainte doivent etre des fractions du niveau OU LA BORNE MORD SOUS L'HOTE,
+# pas du realise d'un run de reference. `plan.yaml` accroche `pareto_azote` a P8 sans
+# reparametrer les seuils : c'est un defaut de conception du plan, pas seulement de ce
+# fichier-ci, et il vaut d'etre corrige la-bas aussi.
+#
+# D'OU LE BALAYAGE LOCAL CI-DESSOUS : cinq points, fractions de 1 351 632. Le premier (100 %)
+# est le controle -- seuil exactement egal a la borne de P8, donc il doit reproduire P8 nue ;
+# s'il en differe au-dela du bruit de branch-and-bound, un des deux solves n'a pas converge.
+# Les quatre suivants serrent reellement. Cinq points distincts contre sept dont cinq
+# identiques : deux solves de moins par front, et un front qui dit quelque chose.
+#
+# Meme raison technique que dans `plan_etape_A_budget.yaml` pour ne pas inclure
+# `scenarios_pareto.yaml` : `load_batch_spec` APPEND les entrees incluses apres les inline
+# (core/config.py:123-139) et `sweep_by_name` est une comprehension de dictionnaire
+# (ligne 502), donc le dernier homonyme gagne et le catalogue ecraserait ce balayage. Le NOM
+# reste `pareto_azote` : `pareto.sweep_of` groupe sur le triplet (balayage, politique,
+# forcage), donc il n'y a pas de collision avec les cinq runs sans politique deja sur disque.
+#
+# ORDRE DES POINTS. `order_sweep_points` reordonne du plus SERRE au plus lache avant de
+# lancer, parce que la faisabilite n'implique que dans un sens : une allocation faisable a
+# 60 % d'azote l'est encore a 100 %, la reciproque est fausse. Dans le bon sens chaque point
+# amorce le suivant. Il le deduit du `sense: le` d'`azote_max`, declare dans `config.yaml`.
+# Rien a ecrire ici, l'ordre de lecture ci-dessous est decroissant et sera inverse.
+#
+# RISQUE SUR LES POINTS BAS -- LEVE. 810 979 kg vaut 42 % du realise 2017, et P10, qui
+# plafonne a 1 158 542 avec en plus un plafond GES et un IFT a 33 473, est intraitable. Le
+# controle LP du 2026-08-09 donne 11/11 faisables, point le plus bas compris. Reserve
+# d'usage : la LP satisfait certaines contraintes en fractions de parcelle, ce que le MILP ne
+# peut pas -- faisable en LP est necessaire, pas suffisant.
+#
+# ---------------------------------------------------------------------------------------
+# LE LOT C EST DESACTIVE, ET C'EST UNE MESURE QUI LE DIT.
+#
+# Le front sous F9_crise_systemique etait prevu pour repondre a « ce cout marginal tient-il
+# sous crise ». Le controle LP repond avant le premier solve MILP : les CINQ points rendent
+# exactement la meme borne, 32 439 337, du seuil le plus lache au plus serre.
+#
+#   1 351 632 -> 32 439 337      946 142 -> 32 439 337
+#   1 216 469 -> 32 439 337      810 979 -> 32 439 337
+#   1 081 306 -> 32 439 337
+#
+# Le plafond d'azote NE MORD A AUCUN NIVEAU sous F9. La raison est economique et non
+# numerique : la crise degrade les rendements (x0,80), les prix export (x0,75) et les
+# subventions (x0,60) tout en renchérissant les couts (x1,30), si bien que l'intensification
+# cesse d'etre rentable et que l'optimum consomme spontanement moins de 810 979 kg -- soit
+# moins de 42 % du realise 2017. Autrement dit LA CRISE FAIT DEJA LE TRAVAIL DU PLAFOND.
+#
+# C'est un resultat, pas un echec, et il est OBTENU SANS AUCUN SOLVE MILP : il n'y a pas de
+# cout marginal de l'azote a mesurer sous F9 dans cette plage, parce qu'il est nul. Le tracer
+# quand meme couterait cinq solves pour une droite horizontale -- exactement la pathologie
+# contre laquelle `scenarios_pareto.yaml` met en garde a propos du front budgetaire sous P8.
+#
+# POUR EN FAIRE UN VRAI FRONT il faudrait des seuils commencant SOUS la consommation
+# spontanee de P8 forcee par F9, donc en dessous de ~810 000 kg. C'est une autre experience,
+# et elle demanderait d'abord de mesurer cette consommation (un solve de P8 x F9 converge --
+# celui qui existe a fini en maxTimeLimit et rend une allocation identique a P8 x F0, donc
+# inexploitable). A instruire si le temps machine le permet, pas avant.
+#
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_BC.yaml --dry-run
+#   .venv/Scripts/python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan_etape_BC.yaml
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_BC.yaml
+#
+# Pour n'en faire qu'une nuit, commenter le second balayage : le front sous crise repond a
+# « ce cout marginal tient-il quand tout se degrade », question qui n'a de sens qu'une fois le
+# front nominal trace.
+#
+# Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
+
+include:
+  crop_groups: crop_groups.yaml
+  policies:    scenarios_politiques.yaml
+  forcings:    scenarios_forcages.yaml
+  # PAS de `sweeps:` -- voir ci-dessus, le catalogue ecraserait le balayage local.
+
+sweeps:
+  - name: pareto_azote
+    description: >-
+      Front marge brute ajustee au risque × azote mineral total, SOUS P8. Cinq points, de
+      100 % a 60 % du plafond que P8 pose elle-meme (1 351 632 kg N, soit -30 % du realise
+      2017). Le premier point est le controle : seuil egal a la borne de la politique, donc
+      allocation identique a P8 nue. Les quatre autres repondent a « que coute le kilo
+      d'azote suivant a une politique qui a deja consenti -30 % » -- question qui n'a rien a
+      voir avec le meme front trace contre la config de reference, ou les premiers kilos
+      retires sont les moins chers.
+      A LIRE AVEC LE BLOC `intensity` : un plafond d'azote se satisfait aussi en cultivant
+      MOINS d'hectares, ce qui n'est pas la meme politique que produire plus proprement.
+      L'azote PAR TONNE distingue les deux.
+    enable: [azote_max]
+    matrix:
+      args:azote_max.threshold:
+        - 1351632   # 100 % du plafond de P8 -- controle, doit redonner P8 nue
+        - 1216469   #  90 %
+        - 1081306   #  80 %
+        -  946142   #  70 %
+        -  810979   #  60 %  -- 42 % du realise 2017 : le point a risque
+
+scenarios:
+
+  P8_transition_agroecologique:
+    sweeps:
+      - pareto_azote                                              # lot B
+      # - {name: pareto_azote, forcings: [F9_crise_systemique]}   # lot C -- DESACTIVE, lire ci-dessous

@@ -82,7 +82,21 @@ de groupes de cultures `{group: canne}` adossé à `crop_families` (les ancres Y
 pas les fichiers), la branche `scenarios:` de `compose_runs`, la coordonnée `sweep` portée
 jusqu'au recap. Le découpage a été vérifié **identité exacte** : les 10 politiques et 12 forçages
 résolvent au même dictionnaire qu'avant. 22 tests neufs.
-→ **Reste à faire** : le plan livré (29 runs) n'a **pas été lancé**.
+→ **Lancé depuis** (2026-08-02 → 08-05, puis 08-09). 26 des 37 runs du plan sont dans
+`outputs/`. Ce qui manque et pourquoi, au 2026-08-09 :
+- **P10** est retirée du plan d'étape — intraitable, aucune graine réparable, borne LP
+  46 311 985 € (voir `plan_etape_A.yaml` et `docs/04-vigilance.md` B.6) ;
+- **P5** et les deux points de contrôle du front budgétaire (72 M, 90 M) sont prêts et
+  validés en LP, non encore résolus (`plan_etape_A.yaml`, `plan_etape_A_budget.yaml`) ;
+- le **front azote sous P8** est reparamétré et validé en LP (`plan_etape_BC.yaml`) ; les
+  cinq runs `pareto_azote_threshold_*` déjà sur disque ont un `run_policy` **vide**, ce sont
+  les fronts du modèle courant et non ceux de P8 — ne pas les confondre ;
+- le **front azote sous F9 est abandonné**, mesuré inutile (plafond inactif à tous les
+  niveaux, voir `docs/04-vigilance.md` A.7) ;
+- **5 runs ont fini en `maxTimeLimit`**, dont `p4_statu_quo_f0_nominal` qui sert d'ancrage de
+  comparaison, et `p8_..._f0_nominal` / `_f9_crise_systemique` qui rendent une allocation
+  physique identique — ce n'est donc pas un couple de résultats indépendants. Reprise en warm
+  start à faire.
 
 **Chaînage de warm start le long d'un balayage — livré le 2026-08-01.**
 `core/config.order_sweep_points` réordonne chaque front du seuil le plus serré vers le plus

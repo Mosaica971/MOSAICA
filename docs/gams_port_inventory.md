@@ -7,7 +7,8 @@ Référence : `MODELE.txt` (équations), `SETS.txt` (appartenances), `ENTREES.tx
 Statuts : **porté** (équivalent Python actif) / **implicite** (obtenu sans équation
 dédiée) / **différé** (identifié, pas encore fait) / **écarté** (délibérément non porté).
 
-Dernière mise à jour : 2026-07-20.
+Dernière mise à jour : 2026-08-09 (les lignes `Eq_MO_MAX_Expl` et « objectifs » étaient
+périmées depuis le 2026-07-21 : les deux sont désormais actives).
 
 ## Éligibilité — bornes numériques
 
@@ -107,14 +108,14 @@ source des données.
 | `Eq_*_QUOTA_MAX` | Plafonds de production | porté | `territory_production_bound` (`sense: le`) |
 | `Eq_LEG/FRU_PROD_OBJ`, `Eq_PAT_SURF_OBJ` | Objectifs légumes / fruits / patrimoine | porté | `territory_production_bound` |
 | `Eq_TUB_PROD_OBJ` | Objectif tubercules | porté mais **no-op** | `tub_prod_obj`, `enable: false`, seuil 0 — placeholder de traçabilité |
-| `Eq_MO_MAX_Expl` | Plafond de main d'œuvre par exploitation | **différé** | `MO_Expl_init` suppose l'allocation fine 2017, qui n'a jamais existé (les codes agrégats portent des OTK/MO nuls). Réactivation possible via l'approximation « cultures représentantes » (`baseline_representative_crops`). |
+| `Eq_MO_MAX_Expl` | Plafond de main d'œuvre par exploitation | **porté et actif** | `farm_labor_hours_max`, `slack: 1.0`. L'obstacle était que `MO_Expl_init` suppose l'allocation fine 2017, qui n'a jamais existé ; il est levé par l'approximation « cultures représentantes » (`baseline_representative_crops`). C'est aujourd'hui **la contrainte dominante** : sans elle l'optimum réclame 21 593 ETP là où le territoire en comptait 3 598 (facteur 6). Corollaire à connaître : changer une représentante change le plafond, donc l'optimum — cf. `docs/04-vigilance.md` C.2. |
 
 ## Objectifs
 
 | Équation | Rôle | Statut | Localisation Python |
 |---|---|---|---|
-| Marge brute | Somme marge/ha × surface | porté | `maximize_gross_margin` (défaut) |
-| Marge ajustée au risque | Marge − `AVERS` × variance | porté, désactivé par défaut | `maximize_risk_adjusted_gross_margin` — objectif réel des solves GAMS, mais diverge du défaut retenu ici |
+| Marge brute | Somme marge/ha × surface | porté, **désactivé** | `maximize_gross_margin`. Sans le terme de risque le modèle couvre l'île de maraîchage : PAD territorial 193 %. |
+| Marge ajustée au risque | Marge × (1 − `AVERS` × `Var_Rdt_Cult`) | porté, **actif par défaut** | `maximize_risk_adjusted_gross_margin` — l'objectif réel des solves GAMS (`Eq_REV_MARKOVITZ`). `AVERS` est calculé en mémoire depuis la cascade `TYPE_EXPL` (8 coefficients, `OPTIMISATION.txt:1745-1754`) et non lu dans le stub `Avers.txt`. ⚠ `Var_Rdt_Cult` est une **fraction de perte de marge**, ni une variance ni un coefficient de variation : la pénalité est linéaire en surface, sans carré ni covariance — cf. `docs/04-vigilance.md` D.4. |
 
 ## Bloc canne fourragère (CF)
 

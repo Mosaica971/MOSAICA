@@ -1,0 +1,65 @@
+# SPEC D'ETAPE A (suite) -- les deux points manquants du front budgetaire.
+#
+# Le batch du 2026-08-05 (`plan_budget.yaml`) s'est arrete en route : cinq points sur sept
+# sont dans `outputs/` (35,9 / 43 / 50,3 / 57,4 / 64,6 M), et les DEUX QUI MANQUENT sont
+# precisement ceux que `scenarios_pareto.yaml` designe comme les controles de validite du
+# front :
+#   72 M  -- le gel de P4 : le plafond y vaut ce que la politique depense deja, donc ce point
+#            doit reproduire P4 nue. S'il en differe au-dela du bruit de branch-and-bound,
+#            ce n'est pas le front qui est faux, c'est qu'un solve n'a pas converge.
+#   90 M  -- plafond inactif : l'optimum de P4 sans enveloppe. Si la subvention realisee y
+#            touche 90 M, ce n'est pas le premier point du front et il faut monter le seuil.
+# Un front sans ses points de controle ne se lit pas : rien ne dit que la machinerie
+# epsilon-contrainte fait ce qu'elle annonce.
+#
+# POURQUOI CE FICHIER N'INCLUT PAS `scenarios_pareto.yaml`. Il faut ici un `pareto_subventions`
+# a deux points, pas a sept -- les cinq autres existent. Or `load_batch_spec` APPEND les
+# entrees incluses apres les entrees inline (core/config.py:123-139) et `_compose_plan`
+# construit `sweep_by_name` par comprehension de dictionnaire (ligne 502) : le DERNIER homonyme
+# gagne. Un balayage inline serait donc ecrase par celui du catalogue. D'ou la declaration
+# locale et l'absence d'include -- et le NOM EST CONSERVE a l'identique, parce que
+# `pareto.sweep_of` groupe le front sur `run_sweep` : le renommer couperait le front en deux.
+#
+# LE RUN NOMINAL DE P4 EST UN DOUBLON ASSUME. Une cellule sans `forcings:` produit toujours le
+# run nominal de sa politique (core/config.py:526-530), et il n'existe aucune ecriture pour
+# dire « ce balayage, et pas la politique nue ». `--forcings` n'aide pas : il ecarterait AUSSI
+# le balayage non force (lignes 545-548). On paie donc un troisieme solve, qui refait
+# `p4_statu_quo` (deja optimal, 81 036 580 en 2 644 s) sous le nom `p4_statu_quo_2`.
+#   -> Warm-starter le batch depuis ce run le rend quasi gratuit : la graine EST son optimum,
+#      HiGHS n'a plus qu'a le prouver. C'est aussi une mesure du bruit de branch-and-bound.
+#   -> Le dossier en double trouble la grille Prospective (memes coordonnees politique/forcage).
+#      A ecarter apres coup, en connaissance de cause.
+#
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_A_budget.yaml --dry-run
+#   .venv/Scripts/python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan_etape_A_budget.yaml
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_A_budget.yaml --warm-start-from outputs/p4_statu_quo
+#
+# Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
+
+include:
+  crop_groups: crop_groups.yaml
+  policies:    scenarios_politiques.yaml
+  forcings:    scenarios_forcages.yaml
+  # PAS de `sweeps:` -- voir ci-dessus.
+
+sweeps:
+  - name: pareto_subventions
+    description: >-
+      Les deux points de controle manquants du front budgetaire sous P4 : le gel a 72 M et le
+      plafond inactif a 90 M. Meme nom que le balayage du catalogue, a dessein : les sept
+      points doivent se lire comme un seul front.
+    overrides:
+      solver.args.time_limit: 7200
+    # ORDRE CROISSANT, comme au catalogue. `order_sweep_points` s'abstient ici faute de `sense`
+    # (`budget_subventions` n'est pas declare dans config.yaml, chaque politique le pose par
+    # `enable_add`), donc l'ordre ECRIT est l'ordre execute. Plafond => le plus serre est le
+    # plus BAS, et c'est lui qui doit passer en premier pour que la graine du suivant soit
+    # faisable.
+    matrix:
+      args:budget_subventions.threshold:
+        - 72000000   # 100 % -- le gel de P4, doit redonner la politique nue
+        - 90000000   # 125 % -- plafond inactif
+
+scenarios:
+  P4_statu_quo:
+    sweeps: [pareto_subventions]

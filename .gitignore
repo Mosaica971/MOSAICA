@@ -18,3 +18,23 @@ venv/
 # le premier est la reference de parite, le second celle de la methode de calibration. Le
 # rapport technique ne l'est pas (binaire volumineux, non diffable).
 context/Rapport technique variables MOSAICA_v2.docx
+/student_context/
+# Memoire : les sources .tex sont versionnees, les produits de compilation non.
+memoire/*.aux
+memoire/*.log
+memoire/*.out
+memoire/*.toc
+memoire/*.bbl
+memoire/*.bcf
+memoire/*.blg
+memoire/*.run.xml
+memoire/*.glo
+memoire/*.gls
+memoire/*.glg
+memoire/*.ist
+memoire/*.lof
+memoire/*.lot
+memoire/memoire.pdf
+# Figures : derivees de outputs/, lui-meme local. Les logos, eux, sont des sources.
+memoire/figures/*.pdf
+!memoire/figures/logo-*.pdf

@@ -1,0 +1,69 @@
+# SPEC D'ETAPE D -- reprendre les cellules qui n'ont pas converge.
+#
+# POURQUOI CE LOT EXISTE. Cinq runs du batch des 2026-08-02/03 sont sortis en `maxTimeLimit`.
+# Ce n'est pas un defaut de precision : un incumbent rendu a la limite de temps est
+# PROUVABLEMENT sous-optimal (docs/04-vigilance.md B.2 -- une solution construite a la main en
+# quelques secondes bat de 5,5 % ce que HiGHS trouve en une heure). Les citer comme resultats
+# reviendrait a comparer des politiques sur la qualite du hasard de branchement.
+#
+# Deux d'entre eux comptent particulierement :
+#   * `p4_statu_quo_f0_nominal` est l'ANCRAGE de toute la grille prospective -- c'est la
+#     cellule contre laquelle les autres politiques se lisent ;
+#   * `p8_..._f0_nominal` et `p8_..._f9_crise_systemique` rendent aujourd'hui une allocation
+#     physique IDENTIQUE (memes surfaces, meme azote, meme IFT, meme eau, meme PAD 73,55) :
+#     seule l'economie differe. Ce n'est donc pas un couple de resultats independants, et
+#     toute lecture de la robustesse de P8 sous crise est aujourd'hui sans objet.
+#
+# CE QU'IL LANCE -- 4 solves, tous amorces.
+#   P4 x F0    P6 x F0    P8 x F0    P8 x F9
+# (`p4_statu_quo` non force n'est pas repris : il a converge, en 2 644 s.)
+#
+# LES DOUBLONS SONT LE VRAI SUJET DE CE FICHIER. `create_output_folder` SUFFIXE au lieu
+# d'ecraser : ces quatre runs produiront `p4_statu_quo_f0_nominal_2` etc., aux MEMES
+# coordonnees (politique, forcage) que les originaux. La grille Prospective du dashboard
+# groupe sur ces coordonnees et affichera donc deux valeurs par case, sans savoir laquelle
+# est la bonne.
+#   -> AVANT de lancer, ecarter les quatre dossiers non convergs (les deplacer dans
+#      `outputs/_non_converges/`, ne pas les supprimer : ils portent la preuve que la reprise
+#      etait necessaire, et le memoire s'en sert). Apres quoi les nouveaux dossiers
+#      reprendront les noms canoniques.
+#   -> C'est une manipulation destructrice sur des resultats : a faire en connaissance de
+#      cause, jamais dans le meme geste que le lancement.
+#
+# L'AMORCAGE EST CE QUI REND CE LOT UTILE. Sans graine, on relance exactement le solve qui a
+# echoue. Chaque cellule reprend l'allocation de sa propre politique -- c'est le chainage par
+# defaut de `run_scenarios.py` (`seed_candidates`), qui propose l'allocation non forcee de la
+# politique avant toute autre. Il faut donc que la politique nue existe et ait converge :
+#   P4 -> `outputs/p4_statu_quo` (optimal) : disponible.
+#   P8 -> produit par `plan_etape_BC.yaml`, QUI DOIT DONC ETRE PASSE AVANT CE LOT.
+#   P6 -> aucune version nue n'existe ; la cellule repartira a froid sauf a lui donner une
+#         graine globale. `--warm-start-from outputs/p4_statu_quo` est le candidat le plus
+#         proche (meme inertie a 50 % contre 70 %, memes ordres de grandeur), mais l'audit
+#         peut la rejeter -- il le dira, et le run repartira a froid sans faire semblant.
+#
+# ORDRE : apres `plan_etape_BC.yaml`.
+#
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml --dry-run
+#   .venv/Scripts/python scripts/audit_warm_start_seed.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml \
+#       --run P6_verdissement --seed outputs/p4_statu_quo
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml
+#
+# Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
+
+include:
+  crop_groups: crop_groups.yaml
+  policies:    scenarios_politiques.yaml
+  forcings:    scenarios_forcages.yaml
+
+scenarios:
+
+  # L'ancrage de la grille. Sans lui converge, toutes les comparaisons portent sur un point
+  # de reference dont on sait qu'il est faux.
+  P4_statu_quo: [F0_nominal]
+
+  # Payer (P6) et interdire (P7) ne se lisent qu'ensemble et sous les memes forcages. P7 a
+  # converge sur les deux, P6 seulement sous F6 : la paire est aujourd'hui boiteuse sous F0.
+  P6_verdissement_incitatif: [F0_nominal]
+
+  # Les deux cellules de P8, qui rendent la meme allocation physique.
+  P8_transition_agroecologique: [F0_nominal, F9_crise_systemique]

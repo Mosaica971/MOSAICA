@@ -63,6 +63,36 @@ Une contrainte qui ne mord pas ne change aucun résultat. Et deux configs identi
 déjà par le seul arbitraire de branchement du solveur (**0,15 point de PAD** mesuré sur trois
 graines HiGHS). Le diff d'**allocation** répond à la question suivante.
 
+### A.7 — Critique — Un front ε-contrainte se paramètre sur la borne de sa POLITIQUE HÔTE
+
+Les seuils de `scenarios_pareto.yaml` sont des fractions du **réalisé de `calib_retenu`**
+(1 930 903 kg N). C'est le bon réglage pour un front tracé contre la config de référence. Sous
+une politique qui pose déjà sa propre borne, il ne l'est plus.
+
+Mesuré en LP le 2026-08-09 : sous **P8**, qui plafonne l'azote à 1 351 632, **cinq des sept
+points du catalogue sont inactifs ou égaux** à cette borne. P8 nue et le point à 1 930 903
+rendent la même valeur, **71 065 297, au centime**. Sept solves pour trois points distincts.
+
+→ Reparamétrer sur le niveau **où la borne mord sous l'hôte** (`plan_etape_BC.yaml` : cinq
+points, fractions de 1 351 632 ; pente mesurée **5,27 €/kg N**, qui recoupe exactement le prix
+dual relevé sur `plafond_azote`). ⚠ `plan.yaml` accroche `pareto_azote` à P8 **sans**
+reparamétrer : le défaut est dans le plan, pas seulement dans un spec d'étape.
+
+### A.8 — Majeur — Sous crise systémique, le plafond d'azote ne mord plus du tout
+
+Le front azote sous **F9** a été instruit puis **abandonné sur mesure**. Les cinq points, de
+1 351 632 à 810 979 kg, rendent la **même borne LP : 32 439 337**. Le plafond est inactif
+partout dans la plage.
+
+La raison est économique : F9 dégrade les rendements (×0,80), les prix export (×0,75) et les
+subventions (×0,60) en renchérissant les coûts (×1,30), si bien que l'intensification cesse
+d'être rentable et que l'optimum consomme spontanément **moins de 42 % de l'azote de 2017**.
+
+→ **La crise fait déjà le travail du plafond.** C'est un résultat, obtenu sans aucun solve
+MILP — et non un échec. Un vrai front sous F9 demanderait des seuils commençant sous ~810 000
+kg, donc de mesurer d'abord la consommation spontanée de P8×F9 (le run existant a fini en
+`maxTimeLimit` et rend une allocation identique à P8×F0, donc inexploitable).
+
 ---
 
 ## B. Solveur et tractabilité {#tractabilite}
@@ -135,6 +165,31 @@ zone est **dispensée** au lieu de rendre le run infaisable.
 
 → Contrôle : comparer le nombre de zones que la contrainte a produites au nombre que le
 groupement déclare.
+
+### B.6 — Majeur — P10 est hors d'atteinte, et aucune graine n'est réparable {#p10}
+
+`P10_bifurcation_agroecologique` empile un plafond GES (−25 %), un IFT à 33 473 (−50 %), un
+azote à 1 158 542 (−40 %), 120 kgN/ha par ferme, un plafond d'eau, cinq planchers vivriers et
+un plancher d'emploi à 4 400 ETP. Le 2026-08-03 elle est sortie en `maxTimeLimit` **sans aucun
+incumbent** en 7 200 s.
+
+**Ce n'est pas de l'infaisabilité** — la relaxation LP est faisable, borne **46 311 985 €** en
+81 s. Et ce n'est pas non plus une simple lenteur : `scripts/audit_warm_start_seed.py` rejette
+les trois graines les plus proches.
+
+| Graine | Contraintes violées | Le plus parlant |
+|---|---:|---|
+| `pareto_azote_threshold_1061997` | 124 | IFT dépassé de 26 316 sur un plafond à 33 473 |
+| `pareto_azote_threshold_1158542` | 156 | + GES dépassés de 6,4 M |
+| `p8_..._f0_nominal` | 407 | GES dépassés de 63,4 M, azote de 193 081 |
+
+→ **Aucune allocation jamais produite par ce modèle n'est à distance de réparation** de ces
+plafonds cumulés, et `repair_allocation.py` ne répare qu'un plancher de surface. Relancer à
+froid reproduirait l'échec. Ce qu'on sait dire tient dans la borne LP : **même en autorisant
+les fractions de parcelle, P10 coûte au moins 43 % de l'objectif** (46,3 M€ contre 80,8 M€
+pour P8). C'est une borne supérieure valide et elle est plus solide qu'un incumbent non prouvé.
+⚠ Conséquence pour la lecture : **l'axe P1 ↔ P10 est unilatéral**, seule la borne
+accélérationniste est résolue.
 
 ---
 
