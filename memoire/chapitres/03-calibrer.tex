@@ -120,6 +120,19 @@ ou dépasse les trois métriques publiées par l'article. Le coût est modeste e
 l'objectif recule de \num{\calibPariteObjectifM} à \num{\calibRetenuObjectifM} millions
 d'euros, soit ce que la fidélité au territoire coûte en marge théorique.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/calibration-observe-simule.pdf}
+  \caption{Assolement observé et simulé par groupe de cultures (calibration retenue).
+  L'échelle est logarithmique : les surfaces vont de \SI{4}{\ha} à \SI{12813}{\ha}, et des
+  barres linéaires n'auraient laissé voir que la canne et la prairie. La \emph{longueur du
+  segment} est donc l'écart en rapport --- ce que mesure le \gls{pad}. Là où le modèle tombe
+  juste, les deux marques se confondent : c'est le cas de la canne et de la prairie, mais pour
+  deux raisons opposées --- la prairie est épinglée par son plancher, la canne ne l'est par
+  rien.}
+  \label{fig:calibration}
+\end{figure}
+
 Le résultat le plus solide n'est dans aucune de ces lignes. \textbf{La canne revient à
 \SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés --- un écart de
 \SI{\padRetenuCS}{\percent} --- sans qu'aucune contrainte ne la nomme.} C'est le seul endroit
