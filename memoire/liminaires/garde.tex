@@ -1,0 +1,60 @@
+% Page de garde. Exigences MF2E : titre, nom de l'etudiant, laboratoire d'accueil,
+% logo Toulouse INP-N7 ET logo de la structure, mention "Projet de Fin d'Etudes".
+% Les deux logos sont a deposer dans memoire/figures/ (logo-n7.pdf, logo-inrae.pdf).
+
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+
+% --- Logos -----------------------------------------------------------------
+\begin{minipage}{0.45\textwidth}
+  \raggedright
+  \IfFileExists{figures/logo-n7.pdf}%
+    {\includegraphics[height=2.2cm]{figures/logo-n7.pdf}}%
+    {\fbox{\parbox[c][2.2cm][c]{4.5cm}{\centering\footnotesize logo Toulouse INP-N7\\\texttt{figures/logo-n7.pdf}}}}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+  \raggedleft
+  \IfFileExists{figures/logo-inrae.pdf}%
+    {\includegraphics[height=2.2cm]{figures/logo-inrae.pdf}}%
+    {\fbox{\parbox[c][2.2cm][c]{4.5cm}{\centering\footnotesize logo INRAE\\\texttt{figures/logo-inrae.pdf}}}}
+\end{minipage}
+
+\vspace{2.2cm}
+
+{\large\scshape Projet de Fin d'Études}\\[4pt]
+{\normalsize Toulouse INP-ENSEEIHT --- Département MF2E\\
+ \footnotesize Mécanique des Fluides, Énergétique et Environnement}
+
+\vspace{1.6cm}
+\rule{\textwidth}{0.8pt}
+\vspace{0.7cm}
+
+{\LARGE\bfseries Reconstruire pour pouvoir simuler\par}
+\vspace{0.5cm}
+{\large Portage, calibration et usage prospectif du modèle\\
+bioéconomique \gls{mosaica} en Guadeloupe\par}
+
+\vspace{0.7cm}
+\rule{\textwidth}{0.8pt}
+
+\vspace{2.2cm}
+
+{\large\bfseries Clément Le Borgne-Larivière}\\[1.4cm]
+
+% tabularx et non tabular : la colonne de droite doit pouvoir se replier, sinon
+% « Centre Régional des Antilles-Guyane » deborde de 324 pt.
+\begin{tabularx}{0.92\textwidth}{@{}>{\raggedleft\itshape\arraybackslash}p{4.2cm}@{\hspace{1em}}X@{}}
+  Structure d'accueil       & \acrshort{inrae}, Centre Régional des Antilles-Guyane \newline
+                              \acrshort{astro} --- Domaine de Duclos, 97170 Petit-Bourg \\[6pt]
+  Projet                    & \acrshort{tifig} \\[6pt]
+  Responsable scientifique  & Dr Jean-Marc Blazy, directeur de recherches \\[6pt]
+  Co-encadrant              & Loïc Guindé, ingénieur d'études \\[6pt]
+  Période                   & mai --- octobre 2026 \\
+\end{tabularx}
+
+\vfill
+{\normalsize Soutenance : septembre 2026}
+
+\end{titlepage}

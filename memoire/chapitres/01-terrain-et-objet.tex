@@ -1,0 +1,147 @@
+\chapter{Terrain et objet}
+\label{ch:terrain}
+% BUDGET : 4 pages.
+
+\section{Un système agricole sous contrainte}
+\label{sec:territoire}
+
+L'agriculture guadeloupéenne est organisée par une tension que le reste de ce mémoire ne
+cessera de rencontrer : elle est structurée par deux filières d'exportation, et le territoire
+qu'elle occupe importe l'essentiel de ce qu'il mange.
+
+Les chiffres du jeu de données utilisé ici en donnent la mesure. Le territoire compte
+\num{\obsExploitations} exploitations pour \num{\obsParcelles} parcelles et
+\SI{\obsSurfaceCultivee}{\ha} cultivés, soit environ \SI{\mesCouvertureSau}{\percent} de la
+surface agricole utile recensée. La \textbf{canne à sucre en occupe \SI{\obsHaCS}{\ha}}, plus
+de la moitié ; la \textbf{prairie \SI{\obsHaPN}{\ha}} ; la \textbf{banane
+\SI{\obsHaBA}{\ha}}. Tout le reste --- maraîchage, igname, ananas, melon, vergers, agrumes,
+plantain --- tient dans les quelque \SI{2000}{\ha} qui subsistent. Le vivrier, celui-là même
+que le projet dans lequel s'inscrit ce stage cherche à développer, est \emph{résiduel en
+surface} face aux filières historiques.
+
+En regard, la dépendance alimentaire est massive : de l'ordre de \SI{80}{\percent} des
+produits alimentaires consommés dans les départements d'outre-mer sont
+importés~\autocite{viepublique2023,odeadom2019}. Ce n'est pas un déficit de potentiel
+agronomique --- le territoire est fertile et cultivé toute l'année --- mais un effet
+d'organisation : la terre, le capital et le soutien public sont engagés ailleurs.
+
+Le soutien public est en effet un déterminant de premier ordre, et non un correctif marginal.
+Le programme européen \gls{posei} concentre ses aides sur la banane et la canne, au point que
+ces deux filières en captent l'essentiel~\autocite{touteleurope2024}. L'ordre de grandeur
+compte pour la suite : dans notre jeu de données, la subvention perçue par le territoire
+représente environ les trois quarts de sa marge brute. Une politique qui déplacerait
+l'assolement sans toucher aux aides ne déplacerait pas grand-chose --- observation banale, mais
+qui justifie que le dispositif du chapitre~\ref{ch:explorer} traite les subventions comme un
+levier à part entière.
+
+Deux contraintes physiques achèvent de fermer le jeu. La \textbf{chlordécone}, insecticide
+massivement épandu en bananeraie jusqu'en 1993, a contaminé durablement les sols : les études
+de cartographie identifient de l'ordre de \SI{14200}{\ha} à risque, dont environ
+\SI{7300}{\ha} encore en usage agricole, et la molécule persiste dans les sols pour des
+siècles~\autocite{daafchlordecone}. Elle interdit certaines cultures sur certaines parcelles,
+et le modèle l'encode comme telle : une classe de risque par parcelle, qui referme
+l'éligibilité de l'igname tutorée ou de la prairie pâturée. Le \textbf{foncier} enfin est
+fragmenté et partiellement encadré : les groupements fonciers agricoles imposent à certaines
+exploitations une part minimale de canne, contrainte que le modèle porte également.
+
+L'agriculture guadeloupéenne est donc un système où très peu de choses sont libres : le climat
+et le sol fixent ce qui peut pousser où, la chlordécone en retire une part, le foncier et le
+travail bornent ce que chaque exploitation peut faire, et la structure des aides oriente
+fortement le reste. C'est précisément ce qui rend un modèle d'allocation pertinent --- il n'y a
+d'arbitrage que sous contrainte --- et ce qui rend sa calibration difficile.
+
+\section{\gls{mosaica} : ce que le modèle promet}
+\label{sec:mosaica}
+
+\textcite{chopin2015} proposent un modèle bioéconomique conçu pour ce territoire et pour cette
+question. L'objet qu'il manipule n'est pas l'exploitation moyenne ni la région agrégée, mais
+la \emph{mosaïque} : l'ensemble des systèmes de culture effectivement répartis sur les
+parcelles d'un territoire. Le modèle simule les choix de production de tous les agriculteurs
+simultanément, sous contraintes agronomiques, foncières et de débouché, en supposant que
+chacun maximise une marge corrigée de son aversion au risque --- laquelle dépend du type de son
+exploitation.
+
+L'intérêt de cette échelle est qu'elle permet une évaluation \emph{ex ante} : on peut demander
+au modèle ce que produirait une politique qui n'existe pas encore, et lire la réponse non
+seulement en marge, mais en emploi, en azote, en produits phytosanitaires, en eau, en
+autonomie alimentaire. C'est exactement l'outil qu'appelait la commande décrite en
+introduction --- concevoir des scénarios de développement de la production d'aliments
+traditionnels et en mesurer les effets.
+
+La validation proposée par les auteurs est celle que le chapitre~\ref{ch:calibrer} reprend :
+comparer l'assolement simulé à l'assolement observé, à plusieurs échelles emboîtées, avec des
+seuils explicites. C'est une exigence forte pour un modèle normatif, et elle mérite d'être
+soulignée : le modèle ne se contente pas de produire des scénarios plausibles, il accepte
+d'être confronté à un état de fait.
+
+\section{Le \gls{gams} existant, et pourquoi il a fallu reconstruire}
+\label{sec:gams}
+
+Le modèle existait, sous la forme d'une implémentation en \gls{gams} : environ
+\SI{646}{\kilo\byte} de code réparti en douze fichiers, où les équations, la lecture des
+données et le calcul des indicateurs sont entrelacés. C'est cette implémentation que le stage
+devait mettre en \oe uvre.
+
+Trois obstacles, de nature différente, ont conduit à la réécrire plutôt qu'à l'utiliser.
+
+Le premier est d'accès. \gls{gams} est un environnement propriétaire, et un modèle qui n'y est
+plus exécuté couramment devient rapidement un objet qu'on ne peut plus interroger --- ni faire
+tourner, ni modifier avec confiance, ni brancher sur des outils d'analyse.
+
+Le deuxième est structurel, et c'est le plus déterminant pour la commande. Produire les
+scénarios attendus suppose de faire varier des leviers --- un plafond, une aide, un plancher de
+production --- et de comparer les résultats. Dans l'implémentation d'origine, faire varier un
+levier signifie éditer les équations elles-mêmes. Une campagne de quelques dizaines de
+scénarios devient alors une suite de modifications manuelles du modèle, sans trace de ce qui a
+changé d'un scénario à l'autre. Ce n'est pas une critique de l'auteur : c'est ce que le
+paradigme impose. Mais cela rend la question posée par le projet --- comparer des politiques
+publiques --- matériellement difficile à instruire.
+
+Le troisième est apparu en cours de lecture, et a transformé ma compréhension du travail.
+\gls{gams} renvoie zéro, sans avertissement, lorsqu'on interroge une table sur une colonne
+qu'elle ne contient pas. Le modèle contient plusieurs occurrences de ce cas, dont une qui
+interdit purement et simplement une variante de verger sur l'ensemble du territoire
+(§\ref{sec:parite}). Ces comportements ne sont visibles ni dans les résultats, qui restent
+plausibles, ni dans le code, qui a l'air correct. Les découvrir suppose de relire la source en
+la confrontant aux données --- c'est-à-dire, en pratique, de refaire le modèle.
+
+\arediger{le récit de première main : ce que j'ai trouvé en ouvrant le code, l'état de la
+documentation, ce qui a été décidé avec l'encadrement et à quel moment. Deux paragraphes.
+C'est la seule partie du mémoire que le dépôt ne peut pas fournir.}
+
+\section{Le mandat de parité}
+\label{sec:mandat}
+
+La décision de réécrire s'est accompagnée d'une contrainte : le modèle Python devait
+reproduire le comportement \emph{réel} du \gls{gams}, y compris là où ce comportement est
+manifestement involontaire. Cette exigence mérite d'être justifiée, car elle paraît
+contre-intuitive --- pourquoi porter un défaut qu'on a identifié ?
+
+Parce que sans elle, il n'y a plus de référence. Un port qui corrige au passage ce qu'il juge
+douteux produit un modèle dont on ne peut plus dire s'il diffère de l'original par une
+correction voulue ou par une erreur de transcription. Tout désaccord ultérieur devient
+indémêlable, et le modèle nouveau perd la seule garantie qu'il pouvait offrir : celle de dire
+la même chose que celui dont il hérite. Le mandat de parité n'est donc pas une forme de
+déférence, c'est ce qui rend chaque divergence \emph{attribuable}.
+
+Il s'accompagne d'une contrepartie qui en fait un dispositif utilisable plutôt qu'une camisole :
+chaque comportement douteux est porté tel quel \emph{et} accompagné, dans la configuration,
+d'une variante \guillemotleft~intention présumée~\guillemotright{} désactivée. Basculer les deux
+lignes suffit à tester l'autre lecture, et à mesurer ce qu'elle change. La parité devient alors
+un point de départ documenté, pas un point d'arrivée.
+
+\begin{reflexion}
+Une chose me frappe rétrospectivement dans ce chapitre : je l'ai écrit à partir de fichiers.
+Le territoire que je viens de décrire, je le connais par un jeu de tables, une bibliographie et
+six mois passés dans un centre de recherche qui s'y trouve --- pas par les exploitations qu'il
+dénombre. Les \num{\obsExploitations} exploitations de ce chapitre sont des lignes ; leurs
+arbitrages, que le modèle prétend représenter, me sont connus par un coefficient d'aversion au
+risque déduit d'une typologie.
+
+Ce n'est pas disqualifiant en soi --- un modèle territorial est fait pour agréger ce qu'aucun
+observateur ne peut voir en entier. Mais cela fixe ce que ce travail peut affirmer. Il peut
+dire ce qu'implique un jeu d'hypothèses, et le dire avec une précision considérable. Il ne peut
+pas dire si ces hypothèses décrivent la façon dont on décide, en Guadeloupe, de planter de
+l'igname plutôt que de la canne. La lettre de mission prévoyait des enquêtes pour combler
+précisément cet écart. Le chapitre~\ref{ch:discussion} y revient.
+\end{reflexion}

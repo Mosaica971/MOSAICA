@@ -1,0 +1,153 @@
+% ---------------------------------------------------------------------------
+% Preambule -- PFE Toulouse INP-ENSEEIHT / MF2E
+%
+% Contraintes de forme imposees (student_context/Consignes pour les PFE2526.pdf) :
+%   - coeur <= 30 pages, POLICE 12, figures comprises, hors annexes
+%   - annexes <= 20 pages
+%   - resume <= 2 pages en francais ET en anglais
+%   - page de garde, remerciements, sommaire pagine, table des acronymes, biblio en fin
+% Les pages de garde / biblio / sommaire / resume ne comptent pas dans les 30.
+% ---------------------------------------------------------------------------
+
+% --- Langue et encodage ----------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% `english` doit etre charge aussi : le resume anglais l'appelle via
+% \begin{otherlanguage}{english}. Le DERNIER de la liste est la langue principale.
+\usepackage[english,french]{babel}
+\frenchsetup{SmallCapsFigTabCaptions=false}
+\usepackage{csquotes}
+
+% --- Fontes ----------------------------------------------------------------
+% newtx (Times) : lisible en 12 pt et nettement plus compact que Latin Modern,
+% ce qui compte quand 30 pages est une contrainte dure et non un objectif.
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage{microtype}
+
+% --- Mise en page ----------------------------------------------------------
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\nouppercase{\leftmark}}
+\fancyhead[R]{\footnotesize\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\footnotesize\thepage}%
+  \renewcommand{\headrulewidth}{0pt}}
+
+% --- Tableaux et figures ---------------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[font=small,labelfont=bf,width=0.92\textwidth]{caption}
+\usepackage{float}
+
+% --- Mathematiques ---------------------------------------------------------
+\usepackage{amsmath}
+% newtxmath definit deja \Bbbk ; amssymb le redefinirait et LaTeX s'arrete.
+\let\Bbbk\relax
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+% --- Nombres et unites -----------------------------------------------------
+% Convention francaise : virgule decimale, espace insecable fine aux milliers.
+\usepackage{siunitx}
+\sisetup{
+  locale = FR,
+  group-separator = {\,},
+  group-minimum-digits = 4,
+  output-decimal-marker = {,},
+  detect-all
+}
+\usepackage{textcomp}
+% Le symbole euro : \euro n'existe pas avec newtx, c'est textcomp qui le fournit sous le nom
+% \texteuro. NE PAS ecrire \DeclareSIUnit{\euro}{\text{\euro}} -- la definition serait
+% recursive et LaTeX boucle.
+\newcommand{\eur}{\texteuro}
+\DeclareSIUnit{\ha}{ha}
+\DeclareSIUnit{\etp}{ETP}
+\DeclareSIUnit{\tonne}{t}
+\DeclareSIUnit{\EUR}{\texteuro}
+
+% --- Listes ----------------------------------------------------------------
+\usepackage{enumitem}
+\setlist{noitemsep,topsep=4pt}
+
+% --- Encadres reflexifs ----------------------------------------------------
+% La reflexivite est TISSEE dans chaque chapitre, pas reportee a la fin : chaque
+% chapitre se clot sur un encadre. Style sobre, filet a gauche, pas de couleur
+% de fond -- il doit se lire comme une respiration, pas comme une boite a outils.
+\usepackage[most]{tcolorbox}
+\newtcolorbox{reflexion}[1][]{%
+  enhanced, breakable, sharp corners,
+  colback = black!2, colframe = black!55,
+  boxrule = 0pt, leftrule = 1.6pt,
+  left = 8pt, right = 8pt, top = 6pt, bottom = 6pt,
+  fontupper = \small,
+  title = {\itshape Retour réflexif},
+  coltitle = black, colbacktitle = black!2,
+  fonttitle = \small\itshape\bfseries,
+  attach title to upper = {\\[2pt]},
+  #1
+}
+
+% Encadre pour les mises en garde de lecture (les "pieges" de 04-vigilance.md
+% qui doivent voyager avec le chiffre qu'ils qualifient).
+\newtcolorbox{vigilance}[1][]{%
+  enhanced, breakable, sharp corners,
+  colback = white, colframe = black!70,
+  boxrule = 0.6pt,
+  left = 8pt, right = 8pt, top = 6pt, bottom = 6pt,
+  fontupper = \small,
+  #1
+}
+
+% --- Bibliographie ---------------------------------------------------------
+\usepackage[backend=biber,style=authoryear,maxcitenames=2,maxbibnames=99,
+            giveninits=true,uniquename=init,sorting=nyt]{biblatex}
+\addbibresource{biblio.bib}
+
+% --- Liens -----------------------------------------------------------------
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage{cleveref}
+\crefname{chapter}{chapitre}{chapitres}
+\crefname{section}{section}{sections}
+\crefname{figure}{figure}{figures}
+\crefname{table}{tableau}{tableaux}
+\crefname{equation}{équation}{équations}
+
+% --- Acronymes -------------------------------------------------------------
+\usepackage[acronym,nomain,nonumberlist,nopostdot]{glossaries}
+\makenoidxglossaries
+
+% --- Titres de chapitre sobres --------------------------------------------
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\LARGE\bfseries}{\normalsize\mdseries\textsc{\chaptertitlename~\thechapter}}{6pt}{\LARGE}
+\titlespacing*{\chapter}{0pt}{-10pt}{24pt}
+
+% --- Raccourcis ------------------------------------------------------------
+\newcommand{\mosaica}{\textsc{Mosaica}}
+\newcommand{\gams}{\textsc{Gams}}
+\newcommand{\highs}{\textsc{HiGHS}}
+\newcommand{\pad}{\textsc{pad}}
+
+% Marqueur de section non redigee. Visible dans le PDF (on ne rend pas un
+% memoire ou il en reste) et signale dans le .log pour pouvoir les compter.
+\newcommand{\arediger}[1]{%
+  \typeout{A REDIGER : #1}%
+  \par\medskip\noindent\fbox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{%
+    \small\itshape À rédiger --- #1}}\par\medskip}
+
+% Compte de pages du coeur : le compteur arabe redemarre a 1 au chapitre 1 et
+% \pageref{fin-coeur} donne donc directement le nombre de pages du coeur. Il est
+% ecrit dans le .log a chaque compilation pour que la contrainte des 30 pages
+% soit verifiee mecaniquement et non a l'oeil.
+\newcommand{\annoncecoeur}{%
+  \typeout{^^J===== PAGES DU COEUR : \pageref{fin-coeur} / 30 =====^^J}}

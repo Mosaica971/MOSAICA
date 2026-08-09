@@ -1,0 +1,54 @@
+% ---------------------------------------------------------------------------
+% Projet de Fin d'Etudes -- Toulouse INP-ENSEEIHT, departement MF2E
+% Clement Le Borgne-Lariviere -- INRAE, UR ASTRO, Petit-Bourg (Guadeloupe)
+% Encadrement : Jean-Marc Blazy, Loic Guinde -- projet TI-FIG
+%
+% Compilation :  latexmk -pdf memoire.tex
+% ---------------------------------------------------------------------------
+\documentclass[12pt,a4paper,oneside]{report}
+
+\input{preambule}
+\input{chiffres}          % GENERE par build_chiffres.py -- ne pas editer
+\input{acronymes}
+
+\begin{document}
+
+% ===== Pages liminaires (hors quota des 30 pages) ==========================
+\pagenumbering{roman}
+\input{liminaires/garde}
+\input{liminaires/remerciements}
+\input{liminaires/resume-fr}
+\input{liminaires/resume-en}
+\tableofcontents
+\printnoidxglossary[type=\acronymtype,title={Abréviations et acronymes}]
+
+% ===== Coeur du memoire (<= 30 pages, police 12, figures comprises) ========
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{chapitres/00-introduction}
+\input{chapitres/01-terrain-et-objet}
+\input{chapitres/02-porter}
+\input{chapitres/03-calibrer}
+\input{chapitres/04-explorer}
+\input{chapitres/05-discussion}
+\input{chapitres/06-conclusion}
+
+\label{fin-coeur}
+\annoncecoeur
+
+% ===== Bibliographie (hors quota) ==========================================
+\cleardoublepage
+\printbibliography[heading=bibintoc,title={Références bibliographiques}]
+
+% ===== Annexes (<= 20 pages) ===============================================
+\appendix
+\input{annexes/A-formulation}
+\input{annexes/B-portage-gams}
+\input{annexes/C-scenarios}
+\input{annexes/D-resultats}
+\input{annexes/E-calibration}
+\input{annexes/F-chronologie}
+
+\end{document}

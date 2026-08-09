@@ -1,0 +1,249 @@
+\chapter{Calibrer}
+\label{ch:calibrer}
+% BUDGET : 6 pages.
+
+Un modèle d'optimisation ne se valide pas comme un modèle prédictif. Il ne prétend pas
+reproduire ce que les agriculteurs \emph{ont} fait, mais représenter la façon dont ils
+arbitrent. La question de la calibration est donc plus étroite, et plus honnête : le modèle,
+laissé libre, retrouve-t-il quelque chose qui ressemble au territoire observé ? Si oui, ses
+réponses à des questions contrefactuelles méritent d'être écoutées ; sinon, elles décrivent un
+autre territoire que celui-là.
+
+Ce chapitre expose à quoi le modèle est comparé, avec quelle métrique, ce que la comparaison
+a donné, et --- ce qui a occupé le plus de temps --- comment distinguer une correction
+légitime d'un ajustement circulaire.
+
+\section{L'état de référence, et ce qu'il ne dit pas}
+\label{sec:reference}
+
+Le territoire observé compte \num{\obsParcelles} parcelles réparties sur
+\num{\obsExploitations} exploitations, pour \SI{\obsSurfaceTotale}{\ha} dont
+\SI{\obsSurfaceCultivee}{\ha} effectivement cultivés. La canne à sucre en occupe
+\SI{\obsHaCS}{\ha} et la prairie \SI{\obsHaPN}{\ha} : à elles deux, plus des trois quarts.
+
+Cet état de référence est construit comme un artefact autonome, régénérable en quelques
+secondes et sans aucune résolution --- décision qui a l'air technique mais ne l'est pas. Tant
+que l'observé n'existe que comme le \guillemotleft~côté entrée~\guillemotright{} d'un run, on
+ne peut pas l'examiner séparément, donc on ne peut pas dire ce qu'il ignore. Or il ignore
+beaucoup.
+
+D'abord, \textbf{l'assolement fin de 2017 n'a jamais existé}. La donnée parcellaire n'encode
+la culture qu'au niveau de douze groupes agrégés ; les quatre-vingt-quatre variantes
+techniques que le modèle manipule --- une canne mécanisée irriguée n'est pas une canne
+manuelle pluviale --- n'ont jamais été observées. Ce n'est pas une lacune du portage : le
+\gls{gams} faisait exactement pareil. La conséquence est qu'on ne peut comparer les deux côtés
+qu'au niveau des douze groupes, ce qui fixe la résolution de tout ce chapitre.
+
+Ensuite, pour calculer production, subvention ou travail \emph{en entrée}, il faut bien
+attribuer un itinéraire technique à chaque hectare observé. Le modèle substitue donc une
+variante \guillemotleft~représentante~\guillemotright{} par famille. Cette hypothèse est
+documentée et configurable, mais elle a deux effets qu'il serait malhonnête de taire. Elle
+n'affecte plus seulement le reporting : le plafond de main d'\oe uvre par exploitation
+--- équation~\eqref{eq:mo} --- est calculé à travers ces représentantes, si bien que changer
+une représentante change le plafond, donc l'optimum. Et surtout, \textbf{la représentante est
+souvent une culture que le modèle interdirait sur la parcelle qu'elle représente} : la
+variante retenue pour la canne n'est éligible que sur \SI{\mesRepCanne}{\percent} de la
+surface cannière observée.
+
+Un chiffre borne enfin ce qu'on peut espérer. En cherchant, pour chaque hectare observé, s'il
+existe \emph{une} variante fine éligible qui le reproduise, on trouve
+\SI{\obsSurfaceIrreproductible}{\ha} sur \num{\obsSurfaceCultivee} qui ne le sont par aucune.
+Le masque d'éligibilité impose donc un plancher d'écart de \SI{\obsPlancherPad}{\percent}. La
+lecture est importante : tout écart au-delà de ce plancher est un \emph{choix} d'optimisation,
+pas une impossibilité agronomique.
+
+\section{La métrique : le \gls{pad}, à quatre échelles}
+\label{sec:pad}
+
+La méthode de comparaison est celle de \textcite{chopin2015}, dont le §2.6 définit un
+pourcentage d'écart absolu entre surfaces observées et simulées. Pour un usage $u$ :
+\begin{equation}
+  \mathrm{PAD}_u \;=\; 100 \times \frac{\bigl| S^{\text{obs}}_u - S^{\text{sim}}_u \bigr|}
+                                        {S^{\text{obs}}_u},
+  \label{eq:pad}
+\end{equation}
+et, au niveau agrégé, le rapport des sommes plutôt que la moyenne des rapports.
+
+Le \gls{pad} est évalué à quatre échelles emboîtées --- territoire, sous-région,
+exploitation, île --- et complété par deux mesures que l'article publie également : une
+matrice de confusion des huit types d'exploitation, et un taux de correspondance parcellaire
+compté en parcelles \emph{et} en hectares. Les seuils retenus reprennent ceux de l'article :
+\SI{\mesArtPad}{\percent} de \gls{pad}, \SI{80}{\percent} de types correctement reproduits.
+
+Deux conventions méritent d'être explicitées, parce qu'elles changent le résultat. Le
+\gls{pad} d'une culture que le modèle a inventée là où rien n'était observé est indéfini, non
+infini : le dénominateur de~\eqref{eq:pad} est nul, et la ligne est écartée plutôt que comptée
+comme un échec maximal. Et le total est le rapport des sommes, si bien que son verdict est
+\emph{indépendant} des verdicts par culture --- un total sous le seuil ne signifie pas que les
+cultures y sont.
+
+\section{L'échelle d'attribution}
+\label{sec:attribution}
+
+La calibration n'a pas consisté à régler des paramètres jusqu'à ce que le résultat convienne,
+mais à ajouter une contrainte à la fois et à mesurer ce que chacune apporte. Trois runs, trois
+barreaux.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Attribution : ce que chaque contrainte ajoute, et ce qu'elle coûte. Les seuils de
+  la dernière colonne sont ceux de \textcite{chopin2015}.}
+  \label{tab:attribution}
+  \small
+  \begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+    \toprule
+     & \textbf{Parité \gls{gams}} & \textbf{+ plafond plantain} & \textbf{+ plancher prairie}
+     & \textbf{Article} \\
+    \midrule
+    Types d'exploitation reproduits (\%) & \calibPariteTypes & \calibBcSeulTypes
+      & \textbf{\calibRetenuTypes} & \mesArtTypes \\
+    Parcelles bien simulées (\%)         & \calibPariteParcelles & \calibBcSeulParcelles
+      & \textbf{\calibRetenuParcelles} & \mesArtParcelles \\
+    Surface bien simulée (\%)            & \calibPariteSurface & \calibBcSeulSurface
+      & \textbf{\calibRetenuSurface} & \mesArtSurface \\
+    \gls{pad} territorial (\%)           & \calibParitePad & \calibBcSeulPad
+      & \calibRetenuPad & \mesArtPad \\
+    \midrule
+    Objectif (M\eur)                     & \calibPariteObjectifM & \calibBcSeulObjectifM
+      & \calibRetenuObjectifM & --- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Le premier barreau est le portage strict, sans aucune déviation : le bloc de calibration du
+\gls{gams} tel quel. Il reproduit \SI{\calibPariteTypes}{\percent} des types d'exploitation
+contre \SI{\mesArtTypes}{\percent} pour l'article, et laisse un \gls{pad} territorial de
+\SI{\calibParitePad}{\percent}. C'est un mauvais score, et c'est le point de départ honnête.
+
+Les deux barreaux suivants ajoutent chacun une contrainte, et une seule. Le troisième atteint
+ou dépasse les trois métriques publiées par l'article. Le coût est modeste et il faut le dire :
+l'objectif recule de \num{\calibPariteObjectifM} à \num{\calibRetenuObjectifM} millions
+d'euros, soit ce que la fidélité au territoire coûte en marge théorique.
+
+Le résultat le plus solide n'est dans aucune de ces lignes. \textbf{La canne revient à
+\SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés --- un écart de
+\SI{\padRetenuCS}{\percent} --- sans qu'aucune contrainte ne la nomme.} C'est le seul endroit
+du travail où le modèle, laissé libre sur la culture qui occupe plus de la moitié du
+territoire, retombe sur l'observé. Aucune des deux déviations ajoutées ne porte sur la canne.
+
+\begin{vigilance}
+\textbf{Ne pas citer le \gls{pad} territorial de \SI{\calibRetenuPad}{\percent} comme un
+score.} Le plancher de prairie épingle la prairie à sa valeur, dont l'écart est donc nul
+\emph{par construction} (\SI{\padRetenuPN}{\percent}) ; et la prairie pèse un quart de la
+surface cultivée, si bien que le total en hérite. Les chiffres défendables sont les trois
+premières lignes du tableau~\ref{tab:attribution} --- types, parcelles, surface --- et le
+retour de la canne, qu'aucune contrainte ne produit.
+\end{vigilance}
+
+\section{Deux déviations, et le test qui les sépare d'un ajustement}
+\label{sec:deviations}
+
+Les deux contraintes ajoutées sont des \emph{déviations} au bloc de calibration du \gls{gams}.
+Rien n'interdit d'en ajouter ; tout dépend d'où vient leur valeur. Une contrainte calée sur
+l'observé produit mécaniquement un écart nul et n'apprend rien : c'est de l'ajustement
+déguisé en résultat. La règle que je me suis donnée est donc que toute déviation doit avoir
+une source \emph{extérieure} au modèle et à l'observé.
+
+Le \textbf{plafond de production de plantain} vaut \SI{6440}{\tonne}. Il vient d'un chiffre de
+l'auteur du \gls{gams} d'origine, corroboré par l'équation~6 de l'article, qui pose un
+débouché de \SI{4650}{\tonne}. Le \textbf{plancher de surface en prairie} vaut
+\SI{6096}{\ha} : c'est un paramètre présent dans le \gls{gams}, corroboré par la statistique
+agricole.
+
+Cette corroboration mérite d'être détaillée, parce qu'elle est la meilleure preuve du
+chapitre et qu'elle ne passe pas par le modèle. Notre jeu parcellaire couvre
+\SI{\mesCouvertureSau}{\percent} de la surface agricole du territoire et restitue la canne à
+\SI{98}{\percent} --- mais la prairie à \SI{64}{\percent} seulement
+(\SI{\mesPrairieRpg}{\ha} contre \SI{\mesPrairieAgreste}{\ha}). Ce n'est pas une erreur
+d'étiquetage : si les hectares manquants étaient chez nous classés en canne, notre canne
+dépasserait la statistique. Ce sont des parcelles absentes de l'univers parcellaire. La preuve
+est physique et indépendante du modèle : le territoire portait \num{\mesBovins} bovins, soit
+environ \num{\mesUgb} unités gros bétail. Rapportées aux \SI{\mesPrairieAgreste}{\ha} de la
+statistique, cela fait \num{\mesUgbHaAgreste} UGB par hectare, ce qui correspond aux
+recensements ; rapportées aux \SI{2980}{\ha} que le modèle sans plancher laissait à la
+prairie, \num{\mesUgbHaSansPlancher} --- trois à quatre fois le réel, agronomiquement
+impossible. \textbf{Le défaut est donc établi hors du modèle}, et non par désaccord avec notre
+propre référence.
+
+Reste à savoir si ces contraintes \emph{corrigent} ou \emph{ajustent}. Le test est un
+balayage du seuil. Si le résultat s'améliorait de façon monotone à mesure que le seuil se
+rapproche de l'observé, la contrainte serait une variable d'ajustement. Ce n'est pas ce qu'on
+observe : le plafond plantain présente un \textbf{palier plat de \SIrange{4650}{9240}{\tonne}}
+--- un facteur deux sur le seuil pour un demi-point de \gls{pad}, à peine plus que le bruit du
+solveur --- et l'optimum du palier se situe à l'extrémité \emph{haute}, à deux fois et demie
+l'observé, non au seuil le plus serré. Ce qui compte n'est donc pas la valeur du plafond mais
+son \emph{existence} : le modèle a besoin qu'un débouché borne le plantain, et il est
+indifférent à l'endroit exact où on le pose. C'est la différence de fond avec les plafonds de
+marché calés sur l'observé, qui ont été instruits puis écartés pour circularité.
+
+\section{Se comparer à l'article demande quatre corrections}
+\label{sec:corrections}
+
+La ligne \guillemotleft~Article~\guillemotright{} du tableau~\ref{tab:attribution} n'est pas
+directement commensurable avec les nôtres, et il serait facile de s'en arranger.
+
+Premièrement, l'article publie son \gls{pad} \emph{par culture} et jamais agrégé ; son seuil
+qualifie \guillemotleft~huit usages sur dix~\guillemotright. Notre \gls{pad} territorial est
+une ligne de total que nous avons ajoutée, et elle est \emph{plus sévère}. La métrique
+réellement comparable est le nombre de cultures sous le seuil.
+
+Deuxièmement, la table de correspondance parcellaire de l'article compte les parcelles non
+cultivées au dénominateur, nous les excluons. À sa convention, le portage strict afficherait
+\SI{60.5}{\percent} et \SI{67.8}{\percent} au lieu de \SI{\calibPariteParcelles}{\percent} et
+\SI{\calibPariteSurface}{\percent} : quatre points qui relevaient de la définition et non du
+modèle.
+
+Troisièmement --- et c'est structurellement hors d'atteinte --- \textbf{l'année de base de
+l'article est 2010, pas 2017}. Il travaille sur \num{\mesArtParcellesN} parcelles et
+\num{\mesArtFermes} exploitations, contre \num{\obsParcelles} et \num{\obsExploitations} pour
+nous. Région par région les surfaces concordent à quelques pour cent : c'est le même
+territoire, avec sept ans de concentration foncière entre les deux.
+
+Quatrièmement, l'article ne publie aucune table de \gls{pad} par exploitation. Le seuil
+correspondant n'y est jamais instancié, et notre quatrième échelle n'a donc pas de référence
+publiée.
+
+\section{Ce qui reste, et pourquoi on s'arrête là}
+\label{sec:plateau}
+
+Le solveur est hors de cause, et cela se démontre de deux façons. Le plan réellement observé
+en 2017 vaut \SI{15}{\percent} de moins que l'optimum sous notre propre objectif : l'écart à
+combler est quinze fois la tolérance d'optimalité de \SI{\mesGapMip}{\percent} imposée au
+solveur. Et trois exécutions avec trois graines différentes rendent des \gls{pad} de
+\num{\mesGraineA}, \num{\mesGraineB} et \num{\mesGraineC}~\%. Il n'y a pas de bouton solveur
+à tourner.
+
+Trois voies pour descendre sous le plateau ont été instruites jusqu'au bout, puis écartées.
+Recalibrer les coefficients d'aversion au risque fait tomber le \gls{pad} à
+\SI{39.9}{\percent}, mais au prix de coefficients économiquement absurdes --- un exploitant
+spécialisé devenant \guillemotleft~très averse~\guillemotright{} --- c'est-à-dire du
+surajustement. Caler des plafonds de marché sur l'observé descend à \SI{33.6}{\percent} et
+est circulaire par construction. Incorporer l'élevage supposerait une variable d'état
+interdisant de liquider un cheptel sans coût, ce que le modèle mono-période ne peut pas
+porter et que l'article reconnaît lui-même comme une limite.
+
+L'écart résiduel se concentre sur les petites cultures --- ananas, melon, vergers, igname
+--- et recoupe les limites que l'article admet pour son propre modèle. Deux précautions de
+lecture, pour finir. Le \gls{pad} par exploitation a une \emph{médiane} de
+\SI{18.5}{\percent} pour une \emph{moyenne} de \SI{51.5}{\percent} : la moitié des
+exploitations est sous le seuil, et lire la moyenne comme un écart uniforme serait faux.
+Et plusieurs indicateurs simulés tombent à l'intérieur même de la fourchette d'incertitude
+de l'observé --- subvention, revenu, azote, travail : l'assolement 2017 n'étant connu qu'au
+niveau agrégé, l'écart au \guillemotleft~central~\guillemotright{} n'y démontre rien.
+
+\begin{reflexion}
+J'ai dû renverser trois verdicts au cours de cette calibration, et c'est ce que j'en retiens
+de plus utile. J'avais d'abord écarté le plancher de prairie pour une mauvaise raison ---
+j'ai cru y voir un ajustement circulaire, avant de trouver la donnée exogène qui l'établit.
+J'avais conclu qu'une contrainte ne pouvait pas améliorer le résultat en raisonnant sur des
+marges parcelle par parcelle, en oubliant que l'objectif est séparable mais que les
+contraintes ne le sont pas. Et j'avais attribué au solveur un écart dont j'ai pu prouver
+ensuite qu'il venait du modèle.
+
+Le point commun des trois est le même : un raisonnement plausible, tenu pour acquis, qu'une
+mesure a démenti. Ce qui les a démentis n'était jamais une intuition meilleure, mais un
+protocole --- un balayage de seuil, trois graines de solveur, un calcul de charge animale à
+l'hectare fait en dehors du modèle. Je suis entré dans ce stage en pensant que modéliser
+consistait à construire ; j'en retiens que cela consiste surtout à organiser les conditions
+dans lesquelles on peut avoir tort de façon visible.
+\end{reflexion}
