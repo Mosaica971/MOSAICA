@@ -66,14 +66,22 @@
   detect-all
 }
 \usepackage{textcomp}
-% Le symbole euro : \euro n'existe pas avec newtx, c'est textcomp qui le fournit sous le nom
-% \texteuro. NE PAS ecrire \DeclareSIUnit{\euro}{\text{\euro}} -- la definition serait
-% recursive et LaTeX boucle.
-\newcommand{\eur}{\texteuro}
+% LE SYMBOLE EURO. Il apparait des centaines de fois dans ce memoire, il doit donc etre juste.
+% newtx ne fournit pas d'euro en TS1 : \texteuro y declenche un "Faking \texteuro", et pdflatex
+% fabrique alors le glyphe a la volee dans une fonte bitmap Computer Modern. Le resultat est
+% visiblement etranger au texte -- graisse, chasse et dessin ne sont pas ceux de la page.
+% `eurosym` fournit le glyphe officiel en Type 1, vectoriel, et s'accorde a un romain classique.
+% NE PAS ecrire \DeclareSIUnit{\euro}{\text{\euro}} -- la definition serait recursive.
+\usepackage{eurosym}
+\newcommand{\eur}{\euro}
 \DeclareSIUnit{\ha}{ha}
 \DeclareSIUnit{\etp}{ETP}
 \DeclareSIUnit{\tonne}{t}
-\DeclareSIUnit{\EUR}{\texteuro}
+% L'unite siunitx s'appelle \euros et NON \EUR : eurosym definit deja un \EUR{<montant>} qui
+% prend un argument, et \DeclareSIUnit ne le remplace pas -- le symbole avalait alors
+% l'accolade suivante ("Argument of \EUR has an extra }"). Le \text{} remet la macro en mode
+% texte, siunitx composant ses unites en mode mathematique.
+\DeclareSIUnit{\euros}{\text{\euro}}
 
 % --- Listes ----------------------------------------------------------------
 \usepackage{enumitem}

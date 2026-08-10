@@ -27,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUTS = ROOT / "outputs"
 TARGET = Path(__file__).resolve().parent / "chiffres.tex"
+TABLES = Path(__file__).resolve().parent / "tables"
 
 # --- Les runs cites, et le prefixe de macro de chacun -----------------------
 # Les trois runs de calibration sont ceux que `references.yaml` declare ; l'etat observe
@@ -111,11 +112,111 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     # Eligibilite et representantes -- 04-vigilance C.2 et REFERENCE.md
     "mesRepCanne":        ("31",      "part de la canne observee ou sa representante est eligible, en %"),
     "mesPlancherPad":     ("1,5",     "plancher de PAD impose par l'eligibilite, en %"),
+    # Le dispositif prospectif -- denombrements des catalogues au 2026-08-10
+    "mesPolitiques":      ("10",      "politiques declarees dans scenarios_politiques.yaml"),
+    "mesForcages":        ("12",      "forcages declares dans scenarios_forcages.yaml"),
+    "mesBalayages":       ("2",       "fronts declares dans scenarios_pareto.yaml"),
+    "mesPolitiquesVues":  ("7",       "politiques ayant au moins une cellule resolue"),
+    "mesForcagesVus":     ("5",       "forcages ayant au moins une cellule resolue"),
+    "mesSolvesProspectifs": ("33",    "dossiers de run prospectifs sur le disque"),
+    "mesCellulesGrille":  ("14",      "cellules politique x forcage resolues (hors fronts)"),
+    "mesCellulesTotal":   ("120",     "cellules du produit cartesien complet 10 x 12"),
     # P10 -- audit du 2026-08-09 (scripts/audit_warm_start_seed.py)
     "mesPdixBorneLp":     ("46311985", "borne de la relaxation LP de P10, en EUR"),
     "mesPdixViolationsP": ("407",     "contraintes violees par la graine P8 sous P10"),
     "mesPdixViolationsA": ("124",     "contraintes violees par la graine azote la plus serree"),
 }
+
+
+# --- Les politiques citees au chapitre 4 ------------------------------------
+# Prefixe de macro (LETTRES SEULEMENT : \newcommand refuse chiffres et soulignes) -> dossier.
+# On prend la cellule NON FORCEE quand elle existe -- c'est la politique elle-meme, sans
+# hypothese de contexte -- et la cellule F0_nominal sinon. Les deux devraient coincider, F0
+# etant l'absence de forcage ; la ou elles different, c'est un defaut de convergence et non un
+# resultat, et le chapitre le dit (cf. \prosEcartFzero).
+PROSPECTIVE: dict[str, str] = {
+    "Pun":     "p1_deregulation_totale",
+    "Pquatre": "p4_statu_quo",
+    "Pcinq":   "p5_austerite_budgetaire",
+    "Psix":    "p6_verdissement_incitatif_f0_nominal",
+    "Psept":   "p7_ecophyto_reglementaire_f0_nominal",
+    "Phuit":   "p8_transition_agroecologique",
+    "Pneuf":   "p9_souverainete_alimentaire_f0_nominal",
+}
+
+# Le sous-ensemble d'indicateurs qu'un scenario expose. On n'emet PAS le bloc `calibration`
+# d'un run prospectif : le PAD y mesure l'ecart a 2017, or un scenario est fait pour s'en
+# ecarter. Un PAD de scenario n'est pas un mauvais score, c'est une lecture interdite
+# (docs/04-vigilance.md, et section \ref{sec:lectures}).
+PROS_EXTRACTIONS: list[tuple[tuple[str, ...], str, int]] = [
+    (("objective", "value"), "Objectif", 0),
+    (("solve_duration_seconds",), "Duree", 0),
+    (("economics", "output", "total_gross_margin"), "Marge", 0),
+    (("economics", "output", "total_subsidy"), "Subvention", 0),
+    (("economics", "output", "total_etp"), "Etp", 0),
+    (("environment", "output", "total_azote"), "Azote", 0),
+    (("environment", "output", "total_ift"), "Ift", 0),
+    (("environment", "output", "total_ges"), "Ges", 0),
+    (("environment", "output", "total_water_need_m3"), "Eau", 0),
+    (("output", "total_surface_ha"), "SurfaceHa", 0),
+    (("resilience", "output", "revenue_concentration_hhi"), "Hhi", 3),
+]
+
+# --- La grille politiques x forcages ----------------------------------------
+# Les colonnes sont les forcages effectivement couverts. La grille est CREUSE : ni les dix
+# politiques ni les douze forcages n'ont tourne, et c'est une limite du travail, pas un
+# choix -- une cellule coute une heure de solve.
+#
+# LA COLONNE DE COMPARAISON EST LA MARGE BRUTE, PAS L'OBJECTIF. P1 est la seule politique a
+# changer de fonction objectif (`maximize_gross_margin`, sans aversion au risque -- son
+# libelle le dit : un exploitant suppose neutre au risque), donc sa valeur d'objectif n'est
+# pas du meme genre que les autres et un tableau qui les alignerait serait faux.
+# `scenarios_politiques.yaml` porte deja l'avertissement ; on l'applique ici.
+GRILLE_INDICATEUR = ("economics", "output", "total_gross_margin")
+GRILLE: dict[str, dict[str, str]] = {
+    "Fzero": {
+        "Pquatre": "p4_statu_quo_f0_nominal",
+        "Psix":    "p6_verdissement_incitatif_f0_nominal",
+        "Psept":   "p7_ecophyto_reglementaire_f0_nominal",
+        "Phuit":   "p8_transition_agroecologique_f0_nominal",
+        "Pneuf":   "p9_souverainete_alimentaire_f0_nominal",
+    },
+    "Fsix": {
+        "Pquatre": "p4_statu_quo_f6_choc_intrants",
+        "Psix":    "p6_verdissement_incitatif_f6_choc_intrants",
+        "Psept":   "p7_ecophyto_reglementaire_f6_choc_intrants",
+    },
+    "Fneuf": {
+        "Pquatre": "p4_statu_quo_f9_crise_systemique",
+        "Phuit":   "p8_transition_agroecologique_f9_crise_systemique",
+        "Pneuf":   "p9_souverainete_alimentaire_f9_crise_systemique",
+    },
+}
+
+# --- Les fronts de Pareto ---------------------------------------------------
+# (prefixe de macro, balayage, politique hote ou None, label de la contrainte balayee,
+#  chemin de l'indicateur reellement atteint, dossier du run NON BALAYE de reference)
+# La politique hote compte : le cout marginal de l'azote n'est pas le meme sous P8 que contre
+# la configuration de reference, et c'est precisement ce que le chapitre compare.
+#
+# Le SEUIL est lu dans la contrainte du recap, pas dans le nom du dossier ; l'indicateur
+# ATTEINT est lu dans le bloc environnement ou economie.
+#
+# LE RUN NON BALAYE sert de TEMOIN DE PLATEAU. Un point dont l'objectif retombe exactement sur
+# le sien est un point ou le seuil ne contraint rien : il n'appartient pas au front, il le
+# prolonge par une horizontale. C'est le controle que les specs designent, et le defaut que
+# 04-vigilance A.7 documente -- un front peut etre entierement inactif si ses seuils sont
+# calibres sur une autre configuration que celle qui l'heberge. On ne teste PAS "atteint <
+# seuil" : avec des variables binaires par parcelle, l'atteint reste toujours un peu sous le
+# plafond (ici 0,5 %) sans que la contrainte cesse de mordre pour autant.
+FRONTS: list[tuple[str, str, str | None, str, tuple[str, ...], str]] = [
+    ("azoteHuit", "pareto_azote", "P8_transition_agroecologique", "azote_max",
+     ("environment", "output", "total_azote"), "p8_transition_agroecologique"),
+    ("azoteRef", "pareto_azote", None, "azote_max",
+     ("environment", "output", "total_azote"), "calib_retenu"),
+    ("subvQuatre", "pareto_subventions", "P4_statu_quo", "budget_subventions",
+     ("economics", "output", "total_subsidy"), "p4_statu_quo"),
+]
 
 
 def _dig(data: dict, path: tuple[str, ...]) -> float | int | None:
@@ -136,6 +237,222 @@ def _fmt(value: float, decimals: int) -> str:
     if decimals == 0:
         return str(int(round(value)))
     return f"{value:.{decimals}f}"
+
+
+_ENTIERS = ("zero", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf",
+            "dix", "onze", "douze")
+
+
+def _mot(n: int) -> str:
+    """Un entier en lettres -- un nom de macro LaTeX ne peut pas contenir de chiffre."""
+    return _ENTIERS[n] if n < len(_ENTIERS) else f"pt{'x' * n}"
+
+
+def _ecrire_tabular(cible: str, colspec: str, entetes: list[str], corps: list[str]) -> None:
+    """Ecrit un `tabular` COMPLET dans tables/<cible>.tex, entete et filets compris.
+
+    POURQUOI LE TABLEAU ENTIER ET PAS SEULEMENT SES LIGNES. Le `\\input` de LaTeX n'est pas
+    celui de TeX : il passe par `\\InputIfFileExists` et ses crochets de fichier, qui emettent
+    du materiel non extensible. Dans un alignement, ce materiel OUVRE UNE CELLULE -- et le
+    `\\bottomrule` qui suit devient alors un `\\noalign` egare, erreur fatale. Le contournement
+    n'est pas de ruser avec la primitive : c'est de sortir le `\\input` de l'alignement. Le
+    fichier porte donc l'environnement complet, et le chapitre ne l'entoure plus que d'un
+    `table` avec sa legende et son label -- qui restent, eux, du texte a ecrire a la main.
+    """
+    TABLES.mkdir(exist_ok=True)
+    lignes = [
+        "% Genere par memoire/build_chiffres.py -- ne pas editer.",
+        f"\\begin{{tabular}}{{{colspec}}}",
+        "  \\toprule",
+        "  " + " & ".join(f"\\textbf{{{e}}}" for e in entetes) + " \\\\",
+        "  \\midrule",
+        *corps,
+        "  \\bottomrule",
+        "\\end{tabular}",
+    ]
+    (TABLES / f"{cible}.tex").write_text("\n".join(lignes) + "\n", encoding="utf8")
+
+
+def _tous_les_recaps() -> list[tuple[str, dict]]:
+    """Tous les runs du disque. La decouverte se fait sur la presence d'un `recap.json`,
+    comme dans le depot : cela met sur le meme plan dossiers nommes et numerotes, et exclut
+    `reference_2017/` qui ecrit `reference.json`."""
+    trouves = []
+    for recap in sorted(OUTPUTS.glob("*/recap.json")):
+        try:
+            trouves.append((recap.parent.name, json.loads(recap.read_text(encoding="utf8"))))
+        except json.JSONDecodeError:
+            continue  # run tue en cours d'ecriture -- il n'a rien a dire
+    return trouves
+
+
+def _seuil(data: dict, label: str) -> float | None:
+    for entry in data.get("constraints") or []:
+        args = entry.get("args") or {}
+        if args.get("label") == label and "threshold" in args:
+            return float(args["threshold"])
+    return None
+
+
+def _points_du_front(recaps, sweep, policy, label, indicateur) -> list[dict]:
+    """Les points d'un front, ordonnes par seuil croissant.
+
+    Le rattachement se fait sur le TRIPLET (balayage, politique, forcage) porte par le recap,
+    jamais sur le nom du dossier -- c'est ce qui permet a un point relance depuis un fichier
+    d'etape separe de rejoindre le front des autres.
+    """
+    points = []
+    for nom, data in recaps:
+        if data.get("run_sweep") != sweep or data.get("run_policy") != policy:
+            continue
+        if data.get("run_forcing") is not None:
+            continue  # un front force est un autre objet ; il se declare a part
+        seuil = _seuil(data, label)
+        objectif = _dig(data, ("objective", "value"))
+        if seuil is None or objectif is None:
+            continue
+        points.append({
+            "dossier": nom,
+            "seuil": seuil,
+            "atteint": _dig(data, indicateur),
+            "objectif": objectif,
+            "marge": _dig(data, ("economics", "output", "total_gross_margin")),
+            "etp": _dig(data, ("economics", "output", "total_etp")),
+            # Le prix dual de la contrainte BALAYEE, lu dans la relaxation lineaire. C'est une
+            # pente LOCALE : elle ne vaut qu'au voisinage de ce point, alors que le front donne
+            # la pente MOYENNE sur tout l'intervalle. Emettre les deux permet de montrer leur
+            # ecart au lieu de l'affirmer.
+            "dual": _dig(data, ("shadow_prices", label, "dual")),
+            "prouve": data.get("termination_condition") == "optimal",
+        })
+    return sorted(points, key=lambda p: p["seuil"])
+
+
+def _emettre_front(prefixe: str, points: list[dict], temoin: float | None) -> list[str]:
+    """Ecrit `tables/front-<prefixe>.tex` (le corps du tableau) et rend les macros de synthese.
+
+    POURQUOI UN CORPS DE TABLEAU GENERE PLUTOT QUE DES MACROS PAR POINT. Un front n'a pas un
+    nombre de lignes connu d'avance : il en gagne quand un point manquant est relance. Un
+    tableau ecrit a la main dans le chapitre aurait a etre re-edite a chaque fois, et c'est
+    exactement le geste que ce fichier existe pour supprimer. Le chapitre fait
+    `\\input{tables/front-azoteHuit}` et ne connait pas le nombre de points.
+    """
+    corps = []
+    for point in points:
+        # La dague marque un solve non prouve optimal. Elle est POSEE PAR LE GENERATEUR, donc
+        # elle disparait d'elle-meme le jour ou le point est repris et converge -- une mise en
+        # garde qu'on ne peut pas oublier de retirer, ni oublier de mettre.
+        dague = "" if point["prouve"] else r"\dag"
+        point["plateau"] = temoin is not None and point["objectif"] >= temoin * (1 - 1e-6)
+        # Asterisque et non petit rond : accole a un nombre, un rond en exposant se lit degre.
+        plat = r"\textsuperscript{*}" if point["plateau"] else ""
+        corps.append(
+            f"  \\num{{{_fmt(point['seuil'], 0)}}} & "
+            f"\\num{{{_fmt(point['atteint'] or 0, 0)}}} & "
+            f"\\num{{{_fmt(point['objectif'] / 1e6, 2)}}}{dague}{plat} \\\\"
+        )
+    _ecrire_tabular(
+        f"front-{prefixe}", "@{}lrr@{}",
+        ["Plafond", "Niveau atteint", "Objectif (M\\eur)"], corps,
+    )
+
+    macros = [f"\\newcommand{{\\front{prefixe}Points}}{{{len(points)}}}"]
+    if not points:
+        return macros
+    bas, haut = points[0], points[-1]
+    macros += [
+        f"\\newcommand{{\\front{prefixe}SeuilBas}}{{{_fmt(bas['seuil'], 0)}}}",
+        f"\\newcommand{{\\front{prefixe}SeuilHaut}}{{{_fmt(haut['seuil'], 0)}}}",
+        f"\\newcommand{{\\front{prefixe}ObjBas}}{{{_fmt(bas['objectif'] / 1e6, 2)}}}",
+        f"\\newcommand{{\\front{prefixe}ObjHaut}}{{{_fmt(haut['objectif'] / 1e6, 2)}}}",
+        f"\\newcommand{{\\front{prefixe}Prouves}}"
+        f"{{{sum(1 for p in points if p['prouve'])}}}",
+    ]
+    # La PENTE MOYENNE. C'est la grandeur que le front donne et que le prix dual ne donne pas :
+    # le dual est une pente locale, valable au voisinage d'un point.
+    # Elle se calcule sur la PARTIE MORDANTE du front seulement -- inclure un point de plateau
+    # y melerait un segment horizontal et diluerait le cout marginal vers zero. Et elle est un
+    # MINORANT des que l'une des deux extremites n'est pas prouvee optimale : son objectif est
+    # alors sous-estime, donc l'ecart entre extremites aussi.
+    mordants = [p for p in points if not p.get("plateau")]
+    macros.append(f"\\newcommand{{\\front{prefixe}Plateau}}{{{len(points) - len(mordants)}}}")
+    if len(mordants) >= 2 and mordants[-1]["seuil"] > mordants[0]["seuil"]:
+        gauche, droite = mordants[0], mordants[-1]
+        pente = ((droite["objectif"] - gauche["objectif"])
+                 / (droite["seuil"] - gauche["seuil"]))
+        macros += [
+            f"\\newcommand{{\\front{prefixe}Pente}}{{{_fmt(pente, 2)}}}",
+            f"\\newcommand{{\\front{prefixe}PenteBas}}{{{_fmt(gauche['seuil'], 0)}}}",
+            f"\\newcommand{{\\front{prefixe}PenteHaut}}{{{_fmt(droite['seuil'], 0)}}}",
+            f"\\newcommand{{\\front{prefixe}PenteExacte}}"
+            f"{{{'oui' if gauche['prouve'] and droite['prouve'] else 'non'}}}",
+        ]
+    # Le dual du point le plus serre : la pente LOCALE, a confronter a \front...Pente qui est
+    # la pente MOYENNE. Un ecart important entre les deux signifie que le front est convexe et
+    # qu'extrapoler le dual serait faux -- c'est l'argument que le chapitre 4 fait tenir.
+    if bas.get("dual") is not None:
+        macros.append(f"\\newcommand{{\\front{prefixe}DualBas}}{{{_fmt(abs(bas['dual']), 2)}}}")
+
+    # Point par point, pour les phrases qui en citent un seul.
+    for i, point in enumerate(points, start=1):
+        rang = _mot(i)
+        macros += [
+            f"\\newcommand{{\\front{prefixe}{rang}Seuil}}{{{_fmt(point['seuil'], 0)}}}",
+            f"\\newcommand{{\\front{prefixe}{rang}Obj}}{{{_fmt(point['objectif'], 0)}}}",
+            f"\\newcommand{{\\front{prefixe}{rang}ObjM}}{{{_fmt(point['objectif'] / 1e6, 2)}}}",
+        ]
+        if point.get("marge") is not None:
+            macros.append(
+                f"\\newcommand{{\\front{prefixe}{rang}MargeM}}"
+                f"{{{_fmt(point['marge'] / 1e6, 2)}}}"
+            )
+        if point.get("etp") is not None:
+            macros.append(
+                f"\\newcommand{{\\front{prefixe}{rang}Etp}}{{{_fmt(point['etp'], 0)}}}"
+            )
+    return macros
+
+
+_NOMS_GROUPES = {
+    "AG": "Agrumes", "AN": "Ananas", "BA": "Banane export", "BC": "Banane plantain",
+    "CS": "Canne à sucre", "IG": "Igname", "JA": "Jachère", "MA": "Maraîchage",
+    "ME": "Melon", "PN": "Prairie", "VE": "Vergers",
+}
+
+
+def _table_realloc(cible: str, avant: str, apres: str, seuil_ha: float = 50.0) -> list[str]:
+    """Ce que deux allocations deplacent, groupe par groupe, en hectares.
+
+    Un tableau d'ecarts et non deux colonnes de niveaux : la question n'est pas ce que chaque
+    scenario cultive, c'est ce que le passage de l'un a l'autre DEPLACE. Les groupes qui
+    bougent de moins de `seuil_ha` sont replies dans une ligne "autres" -- les afficher
+    donnerait a du bruit d'arrondi le meme poids visuel qu'a une filiere qui disparait.
+    """
+    def _lire(run: str) -> dict[str, float]:
+        chemin = OUTPUTS / run / "csv" / "calibration_pad_by_crop.csv"
+        with chemin.open(encoding="utf8", newline="") as f:
+            return {r["crop"]: float(r["simulated_ha"])
+                    for r in csv.DictReader(f) if r["crop"] != "TOTAL"}
+
+    a, b = _lire(avant), _lire(apres)
+    ecarts = sorted(((c, b.get(c, 0.0) - v) for c, v in a.items()),
+                    key=lambda t: t[1], reverse=True)
+    corps, reste = [], 0.0
+    for code, delta in ecarts:
+        if abs(delta) < seuil_ha:
+            reste += delta
+            continue
+        corps.append(
+            f"  {_NOMS_GROUPES.get(code, code)} & \\num{{{_fmt(a[code], 0)}}} & "
+            f"\\num{{{_fmt(b.get(code, 0.0), 0)}}} & \\num{{{_fmt(delta, 0)}}} \\\\"
+        )
+    if abs(reste) >= 1:
+        corps.append(f"  \\emph{{autres groupes}} & --- & --- & \\num{{{_fmt(reste, 0)}}} \\\\")
+    _ecrire_tabular(
+        cible, "@{}lrrr@{}",
+        ["Groupe", "Avant (ha)", "Après (ha)", "Écart (ha)"], corps,
+    )
+    return [f"\\newcommand{{\\realloc{cible.title().replace('-', '')}Lignes}}{{{len(corps)}}}"]
 
 
 def main() -> int:
@@ -236,6 +553,125 @@ def main() -> int:
         for code, surface in (data.get("assolement_observe_ha") or {}).items():
             lines.append(f"\\newcommand{{\\obsHa{code}}}{{{_fmt(float(surface), 0)}}}")
         lines.append("")
+
+    # --- Les politiques du chapitre 4 --------------------------------------
+    recaps = _tous_les_recaps()
+    par_dossier = dict(recaps)
+    lines.append("% --- politiques prospectives " + "-" * 46)
+    for prefixe, dossier in PROSPECTIVE.items():
+        data = par_dossier.get(dossier)
+        if data is None:
+            missing.append(f"{dossier}/recap.json est absent (politique \\pros{prefixe}*)")
+            continue
+        for path, suffix, decimals in PROS_EXTRACTIONS:
+            value = _dig(data, path)
+            name = f"pros{prefixe}{suffix}"
+            if value is None:
+                missing.append(f"{dossier} : {'.'.join(path)} introuvable (\\{name})")
+                continue
+            lines.append(f"\\newcommand{{\\{name}}}{{{_fmt(value, decimals)}}}")
+        objectif = _dig(data, ("objective", "value"))
+        if objectif is not None:
+            lines.append(f"\\newcommand{{\\pros{prefixe}ObjectifM}}{{{_fmt(objectif / 1e6, 2)}}}")
+        # La dague de non-convergence, posee par le generateur pour la meme raison que sur les
+        # fronts : elle doit disparaitre toute seule quand le run est repris.
+        prouve = data.get("termination_condition") == "optimal"
+        lines.append(f"\\newcommand{{\\pros{prefixe}Flag}}{{{'' if prouve else r'\dag'}}}")
+        lines.append(f"\\newcommand{{\\pros{prefixe}Prouve}}{{{'oui' if prouve else 'non'}}}")
+    lines.append("")
+
+    # LE TEMOIN DE NON-CONVERGENCE. F0_nominal est le forcage NUL : il ne change aucun
+    # coefficient. P4 nue et P4 x F0 devraient donc rendre le meme optimum. L'ecart entre les
+    # deux ne mesure aucun effet de scenario -- il mesure ce qu'un solve arrete a la limite de
+    # temps a laisse sur la table. C'est le chiffre qui justifie la reprise du lot D, et il
+    # vaut mieux qu'un discours sur la convergence.
+    nue = _dig(par_dossier.get("p4_statu_quo") or {}, ("objective", "value"))
+    forcee = _dig(par_dossier.get("p4_statu_quo_f0_nominal") or {}, ("objective", "value"))
+    if nue is not None and forcee is not None:
+        lines.append("% --- temoin : F0 est le forcage nul, l'ecart est du solveur seul -----")
+        lines.append(f"\\newcommand{{\\prosEcartFzero}}{{{_fmt(nue - forcee, 0)}}}")
+        lines.append(
+            f"\\newcommand{{\\prosEcartFzeroPct}}{{{_fmt(100 * (nue - forcee) / nue, 2)}}}"
+        )
+        lines.append("")
+
+    # --- La grille et le regret ---------------------------------------------
+    # Le REGRET DE SAVAGE se calcule contre la meilleure politique DU MEME FORCAGE, jamais
+    # contre un optimum global : la question est "qu'aurais-je perdu a avoir choisi celle-ci
+    # plutot que la bonne, sachant que ce contexte-la est survenu". La convention est celle
+    # de core/reporting/robustness.py, reprise ici pour que le memoire cite exactement ce que
+    # le tableau de bord affiche.
+    lines.append("% --- grille politiques x forcages (MARGE BRUTE -- voir GRILLE) --------")
+    for forcage, cellules in GRILLE.items():
+        valeurs: dict[str, float] = {}
+        nettes: dict[str, float] = {}
+        for politique, dossier in cellules.items():
+            data = par_dossier.get(dossier)
+            if data is None:
+                missing.append(f"{dossier}/recap.json est absent (cellule {politique}x{forcage})")
+                continue
+            valeur = _dig(data, GRILLE_INDICATEUR)
+            if valeur is None:
+                missing.append(f"{dossier} : marge brute introuvable")
+                continue
+            valeurs[politique] = valeur
+            lines.append(
+                f"\\newcommand{{\\grille{politique}{forcage}}}{{{_fmt(valeur / 1e6, 2)}}}"
+            )
+            # LA MEME GRILLE, TRANSFERT DEDUIT. La marge brute contient la subvention
+            # (PB = ventes + aides, MB = PB - charges), or ces politiques deplacent
+            # justement les aides : classer P9 devant P4 sur la marge brute, c'est en partie
+            # constater que P9 subventionne davantage. Ventes moins charges isole ce que
+            # l'assolement PRODUIT, independamment de ce que la collectivite y met. Les deux
+            # lectures sont legitimes et ne donnent pas le meme classement -- le chapitre
+            # montre l'ecart plutot que d'en choisir une en silence.
+            aide = _dig(data, ("economics", "output", "total_subsidy"))
+            if aide is not None:
+                nettes[politique] = valeur - aide
+                lines.append(
+                    f"\\newcommand{{\\grilleNet{politique}{forcage}}}"
+                    f"{{{_fmt((valeur - aide) / 1e6, 2)}}}"
+                )
+            prouve = data.get("termination_condition") == "optimal"
+            lines.append(
+                f"\\newcommand{{\\grille{politique}{forcage}Flag}}"
+                f"{{{'' if prouve else r'\dag'}}}"
+            )
+        for etiquette, table in (("", valeurs), ("Net", nettes)):
+            if not table:
+                continue
+            meilleure = max(table, key=lambda k: table[k])
+            lines.append(
+                f"\\newcommand{{\\grilleMeilleure{etiquette}{forcage}}}{{{meilleure}}}"
+            )
+            for politique, valeur in table.items():
+                lines.append(
+                    f"\\newcommand{{\\regret{etiquette}{politique}{forcage}}}"
+                    f"{{{_fmt((table[meilleure] - valeur) / 1e6, 2)}}}"
+                )
+    lines.append("")
+
+    # --- Les fronts ---------------------------------------------------------
+    lines.append("% --- fronts de Pareto " + "-" * 53)
+    for prefixe, sweep, policy, label, indicateur, hote in FRONTS:
+        points = _points_du_front(recaps, sweep, policy, label, indicateur)
+        if not points:
+            missing.append(f"front {prefixe} : aucun point sur le disque")
+        temoin = _dig(par_dossier.get(hote) or {}, ("objective", "value"))
+        if temoin is None:
+            missing.append(f"front {prefixe} : temoin non balaye `{hote}` absent")
+        else:
+            lines.append(f"\\newcommand{{\\front{prefixe}Temoin}}{{{_fmt(temoin / 1e6, 2)}}}")
+        lines += _emettre_front(prefixe, points, temoin)
+    lines.append("")
+
+    # Ce que le serrage de l'enveloppe publique deplace sur le terrain.
+    lines.append("% --- reallocation sous plafond de subventions " + "-" * 30)
+    lines += _table_realloc(
+        "realloc-budget", "p4_statu_quo",
+        "p4_statu_quo_pareto_subventions_threshold_35900000",
+    )
+    lines.append("")
 
     lines.append("% --- mesures hors recap (voir build_chiffres.py pour les sources) -----")
     for name, (value, source) in MEASUREMENTS.items():

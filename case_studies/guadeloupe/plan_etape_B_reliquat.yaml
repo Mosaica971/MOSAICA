@@ -1,0 +1,110 @@
+# RELIQUAT DE L'ETAPE B -- les deux points du front azote que le reboot a emportes.
+#
+# CE QUI S'EST PASSE. Le batch `plan_etape_BC.yaml` du 2026-08-09 a ete tue par un
+# redemarrage Windows Update a 03:47. Trois des cinq points du front etaient ecrits :
+#
+#   810 979   -> 63 304 371   optimal
+#   946 142   -> 65 780 393   maxTimeLimit
+#   1 081 306 -> 66 552 098   maxTimeLimit
+#   1 216 469 -> TUE EN COURS DE SOLVE
+#   1 351 632 -> jamais lance
+#
+# Aucun dossier partiel n'a ete laisse derriere : `outputs/` est propre, il n'y a rien a
+# reparer avant de relancer.
+#
+# POURQUOI CE FICHIER EXISTE PLUTOT QU'UN `plan_etape_BC.yaml` RABOTE A DEUX POINTS.
+# Une cellule de plan sans `forcings:` reemet TOUJOURS le run nominal de sa politique
+# (core/config.py:526-530). Relancer le plan, meme reduit aux deux seuils manquants,
+# resoudrait donc une seconde fois `p8_transition_agroecologique` -- une heure de solve pour
+# un resultat deja sur disque, plus un dossier `_2` en doublon qui trouble la grille
+# Prospective. `--forcings` n'y aide pas : il ecarte les balayages non forces
+# (core/config.py:545-548).
+#
+# D'OU LE FORMAT PLAT. `compose_runs` passe une liste `runs:` telle quelle a `expand_runs`
+# (core/config.py:411-412), sans composition politique x forcage, donc sans run nominal
+# parasite. Les coordonnees de grille sont alors portees A LA MAIN par les cles `policy` et
+# `sweep` ci-dessous, que `run_scenarios.py:274-276` recopie en `run_policy` / `run_sweep`
+# dans le recap. C'est ce qui fait que ces deux points REJOIGNENT le front des trois autres :
+# `pareto.sweep_of` groupe sur le triplet (balayage, politique, forcage) et jamais sur le nom.
+#
+# LE CORPS DE P8 EST RECOPIE VERBATIM depuis `scenarios_politiques.yaml` lignes 257-294. Un
+# format plat ne sait pas composer une politique, il faut donc la dupliquer -- et c'est le
+# seul vrai risque de ce fichier. IL EST VERIFIABLE SANS SOLVE, et ce controle est a faire
+# AVANT d'engager les heures machine :
+#
+#   .venv/Scripts/python scripts/check_scenario_feasibility.py \
+#       --scenarios case_studies/guadeloupe/plan_etape_B_reliquat.yaml
+#
+# Le point a 1 351 632 doit rendre une borne LP de 71 065 297 -- la valeur mesuree pour P8
+# nue le 2026-08-09 et consignee dans `plan_etape_BC.yaml` lignes 37-38. Ce seuil est
+# exactement celui que P8 se pose deja (`plafond_azote`), donc `azote_max` n'y mord pas et la
+# relaxation doit retomber sur celle de la politique nue. Si le chiffre differe, la recopie
+# est infidele -- ne pas lancer le batch, corriger d'abord.
+#
+# ORDRE ET AMORCAGE. `order_sweep_points` lit le `sense: le` d'`azote_max` dans `config.yaml`
+# et reordonne du plus SERRE au plus lache : 1 216 469 puis 1 351 632. Le second est donc
+# amorce par le premier. Le premier, lui, n'a pas de predecesseur dans ce batch et retombera
+# sur l'allocation non forcee de P8 -- qui consomme jusqu'a 1 351 632 kg N et sera donc
+# probablement jugee INFAISABLE par l'audit de graine. C'est sans gravite, mais c'est du temps
+# perdu : passer explicitement le point a 1 081 306, faisable a l'un comme a l'autre seuil
+# puisque la faisabilite d'un plafond n'implique que vers le haut.
+#
+#   --warm-start-from outputs/p8_transition_agroecologique_pareto_azote_threshold_1081306
+#
+# Ce fichier est jetable. Une fois les deux points ecrits, le front est complet et
+# `plan.yaml` seul fait foi.
+
+include:
+  crop_groups: crop_groups.yaml
+
+runs:
+
+  # P8_transition_agroecologique, recopiee verbatim (scenarios_politiques.yaml:257-294),
+  # augmentee du seul `enable: [azote_max]` que le balayage exige -- `set_args` ne sait
+  # patcher qu'une entree DEJA declaree, d'ou la coquille `enable: false` de `config.yaml`.
+  - name: P8_transition_agroecologique__pareto_azote
+    policy: P8_transition_agroecologique     # -> recap.run_policy : rattache au front
+    sweep: pareto_azote                      # -> recap.run_sweep  : idem
+    description: >-
+      Reliquat du front marge x azote sous P8 : les deux points les plus laches, 90 % et
+      100 % du plafond que P8 pose elle-meme. Le point a 1 351 632 est le CONTROLE -- seuil
+      egal a la borne de la politique, donc allocation identique a P8 nue (68 445 374, mais
+      run non converge : comparer au bruit de branch-and-bound pres, pas a l'egalite).
+    overrides:
+      data.scenario: SMART                     # 1.
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: bio_maraichage}, factor: 1.80}  # 2. redeploiement vers le bio
+        - {crops: {group: maraichage}, factor: 1.30}      # 3.
+        - {crops: {group: canne}, factor: 0.80}           # 4. ... finance par l'export
+    disable:
+      - pn_tour_supp                           # 5. paturage tournant rouvert
+    enable:
+      - azote_max                              # 8. la coquille que le balayage vient remplir
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.35}}    # 6. rotations franchement renforcees
+      - {label: mo_max_expl, args: {slack: 1.50}}  # 7. politique d'installation
+    enable_add:
+      - name: territory_indicator_bound        # 9. IFT -40 %
+        args: {label: plafond_ift, indicator: ift, sense: le, threshold: 40168}
+      - name: territory_indicator_bound        # 10. azote -30 %
+        args: {label: plafond_azote, indicator: azote, sense: le, threshold: 1351632}
+      - name: zone_indicator_bound             # 11. 150 kgN/ha par ferme
+        args: {label: nitrates_ferme, zone: farms, indicator: azote, sense: le,
+               threshold_per_ha: 150}
+      - name: territory_indicator_bound        # 12. eau -20 % (surface irrigable seulement)
+        args: {label: plafond_eau, indicator: eau, sense: le, threshold: 27700000,
+               scale: 10.0, plot_weight: irrigable}
+      - name: territory_indicator_bound        # 13. plancher d'emploi : +20 % contre 3 503
+        args: {label: plancher_emploi, indicator: travail, sense: ge,   #  ETP de reference.
+               threshold: 4200, scale: 0.00062228}  # 86 % du maximum mesure (4 875 ETP)
+      - name: crop_share_bound                 # 14. 25 % du maraichage en bio
+        args: {label: bio_min, numerator_crops: {group: bio_maraichage},
+               denominator_crops: {group: maraichage}, sense: ge, share: 0.25}
+      - name: territory_indicator_bound        # 15. enveloppe publique bornee
+        args: {label: budget_subventions, indicator: subvention, sense: le, threshold: 80000000}
+      - name: baseline_inertia_min             # 16.
+        args: {label: inertie, min_share: 0.40}
+    matrix:
+      args:azote_max.threshold:
+        - 1216469   #  90 % du plafond de P8
+        - 1351632   # 100 % -- controle, doit redonner P8 nue
