@@ -41,7 +41,29 @@
 #         proche (meme inertie a 50 % contre 70 %, memes ordres de grandeur), mais l'audit
 #         peut la rejeter -- il le dira, et le run repartira a froid sans faire semblant.
 #
-# ORDRE : apres `plan_etape_BC.yaml`.
+# ORDRE : apres `plan_etape_BC.yaml`, PUIS apres `plan_etape_D_socles.yaml`.
+#
+# MISE A JOUR DU 2026-08-10, apres le reliquat de l'etape B. L'inventaire des `outputs/` donne
+# maintenant 10 runs non convergés sur 38, et non plus cinq. Ce fichier n'en couvre que quatre.
+# Les six autres se repartissent en deux paquets, traites ailleurs et pour de bonnes raisons :
+#
+#   * P8 nue et P5 nue -> `plan_etape_D_socles.yaml`, A LANCER AVANT CELUI-CI. P8 nue est la
+#     graine des deux cellules P8 ci-dessous ; tant qu'elle stagne a 68 445 374, les reprendre
+#     rend le meme nombre. La mesure est dans l'en-tete du fichier socles.
+#   * les quatre points du front azote sous P8 -> a reprendre APRES, et seulement si P8 nue a
+#     gagne. Trois d'entre eux (1 081 306, 1 216 469, 1 351 632) rendent aujourd'hui le MEME
+#     objectif 66 552 098 pour le meme azote 1 066 127 : la chaine de warm start les a tous
+#     epingles sur l'incumbent du plus serre, et aucun n'a su s'en detacher en une heure. Le
+#     point a 1 351 632 est cense etre le CONTROLE du front -- son plafond depasse de 9 kg
+#     l'azote que P8 nue consomme deja (1 351 623), la contrainte n'y mord donc pas et il
+#     devrait redonner P8 nue. Il rend 2,77 % de moins. Le controle est en echec, et c'est
+#     exactement le diagnostic que CLAUDE.md annonce : un point domine signale un solve non
+#     converge, pas une decouverte.
+#
+# LE TEMPS EST LE LEVIER COMMUN. Les dix runs sortent entre 3 617 et 3 701 s, tous sur
+# `solver.args.time_limit: 3600`. Un plan-cellule n'accepte que `forcings:` et `sweeps:`
+# (core/config.py:565), donc ce reglage se fait dans `config.yaml` avant le batch -- et le
+# fichier socles est la pour tester le pari sur deux runs avant d'y engager celui-ci.
 #
 #   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml --dry-run
 #   .venv/Scripts/python scripts/audit_warm_start_seed.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml \
