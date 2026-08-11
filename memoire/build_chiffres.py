@@ -125,6 +125,20 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     "mesPdixBorneLp":     ("46311985", "borne de la relaxation LP de P10, en EUR"),
     "mesPdixViolationsP": ("407",     "contraintes violees par la graine P8 sous P10"),
     "mesPdixViolationsA": ("124",     "contraintes violees par la graine azote la plus serree"),
+    # LE MEME PROBLEME RESOLU TROIS FOIS -- 04-vigilance B.8, mesures des 2026-08-10/11.
+    # Trois solves de P8 non forcee, ensemble faisable IDENTIQUE a chaque fois, amorces en
+    # chaine l'un sur l'autre. Le troisieme est prouve optimal, donc les deux premiers sont
+    # faux d'un ecart connu -- c'est ce qui fait la demonstration du chapitre 4.
+    "mesHuitUneHeure":    ("68445374", "P8 nue, 1 h de solve, en EUR (maxTimeLimit)"),
+    "mesHuitTroisHeures": ("68644754", "la meme, 3 h, amorcee sur la precedente (maxTimeLimit)"),
+    "mesHuitOptimum":     ("69088438", "la meme, +2,2 h, PROUVEE OPTIMALE"),
+    "mesHuitEcartPct":    ("0,93",     "ecart du premier a l'optimum, en %"),
+    "mesHuitPreuveDuree": ("8981",     "s pour PROUVER l'optimum en partant deja de lui (B.8)"),
+    # La borne LP racine surestime ce qu'un solve a laisse -- 04-vigilance B.8
+    "mesHuitBorneLp":     ("71065297", "borne de la relaxation LP de P8, en EUR"),
+    "mesHuitSautInt":     ("2,78",     "saut d'integralite seul, en % de la borne LP"),
+    "mesHuitEcartApparent": ("3,41",   "ecart du run de 3 h a la BORNE LP, en %"),
+    "mesHuitEcartReel":   ("0,64",     "son ecart a l'optimum reel, en % -- cinq fois moins"),
 }
 
 
@@ -585,14 +599,42 @@ def main() -> int:
     # deux ne mesure aucun effet de scenario -- il mesure ce qu'un solve arrete a la limite de
     # temps a laisse sur la table. C'est le chiffre qui justifie la reprise du lot D, et il
     # vaut mieux qu'un discours sur la convergence.
+    #
+    # AVANT / APRES. Le temoin ne vaut que tant que la cellule forcee n'a pas ete reprise :
+    # une fois les deux runs converges, l'ecart tombe a zero et le chiffre disparait -- alors
+    # que c'est justement la demonstration qu'on veut garder. On lit donc AUSSI la version
+    # ecartee dans `outputs/_non_converges/`, ce qui transforme le temoin en avant/apres :
+    # l'ecart valait tant, il etait entierement imputable au branch-and-bound, une graine
+    # correcte l'annule. Rien a editer le jour de la reprise, les macros suivent.
+    # `\prosEcartFzeroRepris` vaut oui/non : le chapitre choisit sa phrase dessus.
     nue = _dig(par_dossier.get("p4_statu_quo") or {}, ("objective", "value"))
-    forcee = _dig(par_dossier.get("p4_statu_quo_f0_nominal") or {}, ("objective", "value"))
-    if nue is not None and forcee is not None:
+    cellule = par_dossier.get("p4_statu_quo_f0_nominal") or {}
+    forcee = _dig(cellule, ("objective", "value"))
+    repris = cellule.get("termination_condition") == "optimal"
+    # `_tous_les_recaps` ne descend que d'un niveau (`outputs/*/recap.json`), donc la
+    # quarantaine n'entre jamais dans `par_dossier` ni dans la grille -- il faut la lire ici.
+    ecarte = OUTPUTS / "_non_converges" / "p4_statu_quo_f0_nominal" / "recap.json"
+    avant = None
+    if ecarte.exists():
+        try:
+            avant = _dig(json.loads(ecarte.read_text(encoding="utf8")), ("objective", "value"))
+        except json.JSONDecodeError:
+            pass
+    if avant is None:
+        avant = forcee  # pas encore reprise : l'ecart courant EST l'ecart d'avant
+    if nue is not None and avant is not None:
         lines.append("% --- temoin : F0 est le forcage nul, l'ecart est du solveur seul -----")
-        lines.append(f"\\newcommand{{\\prosEcartFzero}}{{{_fmt(nue - forcee, 0)}}}")
+        lines.append(f"\\newcommand{{\\prosEcartFzero}}{{{_fmt(nue - avant, 0)}}}")
         lines.append(
-            f"\\newcommand{{\\prosEcartFzeroPct}}{{{_fmt(100 * (nue - forcee) / nue, 2)}}}"
+            f"\\newcommand{{\\prosEcartFzeroPct}}{{{_fmt(100 * (nue - avant) / nue, 2)}}}"
         )
+        lines.append(
+            f"\\newcommand{{\\prosEcartFzeroRepris}}{{{'oui' if repris else 'non'}}}"
+        )
+        if forcee is not None:
+            lines.append(
+                f"\\newcommand{{\\prosEcartFzeroApres}}{{{_fmt(abs(nue - forcee), 0)}}}"
+            )
         lines.append("")
 
     # --- La grille et le regret ---------------------------------------------

@@ -157,5 +157,9 @@
 % \pageref{fin-coeur} donne donc directement le nombre de pages du coeur. Il est
 % ecrit dans le .log a chaque compilation pour que la contrainte des 30 pages
 % soit verifiee mecaniquement et non a l'oeil.
+% `\typeout` n'expanse PAS `\pageref` -- il ecrivait la macro litteralement, et le
+% controle des 30 pages ne controlait donc rien (corrige le 2026-08-11). `refcount`
+% fournit la version developpable, seule utilisable dans un \typeout.
+\usepackage{refcount}
 \newcommand{\annoncecoeur}{%
-  \typeout{^^J===== PAGES DU COEUR : \pageref{fin-coeur} / 30 =====^^J}}
+  \typeout{^^J===== PAGES DU COEUR : \getpagerefnumber{fin-coeur} / 30 =====^^J}}

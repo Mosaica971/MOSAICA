@@ -224,23 +224,32 @@ Les deux fronts partent d'ailleurs de duals locaux quasi identiques
 (\num{\frontazoteRefDualBas} et \num{\frontazoteHuitDualBas}~\eur/kg) : sans les tracer, on
 aurait conclu à l'égalité des coûts marginaux.
 
-Ce second front porte une réserve que je ne peux pas lever : \num{\frontazoteHuitPoints} points
-seulement, dont \num{\frontazoteHuitProuves} prouvé optimal. Les deux points les plus lâches
-manquent, et deux des trois tracés sont arrêtés à la limite de temps. Leur objectif est donc
-sous-estimé, la pente calculée entre eux est un \textbf{minorant}, et le front ne peut pas être
-présenté autrement.
+Ce second front porte une réserve que je ne peux pas lever. Sur ses
+\num{\frontazoteHuitPoints} points, \num{\frontazoteHuitProuves} sont prouvés optimaux --- les
+deux extrémités ; entre elles, deux points rendent \emph{exactement} le même objectif pour
+\emph{exactement} le même azote. La chaîne de warm start les a épinglés sur l'incumbent du plus
+serré et aucun n'a su s'en détacher dans son heure : ce palier est un artefact de solveur, pas
+un plateau économique. La pente y est sous-estimée et le saut vers le point le plus lâche
+sur-estimé d'autant. Le front \textbf{borne} le coût marginal de l'azote, il ne le mesure pas
+point par point.
 
 \section{Ce que le dispositif ne permet pas de conclure}
 \label{sec:limites}
 
 \begin{vigilance}
-\textbf{Un solve arrêté à la limite de temps est faux, pas seulement imprécis.} Le témoin le
-montre sans discussion : F0 est le forçage \emph{nul}, il ne modifie aucun coefficient, donc le
-statu quo et le statu quo${}\times{}$F0 devraient rendre le même optimum. Ils diffèrent de
-\SI{\prosEcartFzero}{\euros}, soit \SI{\prosEcartFzeroPct}{\percent}. Cet écart ne mesure aucun
-effet de scénario : il mesure ce que le \emph{branch-and-bound} a laissé sur la table. Toute
-comparaison entre une cellule convergée et une cellule daguée porte cette erreur, et rien ne
-garantit qu'elle soit du même ordre partout.
+\textbf{Un solve arrêté à la limite de temps est faux, pas seulement imprécis --- et l'écart à
+la borne de relaxation ne le mesure pas.} P8 non forcée a été résolue trois fois sur le
+\emph{même} ensemble faisable, chaque solve amorcé sur le précédent :
+\SI{\mesHuitUneHeure}{\euros}, \SI{\mesHuitTroisHeures}{\euros}, puis
+\SI{\mesHuitOptimum}{\euros} \emph{prouvé optimal} --- trois réponses à une seule question. Mais
+la relaxation linéaire, qui borne à \SI{\mesHuitBorneLp}{\euros}, aurait dit le deuxième faux de
+\SI{\mesHuitEcartApparent}{\percent} quand il l'était de \SI{\mesHuitEcartReel}{\percent} : le
+saut d'intégralité en absorbe \SI{\mesHuitSautInt}{\percent} à lui seul. Une borne LP prouve une
+infaisabilité, elle ne chiffre pas ce qu'un \emph{branch-and-bound} a laissé. La grille porte la
+même erreur --- F0 étant le forçage \emph{nul}, le statu quo et le statu quo${}\times{}$F0 sont
+le même problème, et ils différaient de \SI{\prosEcartFzero}{\euros}. Toute comparaison entre une
+cellule convergée et une cellule daguée porte cet écart, sans garantie qu'il soit du même ordre
+partout.
 \end{vigilance}
 
 \paragraph{Un front peut être entièrement inactif.} Le catalogue paramétrait les seuils du front
