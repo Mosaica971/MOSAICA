@@ -106,5 +106,17 @@ runs:
         args: {label: inertie, min_share: 0.40}
     matrix:
       args:azote_max.threshold:
-        - 1216469   #  90 % du plafond de P8
-        - 1351632   # 100 % -- controle, doit redonner P8 nue
+        # SECONDE PASSE, 2026-08-10. Les deux points ont ete ecrits, et le CONTROLE A ECHOUE :
+        # 1 351 632 a rendu 66 552 098 la ou P8 nue en rendait 68 445 374 -- exactement le meme
+        # objectif, pour exactement le meme azote 1 066 127, que le point a 1 081 306. La chaine
+        # de warm start les avait tous epingles sur l'incumbent du plus serre.
+        #   - 1216469   NON REPRIS. La seule graine faisable a ce plafond reste l'incumbent de
+        #               1 081 306, celui-la meme qui a echoue ; le relancer ne changerait rien.
+        #               Le point reste une BORNE INFERIEURE du front, monotone et daguee.
+        - 1351632   # 100 % -- controle. Repris avec une vraie graine : la P8 nue du 2026-08-10
+                    # (68 644 754, azote 1 351 522) passe sous ce plafond et sous LUI SEUL. Le
+                    # plafond n'y mordant pas, l'optimum du point EST celui de P8 nue : le run
+                    # doit rendre au moins 68 644 754. En dessous, c'est le solveur qu'on lit,
+                    # pas le front.
+                    #
+                    #   --warm-start-from outputs/p8_transition_agroecologique

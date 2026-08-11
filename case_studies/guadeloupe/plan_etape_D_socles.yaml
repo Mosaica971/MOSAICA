@@ -69,13 +69,35 @@
 #       --policies P5_austerite_budgetaire \
 #       --warm-start-from outputs/_non_converges/p5_austerite_budgetaire
 #
-# CE QUE LE RESULTAT DECIDE. Si P8 nue converge (ou gagne franchement), le lot D se lance tel
-# quel et le point de controle du front azote se reprend derriere. Si elle rend le meme
-# 68 445 374 apres trois heures, le pari est perdu et il faut l'ecrire comme resultat plutot
-# que d'y passer une nuit de plus : le chapitre 4 dira que sur cette instance le solveur cale a
-# 3,7 % de la borne, ce qui est une limite mesuree et non un aveu.
+# ===========================================================================================
+# RESULTAT, 2026-08-10 : LE PARI EST PERDU. MESURE, PAS SUPPOSE.
 #
-# Ce fichier est jetable. Une fois les deux socles ecrits, `plan.yaml` seul fait foi.
+#   P8 nue   1 h  ->  68 445 374   gap 3,69 %   azote 1 351 623   3 617 s
+#   P8 nue   3 h  ->  68 644 754   gap 3,41 %   azote 1 351 522  10 823 s
+#
+# Trois fois le temps a rapporte +199 380 EUR, soit +0,29 % -- et ferme 0,28 point de gap sur
+# les 2,69 qui separaient de la cible a 1 %. Le branch-and-bound n'etant pas lineaire, une
+# extrapolation optimiste met le 1 % a une trentaine d'heures de solve pour ce seul run. Sur
+# cette instance HiGHS cale, il ne progresse pas lentement -- exactement le comportement que
+# `config.yaml` (lignes 51-62) documentait deja a `mip_rel_gap: 0.001`.
+#
+# CONSEQUENCES, ET ELLES SONT NETTES :
+#
+#   1. REMETTRE `solver.args.time_limit` A 3600. Rien ne justifie de payer trois heures.
+#   2. NE PAS LANCER LE SOCLE P5. Il gagnerait le meme demi-pourcent, resterait en
+#      `maxTimeLimit`, et garderait donc sa dague dans le memoire : zero information achetee
+#      pour trois heures machine. `p5_austerite_budgetaire` reste en quarantaine -- le RENDRE
+#      A `outputs/` avant toute regeneration de la grille, il y est cite.
+#   3. LE RUN N'EST PAS PERDU POUR AUTANT. Sa nouvelle allocation consomme 1 351 522 kg N, ce
+#      qui la rend faisable au plafond de 1 351 632 et A LUI SEUL parmi les cinq points du
+#      front. C'est la graine qui manquait au point de controle -> voir la seconde passe de
+#      `plan_etape_B_reliquat.yaml`.
+#   4. LE CHAPITRE 4 ECRIT LA LIMITE PLUTOT QUE DE LA CONTOURNER : sur cette instance le
+#      solveur cale a 3,4 % de la borne LP. C'est une limite mesuree -- avec son cout et son
+#      rendement decroissant -- et non un aveu.
+#
+# Ce fichier est jetable. Il est conserve pour la mesure ci-dessus, qui est le seul chiffrage
+# qu'on ait du rendement du temps de solve sur cette instance.
 
 include:
   crop_groups: crop_groups.yaml
