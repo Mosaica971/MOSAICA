@@ -31,15 +31,15 @@
 #      cause, jamais dans le meme geste que le lancement.
 #
 # L'AMORCAGE EST CE QUI REND CE LOT UTILE. Sans graine, on relance exactement le solve qui a
-# echoue. Chaque cellule reprend l'allocation de sa propre politique -- c'est le chainage par
-# defaut de `run_scenarios.py` (`seed_candidates`), qui propose l'allocation non forcee de la
-# politique avant toute autre. Il faut donc que la politique nue existe et ait converge :
-#   P4 -> `outputs/p4_statu_quo` (optimal) : disponible.
-#   P8 -> produit par `plan_etape_BC.yaml`, QUI DOIT DONC ETRE PASSE AVANT CE LOT.
-#   P6 -> aucune version nue n'existe ; la cellule repartira a froid sauf a lui donner une
-#         graine globale. `--warm-start-from outputs/p4_statu_quo` est le candidat le plus
-#         proche (meme inertie a 50 % contre 70 %, memes ordres de grandeur), mais l'audit
-#         peut la rejeter -- il le dira, et le run repartira a froid sans faire semblant.
+# echoue.
+#
+#   /!\ CE PARAGRAPHE ETAIT FAUX JUSQU'AU 2026-08-11 ET LE RESTE CI-DESSOUS POUR MEMOIRE. Il
+#   affirmait que « chaque cellule reprend l'allocation de sa propre politique » et concluait
+#   que `outputs/p4_statu_quo` etait « disponible ». La lecture de `run_scenarios.py:304` dit
+#   le contraire : `policy_seeds` est un dictionnaire REMPLI PENDANT LE BATCH, jamais une
+#   lecture de `outputs/`. Un lot de reprise ne rejouant que des cellules FORCEES, aucune
+#   politique n'y a de run nominal, et les quatre cellules seraient parties A FROID -- soit
+#   exactement le solve qui a deja echoue. Voir docs/04-vigilance.md B.7.
 #
 # ORDRE : apres `plan_etape_BC.yaml`, PUIS apres `plan_etape_D_socles.yaml`.
 #
@@ -70,35 +70,61 @@
 #       --run P6_verdissement --seed outputs/p4_statu_quo
 #   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml
 #
-# MISE A JOUR DU 2026-08-11 -- LA MEILLEURE GRAINE DE P8 N'EST PLUS P8 NUE.
+# =============================================================================================
+# MISE A JOUR DU 2026-08-11 -- LE LOT SE LANCE EN TROIS COMMANDES, PAS UNE. LIRE AVANT.
 #
-# Le point de controle du front azote a converge a 69 088 438 (OPTIMAL), sur un ensemble
-# faisable identique a celui de P8 nue -- son unique contrainte supplementaire, `azote_max`
-# a 1 351 632, double exactement `plafond_azote`. C'est donc l'optimum du probleme P8, et il
-# vaut 0,64 % de plus que la cellule `p8_transition_agroecologique` actuellement sur disque
-# (68 644 754, `maxTimeLimit`).
+# ETAT DES SOCLES. `p8_transition_agroecologique` vaut desormais 69 088 438, OPTIMAL, et
+# `p4_statu_quo` 81 036 580, OPTIMAL. `p6_verdissement_incitatif` n'existe toujours pas.
 #
-# CONSEQUENCE D'ORDONNANCEMENT, ET ELLE EST CONTRAIGNANTE. `seed_candidates` propose aux deux
-# cellules P8 ci-dessous l'allocation non forcee de la politique, c'est-a-dire le dossier
-# nomme `p8_transition_agroecologique` -- pas le meilleur run connu. Les lancer maintenant
-# leur donnerait la graine a 68 644 754 alors qu'on detient mieux. Il faut donc D'ABORD
-# rafraichir le socle P8 depuis l'optimum prouve :
+# LE CHAINAGE NE VA PAS CHERCHER CES RUNS. Voir l'avertissement plus haut : `policy_seeds` est
+# interne au batch. Comme aucune des trois politiques ci-dessous n'a de cellule NON FORCEE dans
+# ce fichier, la chaine ne leur proposera rien et il faut nommer la graine a la main. Or
+# `--warm-start-from` est GLOBAL au batch : une seule graine pour les quatre cellules, alors
+# que P4 et P8 en veulent chacune une differente. D'ou le decoupage par politique.
 #
-#   move outputs\p8_transition_agroecologique  outputs\_non_converges\p8_transition_agroecologique_3h
-#           (le nom simple est deja pris dans la quarantaine par la version 1 h)
+#   1) P8 -- les deux cellules, la graine etant l'optimum prouve de la politique nue. F0 passe
+#      EN PREMIER pour que son allocation devienne (via `policy_seeds`, cette fois interne au
+#      batch et donc effective) la graine de F9. L'ordre du bloc `scenarios:` le garantit.
 #
-#   .venv/Scripts/python scripts/run_scenarios.py \
-#       --scenarios case_studies/guadeloupe/plan_etape_D_socles.yaml \
-#       --policies P8_transition_agroecologique \
-#       --warm-start-from outputs/p8_transition_agroecologique_pareto_azote_threshold_1351632
+#      .venv/Scripts/python scripts/run_scenarios.py \
+#          --scenarios case_studies/guadeloupe/plan_etape_D.yaml \
+#          --policies P8_transition_agroecologique \
+#          --warm-start-from outputs/p8_transition_agroecologique
 #
-# Ce run part de l'optimum : il n'a plus qu'a fermer la borne duale. Il doit rendre AU MOINS
-# 69 088 438 -- en dessous, l'audit de graine a rejete la solution et il faut lire pourquoi
-# avant d'aller plus loin. Ce n'est qu'ensuite que les quatre cellules ci-dessous s'amorcent
-# correctement.
+#   2) P6 -- aucune version nue n'existe. `outputs/p4_statu_quo` est le candidat le plus proche
+#      (inertie 50 % contre 70 %, memes ordres de grandeur) ; l'audit peut la rejeter, il le
+#      dira, et le run repartira a froid sans faire semblant.
 #
-# ET `time_limit` RESTE A 10800 : l'etape qui a converge a mis 7 774 s (voir la correction du
-# 2026-08-11 dans `plan_etape_D_socles.yaml`).
+#      .venv/Scripts/python scripts/run_scenarios.py \
+#          --scenarios case_studies/guadeloupe/plan_etape_D.yaml \
+#          --policies P6_verdissement_incitatif \
+#          --warm-start-from outputs/p4_statu_quo
+#
+#   3) P4 -- l'ancrage. Graine : son propre optimum.
+#
+#      .venv/Scripts/python scripts/run_scenarios.py \
+#          --scenarios case_studies/guadeloupe/plan_etape_D.yaml \
+#          --policies P4_statu_quo \
+#          --warm-start-from outputs/p4_statu_quo
+#
+# CET ORDRE EST CELUI DE L'INFORMATION ACQUISE, decroissante -- il vaut si la nuit est trop
+# courte. `F0_nominal` ne porte AUCUN override (`scenarios_forcages.yaml:28-29`), donc une
+# cellule x F0 est le MEME PROBLEME que sa politique nue et son optimum est deja connu :
+#
+#   P8 x F9   -1 506 116  inconnu, et seul resultat qui rende la robustesse de P8 lisible
+#   P6 x F0   57 191 548  inconnu (aucune P6 nue n'a jamais tourne)
+#   P4 x F0   80 468 932  optimum CONNU = 81 036 580, mais c'est l'ancrage de tous les regrets
+#   P8 x F0   68 445 374  optimum CONNU = 69 088 438, la cellule la moins informative du lot
+#
+# Les deux dernieres se relancent pour que la grille porte des cellules resolues plutot que des
+# valeurs recopiees a la main -- pas pour apprendre quelque chose.
+#
+# ET `time_limit` RESTE A 10800 : le socle P8 a converge a 8 981 s en partant deja de son
+# optimum (voir 04-vigilance.md B.8 -- prouver coute plus cher que trouver).
+#
+# MENAGE PREALABLE, independant du reste : `outputs/p4_statu_quo_2` est un doublon exact
+# (81 036 580, optimal, 353 s) aux memes coordonnees que `p4_statu_quo`. La grille Prospective
+# groupant sur (politique, forcage), elle y verra deux valeurs. A ecarter aussi.
 #
 # Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
 

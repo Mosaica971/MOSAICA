@@ -193,6 +193,45 @@ accélérationniste est résolue.
 
 ---
 
+### B.7 — Majeur — La chaîne de warm start est **interne au batch** : un run sur disque n'est jamais une graine {#chaine-batch}
+
+`seed_candidates` (`scripts/run_scenarios.py:74`) propose trois graines, la plus proche
+d'abord : le point précédent du même front, l'allocation nominale de la politique, la graine
+globale. Les deux premières se lisent dans `sweep_seeds` et `policy_seeds` — **deux
+dictionnaires remplis pendant le batch** (`run_scenarios.py:304-312`), jamais depuis
+`outputs/`. Il n'existe aucune découverte de graine sur disque.
+
+→ Conséquence : **une cellule dont la politique n'a pas de run non forcé dans le même batch
+repart à froid**, quel que soit ce qui dort dans `outputs/`. C'est exactement le cas d'un lot
+de reprise, qui ne rejoue par construction que les cellules forcées. Le seul moyen de nommer
+un run existant est `--warm-start-from`, et il est **global au batch** : un lot mêlant
+plusieurs politiques ne peut donner à chacune sa propre graine. Le découper par politique
+n'est pas de la coquetterie, c'est la seule façon d'amorcer correctement.
+
+Le symptôme est discret — la ligne « warm start depuis … » manque, mais le solve démarre
+normalement et le batch ne dit rien. Contrôle : `run_scenarios.py` imprime la graine retenue
+pour chaque run ; **son absence signifie froid**.
+
+### B.8 — Majeur — La borne LP racine surestime largement ce qu'un solve a laissé {#borne-lp}
+
+Mesuré sur `P8_transition_agroecologique` le 2026-08-11 : optimum entier **69 088 438**
+(prouvé), borne LP racine **71 065 297**. Le **saut d'intégralité vaut à lui seul 2,78 %**.
+Un incumbent à 68 644 754 est donc à 3,41 % de la borne LP mais à **0,64 % de l'optimum** —
+un facteur cinq entre les deux lectures.
+
+→ La borne LP sert à **prouver une infaisabilité** (cf. B.6) et à comparer des politiques
+entre elles. Elle ne chiffre pas la sous-optimalité d'un incumbent : l'écart qu'elle affiche
+appartient pour l'essentiel à la relaxation, pas au branch-and-bound. Ne jamais écrire « le
+solveur cale à 3,4 % » sur cette base.
+
+Corollaire mesuré le même jour : **prouver coûte plus cher que trouver**. Réamorcé sur
+l'optimum lui-même, le solve a mis **8 981 s** uniquement à fermer la borne duale. Et le temps
+ne rend qu'en chaîne, chaque étape repartant de l'incumbent de la précédente — 68 445 374
+(1 h), 68 644 754 (+3 h), 69 088 438 prouvé (+2,2 h) — là où trois heures d'un seul tenant à
+graine fixe n'avaient rapporté que 0,29 %.
+
+---
+
 ## C. Données : ce que le jeu ne contient pas
 
 ### C.1 — Majeur — Les rendements du modèle sont 2 à 4× ceux du territoire
