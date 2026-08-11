@@ -70,6 +70,36 @@
 #       --run P6_verdissement --seed outputs/p4_statu_quo
 #   .venv/Scripts/python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan_etape_D.yaml
 #
+# MISE A JOUR DU 2026-08-11 -- LA MEILLEURE GRAINE DE P8 N'EST PLUS P8 NUE.
+#
+# Le point de controle du front azote a converge a 69 088 438 (OPTIMAL), sur un ensemble
+# faisable identique a celui de P8 nue -- son unique contrainte supplementaire, `azote_max`
+# a 1 351 632, double exactement `plafond_azote`. C'est donc l'optimum du probleme P8, et il
+# vaut 0,64 % de plus que la cellule `p8_transition_agroecologique` actuellement sur disque
+# (68 644 754, `maxTimeLimit`).
+#
+# CONSEQUENCE D'ORDONNANCEMENT, ET ELLE EST CONTRAIGNANTE. `seed_candidates` propose aux deux
+# cellules P8 ci-dessous l'allocation non forcee de la politique, c'est-a-dire le dossier
+# nomme `p8_transition_agroecologique` -- pas le meilleur run connu. Les lancer maintenant
+# leur donnerait la graine a 68 644 754 alors qu'on detient mieux. Il faut donc D'ABORD
+# rafraichir le socle P8 depuis l'optimum prouve :
+#
+#   move outputs\p8_transition_agroecologique  outputs\_non_converges\p8_transition_agroecologique_3h
+#           (le nom simple est deja pris dans la quarantaine par la version 1 h)
+#
+#   .venv/Scripts/python scripts/run_scenarios.py \
+#       --scenarios case_studies/guadeloupe/plan_etape_D_socles.yaml \
+#       --policies P8_transition_agroecologique \
+#       --warm-start-from outputs/p8_transition_agroecologique_pareto_azote_threshold_1351632
+#
+# Ce run part de l'optimum : il n'a plus qu'a fermer la borne duale. Il doit rendre AU MOINS
+# 69 088 438 -- en dessous, l'audit de graine a rejete la solution et il faut lire pourquoi
+# avant d'aller plus loin. Ce n'est qu'ensuite que les quatre cellules ci-dessous s'amorcent
+# correctement.
+#
+# ET `time_limit` RESTE A 10800 : l'etape qui a converge a mis 7 774 s (voir la correction du
+# 2026-08-11 dans `plan_etape_D_socles.yaml`).
+#
 # Ce fichier est jetable. Une fois le batch passe, `plan.yaml` seul fait foi.
 
 include:

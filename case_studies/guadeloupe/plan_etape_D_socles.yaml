@@ -96,8 +96,33 @@
 #      solveur cale a 3,4 % de la borne LP. C'est une limite mesuree -- avec son cout et son
 #      rendement decroissant -- et non un aveu.
 #
-# Ce fichier est jetable. Il est conserve pour la mesure ci-dessus, qui est le seul chiffrage
-# qu'on ait du rendement du temps de solve sur cette instance.
+# ===========================================================================================
+# CORRECTION DU 2026-08-11 -- le verdict ci-dessus tenait sur une reference lache. LIRE ICI
+# AVANT DE S'EN SERVIR.
+#
+# Le point de controle du front (`plan_etape_B_reliquat.yaml`, seconde passe) a converge :
+# 69 088 438, OPTIMAL, sur un ensemble faisable identique a celui de P8 nue (son unique
+# contrainte de plus est un doublon exact de `plafond_azote`). C'est donc l'optimum du
+# probleme P8, et il rectifie deux affirmations du bloc precedent.
+#
+#   1. LE GAP DE 3,41 % ETAIT MESURE CONTRE LA BORNE LP RACINE. L'optimum entier valant
+#      69 088 438, le saut d'integralite pese a lui seul 2,78 % : le run de 3 h n'etait
+#      sous-optimal que de 0,64 %, pas de 3,41 %. « HiGHS cale a 3,4 % de l'optimum » est
+#      faux ; « le solveur cale a 0,6 % de l'optimum, et la relaxation LP est lache de 2,8 % »
+#      est ce que la mesure dit. Le chapitre 4 ne doit pas confondre les deux.
+#
+#   2. NE PAS REMETTRE `time_limit` A 3600. La consequence n. 1 du bloc precedent est annulee.
+#      Le rendement du temps est mauvais A GRAINE FIXE (1 h -> 3 h : +0,29 %) mais bon EN
+#      CHAINE, chaque etape repartant de l'incumbent de la precedente : 68 445 374, puis
+#      68 644 754, puis 69 088 438 prouve. Et l'etape qui a converge a mis 7 774 s -- une
+#      limite d'une heure l'aurait tranchee juste avant. `time_limit: 10800` reste en place.
+#
+# La consequence n. 2 (ne pas lancer le socle P5) TIENT : P5 nue n'est la graine de personne,
+# aucune cellule ne l'attend, et son statut dague est un resultat presentable tel quel.
+# `p5_austerite_budgetaire` est de retour dans `outputs/`.
+#
+# Ce fichier est jetable. Il est conserve pour la mesure ci-dessus -- le seul chiffrage qu'on
+# ait du rendement du temps de solve, a condition de la lire avec la correction.
 
 include:
   crop_groups: crop_groups.yaml

@@ -63,7 +63,7 @@ solver:
     mip_rel_gap: 0.01
     # Safety net: fail loudly after 1 h rather than grind for a day and a half. With the gap
     # above the real solve is far under this, so it should never trigger.
-    time_limit: 3600
+    time_limit: 10800
 
 # Labor: annual working hours per full-time-equivalent (ETP/UTA), used to convert the
 # estimated labor hours (surface x crop x technical itinerary x time per operation) into
