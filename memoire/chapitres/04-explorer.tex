@@ -245,11 +245,13 @@ la borne de relaxation ne le mesure pas.} P8 non forcée a été résolue trois 
 la relaxation linéaire, qui borne à \SI{\mesHuitBorneLp}{\euros}, aurait dit le deuxième faux de
 \SI{\mesHuitEcartApparent}{\percent} quand il l'était de \SI{\mesHuitEcartReel}{\percent} : le
 saut d'intégralité en absorbe \SI{\mesHuitSautInt}{\percent} à lui seul. Une borne LP prouve une
-infaisabilité, elle ne chiffre pas ce qu'un \emph{branch-and-bound} a laissé. La grille porte la
-même erreur --- F0 étant le forçage \emph{nul}, le statu quo et le statu quo${}\times{}$F0 sont
-le même problème, et ils différaient de \SI{\prosEcartFzero}{\euros}. Toute comparaison entre une
-cellule convergée et une cellule daguée porte cet écart, sans garantie qu'il soit du même ordre
-partout.
+infaisabilité, elle ne chiffre pas ce qu'un \emph{branch-and-bound} a laissé. La grille portait la
+même erreur --- F0 étant le forçage \emph{nul}, le statu quo et le statu quo${}\times{}$F0 sont le
+même problème, et ils différaient de \SI{\prosEcartFzero}{\euros}. Repris depuis une graine
+correcte, le second a rendu l'optimum \emph{prouvé} en \SI{\prosEcartFzeroDuree}{\second} : l'écart
+n'était pas un coût de taille du problème, il était entièrement imputable au hasard du
+branchement. Toute comparaison entre une cellule convergée et une cellule daguée porte cet écart,
+sans garantie qu'il soit du même ordre partout.
 \end{vigilance}
 
 \paragraph{Un front peut être entièrement inactif.} Le catalogue paramétrait les seuils du front

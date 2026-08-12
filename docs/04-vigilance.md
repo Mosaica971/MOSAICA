@@ -230,6 +230,32 @@ ne rend qu'en chaîne, chaque étape repartant de l'incumbent de la précédente
 (1 h), 68 644 754 (+3 h), 69 088 438 prouvé (+2,2 h) — là où trois heures d'un seul tenant à
 graine fixe n'avaient rapporté que 0,29 %.
 
+### B.9 — Majeur — Un warm start peut **dégrader** une cellule forcée {#warm-regression}
+
+Un warm start garantit un résultat **supérieur ou égal à la valeur de sa graine**. Il ne
+garantit rien vis-à-vis d'un run antérieur de la même cellule, qui a pu partir d'ailleurs et
+atterrir plus haut.
+
+Mesuré le 2026-08-12 sur `P8 × F9_crise_systemique`, repris avec trois fois plus de temps :
+
+| | objectif | durée |
+|---|---:|---:|
+| run initial, à froid | **−1 506 116** | 3 629 s |
+| reprise, amorcée sur P8 × F0 | −1 678 357 | 10 825 s |
+
+La graine était l'allocation de `P8 × F0`, **optimale sous F0 et médiocre sous F9** : la crise
+systémique renverse la rentabilité relative des cultures, si bien que le meilleur assolement
+nominal est un mauvais point de départ. Le solveur est parti d'un incumbent bas et n'en est
+pas sorti en trois heures.
+
+→ **Ne jamais écraser l'ancien run.** Après toute reprise, comparer et garder le meilleur des
+deux incumbents ; la quarantaine `outputs/_non_converges/` sert exactement à ça. Et pour
+reprendre une cellule forcée, la graine la plus sûre est **son propre run antérieur**, pas
+l'allocation nominale de la politique — celle-ci n'est la meilleure graine que pour les
+forçages qui déplacent peu les coefficients. Ce que dit `scenarios_forcages.yaml`
+(« un forçage change des coefficients, pas l'ensemble faisable ») garantit la **faisabilité**
+de la graine, jamais sa **qualité**.
+
 ---
 
 ## C. Données : ce que le jeu ne contient pas

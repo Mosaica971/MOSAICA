@@ -635,6 +635,12 @@ def main() -> int:
             lines.append(
                 f"\\newcommand{{\\prosEcartFzeroApres}}{{{_fmt(abs(nue - forcee), 0)}}}"
             )
+        # Le prix de la reparation. C'est la moitie de la demonstration : l'ecart n'etait pas
+        # une fatalite de taille du probleme, il tenait a une graine -- et il s'est ferme en
+        # quelques minutes la ou le run initial avait consomme son heure entiere.
+        duree = _dig(cellule, ("solve_duration_seconds",))
+        if duree is not None:
+            lines.append(f"\\newcommand{{\\prosEcartFzeroDuree}}{{{_fmt(duree, 0)}}}")
         lines.append("")
 
     # --- La grille et le regret ---------------------------------------------
