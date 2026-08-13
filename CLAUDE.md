@@ -8,6 +8,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > investigation log. Keep `docs/04-vigilance.md` in sync when a new limitation is found: it is the
 > file a newcomer reads, and this one is not.
 
+> **Travailler sur le mémoire ? Lire `memoire/ETAT.md` D'ABORD, avant toute autre chose.**
+> C'est le fichier de reprise de contexte : où en est le document, les trois décisions déjà
+> arbitrées qu'il ne faut pas rouvrir, les deux contraintes permanentes (aucun solve neuf ;
+> **les chapitres actuels ont été rédigés par Claude et Clément compte s'en éloigner**), le
+> plan par phases, et les points ouverts. Le tenir à jour à la fin de chaque session de
+> rédaction — c'est ce qui évite de tout réexpliquer à chaque conversation.
+> L'inventaire raisonné du stage vit dans `memoire/corpus/` (482 items typés, 1 267 arcs de
+> justification) ; `memoire/audit_corpus.py` en vérifie la complétude et écrit
+> `corpus/_audit.md`.
+
 ## What this is
 
 Python/Pyomo rewrite of **MOSAICA**, a crop-allocation optimization model originally
@@ -157,7 +167,7 @@ the PAD). Rebuild it whenever `config.yaml` changes year, `zone_filter` or
 
 **Invariance check before/after a refactor** — `scripts/golden_snapshot.py` builds the full
 real dataset and every indicator block on a real allocation (~7s, **no MILP solve**, so it is
-exactly reproducible) and serialises ~570 numeric checksums:
+exactly reproducible) and serialises 681 numeric checksums:
 
 ```bash
 .venv/Scripts/python scripts/golden_snapshot.py --write   # record current behavior
