@@ -18,6 +18,15 @@
 # pourrait figurer à l'identique dans n'importe quel autre mémoire de stage ne
 # vaut pas la place qu'il prend. Ceux qui restent doivent être INDÉCOLLABLES de
 # ce projet-ci. Sur ~40 axes, le Ch. 5 en tient 8 à 10.
+#
+# 2026-08-13 — HUIT AXES AJOUTÉS, VENUS DE CLÉMENT ET NON DU DÉPOUILLEMENT :
+# REF-05 (position raciale et coloniale), REF-06 (composition de l'institution),
+# REF-07 (le vécu réduit à un scalaire), REF-25 (co-construction), REF-26 (effet
+# réel sur la société), REF-55 (le refus de la thèse), REF-60 et REF-61 (la forme
+# du rendu). Ils touchent tous à quelque chose que le dépôt ne contient pas, et
+# c'est exactement pourquoi aucun n'était sorti des 27 premiers : dépouiller un
+# dépôt ne peut produire que des axes sur son contenu. La limite de la méthode
+# est elle-même un item — REF-60.
 # =============================================================================
 
 # --- A. La position : d'où je parle ------------------------------------------
@@ -94,6 +103,97 @@
     Aucun, sauf de le sous-employer. C'est l'axe le plus fort du chapitre :
     l'aveu n'a pas la forme d'une confidence, il a la forme d'un résultat
     technique. À placer tôt, il donne son régime à tout le reste.
+  destination: [ch5, oral]
+
+# Les trois axes qui suivent viennent de Clément (2026-08-13) et non du dépouillement.
+# Ils touchent à la race, à l'institution et à la distance sociale. Traitement retenu :
+# leur donner le même régime qu'au reste du corpus — un ancrage vérifiable, une question
+# ouverte, un risque nommé — plutôt qu'un régime d'exception qui les rendrait soit
+# intouchables soit décoratifs.
+
+- id: REF-05
+  axe: >
+    Être un homme blanc métropolitain modélisant l'usage des terres d'une société
+    antillaise noire, dans un pays où la propriété foncière est un fait colonial
+  ancrage: >
+    L'objet où cette position et le modèle se touchent physiquement s'appelle
+    CHLORDÉCONE. ~14 200 ha à risque dont ~7 300 encore en usage agricole
+    (CTX-04) ; un insecticide employé dans les bananeraies jusqu'en 1993, dont la
+    contamination est en Guadeloupe un fait politique et racial explicite, et
+    non un paramètre agronomique. Dans ce modèle il s'appelle `RISQUE_CLD`, c'est
+    une colonne, elle alimente deux contraintes d'éligibilité, et le rapport
+    technique montre qu'elle est agrégée par le MINIMUM de la classe rencontrée
+    sur la parcelle — c'est-à-dire par la lecture la PLUS PERMISSIVE (DON-72).
+    Une parcelle à cheval sur une zone saine et une zone contaminée est traitée
+    comme saine. Personne ne l'avait relevé avant ce dépouillement.
+  question: >
+    Est-ce que la position a changé quelque chose d'IDENTIFIABLE dans le travail,
+    ou seulement dans le rapport au travail ? Et une question plus dure, qui est
+    la vraie : est-ce que le fait de ne pas avoir vu ce Minimum/Maximum pendant
+    six mois tient à l'inattention ordinaire, ou au fait que la chlordécone était
+    pour toi un paramètre parmi 34 alors qu'elle n'en est pas un ici ?
+  risque: >
+    ⚠ C'EST L'AXE LE PLUS FACILE À RATER DU MÉMOIRE, et il se rate toujours de la
+    même façon : un paragraphe où l'auteur parle de sa propre position, se déclare
+    conscient, et occupe une page à se situer. Le lecteur guadeloupéen n'apprend
+    rien, et le jury lit une précaution. Ce qui sauve l'axe est qu'il y a un OBJET :
+    la blessure centrale de l'agriculture guadeloupéenne traverse ce modèle sous
+    forme de booléen, et le booléen est permissif. Écrire cela, c'est dire quelque
+    chose. Écrire « en tant que blanc j'ai conscience que », ce n'est rien dire.
+  destination: [ch5]
+
+- id: REF-06
+  axe: >
+    Une unité de recherche métropolitaine par sa composition, produisant des
+    prescriptions d'usage du sol pour un territoire qui ne s'y reconnaît pas
+  ancrage: >
+    ⚠ CET AXE N'A PAS D'ANCRAGE DANS LE DÉPÔT, et c'est à dire tel quel : il
+    repose sur une observation de Clément, invérifiable ici, et le corpus ne peut
+    ni la confirmer ni la démentir. Ce que le dépôt établit en revanche, c'est ce
+    que l'institution PRODUIT : une carte de ce que chaque parcelle devrait
+    cultiver, sous une politique donnée. La sortie est prescriptive (REF-23), et
+    la question de savoir qui siège dans l'institution qui la produit cesse
+    d'être un détail dès lors que la sortie l'est.
+  question: >
+    Est-ce que tu écris cet axe parce qu'il t'a gêné, ou parce qu'il a eu un
+    effet ? Les deux se disent, mais pas de la même façon : le premier appartient
+    au journal de bord, le second au mémoire. Et une question préalable : as-tu
+    de quoi étayer, ou est-ce une impression de six mois ?
+  risque: >
+    Trois écueils. (1) Mettre en cause des personnes nommables dans un document
+    qu'elles évalueront — inacceptable, et inutile : l'objet est structurel.
+    (2) Le procès d'intention sans donnée, qui décrédibilise tout le reste du
+    chapitre par contagion. (3) L'effet inverse du but recherché : un axe mal posé
+    fait passer l'auteur pour quelqu'un qui règle un compte. Formulation viable :
+    poser la question de la COMPOSITION comme une question de VALIDITÉ du produit,
+    pas de morale des producteurs — qui définit ce qu'est une « bonne » allocation,
+    et depuis quel corps social ?
+  destination: [ch5]
+
+- id: REF-07
+  axe: >
+    Le vécu agricole tout entier entre dans ce modèle sous la forme d'UN SCALAIRE
+    par type d'exploitation
+  ancrage: >
+    `AVERS`, le coefficient d'aversion au risque, est le seul endroit du programme
+    où la subjectivité d'un agriculteur existe. Il est déduit d'une typologie à
+    huit classes, elle-même déduite du groupe de culture dominant de
+    l'exploitation (PORT-54, `domain/farm_typology.py`). Autrement dit : la dette,
+    la succession, la chlordécone dans son propre sol, la mémoire de 2009, l'âge,
+    la fatigue, le fait de vouloir ou non que ses enfants reprennent — tout cela
+    est un nombre, et ce nombre se déduit de ce que l'on cultivait déjà.
+  question: >
+    Cette réduction est-elle un DÉFAUT du modèle ou sa CONDITION d'existence ?
+    Les deux réponses sont défendables et elles n'engagent pas le même mémoire.
+    Réponse à trancher toi-même, parce qu'elle détermine si le Ch. 5 est une
+    critique du modèle ou une explicitation de son domaine de validité.
+  risque: >
+    Distinct de REF-01, et il faut que ça se voie : REF-01 dit ce que le modèle
+    ne peut pas SAVOIR (question épistémique), celui-ci dit ce qu'il fait de ce
+    qu'il sait (question de représentation). Fondus ensemble, les deux perdent.
+    Second risque : le pathos. La liste ci-dessus est efficace parce qu'elle est
+    sèche et qu'elle se termine sur un fait technique — pas l'inverse.
+  destination: [ch5, oral]
   destination: [ch2, ch5, oral]
 
 # --- B. La posture de modélisateur -------------------------------------------
@@ -279,6 +379,61 @@
     arbitrage réel — mais un jury qui la pose lui-même et ne trouve pas de
     réponse préparée fait plus de dégâts.
   destination: [ch3, ch5, oral]
+
+- id: REF-25
+  axe: >
+    La co-construction avec les acteurs de terrain — non pas absente par manque de
+    temps, mais absente par CONSTRUCTION du dispositif
+  ancrage: >
+    Un modèle d'évaluation ex ante peut être co-construit à trois niveaux, et ils
+    ne coûtent pas la même chose. (1) L'OBJECTIF — « max marge ajustée du risque »
+    n'a été discuté avec personne, et REF-24 mesure qu'il laisse 15 % d'écart avec
+    ce que les agriculteurs font réellement. (2) Les CONTRAINTES — héritées du
+    GAMS sous mandat de parité (PORT-01), donc soustraites à la discussion par
+    décision de méthode. (3) Les SCÉNARIOS — dix politiques dans un YAML, écrites
+    seul (REF-22). Seul le troisième niveau est bon marché : `plan.yaml` est un
+    fichier de trente lignes qu'un atelier de deux heures pourrait remplir.
+    Les deux premiers demanderaient de rouvrir le modèle lui-même.
+  question: >
+    Deux questions distinctes, et il faut les séparer. (a) Aurais-tu PU faire
+    autrement dans les six mois — la lettre de mission prévoyait des enquêtes
+    (CTX-21), et la réorientation vers la reconstruction de l'outil (CTX-22) les
+    a mangées ; est-ce un arbitrage que tu assumes ou que tu regrettes ?
+    (b) Indépendamment de toi : le dispositif tel qu'il existe aujourd'hui
+    PERMET-il la co-construction, ou faudrait-il le refaire pour ça ?
+  risque: >
+    L'écueil est l'incantation — « il faudrait associer les acteurs », que tout
+    mémoire d'agronomie contient et que personne ne lit. Ce qui rend l'axe
+    utilisable est la GRADATION ci-dessus : dire précisément quel niveau est
+    ouvert (les scénarios, aujourd'hui, pour deux heures d'atelier) et lesquels
+    sont fermés (l'objectif et les contraintes, qui demanderaient de rouvrir la
+    parité). Une proposition chiffrée vaut mieux qu'un vœu.
+  destination: [ch5, ch6, note]
+
+- id: REF-26
+  axe: >
+    Quel effet réel sur la société — la question se teste, elle ne se médite pas
+  ancrage: >
+    Il existe un PRÉCÉDENT directement comparable, et il est dans `context/` :
+    CALALOU (2021-2025), même unité, mêmes encadrants, même territoire, même
+    ambition « de la fourchette à la fourche », conclu par un LIVRE BLANC
+    (CTX-10). TI-FIG lui succède. La question « qu'est-ce que ça change » n'est
+    donc pas rhétorique : elle a une réponse observable, et deux personnes du
+    couloir la connaissent. Qu'a produit CALALOU dans l'agriculture guadeloupéenne
+    entre 2021 et 2026 — une décision, une aide, une ligne de politique, un
+    article, rien ?
+  question: >
+    ⚠ CELLE-CI SE POSE À BLAZY ET GUINDÉ, PAS À TOI, ET ELLE SE POSE AVANT LE
+    26/08. Leur réponse est la meilleure donnée que tu puisses avoir sur ta propre
+    trajectoire, et elle ne coûte qu'une conversation. Le mémoire est
+    considérablement plus fort s'il cite ce qu'un projet antérieur a réellement
+    déplacé — y compris si la réponse est « pas grand-chose », qui est un résultat.
+  risque: >
+    Deux poses également faciles et également creuses : le désabusement
+    (« de toute façon les modèles ne servent à rien ») et l'utilité proclamée
+    (« cet outil aidera les décideurs à… »), qui est une promesse qu'aucun élément
+    du dépôt n'étaye. La sortie est empirique : demander, et rapporter.
+  destination: [ch5, ch6, oral]
 
 # --- D. L'honnêteté épistémique comme livrable -------------------------------
 
@@ -510,4 +665,113 @@
   risque: >
     Le réduire à une plainte sur la lenteur. Ce qui l'intéresse, c'est le lien
     entre coût d'une expérience et forme de la connaissance produite.
+  destination: [ch5, oral]
+
+- id: REF-55
+  axe: >
+    Avoir refusé la thèse qu'ils proposaient — et ce que ce refus dit du travail
+    qui précède
+  ancrage: >
+    Le refus a une TRACE MATÉRIELLE dans le dépôt, et c'est ce qui le rend
+    utilisable : `97-perspectives.yaml` contient 24 chantiers, dont aucun ne sera
+    fait par celui qui les a identifiés. MET-B2 (basculer le dépôt en anglais) est
+    différé pour une raison DATÉE — « le même choix aurait été juste trois mois
+    plus tôt ». PERSP-E (former les encadrants) devient le chantier critique, non
+    plus comme bonne pratique mais comme condition pour que le reste survive.
+    Et REF-52 pose déjà la question sans connaître la réponse : si le port n'est
+    interrogeable que par son auteur, il aura déplacé la dépendance sans la lever.
+  question: >
+    ⚠ CE QUI EST DÉCIDABLE PAR TOI SEUL, ET IL Y A DEUX DÉCISIONS EMBOÎTÉES.
+    (a) Est-ce que ce refus a sa place dans le mémoire ? Rien ne t'y oblige, un
+    mémoire n'est pas une confession, et le jury n'a pas à en connaître.
+    (b) Si oui : sous quel angle ? Le seul qui apporte quelque chose au lecteur
+    est le RETOUR SUR LE TRAVAIL — qu'est-ce que six mois passés à mesurer avant
+    de conclure t'ont appris sur ce que serait une thèse, et qu'est-ce que tu as
+    vu du métier qui a pesé ? Refuser en connaissance de cause est une évaluation,
+    et une évaluation motivée intéresse ; l'annonce seule n'intéresse personne.
+  risque: >
+    Trois. (1) Le registre : un mémoire qui glisse vers la lettre de rupture perd
+    le jury et met les encadrants dans une position impossible, puisqu'ils sont
+    dans la salle. (2) L'ingratitude apparente, alors que la proposition est un
+    signe de confiance — à nommer comme tel si l'axe est retenu. (3) Le contraire
+    exact : la fausse modestie qui neutralise le propos. La formulation qui tient
+    est celle qui parle du MÉTIER et pas des personnes, et qui s'appuie sur les
+    24 perspectives — tu sais précisément ce que serait la suite, tu l'as écrite,
+    et c'est en le sachant que tu ne la fais pas.
+  destination: [ch5, ch6]
+
+# --- G. La forme du rendu — pourquoi un rapport technique ? -------------------
+#
+# Axe soulevé par Clément le 2026-08-13, et qui n'était dans aucun des 27 axes
+# proposés par le dépouillement — pour une raison qui est elle-même le sujet :
+# un dépouillement de dépôt ne peut produire que des axes sur le CONTENU.
+
+- id: REF-60
+  axe: >
+    Le réflexe du rendu technique — et le fait que ce corpus lui-même en soit
+    la démonstration
+  ancrage: >
+    L'ancrage est SOUS TES YEUX. Devant la question « comment donner du sens à ce
+    stage », la réponse produite a été : un inventaire exhaustif de 482 items
+    typés, 1 267 arcs de justification, un script d'audit, trois règles formelles
+    et un graphe. C'est-à-dire qu'une méthode d'ingénieur a été appliquée à la
+    question du sens — et elle a d'ailleurs marché, ce qui complique le procès.
+    Second ancrage, mesurable dans le document : sur les 14 marqueurs `\arediger`
+    qui restent, TREIZE sont dans l'introduction, la discussion et la conclusion,
+    et UN dans les chapitres techniques. Ce qui explique COMMENT est écrit. Ce qui
+    explique POURQUOI ne l'est pas.
+  question: >
+    Le réflexe est-il un défaut de formation, une préférence personnelle, ou une
+    réponse rationnelle à l'incitation réelle — c'est-à-dire au fait qu'un jury
+    d'école d'ingénieurs évalue sur une grille de compétences techniques (CI2,
+    CI5, C5) et non sur la pertinence sociale du travail ? Les trois hypothèses
+    sont défendables ; la troisième est la plus intéressante parce qu'elle est
+    VÉRIFIABLE : la grille existe, tu peux la citer.
+  risque: >
+    L'auto-flagellation, qui est une autre forme de complaisance. Le fait
+    technique reste le fait technique : le corpus a trouvé des choses vraies que
+    la seule réflexion n'aurait pas trouvées — un plafond de subventions qui ne
+    contraint rien, un booléen chlordécone permissif, une métrique annoncée
+    comparable et jamais citée. L'axe n'est pas « la technique m'a empêché de
+    penser », il est « la technique a été ma façon de penser, et il faut regarder
+    ce qu'elle a produit ET ce qu'elle n'a pas pu produire ».
+  destination: [ch5, oral]
+
+- id: REF-61
+  axe: >
+    Faire une soutenance qui répond à POURQUOI plutôt qu'à COMMENT — quatre
+    questions : pourquoi, dans quel contexte, pour quelles finalités, avec qui
+  ancrage: >
+    Les quatre questions ont chacune une réponse ANCRÉE dans le corpus, et c'est
+    ce qui distingue cette soutenance-là d'un exposé d'opinions.
+    POURQUOI : la commande TI-FIG (CTX-20) et le fait que 80 % de l'alimentation
+    des DOM soit importée (CTX-02).
+    DANS QUEL CONTEXTE : une lignée de projets — CALALOU puis TI-FIG (CTX-10) —
+    et un stage réorienté de la simulation vers la reconstruction de l'outil
+    (CTX-22), donc six mois passés à réparer un instrument plutôt qu'à répondre à
+    la question qui l'avait motivé.
+    POUR QUELLES FINALITÉS : REF-26, la question à poser aux encadrants.
+    AVEC QUI : REF-25, la gradation des trois niveaux de co-construction, dont un
+    seul est ouvert aujourd'hui.
+    Une soutenance de vingt minutes tient environ dix items. Le corpus en destine
+    130 à l'oral : le tri est l'exercice, pas la collecte.
+  question: >
+    Deux décisions, et la seconde n'est pas la même que la première.
+    (a) Est-ce que la SOUTENANCE peut prendre cette forme — c'est un pari sur le
+    jury, à instruire auprès de ton tuteur école avant de s'y engager, parce
+    qu'une grille d'évaluation technique mal servie coûte cher.
+    (b) Est-ce que le MÉMOIRE le peut ? Ma réponse est non, et il ne le faut pas :
+    les deux objets n'ont pas le même lecteur ni le même contrat. Le mémoire doit
+    prouver la compétence technique — c'est ce qui est évalué. La soutenance, elle,
+    est le seul moment où tu parles à des humains présents, et c'est là que la
+    question du sens a sa place. La bonne architecture est probablement : mémoire
+    technique avec un Ch. 5 qui ouvre franchement, et soutenance qui prend le Ch. 5
+    comme colonne vertébrale en s'appuyant sur le reste comme preuve.
+  risque: >
+    Le risque n'est pas de ne pas être compris, il est d'être compris comme une
+    ESQUIVE. Une soutenance sur le sens, sans démonstration technique visible,
+    ressemble à une soutenance qui n'a rien à montrer. L'antidote est structurel :
+    chaque affirmation de sens doit être adossée à un fait mesuré du corpus, et
+    la démonstration technique passe alors dans les PREUVES au lieu d'être le
+    plan. C'est plus difficile à réussir et bien meilleur si c'est réussi.
   destination: [ch5, oral]

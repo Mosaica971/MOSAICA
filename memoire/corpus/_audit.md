@@ -4,7 +4,7 @@ Genere par `memoire/audit_corpus.py`. Ne pas editer a la main.
 
 ## Inventaire
 
-- **482 items** dont 455 factuels et 27 axes reflexifs
+- **490 items** dont 455 factuels et 35 axes reflexifs
 - **1267 arcs** poses
 - 7 branches coupees documentees
 
@@ -120,7 +120,7 @@ Aucun.
 
 ## Couverture des chapitres — 17 manquants
 
-Items destines a un chapitre : 67 controlables (ils portent un chiffre), 321 incontrolables automatiquement. **50 couverts.**
+Items destines a un chapitre : 67 controlables (ils portent un chiffre), 329 incontrolables automatiquement. **50 couverts.**
 
 | item | chapitre | titre |
 |---|---|---|
