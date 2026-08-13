@@ -1,0 +1,648 @@
+# =============================================================================
+# 80 — INDICATEURS D'IMPACT                                        préfixe : IND
+#
+# Ce que le modèle sait dire au-delà de la marge : azote, IFT, GES, eau,
+# carbone, pesticides, emploi, autonomie alimentaire, exposition au risque.
+#
+# Deux questions traversent le domaine et méritent d'être posées au lecteur :
+# (1) un indicateur calculé APRÈS le solve décrit une allocation, il ne
+#     l'influence pas — jusqu'au jour où on le borne, et il change de nature ;
+# (2) agréger des indicateurs en un score suppose des poids, donc une valeur.
+# =============================================================================
+
+# --- Le régime général -------------------------------------------------------
+
+- id: IND-01
+  titre: >
+    Tous les indicateurs sont des TAUX PAR HECTARE appliqués à l'allocation
+    après le solve
+  type: choix
+  statut: retenu
+  severite: null
+  source: [case_studies/guadeloupe/reporting/indicators.py, case_studies/guadeloupe/domain/]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [SOLV-01]
+    justifie: [IND-02, ARCH-20]
+  critique: >
+    Structure simple qui a une conséquence forte : le même taux sert au
+    reporting ET, depuis `territory_indicator_bound`, à contraindre. Un
+    indicateur descriptif devient normatif sans changer de code — c'est ce qui
+    a rendu la campagne prospective possible sans réécrire le modèle.
+
+- id: IND-02
+  titre: >
+    EXCEPTION — le carbone organique dépend de la PARCELLE (via `TYPE_SOL`), pas
+    seulement de la culture
+  type: donnee
+  statut: retenu
+  severite: mineur
+  source: [case_studies/guadeloupe/domain/soil_carbon.py, CLAUDE.md]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [IND-01]
+  critique: >
+    Il ne passe donc pas par l'helper générique `rate()`. Petite entorse
+    structurelle, documentée. Le Rpest est la seconde exception, et plus
+    profonde (IND-30) : il dépend du COUPLE parcelle × culture.
+
+- id: IND-03
+  titre: >
+    Le bloc `intensity` — azote et IFT PAR TONNE, marge et emploi par hectare,
+    efficience de la dépense publique
+  type: methode
+  statut: retenu
+  severite: critique
+  quand: 2026-07-31
+  source: [case_studies/guadeloupe/reporting/indicators.py, docs/04-vigilance.md#A.2]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [IND-01, PROS-43]
+    justifie: [IND-40]
+  critique: >
+    Réponse directe au piège « comparer des totaux confond échelle et
+    intensité » : une politique qui cultive moins d'hectares affiche moins
+    d'azote total sans produire plus proprement. Sans ce bloc, toute la grille
+    prospective serait ininterprétable. L'efficience de la dépense publique
+    (subvention par tonne / par ETP / par € de marge) est la partie la plus
+    directement utile à un décideur.
+
+# --- Environnement -----------------------------------------------------------
+
+- id: IND-10
+  titre: Azote, GES et IFT — les trois indicateurs portés du GAMS
+  type: choix
+  statut: retenu
+  severite: null
+  source: [case_studies/guadeloupe/domain/environment.py, context/gams/OPTIMISATION.txt]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [IND-01, PORT-04]
+    justifie: [IND-11, DON-53]
+
+- id: IND-11
+  titre: >
+    Phosphore et potasse ajoutés en lisant les NOMS d'engrais NPK — validés
+    contre la colonne `AZOTE` au millième près
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [case_studies/guadeloupe/domain/environment.py, docs/04-vigilance.md]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [IND-10, DON-23]
+  critique: >
+    Le seul ajout d'indicateur qui n'était pas dans le GAMS et qui repose sur
+    une convention interne au fichier de données plutôt que sur une source
+    externe. Sa validation croisée (l'azote déduit du nom égale la colonne
+    connue) est ce qui le rend défendable.
+
+- id: IND-20
+  titre: >
+    Besoin en eau — indicateur BRUT des cultures, jamais un besoin net
+    d'irrigation
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-20
+  source: [case_studies/guadeloupe/domain/water.py, docs/04-vigilance.md#C.4]
+  chiffre: []
+  destination: [ch2, annexeA, note]
+  arcs:
+    parce-que: [DON-20]
+    justifie: [ARCH-21]
+  critique: >
+    La formule GAMS déduit une pluviométrie mensuelle dont les colonnes sont
+    absentes ; GAMS rend 0 ; la pluie n'a donc jamais été déduite. Conséquence de
+    nommage : appeler cet indicateur « irrigation » dans un document de politique
+    publique serait un contresens à facteur inconnu.
+
+- id: IND-21
+  titre: >
+    Carbone organique — FLUX ANNUEL seulement, là où le GAMS itérait sur
+    plusieurs années
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#D.5, case_studies/guadeloupe/domain/soil_carbon.py]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [IND-02]
+    justifie: [PERSP-10]
+  critique: >
+    `C_ORG = C_ORG + (entrées − sorties)` suppose une trajectoire ; le modèle est
+    mono-année, seul le flux est portable. Un stock de carbone du sol cité depuis
+    ce modèle serait faux. C'est une des trois portes d'entrée du multi-périodes
+    (avec l'inertie et l'élevage).
+
+# --- Pesticides --------------------------------------------------------------
+
+- id: IND-30
+  titre: >
+    Rpest (arbre flou de Tixier) — le seul indicateur qui dépende du COUPLE
+    (parcelle, culture)
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [case_studies/guadeloupe/domain/rpest.py, context/gams/R_PEST_NEW.txt]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [IND-01]
+    justifie: [IND-31, IND-32]
+  critique: >
+    Il croise les produits de la culture avec le RUISSELLEMENT et le DRAINAGE de
+    la parcelle. Le plus lourd des indicateurs (4 sous-scores, surface et
+    profondeur, 14 seuils) et le seul dont la valeur ne se factorise pas.
+    Banane intensive 8,81, maraîchage 6,05, canne 5,66 ; 2 655 ha à risque élevé.
+
+- id: IND-31
+  titre: >
+    ⚠ PLANCHER ARTIFICIEL — « aucun produit » s'encode exactement comme « le
+    produit le plus toxique »
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#G.4]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [IND-30]
+  critique: >
+    Une culture sans pesticide somme `ADI = 0` et `AQUATOX = 0`, or les seuils
+    font du BAS de l'ADI le côté défavorable. Prairie, jachère et `MA_PLBIO` à
+    2,36 contre 8,81 pour la banane. Le CLASSEMENT est solide, le niveau absolu
+    du bas d'échelle ne l'est pas. Piège classique des agrégations floues :
+    l'absence et le pire se ressemblent dans une normalisation mal bornée.
+
+- id: IND-32
+  titre: >
+    ⚠ La « moyenne pondérée » annoncée est une SOMME SIMPLE — la dose se
+    simplifie entre numérateur et dénominateur
+  type: erreur
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#G.4]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [IND-30]
+  critique: >
+    Conséquence : beaucoup de petits traitements scorent plus haut qu'un seul
+    gros. Défaut d'algèbre dans la source, porté fidèlement, et qui change le
+    sens de l'indicateur — c'est un bon exemple d'erreur qu'on ne trouve qu'en
+    refaisant le calcul à la main.
+
+# --- Agroécologie et bio -----------------------------------------------------
+
+- id: IND-33
+  titre: >
+    Les MAE donnent une définition SOURCÉE de l'agroécologie, les opérations
+    `FERTI_MA_*BIO` une définition du bio — rapportées SÉPARÉMENT
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-01
+  source: [case_studies/guadeloupe/domain/agroecology.py]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [CTX-20]
+    justifie: [IND-34]
+  critique: >
+    Les additionner classerait la canne en récolte verte comme bio. Deux
+    définitions distinctes, deux chiffres distincts, aucune agrégation :
+    c'est le refus d'un raccourci commode qui aurait produit un chiffre flatteur
+    (14 502 ha sous MAE, 2,18 M€).
+
+- id: IND-34
+  titre: >
+    ⚠ Le « bio » par itinéraire INCLUT LA PRAIRIE — et la surface bio hors
+    prairie vaut 0 ha
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#G.5]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [IND-33, CAL-31]
+  critique: >
+    `PN_PIQ` et `PN_TOUR` utilisent `PROC_BIO_BOVIN`, donc TOUTE la surface
+    « bio » est le plancher de prairie. Toute affirmation sur les terres
+    cultivées doit lire la variante `surface_bio_hors_prairie_*`. Piège
+    circulaire : une contrainte ajoutée pour la calibration produit
+    mécaniquement un indicateur environnemental flatteur.
+
+- id: IND-35
+  titre: >
+    Le bio ne peut PAS être bâti sur les 25 variantes symétriques — la contrainte
+    serait satisfaite à coût nul
+  type: choix
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#B.3, SOLV-42]
+  chiffre: []
+  destination: [ch2, ch4, oral]
+  arcs:
+    parce-que: [SOLV-42]
+  critique: >
+    Le lien entre un défaut de données et un artefact de politique publique
+    passe précisément par cet indicateur. C'est le point de jonction entre le
+    domaine 40 (solveur) et le domaine 80 (indicateurs), et il vaut d'être
+    raconté d'un seul tenant.
+
+# --- Résilience et robustesse ------------------------------------------------
+
+- id: IND-36
+  titre: >
+    Trois indicateurs d'EXPOSITION — marge à risque climatique, concentration du
+    revenu (HHI), perte sous choc de prix
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-20
+  source: [case_studies/guadeloupe/domain/resilience.py]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [CTX-02, CTX-20]
+    justifie: [IND-37]
+
+- id: IND-37
+  titre: >
+    ⚠ « RÉSILIENCE » DÉSIGNE DEUX CHOSES OPPOSÉES dans le dépôt — ne jamais les
+    additionner
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#A.3]
+  chiffre: []
+  destination: [ch4, oral, note]
+  arcs:
+    parce-que: [IND-36, PROS-26]
+  critique: >
+    `recap["resilience"]` mesure l'EXPOSITION d'une allocation FIGÉE — le choc
+    est appliqué après le solve, donc « que perd-on si personne ne réagit ».
+    `robustness.py` mesure la CAPACITÉ D'ADAPTATION sous contrainte politique —
+    le modèle a ré-optimisé. Même mot, question inverse. Le nombre obtenu en les
+    additionnant n'a aucun sens. Piège de vocabulaire d'autant plus dangereux que
+    « résilience » est un mot que tout rapport de politique publique emploie.
+
+- id: IND-38
+  titre: >
+    `NC` (non cultivé) porte `Var_Rdt = 1,0`, soit une perte de 100 %
+  type: erreur
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#G.6]
+  chiffre: []
+  destination: [annexeA]
+  arcs:
+    parce-que: [IND-36, SOLV-04]
+  critique: >
+    Artefact du tableau source. Sans effet sur le choc de prix, mais sa
+    contribution à la marge à risque vaut `marge_NC × 1,0`. À connaître avant de
+    lire un scénario qui laisse beaucoup de surface non cultivée.
+
+# --- Le score composite ------------------------------------------------------
+
+- id: IND-40
+  titre: >
+    ⚠ UN INDICATEUR QU'UNE CONTRAINTE FIXE N'EST PAS UN RÉSULTAT — noter une
+    politique sur le plafond qu'elle s'est donné est circulaire
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#A.1, apps/dashboard/comparison.py]
+  chiffre: []
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [IND-03]
+    justifie: [IND-41]
+  critique: >
+    P1 gagne l'axe « dépense publique » en la mettant à zéro. `bound_indicators`
+    les détecte depuis `recap["constraints"]`, donc RÉTROACTIVEMENT sur les runs
+    déjà écrits — propriété précieuse : le garde-fou s'applique au passé.
+    Décision assumée : le score les inclut quand même SI ON LE DEMANDE, parce que
+    les exclure d'office empêcherait de voir l'effet d'un plafond sur les AUTRES
+    indicateurs. Nuance rare et bien vue.
+
+- id: IND-41
+  titre: >
+    PONDÉRER PAR FAMILLE — sans quoi les onze ratios d'autonomie alimentaire,
+    quasi colinéaires, pèsent ONZE FOIS les GES
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-31
+  source: [docs/04-vigilance.md#A.4, apps/dashboard/comparison.py]
+  chiffre: []
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [IND-40]
+  verdict-anterieur: >
+    « Un score composite normalisé indicateur par indicateur traite tous les
+    critères équitablement. » Il traite équitablement les COLONNES, pas les
+    enjeux : les onze ratios d'autonomie alimentaire, quasi colinéaires, pèsent
+    onze fois les GES. Le score classait les politiques sur la finesse d'une
+    nomenclature.
+  critique: >
+    Défaut de méthode générique à tout tableau de bord multicritère, découvert
+    ici parce que le découpage de l'autonomie alimentaire est fin. Un décideur
+    lisant le score non corrigé aurait classé les politiques sur un artefact de
+    nomenclature. Publiable comme mise en garde.
+
+- id: IND-42
+  titre: >
+    Exposer un indicateur au score demande DEUX ajouts — le sens et
+    l'appartenance ; le premier seul ne branche rien
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [CLAUDE.md, apps/dashboard/comparison.py, "apps/dashboard/pages/2_Comparaison.py"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [IND-41]
+  critique: >
+    `INDICATOR_DIRECTION` pour le sens, `_INDICATOR_LABELS` pour le groupe. Dette
+    de conception : deux registres à tenir synchrones à la main, exactement le
+    genre d'écart qui produit un indicateur silencieusement absent d'un score.
+    Un test de synchronisation manque ici, alors qu'il existe ailleurs (VER-61).
+
+- id: IND-43
+  titre: >
+    L'eau est EXCLUE du score composite parce que sa donnée mensuelle est
+    dégénérée
+  type: choix
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#C.4]
+  chiffre: []
+  destination: [annexeD, note]
+  arcs:
+    parce-que: [DON-21, IND-41]
+  critique: >
+    Exclusion motivée par la STRUCTURE de la donnée et non par un jugement de
+    pertinence. C'est le bon critère, et il faut le dire — sinon une exclusion
+    ressemble à un arbitrage caché.
+
+- id: IND-44
+  titre: >
+    Diversité de Shannon territoriale — mesurer la diversification de
+    l'assolement plutôt que sa composition
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-31
+  source: [core/reporting/, "docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md"]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [IND-03]
+  critique: >
+    Indicateur agrégé qui répond à une question que les surfaces par culture ne
+    posent pas : un territoire qui remplace une monoculture par une autre n'a pas
+    progressé. À relier à IND-36 (concentration du revenu) — les deux mesurent
+    une forme de dépendance, l'un en surface, l'autre en euros.
+
+# --- Autonomie alimentaire ---------------------------------------------------
+
+- id: IND-50
+  titre: >
+    Onze ratios d'autonomie alimentaire — la réponse la plus directe à la
+    question du projet
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-17
+  source: ["docs/superpowers/specs/2026-07-17-food-self-sufficiency-indicators-design.md"]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [CTX-20]
+    justifie: [IND-41]
+  critique: >
+    C'est l'indicateur que la commande appelait littéralement (développer les
+    aliments traditionnels, mesurer la couverture des besoins). Ironie du
+    dispositif : sa FINESSE de découpage a failli fausser le score composite
+    (IND-41). Le levier le plus aligné sur la commande est aussi celui qui a
+    créé le biais de mesure.
+
+- id: IND-51
+  titre: >
+    ⚠ Un ratio d'autonomie suppose une DEMANDE, et la demande n'est pas modélisée
+  type: piege
+  statut: ouvert
+  severite: critique
+  source: ["docs/superpowers/specs/2026-07-17-food-self-sufficiency-indicators-design.md", PROS-44]
+  chiffre: []
+  destination: [ch4, ch5, ch6, article]
+  arcs:
+    parce-que: [IND-50, PROS-44]
+    justifie: [PERSP-20]
+  critique: >
+    Le dénominateur vient d'une source exogène (besoins de la population), le
+    numérateur d'une production optimisée sous hypothèse de marché parfaitement
+    élastique. Les deux ne se rencontrent nulle part dans le modèle. C'est
+    exactement le point que CALALOU traitait par son WP1 (préférences des
+    consommateurs, restauration collective) et que ce stage n'a pas.
+
+- id: IND-52
+  titre: >
+    Restauration collective / EGalim — cadré puis DIFFÉRÉ faute de données
+    externes
+  type: perspective
+  statut: differe
+  severite: null
+  quand: 2026-07-17
+  source: ["docs/superpowers/specs/2026-07-17-egalim-collective-catering-design-DEFERRED.md"]
+  chiffre: []
+  destination: [ch6, note]
+  arcs:
+    parce-que: [IND-51, CTX-23]
+  critique: >
+    ⚠ À REVÉRIFIER : CALALOU avait un volet restauration collective, avec une
+    thèse de master dédiée (Ben Ali 2023, CIHEAM-IAM Montpellier) sur la
+    relocalisation des légumes pour les cantines guadeloupéennes. Le blocage
+    était peut-être un problème d'ACCÈS et non d'existence. Question concrète à
+    poser à l'encadrement — elle peut requalifier un « différé faute de données »
+    en « différé faute d'avoir demandé ».
+
+# --- Prix duaux --------------------------------------------------------------
+
+- id: IND-60
+  titre: >
+    Le coût marginal de chaque contrainte nommée — un point d'IFT vaut 286 €,
+    un kg d'azote 9,81 €, une heure de travail 12,50 €
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [core/solve/shadow_prices.py]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [IND-01]
+    justifie: [PROS-11]
+  critique: >
+    Chiffres directement parlants pour un décideur, et c'est rare dans ce
+    travail. Mais ils portent la réserve de VER-13 (duaux de la relaxation, pas
+    du MILP) ET celle de PROS-11 (validité locale seulement) — deux réserves
+    empilées sur le chiffre le plus citable du lot. À ne jamais sortir seul.
+
+# =============================================================================
+# DENSIFICATION — spec « eau et carbone organique » (2026-07-20).
+# =============================================================================
+
+- id: IND-70
+  titre: >
+    UN INDICATEUR SUPPRIMÉ PARCE QU'IL SERAIT MAL LU, pas parce qu'il est faux
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md:120-131"]
+  chiffre: []
+  destination: [ch2, ch5, oral, article]
+  arcs:
+    parce-que: [DON-21]
+    justifie: [IND-43]
+  critique: >
+    ⚠ L'UNE DES PLUS BELLES DÉCISIONS DU DÉPÔT, et elle est enfouie dans une spec.
+    Le « mois de pointe » devait dimensionner la ressource et l'infrastructure —
+    raisonnement juste, et rendu CADUC par la donnée : les douze colonnes
+    `BESOIN_EAU_01..12` étant identiques pour les 84 cultures, le mois de pointe
+    vaut toujours exactement le total divisé par douze. Trois décisions en
+    découlent, graduées : (1) l'indicateur RESTE dans le recap, « utile si un jour
+    une vraie saisonnalité arrive » ; (2) il est RETIRÉ du score composite, où il
+    doublerait le poids de l'eau par colinéarité ; (3) le CSV mensuel prévu pour
+    le tableau de bord est **supprimé**, et la raison est explicite —
+    « 12 lignes identiques s'y liraient comme une vraie courbe saisonnière ».
+    Supprimer une sortie exacte parce qu'elle serait MAL LUE est le degré le plus
+    abouti de MET-40, et il coûte quelque chose : on retire une information
+    plutôt que d'y accoler un avertissement.
+
+- id: IND-71
+  titre: >
+    LE PIÈGE DES DEUX REGISTRES A MORDU DANS LA SPEC MÊME QUI LE DOCUMENTE
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md:112-118"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [IND-42]
+  verdict-anterieur: >
+    « Documenter un piège suffit à s'en prémunir. » Le piège des deux registres a
+    été commis DANS la spec qui le documente, par son auteur, et corrigé en
+    post-revue dans le même fichier. Documenter n'est pas garder : seul un test
+    de synchronisation l'aurait empêché, et il n'existe toujours pas.
+  critique: >
+    « Ajouter une clé à `INDICATOR_DIRECTION` sans l'ajouter aussi à
+    `_ENV_INDICATORS` la laisse invisible du picker — **c'est ce qui s'est
+    produit ici avant correction**. » L'aveu est dans la spec elle-même, en
+    correction post-revue. Le piège n'est donc pas théorique : il a été commis
+    par celui qui l'a ensuite documenté, dans le même document. Et il n'a
+    toujours pas de test de synchronisation, contrairement à d'autres couples de
+    fichiers (VER-61) — la dette est identifiée, nommée, et non payée.
+
+- id: IND-72
+  titre: >
+    Un troisième bug d'eau porté fidèlement — le `max(0, ·)` manquant
+  type: erreur
+  statut: retenu
+  severite: mineur
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md:154-157"]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-01, DON-20]
+  critique: >
+    Le `$` du GAMS ne conditionne que le terme de pluie, pas la soustraction :
+    quand le besoin est inférieur à la pluie, l'expression vaut `BESOIN − 0 =
+    BESOIN` au lieu de `0`. L'intention était clairement `max(0, ·)`. Porté tel
+    quel. ⚠ Sans effet PRATIQUE ici, puisque la pluie n'est jamais déduite
+    (DON-20, les colonnes mensuelles sont absentes) : c'est un bug dormant à
+    l'intérieur d'un autre bug. Si la série pluviométrique arrivait un jour, il
+    se réveillerait — à signaler dans la même entrée que le déblocage.
+
+# =============================================================================
+# DENSIFICATION — spec « score de stabilité / résilience » (2026-07-20).
+# =============================================================================
+
+- id: IND-73
+  titre: >
+    `Var_Rdt` varie de 0 à 0,7 À L'INTÉRIEUR de certaines familles — le choix de
+    la représentante déplace sensiblement le risque de la baseline
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-resilience-stability-score-design.md:196-200"]
+  chiffre: []
+  destination: [ch3, annexeD, note]
+  arcs:
+    parce-que: [DON-11, IND-36]
+  critique: >
+    La réserve générale sur les représentantes (DON-11) « mord un peu plus ici » :
+    un écart de 0 à 0,7 sur le coefficient de perte, à l'intérieur d'une même
+    famille, signifie que le risque de la situation observée dépend pour une
+    bonne part d'un choix de configuration. Troisième canal par lequel
+    l'hypothèse de représentante contamine un résultat, après l'économie
+    d'entrée et le plafond de main d'œuvre (DON-12).
+
+- id: IND-74
+  titre: >
+    `NC` a bien `Prix = 0` et `Rdt = 0` — sa contribution au choc de prix est
+    EXACTEMENT nulle, mais pas sa contribution au risque climatique
+  type: piege
+  statut: ouvert
+  severite: mineur
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-resilience-stability-score-design.md:202-210"]
+  chiffre: []
+  destination: [annexeD, note]
+  arcs:
+    parce-que: [IND-38]
+  critique: >
+    Analyse fine et honnête : la vérification a établi que deux des trois canaux
+    sont neutres, et isolé le troisième. La marge de `NC` vaut
+    `subventions − coûts variables`, donc n'est pas mécaniquement nulle, et elle
+    pèse à taux plein (`Var_Rdt = 1,0`) dans la marge à risque. ⚠ La spec dit
+    « À MESURER AU CÂBLAGE : si la contribution est significative, il faudra
+    décider de l'exclure explicitement » — cette mesure ne semble avoir été faite
+    nulle part. Action ouverte, bon marché. Argument supplémentaire : le GAMS
+    maintient un set dédié `CULT_NON_NC_2017` (« toutes les cultures sauf NC »),
+    signe que `NC` y était DÉJÀ traitée à part.
+
+- id: IND-75
+  titre: >
+    Le choc de prix ne touche NI la bagasse NI les subventions
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: ["docs/superpowers/specs/2026-07-20-resilience-stability-score-design.md:212"]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [IND-36]
+  critique: >
+    Hypothèse de modélisation lourde et facile à manquer : un choc de prix
+    n'atteint que le produit de marché. Or la subvention vaut environ les trois
+    quarts de la marge brute du territoire (CTX-03). L'indicateur d'exposition
+    mesure donc la sensibilité du quart restant, et sous-estime structurellement
+    la volatilité perçue par un exploitant si les aides devaient bouger. À dire
+    quand on cite un chiffre de perte sous choc.

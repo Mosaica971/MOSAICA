@@ -1,0 +1,623 @@
+# =============================================================================
+# 95 — MÉTHODE ET ORGANISATION DU TRAVAIL                          préfixe : MET
+#
+# Comment le travail a été conduit : le rythme, la trace écrite, le style de
+# code et de commentaire, la langue, la discipline de mesure.
+#
+# Domaine délicat pour un mémoire : ce sont des choix réels et justifiables,
+# mais un jury MF2E n'attend pas un traité de génie logiciel. Sélection stricte
+# — ne montent au cœur que ceux dont dépend la CRÉDIBILITÉ d'un résultat.
+# =============================================================================
+
+# --- Le principe directeur ---------------------------------------------------
+
+- id: MET-01
+  titre: >
+    MESURER AVANT DE CONCLURE — la règle que le stage s'est donnée, et qui a
+    renversé quatre verdicts
+  type: methode
+  statut: retenu
+  severite: null
+  source: [docs/archives/journal-vigilance.md, memoire/chapitres/03-calibrer.tex]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  racine: true          # axiome fondateur : la seule règle que le stage se soit donnée a priori
+  arcs:
+    justifie: [MET-02, MET-10, VER-20, VER-42]
+  critique: >
+    Les quatre renversements (CAL-54 pour trois, SOLV-22 pour le quatrième) ont
+    tous la même forme : un raisonnement plausible, tenu pour acquis, qu'une
+    mesure a démenti. Et ce qui les a démentis n'était JAMAIS une meilleure
+    intuition, toujours un protocole. C'est la thèse méthodologique que le
+    travail permet de soutenir, et elle se formule ainsi : modéliser ne consiste
+    pas d'abord à construire, mais à organiser les conditions dans lesquelles on
+    peut avoir tort de façon visible.
+
+- id: MET-02
+  titre: >
+    Un résultat NÉGATIF mesuré vaut un résultat positif, et il est consigné avec
+    le même soin
+  type: methode
+  statut: retenu
+  severite: null
+  source: [TODO.md, docs/04-vigilance.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-01]
+  critique: >
+    Exemples : les deux contraintes hors CALIB sont INERTES (+0 paire éligible,
+    PORT-53) ; resserrer le gap MIP ne récupère AUCUNE prairie (CAL-B4) ;
+    l'enveloppe Pyomo→HiGHS est négligeable (SOLV-13) ; le front azote sous F9 ne
+    mord nulle part (PROS-42). Quatre non-résultats qui ont chacun fermé une
+    branche. Un mémoire qui ne montre que ce qui a marché ne montre pas comment
+    on travaille.
+
+- id: MET-03
+  titre: >
+    S'ABSTENIR est un mode de sortie légitime, et il est implémenté trois fois
+  type: methode
+  statut: retenu
+  severite: null
+  source: [core/config.py, core/solve/timing.py, core/reporting/robustness.py]
+  chiffre: []
+  destination: [ch5, note, article]
+  arcs:
+    parce-que: [MET-01]
+  critique: >
+    (1) `order_sweep_points` s'abstient dès qu'il ne peut pas conclure sur le
+    sens ; (2) `estimate_range` rend `None` hors de sa bande de comparabilité ;
+    (3) le module de robustesse refuse de moyenner les forçages. Trois modules
+    sans rapport, un même principe : mieux vaut ne rien dire qu'affirmer
+    au-delà de ce qu'on sait. C'est un fil conducteur du Ch. 5.
+
+# --- La trace écrite ---------------------------------------------------------
+
+- id: MET-10
+  titre: >
+    Un commit = un FAIT MESURÉ, avec son chiffre dans le message
+  type: organisation
+  statut: retenu
+  severite: null
+  source: ["git log"]
+  chiffre: []
+  destination: [ch5, annexeF, note]
+  arcs:
+    parce-que: [MET-01]
+  critique: >
+    « le lot D repare l'ancrage, et decouvre qu'une reprise peut regresser » ;
+    « le temps de solve rend 0,28 point de gap pour 3x l'heure » ; « ecart
+    d'optimalite 1% -- l'objectif Markowitz etait intraitable ». L'historique se
+    lit comme un journal d'expérience et non comme une liste de modifications.
+    Conséquence concrète : l'annexe F (chronologie) est déjà écrite dans le
+    `git log`, il reste à la mettre en forme.
+
+- id: MET-11
+  titre: >
+    QUATRE lieux d'écriture, avec une règle de tri explicite entre eux
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, docs/README.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-10]
+    justifie: [MET-12, MET-13]
+  critique: >
+    `docs/04-vigilance.md` = les pièges (le POURQUOI, et ce qu'un nouveau doit
+    lire avant de citer un chiffre) ; `TODO.md` = ce qui reste à faire (le QUOI
+    ENSUITE) ; `docs/superpowers/specs/` = une enquête entière avec ses impasses ;
+    `docs/archives/journal-vigilance.md` = le log historique. Quatre questions
+    différentes, quatre fichiers. Sans cette règle, tout finit dans un seul
+    document que personne ne relit.
+
+- id: MET-12
+  titre: >
+    `journal-vigilance.md` (1 016 lignes) a été SYNTHÉTISÉ en `04-vigilance.md`
+    plutôt que maintenu
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [docs/archives/journal-vigilance.md, docs/04-vigilance.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-11]
+  critique: >
+    Décision juste : un journal chronologique de 1 000 lignes devient illisible
+    au moment précis où il devient précieux. La synthèse est TYPÉE (Critique /
+    Majeur / Mineur), donc triable, et l'original reste consultable. Le journal
+    n'est pas jeté, il est déclassé — nuance importante.
+
+- id: MET-13
+  titre: >
+    Seuls les PLANS NON EXÉCUTÉS sont conservés ; un plan exécuté est supprimé,
+    sa raison d'être survivant dans la spec correspondante
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, docs/superpowers/]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [MET-11]
+  critique: >
+    Règle qui évite l'accumulation de documents périmés — le vrai fléau d'un
+    dépôt de recherche. `plans/` est aujourd'hui vide pour exactement cette
+    raison, et le dire évite qu'un successeur le croie abandonné.
+
+- id: MET-14
+  titre: >
+    ⚠ CONTRE-EXEMPLE — l'inventaire de portage a dérivé trois semaines sans que
+    personne le voie
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  quand: 2026-08-09
+  source: [docs/gams_port_inventory.md, PORT-05]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-11]
+    justifie: [MET-20]
+  verdict-anterieur: >
+    « Une documentation tenue à jour avec discipline reste juste. » La discipline
+    a tenu partout sauf sur deux lignes, pendant trois semaines, dans le document
+    dont la seule raison d'être est la traçabilité — et personne ne l'a vu parce
+    qu'il n'y avait rien à voir : un document périmé se lit exactement comme un
+    document à jour.
+  critique: >
+    Deux lignes fausses dans le document censé garantir la traçabilité du
+    portage. Une documentation à laquelle on fait confiance et qui dérive est
+    PIRE que pas de documentation. C'est l'argument le plus fort pour MET-20.
+    Et il y a un second cas dans le dépôt : PORT-41, où l'inventaire et une spec
+    se contredisent encore aujourd'hui.
+
+- id: MET-20
+  titre: >
+    GÉNÉRER plutôt que rédiger tout ce qui peut l'être
+  type: methode
+  statut: retenu
+  severite: null
+  source: [memoire/build_chiffres.py, scripts/golden_snapshot.py]
+  chiffre: []
+  destination: [ch5, note, oral]
+  arcs:
+    parce-que: [MET-14]
+    justifie: [MET-21, MET-40]
+  critique: >
+    Application la plus visible : les 518 macros de `chiffres.tex`. AUCUN chiffre
+    du mémoire n'est saisi à la main ; chacun est extrait d'un run ou déclaré
+    dans un dictionnaire de mesures AVEC SA PROVENANCE. Un run relancé, une
+    recompilation, et le mémoire est à jour. C'est la seule défense contre le
+    chiffre qui vieillit dans un texte.
+
+- id: MET-21
+  titre: >
+    Les constantes mesurées mais non recalculables portent leur PROVENANCE dans
+    le code qui les déclare
+  type: methode
+  statut: retenu
+  severite: null
+  source: ["memoire/build_chiffres.py:73-142"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [MET-20]
+  critique: >
+    `"mesWarmAvant": ("720", "solve a froid, en s (CLAUDE.md, journal 2026-07-29)")`.
+    Compromis honnête entre « tout regénérer » (impossible : certaines mesures
+    coûtent des heures de solve) et « écrire le chiffre dans le texte »
+    (invérifiable). ⚠ Limite à assumer : ces valeurs ne sont pas reproductibles
+    depuis `outputs/` aujourd'hui, elles sont attestées par un journal.
+
+- id: MET-22
+  titre: >
+    Le générateur de chiffres REFUSE d'émettre un PAD pour un run prospectif
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: ["memoire/build_chiffres.py:161-164"]
+  chiffre: []
+  destination: [ch4, ch5, oral]
+  arcs:
+    parce-que: [MET-20, PROS-43]
+  critique: >
+    Un piège de lecture (« le PAD ne s'applique pas en prospective ») encodé
+    dans l'OUTIL D'ÉCRITURE du mémoire, et pas seulement dans une note de
+    vigilance. On ne peut donc pas se tromper par distraction. C'est le plus bel
+    exemple de MET-40 et il mérite d'être cité tel quel.
+
+# --- Le code et ses commentaires ---------------------------------------------
+
+- id: MET-30
+  titre: >
+    LE COMMENTAIRE PORTE LA JUSTIFICATION, PAS LA PARAPHRASE
+  type: organisation
+  statut: retenu
+  severite: null
+  source: ["case_studies/guadeloupe/config.yaml:437-474", "memoire/preambule.tex:69-84"]
+  chiffre: []
+  destination: [ch5, note, oral]
+  arcs:
+    parce-que: [MET-01]
+    justifie: [MET-31, MET-14]
+  critique: >
+    Le cas d'école est `pn_prod_min` : 37 lignes de commentaire pour 5 lignes de
+    configuration — pourquoi un plancher, pourquoi CETTE valeur, pourquoi ce
+    n'est pas circulaire, ce qui a été mesuré, comment revenir en arrière. Le
+    commentaire ne dit pas ce que fait le code, il dit CE QU'IL FAUDRAIT SAVOIR
+    AVANT DE LE CHANGER. Même motif dans le préambule LaTeX (pourquoi `eurosym`
+    et pas `\texteuro`, avec le symptôme exact). C'est un choix de style
+    défendable en tant que tel, et il est directement lié à la nature du projet :
+    un modèle hérité meurt de ce que personne ne sait plus pourquoi.
+
+- id: MET-31
+  titre: >
+    Un commentaire qui ment est pire qu'un commentaire absent — cas vécu sur les
+    bans chlordécone
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  source: [PORT-24, "docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-30]
+  verdict-anterieur: >
+    « Commenter abondamment rend un code plus sûr. » Un commentaire qui reformule
+    un COMMENT est vérifiable, donc destiné à dériver, et il est cru sur parole
+    quand il a dérivé. Le lecteur des bans chlordécone a fait confiance à la
+    prose contre le code, et a conclu à un bug qui n'existait pas.
+  critique: >
+    Les commentaires décrivaient la règle À L'ENVERS, le code était juste. Un
+    lecteur fait confiance au commentaire. Conséquence pratique : préférer un
+    commentaire qui explique un POURQUOI (invérifiable mais stable) à un
+    commentaire qui reformule un COMMENT (vérifiable, donc destiné à dériver).
+
+- id: MET-32
+  titre: >
+    Le code est en ANGLAIS, la documentation et les commentaires en FRANÇAIS
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/, docs/, CLAUDE.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    ferme-la-branche: [MET-B2]
+  # PAS DE `parce-que`, ET PAS DE `racine: true` NON PLUS. C'est délibéré : ce choix
+  # n'a effectivement pas été justifié au moment où il a été fait, et lui inventer un
+  # parent après coup serait exactement le travers que ce corpus existe pour empêcher.
+  # Il reste donc la SEULE violation de la règle 1 sur tout le corpus, et l'audit la
+  # signale à chaque exécution. Un choix non justifié sur cent-quatre-vingt-dix, nommé,
+  # vaut mieux que zéro violation obtenue par reconstruction.
+  critique: >
+    ⚠ CHOIX NON EXPLICITÉ ET DISCUTABLE. Le GAMS d'origine était intégralement en
+    français ; le port a basculé les identifiants en anglais mais gardé le
+    français pour tout ce qui s'écrit en prose. Le résultat est un dépôt
+    BILINGUE, ce qui n'est ni le GAMS ni un projet international. Clément le sait
+    et l'a inscrit en tête de sa liste « à faire ». À justifier ou à assumer
+    comme un état transitoire — mais à ne pas laisser implicite.
+
+- id: MET-B2
+  titre: >
+    BRANCHE COUPÉE (pour l'instant) — tout basculer en anglais avant la fin du
+    stage
+  type: choix
+  statut: differe
+  severite: null
+  quand: 2026-08-12
+  source: [MET-32]
+  chiffre: []
+  destination: [ch6, note]
+  arcs:
+    mesure-par: [MET-33]
+  critique: >
+    Différé POUR UNE RAISON DATÉE, pas par manque d'envie : à quatorze jours du
+    dépôt, un renommage transverse casserait les 518 macros de `chiffres.tex`,
+    invaliderait le golden snapshot et rendrait tout run antérieur illisible.
+    C'est exactement le genre d'arbitrage que le graphe doit enregistrer : le
+    même choix aurait été JUSTE trois mois plus tôt.
+
+- id: MET-33
+  titre: >
+    Le coût d'un renommage transverse est mesurable : 518 macros, 681 checksums,
+    39 dossiers de runs, ~18 400 lignes de Python
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chiffres.tex, .golden/, outputs/]
+  chiffre: [mesChecksums, mesLignesCode]
+  destination: [ch6, note]
+  arcs:
+    parce-que: [MET-B2]
+
+- id: MET-34
+  titre: >
+    `CLAUDE.md` est un contrat de travail avec l'outil, et il est devenu la
+    meilleure documentation d'architecture du dépôt
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-11]
+    justifie: [REF-40]
+  critique: >
+    ⚠ EFFET SECONDAIRE INATTENDU ET RÉFLEXIVEMENT INTÉRESSANT. Écrit pour
+    qu'un assistant ne casse rien, il documente en fait tous les pièges
+    d'architecture (import pour effet de bord, booléen trivial, conflit de fd,
+    résolution par nom de l'étude de cas) mieux que `docs/`. Écrire pour une
+    machine a produit une meilleure prose technique qu'écrire pour un humain —
+    parce que la machine ne comble pas les non-dits. À creuser au Ch. 5.
+
+- id: MET-40
+  titre: >
+    L'AVERTISSEMENT VOYAGE AVEC LE CHIFFRE — motif récurrent, quatre implémentations
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [apps/dashboard/synthesis.py, apps/dashboard/comparison.py, memoire/build_chiffres.py]
+  chiffre: []
+  destination: [ch2, ch5, oral, article]
+  arcs:
+    parce-que: [MET-20]
+    justifie: [MET-41]
+  critique: >
+    (1) `run_alerts` dérive du recap les pièges applicables à CE run ;
+    (2) `bound_indicators` détecte rétroactivement les indicateurs fixés par une
+    contrainte et les marque ⚠ ; (3) la page Carte affiche sa propre réserve sur
+    la jointure ; (4) le générateur de chiffres refuse d'émettre un PAD
+    prospectif. Quatre fois le même principe : une mise en garde rangée dans un
+    document n'est lue par personne ; une mise en garde attachée au chiffre est
+    inévitable. C'est la meilleure réponse opérationnelle à la question « comment
+    fait-on pour qu'un modèle ne soit pas mal cité ? » et c'est publiable.
+
+- id: MET-41
+  titre: >
+    Un piège découvert devient un GARDE-FOU PERMANENT, jamais une ligne de
+    documentation seule
+  type: methode
+  statut: retenu
+  severite: null
+  source: [scripts/check_scenario_feasibility.py, core/solve/warm_start.py, tests/]
+  chiffre: []
+  destination: [ch5, note, oral]
+  arcs:
+    parce-que: [MET-40]
+  critique: >
+    La symétrie des cultures a produit un détecteur (SOLV-44) ; le warm start
+    silencieux a produit un audit (VER-21) ; l'incohérence emploi/slack a produit
+    un test. Trajectoire type du dépôt : incident → mesure → entrée de vigilance
+    → garde-fou exécutable. Décrire CE CYCLE vaut mieux que décrire les trois
+    incidents séparément.
+
+# --- Le rythme ---------------------------------------------------------------
+
+- id: MET-50
+  titre: >
+    Ne lancer un solve complet qu'EN FIN DE JOURNÉE ; itérer sur `zone_filter` et
+    des tests ciblés
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, SOLV-71]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [SOLV-10]
+  critique: >
+    Discipline imposée par un coût physique : 30 à 55 min par solve, six mois de
+    stage. Elle structure la journée de travail — le développement le jour, la
+    mesure la nuit. À dire au Ch. 5 : le temps de calcul n'est pas une contrainte
+    technique, c'est une contrainte d'ORGANISATION DU TRAVAIL de recherche.
+
+- id: MET-51
+  titre: >
+    ⚠ Un dispositif validé sans données reste NON VALIDÉ de bout en bout —
+    reconnu à cinq reprises dans TODO.md
+  type: piege
+  statut: ouvert
+  severite: majeur
+  source: [TODO.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-50, VER-01]
+  critique: >
+    Motif répété : « livré, validé par N tests sans données, AUCUN SOLVE RÉEL
+    LANCÉ ». Vrai pour les indicateurs d'impact, les 25 scénarios, les fronts de
+    Pareto, le chaînage d'amorçage, la page Prospective. Le stage a construit
+    plus vite qu'il ne pouvait mesurer, et la contrainte est le temps de solve.
+    C'est un constat honnête à porter au bilan, PAS un aveu à cacher : il découle
+    directement de SOLV-10.
+
+- id: MET-52
+  titre: >
+    La quarantaine `outputs/_non_converges/` — ne jamais écraser un run antérieur
+  type: organisation
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: [docs/04-vigilance.md#B.9, outputs/_non_converges/]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    parce-que: [SOLV-37]
+  critique: >
+    Conséquence organisationnelle DIRECTE d'un résultat technique (une reprise
+    peut dégrader). La bonne pratique n'a pas été anticipée, elle a été imposée
+    par une mesure du 12/08 — dernier jour d'expérience du stage. Bel exemple
+    de savoir acquis trop tard pour en profiter, et consigné quand même.
+
+- id: MET-53
+  titre: >
+    Un batch se valide TOUJOURS avant d'engager des heures : `--dry-run` puis
+    contrôle LP
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, scripts/run_scenarios.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [MET-50, VER-40]
+
+- id: MET-54
+  titre: >
+    Le mémoire est écrit DANS le dépôt, versionné avec le code qu'il décrit
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [memoire/, "git log"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-20]
+  critique: >
+    Conséquence : les chiffres du mémoire sont générés depuis les runs, et un
+    commit `docs(memoire)` voisine un commit `measure(solves)`. Le document et
+    son objet vieillissent ensemble. Choix peu courant pour un rapport de stage
+    et directement lié à la thèse du travail (la traçabilité comme livrable).
+
+# =============================================================================
+# DENSIFICATION — corps des messages de commit.
+# =============================================================================
+
+- id: MET-60
+  titre: >
+    Le générateur de chiffres ÉCHOUE BRUYAMMENT plutôt que d'émettre une valeur
+    périmée
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-11
+  source: ["commit 9585f43"]
+  chiffre: []
+  destination: [ch5, note, oral]
+  arcs:
+    parce-que: [MET-20]
+    justifie: [MET-61]
+  critique: >
+    Consigné tel quel dans un commit : « ATTENTION : le mémoire NE COMPILE PAS en
+    l'état. Les quatre cellules du lot D sont en cours de résolution, donc 34
+    macros de grille manquent et `build_chiffres.py` échoue bruyamment, COMME
+    PRÉVU. » C'est le contraire exact du défaut silencieux d'ARCH-63 : le
+    dispositif refuse de produire un document plutôt que d'en produire un faux.
+    Choix inconfortable — le document est inutilisable pendant le calcul — et
+    correct.
+
+- id: MET-61
+  titre: >
+    Le générateur lit AUSSI la version écartée dans la quarantaine, pour que la
+    démonstration survive à sa propre réparation
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-11
+  source: ["commit 9585f43", MET-52]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-60, MET-52]
+  critique: >
+    ⚠ SUBTILITÉ REMARQUABLE. Le témoin qui DÉMONTRE qu'un solve non convergé est
+    faux est précisément le run non convergé. Le réparer détruirait la preuve.
+    Solution : le générateur lit `outputs/_non_converges/` et présente un
+    AVANT/APRÈS, si bien que la réparation ENRICHIT la démonstration au lieu de
+    l'effacer — « rien à rédiger le jour où la cellule converge ». Un dispositif
+    d'écriture conçu pour que l'amélioration du résultat ne détruise pas
+    l'argument méthodologique qu'il portait.
+
+- id: MET-62
+  titre: >
+    `chiffres.tex` est VERSIONNÉ bien que généré — parce qu'un clone frais ne
+    pourrait pas le reconstruire
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-10
+  source: ["commit 8cfff0b"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [MET-20, DON-50]
+  critique: >
+    Exception assumée à la règle « ne pas versionner ce qui est généré », et sa
+    raison est structurelle : le fichier dérive d'`outputs/`, qui est local et
+    gitignoré. Sans lui, le mémoire ne compilerait sur aucune autre machine.
+    Conséquence directe de DON-50 (les données ne sont pas dans le dépôt) sur un
+    objet qui n'a rien à voir avec le modèle — la contrainte de confidentialité
+    se propage jusqu'à la chaîne éditoriale.
+
+- id: MET-63
+  titre: >
+    Le générateur de chiffres est passé de 205 macros à 518 en deux jours
+  type: resultat
+  statut: retenu
+  severite: null
+  source: ["commit 8cfff0b", memoire/chiffres.tex]
+  chiffre: []
+  destination: [note, annexeF]
+  arcs:
+    parce-que: [MET-20]
+  critique: >
+    Indicateur d'effort peu conventionnel mais parlant : la densité chiffrée du
+    mémoire a plus que doublé une fois la chaîne en place. C'est ce que coûte —
+    et ce que rapporte — le fait de rendre l'ajout d'un chiffre gratuit.
+
+- id: MET-64
+  titre: >
+    ⚠ Le chiffre de contrôle du golden était PÉRIMÉ dans le fichier même chargé
+    d'empêcher les chiffres de dériver
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-08-12
+  source: ["memoire/build_chiffres.py", "golden_snapshot.py --check"]
+  chiffre: [mesChecksums]
+  destination: [ch5, oral, note]
+  arcs:
+    parce-que: [MET-14]
+  verdict-anterieur: >
+    « Les chiffres du mémoire ne peuvent pas dériver, puisqu'ils sont GÉNÉRÉS
+    depuis les `recap.json` des runs. » Ils le sont presque tous. `mesChecksums`
+    faisait partie du bloc de constantes saisies à la main, dans le fichier même
+    dont la raison d'être est d'empêcher la dérive : il annonçait 570 quand la
+    vérification en donnait 681.
+  critique: >
+    `mesChecksums` valait 570 ; la vérification en donne 681. La valeur datait du
+    refactor du 21/07, avant l'ajout des blocs `intensity`, `agroecology`, P/K et
+    Rpest. Corrigé le 12/08. ⚠ ITEM RÉFLEXIF PRÉCIEUX PARCE QU'IL EST
+    AUTORÉFÉRENT : le dispositif conçu pour que les chiffres ne vieillissent pas
+    contient un bloc de constantes SAISIES À LA MAIN (MET-21), et c'est
+    exactement là que la dérive s'est logée. La discipline de génération ne
+    protège que ce qu'elle génère ; tout ce qui reste déclaratif dérive, y
+    compris dans un fichier qui s'appelle `build_chiffres`.
+
+- id: MET-65
+  titre: >
+    Les messages de commit portent les CHIFFRES et les prédictions, pas seulement
+    les intentions
+  type: organisation
+  statut: retenu
+  severite: null
+  source: ["git log"]
+  chiffre: []
+  destination: [ch5, annexeF, note]
+  arcs:
+    parce-que: [MET-10]
+  critique: >
+    Exemples : « 80 468 932 maxTimeLimit → 81 036 580 OPTIMAL en 675 s. La valeur
+    prédite avant le run, au centime » ; « l'écart entre payer et interdire passe
+    de 15,1 à 7,3 M€ : le classement tient, sa magnitude était fausse d'un
+    facteur deux » ; « 9/9 optimal, ~43 min ». L'historique est utilisable comme
+    CAHIER DE LABORATOIRE, avec la date, la mesure et l'interprétation. C'est ce
+    qui rend l'annexe F (chronologie) écrivable en quelques heures — et c'est un
+    argument concret sur la façon de commenter un travail de recherche, au-delà
+    du code.

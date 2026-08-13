@@ -1,0 +1,381 @@
+# =============================================================================
+# 10 — CONTEXTE ET COMMANDE                                        préfixe : CTX
+#
+# Le territoire, la lignée de projets (CALALOU → TI-FIG), la lettre de mission,
+# et l'écart entre ce qui était commandé et ce qui a été fait.
+# C'est le domaine où le mémoire doit être le plus honnête, parce que c'est
+# celui où il est le plus facile de réécrire l'histoire a posteriori.
+# =============================================================================
+
+# --- Le territoire -----------------------------------------------------------
+
+- id: CTX-01
+  titre: >
+    Un système agricole structuré par deux filières d'exportation sur un
+    territoire qui importe l'essentiel de ce qu'il mange
+  type: donnee
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex, context/Livre_Blanc_CALALOU.pdf]
+  chiffre: [obsHaCS, obsHaPN, obsHaBA]
+  destination: [ch0, ch1]
+  arcs:
+    justifie: [CTX-02, CTX-10]
+
+- id: CTX-02
+  titre: >
+    ~80 % des produits alimentaires consommés dans les DOM sont importés ;
+    prix supérieurs de 32,9 % à l'Hexagone pour un niveau de vie inférieur de 20-23 %
+  type: donnee
+  statut: retenu
+  severite: null
+  source: [context/Livre_Blanc_CALALOU.pdf, biblio.bib viepublique2023, odeadom2019]
+  chiffre: []
+  destination: [ch0, ch1]
+  arcs:
+    parce-que: [CTX-01]
+  critique: >
+    CALALOU ajoute la dimension que le mémoire ne traite pas : la dépendance
+    alimentaire est aussi un problème de SANTÉ PUBLIQUE (obésité, diabète,
+    hypertension) et d'INÉGALITÉ D'ACCÈS. Le modèle ne porte ni l'une ni l'autre
+    — il optimise une marge, pas une diète. À dire en introduction.
+
+- id: CTX-03
+  titre: >
+    Le soutien public (POSEI) est un déterminant de premier ordre : la
+    subvention vaut environ les trois quarts de la marge brute du territoire
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex, biblio.bib touteleurope2024]
+  chiffre: []
+  destination: [ch1, ch4]
+  arcs:
+    parce-que: [CTX-01]
+    justifie: [PROS-20]
+  critique: >
+    C'est ce qui justifie que le front budgétaire soit le résultat central du
+    Ch. 4 plutôt qu'un scénario parmi d'autres.
+
+- id: CTX-04
+  titre: >
+    La chlordécone : ~14 200 ha à risque dont ~7 300 encore en usage agricole,
+    persistante pour des siècles
+  type: donnee
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex, biblio.bib daafchlordecone]
+  chiffre: []
+  destination: [ch1]
+  arcs:
+    parce-que: [CTX-01]
+    justifie: [PORT-30]
+
+- id: CTX-05
+  titre: Le foncier fragmenté et les GFA imposent une part minimale de canne
+  type: donnee
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex, config.yaml cs_gfa_minimum_share]
+  chiffre: []
+  destination: [ch1]
+  arcs:
+    parce-que: [CTX-01]
+    justifie: [PORT-40]
+
+- id: CTX-06
+  titre: >
+    Très peu de choses sont libres — et c'est exactement ce qui rend un modèle
+    d'allocation pertinent : il n'y a d'arbitrage que sous contrainte
+  type: choix
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex]
+  chiffre: []
+  destination: [ch1]
+  arcs:
+    parce-que: [CTX-01, CTX-04, CTX-05]
+  critique: >
+    Argument de justification du modèle lui-même, et il a une double détente :
+    le même énoncé justifie l'outil (il n'y a d'arbitrage que sous contrainte)
+    et annonce que sa calibration sera difficile (les contraintes déterminent
+    presque tout).
+
+# --- La lignée de projets ----------------------------------------------------
+
+- id: CTX-10
+  titre: >
+    CALALOU (2021-2025) est l'ancêtre direct : « de la fourchette à la fourche »,
+    interdisciplinaire, coordonné par S. Drogué, avec J.-M. Blazy et L. Guindé
+    parmi les auteurs
+  type: organisation
+  statut: retenu
+  severite: null
+  quand: 2025-02
+  source: [context/Livre_Blanc_CALALOU.pdf]
+  chiffre: []
+  destination: [ch0, ch1, ch5]
+  arcs:
+    parce-que: [CTX-02]
+    justifie: [CTX-11, CTX-12, CTX-13, CTX-20]
+  critique: >
+    À NE PAS OMETTRE dans l'introduction : le stage ne commence pas à une page
+    blanche, il s'inscrit dans une lignée où ses propres encadrants sont
+    co-auteurs. C'est ce qui donne sa force à REF-11 (porter le modèle de ses
+    propres encadrants) et ce qui explique le mandat de parité.
+
+- id: CTX-11
+  titre: >
+    CALALOU a utilisé MOSAICA (version GAMS) dans son WP4, alimenté par les
+    résultats nutritionnels du WP1
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [context/Livre_Blanc_CALALOU.pdf]
+  chiffre: []
+  destination: [ch1, ch5]
+  arcs:
+    parce-que: [CTX-10]
+    justifie: [CTX-12, CTX-B1]
+  critique: >
+    Preuve directe que le GAMS n'était pas un objet mort quand le stage a
+    commencé : il tournait encore en 2024. Nuance donc le récit « personne ne
+    savait plus le faire tourner » du Ch. 1 — la formulation exacte compte.
+    À vérifier avec l'encadrement : qui l'a lancé pour CALALOU, et comment.
+
+- id: CTX-12
+  titre: >
+    CALALOU trouve DÉJÀ, sur trois scénarios, que la relocalisation alimentaire
+    se paie en canne et en banane export
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2025-02
+  source: [context/Livre_Blanc_CALALOU.pdf table 3]
+  chiffre: []
+  destination: [ch1, ch4, ch5, article]
+  arcs:
+    parce-que: [CTX-11]
+    justifie: [ART-10, PROS-21]
+  critique: >
+    CHIFFRES CALALOU : scénario Reloc, banane export 1 717 → 4 ha, canne
+    12 908 → 3 159 ha ; Nutri+Reloc, banane → 61 ha, canne → 1 767 ha.
+    Le front budgétaire du Ch. 4 retrouve la MÊME structure (banane 2 004 → 95 ha,
+    canne −2 231 ha) par un levier tout autre (l'enveloppe publique, pas une
+    demande imposée). C'est une CORROBORATION indépendante et il faut la citer —
+    mais c'est aussi une limite de nouveauté à instruire pour l'article.
+
+- id: CTX-13
+  titre: >
+    CALALOU écrit explicitement que la disparition de la canne et de la banane
+    « dégagerait des subsides importants » pour le maraîchage et le fruitier
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2025-02
+  source: [context/Livre_Blanc_CALALOU.pdf §3.4]
+  chiffre: []
+  destination: [ch4, ch5, article]
+  arcs:
+    parce-que: [CTX-12]
+    justifie: [ART-10]
+  critique: >
+    ⚠ POUR L'ARTICLE. Le résultat qualitatif « les aides tiennent la canne et la
+    banane » est DÉJÀ dans la littérature du projet. Ce qui est neuf dans le
+    Ch. 4 n'est donc pas le sens de l'effet mais sa MESURE MARGINALE (la pente
+    en € de marge ajustée par € public, le palier, l'écart au dual local) et
+    l'interprétation « l'aide publique n'achète pas de la marge, elle achète de
+    la stabilité » — que CALALOU ne pouvait pas formuler, n'ayant pas de front.
+    Ne pas présenter le résultat comme une découverte : le présenter comme la
+    quantification d'un constat de la lignée.
+
+- id: CTX-14
+  titre: >
+    CALALOU mesure aussi que les scénarios demandent +10 à +60 % de main d'œuvre
+    agricole à SAU constante
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [context/Livre_Blanc_CALALOU.pdf §3.4]
+  chiffre: []
+  destination: [ch3, ch4]
+  arcs:
+    parce-que: [CTX-11]
+    justifie: [SOLV-60]
+  critique: >
+    Corrobore de l'extérieur que le plafond de main d'œuvre est le facteur
+    limitant du modèle (SOLV-60/61), et le fait sur un tout autre jeu de
+    scénarios. Bon appui pour le Ch. 3.
+
+- id: CTX-15
+  titre: >
+    CALALOU a mené une démarche PARTICIPATIVE — séminaire du 27/09/2024,
+    World Café, questionnaire, acteurs du territoire
+  type: organisation
+  statut: retenu
+  severite: null
+  quand: 2024-09-27
+  source: [context/Livre_Blanc_CALALOU.pdf §4]
+  chiffre: []
+  destination: [ch5, oral]
+  arcs:
+    parce-que: [CTX-10]
+    justifie: [REF-22]
+  critique: >
+    ⚠ ITEM RÉFLEXIF DE PREMIER ORDRE. Le projet ancêtre a fait la conception
+    participative que la lettre de mission du stage prévoyait et qui n'a pas eu
+    lieu. Le catalogue de dix politiques écrit seul dans un YAML (REF-22) n'est
+    donc pas un manque abstrait : il y avait un précédent méthodologique dans le
+    même laboratoire, sur le même territoire, deux ans plus tôt. C'est beaucoup
+    plus fort que « les enquêtes n'ont pas eu lieu ».
+
+- id: CTX-16
+  titre: >
+    CALALOU tenait la SAU constante, les structures d'exploitation inchangées et
+    les rendements figés aux pratiques actuelles
+  type: choix
+  statut: retenu
+  severite: null
+  source: [context/Livre_Blanc_CALALOU.pdf §3.4]
+  chiffre: []
+  destination: [ch4, article]
+  arcs:
+    parce-que: [CTX-11]
+  critique: >
+    Les mêmes hypothèses que le stage, à une exception près : le forçage
+    `land_take` (artificialisation) desserre la SAU constante. Petit gain de
+    généralité à signaler, et à ne pas surestimer.
+
+- id: CTX-B1
+  titre: >
+    BRANCHE COUPÉE — reprendre le pipeline CALALOU (scénarios Reloc / Nutri)
+    plutôt que construire un dispositif politiques × forçages
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [context/Livre_Blanc_CALALOU.pdf, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, ch5]
+  arcs:
+    mesure-par: []
+  sans-mesure: >
+    ⚠ CE N'EST PAS UNE BRANCHE COUPÉE, C'EST UNE BRANCHE JAMAIS OUVERTE — et le
+    dire ainsi est le seul traitement honnête. La bifurcation n'a jamais été posée
+    explicitement : le dispositif politiques × forçages a été construit sans que
+    la reprise du cadre CALALOU soit envisagée puis écartée. La justification
+    donnée ci-dessous est donc RECONSTRUITE a posteriori, ce qui la rend valable
+    comme explication et nulle comme preuve.
+  critique: >
+    Les scénarios CALALOU sont des scénarios de
+    DEMANDE (doubler les volumes) ; ceux du stage sont des scénarios de
+    POLITIQUE (plafonner un intrant, redéployer une aide). Les deux répondent à
+    des questions différentes et le second est plus proche de la commande TI-FIG.
+    Mais la bifurcation n'a jamais été posée explicitement, et la comparabilité
+    avec CALALOU en est perdue. Un scénario « Reloc » rejoué dans le nouveau
+    dispositif serait un pont utile, et il est bon marché (c'est un YAML).
+
+# --- La commande TI-FIG ------------------------------------------------------
+
+- id: CTX-20
+  titre: >
+    La commande — concevoir des scénarios agro-économiques de développement des
+    aliments traditionnels, MOSAICA étant l'outil attendu
+  type: organisation
+  statut: retenu
+  severite: null
+  source: ["student_context/Offre de stage_M2-TiFig_VF.docx", memoire/chapitres/00-introduction.tex]
+  chiffre: []
+  destination: [ch0]
+  arcs:
+    parce-que: [CTX-10]
+    justifie: [CTX-21, CTX-22]
+  critique: >
+    À CITER TEXTUELLEMENT dans l'introduction, parce que tout le mémoire est
+    l'histoire de l'écart entre cette commande et ce qui a été livré. Un lecteur
+    doit pouvoir mesurer l'écart lui-même.
+
+- id: CTX-21
+  titre: >
+    La lettre de mission prévoyait des ENQUÊTES de terrain et l'acquisition de
+    données technico-économiques sur une microferme expérimentale
+  type: organisation
+  statut: retenu
+  severite: null
+  source: ["student_context/Offre de stage_M2-TiFig_VF.docx", memoire/chapitres/02-porter.tex]
+  chiffre: []
+  destination: [ch0, ch5, oral]
+  arcs:
+    parce-que: [CTX-20]
+    justifie: [CTX-22, REF-20]
+  critique: >
+    Le lien avec SOLV-40 est ce qui rend l'aveu mesurable plutôt que
+    confessionnel : les 25 variantes vides PORTENT LE NOM de la microferme où le
+    terrain devait avoir lieu. Le manque de données a une trace dans le nombre de
+    variables du programme.
+
+- id: CTX-22
+  titre: >
+    Le stage a été réorienté : reconstruire l'outil avant de pouvoir simuler
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [memoire/chapitres/00-introduction.tex, memoire/chapitres/01-terrain-et-objet.tex]
+  chiffre: []
+  destination: [ch0, ch1, ch5, oral]
+  arcs:
+    parce-que: [CTX-20, CTX-21, SOLV-B1]
+    justifie: [PORT-01, ARCH-01]
+  critique: >
+    ⚠ SEUL CLÉMENT PEUT ÉCRIRE CETTE PARTIE. Quand la réorientation a-t-elle été
+    décidée, avec qui, et sur quel constat ? Le dépôt en garde la trace
+    matérielle (les commits) mais pas la décision. C'est le `\arediger` de
+    §1.3 : « le récit de première main ».
+
+- id: CTX-23
+  titre: >
+    Le volet cantines / restauration collective / EGalim est resté différé,
+    bloqué sur des données externes
+  type: perspective
+  statut: differe
+  severite: null
+  source: ["docs/superpowers/specs/2026-07-17-egalim-collective-catering-design-DEFERRED.md"]
+  chiffre: []
+  destination: [ch5, ch6, note]
+  arcs:
+    parce-que: [CTX-21]
+  critique: >
+    Or CALALOU avait précisément un volet « restauration collective » avec des
+    données de demande (Ben Ali 2023). La question à poser à l'encadrement :
+    ces données existent-elles dans le laboratoire ? Le blocage était peut-être
+    un problème d'accès et non d'inexistence — ce qui change le statut de l'item.
+
+- id: CTX-24
+  titre: Le stage dure six mois, sans enquête de terrain, sur des données produites par d'autres
+  type: reflexivite
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex, memoire/chapitres/00-introduction.tex]
+  chiffre: []
+  destination: [ch0, ch5]
+  arcs:
+    parce-que: [CTX-22]
+    justifie: [REF-01, REF-10]
+
+- id: CTX-25
+  titre: >
+    Positionnement disciplinaire — ingénieur en mécanique des fluides et
+    énergétique portant un modèle bioéconomique agronomique
+  type: reflexivite
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/00-introduction.tex, student_context/grille_stage_PFE_MF2E_VF.pdf]
+  chiffre: []
+  destination: [ch0, ch5, oral]
+  arcs:
+    justifie: [REF-02]
+  critique: >
+    Contrainte d'évaluation concrète : la grille MF2E note CI2 (systèmes liés à
+    des problématiques environnementales), CI5 (multi-échelles / stochastiques)
+    et C5 (méthodes numériques et calcul scientifique). Les items SOLV-* sont ce
+    qui rattache le stage à la grille de l'école — c'est un argument pour leur
+    donner de la place, et pas seulement un goût personnel pour l'algorithmique.

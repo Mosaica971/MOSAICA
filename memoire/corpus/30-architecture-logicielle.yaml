@@ -1,0 +1,779 @@
+# =============================================================================
+# 30 — ARCHITECTURE LOGICIELLE                                    préfixe : ARCH
+#
+# Le registre piloté par configuration, la séparation générique / territoire,
+# la couche lecture seule, et ce que cette indirection coûte.
+#
+# C'est le domaine où le mémoire risque le plus de devenir un rapport de
+# développement. La règle de tri : ne garder au cœur que ce dont dépend un
+# RÉSULTAT ou une LIMITE de lecture.
+# =============================================================================
+
+# --- Le principe -------------------------------------------------------------
+
+- id: ARCH-01
+  titre: >
+    La formulation ne mentionne la Guadeloupe nulle part — elle parle de
+    parcelles, de cultures et d'exploitations
+  type: choix
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/02-porter.tex#sec:architecture, core/]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [CTX-22]
+    justifie: [ARCH-02, ARCH-10, ARCH-40]
+  critique: >
+    « Observation banale une fois faite, et c'est le principe d'organisation du
+    code. » La formule est juste : l'abstraction n'est pas ici une élégance
+    d'ingénieur, elle est LUE dans la formulation mathématique elle-même.
+
+- id: ARCH-02
+  titre: >
+    Trois couches — un noyau générique, une étude de cas qui apporte données et
+    règles, une couche strictement en lecture
+  type: choix
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, docs/02-arborescence.md]
+  chiffre: []
+  destination: [ch2, annexeA, note]
+  arcs:
+    parce-que: [ARCH-01]
+    justifie: [ARCH-03, ARCH-40, ARCH-50]
+
+- id: ARCH-03
+  titre: >
+    `core/` ne parle PAS guadeloupéen — pas de `data_parc`, pas d'`ILE`, pas de
+    GFA, et c'est vérifié
+  type: choix
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, tests/]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [ARCH-02]
+    justifie: [ARCH-04]
+  critique: >
+    Une discipline d'abstraction qui n'est pas testée dérive en trois semaines.
+    Celle-ci l'est. Exemple concret :
+    `ModelInputs.farm_restricted_surface_ha` est le nom générique de « surface
+    des parcelles soumises à un régime foncier », l'étude de cas y branchant son
+    `farm_gfa_surface_ha`. Le vocabulaire métier reste où il ancre la parité.
+
+- id: ARCH-04
+  titre: >
+    Le nom de l'étude de cas n'est PAS câblé dans les imports : `core/case_study.py`
+    résout trois fonctions par nom
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [core/case_study.py, TODO.md]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [ARCH-03]
+  critique: >
+    Contrat minimal : `build_dataset`, `build_model`, `generate_report`, plus un
+    `config.yaml`. Trois fonctions, c'est peu — et c'est ce qui rend le contrat
+    crédible. ⚠ Portabilité INCOMPLÈTE et honnêtement consignée : le tableau de
+    bord importe encore `case_studies.guadeloupe.domain` pour les libellés et la
+    géométrie. À généraliser quand un second cas existera, pas avant.
+
+# --- Le registre -------------------------------------------------------------
+
+- id: ARCH-10
+  titre: >
+    Le noyau ne définit pas des contraintes mais des FAMILLES de contraintes,
+    enregistrées sous un nom et paramétrées en YAML
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/model/registry.py, core/config.py, memoire/chapitres/02-porter.tex]
+  chiffre: []
+  destination: [ch2, annexeA, oral]
+  arcs:
+    parce-que: [ARCH-01]
+    justifie: [ARCH-11, ARCH-12, ARCH-20]
+  critique: >
+    LE RÉSULTAT QUI JUSTIFIE TOUT : la totalité du dispositif expérimental du
+    Ch. 4 — dix politiques, douze forçages, deux fronts — est écrite en YAML et
+    n'a demandé AUCUNE modification du constructeur de modèle. C'est la réponse
+    directe au deuxième obstacle du GAMS (faire varier un levier = éditer les
+    équations). Argument à garder au cœur.
+
+- id: ARCH-11
+  titre: >
+    `resolve_enabled` lit une liste de configuration et rend des couples
+    (constructeur, arguments) — le même motif pour contraintes, objectifs,
+    éligibilité et règles catégorielles
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/config.py]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [ARCH-10]
+    justifie: [PROS-52]
+  critique: >
+    Un seul motif pour quatre familles d'objets : ce qui rend le système
+    apprenable. ⚠ Limite connue : `set_args` ne sait toucher qu'une entrée DÉJÀ
+    déclarée, d'où les leviers `enable: false` fantômes de `config.yaml`
+    (PROS-52). Dette assumée et documentée.
+
+- id: ARCH-12
+  titre: >
+    Exactement UN objectif doit être activé — contrainte structurelle du registre
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/config.py, core/model/registry.py]
+  chiffre: []
+  destination: [annexeA]
+  arcs:
+    parce-que: [ARCH-10]
+
+- id: ARCH-13
+  titre: >
+    ⚠ LE COÛT DE L'INDIRECTION — un nom mal orthographié n'échoue qu'à
+    l'interrogation du registre, donc TARD
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [memoire/chapitres/02-porter.tex#sec:architecture]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [ARCH-10]
+    justifie: [ARCH-14, VER-01]
+  critique: >
+    Le coût de ce choix d'architecture doit être nommé au même endroit que ses
+    bénéfices : c'est le prix ordinaire de l'indirection, et il se paie en
+    discipline de vérification. C'est ce qui rend NÉCESSAIRES les trois
+    garde-fous de VER-01, VER-30 et VER-50 — sans registre, deux d'entre eux
+    n'auraient pas de raison d'être.
+
+- id: ARCH-14
+  titre: >
+    Pire — une famille de contraintes dont le MODULE n'a pas été importé est
+    simplement ABSENTE du registre, donc introuvable
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, core/model/builder.py]
+  chiffre: []
+  destination: [note, annexeA]
+  arcs:
+    parce-que: [ARCH-13]
+  critique: >
+    Les constructeurs sont importés POUR LEUR EFFET DE BORD d'enregistrement
+    (`import ... as _constraints  # noqa: F401`). Piège aggravé : importer le
+    PAQUET `case_studies.guadeloupe.model` n'enregistre rien, son `__init__.py`
+    étant vide — il faut importer le MODULE `...model.model`. Exactement le genre
+    de savoir qui se perd et que CLAUDE.md conserve.
+
+# --- Les contraintes génériques ----------------------------------------------
+
+- id: ARCH-20
+  titre: >
+    `territory_indicator_bound` borne N'IMPORTE QUEL taux par hectare exposé par
+    l'étude de cas — azote, IFT, GES, eau, carbone, heures, euros de subvention
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-31
+  source: [core/model/constraints.py, "docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md"]
+  chiffre: []
+  destination: [ch2, ch4, annexeA]
+  arcs:
+    parce-que: [ARCH-10]
+    justifie: [ARCH-21, ARCH-22, SOLV-63]
+  critique: >
+    « Un seul constructeur écrit un plafond nitrates, une enveloppe de dépense
+    publique et un plancher d'emploi. » C'est ce qui rend enfin BORNABLES des
+    indicateurs jusque-là cantonnés au reporting — le passage du descriptif au
+    normatif tient dans une généralisation de signature.
+
+- id: ARCH-21
+  titre: >
+    `ModelInputs.plot_weights` existe parce que les taux sont par culture alors
+    que l'eau n'est prélevée que sur les parcelles IRRIGABLES
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [core/model/model_inputs.py, CLAUDE.md]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [ARCH-20]
+  critique: >
+    Sans le poids, la contrainte compte 56 Mm³ là où le rapport en annonce 35.
+    Un facteur 1,6 sur une ressource critique, invisible à la lecture du YAML.
+    Excellent exemple de généralisation qui casse une hypothèse implicite.
+
+- id: ARCH-22
+  titre: >
+    `zone_indicator_bound` décline la même borne par île / région / bassin /
+    EXPLOITATION — la forme « directive nitrates » est `threshold_per_ha` × les
+    hectares de la zone
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/model/constraints.py]
+  chiffre: []
+  destination: [ch4, annexeA]
+  arcs:
+    parce-que: [ARCH-20]
+
+- id: ARCH-23
+  titre: >
+    `baseline_inertia_min` — proxy grossier d'une trajectoire dans un modèle
+    statique
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [core/model/constraints.py, TODO.md]
+  chiffre: []
+  destination: [ch4, ch6, annexeA]
+  arcs:
+    parce-que: [ARCH-20]
+    justifie: [PERSP-10]
+  critique: >
+    « Il dit "70 % des hectares ne bougent pas" sans dire en combien de temps ni
+    à quel coût. » Auto-critique juste, et elle ouvre directement sur le
+    multi-périodes (PERSP-10). Un scénario décrit un ÉTAT, jamais une TRAJECTOIRE :
+    c'est la limite la plus lourde du dispositif et elle mérite d'être au Ch. 4
+    ou 5, pas seulement dans TODO.
+
+- id: ARCH-24
+  titre: >
+    Une contrainte dont la somme est VIDE doit rendre `Constraint.Feasible`, pas
+    un booléen Python
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [CLAUDE.md, core/model/constraints.py]
+  chiffre: []
+  destination: [note, annexeA]
+  arcs:
+    parce-que: [ARCH-20, SOLV-64]
+
+# --- Éligibilité -------------------------------------------------------------
+
+- id: ARCH-30
+  titre: >
+    L'éligibilité est une matrice booléenne parcelle × culture : bornes
+    numériques INTERSECTÉES avec des règles catégorielles
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/data/eligibility.py, CLAUDE.md]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [ARCH-10]
+    justifie: [ARCH-31, SOLV-02, CAL-04]
+
+- id: ARCH-31
+  titre: >
+    Chaque règle interdit son propre sous-ensemble et le masque garde l'UNION
+    interdite — donc un OU s'exprime par PLUSIEURS entrées
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, case_studies/guadeloupe/config.yaml]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [ARCH-30]
+  critique: >
+    Une entrée `attribute_forbidden` fait un ET de ses conditions ; le OU se
+    fabrique en empilant les entrées. C'est ainsi qu'est écrite l'interdiction
+    sol/île du melon. Piège de logique classique, qui produit des configurations
+    fausses et plausibles si on l'ignore.
+
+- id: ARCH-32
+  titre: >
+    Cinq règles catégorielles de `core/` sont des cas particuliers
+    d'`attribute_forbidden` et ont été CONSERVÉES pour la lisibilité du YAML
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: [TODO.md, "docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-30]
+    ferme-la-branche: [ARCH-B1]
+  critique: >
+    Refus explicite d'une déduplication possible, au motif que les noms
+    génériques (`soil_type_forbidden`, `irrigation_required`) se lisent mieux en
+    configuration qu'une règle générique paramétrée. Seule
+    `melon_soil_restriction`, au nom spécifique à une culture, a été supprimée.
+    Bon critère de tri : ce qui se lit dans le YAML l'emporte sur ce qui se
+    factorise dans le code.
+
+- id: ARCH-B1
+  titre: "BRANCHE COUPÉE — factoriser les cinq règles catégorielles en une seule"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    mesure-par: []
+  sans-mesure: >
+    Le critère de la décision n'est pas mesurable par un solve : c'est la
+    lisibilité du fichier de configuration par un non-développeur. Cinq règles
+    nommées, chacune lisible seule, valent mieux qu'une règle générale
+    paramétrée — au prix d'une répétition que personne ne relit jamais. Une
+    factorisation gagnerait des lignes de Python et perdrait l'interface humaine,
+    qui est la raison d'être du YAML dans ce dépôt (ARCH-02).
+  critique: >
+    Cohérent avec toute la stratégie du dépôt, mais c'est bien un arbitrage de
+    goût : un développeur seul aurait factorisé. Le choix ne se défend que si
+    l'on assume que le prochain lecteur du fichier est un agronome.
+
+- id: ARCH-33
+  titre: >
+    Des `label:` sur les règles d'éligibilité pour qu'un scénario puisse lever
+    UNE interdiction précise
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-31
+  source: ["docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md"]
+  chiffre: []
+  destination: [annexeC]
+  arcs:
+    parce-que: [ARCH-30]
+  critique: >
+    Nommer les objets de configuration pour pouvoir les cibler individuellement :
+    la même idée que `label:` sur les contraintes. Petit, mais c'est ce qui rend
+    un catalogue de scénarios écrivable sans recopie.
+
+# --- La couche lecture -------------------------------------------------------
+
+- id: ARCH-40
+  titre: >
+    `apps/dashboard/` vit HORS de `case_studies/` parce qu'il n'est pas sur le
+    chemin du solve
+  type: choix
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, apps/dashboard/]
+  chiffre: []
+  destination: [note, annexeA]
+  arcs:
+    parce-que: [ARCH-02]
+  critique: >
+    Critère de rangement clair et défendable : il OUVRE des dossiers de sortie,
+    il ne construit jamais un jeu de données, un modèle ou un solveur. La règle
+    de dépendance qui en découle (rien sous `core/` ni `case_studies/` ne
+    l'importe) est vérifiable.
+
+- id: ARCH-41
+  titre: >
+    Deux diffs, à lire DANS CET ORDRE — la configuration dit ce qui a été
+    DEMANDÉ, l'allocation dit ce que ça a DÉPLACÉ
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-01
+  source: [apps/dashboard/config_diff.py, apps/dashboard/allocation_diff.py]
+  chiffre: []
+  destination: [note, annexeE]
+  arcs:
+    parce-que: [ARCH-40]
+  critique: >
+    « Une contrainte qui ne mord pas ne change aucun résultat. » Le diff de
+    config seul induit en erreur ; le couple ne le fait pas. Validation
+    remarquable : le diff d'allocation RETROUVE SEUL trois chiffres établis par
+    des enquêtes séparées — c'est le bon test pour un outil d'analyse, retrouver
+    ce qu'on sait déjà par une autre voie.
+
+- id: ARCH-42
+  titre: >
+    ⚠ Résolution du diff d'allocation — `fine` (84 codes) n'a de sens qu'entre
+    deux runs SIMULÉS ; contre l'observé, seuls les 12 groupes RPG existent
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, apps/dashboard/allocation_diff.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-41, DON-10]
+
+- id: ARCH-43
+  titre: >
+    Le tableau de bord s'ouvre sur une page SYNTHÈSE qui répond en un écran, et
+    qui liste les pièges applicables à CE run
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [apps/dashboard/app.py, apps/dashboard/synthesis.py]
+  chiffre: []
+  destination: [note, ch2]
+  arcs:
+    parce-que: [ARCH-40]
+    justifie: [MET-40]
+  critique: >
+    `run_alerts` DÉRIVE les avertissements du recap : solve non prouvé optimal,
+    PAD épinglé par une contrainte, indicateur fixé par une contrainte, objectif
+    de marge brute pure. La mise en garde voyage donc avec le chiffre au lieu de
+    dormir dans un fichier de documentation. C'est l'expression la plus aboutie
+    du motif MET-40, et c'est un argument de mémoire, pas seulement d'outil.
+
+- id: ARCH-44
+  titre: >
+    Les écarts sont classés en HECTARES et non en PAD sur la page de synthèse
+  type: choix
+  statut: retenu
+  severite: null
+  source: [apps/dashboard/synthesis.py, TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-43, CAL-11]
+  critique: >
+    Conséquence directe de la convention du PAD (un petit poste mal simulé a un
+    PAD énorme). Classer en PAD mettrait les vergers avant la canne. Détail
+    d'interface qui encode une compréhension de la métrique.
+
+- id: ARCH-45
+  titre: >
+    ⚠ La page Synthèse n'a été exercée que sur cinq runs, jamais sur une grande
+    grille
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-43]
+
+- id: ARCH-50
+  titre: >
+    Chaque run écrit un dossier autonome — recap, CSV, YAML de configuration
+    utilisée, figures
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/reporting/run_folder.py]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [ARCH-02]
+    justifie: [ARCH-51, CAL-60]
+  critique: >
+    Répond au troisième reproche fait au GAMS : « sans trace de ce qui a changé
+    d'un scénario à l'autre ». Un dossier de run porte SA propre configuration,
+    donc un résultat reste interprétable des mois plus tard. C'est la
+    reproductibilité au sens pratique, pas au sens déclaratif.
+
+- id: ARCH-51
+  titre: >
+    Un run peut NOMMER son dossier, la découverte se faisant sur la présence
+    d'un `recap.json`
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [core/reporting/run_folder.py, CLAUDE.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-50]
+  critique: >
+    Effet de bord élégant : `reference_2017/` écrit un `reference.json` et se
+    trouve donc NATURELLEMENT exclu de la découverte des runs, sans liste
+    d'exceptions. Un critère structurel plutôt qu'une exclusion nommée — ça ne
+    dérive pas.
+
+- id: ARCH-52
+  titre: >
+    Le solve tourne SYNCHRONEMENT sur le fil principal, et une barre de
+    progression concurrente est interdite
+  type: choix
+  statut: retenu
+  severite: critique
+  source: [core/solve/progress.py, "docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [SOLV-70]
+
+- id: ARCH-53
+  titre: >
+    `core/` sépare CONSTRUIRE un modèle de le RÉSOUDRE — `core/model/` ignore
+    tout de la façon dont il sera résolu
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: [CLAUDE.md, "docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md"]
+  chiffre: []
+  destination: [annexeA, note]
+  arcs:
+    parce-que: [ARCH-02]
+  critique: >
+    Séparation qui a payé : tout `core/solve/` (amorçage, audit, chronométrie,
+    prix duaux, progression) a pu être ajouté sans toucher au constructeur. Le
+    Ch. 2 pourrait le dire en une phrase — c'est la preuve que l'architecture
+    a tenu sous une charge qu'elle n'avait pas anticipée.
+
+- id: ARCH-54
+  titre: >
+    Le refactor transverse du 21/07 n'a produit AUCUN changement de comportement,
+    et c'est prouvé
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: [scripts/golden_snapshot.py, "docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md"]
+  chiffre: [mesChecksums]
+  destination: [ch2, note]
+  arcs:
+    parce-que: [ARCH-02]
+    mesure-par: [VER-30]
+  critique: >
+    Réorganiser une arborescence entière et pouvoir le PROUVER par ~570 sommes
+    de contrôle sur les vraies données, sans résoudre un seul MILP. C'est la
+    justification complète de l'existence du golden snapshot, et le meilleur
+    argument pour l'avoir écrit AVANT d'en avoir besoin.
+
+# =============================================================================
+# DENSIFICATION — journal-vigilance.md, bloc « Résolu ».
+# Les défauts d'ingénierie qui n'ont pas survécu à la synthèse de 04-vigilance,
+# et qui sont pourtant les plus instructifs : tous SILENCIEUX.
+# =============================================================================
+
+- id: ARCH-60
+  titre: >
+    DEUX normalisations divergentes du même code région — deux libellés possibles
+    pour la même région selon la fonction appelée
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-08-01
+  source: ["docs/archives/journal-vigilance.md:965-970"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [ARCH-02]
+    justifie: [ARCH-63]
+  verdict-anterieur: >
+    « La séparation `core/` ↔ `case_studies/` ↔ `apps/` garantit qu'une même
+    intention n'est écrite qu'une fois. » Elle garantit qu'on ne s'IMPORTE pas de
+    travers ; elle n'empêche pas d'écrire deux fois le même algorithme dans deux
+    couches, à deux moments, avec deux résultats.
+  critique: >
+    `domain/zones.py` découpait la chaîne (`"4.5"` → `"4.5"`), `dashboard/
+    comparison.py` faisait `str(int(float(·)))` (`"4.5"` → `"4"`). Deux
+    algorithmes pour la même intention, écrits à des moments différents, dans
+    deux couches censées être séparées. Résolu en faisant des fonctions du
+    dashboard des ALIAS et non des copies, avec un test qui l'exige. ⚠ Défaut
+    de duplication SILENCIEUX : rien ne plante, un libellé change.
+
+- id: ARCH-61
+  titre: >
+    Un BOM UTF-8 invisible à l'exécution et fatal à tout outillage
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  quand: 2026-08-01
+  source: ["docs/archives/journal-vigilance.md:983-985"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-40]
+  verdict-anterieur: >
+    « Un fichier qui s'exécute correctement est un fichier correct. » Il tournait
+    depuis le début : c'est l'outillage d'analyse, pas l'interpréteur, qui l'a
+    déclaré illisible.
+  critique: >
+    Python décode en `utf-8-sig`, donc le fichier tournait parfaitement ; mais
+    tout outil le lisant en UTF-8 pur échouait, `ast.parse` compris. Encore un
+    défaut qui ne se manifeste QUE dans l'analyse, jamais dans l'usage. Aucun
+    autre fichier du dépôt n'en portait — vérifié plutôt que supposé.
+
+- id: ARCH-62
+  titre: >
+    Une propriété nommée « couverture » qui renvoyait un EFFECTIF, et qu'aucun
+    appelant n'utilisait
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  quand: 2026-08-01
+  source: ["docs/archives/journal-vigilance.md:986-988"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [DON-40]
+  verdict-anterieur: >
+    « Le nom dit ce que la chose est. » `GeometryJoin.coverage` annonçait une part
+    et rendait un effectif ; aucun appelant ne s'en servait, donc rien ne l'a
+    jamais démenti. Un nom faux qu'on n'appelle pas ne casse rien — il attend.
+  critique: >
+    `GeometryJoin.coverage`. Supprimée — `summary()` calcule bien la part.
+    Intérêt de l'item : c'est le MÊME défaut que MET-31 (le commentaire qui ment)
+    transposé à un NOM. Un identifiant est une affirmation, et il peut être faux
+    sans que rien ne le signale. Le fait qu'aucun appelant ne l'utilisait est ce
+    qui a permis de la supprimer sans risque — et ce qui explique qu'elle ait
+    survécu si longtemps.
+
+- id: ARCH-63
+  titre: >
+    Trois défauts silencieux de la même famille, corrigés le même jour
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-01
+  source: [ARCH-60, ARCH-61, ARCH-62]
+  chiffre: []
+  destination: [ch5, oral, note]
+  arcs:
+    parce-que: [ARCH-60]
+    justifie: [MET-41]
+  critique: >
+    Deux normalisations divergentes, un BOM, un nom qui ment. Aucun ne provoque
+    d'erreur ; tous les trois faussent quelque chose. C'est la même classe que
+    PORT-10 (GAMS rend 0), SOLV-32 (HiGHS jette la graine), VER-63 (le compteur
+    de pages ne comptait rien) et PORT-22 (les sols indexés par position).
+    ⚠ SEPT OCCURRENCES, sur sept objets sans rapport — un solveur commercial, un
+    langage de modélisation, une chaîne LaTeX, un encodage de fichier, un nom de
+    propriété, deux fonctions utilitaires. C'est le fil conducteur le plus solide
+    du mémoire, et il se formule en une phrase : **le défaut dangereux n'est pas
+    celui qui casse, c'est celui qui continue.**
+
+- id: ARCH-64
+  titre: >
+    Un même formateur de nombres recopié dans deux scripts, et une constante à
+    deux sources
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  quand: 2026-08-01
+  source: ["docs/archives/journal-vigilance.md:978-982"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-02]
+  verdict-anterieur: >
+    « Toute duplication est un défaut à supprimer. » La moitié de celle-ci en
+    était un et a été fusionnée ; l'autre (`CONFIG_PATH`) a été CONSERVÉE
+    délibérément, parce que la factoriser aurait chargé pandas au `--help`. La
+    bonne réponse n'était pas de choisir entre les deux mais d'ajouter un test qui
+    exige que les copies s'accordent.
+  critique: >
+    Fusionné en `_common.format_number`. Point intéressant sur la seconde
+    partie : `CONFIG_PATH` avait deux sources, et la duplication a été CONSERVÉE
+    délibérément — pour ne pas charger pandas au `--help` — mais avec un test qui
+    exige qu'elles s'accordent. Duplication assumée + garde automatique : c'est
+    la bonne réponse quand la factorisation coûte plus qu'elle ne rapporte.
+
+- id: ARCH-65
+  titre: >
+    TRANCHÉ — le golden porte bien 681 sommes de contrôle, et c'est le
+    générateur de chiffres qui était périmé
+  type: donnee
+  statut: retenu
+  severite: mineur
+  quand: 2026-08-12
+  source: ["docs/archives/journal-vigilance.md:975", "golden_snapshot.py --check", "memoire/build_chiffres.py"]
+  chiffre: [mesChecksums]
+  destination: [note]
+  arcs:
+    parce-que: [VER-30]
+    justifie: [MET-64]
+  critique: >
+    L'incohérence était réelle : le journal disait 681 le 2026-08-01, le
+    générateur de chiffres déclarait 570. Tranchée de la seule façon acceptable —
+    en relançant `golden_snapshot.py --check`, qui répond « OK (681 checksums
+    unchanged) ». Le 570 datait du refactor du 21/07, avant les blocs
+    `intensity`, `agroecology`, P/K et Rpest. Item conservé bien qu'il soit clos,
+    parce que la MANIÈRE dont il a été clos est le sujet : deux documents se
+    contredisaient, aucun des deux n'a été cru, et c'est l'exécutable qui a
+    tranché en sept secondes.
+
+- id: ARCH-66
+  titre: >
+    La main d'œuvre n'est PAS monétisée dans le coût variable du GAMS — le revenu
+    net est un ajout de reporting
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-13
+  source: ["docs/archives/journal-vigilance.md:1002-1005"]
+  chiffre: []
+  destination: [ch2, annexeA, note]
+  arcs:
+    parce-que: [PORT-01]
+  critique: >
+    ⚠ FAIT DE MODÉLISATION LOURD ET PEU VISIBLE. La marge brute que le modèle
+    maximise ne déduit AUCUN coût de travail — seules des heures sont comptées,
+    et uniquement pour la contrainte de plafond. Une culture à 1 128 h/ha et une
+    à 12,7 h/ha ont donc la même structure de coût dans l'objectif. C'est
+    cohérent avec la notion de marge BRUTE, mais cela explique en partie pourquoi
+    le modèle bascule si volontiers vers le maraîchage intensif dès que le
+    plafond horaire le permet. `labor.cost_per_hour` ajoute un revenu net en
+    REPORTING seulement, sans effet sur l'optimum (défaut 0, rétro-compatible).
+
+- id: ARCH-67
+  titre: >
+    `output_2` est conservé parce que la paire régénérée ne le reproduit PAS
+  type: choix
+  statut: retenu
+  severite: mineur
+  quand: 2026-08-01
+  source: ["docs/archives/journal-vigilance.md:950-951"]
+  chiffre: []
+  destination: [note, annexeE]
+  arcs:
+    parce-que: [CAL-60]
+  critique: >
+    C'est l'état intermédiaire — plafond plantain seul, PAD 31,7 % — qui
+    correspond au barreau du milieu du tableau d'attribution. Il n'existe dans
+    aucun des deux runs de référence nommés. Détail d'archivage, mais il conserve
+    un point de mesure sans lequel la démonstration à trois barreaux perdrait son
+    barreau central.
+
+- id: ARCH-68
+  titre: >
+    `enable_add` doit s'appliquer AVANT `set_args` — une politique POSE sa
+    contrainte, un front la DÉPLACE
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-08-05
+  source: ["commit 3cfa575", core/config.py]
+  chiffre: []
+  destination: [note, annexeC]
+  arcs:
+    parce-que: [ARCH-11, PROS-52]
+  verdict-anterieur: >
+    « L'ordre d'application de `enable_add` et `set_args` est un détail de
+    plomberie. » C'est une décision de SÉMANTIQUE : une politique POSE une
+    contrainte, un front la DÉPLACE, et déplacer ce qui n'existe pas encore n'a
+    pas de sens. La limite qui l'imposait (PROS-52) était consignée depuis des
+    semaines ; sa conséquence sur l'ordre ne l'avait pas été.
+  critique: >
+    Dans l'ordre inverse, `set_args` cherchait un label pas encore ajouté et les
+    SEPT points de `pareto_subventions` échouaient sur
+    `KeyError: set_args label 'budget_subventions' matched no entry`.
+    ⚠ Ce bug est la conséquence directe de la limite déjà consignée en PROS-52
+    (`set_args` ne sait toucher qu'une entrée déjà déclarée) : la limite était
+    connue, sa conséquence sur l'ORDRE de composition ne l'était pas. Un ordre
+    d'application de transformations de configuration est une décision de
+    sémantique, pas de plomberie — poser puis déplacer, jamais l'inverse.
+    Bon point pour l'échec bruyant : le `KeyError` est immédiat et nommé, très
+    loin des défauts silencieux d'ARCH-63.

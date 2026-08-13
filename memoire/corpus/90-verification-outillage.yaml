@@ -1,0 +1,572 @@
+# =============================================================================
+# 90 — VÉRIFICATION ET OUTILLAGE                                   préfixe : VER
+#
+# Trois dispositifs qui n'attrapent PAS les mêmes choses, plus les audits ad hoc
+# qui ont tranché les débats. La thèse du domaine : dans ce travail, savoir
+# qu'on a tort est un livrable, pas une précaution.
+# =============================================================================
+
+# --- Les trois garde-fous ----------------------------------------------------
+
+- id: VER-01
+  titre: >
+    Les tests unitaires ne lisent JAMAIS les données réelles — et c'est délibéré
+  type: choix
+  statut: retenu
+  severite: null
+  source: [tests/, memoire/chapitres/02-porter.tex#sec:gardefous, CLAUDE.md]
+  chiffre: [mesTests, mesTestsFichiers]
+  destination: [ch2, note, oral]
+  arcs:
+    parce-que: [ARCH-13, DON-50]
+    justifie: [VER-02, VER-30]
+  critique: >
+    « Un test qui dépend d'un jeu de données de production échoue pour des
+    raisons qui n'ont rien à voir avec la logique testée, et devient un test
+    qu'on désactive. » Argument juste, et le revers est dit dans la même phrase :
+    ils vérifient que chaque contrainte fait ce qu'elle dit, jamais que le
+    résultat global est le bon. Un garde-fou dont on énonce la portée ET la
+    limite — c'est ce qui manque à la plupart des suites de tests.
+
+- id: VER-02
+  titre: >
+    Les tests exercent les constructeurs sur des configurations MINUSCULES
+    construites à la main
+  type: methode
+  statut: retenu
+  severite: null
+  source: [tests/test_guadeloupe_constraints.py, CLAUDE.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-01]
+  critique: >
+    Conséquence pratique : la suite reste rapide et lisible, et un test échoué
+    désigne une ligne de logique et non un jeu de données. Style à documenter
+    pour un successeur — CLAUDE.md le fait explicitement (« Follow that style
+    for new model logic »).
+
+- id: VER-03
+  titre: >
+    ⚠ La suite complète dure ~29 min parce que quelques tests construisent le
+    vrai jeu de données et lancent de vrais solves
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [CLAUDE.md, pyproject.toml]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-01]
+  critique: >
+    Contradiction partielle avec VER-01 : le principe « aucun test ne lit les
+    données » souffre des exceptions. Elles sont assumées, mais elles rendent la
+    suite complète inutilisable en boucle d'itération — d'où la consigne de ne
+    lancer que les fichiers touchés. Une séparation par marqueur pytest
+    (`-m slow`) serait le correctif naturel et n'a pas été faite.
+
+- id: VER-30
+  titre: >
+    LE GOLDEN SNAPSHOT — ~570 sommes de contrôle sur le vrai jeu de données,
+    SANS résoudre le moindre MILP, donc exactement reproductible
+  type: methode
+  statut: retenu
+  severite: null
+  source: [scripts/golden_snapshot.py, memoire/chapitres/02-porter.tex]
+  chiffre: [mesChecksums]
+  destination: [ch2, note, oral, article]
+  arcs:
+    parce-que: [VER-01]
+    justifie: [ARCH-54, VER-31]
+  critique: >
+    L'idée centrale : SÉPARER ce qui est déterministe (pipeline, indicateurs,
+    construction du modèle) de ce qui ne l'est pas (la recherche arborescente),
+    et verrouiller le premier au checksum près. C'est ce qui permet de remanier
+    l'arborescence entière en sachant qu'on n'a rien cassé. Transférable à tout
+    projet où un solveur stochastique masque les régressions.
+
+- id: VER-31
+  titre: >
+    Le golden vit dans `.golden/`, GITIGNORÉ, parce qu'il dérive de `data/` qui
+    l'est aussi
+  type: choix
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, .gitignore]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-30, DON-50]
+  critique: >
+    Conséquence gênante et non dite : le garde-fou n'est PAS partagé. Deux
+    développeurs sur deux machines ont deux références, et rien ne garantit
+    qu'elles coïncident. Acceptable à une personne, faux dès la deuxième.
+    À signaler dans la note technique.
+
+- id: VER-50
+  titre: >
+    `check_references.py` — le SEUL garde-fou du dépôt sur le solve, ~0 s, aucun
+    solve
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-01
+  source: [scripts/check_references.py, case_studies/guadeloupe/references.yaml]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [CAL-60]
+    justifie: [VER-51]
+  critique: >
+    Comble exactement le trou laissé par les deux autres : les tests sont sans
+    données, le golden couvre le pipeline et les indicateurs, ni l'un ni l'autre
+    ne couvre la RÉSOLUTION. Trois dispositifs, trois périmètres disjoints,
+    énoncés — c'est la partie « garde-fous » du Ch. 2 et elle est solide.
+
+- id: VER-51
+  titre: >
+    Sa tolérance est de 5 % PARCE QUE le bruit de branch-and-bound mesuré vaut
+    0,15 point de PAD
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [scripts/check_references.py, docs/04-vigilance.md#E.3]
+  chiffre: [mesBruitPad, mesGraineA, mesGraineB, mesGraineC]
+  destination: [ch2, oral]
+  arcs:
+    parce-que: [VER-50, SOLV-55]
+  critique: >
+    Un seuil de garde-fou DÉRIVÉ D'UNE MESURE de bruit, et non choisi. « Une
+    garde à l'égalité exacte échouerait sur un simple re-run. » C'est la bonne
+    façon de fixer une tolérance, et c'est rare. Bon exemple à l'oral : la
+    démarche expérimentale appliquée à son propre outillage.
+
+- id: VER-52
+  titre: >
+    ⚠ `check_references.py` reste une commande à lancer À LA MAIN, jamais
+    branchée sur un hook
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-50]
+  critique: >
+    Décision explicite (« si le rythme de modification du modèle le justifie »),
+    donc pas un oubli. Mais un garde-fou qu'on peut oublier de lancer n'en est
+    un qu'à moitié.
+
+# --- Les audits qui ont tranché ----------------------------------------------
+
+- id: VER-20
+  titre: >
+    `repair_allocation.py` — construire À LA MAIN une solution faisable pour
+    prouver qu'un incumbent est faux
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: [scripts/repair_allocation.py, docs/04-vigilance.md#B.2]
+  chiffre: [mesIncumbentGain, mesIncumbentEcart]
+  destination: [ch2, oral, article]
+  arcs:
+    parce-que: [SOLV-20]
+  critique: >
+    Le renversement de charge de la preuve : au lieu de demander au solveur s'il
+    a bien travaillé, on lui EXHIBE une meilleure solution. Quelques secondes de
+    calcul contre une heure. Méthode simple, décisive, et applicable à tout MILP
+    dont on connaît une heuristique gloutonne.
+
+- id: VER-21
+  titre: >
+    `constraint_violations` — auditer une graine contre les contraintes du modèle
+    AVANT le solve
+  type: methode
+  statut: retenu
+  severite: critique
+  quand: 2026-07-29
+  source: [core/solve/warm_start.py]
+  chiffre: []
+  destination: [ch2, ch4, note, article]
+  arcs:
+    parce-que: [SOLV-32]
+  critique: >
+    Sans lui, un run PARAÎT amorcé et se comporte comme à froid, sans le moindre
+    signal. L'audit a attrapé une vraie erreur : la réparation par défaut cassait
+    `Eq_BA_JA` sur 318 exploitations. « L'audit n'est pas un confort. »
+
+- id: VER-22
+  titre: >
+    `audit_warm_start_seed.py` — chiffrer la DISTANCE d'une graine à la
+    faisabilité, contrainte par contrainte
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-09
+  source: [scripts/audit_warm_start_seed.py, docs/04-vigilance.md#B.6]
+  chiffre: [mesPdixViolationsA, mesPdixViolationsP]
+  destination: [ch4, note, article]
+  arcs:
+    parce-que: [VER-21]
+    justifie: [VER-43]
+  critique: >
+    Passe de « la graine est-elle valide ? » à « à quelle distance est-elle, et
+    par quelles contraintes ? ». C'est ce qui permet d'établir que P10 n'est pas
+    lente mais HORS D'ATTEINTE : 124 violations pour la plus proche, 407 pour la
+    plus éloignée. Un diagnostic quantitatif là où on aurait conclu par lassitude.
+
+- id: VER-40
+  titre: >
+    `check_scenario_feasibility.py` — le contrôle avant vol en relaxation LP
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: [scripts/check_scenario_feasibility.py]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    parce-que: [SOLV-50]
+    justifie: [VER-41, VER-42, VER-43, SOLV-44]
+  critique: >
+    A payé trois fois : erreur de conception écartée avant tout batch, P10
+    établie infaisable telle qu'écrite, emploi maximal mesuré. Et il détecte en
+    prime les groupes de cultures symétriques. Un outil qui répond à une
+    question différente de celle pour laquelle il a été écrit est un bon signe.
+
+- id: VER-41
+  titre: >
+    Mesurer le SAUT D'INTÉGRALITÉ en résolvant le même problème en LP et en
+    entiers prouvés
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-11
+  source: [docs/04-vigilance.md#B.8]
+  chiffre: [mesHuitBorneLp, mesHuitOptimum, mesHuitSautInt]
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [VER-40]
+    justifie: [SOLV-51]
+  critique: >
+    Protocole rare et bon marché : il faut juste avoir UN optimum prouvé pour
+    calibrer ce que la borne LP raconte. Sans lui, tout le corpus de mesures de
+    sous-optimalité du stage aurait été surestimé d'un facteur cinq.
+
+- id: VER-42
+  titre: >
+    LA BISSECTION — retirer les plafonds un par un pour établir que
+    l'infaisabilité vient de leur COMBINAISON
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#B.4]
+  chiffre: []
+  destination: [ch4, note, article]
+  arcs:
+    parce-que: [VER-40]
+    justifie: [SOLV-61]
+  critique: >
+    Retirer l'IFT, l'azote ou les GES isolément LAISSE l'infaisabilité. Méthode
+    de débogage classique appliquée à un modèle d'optimisation, ce qui est peu
+    courant — et elle produit un résultat qu'aucune inspection du YAML n'aurait
+    donné : ce ne sont pas les heures qui manquent, ce sont les cultures capables
+    de les absorber.
+
+- id: VER-43
+  titre: >
+    Établir qu'une politique est HORS D'ATTEINTE demande TROIS constats
+    distincts, aucun ne suffit
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#B.6]
+  chiffre: []
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [VER-22, VER-40]
+    justifie: [SOLV-62]
+  critique: >
+    (1) LP faisable en 81 s ⇒ ce n'est PAS de l'infaisabilité ; (2) aucun
+    incumbent en 7 200 s ⇒ ce n'est pas non plus une simple lenteur ; (3) les
+    trois graines les plus proches sont rejetées ⇒ aucune réparation n'est à
+    portée. Chaîne de preuve exemplaire, et le seul énoncé citable qui en sort
+    est une BORNE, pas un résultat.
+
+# --- Chronométrie et instrumentation -----------------------------------------
+
+- id: VER-10
+  titre: >
+    `SolveHistory` — le seul relevé empirique du coût de résolution du dépôt
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/solve/timing.py, .mosaica_solve_history.json]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [SOLV-10]
+    justifie: [SOLV-11, SOLV-12]
+  critique: >
+    Enregistrer systématiquement une mesure dont on ne sait pas encore quoi
+    faire : c'est ce qui a permis, six semaines plus tard, d'établir le CV de
+    64 % et de tuer l'estimateur ponctuel. Argument pour instrumenter tôt.
+
+- id: VER-11
+  titre: >
+    L'estimateur refuse de répondre HORS de sa bande de comparabilité plutôt que
+    d'extrapoler
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [core/solve/timing.py]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [SOLV-12]
+  critique: >
+    « Rendre None plutôt qu'un chiffre hors bande. » Même famille de décisions
+    que SOLV-34 (le tri s'abstient quand il ne peut pas conclure) et PROS-25
+    (les forçages ne sont pas moyennés) : REFUSER DE RÉPONDRE est un mode de
+    sortie légitime. Trois occurrences d'un même principe = un item de méthode à
+    part entière (MET-41).
+
+- id: VER-12
+  titre: >
+    `profile_solver.py` — run chronométré par phase sur un sous-ensemble de zones
+  type: methode
+  statut: retenu
+  severite: null
+  source: [scripts/profile_solver.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [SOLV-71]
+  critique: >
+    C'est lui qui établit que l'enveloppe Pyomo→HiGHS coûte ~15 s, donc que le
+    goulot est la recherche. Un profilage qui FERME une piste d'optimisation vaut
+    autant qu'un profilage qui en ouvre une.
+
+- id: VER-13
+  titre: >
+    `shadow_prices.py` — et le piège qu'il documente : figer les entiers ne marche
+    PAS ici
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [core/solve/shadow_prices.py, CLAUDE.md]
+  chiffre: []
+  destination: [ch4, note, annexeA]
+  arcs:
+    parce-que: [SOLV-01]
+    justifie: [PROS-11]
+  critique: >
+    Le modèle étant PUREMENT binaire, figer les entiers laisse une LP sans
+    aucune variable libre et tous les duaux valent 0. Ce sont donc les duaux de
+    la RELAXATION qui sont lus, avec les réserves que le module détaille. Piège
+    d'une subtilité réelle : la méthode standard échoue silencieusement en
+    rendant des zéros, qui ressemblent à « la contrainte ne mord pas ».
+
+- id: VER-60
+  titre: >
+    `display_datasets.py` — inspecter le jeu de données sans lancer de solve
+  type: methode
+  statut: retenu
+  severite: null
+  source: [scripts/display_datasets.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [DON-50]
+
+- id: VER-61
+  titre: >
+    Un test de SYNCHRONISATION garde la cohérence entre `config.yaml` et les
+    specs de scénarios
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [tests/, TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-11]
+  critique: >
+    Même famille que le test qui garde la cohérence entre plancher d'emploi et
+    slack de main d'œuvre
+    (`test_prospective_labour_slack_covers_every_employment_floor`). Encoder
+    dans un test une contrainte qui relie DEUX fichiers de configuration : c'est
+    le seul moyen qu'elle survive à un éditeur pressé.
+
+- id: VER-62
+  titre: >
+    ⚠ CE QUI N'EST GARDÉ PAR RIEN — la chaîne solve → generate_report → écriture
+    du dossier de sortie
+  type: piege
+  statut: ouvert
+  severite: majeur
+  source: [TODO.md]
+  chiffre: []
+  destination: [note, ch5]
+  arcs:
+    parce-que: [VER-30, VER-50]
+  critique: >
+    Le golden s'arrête à la construction du modèle ; `check_references` repart du
+    recap déjà écrit. Le maillon intermédiaire n'est couvert que par le fait
+    qu'on lance des runs réels. Trou reconnu dans TODO depuis le 21/07 et jamais
+    comblé — à assumer dans le bilan plutôt qu'à taire.
+
+- id: VER-63
+  titre: >
+    Le compte de pages du cœur est vérifié MÉCANIQUEMENT à chaque compilation,
+    pas à l'œil
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-08-11
+  source: ["memoire/preambule.tex:156-165", memoire/compile.ps1]
+  chiffre: []
+  destination: [annexeF, note]
+  arcs:
+    parce-que: [MET-40]
+  critique: >
+    ⚠ ET IL A ÉTÉ CASSÉ PENDANT UN TEMPS : `\typeout` n'expanse pas `\pageref`,
+    donc il écrivait la macro littéralement et le contrôle des 30 pages ne
+    contrôlait rien. Corrigé le 11/08 avec `refcount`. Un garde-fou silencieux
+    qui ne garde rien est exactement le défaut que SOLV-32 décrit pour le warm
+    start — le même motif, sur un tout autre objet, dans le même dépôt.
+
+# =============================================================================
+# DENSIFICATION — specs de conception (docs/superpowers/specs/).
+# =============================================================================
+
+- id: VER-B1
+  titre: >
+    BRANCHE COUPÉE — un run de référence AVEC SOLVE comme garde-fou de refactor
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-21
+  source: ["docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md:43-51"]
+  chiffre: []
+  destination: [ch2, oral, article, note]
+  arcs:
+    parce-que: [VER-30]
+    mesure-par: [SOLV-11]
+  critique: >
+    ⚠ LA BRANCHE LA MIEUX COUPÉE DU DÉPÔT, avec DEUX raisons dont la seconde est
+    la vraie. (1) Trop lent : 30 à 55 min avec une variance ×2,1. (2) Et surtout
+    **pas déterministe au sens qui nous intéresse** — sur un MILP DÉGÉNÉRÉ, deux
+    optima de VALEUR IDENTIQUE peuvent être retournés indifféremment. « Un écart
+    d'allocation entre deux runs ne prouverait rien, et MASQUERAIT les vrais
+    écarts. » Le garde-fou naturel serait donc à la fois trop cher et activement
+    trompeur : il crierait au loup sur du bruit, donc on le désactiverait, donc
+    il ne garderait rien. C'est ce raisonnement qui produit le golden snapshot —
+    séparer le déterministe du non déterministe et ne verrouiller que le premier.
+
+- id: VER-32
+  titre: >
+    Ce qu'il fallait prouver se réduit à : entrées du solveur et sorties du
+    reporting inchangées — mesurable sans jamais résoudre
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-21
+  source: ["docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md:53-57"]
+  chiffre: []
+  destination: [ch2, oral, article]
+  arcs:
+    parce-que: [VER-B1]
+    justifie: [VER-33]
+  critique: >
+    Le raisonnement qui rend le problème traitable : « le refactor ne touche NI
+    le solveur, NI la formulation mathématique ». Réduire une question de
+    non-régression à ses invariants vérifiables plutôt que de tout rejouer —
+    transférable à n'importe quel système coûteux à exécuter, et c'est le genre
+    d'analyse qu'on saute d'ordinaire faute de la formuler.
+
+- id: VER-33
+  titre: >
+    Le golden coûte 7 s là où un run avec solve coûte 30 à 55 min — 250× moins
+    cher, et EXHAUSTIF sur les vraies données
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: ["docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md:59-70"]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [VER-32]
+  critique: >
+    G1 : `build_dataset` complet (33 paramètres, 5 sets, **1 271 780 paires
+    éligibles**) plus tous les indicateurs sur les 22 197 parcelles de la
+    baseline, en 7 s mesurées, parfaitement déterministe. Couvre
+    `data_pipeline`, `economics`, `environment`, `water`, `soil_carbon`,
+    `resilience`, `farm_typology`, `eligibility`, `indicators` et la table de
+    faits. Le rapport 250× est l'argument qui rend la décision évidente une fois
+    posée — et invisible tant qu'elle ne l'est pas.
+
+- id: VER-34
+  titre: >
+    `build_model` seul coûte 188 s sur le territoire complet
+  type: resultat
+  statut: ouvert
+  severite: mineur
+  source: ["docs/superpowers/specs/2026-07-21-refactor-structure-et-deduplication-design.md:64"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-33]
+  critique: >
+    ⚠ À CONFRONTER À SOLV-13, qui dit l'enveloppe Pyomo→HiGHS « négligeable,
+    ~15 s ». 188 s de CONSTRUCTION du modèle contre ~15 s de transfert au
+    solveur : les deux mesures portent sur des étages différents et ne se
+    contredisent pas, mais écrire « l'enveloppe logicielle est négligeable » sans
+    préciser laquelle serait approximatif. À trancher avant citation.
+
+- id: VER-35
+  titre: >
+    Le piège du mapping des sols a reçu un correctif STRUCTUREL, pas un commentaire
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md:81-98"]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [PORT-22]
+  critique: >
+    Le mapping vit dans une constante NOMMÉE, `_TYPE_SOL_TO_SOIL_NAME`, avec un
+    test dédié qui vérifie **chacune des cinq entrées** contre les lignes GAMS
+    correspondantes. La spec dit pourquoi : « une erreur silencieuse, qui ne
+    ferait échouer aucun test générique ». Un défaut inatteignable par un test
+    générique doit recevoir un test SPÉCIFIQUE — seule réponse possible, et elle
+    suppose d'avoir identifié le défaut d'abord.
+
+- id: VER-36
+  titre: >
+    Les tests vérifient LES DEUX BORNES d'un indicateur, pas un cas intermédiaire
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-20
+  source: ["docs/superpowers/specs/2026-07-20-resilience-stability-score-design.md:219-226"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-02]
+  critique: >
+    Le HHI d'une monoculture vaut 1,0, celui de `n` cultures à parts égales vaut
+    `1/n` — « les deux bornes, pas seulement un cas intermédiaire ». Plus les cas
+    dégénérés : revenu total nul rend `0.0` sans lever, une culture de revenu nul
+    ne pèse pas dans `n`, `δ = 0` annule la perte et `δ = 1` la porte au revenu
+    entier. Discipline de test qui vaut d'être nommée : sur une formule agrégée,
+    ce sont les EXTRÊMES et les DÉGÉNÉRESCENCES qui distinguent une
+    implémentation juste d'une implémentation plausible — un cas moyen passe avec
+    presque n'importe quelle formule.

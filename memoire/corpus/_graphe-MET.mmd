@@ -1,0 +1,63 @@
+flowchart LR
+  MET_01["MET-01 — MESURER AVANT DE CONCLURE — la règle que le stage s'"]
+  MET_02["MET-02 — Un résultat NÉGATIF mesuré vaut un résultat positif,"]
+  MET_03["MET-03 — S'ABSTENIR est un mode de sortie légitime, et il est"]
+  MET_10["MET-10 — Un commit = un FAIT MESURÉ, avec son chiffre dans le"]
+  MET_11["MET-11 — QUATRE lieux d'écriture, avec une règle de tri expli"]
+  MET_12["MET-12 — `journal-vigilance.md` (1 016 lignes) a été SYNTHÉTI"]
+  MET_13["MET-13 — Seuls les PLANS NON EXÉCUTÉS sont conservés ; un pla"]
+  MET_14["MET-14 — ⚠ CONTRE-EXEMPLE — l'inventaire de portage a dérivé "]:::renverse
+  MET_20["MET-20 — GÉNÉRER plutôt que rédiger tout ce qui peut l'être"]
+  MET_21["MET-21 — Les constantes mesurées mais non recalculables porte"]
+  MET_22["MET-22 — Le générateur de chiffres REFUSE d'émettre un PAD po"]
+  MET_30["MET-30 — LE COMMENTAIRE PORTE LA JUSTIFICATION, PAS LA PARAPH"]
+  MET_31["MET-31 — Un commentaire qui ment est pire qu'un commentaire a"]:::renverse
+  MET_32["MET-32 — Le code est en ANGLAIS, la documentation et les comm"]
+  MET_B2["MET-B2 — BRANCHE COUPÉE (pour l'instant) — tout basculer en a"]
+  MET_33["MET-33 — Le coût d'un renommage transverse est mesurable : 51"]
+  MET_34["MET-34 — `CLAUDE.md` est un contrat de travail avec l'outil, "]
+  MET_40["MET-40 — L'AVERTISSEMENT VOYAGE AVEC LE CHIFFRE — motif récur"]
+  MET_41["MET-41 — Un piège découvert devient un GARDE-FOU PERMANENT, j"]
+  MET_50["MET-50 — Ne lancer un solve complet qu'EN FIN DE JOURNÉE ; it"]
+  MET_51["MET-51 — ⚠ Un dispositif validé sans données reste NON VALIDÉ"]:::ouvert
+  MET_52["MET-52 — La quarantaine `outputs/_non_converges/` — ne jamais"]
+  MET_53["MET-53 — Un batch se valide TOUJOURS avant d'engager des heur"]
+  MET_54["MET-54 — Le mémoire est écrit DANS le dépôt, versionné avec l"]
+  MET_60["MET-60 — Le générateur de chiffres ÉCHOUE BRUYAMMENT plutôt q"]
+  MET_61["MET-61 — Le générateur lit AUSSI la version écartée dans la q"]
+  MET_62["MET-62 — `chiffres.tex` est VERSIONNÉ bien que généré — parce"]
+  MET_63["MET-63 — Le générateur de chiffres est passé de 205 macros à "]
+  MET_64["MET-64 — ⚠ Le chiffre de contrôle du golden était PÉRIMÉ dans"]:::renverse
+  MET_65["MET-65 — Les messages de commit portent les CHIFFRES et les p"]
+  MET_01 --> MET_02
+  MET_01 --> MET_03
+  MET_01 --> MET_10
+  MET_10 --> MET_11
+  MET_11 --> MET_12
+  MET_11 --> MET_13
+  MET_11 --> MET_14
+  MET_30 --> MET_14
+  MET_14 --> MET_20
+  MET_20 --> MET_21
+  MET_20 --> MET_22
+  MET_01 --> MET_30
+  MET_30 --> MET_31
+  MET_32 -.->|coupe| MET_B2
+  MET_33 ==>|mesure| MET_B2
+  MET_B2 --> MET_33
+  MET_11 --> MET_34
+  MET_20 --> MET_40
+  MET_40 --> MET_41
+  MET_50 --> MET_51
+  MET_50 --> MET_53
+  MET_20 --> MET_54
+  MET_20 --> MET_60
+  MET_60 --> MET_61
+  MET_52 --> MET_61
+  MET_20 --> MET_62
+  MET_20 --> MET_63
+  MET_14 --> MET_64
+  MET_10 --> MET_65
+  classDef ecarte fill:#ffebee,stroke:#b71c1c;
+  classDef renverse fill:#f3e5f5,stroke:#6a1b9a;
+  classDef ouvert fill:#e1f5fe,stroke:#01579b;

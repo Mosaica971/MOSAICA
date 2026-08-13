@@ -1,0 +1,1209 @@
+# =============================================================================
+# 70 — PROSPECTIVE : POLITIQUES, FORÇAGES, FRONTS                 préfixe : PROS
+#
+# Le dispositif expérimental, ce qu'il mesure, ses conventions assumées, et
+# — la partie la plus longue — ce qu'il ne permet pas de conclure.
+#
+# C'est le domaine où le stage a le plus de latitude et donc le plus de choix à
+# justifier : chaque seuil du catalogue est une décision politique prise dans un
+# fichier YAML par une personne seule.
+# =============================================================================
+
+# --- La séparation en trois objets -------------------------------------------
+
+- id: PROS-01
+  titre: >
+    Séparer POLITIQUE (ce qu'une puissance publique décide), FORÇAGE (ce que le
+    climat et les marchés imposent) et BALAYAGE (un seuil qui varie)
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-31
+  source: ["docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md", memoire/chapitres/04-explorer.tex]
+  chiffre: [mesPolitiques, mesForcages, mesBalayages]
+  destination: [ch4, annexeC, oral]
+  arcs:
+    parce-que: [CTX-20]
+    justifie: [PROS-02, PROS-03, PROS-10]
+  critique: >
+    Justification donnée : « ils n'ont pas le même auteur ». C'est le bon
+    critère — il est ontologique, pas informatique. Un forçage n'est pas une
+    politique dont on aurait retiré le décideur.
+
+- id: PROS-02
+  titre: >
+    La séparation décide de ce que COÛTE une campagne : le produit cartésien
+    complet vaudrait 120 cellules, soit cinq jours de calcul continu
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex]
+  chiffre: [mesCellulesTotal]
+  destination: [ch4, oral]
+  arcs:
+    parce-que: [PROS-01, SOLV-10]
+    justifie: [PROS-03]
+
+- id: PROS-03
+  titre: >
+    `plan.yaml` déclare politique par politique quels forçages la traversent —
+    au lieu du produit complet moins ce qu'on pense à exclure
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [case_studies/guadeloupe/plan.yaml, CLAUDE.md]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [PROS-02]
+    justifie: [PROS-04]
+  critique: >
+    Inversion de la valeur par défaut : déclarer ce qu'on veut plutôt
+    qu'exclure ce qu'on ne veut pas. Un batch devient alors une intention lisible
+    et pas un résidu. Le découpage a été vérifié à l'IDENTITÉ EXACTE (les 10
+    politiques et 12 forçages résolvent au même dictionnaire qu'avant) — c'est
+    ce qui rend le refactor sûr, et c'est la bonne façon de valider une
+    réorganisation de configuration.
+
+- id: PROS-04
+  titre: >
+    Un front n'est JAMAIS croisé avec la liste de forçages de sa cellule — un
+    front forcé se demande et se paie explicitement
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [PROS-03]
+  critique: >
+    « Un front est déjà un solve par point, et le multiplier par quatre forçages
+    transforme une après-midi en semaine. » Décision d'économie de calcul qui
+    devient une décision de méthode : ce qui est cher doit être demandé, jamais
+    obtenu par inadvertance d'une valeur par défaut.
+
+- id: PROS-05
+  titre: >
+    Les groupes de cultures sont un CATALOGUE, pas une copie : `{group: canne}`
+    est substitué à la lecture, les ancres YAML ne traversant pas les fichiers
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/config.py, case_studies/guadeloupe/crop_groups.yaml]
+  chiffre: []
+  destination: [annexeC, note]
+  arcs:
+    parce-que: [PROS-03]
+  critique: >
+    Deux pièges consignés : la correspondance est le dictionnaire à UNE clé
+    exacte (parce que `territory_production_bound` a déjà un argument nommé
+    `groups`), et chaque catalogue déclare son propre include pour rester
+    lançable seul. Détails, mais ce sont exactement les détails qui font qu'un
+    fichier de configuration reste utilisable par quelqu'un d'autre.
+
+# --- Les méthodes numériques -------------------------------------------------
+
+- id: PROS-10
+  titre: >
+    L'ε-contrainte plutôt qu'une somme pondérée : on garde l'objectif inchangé
+    et on plafonne le second critère
+  type: notion
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex, case_studies/guadeloupe/scenarios_pareto.yaml]
+  chiffre: []
+  destination: [ch4, annexeA, oral]
+  arcs:
+    parce-que: [PROS-01]
+    justifie: [PROS-11, SOLV-33]
+    ferme-la-branche: [PROS-B1]
+  critique: >
+    Deux justifications, et la seconde est politique : les poids n'ont pas à être
+    choisis — « et ils encoderaient une valeur politique déguisée en paramètre
+    technique ». C'est un des meilleurs arguments du mémoire, parce qu'il montre
+    qu'un choix de méthode numérique EST un choix de posture.
+
+- id: PROS-B1
+  titre: "BRANCHE COUPÉE — agréger marge et azote dans une somme pondérée"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, oral]
+  arcs:
+    mesure-par: []
+  sans-mesure: >
+    Coupée sur un THÉORÈME, et aucun banc d'essai ne l'établirait mieux : une somme
+    pondérée ne peut atteindre que les points du front situés sur son enveloppe
+    convexe, quels que soient les poids. Toute partie non convexe du compromis
+    marge / azote lui est structurellement invisible. S'y ajoute un argument de
+    posture, lui non démontrable : les poids encodent une valeur politique
+    déguisée en paramètre technique, et personne dans ce stage n'a mandat pour
+    fixer combien vaut un kilo d'azote en euros de marge.
+  critique: >
+    Un des meilleurs arguments du mémoire, parce qu'il montre qu'un choix de
+    méthode numérique EST un choix de posture — et parce que les deux
+    justifications sont de natures différentes, l'une opposable, l'autre assumée.
+
+- id: PROS-B3
+  titre: >
+    BRANCHE COUPÉE — écrire la politique agroécologique comme une PART MINIMALE
+    de cultures bio, ce qui était la formulation naturelle
+  type: choix
+  statut: ecarte
+  severite: majeur
+  quand: 2026-07-31
+  source: ["docs/04-vigilance.md#B.3", case_studies/guadeloupe/scenarios_politiques.yaml]
+  chiffre: []
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [SOLV-40, SOLV-42]
+    mesure-par: [VER-30]
+    justifie: [PROS-26]
+  critique: >
+    C'EST LA BRANCHE LA PLUS INSTRUCTIVE DU CORPUS, parce qu'elle a été coupée par
+    une propriété des DONNÉES et non par un arbitrage de modélisation. Une part
+    minimale de bio bâtie sur les 25 variantes maraîchères est satisfaite à coût
+    EXACTEMENT nul : le modèle ne distingue pas ces variantes, il lui suffit de
+    renommer. La contrainte serait passée, le rapport aurait affiché la part
+    demandée, et rien n'aurait changé sur le terrain. Une politique publique
+    simulée avec succès, et sans aucun effet — l'artefact parfait.
+    Le détecteur de groupes symétriques de `check_scenario_feasibility.py`
+    (VER-30) est ce qui a rendu le défaut visible AVANT qu'un batch ne tourne ;
+    sans lui la branche aurait été prise, et le résultat publié.
+    P8 a donc été reformulé sur des leviers que les données distinguent
+    réellement (azote, IFT, inertie), ce qui est plus faible politiquement et
+    seul défendable.
+
+- id: PROS-11
+  titre: >
+    Le front donne le coût marginal sur TOUT l'intervalle, là où le prix dual
+    n'en donne que la pente locale
+  type: notion
+  statut: retenu
+  severite: majeur
+  source: [core/solve/shadow_prices.py, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [PROS-10]
+    justifie: [PROS-22]
+  critique: >
+    Et l'écart entre les deux est mesuré, pas supposé : au point le plus serré du
+    front budgétaire, le dual vaut presque le DOUBLE de la pente moyenne.
+    Extrapoler le dual surestimerait l'effet d'environ trois quarts. C'est un
+    résultat de méthode citable hors du contexte guadeloupéen.
+
+- id: PROS-12
+  titre: >
+    Le contrôle avant vol en relaxation LP : ~2 min contre 30-55 min, filtre et
+    non garantie
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-31
+  source: [scripts/check_scenario_feasibility.py, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, oral, note]
+  arcs:
+    parce-que: [SOLV-50]
+    justifie: [PROS-13]
+  critique: >
+    Il a servi trois fois pour de vrai : écarter une erreur de conception avant
+    tout batch, établir que P10 était infaisable tel qu'écrit, et mesurer
+    l'emploi maximal atteignable. Un outil qui a payé trois fois son écriture.
+
+- id: PROS-13
+  titre: >
+    Les planchers d'emploi ont été recalibrés sur des MESURES et non sur des
+    chiffres choisis (P8 → 4 875 ETP, P9 → 5 734, P10 → 4 975, contre 3 503 réalisés)
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: [TODO.md, docs/04-vigilance.md#B.4]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [PROS-12]
+  critique: >
+    Exemple de scénario dont les seuils ne sont pas inventés. À opposer aux
+    seuils du catalogue qui, eux, sont des fractions choisies des totaux
+    d'`output_3` (PROS-50) — la différence de statut entre les deux n'est pas
+    dite dans le mémoire et devrait l'être.
+
+# --- Ce que la grille montre -------------------------------------------------
+
+- id: PROS-20
+  titre: >
+    Sous crise systémique, la marge brute du territoire devient NÉGATIVE pour
+    les trois politiques testées
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex#sec:grille]
+  chiffre: []
+  destination: [ch4, ch6, oral]
+  arcs:
+    parce-que: [CTX-03]
+  critique: >
+    C'est le pire cas au sens de Wald, et il est atteint par TOUTES. Résultat
+    fort, mais à qualifier : F9 cumule quatre dégradations simultanées, et rien
+    ne dit qu'elles soient conjointement plausibles. Le mémoire ne pose pas cette
+    question ; il devrait, ne serait-ce qu'en une phrase.
+
+- id: PROS-21
+  titre: >
+    LE CLASSEMENT DES POLITIQUES DÉPEND DU FORÇAGE — P9 est la meilleure sous F0
+    et la pire sous F9 hors aide
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex#sec:grille]
+  chiffre: []
+  destination: [ch4, ch6, oral, article]
+  arcs:
+    parce-que: [PROS-01]
+  critique: >
+    C'est le résultat qui JUSTIFIE la grille : une politique n'est pas « bonne »
+    dans l'absolu, et un scénario unique masque exactement cela. L'argument
+    méthodologique et le résultat empirique coïncident, ce qui est rare et
+    précieux.
+
+- id: PROS-22
+  titre: >
+    LECTURE QUI NE TIENT PAS — classer sur la marge brute des politiques qui
+    déplacent les aides, c'est constater qu'elles subventionnent davantage
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [memoire/chapitres/04-explorer.tex#sec:grille]
+  chiffre: []
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [CTX-03]
+    justifie: [PROS-23]
+  critique: >
+    La réponse retenue — exposer les DEUX colonnes (brute et hors aide) plutôt
+    que d'en choisir une en silence — est la bonne posture et mérite d'être
+    nommée comme telle : le dispositif ne tranche pas à la place du lecteur, il
+    rend le désaccord visible. Sous F9 l'ordre s'inverse entre les deux lectures,
+    donc le choix n'est pas cosmétique.
+
+- id: PROS-23
+  titre: >
+    Le regret de Savage se mesure contre la meilleure politique DU MÊME FORÇAGE,
+    jamais contre un optimum global
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [core/reporting/robustness.py, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [PROS-21]
+    justifie: [PROS-24, PROS-25]
+  critique: >
+    « Qu'aurais-je perdu à avoir choisi celle-ci, sachant que ce contexte-là est
+    survenu » — la question n'a de sens qu'à contexte fixé. Convention correcte
+    et explicitement assumée.
+
+- id: PROS-24
+  titre: >
+    Convention — l'INFAISABILITÉ compte comme le PIRE résultat, pas comme une
+    donnée manquante
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [core/reporting/robustness.py, docs/04-vigilance.md#A.3]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [PROS-23]
+  critique: >
+    « Une politique qui ne laisse aucune solution est un échec, pas une absence
+    de mesure. » Sans cette convention, le pire cas des survivants ferait passer
+    une politique fragile pour robuste. Choix qui change les classements.
+
+- id: PROS-25
+  titre: >
+    Convention — les forçages ne sont PAS moyennés : une moyenne affirmerait une
+    distribution de probabilité que personne n'a choisie
+  type: choix
+  statut: retenu
+  severite: critique
+  source: [core/reporting/robustness.py]
+  chiffre: []
+  destination: [ch4, ch5, annexeD, oral, article]
+  arcs:
+    parce-que: [PROS-23]
+  critique: >
+    Le meilleur item d'épistémologie appliquée du dépôt. Refuser une moyenne
+    parce qu'elle porterait une affirmation probabiliste non assumée est une
+    décision qu'un mémoire d'ingénieur prend rarement, et elle se défend en une
+    phrase. À faire remonter au Ch. 5 (« l'honnêteté épistémique comme livrable »).
+
+- id: PROS-26
+  titre: >
+    Cinq mesures de robustesse fournies — pire cas (Wald), rétention, CV, regret
+    maximal (Savage), domaine de viabilité (Starr)
+  type: methode
+  statut: retenu
+  severite: null
+  source: [core/reporting/robustness.py]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [PROS-21]
+  critique: >
+    Cinq critères plutôt qu'un : le dispositif refuse de choisir le critère de
+    décision à la place du décideur. Cohérent avec PROS-22 et PROS-25 — c'est
+    une ligne de conduite, pas trois décisions isolées.
+
+- id: PROS-27
+  titre: >
+    Le seuil de viabilité de Starr est saisi À LA MAIN et n'est pas mémorisé par
+    indicateur
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [PROS-26]
+
+# --- Les fronts --------------------------------------------------------------
+
+- id: PROS-30
+  titre: >
+    Le front budgétaire, 7 points TOUS prouvés optimaux, dont deux points de
+    contrôle où le plafond ne mord plus
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex#sec:fronts, outputs/p4_statu_quo_pareto_subventions_*]
+  chiffre: [frontsubvQuatrePoints, frontsubvQuatreTemoin]
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [PROS-10]
+    justifie: [PROS-31, PROS-32]
+    mesure-par: [PROS-33]
+
+- id: PROS-31
+  titre: >
+    RÉSULTAT CENTRAL — la marge brute varie en SENS INVERSE du plafond de
+    subventions, de façon monotone sur les sept points
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex]
+  chiffre: [frontsubvQuatreunMargeM, frontsubvQuatresixMargeM]
+  destination: [ch4, ch6, oral, article]
+  arcs:
+    parce-que: [PROS-30]
+    justifie: [PROS-32]
+  critique: >
+    Serrer l'enveloppe publique AUGMENTE la marge brute de plus de 14 M€ tout en
+    faisant reculer l'objectif. L'explication tient dans le terme de risque : la
+    pénalité passe de 18 à 34 % de la marge brute. « L'aide publique n'achète pas
+    de la marge, elle achète de la stabilité. » ⚠ Voir CTX-13 : le SENS de
+    l'effet est déjà chez CALALOU ; ce qui est neuf est cette interprétation par
+    le risque, que seul un front permet d'établir.
+
+- id: PROS-32
+  titre: >
+    La banane d'exportation passe de 2 004 à 95 ha (−95 %) et la canne recule de
+    2 231 ha ; le maraîchage double, les agrumes passent de 9 à 657 ha
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex, memoire/tables/realloc-budget.tex]
+  chiffre: []
+  destination: [ch4, ch6, oral]
+  arcs:
+    parce-que: [PROS-31]
+    justifie: [PROS-44]
+  critique: >
+    « L'énoncé le plus direct que le modèle produise sur la question du projet. »
+    ⚠ Et c'est aussi celui qui porte la réserve la plus lourde (PROS-44 : aucun
+    débouché modélisé). Le mémoire lie bien les deux — ne pas les séparer à
+    l'oral, où la tentation sera forte.
+
+- id: PROS-33
+  titre: >
+    LE CONTRÔLE qui valide un front avant d'en lire quoi que ce soit — au point
+    non mordant, l'objectif doit retomber au centime sur le run non balayé
+  type: methode
+  statut: retenu
+  severite: critique
+  source: [memoire/chapitres/04-explorer.tex, docs/04-vigilance.md#A.7]
+  chiffre: []
+  destination: [ch4, oral, note, article]
+  arcs:
+    parce-que: [PROS-30]
+    justifie: [PROS-40]
+  critique: >
+    Contrôle simple, bon marché, et il a effectivement attrapé un défaut réel
+    (PROS-40). C'est le type de garde-fou qu'on n'invente qu'après s'être fait
+    prendre — dire les deux ensemble est plus honnête et plus utile.
+
+- id: PROS-34
+  titre: >
+    Le front azote tracé DEUX fois — contre la config de référence et SOUS la
+    politique agroécologique P8
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-11
+  source: [memoire/chapitres/04-explorer.tex, case_studies/guadeloupe/plan_etape_BC.yaml]
+  chiffre: [frontazoteRefPente, frontazoteHuitPente, frontazoteRefPoints, frontazoteHuitPoints]
+  destination: [ch4, annexeD, oral, article]
+  arcs:
+    parce-que: [PROS-10]
+    justifie: [PROS-35]
+  critique: >
+    LA comparaison intéressante : le coût marginal d'un kilo d'azote n'a aucune
+    raison d'être le même selon ce que la politique laisse par ailleurs. C'est,
+    à mon sens, le résultat le plus original du chapitre pour un article.
+
+- id: PROS-35
+  titre: >
+    Le kilo d'azote est MOINS cher à retirer sous une politique déjà
+    contraignante — et les duals locaux des deux fronts sont quasi identiques
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex]
+  chiffre: [frontazoteRefDualBas, frontazoteHuitDualBas]
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [PROS-34]
+  critique: >
+    « Sans les tracer, on aurait conclu à l'égalité des coûts marginaux. »
+    C'est la démonstration expérimentale de PROS-11 : le dual ment hors de son
+    voisinage. Deux items qui se prouvent l'un l'autre.
+
+- id: PROS-36
+  titre: >
+    RÉSERVE NON LEVÉE — sur les 5 points du front azote sous P8, seuls les deux
+    extrêmes sont prouvés ; deux points intermédiaires rendent exactement la
+    même valeur
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-11
+  source: [memoire/chapitres/04-explorer.tex, commit 9585f43]
+  chiffre: [frontazoteHuitProuves]
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [SOLV-33, SOLV-20]
+  critique: >
+    La chaîne de warm start les a ÉPINGLÉS sur l'incumbent du plus serré. « Ce
+    palier est un artefact de solveur, pas un plateau économique. » Le front
+    BORNE le coût marginal, il ne le mesure pas point par point. Aveu exemplaire
+    — et effet secondaire inattendu du chaînage (SOLV-33), qui accélère mais peut
+    figer. Ce couplage n'est pas énoncé comme tel dans le mémoire et devrait
+    l'être : c'est le coût caché de l'amorçage en chaîne.
+
+# --- Ce que le dispositif ne permet pas de conclure ---------------------------
+
+- id: PROS-40
+  titre: >
+    DÉFAUT MESURÉ — un front peut être entièrement INACTIF : cinq des sept seuils
+    étaient au-dessus du plafond que P8 s'impose déjà
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: critique
+  quand: 2026-08-09
+  source: [docs/04-vigilance.md#A.7, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, oral, note, article]
+  arcs:
+    parce-que: [PROS-33]
+    mesure-par: [PROS-12]
+  verdict-anterieur: >
+    « Un front ε-contrainte se paramètre sur le réalisé de la configuration de
+    référence. » Il se paramètre sur la borne de sa POLITIQUE HÔTE : sous P8, cinq
+    des sept seuils étaient déjà au-dessus du plafond que la politique s'impose,
+    donc inactifs. Sept solves pour trois points distincts, et rien dans le YAML
+    ne le laissait voir.
+  critique: >
+    « Le défaut est dans le PLAN, pas dans le modèle, et il ne se voit pas à la
+    lecture. » Sept solves pour trois points distincts. Un front ε-contrainte se
+    paramètre sur la borne de sa POLITIQUE HÔTE, pas sur le réalisé de la
+    configuration de référence. Erreur générique, coûteuse, et à ma connaissance
+    non documentée ailleurs — bon candidat pour un article de méthode.
+
+- id: PROS-41
+  titre: >
+    Une politique peut être HORS D'ATTEINTE sans être infaisable — l'axe P1↔P10
+    est unilatéral
+  type: resultat
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#B.6, memoire/chapitres/04-explorer.tex]
+  chiffre: [mesPdixBorneLp, mesPdixViolationsA, mesPdixViolationsP]
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [SOLV-62]
+    justifie: [REF-21]
+  critique: >
+    ⚠ CONSÉQUENCE POLITIQUE, PAS SEULEMENT TECHNIQUE. Le dispositif est conçu
+    pour encadrer un débat entre dérégulation et bifurcation agroécologique ; la
+    borne dérégulatrice a tourné, la borne bifurcation non. Le dire ne suffit
+    pas : il faut mesurer ce que cela signifie, à savoir que le seul axe que
+    l'outil restitue entièrement est celui qui va vers MOINS de contraintes.
+
+- id: PROS-42
+  titre: >
+    Un FORÇAGE peut annuler une politique — sous crise systémique le plafond
+    d'azote ne mord jamais, la crise fait gratuitement le travail
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-09
+  source: [docs/04-vigilance.md#A.8]
+  chiffre: []
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [PROS-01]
+  critique: >
+    Obtenu SANS AUCUN SOLVE MILP — cinq bornes LP identiques suffisent. Résultat
+    à double lecture : techniquement, un front n'a pas de sens dans ce contexte
+    et le lot a été abandonné ; politiquement, une politique environnementale
+    peut être rendue inutile par la crise qu'elle prétendait anticiper. La
+    seconde lecture est plus intéressante que la première et le mémoire la sous-
+    exploite.
+
+- id: PROS-43
+  titre: >
+    TROIS LECTURES INTERDITES — un indicateur fixé par une contrainte, un total
+    pris pour une intensité, le PAD appliqué à un scénario prospectif
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#A.1, "#A.2", "#A.5", memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, oral, note]
+  arcs:
+    justifie: [PROS-45, IND-40]
+  critique: >
+    Les trois sont détectées ou refusées MÉCANIQUEMENT : `bound_indicators` lit
+    `recap["constraints"]` (donc rétroactivement), le bloc `intensity` donne les
+    ratios, et le générateur de chiffres du mémoire REFUSE d'émettre un PAD pour
+    un run prospectif. Encoder un avertissement dans un outil plutôt que dans une
+    note de bas de page est le motif récurrent du dépôt — c'est un item de
+    méthode à part entière (MET-40).
+
+- id: PROS-44
+  titre: >
+    RÉSERVE MAJEURE — aucun débouché n'est modélisé au-delà de deux filières :
+    partout ailleurs, ce qui est produit est supposé vendu au prix de la table
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [memoire/chapitres/04-explorer.tex#sec:limites]
+  chiffre: []
+  destination: [ch4, ch5, ch6, oral, article]
+  arcs:
+    parce-que: [PROS-32]
+    justifie: [PERSP-20]
+  critique: >
+    Le résultat le plus spectaculaire du chapitre repose donc sur une hypothèse
+    de marché parfaitement élastique pour le maraîchage, les agrumes et l'igname.
+    « Il dit ce que l'agronomie et l'économie de la PRODUCTION rendent possible ;
+    il ne dit pas si le territoire absorberait cette production. » ⚠ Et c'est
+    exactement l'information que les enquêtes de la lettre de mission devaient
+    apporter (CTX-21) — la boucle se referme, et c'est ce qui donne au Ch. 5 sa
+    matière.
+
+- id: PROS-45
+  titre: >
+    La grille est CREUSE — 14 cellules résolues sur 7 politiques et 5 forçages,
+    contre 10 et 12 déclarés
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: [memoire/chapitres/04-explorer.tex, TODO.md]
+  chiffre: [mesCellulesGrille, mesPolitiquesVues, mesForcagesVus]
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [SOLV-10]
+  critique: >
+    Présenté comme « une limite du travail plutôt qu'un choix de méthode ». Juste,
+    et à ne pas adoucir : une cellule coûte une heure, le stage dure six mois, et
+    la reconstruction en a mangé l'essentiel.
+
+- id: PROS-46
+  titre: >
+    Cinq runs ont fini en `maxTimeLimit`, dont l'ancrage de comparaison
+    `p4_statu_quo_f0_nominal`
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [TODO.md, docs/04-vigilance.md#B.2]
+  chiffre: [prosEcartFzero, prosEcartFzeroDuree]
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [SOLV-20]
+    mesure-par: [VER-22]
+  critique: >
+    Le cas le plus net : F0 étant le forçage NUL, le statu quo et statu quo × F0
+    sont LE MÊME PROBLÈME, et ils différaient. Repris depuis une graine correcte,
+    le second a rendu l'optimum prouvé. L'écart n'était pas un coût de taille, il
+    était entièrement imputable au hasard du branchement. Meilleure démonstration
+    possible que « toute comparaison entre une cellule convergée et une cellule
+    daguée porte cet écart ».
+
+- id: PROS-47
+  titre: >
+    P8 × F0 et P8 × F9 rendaient une allocation PHYSIQUEMENT IDENTIQUE — ce
+    n'était donc pas un couple de résultats indépendants
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [TODO.md]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    parce-que: [PROS-46]
+  critique: >
+    Piège vicieux : deux cellules d'une grille qui semblent se répondre alors
+    que l'une est une copie non convergée de l'autre. Sans le contrôle, on
+    aurait publié « P8 est insensible à la crise systémique » — une conclusion
+    forte, entièrement fausse.
+
+# --- Le catalogue lui-même ---------------------------------------------------
+
+- id: PROS-50
+  titre: >
+    Les seuils du catalogue sont des FRACTIONS CHOISIES des totaux mesurés
+    d'`output_3`
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [case_studies/guadeloupe/scenarios_politiques.yaml, TODO.md]
+  chiffre: []
+  destination: [ch4, ch5, annexeC]
+  arcs:
+    parce-que: [PROS-01]
+    justifie: [REF-22]
+  critique: >
+    ⚠ STATUT ÉPISTÉMIQUE À DIRE. Un plafond d'azote à −30 % du réalisé est
+    lisible et reproductible, mais ce n'est pas une cible de politique publique
+    existante. Certaines politiques (Écophyto, directive nitrates) ont des cibles
+    réglementaires réelles qui auraient pu servir d'ancrage. Le mémoire ne dit
+    pas laquelle des deux logiques il a suivie, et devrait — c'est une phrase.
+
+- id: PROS-51
+  titre: >
+    L'axe dérégulation ↔ bifurcation est une HYPOTHÈSE sur la structure du débat
+    agricole guadeloupéen, pas une observation
+  type: reflexivite
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/04-explorer.tex encadré réflexif]
+  chiffre: []
+  destination: [ch4, ch5, oral]
+  arcs:
+    parce-que: [PROS-50]
+    justifie: [REF-22]
+  critique: >
+    Le constat est à durcir avec CTX-15 : CALALOU
+    avait fait la démarche participative, dans le même laboratoire, deux ans
+    plus tôt. L'absence n'est pas une fatalité de format, c'est un arbitrage de
+    ce stage-ci.
+
+- id: PROS-52
+  titre: >
+    Deux leviers `enable: false` vivent dans `config.yaml` uniquement pour que
+    `matrix:` puisse en faire varier le seuil
+  type: choix
+  statut: retenu
+  severite: mineur
+  source: [case_studies/guadeloupe/config.yaml, CLAUDE.md]
+  chiffre: []
+  destination: [annexeC, note]
+  arcs:
+    parce-que: [PROS-10, ARCH-11]
+  critique: >
+    Conséquence d'une limite de `set_args`, qui ne sait toucher qu'une entrée
+    DÉJÀ déclarée. Bricolage assumé et documenté. Petit, mais c'est exactement le
+    genre de dette que le lecteur suivant doit trouver expliquée.
+
+- id: PROS-53
+  titre: >
+    P1 est la seule politique à CHANGER de fonction objectif — sa valeur
+    d'objectif n'est pas du même genre que les autres
+  type: piege
+  statut: retenu
+  severite: critique
+  source: ["memoire/build_chiffres.py:184-189", case_studies/guadeloupe/scenarios_politiques.yaml]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [PROS-50]
+  critique: >
+    `maximize_gross_margin` sans aversion au risque — un exploitant supposé
+    neutre au risque, ce que son libellé « dérégulation totale » assume. Un
+    tableau qui alignerait sa valeur d'objectif avec les autres serait FAUX, et
+    c'est pourquoi la grille compare sur la marge brute. Piège bien traité, et
+    bon exemple de comparaison qui a l'air valide et ne l'est pas.
+
+- id: PROS-54
+  titre: >
+    Un point DOMINÉ sur un front signale presque toujours un solve non convergé,
+    pas une découverte
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, apps/dashboard/pareto.py]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    parce-que: [SOLV-20]
+  critique: >
+    « Serrer une contrainte ne peut pas améliorer l'objectif. » Test de
+    cohérence gratuit, encodé dans la page du tableau de bord. Encore le motif
+    MET-40 : l'avertissement voyage avec le chiffre.
+
+- id: PROS-55
+  titre: >
+    Chaque run porte `policy` / `forcing` / `sweep` dans son recap — le tableau
+    de bord groupe sur des COORDONNÉES et non sur un nom découpé
+  type: choix
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md, apps/dashboard/pareto.py]
+  chiffre: []
+  destination: [note, annexeC]
+  arcs:
+    parce-que: [PROS-03]
+  critique: >
+    Décision d'ingénierie qui évite une classe entière de bugs : le nom d'un run
+    sous politique est `<politique>__<forçage>__<balayage>__<point>`, donc le
+    préfixe nomme la POLITIQUE et non le balayage. Parser le nom aurait marché
+    jusqu'au premier front sous politique, puis silencieusement menti.
+
+# =============================================================================
+# DENSIFICATION — journal-vigilance.md, entrée « trois pièges qui ne se voient
+# qu'après le solve » (2026-07-31).
+# =============================================================================
+
+- id: PROS-60
+  titre: >
+    `main.py` A ÉCHOUÉ exactement là-dessus le 2026-07-21 — les planchers
+    vivriers réclament plus d'heures que le plafond n'en accorde
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-21
+  source: ["docs/archives/journal-vigilance.md:131-139"]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    parce-que: [SOLV-60]
+    justifie: [VER-61]
+  verdict-anterieur: >
+    « Deux blocs de configuration écrits séparément et corrects séparément
+    composent un scénario faisable. » Les planchers vivriers réclamaient 6 222 537
+    heures par leurs cultures les moins gourmandes contre 6 252 740 accordées par
+    le plafond de main d'œuvre — 0,5 % de marge sur une borne qui ignore déjà la
+    concurrence foncière. L'incompatibilité n'est visible dans aucun des deux
+    blocs, seulement dans leur produit.
+  critique: >
+    Les planchers de production vivrière réclament 6 222 537 h par leurs cultures
+    LES MOINS GOURMANDES, contre 6 252 740 h accordées — soit 0,5 % de marge sur
+    une borne inférieure qui IGNORE DÉJÀ la concurrence foncière. Infaisables à
+    `slack: 1.0`, et découvert par un plantage réel et non par relecture. C'est
+    ce qui a produit le test de cohérence sans données entre les deux blocs de
+    configuration : incident → mesure → garde-fou exécutable (MET-41).
+
+- id: PROS-61
+  titre: >
+    ATTENTION À L'EXPLICATION TROP RAPIDE — « travail et IFT sont corrélés » est
+    vrai dans la table et NE SUFFIT PAS
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: ["docs/archives/journal-vigilance.md:146-152"]
+  chiffre: []
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [SOLV-61]
+    mesure-par: [VER-42]
+  critique: >
+    ⚠ ITEM DE MÉTHODE DE PREMIER ORDRE, et il est nommé comme tel dans le journal.
+    La corrélation est réelle dans les taux — maraîchage 1 128-1 653 h/ha à IFT
+    10-15, canne 12,7 h/ha à IFT 2,5, prairie 126 h/ha à IFT 0 — et l'explication
+    « le plafond d'IFT borne l'emploi » est donc SÉDUISANTE, COHÉRENTE et FAUSSE.
+    La bissection la démolit : retirer l'IFT laisse l'infaisabilité, retirer
+    l'azote aussi, retirer les GES aussi. C'est la combinaison, plus la forme PAR
+    FERME du plafond de main d'œuvre. Cas d'école d'une explication plausible
+    appuyée sur une corrélation visible dans les données et démentie par une
+    expérience — le motif MET-01 appliqué à une intuition qui n'avait rien
+    d'absurde.
+
+- id: PROS-62
+  titre: >
+    P10 était infaisable avec un plancher à 6 000 ETP alors que son slack en
+    autorisait 8 561
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: ["docs/archives/journal-vigilance.md:140-145"]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [PROS-61]
+    justifie: [SOLV-62]
+  critique: >
+    Un facteur 1,4 de budget horaire disponible, et toujours infaisable. C'est ce
+    chiffre qui rend indiscutable que « ce ne sont pas les heures qui manquent
+    mais les cultures capables de les absorber ». Et les plafonds mesurés en LP
+    (P8 → 4 875, P10 → 4 975 ETP, contre 3 503 réalisés) sont des BORNES
+    SUPÉRIEURES : le vrai maximum entier est plus bas encore.
+
+- id: PROS-63
+  titre: >
+    `output_3` sature le plafond de main d'œuvre à 90 % — 5 629 390 h sur
+    6 252 740
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: ["docs/archives/journal-vigilance.md:131-133"]
+  chiffre: []
+  destination: [ch3, ch4, annexeC]
+  arcs:
+    parce-que: [SOLV-60]
+  critique: >
+    Chiffre qui manquait pour comprendre le reste : la contrainte n'est saturée
+    qu'à 90 % au niveau territorial — et elle mord pourtant FERME PAR FERME
+    (CAL-85 : 99 ha d'arboriculture bloqués faute d'heures). Une contrainte peut
+    avoir 10 % de mou agrégé et être bloquante partout où ça compte. Distinction
+    agrégé / par ferme à ne jamais escamoter.
+
+- id: PROS-64
+  titre: >
+    ⚠ PIÈGE JUMEAU DE L'EAU, SUR LE CARBONE — le taux exposé au modèle n'est pas
+    ce que le rapport mesure
+  type: piege
+  statut: ouvert
+  severite: majeur
+  quand: 2026-07-31
+  source: ["docs/archives/journal-vigilance.md:161-167"]
+  chiffre: []
+  destination: [ch4, note, annexeA]
+  arcs:
+    parce-que: [ARCH-21, IND-02]
+  critique: >
+    ⚠ PIÈGE NON REPRIS DANS `04-vigilance.md` ET SANS CORRECTIF. Le taux de
+    carbone exposé aux contraintes est l'ENTRÉE de carbone de la culture ; le
+    bilan rapporté dans le recap dépend AUSSI du type de sol de la parcelle
+    (`Data_Sol`), qu'un taux par culture ne peut pas porter. Un plafond ou un
+    plancher de carbone ne contraint donc PAS la grandeur que le rapport affiche.
+    L'eau a reçu son correctif (`plot_weight: irrigable`, facteur 1,6) ; le
+    carbone n'en a pas d'équivalent, la dépendance au sol n'étant pas un simple
+    poids par parcelle mais une fonction du COUPLE. Un scénario carbone écrit
+    aujourd'hui serait faux d'une façon qui ne se voit nulle part. À vérifier et
+    à signaler avant tout usage.
+
+- id: PROS-65
+  titre: >
+    Un seuil lu sur `recap.json` et reposé en configuration sans son poids est
+    faux d'un facteur 1,6
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: ["docs/archives/journal-vigilance.md:161-165"]
+  chiffre: []
+  destination: [ch2, ch4, annexeA]
+  arcs:
+    parce-que: [ARCH-21]
+  critique: >
+    Formulation la plus opératoire du piège : l'erreur ne vient pas d'un calcul
+    faux mais d'un ALLER-RETOUR entre deux objets qui portent le même nom — on
+    lit 35 Mm³ dans un rapport, on l'écrit comme seuil, la contrainte en compte
+    56. Toute grandeur qui circule du reporting vers la configuration est exposée
+    à cette faute, et c'est un canal que le dépôt encourage (les seuils du
+    catalogue sont des fractions de totaux mesurés, PROS-50).
+
+# =============================================================================
+# DENSIFICATION — corps des messages de commit (2026-08-05 → 2026-08-12).
+# La campagne prospective y est documentée mesure par mesure, avec les
+# prédictions faites AVANT les runs et leur vérification après.
+# =============================================================================
+
+- id: PROS-70
+  titre: >
+    UNE PRÉDICTION VÉRIFIÉE AU CENTIME — l'ancrage de la grille était faux de
+    0,71 % et sa réparation a coûté onze minutes
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-08-12
+  source: ["commit 2117ddf"]
+  chiffre: [prosEcartFzero, prosEcartFzeroDuree]
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [PROS-46]
+    mesure-par: [VER-22]
+  critique: >
+    ⚠ LE MEILLEUR ARGUMENT DISPONIBLE SUR LA NON-CONVERGENCE, parce que c'est une
+    PRÉDICTION et non un constat. F0 ne portant aucun override, la cellule
+    P4 × F0 est le MÊME PROBLÈME que P4 nue : sa valeur était donc connue avant
+    le run. Elle est passée de 80 468 932 (`maxTimeLimit`) à 81 036 580 PROUVÉ
+    OPTIMAL en 675 s — exactement la valeur annoncée. La grille entière était
+    ancrée sur une valeur fausse de 0,71 %, et onze minutes de calcul l'ont
+    corrigée. Un protocole falsifiable, exécuté, confirmé.
+
+- id: PROS-71
+  titre: >
+    LE CLASSEMENT TIENT, SA MAGNITUDE ÉTAIT FAUSSE D'UN FACTEUR DEUX — P6 × F0
+    corrigée de +13,66 %
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-08-12
+  source: ["commit 2117ddf"]
+  chiffre: []
+  destination: [ch4, ch5, oral, article]
+  arcs:
+    parce-que: [PROS-70]
+  critique: >
+    57 191 548 → 65 005 778 €. Conséquence pour la lecture politique : l'écart
+    entre PAYER (P6, verdissement incitatif) et INTERDIRE (P7, Écophyto
+    réglementaire) passe de 15,1 à 7,3 M€. La conclusion qualitative survit, sa
+    quantification était fausse du simple au double. C'est la démonstration la
+    plus nette de ce qu'un solve non convergé fait à une comparaison de
+    politiques publiques — et de ce que 30 min de calcul supplémentaire changent
+    à un chiffre destiné à un décideur.
+
+- id: PROS-72
+  titre: >
+    « Aucune prose ne l'affirmait, seule la table le porte, donc le chapitre suit
+    tout seul »
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["commit 2117ddf"]
+  chiffre: []
+  destination: [ch5, oral, note]
+  arcs:
+    parce-que: [MET-20, PROS-71]
+  critique: >
+    ⚠ LE BÉNÉFICE DE MET-20 PAYÉ EN SITUATION RÉELLE. Un chiffre change de 13,66 %
+    à J-14 du dépôt ; comme aucun paragraphe ne le citait en dur et que la table
+    est générée, le document se met à jour par recompilation. Si la valeur avait
+    été écrite dans le texte, il aurait fallu la retrouver — et la version fausse
+    aurait probablement survécu quelque part. C'est l'argument décisif pour la
+    discipline de génération, et il est daté et vérifiable.
+
+- id: PROS-73
+  titre: >
+    Le front budgétaire est accroché à P4 et NON à P8 — parce que le plafond n'y
+    mord que sous P4
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-05
+  source: ["commit 9440f81"]
+  chiffre: []
+  destination: [ch4, annexeC, oral]
+  arcs:
+    parce-que: [PROS-40]
+    mesure-par: [VER-40]
+  critique: >
+    ⚠ LA LEÇON DE PROS-40 APPLIQUÉE PRÉVENTIVEMENT, et c'est ce qui en fait un
+    item intéressant plutôt qu'une redite. Mesuré AVANT de lancer : sous P4, le
+    territoire verse 71,20 M€ contre un plafond à 72 (dual 0,056) — la contrainte
+    mord. Sous P8, les cinq premiers points rendraient la même allocation. Le
+    choix de l'hôte d'un front est donc une décision MESURÉE, pas un défaut de
+    lecture. Le dépôt a appris de son erreur du 09/08 et l'a évitée le 05/08 —
+    vérifier l'ordre chronologique avant de le raconter ainsi.
+
+- id: PROS-74
+  titre: >
+    Le contrôle LP du front budgétaire — 9/9 optimal en ~43 min, trois vérifications
+    en une passe
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-08-05
+  source: ["commit 9440f81"]
+  chiffre: []
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [VER-40]
+  critique: >
+    Trois résultats pour 43 min : (1) le plancher structurel REDOUTÉ sous
+    l'inertie à 70 % ne mord pas, même à 35,9 M€ — une crainte levée sans solve
+    MILP ; (2) le front est monotone ; (3) le point à 72 M rend EXACTEMENT la
+    borne de P4 nue et celui à 90 M est quasi inactif (0,002 €/€ contre 0,118
+    entre 64,6 et 72 M). Le contrôle avant vol ne se contente pas de dire
+    « faisable » : il prédit la FORME du front.
+
+- id: PROS-75
+  titre: >
+    « L'écart front-à-43-M / P5 ne mesure PAS le coût du ciblage » — la
+    description le dit plutôt que de le laisser croire
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-05
+  source: ["commit 9440f81"]
+  chiffre: []
+  destination: [ch4, ch5, annexeC]
+  arcs:
+    parce-que: [PROS-22]
+  critique: >
+    P5 (austérité budgétaire) ne change pas que l'enveloppe : elle change aussi
+    le travail (0,90) et l'inertie (0,60). Comparer un point de front à P5
+    mélangerait donc trois leviers. La formulation du commit est exactement la
+    bonne posture — « la description le dit PLUTÔT QUE DE LE LAISSER CROIRE » —
+    et c'est la même famille que MET-40. Une comparaison n'est valide que
+    « toutes choses égales par ailleurs », et dans un catalogue de politiques
+    multi-leviers, presque rien ne l'est.
+
+- id: PROS-76
+  titre: >
+    Un lot d'étape est écrit en specs JETABLES plutôt qu'en relançant le plan
+  type: organisation
+  statut: retenu
+  severite: null
+  quand: 2026-08-09
+  source: ["commit 6015324"]
+  chiffre: []
+  destination: [note, annexeC]
+  arcs:
+    parce-que: [PROS-03]
+  critique: >
+    Motif : relancer `plan.yaml` créerait des DOUBLONS aux mêmes coordonnées.
+    D'où `plan_etape_A.yaml`, `_A_budget`, `_BC`, `_D`. Et une limite d'outil
+    consignée au passage : `--forcings` ne sait pas exclure seulement les
+    cellules forcées, il écarterait aussi le balayage non forcé. Détail
+    d'ergonomie qui a un coût réel — il oblige à écrire un fichier plutôt qu'à
+    passer un drapeau.
+
+- id: PROS-77
+  titre: >
+    Un même problème, une même graine, deux durées de preuve : 8 981 s et 10 856 s
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["commit 2117ddf"]
+  chiffre: [mesHuitPreuveDuree]
+  destination: [ch4, annexeD]
+  arcs:
+    parce-que: [SOLV-11, SOLV-52]
+  critique: >
+    P8 nue a PROUVÉ en 8 981 s ; P8 × F0 — le même problème, la même graine — est
+    sortie en `maxTimeLimit` à 10 856 s sur la même valeur. La dispersion de
+    SOLV-11 ne porte donc pas seulement sur le temps de RÉSOLUTION mais sur le
+    temps de PREUVE, et elle suffit à faire basculer une cellule d'un statut à
+    l'autre. Le statut « optimal / non prouvé » d'une cellule de grille est en
+    partie un tirage.
+
+# =============================================================================
+# DENSIFICATION — spec « scénarios prospectifs » (2026-07-31).
+# =============================================================================
+
+- id: PROS-80
+  titre: >
+    LES PLANCHERS D'EMPLOI SONT DES POURCENTAGES D'UN MAXIMUM MESURÉ, pas des
+    chiffres choisis
+  type: methode
+  statut: retenu
+  severite: critique
+  quand: 2026-07-31
+  source: ["docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md:194-199"]
+  chiffre: []
+  destination: [ch4, ch5, annexeC, oral]
+  arcs:
+    parce-que: [PROS-62, VER-40]
+    contredit: [PROS-50]
+  critique: >
+    ⚠ CORRIGE ET NUANCE PROS-50. Tous les seuils du catalogue ne sont pas des
+    fractions arbitraires d'`output_3` : les planchers d'emploi sont des
+    pourcentages du maximum ATTEIGNABLE mesuré en relaxation LP sous les autres
+    contraintes de chaque politique — P8 : 4 875 ETP max, plancher à 4 200
+    (86 %) ; P9 : 5 734, plancher 4 200 (73 %) ; P10 : 4 975, plancher 4 400
+    (88 %) ; contre 3 503 ETP réalisés. Le catalogue mélange donc DEUX régimes de
+    seuils, l'un mesuré et l'autre choisi, et le mémoire doit dire lequel est
+    lequel plutôt que de les présenter uniformément.
+
+- id: PROS-81
+  titre: >
+    RÉSULTAT POLITIQUE — dans ce modèle, une politique environnementale ambitieuse
+    PLAFONNE l'emploi agricole qu'elle peut soutenir
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-07-31
+  source: ["docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md:205-207"]
+  chiffre: []
+  destination: [ch4, ch5, ch6, oral, article]
+  arcs:
+    parce-que: [PROS-61, PROS-62]
+  critique: >
+    ⚠ ÉNONCÉ POLITIQUE MAJEUR, ET IL EST ABSENT DU BROUILLON. Il contredit
+    frontalement l'attendu ordinaire — l'agroécologie est censée être intensive
+    en travail, donc créatrice d'emploi — et la spec ajoute la clause qui le rend
+    solide : « et le plafond SE MESURE au lieu de se postuler » (P8 → 4 875 ETP,
+    P10 → 4 975, contre 3 503 réalisés). Deux réserves indispensables : ce sont
+    des bornes LP donc des majorants, et l'énoncé vaut « dans ce modèle », dont
+    on sait qu'il ne monétise pas le travail (ARCH-66) et qu'il ne peut pas
+    évaluer les itinéraires agroécologiques réels (DON-61). Avec ces réserves,
+    c'est le résultat le plus intéressant du chapitre 4 après le front budgétaire.
+
+- id: PROS-82
+  titre: >
+    Le seul garde-fou entre deux blocs YAML distants de trente lignes est un test
+    sans données
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: ["docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md:183-186"]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [PROS-60]
+    justifie: [VER-61]
+  critique: >
+    `test_prospective_labour_slack_covers_every_employment_floor` relit chaque
+    politique, calcule le plafond effectif d'après son `slack` et refuse tout
+    plancher d'emploi au-dessus. Formulation à retenir telle quelle : « c'est le
+    SEUL garde-fou entre deux blocs YAML distants de trente lignes ». Une
+    contrainte de cohérence interne à un fichier de configuration n'est portée
+    par rien d'autre que par un test — ni le langage, ni le schéma, ni la
+    relecture ne la voient.
+
+- id: PROS-83
+  titre: >
+    La comparaison entre politiques se fait sur les colonnes PHYSIQUES, pas sur
+    l'objectif
+  type: choix
+  statut: retenu
+  severite: critique
+  quand: 2026-07-31
+  source: ["docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md:165-169"]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [PROS-53]
+  critique: >
+    Règle explicite : marge brute, ETP, azote, IFT, eau — « calculées à
+    l'identique quel que soit l'objectif ». Parce que P1 maximise la marge brute
+    PURE quand les neuf autres maximisent la marge ajustée du risque : ce sont
+    deux fonctions différentes, et aligner leurs valeurs d'objectif dans une même
+    colonne serait une erreur de catégorie. La règle est posée dans la spec avant
+    d'avoir été violée — c'est de la conception, pas de la réparation.

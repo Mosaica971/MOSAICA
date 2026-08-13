@@ -1,0 +1,43 @@
+flowchart LR
+  ART_01["ART-01 — Le portage lui-même n'est pas un résultat publiable "]
+  ART_B1["ART-B1 — BRANCHE COUPÉE — « MOSAICA-Py : une réimplémentation"]:::ecarte
+  ART_10["ART-10 — ⚠ « LES AIDES TIENNENT LA CANNE ET LA BANANE » N'EST"]
+  ART_11["ART-11 — CE QUI EST NEUF sur cette question — la MESURE MARGI"]:::ouvert
+  ART_30["ART-30 — LA PISTE LA PLUS SOLIDE — un article de MÉTHODE sur "]:::ouvert
+  ART_31["ART-31 — Preuve 1 — un incumbent arrêté à la limite est PROUV"]
+  ART_32["ART-32 — Preuve 2 — la borne LP ne mesure PAS ce qu'un branch"]
+  ART_33["ART-33 — Preuve 3 — PROUVER coûte plus cher que TROUVER, et l"]
+  ART_34["ART-34 — Preuve 4 — un warm start peut DÉGRADER une cellule f"]
+  ART_35["ART-35 — Preuve 5 — un front ε-contrainte tracé SOUS une poli"]:::ouvert
+  ART_36["ART-36 — Preuve 6 — des activités symétriques rendent une con"]:::ouvert
+  ART_37["ART-37 — Preuve 7 — un score composite non pondéré par famill"]:::ouvert
+  ART_40["ART-40 — MANQUE 1 — une validation indépendante de la calibra"]:::ouvert
+  ART_41["ART-41 — MANQUE 2 — la demande et les débouchés"]:::ouvert
+  ART_42["ART-42 — MANQUE 3 — la conception participative des scénarios"]:::ouvert
+  ART_43["ART-43 — MANQUE 4 — la grille est creuse et cinq cellules son"]:::ouvert
+  ART_44["ART-44 — MANQUE 5 — la dimension temporelle"]:::ouvert
+  ART_50["ART-50 — VERDICT — la piste méthodologique est PRÊTE ou presq"]:::ouvert
+  ART_01 -.->|coupe| ART_B1
+  ART_10 --> ART_11
+  ART_01 --> ART_30
+  ART_30 --> ART_31
+  ART_30 --> ART_32
+  ART_30 --> ART_33
+  ART_30 --> ART_34
+  ART_30 --> ART_35
+  ART_30 --> ART_36
+  ART_30 --> ART_37
+  ART_11 --> ART_40
+  ART_11 --> ART_41
+  ART_11 --> ART_42
+  ART_11 --> ART_43
+  ART_11 --> ART_44
+  ART_30 --> ART_50
+  ART_40 --> ART_50
+  ART_41 --> ART_50
+  ART_42 --> ART_50
+  ART_43 --> ART_50
+  ART_44 --> ART_50
+  classDef ecarte fill:#ffebee,stroke:#b71c1c;
+  classDef renverse fill:#f3e5f5,stroke:#6a1b9a;
+  classDef ouvert fill:#e1f5fe,stroke:#01579b;

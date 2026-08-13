@@ -1,0 +1,491 @@
+# =============================================================================
+# 97 — PERSPECTIVES                                              préfixe : PERSP
+#
+# Ce qui reste à faire, et — c'est la seule chose qui rende un item de cette
+# liste utile — CE QUI LE REND NÉCESSAIRE. Une perspective sans arc `parce-que`
+# est une liste de courses.
+#
+# Deux origines mêlées : les chantiers déclarés par Clément (P-A à P-G) et les
+# reports du dépôt. Marqués distinctement, parce qu'ils n'engagent pas les
+# mêmes personnes ni les mêmes horizons.
+# =============================================================================
+
+# --- Les chantiers déclarés --------------------------------------------------
+
+- id: PERSP-A
+  titre: >
+    [CHANTIER DÉCLARÉ] Renommer variables et fonctions vers des noms plus
+    clairs, plus abstraits, et basculer le projet en anglais
+  type: perspective
+  statut: differe
+  severite: null
+  source: ["liste de chantiers, 2026-08-12", MET-32]
+  chiffre: [mesChecksums, mesLignesCode]
+  destination: [ch6, note]
+  arcs:
+    parce-que: [MET-32, ARCH-01]
+    mesure-par: [MET-33]
+  critique: >
+    Deux objectifs distincts empilés dans un seul chantier, et ils n'ont pas le
+    même statut. (a) ABSTRAIRE les noms prolonge une exigence déjà tenue et
+    testée dans `core/` (ARCH-03) : c'est une continuation, elle est justifiée.
+    (b) BASCULER EN ANGLAIS est une décision de PUBLIC — elle vise un lecteur
+    international ou un successeur non francophone, et elle entre en tension
+    avec MET-30 (les commentaires portent la justification, et ils sont longs :
+    les traduire, c'est les réécrire). Différé pour raison datée : à J-14, le
+    renommage casse 518 macros, ~570 checksums et rend illisibles 39 dossiers de
+    runs. Le même chantier était JUSTE trois mois plus tôt — à dire tel quel,
+    c'est un bon exemple de décision dont la valeur dépend de la date.
+
+- id: PERSP-B
+  titre: >
+    [CHANTIER DÉCLARÉ] Une interface de données explicite et facile à remplir —
+    un classeur type « bilan carbone »
+  type: perspective
+  statut: differe
+  severite: null
+  source: ["liste de chantiers, 2026-08-12", TODO.md]
+  chiffre: []
+  destination: [ch6, note]
+  arcs:
+    parce-que: [DON-24, CTX-21, MET-51]
+  critique: >
+    C'est le chantier le plus directement lié à l'échec de terrain du stage. Les
+    25 variantes vides (SOLV-40) sont exactement ce qu'un tel classeur aurait
+    permis de remplir sans développeur : des cases, des unités, une provenance.
+    Trois questions à trancher avant de coder — le PÉRIMÈTRE des postes, le SENS
+    de circulation (export seul, ou aller-retour ?), et l'articulation avec les
+    indicateurs existants qui, eux, sont fidèles au GAMS. ⚠ Piège prévisible :
+    un classeur qui accepte une saisie sans en tracer la source recrée
+    exactement le problème de `Avers.txt` (un fichier qu'on croit lu).
+
+- id: PERSP-C
+  titre: >
+    [CHANTIER DÉCLARÉ] Inclure l'élevage, la pêche, et les cycles associés
+    (méthanisation, compostage)
+  type: perspective
+  statut: differe
+  severite: majeur
+  source: ["liste de chantiers, 2026-08-12", docs/04-vigilance.md#E.5, TODO.md]
+  chiffre: []
+  destination: [ch6, note, article]
+  arcs:
+    parce-que: [CAL-B3, DON-30, IND-51]
+  critique: >
+    ⚠ TROIS SOUS-CHANTIERS DE NATURES TRÈS DIFFÉRENTES, à ne pas confondre.
+    (1) L'ÉLEVAGE est déjà là ÉCONOMIQUEMENT (la prairie porte sa marge) ; ce qui
+    manque est une VARIABLE D'ÉTAT interdisant de liquider un cheptel sans coût.
+    C'est donc un sous-problème du multi-périodes (PERSP-10), pas un ajout
+    d'activité — et l'article de 2015 reconnaît lui-même cette limite.
+    (2) LA PÊCHE est un ajout d'un tout autre ordre : elle n'a pas de parcelle,
+    donc elle ne rentre pas dans la variable de décision `Y[parcelle, culture]`.
+    L'intégrer change la NATURE du modèle (allocation de terre → allocation de
+    ressources hétérogènes), pas son paramétrage. À cadrer séparément, et
+    peut-être à ne pas coupler du tout : un modèle halieutique voisin, joint au
+    niveau des bilans d'autonomie alimentaire, coûte beaucoup moins cher.
+    (3) MÉTHANISATION / COMPOSTAGE sont des BOUCLES entre activités, donc des
+    contraintes de flux — la première fois que le modèle porterait un lien
+    matière entre deux cultures. Le bloc canne fibre (PORT-50) est le point
+    d'entrée naturel et il est déjà à moitié instruit.
+
+- id: PERSP-D
+  titre: >
+    [CHANTIER DÉCLARÉ] Incorporer MAELIA pour SIMULER rendements et itinéraires
+    plutôt que les tabuler
+  type: perspective
+  statut: differe
+  severite: majeur
+  source: ["liste de chantiers, 2026-08-12", DON-01]
+  chiffre: []
+  destination: [ch6, note, article]
+  arcs:
+    parce-que: [DON-01, DON-02, PORT-01]
+  critique: >
+    ⚠ LE CHANTIER LE PLUS AMBITIEUX, ET CELUI QUI RÉPOND À UN DÉFAUT ÉTABLI.
+    Justification directe : DON-01 mesure que les rendements tabulés valent 2 à
+    4× ceux du territoire, et DON-02 montre que c'est la cause commune des
+    plafonds de marché. Un rendement SIMULÉ, dépendant du sol, du climat et de
+    l'itinéraire réel, attaque la racine plutôt que le symptôme.
+    ⚠ TROIS POINTS À VÉRIFIER AVANT DE S'ENGAGER, que je ne peux pas trancher
+    ici : (a) ce que MAELIA simule exactement et à quelle résolution — il faut
+    lire sa documentation, pas s'en remettre à une réputation ; (b) la licence
+    et la disponibilité d'une API de couplage ; (c) et surtout le COÛT DE
+    COUPLAGE, qui est le vrai obstacle : un simulateur dans la boucle d'un MILP
+    à 309 000 binaires est impossible tel quel — 30 à 55 min par solve, et un
+    appel de simulateur par couple (parcelle, culture) évalué. La seule
+    architecture viable est un PRÉ-CALCUL : MAELIA génère hors ligne la table de
+    rendements que le modèle lit aujourd'hui. Ce qui change alors n'est pas le
+    modèle, c'est la PROVENANCE de `Rdt_Cult` — et cela lève par la même occasion
+    la contrainte de parité qui interdit d'y toucher (DON-B1).
+
+- id: PERSP-E
+  titre: >
+    [CHANTIER DÉCLARÉ] Former les encadrants au projet et à Python
+  type: perspective
+  statut: differe
+  severite: majeur
+  source: ["liste de chantiers, 2026-08-12"]
+  chiffre: []
+  destination: [ch5, ch6, note]
+  arcs:
+    parce-que: [SOLV-B1, ARCH-04, MET-11]
+  critique: >
+    ⚠ C'EST LE CHANTIER QUI DÉCIDE SI LE STAGE A SERVI À QUELQUE CHOSE.
+    L'argument de la réécriture (Ch. 1) était qu'un modèle qu'on ne peut plus
+    interroger est mort. Si le port Python n'est interrogeable que par son
+    auteur, il aura seulement DÉPLACÉ le problème — d'un environnement
+    propriétaire vers une dépendance à une personne. Toute la documentation du
+    dépôt (les cinq fichiers de `docs/`, l'entrée `04-vigilance`, les specs) est
+    déjà une réponse à ça, et elle est substantielle. Ce qui manque n'est pas
+    l'écrit mais la MISE À L'ÉPREUVE : personne d'autre n'a encore lancé un
+    scénario de bout en bout. Le test décisif est simple et non fait — faire
+    écrire à un encadrant une politique dans `plan.yaml` et la lancer.
+
+- id: PERSP-F
+  titre: >
+    [CHANTIER DÉCLARÉ] Une note technique interne à l'équipe, recoupant le mémoire
+  type: perspective
+  statut: differe
+  severite: null
+  source: ["liste de chantiers, 2026-08-12"]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [PERSP-E, MET-11]
+  critique: >
+    Public et contrainte différents du mémoire : pas de limite de pages, pas de
+    jury, un lecteur qui reprendra le dépôt. C'est donc là que va tout ce que les
+    30 pages ne peuvent pas porter — l'inventaire de portage complet, les pièges
+    mineurs, les dettes de conception (IND-42, VER-31, VER-62), et le mode
+    d'emploi opérationnel. Le corpus rend ce tri mécanique : `destination: [note]`.
+
+- id: PERSP-G
+  titre: >
+    [CHANTIER DÉCLARÉ] Un article qui ne soit pas une redite de Chopin et al. 2015
+  type: perspective
+  statut: ouvert
+  severite: null
+  source: ["liste de chantiers, 2026-08-12"]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [CTX-12, CTX-13]
+  critique: >
+    Traité en entier dans `98-article.yaml`. Le point d'attention établi par
+    l'extraction : la contrainte n'est pas seulement de ne pas répéter
+    Chopin 2015, c'est aussi de ne pas répéter CALALOU (2025), qui contient déjà
+    le résultat qualitatif le plus spectaculaire du Ch. 4.
+
+# --- Ce qui change la nature du modèle ---------------------------------------
+
+- id: PERSP-10
+  titre: >
+    LE MODÈLE MULTI-PÉRIODES — cadré, non commencé, et délibérément
+  type: perspective
+  statut: differe
+  severite: majeur
+  source: [TODO.md, ARCH-23, IND-21]
+  chiffre: []
+  destination: [ch4, ch5, ch6, note, article]
+  arcs:
+    parce-que: [ARCH-23, IND-21, CAL-B3]
+    justifie: [PERSP-C]
+  critique: >
+    LA limite structurelle du dispositif : le modèle est STATIQUE, donc un
+    scénario décrit un ÉTAT et jamais une TRAJECTOIRE. Trois symptômes
+    indépendants convergent — l'inertie n'est qu'un proxy grossier (ARCH-23), le
+    carbone du sol n'est portable qu'en flux annuel (IND-21), et l'élevage exige
+    une variable d'état (CAL-B3). Ce qu'il faudrait : un index de temps sur `Y`,
+    un coût de reconversion par hectare et par couple de cultures,
+    l'immobilisation des pérennes sur leur durée de plantation, des contraintes
+    territoriales par pas de temps, un objectif actualisé. ⚠ C'est un CHANGEMENT
+    DE NATURE, pas un ajout d'indicateur : la taille est multipliée par le nombre
+    de pas, or le modèle mono-période demande déjà 30 à 55 min. Sous-projet avec
+    sa propre spec, et il faut y entrer par la question de la tractabilité.
+
+- id: PERSP-20
+  titre: >
+    MODÉLISER LES DÉBOUCHÉS — la réserve la plus lourde du dispositif
+  type: perspective
+  statut: ouvert
+  severite: critique
+  source: [PROS-44, IND-51, CTX-21]
+  chiffre: []
+  destination: [ch4, ch5, ch6, article]
+  arcs:
+    parce-que: [PROS-44, IND-51]
+  critique: >
+    Le modèle porte un plafond de commercialisation (plantain) et un plancher de
+    production fourragère ; partout ailleurs il suppose que ce qui est produit
+    est vendu au prix de la table. Le résultat le plus fort du Ch. 4 — le
+    maraîchage qui double sous contrainte budgétaire — repose donc sur une
+    élasticité parfaite. ⚠ Et c'est exactement l'information que les enquêtes de
+    la lettre de mission devaient apporter (CTX-21), et que CALALOU avait par son
+    WP1 (CTX-10). Les données existent peut-être dans le laboratoire.
+
+- id: PERSP-30
+  titre: >
+    CHOISIR LA REPRÉSENTANTE PAR PARCELLE — le meilleur rapport qualité / coût de
+    la liste
+  type: perspective
+  statut: differe
+  severite: majeur
+  quand: 2026-07-27
+  source: [TODO.md, DON-13, outputs/reference_2017/csv/reference_representative_eligibility.csv]
+  chiffre: [mesRepCanne]
+  destination: [ch3, ch6, note]
+  arcs:
+    parce-que: [DON-13, DON-12]
+  critique: >
+    Ce n'est plus une amélioration cosmétique : la représentante n'est éligible
+    que sur 31 % des hectares de canne observés, et elle influence le plafond de
+    main d'œuvre, donc l'OPTIMUM. Le correctif est identifié (choisir par
+    parcelle parmi les variantes éligibles) et le calcul EXISTE DÉJÀ — c'est
+    celui qui produit la borne basse/haute de `build_reference_state.py`. Peu de
+    code, effet mesurable sur la calibration. À faire passer devant les chantiers
+    plus spectaculaires.
+
+# --- Les reports du dépôt ----------------------------------------------------
+
+- id: PERSP-40
+  titre: Bloc canne fibre — bloqué sur le SENS des données, pas sur le code
+  type: perspective
+  statut: differe
+  severite: majeur
+  source: [PORT-50, docs/04-vigilance.md#G.3]
+  chiffre: []
+  destination: [note, annexeB]
+  arcs:
+    parce-que: [PORT-50]
+    justifie: [PERSP-C]
+  critique: >
+    Point d'entrée naturel du volet méthanisation/compostage de PERSP-C — la
+    canne fibre est précisément une culture à débouché énergétique. Trancher le
+    sens de `Prix_Cult_CF_*` avec la source est donc un préalable à DEUX
+    chantiers, ce qui en relève la priorité.
+
+- id: PERSP-41
+  titre: >
+    `Eq_AN_PA` — règle catégorielle indexée par EXPLOITATION, absente du
+    vocabulaire actuel
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [PORT-41, docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-41, ARCH-30]
+  critique: >
+    ⚠ Statut CONTRADICTOIRE dans le dépôt (inventaire : différé ; spec du 27/07 :
+    fait). À trancher dans `config.yaml` avant toute citation. Au-delà du cas :
+    il révèle un trou dans l'abstraction — les règles catégorielles portent sur
+    des attributs de PARCELLE, et rien n'exprime une condition sur l'exploitation.
+
+- id: PERSP-42
+  titre: >
+    Généraliser le tableau de bord — il importe encore le vocabulaire
+    guadeloupéen pour les libellés et la géométrie
+  type: perspective
+  statut: differe
+  severite: null
+  source: [TODO.md, ARCH-04]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-04]
+  critique: >
+    Report EXPLICITEMENT motivé : « à généraliser quand un second cas existera,
+    pas avant ». Refuser d'abstraire sur un seul exemple est une bonne pratique
+    et mérite d'être citée comme telle — l'abstraction prématurée invente des
+    axes de variation qui n'existent pas.
+
+- id: PERSP-43
+  titre: >
+    Décider si la méthode de calibration se factorise — générique dans son
+    principe, guadeloupéenne dans son vocabulaire
+  type: perspective
+  statut: ouvert
+  severite: null
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-04, CAL-13]
+  critique: >
+    PAD et matrice de confusion sont génériques ; les 12 groupes RPG ne le sont
+    pas. La ligne de partage passe donc à l'intérieur d'un même module, ce qui
+    est le cas le plus difficile à trancher.
+
+- id: PERSP-44
+  titre: >
+    Agrégats de restitution Nord Basse-Terre — sets présents, jamais portés
+  type: perspective
+  statut: differe
+  severite: mineur
+  source: [TODO.md, DON-24]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [DON-24]
+
+- id: PERSP-45
+  titre: >
+    Énergie et mix électrique — le seul indicateur de la liste initiale qui ne
+    soit pas calculable
+  type: perspective
+  statut: differe
+  severite: null
+  source: [DON-25, TODO.md]
+  chiffre: []
+  destination: [ch6, note]
+  arcs:
+    parce-que: [DON-25]
+    justifie: [PERSP-B]
+  critique: >
+    Bloqué faute de DONNÉE, pas de temps — distinction qui compte dans un bilan.
+    Et c'est un candidat évident pour le classeur de saisie de PERSP-B : des
+    facteurs énergétiques par opération sont exactement le genre de valeurs
+    qu'un agronome peut remplir et qu'aucun fichier existant ne porte.
+
+- id: PERSP-60
+  titre: >
+    DÉBLOQUER LE BESOIN NET D'IRRIGATION — la clé mensuelle est dans `context/`
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §5", DON-70]
+  chiffre: []
+  destination: [ch6, note]
+  arcs:
+    parce-que: [DON-70, DON-20]
+  critique: >
+    ⚠ LE CHANTIER LE MOINS CHER ET LE MIEUX FONDÉ DE TOUTE LA LISTE. Douze
+    coefficients à saisir, une multiplication par parcelle, et l'indicateur d'eau
+    passe de « besoin brut des cultures » à « besoin net d'irrigation » — ce que
+    le GAMS voulait dire depuis l'origine. Trois précautions, toutes déjà
+    documentées : (a) `PLUVIO_PARC` est une normale 1981-2010, donc le net obtenu
+    est un net CLIMATOLOGIQUE et non celui d'une année ; (b) le bug `max(0, ·)`
+    manquant (IND-72) se RÉVEILLERA — il dort aujourd'hui parce que la pluie vaut
+    zéro, et il faudra décider de le porter ou de le corriger ; (c) la clé est
+    territoriale et non parcellaire, donc elle ne restitue pas le gradient
+    est-ouest que le krigeage annuel porte déjà. Malgré cela, c'est le seul
+    indicateur d'impact déclaré « non calculable » qui devient calculable en une
+    après-midi.
+
+- id: PERSP-61
+  titre: >
+    Chiffrer la part de `Data_Parc` qui relève d'une reprise manuelle
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  quand: 2026-08-12
+  source: [DON-78, "context/Rapport technique variables MOSAICA_v2.docx"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [DON-78]
+  critique: >
+    Le rapport technique décrit trois familles de reprises manuelles répétées
+    pour chaque attribut, sans jamais dire COMBIEN de parcelles sont concernées.
+    C'est une question à poser à la source, et la réponse borne ce qu'on peut
+    dire de la précision des attributs physiques — donc du masque d'éligibilité,
+    donc du plancher de PAD (CAL-04).
+
+- id: PERSP-62
+  titre: >
+    Confirmer avec la source l'agrégation « Minimum » du risque chlordécone
+  type: perspective
+  statut: ouvert
+  severite: critique
+  quand: 2026-08-12
+  source: [DON-72]
+  chiffre: []
+  destination: [ch5, ch6, note]
+  arcs:
+    parce-que: [DON-72]
+  critique: >
+    ⚠ PRIORITÉ HAUTE, parce que c'est une contrainte de santé publique et que
+    l'inversion Min/Max entre risque et réel suggère un choix délibéré dont
+    personne dans le projet actuel ne connaît la raison. Si le « Minimum » est
+    une erreur, l'éligibilité de l'igname tutorée et de la prairie pâturée est
+    trop permissive sur toutes les parcelles à cheval. Une question, un courriel.
+
+- id: PERSP-46
+  titre: >
+    Brancher `check_references.py` sur un hook de pré-commit
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md, VER-52]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [VER-52]
+
+- id: PERSP-47
+  titre: >
+    Combler le trou de vérification — la chaîne solve → rapport → dossier de
+    sortie n'est gardée par rien
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  source: [VER-62, TODO.md]
+  chiffre: []
+  destination: [note, ch5]
+  arcs:
+    parce-que: [VER-62]
+  critique: >
+    Reconnu dans TODO depuis le 21/07 et jamais comblé. C'est le maillon qui
+    sépare « le modèle est juste » de « le run écrit sur le disque dit ce que le
+    modèle a calculé ». À porter au bilan honnêtement plutôt qu'à taire.
+
+- id: PERSP-48
+  titre: >
+    Obtenir les sorties du run GAMS de CALALOU — trancherait le doute sur
+    l'aversion au risque
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  source: [CAL-62, CTX-11]
+  chiffre: []
+  destination: [ch3, ch6, note]
+  arcs:
+    parce-que: [CAL-62, CTX-11]
+  critique: >
+    ⚠ ACTION CONCRÈTE ET BON MARCHÉ, à faire AVANT la soutenance. `TODO.md` porte
+    depuis juillet la piste « si un jour on obtient les résultats du vrai run
+    GAMS ». Or CALALOU a fait tourner MOSAICA en 2024, avec Blazy et Guindé parmi
+    les auteurs. Ces sorties existent peut-être à portée de courriel. Elles
+    transformeraient une limite reconnue du mémoire en comparaison directe.
+
+- id: PERSP-49
+  titre: >
+    Exercer la page Prospective sur une GRANDE grille — elle n'a vu que cinq runs
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md, ARCH-45]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-45, PROS-45]
+
+- id: PERSP-50
+  titre: >
+    Mesurer le gain PROPRE du chaînage d'amorçage le long d'un front
+  type: perspective
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md, SOLV-33]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [SOLV-33]
+  critique: >
+    Le gain annoncé (720 → 209 s) vient du warm start EN GÉNÉRAL. Douze tests
+    couvrent l'ordre et le choix de graine, aucun ne couvre le solve. Mesure
+    manquante sur un mécanisme qui, entre-temps, s'est révélé avoir un effet
+    SECONDAIRE indésirable (PROS-36 : il fige des points de front sur un même
+    incumbent). Les deux devraient être chiffrés ensemble.

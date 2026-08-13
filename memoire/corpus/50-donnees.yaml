@@ -1,0 +1,928 @@
+# =============================================================================
+# 50 — LES DONNÉES                                                 préfixe : DON
+#
+# Ce que le jeu contient, ce qu'il ne contient pas, et surtout ce qu'il contient
+# SANS QUE ÇA SE VOIE. La thèse du domaine tient en une phrase du chapitre 2 :
+# « un paramètre absent ne laisse pas un trou, il laisse un nombre plausible ».
+# =============================================================================
+
+# --- Le défaut structurant ---------------------------------------------------
+
+- id: DON-01
+  titre: >
+    Les rendements du modèle valent 2 à 4 fois ceux du territoire — et le melon,
+    lui, tombe juste
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: [docs/04-vigilance.md#C.1, "Agreste SAA 2017"]
+  chiffre: []
+  destination: [ch3, ch5, annexeE, oral, article]
+  arcs:
+    justifie: [DON-02, CAL-30]
+  critique: >
+    Ananas 34,0 contre 12,3 t/ha ; plantain 26,0 contre 9,0 ; maraîchage 43,9
+    contre 10,8 ; agrumes 20,0 contre 5,2 ; melon 20,0 contre 19,9 ✓. Une part
+    de l'écart est légitime (Agreste moyenne tous les producteurs, `Rdt_Cult`
+    décrit des itinéraires spécifiés) mais un facteur 3-4 ne s'explique pas par
+    cela seul — et le melon prouve que la comparaison est faisable.
+
+- id: DON-02
+  titre: >
+    CONSÉQUENCE — la marge de ces cultures est mécaniquement surestimée, donc le
+    modèle en couvre l'île dès qu'aucun débouché ne les borne
+  type: resultat
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#C.1]
+  chiffre: []
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [DON-01]
+    justifie: [DON-B1]
+  critique: >
+    ⚠ RETOURNEMENT IMPORTANT ET SOUS-EXPLOITÉ. Les plafonds de marché ne sont
+    PAS des béquilles ajoutées pour faire joli : ils compensent une productivité
+    surévaluée EN AMONT. C'est la cause commune du plantain, de l'ananas et de
+    l'igname. Le Ch. 3 justifie chaque déviation une par une ; cette explication
+    unique les couvre toutes et n'y figure pas. Elle vaut un paragraphe.
+
+- id: DON-B1
+  titre: "BRANCHE COUPÉE — corriger les rendements pour qu'ils collent à Agreste"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [docs/04-vigilance.md#C.1, TODO.md]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [PORT-01]
+    mesure-par: []
+  sans-mesure: >
+    Fermée par le MANDAT, et un mandat ne se mesure pas. `Rdt_Cult` EST la Table 1
+    de Chopin et al. (2015) : la corriger romprait la parité au point exact où
+    elle sert le plus, puisque tout désaccord ultérieur entre les deux modèles
+    deviendrait inexplicable (PORT-02). L'écart aux statistiques est donc porté,
+    documenté, et sert d'explication à la sur-performance simulée — pas corrigé.
+  critique: >
+    Bon exemple d'une contrainte de méthode qui interdit la solution évidente ET
+    produit une meilleure compréhension : c'est parce qu'on n'a pas eu le droit de
+    toucher aux rendements qu'on a dû comprendre pourquoi ils divergeaient.
+
+# --- Ce que l'observé ne dit pas ---------------------------------------------
+
+- id: DON-10
+  titre: >
+    L'allocation FINE de 2017 n'a jamais existé — la baseline n'encode la culture
+    qu'au niveau des 12 groupes RPG
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.2]
+  chiffre: []
+  destination: [ch3, annexeE, oral]
+  arcs:
+    justifie: [DON-11, CAL-13, CAL-56, PORT-42]
+  critique: >
+    ⚠ ET LE GAMS FAISAIT PAREIL. Ce n'est pas un portage manquant, c'est une
+    propriété de la donnée. Précision indispensable : sans elle, un lecteur croit
+    à une régression du port.
+
+- id: DON-11
+  titre: >
+    Pour calculer production, subvention ou travail EN ENTRÉE, on substitue une
+    variante « représentante » par famille
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.2, "config.yaml baseline_representative_crops"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [DON-10, PORT-34]
+    justifie: [DON-12, DON-13]
+
+- id: DON-12
+  titre: >
+    Cette hypothèse influence désormais L'ALLOCATION et pas seulement le
+    reporting : le plafond de main d'œuvre est calculé via les représentantes
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#C.2, memoire/chapitres/03-calibrer.tex]
+  chiffre: []
+  destination: [ch3, oral]
+  arcs:
+    parce-que: [DON-11]
+  critique: >
+    Changer une représentante change le plafond, donc l'OPTIMUM. Une hypothèse
+    de reporting qui migre vers le cœur du modèle sans que personne ne l'ait
+    décidé : c'est le meilleur exemple du dépôt d'une dette qui se propage d'une
+    couche à l'autre sans franchir de décision explicite.
+
+- id: DON-13
+  titre: >
+    PIRE — la représentante est souvent une culture que le modèle INTERDIRAIT sur
+    la parcelle qu'elle représente : canne 31 %, maraîchage 61 %, plantain 63 %
+  type: piege
+  statut: retenu
+  severite: critique
+  quand: 2026-07-27
+  source: [docs/04-vigilance.md#C.2, outputs/reference_2017/csv/reference_representative_eligibility.csv]
+  chiffre: [mesRepCanne]
+  destination: [ch3, oral, note]
+  arcs:
+    parce-que: [DON-11]
+    justifie: [PERSP-30]
+  critique: >
+    31 % pour la canne, qui occupe plus de la moitié du territoire. Ce n'est plus
+    une approximation cosmétique : la représentante inéligible fausse l'économie
+    de la référence ET le plafond de main d'œuvre, donc l'optimum. Le correctif
+    naturel (choisir la représentante PAR PARCELLE parmi les variantes éligibles)
+    est identifié, chiffré, et non fait — c'est le meilleur candidat de la liste
+    « à faire » par rapport qualité/coût.
+
+- id: DON-14
+  titre: >
+    Conséquence en cascade — tout indicateur d'entrée est une FOURCHETTE
+    basse/haute, jamais un point
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [outputs/reference_2017/REFERENCE.md, docs/04-vigilance.md#E.6]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [DON-11]
+    justifie: [CAL-56]
+  critique: >
+    Décision de présentation honnête : refuser un chiffre central quand
+    l'incertitude le rend arbitraire. Et elle a une conséquence gênante que le
+    mémoire assume (CAL-56) : plusieurs indicateurs simulés tombent DANS la
+    fourchette, donc l'accord ne prouve rien non plus.
+
+# --- Colonnes absentes, valeurs muettes --------------------------------------
+
+- id: DON-20
+  titre: >
+    Pas de pluviométrie mensuelle — les colonnes `PLUVIO_01..12_PARC` sont
+    ABSENTES, GAMS a donc toujours déduit 0 de pluie
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.4]
+  chiffre: []
+  destination: [ch2, annexeB, note]
+  arcs:
+    parce-que: [PORT-10]
+    justifie: [DON-21, IND-20]
+  critique: >
+    L'indicateur est un besoin en eau BRUT des cultures, pas un besoin net
+    d'irrigation. NE PAS l'étiqueter « irrigation ». Erreur de nommage qui aurait
+    été invisible et lourde de conséquences dans un rapport de politique publique.
+
+- id: DON-21
+  titre: >
+    Corollaire — les 12 colonnes `BESOIN_EAU_01..12` sont IDENTIQUES pour les 84
+    cultures, donc tout indicateur mensuel est dégénéré
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.4]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [DON-20]
+  critique: >
+    Le « mois de pointe » vaut toujours le total divisé par 12. C'est pourquoi
+    l'indicateur est exclu du score composite. Exclusion motivée par la structure
+    de la donnée et non par un jugement — le bon critère.
+
+- id: DON-22
+  titre: >
+    `KNO3` porte `AZOTE = 0` alors que le nitrate de potassium titre ~13 % d'azote
+  type: donnee
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#C.6]
+  chiffre: []
+  destination: [annexeB]
+  arcs:
+    parce-que: [PORT-01]
+  critique: >
+    Non corrigé (mandat de parité). Le contrôle qui encadre la portée du défaut
+    est élégant : sur les 15 engrais nommés en triplet NPK, l'azote déduit du nom
+    égale la colonne `AZOTE` AU MILLIÈME PRÈS — la convention du fichier est donc
+    sûre, et seuls les sels nommés chimiquement y échappent.
+
+- id: DON-23
+  titre: >
+    Phosphore et potasse récupérés en lisant les NOMS d'engrais NPK, validés
+    contre la colonne `AZOTE` existante
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [docs/04-vigilance.md, case_studies/guadeloupe/domain/environment.py]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [DON-22]
+  critique: >
+    « Bricolage assumé » devenu défendable par une validation croisée : on ne
+    peut pas vérifier P et K directement, mais on peut vérifier que la MÉTHODE de
+    lecture reproduit l'azote connu. Technique de validation transférable —
+    valider un extracteur sur la seule colonne dont on a la vérité.
+
+- id: DON-24
+  titre: >
+    Données présentes mais JAMAIS LUES — écotoxicité, coûts de transport, sets
+    d'agrégats territoriaux
+  type: donnee
+  statut: differe
+  severite: mineur
+  source: [docs/04-vigilance.md#C.5]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-04]
+  critique: >
+    `HOUDART_TOX_SCORE`, `HARMFUL_FACTOR`, `DLRAT`, `BIRD`, `RS_Cult.txt`,
+    `Cout_Transp_Cult_LAM.txt`, `EXPL_NBT`, `PARC_NBT`, `CULTIV_2017`.
+    L'inventaire du non-lu est un livrable en soi pour l'équipe : il dit où sont
+    les gisements sans coût de collecte.
+
+- id: DON-25
+  titre: >
+    Énergie / mix électrique — seul indicateur d'impact de la liste initiale qui
+    ne soit pas calculable
+  type: perspective
+  statut: differe
+  severite: null
+  source: [TODO.md]
+  chiffre: []
+  destination: [ch6, note]
+  arcs:
+    parce-que: [DON-24]
+  critique: >
+    Aucune colonne carburant ou consommation dans `Data_OTK`. Différé pour cause
+    d'absence de donnée, pas de temps — distinction qui compte dans un bilan de
+    stage et qu'il faut faire explicitement.
+
+# --- Le RPG et le périmètre --------------------------------------------------
+
+- id: DON-30
+  titre: >
+    Le RPG SOUS-DÉCLARE la prairie : 64 % seulement (6 109 ha contre 9 595),
+    alors qu'il restitue la canne à 98 %
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-28
+  source: [docs/04-vigilance.md#C.3]
+  chiffre: [mesPrairieRpg, mesPrairieAgreste, mesCouvertureSau]
+  destination: [ch3, annexeE, oral]
+  arcs:
+    justifie: [DON-31, CAL-31]
+    mesure-par: [DON-31]
+
+- id: DON-31
+  titre: >
+    LA PREUVE PHYSIQUE, hors modèle — 40 449 bovins ≈ 29 771 UGB, soit 3,10
+    UGB/ha sur Agreste mais 9,99 sur ce que le modèle laissait
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.3]
+  chiffre: [mesBovins, mesUgb, mesUgbHaAgreste, mesUgbHaSansPlancher]
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [DON-30]
+  critique: >
+    Trois à quatre fois le réel, agronomiquement impossible, et cohérent avec les
+    recensements 2010 (3,13) et 2020 (2,45). Le défaut est établi HORS DU MODÈLE
+    et non par désaccord avec notre propre référence. Ce qui fait la force du
+    raisonnement : une contrainte de CONSERVATION PHYSIQUE tranche là où aucune
+    métrique statistique ne pouvait le faire.
+
+- id: DON-32
+  titre: >
+    Ce ne sont pas des parcelles MAL ÉTIQUETÉES mais des parcelles ABSENTES de
+    l'univers
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.3]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [DON-30]
+  critique: >
+    Test d'exclusion élégant : si les ~3 500 ha manquants étaient chez nous
+    classés en canne, notre canne DÉPASSERAIT la statistique. Elle ne la dépasse
+    pas. Donc ils ne sont pas là. Raisonnement par contradiction sur une
+    contrainte de somme — bon marché, décisif.
+
+- id: DON-33
+  titre: >
+    Assise externe du périmètre — notre jeu couvre 87 % de la SAU 2017, la canne
+    à 98 %, les fruits à 90 %
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-28
+  source: [TODO.md, outputs/reference_2017/REFERENCE.md]
+  chiffre: [mesCouvertureSau, mesSauAgreste]
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [DON-30]
+  critique: >
+    Point ouvert CLOS. La référence 2017 avait longtemps « aucune assise
+    externe » ; la SAA d'Agreste la lui donne. À raconter comme une question
+    restée ouverte plusieurs semaines puis refermée par une source — c'est plus
+    honnête et plus instructif qu'un chiffre présenté comme acquis.
+
+- id: DON-34
+  titre: >
+    L'année de base de l'article (2010) est HORS D'ATTEINTE : `Data_RPG_Gwad`
+    commence en 2012
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: [TODO.md, docs/04-vigilance.md#E.2]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-43]
+
+- id: DON-35
+  titre: >
+    `data.year` (2017-2022) pilote L'ÉCONOMIE SEULE — la structure parcellaire
+    reste épinglée à 2017, seule année dont les données structurelles existent
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, "docs/superpowers/specs/2026-07-13-expose-year-scenario-config-design.md"]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [DON-34]
+  critique: >
+    Asymétrie à ne pas oublier : un run « 2022 » n'est pas la Guadeloupe de 2022,
+    c'est la Guadeloupe de 2017 valorisée aux prix de 2022. Le recap enregistre
+    l'année choisie, ce qui est le minimum. Et `var_rdt_cult` reste délibérément
+    sur sa colonne `init` quelle que soit l'année — décision à justifier.
+
+# --- La géométrie ------------------------------------------------------------
+
+- id: DON-40
+  titre: >
+    Aucun identifiant commun entre `data/gis/` et `data_parc` — la jointure est
+    RECONSTRUITE par signature d'exploitation
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-01
+  source: [docs/04-vigilance.md#F.1, case_studies/guadeloupe/domain/geometry.py]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [ARCH-40]
+    justifie: [DON-41, DON-42]
+  critique: >
+    Les deux décrivent le même univers (24 734 enregistrements de part et
+    d'autre, 4 638 exploitations, MÊME distribution exacte des tailles, zéro
+    signature orpheline) mais le modèle utilise `P1..P24734`, identifiants
+    inventés en amont. Reconstruire une jointure sur une signature statistique
+    est un joli morceau d'ingénierie de données — et il est validé.
+
+- id: DON-41
+  titre: >
+    Couverture 99,4 % des parcelles ; contrôle indépendant — l'emprise de chaque
+    polygone est toujours ≥ la surface déclarée (ratio médian 1,74, 0 anomalie)
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#F.1]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [DON-40]
+  critique: >
+    Le contrôle est INDÉPENDANT de la méthode de jointure — une propriété
+    géométrique qui devrait tenir si l'appariement est juste, et qui n'a aucune
+    raison de tenir sinon. C'est la bonne façon de valider un appariement
+    heuristique.
+
+- id: DON-42
+  titre: >
+    ⚠ ~1 557 parcelles partagent commune ET surface avec une voisine de la même
+    exploitation — une parcelle isolée NE FAIT PAS PREUVE
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#F.1]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [DON-40]
+  critique: >
+    Les lectures territoriales et régionales sont fiables, la parcellaire non.
+    La page l'affiche — encore MET-40 (l'avertissement voyage avec le chiffre).
+    C'est aussi un des cinq points de l'aide-mémoire de VIGILANCE.
+
+- id: DON-43
+  titre: >
+    Lecteur de shapefile en PYTHON PUR — aucune dépendance GDAL ni geopandas
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/data/shapefile.py]
+  chiffre: []
+  destination: [note, ch2]
+  arcs:
+    parce-que: [DON-40, ARCH-40]
+  critique: >
+    Choix cohérent avec la portabilité visée : un successeur doit pouvoir cloner
+    et lancer. GDAL sur Windows est exactement le genre de dépendance qui tue un
+    dépôt hérité. Décision peu spectaculaire, très bien alignée avec le problème
+    d'origine du projet (SOLV-B1).
+
+- id: DON-44
+  titre: >
+    Hors `data/gis/`, il n'y a AUCUNE coordonnée : le reporting spatial s'agrège
+    par île / région / commune
+  type: donnee
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#F.2]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [DON-40]
+
+# --- Le régime des données dans le dépôt -------------------------------------
+
+- id: DON-50
+  titre: >
+    `data/` est GITIGNORÉ — le code échoue sur un clone frais tant que les
+    fichiers ne sont pas là
+  type: organisation
+  statut: retenu
+  severite: majeur
+  source: [CLAUDE.md, .gitignore]
+  chiffre: []
+  destination: [note, annexeF]
+  racine: true          # axiome : les données ne nous appartiennent pas
+  arcs:
+    justifie: [VER-60]
+  critique: >
+    Conséquence méthodologique DIRECTE et souvent manquée : c'est ce qui force
+    les tests à être sans données (VER-01) et le golden snapshot à vivre hors
+    dépôt (`.golden/`). Une décision de confidentialité qui a façonné toute la
+    stratégie de vérification. À raconter dans cet ordre — la contrainte d'abord,
+    l'architecture de test ensuite.
+
+- id: DON-51
+  titre: >
+    `context/` est VERSIONNÉ (sauf le .docx) — le GAMS d'origine voyage avec le
+    port
+  type: organisation
+  statut: retenu
+  severite: null
+  source: [CLAUDE.md]
+  chiffre: []
+  destination: [note, annexeB]
+  arcs:
+    parce-que: [PORT-01]
+  critique: >
+    Décision cohérente avec le mandat de parité : la référence doit être
+    consultable par quiconque ouvre le dépôt, sinon « le GAMS est la source de
+    vérité » est un vœu pieux. Petite décision, grande conséquence pratique.
+
+- id: DON-52
+  titre: >
+    `REGION` vs `REGION_CODE` — deux référentiels distincts dont l'équivalence
+    n'a jamais été tranchée
+  type: donnee
+  statut: ouvert
+  severite: mineur
+  source: [TODO.md, docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-52]
+
+- id: DON-53
+  titre: >
+    Unité des GES — magnitude ~1,6e5 « t CO₂/ha/an », unité annoncée probablement
+    fausse, valeurs issues des données sources
+  type: erreur
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#D.3, TODO.md]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-01]
+  critique: >
+    Sans effet sur les comparaisons (le score composite normalise en min-max),
+    mais un chiffre absolu de GES sorti de ce modèle serait FAUX en unité. À
+    signaler très clairement si un indicateur GES est un jour cité dans un
+    document de politique publique.
+
+- id: DON-54
+  titre: >
+    Eau — le GAMS OMET le facteur 10 de la conversion mm→m³, l'auteur ayant
+    lui-même laissé « pourquoi x 10 ? » en commentaire
+  type: erreur
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#D.3]
+  chiffre: []
+  destination: [annexeB]
+  arcs:
+    parce-que: [PORT-01]
+  critique: >
+    DÉVIATION ASSUMÉE : le portage Python expose des m³ corrects, contrairement
+    au mandat de parité. Incohérence avec PORT-01 à assumer explicitement — il y
+    a donc au moins un endroit où le port CORRIGE. Le brouillon dit « les bugs
+    sont portés » sans exception ; ce n'est pas tout à fait exact.
+
+# =============================================================================
+# DENSIFICATION — journal-vigilance.md, entrées « quatre pièges », « carte
+# parcellaire » et « Karusmart » (2026-07-31 / 2026-08-01).
+# =============================================================================
+
+- id: DON-60
+  titre: >
+    Le détail complet de la symétrie Karusmart — ONZE paramètres identiques, y
+    compris l'empreinte d'éligibilité
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: ["docs/archives/journal-vigilance.md:71-79"]
+  chiffre: []
+  destination: [ch2, annexeC, oral]
+  arcs:
+    parce-que: [SOLV-40]
+    justifie: [DON-61, DON-62]
+  critique: >
+    Marge 20 825,25 €/ha, variance 0,70, rendement 36 t/ha, 1 128 h/ha,
+    75,6 kg N/ha, IFT 10, GES 1 525, eau 1 800 mm, carbone 1,94, subvention 0,
+    coût 18 774,75 — et empreintes d'éligibilité identiques. Ce n'est pas « à peu
+    près pareil », c'est vingt-cinq exemplaires d'une seule activité
+    conventionnelle. Le détail vaut d'être donné en entier une fois : c'est ce
+    qui rend l'affirmation vérifiable plutôt que rhétorique.
+
+- id: DON-61
+  titre: >
+    ⚠ CES 25 VARIANTES SONT PRÉCISÉMENT LES SYSTÈMES AGROÉCOLOGIQUES DU JEU DE
+    DONNÉES — les rouvrir serait agronomiquement JUSTIFIÉ
+  type: donnee
+  statut: ouvert
+  severite: critique
+  quand: 2026-07-31
+  source: ["docs/archives/journal-vigilance.md:154-159"]
+  chiffre: []
+  destination: [ch2, ch5, oral, article]
+  arcs:
+    parce-que: [DON-60]
+  critique: >
+    ⚠ NUANCE MAJEURE ABSENTE DU BROUILLON, ET ELLE RENVERSE LA LECTURE. Les
+    systèmes paillés (bagasse / BRF / paille × fertilisation) ne sont pas des
+    doublons parasites à supprimer : ce sont LES systèmes agroécologiques du jeu.
+    Les fermer est un choix de TRACTABILITÉ, pas de modélisation, et il a un coût
+    scientifique : le dispositif ne peut pas évaluer les itinéraires
+    agroécologiques qu'il prétend explorer, faute que quiconque les ait renseignés.
+    Le dire ainsi est bien plus fort que « 25 doublons » — et c'est exactement le
+    point de jonction avec CTX-21 (le terrain qui n'a pas eu lieu) et PERSP-B (le
+    classeur à remplir).
+
+- id: DON-62
+  titre: >
+    L'AUTEUR DU GAMS LES SUPPRIMAIT DÉJÀ EN BLOC — `Eq_MA_EXP_SUPP`
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: ["docs/archives/journal-vigilance.md:77-79"]
+  chiffre: []
+  destination: [ch2, annexeB, oral]
+  arcs:
+    parce-que: [DON-61, PORT-32]
+  critique: >
+    Le journal en tire la bonne conclusion : « c'est sans doute pourquoi le GAMS
+    les supprime en bloc ». Autrement dit le défaut était CONNU, ou au moins
+    contourné, par l'auteur d'origine — l'équation de suppression est la trace de
+    sa décision. Le port n'a donc pas découvert un bug, il a redécouvert la raison
+    d'un contournement dont la justification n'était écrite nulle part. Bel
+    argument pour MET-30 : le code dit CE QUI est fait, jamais POURQUOI.
+
+- id: DON-63
+  titre: >
+    Le vrai arbitrage bio est ÉNORME — `MA_ROTA` 27 929 €/ha (277 kg N, IFT 15)
+    contre `MA_PLBIO` 3 882 (azote 0, IFT 0)
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: ["docs/archives/journal-vigilance.md:88-90"]
+  chiffre: []
+  destination: [ch2, ch4, annexeC]
+  arcs:
+    parce-que: [SOLV-43]
+  critique: >
+    Facteur SEPT sur la marge à l'hectare. Contraste décisif avec la fausse
+    contrainte de bio bâtie sur les variantes symétriques (coût nul) : sur les
+    deux vraies cultures bio, l'arbitrage est au contraire brutal. Une politique
+    de bio correctement formulée est donc très coûteuse, et une politique de bio
+    mal formulée est gratuite — les deux extrêmes dans le même modèle, selon la
+    liste de cultures qu'on écrit dans un YAML.
+
+- id: DON-64
+  titre: >
+    152 exploitations partagent une signature identique et restent NON APPARIÉES
+    plutôt que devinées
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: ["docs/archives/journal-vigilance.md:61-64"]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [DON-40]
+  critique: >
+    Décision explicite d'abstention sur les cas ambigus : la couverture de 99,4 %
+    est donc une couverture SÛRE et non une couverture obtenue en tranchant au
+    hasard. Quatrième occurrence du principe MET-03 (s'abstenir est un mode de
+    sortie légitime), sur un objet encore différent — un appariement de données.
+
+- id: DON-65
+  titre: >
+    L'azote de `KNO3` est absent PARTOUT, y compris dans les chiffres antérieurs
+    au chantier P/K
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: ["docs/archives/journal-vigilance.md:23-28"]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [DON-22]
+  critique: >
+    Précision qui compte pour la rétro-lecture : ce n'est pas un défaut introduit
+    par l'ajout du phosphore et de la potasse, c'est un défaut de la colonne
+    `AZOTE` que ce chantier a RÉVÉLÉ. Tous les indicateurs d'azote publiés
+    jusque-là le portaient déjà.
+
+# =============================================================================
+# DENSIFICATION — « Rapport technique variables MOSAICA_v2.docx » (context/).
+#
+# ⚠ SOURCE JAMAIS OUVERTE AVANT LE 2026-08-12, ET C'EST LA PLUS AMONT DE TOUTES.
+# Elle documente comment CHAQUE attribut de `Data_Parc` a été fabriqué sous
+# ArcGIS : la source, l'outil, le paramètre d'agrégation, et les reprises
+# manuelles. Tout le dépôt traite `data/` comme un donné ; ce document montre
+# que c'est un CONSTRUIT, avec ses arbitrages.
+# =============================================================================
+
+- id: DON-70
+  titre: >
+    ⚠⚠ LA PLUVIOMÉTRIE MENSUELLE EXISTE — elle est dans `context/`, et le dépôt
+    la déclare « inexistante » depuis juillet
+  type: donnee
+  statut: ouvert
+  severite: critique
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §5"]
+  chiffre: []
+  destination: [ch2, ch5, ch6, note, oral]
+  arcs:
+    contredit: [DON-20]
+    justifie: [PERSP-60]
+  critique: >
+    ⚠ TROUVAILLE LA PLUS ACTIONNABLE DU DÉPOUILLEMENT. `docs/04-vigilance.md` C.4
+    et la spec eau/carbone affirment toutes deux que l'indicateur d'irrigation
+    nette est « débloquable par une série pluviométrique mensuelle par parcelle,
+    QUI N'EXISTE PAS AUJOURD'HUI ». Or le rapport technique contient une section
+    « Calcul de la répartition mensuelle des précipitations annuelles » et
+    publie la CLÉ complète, moyennée sur trois stations INRA (Gardel, Duclos,
+    Godet) et neuf années complètes communes : janvier 7,4 %, février 3,8 %,
+    mars 4,6 %, avril 9,1 %, mai 10,3 %, juin 6,8 %, juillet 8,2 %, août 11,4 %,
+    septembre 9,6 %, octobre 11,7 %, novembre 9,9 %, décembre 7,3 %.
+    `PLUVIO_01..12_PARC` était donc destinée à valoir `PLUVIO_PARC × clé`. Les
+    colonnes sont absentes de la table livrée, mais la MÉTHODE et les
+    COEFFICIENTS sont dans le dépôt. Le blocage n'était pas une absence de
+    donnée, c'était une absence de LECTURE.
+
+- id: DON-71
+  titre: >
+    `PLUVIO_PARC` est une NORMALE CLIMATIQUE 1981-2010, pas la pluie de 2017
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §5"]
+  chiffre: []
+  destination: [ch2, ch3, annexeB, note]
+  arcs:
+    parce-que: [DON-70]
+  critique: >
+    Carte Météo-France de la normale 1981-2010 des cumuls de précipitations,
+    interpolée par krigeage sphérique au pas de 10 m. Conséquence pour la
+    lecture : les critères d'éligibilité pluviométrique du modèle — et donc
+    l'ensemble des couples éligibles, donc la taille du MILP — reposent sur un
+    climat MOYEN sur trente ans, pas sur l'année simulée. Un run « 2017 » n'a
+    jamais vu la pluie de 2017. Ce n'est pas un défaut (une normale est le bon
+    choix pour une éligibilité structurelle) mais c'est une hypothèse invisible
+    dans les tables, et elle interdit tout scénario climatique fondé sur une
+    année réelle.
+
+- id: DON-72
+  titre: >
+    ⚠ LES DEUX INDICATEURS DE CHLORDÉCONE SONT AGRÉGÉS EN SENS OPPOSÉS —
+    « Minimum » pour le risque, « Maximum » pour le réel
+  type: piege
+  statut: ouvert
+  severite: critique
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §11-12"]
+  chiffre: []
+  destination: [ch1, ch2, ch5, note, oral]
+  arcs:
+    parce-que: [CTX-04]
+  critique: >
+    ⚠ HYPOTHÈSE CACHÉE SUR UNE CONTRAINTE DE SANTÉ PUBLIQUE. `RISQUE_CLD` est la
+    statistique zonale **Minimum** de la classe de risque sur la parcelle ;
+    `CLD_REEL` est le **Maximum**, calculé sur une parcelle érodée de 5 m. Or ce
+    sont les règles `Eq_IG_CLD` et `Eq_PN_PIQ_CLD` — donc l'éligibilité de
+    l'igname tutorée et de la prairie pâturée — qui lisent `RISQUE_CLD`. Le
+    modèle retient donc, pour chaque parcelle, **la classe la plus favorable
+    rencontrée**, ce qui est la lecture la plus PERMISSIVE possible. Une parcelle
+    à cheval sur une zone saine et une zone contaminée est traitée comme saine.
+    Aucun document du dépôt ne le signale, et l'inversion Min/Max entre les deux
+    couches suggère que le choix est délibéré — mais il faudrait le confirmer
+    avec la source avant d'en tirer quoi que ce soit.
+
+- id: DON-73
+  titre: >
+    L'ASSOLEMENT OBSERVÉ 2017 CONTIENT DES CORRECTIONS MANUELLES — 419 parcelles
+    reclassées de café/cacao en canne à sucre
+  type: donnee
+  statut: retenu
+  severite: critique
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §15"]
+  chiffre: []
+  destination: [ch3, ch5, annexeE, oral, article]
+  arcs:
+    parce-que: [CAL-02]
+    justifie: [DON-74]
+  critique: >
+    ⚠ CECI TOUCHE LA RÉFÉRENCE ELLE-MÊME, DONC TOUT LE CHAPITRE 3. Sur 444
+    parcelles déclarées en CAC en 2017, seules **25** sont conservées (19 en
+    café/cacao en 2016, 3 en banane créole, 3 en agrume) ; **le reste bascule en
+    « canne à sucre - autre »**. De même, les ACA de 2016 ont été modifiées parce
+    que « le nombre d'hectares est bien trop élevé » (455 ha contre environ 250).
+    L'observé auquel le modèle est comparé n'est donc PAS une observation brute :
+    c'est un jeu corrigé selon des règles de décision documentées ici et nulle
+    part ailleurs. Ça ne l'invalide pas — les corrections sont raisonnées et
+    tracées — mais ça change son STATUT épistémique, et ça donne un troisième
+    exemple, après CAL-88, de ce que « la référence n'est pas la vérité » veut
+    dire concrètement.
+
+- id: DON-74
+  titre: >
+    414 doublons supprimés sur 25 149 parcelles — d'où les 24 734 du modèle
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §13"]
+  chiffre: [obsParcelles]
+  destination: [ch3, annexeB, note]
+  arcs:
+    parce-que: [DON-73]
+  critique: >
+    La cause des doublons est prosaïque et parlante : « la non-suppression d'un
+    ancien i-pacage lorsque la parcelle change de propriétaire ». La règle de
+    décision est « on conserve la déclaration du DERNIER i-pacage introduit dans
+    la base », et l'identification passe par une cascade de trois jointures
+    spatiales (étendues identiques, puis érosion de 15 m, puis de 5 m).
+    25 149 − 414 = 24 735, soit à une unité près les 24 734 parcelles du modèle.
+    ⚠ Ce chiffre RECOUPE de l'extérieur la jointure reconstruite de DON-40 : les
+    deux univers coïncident parce qu'ils descendent du même fichier dédoublonné.
+
+- id: DON-75
+  titre: >
+    « Irrigable » signifie « à moins de 800 m d'une borne d'irrigation »
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §6"]
+  chiffre: []
+  destination: [ch2, annexeB, note]
+  arcs:
+    justifie: [ARCH-21]
+  critique: >
+    Zone tampon de 800 m autour des bornes du réseau du Conseil général, puis
+    jointure spatiale par intersection. C'est donc un PROXY d'accès potentiel,
+    pas un raccordement effectif ni un droit d'eau. ⚠ Conséquence directe sur
+    `ModelInputs.plot_weights` (ARCH-21) : le poids `irrigable` qui corrige le
+    calcul d'eau d'un facteur 1,6 repose sur un rayon de 800 m choisi par le
+    producteur de la donnée. Le chiffre de 35 Mm³ hérite de ce choix.
+
+- id: DON-76
+  titre: >
+    Chaque attribut de parcelle porte une règle d'agrégation, et elles ne sont
+    pas les mêmes
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §2-12"]
+  chiffre: []
+  destination: [ch2, annexeB, note]
+  arcs:
+    justifie: [DON-72]
+  critique: >
+    Altitude et pente : **Mean** sur un MNT ré-échantillonné de 1 m à 10 m.
+    Pédologie : **Majority** — le sol d'une parcelle est sa classe majoritaire,
+    pas une composition. Pluviométrie : **Mean** d'une normale krigée. Risque
+    chlordécone : **Minimum**. Chlordécone réelle : **Maximum**. Bassin versant :
+    « Have their center in ». GFA : intersection avec la zone érodée de 15 m.
+    Sept attributs, cinq règles différentes. Chacune est défendable isolément ;
+    aucune n'est visible dans la table livrée, et aucune n'est mentionnée dans le
+    modèle qui les consomme. C'est la forme la plus pure du thème ARCH-63 — la
+    donnée arrive avec des décisions incorporées et silencieuses.
+
+- id: DON-77
+  titre: >
+    Trois parcelles à plus de 45° de pente ont été RAMENÉES à 45° « pour ne pas
+    avoir à modifier les seuils dans MOSAICA »
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §3"]
+  chiffre: []
+  destination: [ch2, ch5, oral, note]
+  arcs:
+    parce-que: [DON-76]
+  critique: >
+    ⚠ LA DONNÉE A ÉTÉ AJUSTÉE POUR CONVENIR AU MODÈLE, et le rapport le dit sans
+    détour. Trois parcelles seulement, donc l'effet numérique est nul — mais
+    l'inversion de dépendance est exactement celle que le chapitre 3 s'interdit
+    (CAL-25 : une contrainte calée sur l'observé n'apprend rien). Ici c'est
+    l'observé qui a été calé sur la contrainte. Item précieux pour le chapitre 5 :
+    la circularité que le stage traque en aval existait déjà en amont, dans une
+    étape que personne du projet actuel n'a faite, et elle est parfaitement
+    documentée par celui qui l'a commise. Le geste honnête et le geste
+    circulaire sont le même.
+
+- id: DON-78
+  titre: >
+    Reprises manuelles systématiques — polygones superposés, parcelles trop
+    petites, classes pédologiques aberrantes
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §2-4, §14"]
+  chiffre: []
+  destination: [ch2, ch5, note]
+  arcs:
+    parce-que: [DON-76]
+  critique: >
+    Trois familles de reprises, répétées pour chaque attribut : les parcelles non
+    calculées faute de polygones superposés (retraitées en seconde passe) ; les
+    parcelles trop petites pour contenir une cellule entière du raster
+    (**calculées manuellement**) ; et les parcelles tombant en « Eau libre /
+    Surfaces imperméabilisées / Zones non cartographiées », **réaffectées
+    manuellement à la classe pédologique la plus cohérente spatialement**. Une
+    part non chiffrée de `Data_Parc` est donc du jugement d'expert encodé comme
+    mesure. Le rapport ne dit pas combien de parcelles sont concernées — c'est la
+    question à poser à la source.
+
+- id: DON-79
+  titre: >
+    Le découpage en bassins versants est une construction hydrologique complète,
+    230 unités de plus de 50 ha
+  type: donnee
+  statut: retenu
+  severite: mineur
+  quand: 2026-08-12
+  source: ["context/Rapport technique variables MOSAICA_v2.docx §10"]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [DON-76]
+  critique: >
+    MNT forcé par le réseau hydrographique de la BD TOPO via la méthode AGREE,
+    puis chaîne Fill / Flow Direction / Flow Accumulation, seuil à 5 000 cellules
+    (50 ha) : 131 bassins en Basse-Terre, 68 en Grande-Terre, 31 à
+    Marie-Galante. Utile à savoir parce que `zone_indicator_bound` peut poser une
+    contrainte PAR BASSIN VERSANT (la forme « directive nitrates ») : la maille
+    existe, elle est fine, et elle n'a jamais servi dans un scénario.

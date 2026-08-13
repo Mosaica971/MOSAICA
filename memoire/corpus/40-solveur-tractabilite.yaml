@@ -1,0 +1,1007 @@
+# =============================================================================
+# 40 — SOLVEUR ET TRACTABILITÉ                                    préfixe : SOLV
+#
+# Le MILP, la recherche arborescente, l'amorçage, la symétrie, les bornes.
+# C'est le domaine où le stage a produit ses résultats les plus transférables
+# (ils ne dépendent pas de la Guadeloupe) et où il a commis ses erreurs de
+# diagnostic les plus instructives.
+# =============================================================================
+
+# --- Nature du problème ------------------------------------------------------
+
+- id: SOLV-01
+  titre: Le problème est un MILP purement binaire, une culture au plus par parcelle
+  type: notion
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/02-porter.tex#sec:formulation, context/gams/MODELE.txt]
+  chiffre: [mesBinaires]
+  destination: [ch2, annexeA]
+  arcs:
+    justifie: [SOLV-02, SOLV-10, SOLV-20]
+  critique: null
+
+- id: SOLV-02
+  titre: >
+    Restreindre les variables aux seuls couples éligibles ramène ~2 000 000 de
+    colonnes potentielles à ~309 000 déclarées
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/data/eligibility.py, memoire/chapitres/02-porter.tex#sec:formulation]
+  chiffre: [mesBinaires]
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [SOLV-01]
+    justifie: [SOLV-03]
+  critique: >
+    Ce n'est pas une optimisation d'implémentation mais une décision de
+    modélisation : le masque d'éligibilité impose aussi un plancher de PAD
+    (cf. CAL-*), donc il agit sur le résultat et pas seulement sur la vitesse.
+
+- id: SOLV-03
+  titre: Le programme reste à 310 000–335 000 binaires selon la politique simulée
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/02-porter.tex#sec:formulation]
+  chiffre: []
+  destination: [ch2]
+  arcs:
+    parce-que: [SOLV-02]
+
+- id: SOLV-04
+  titre: >
+    L'objectif nommé « Markowitz » n'est pas un arbitrage moyenne-variance :
+    la pénalité est linéaire en surface, sans terme quadratique ni covariance
+  type: piege
+  statut: retenu
+  severite: mineur
+  quand: 2026-07-23
+  source: [docs/04-vigilance.md#D.4, case_studies/guadeloupe/model/model.py]
+  chiffre: []
+  destination: [ch2, annexeA, article]
+  arcs:
+    parce-que: [PORT-01]
+    justifie: [SOLV-05]
+  critique: >
+    Le nom vient du GAMS et de l'article. Le garder est de la parité ; le
+    laisser sans avertissement serait une faute — un lecteur bâtirait un calcul
+    de variance dessus.
+
+- id: SOLV-05
+  titre: >
+    C'est la linéarité de la pénalité de risque qui garde le programme MILP
+    et non MIQP — donc résoluble par HiGHS
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/02-porter.tex#sec:formulation]
+  chiffre: []
+  destination: [ch2]
+  arcs:
+    parce-que: [SOLV-04]
+
+# --- Choix du solveur et de la bibliothèque ---------------------------------
+
+- id: SOLV-06
+  titre: Pyomo + HiGHS (`appsi_highs`) plutôt que GAMS, Gurobi ou CPLEX
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/solve/solver.py, pyproject.toml]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [CTX-B1, ARCH-01]
+    ferme-la-branche: [SOLV-B1, SOLV-B2]
+  critique: null
+
+- id: SOLV-B1
+  titre: "BRANCHE COUPÉE — rester en GAMS et n'ajouter qu'une couche de scripts"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex#sec:gams, docs/README.md]
+  chiffre: []
+  destination: [ch1, oral]
+  arcs:
+    mesure-par: [PORT-10, PORT-20, PORT-22]
+    justifie: [SOLV-06]
+  critique: >
+    Trois raisons cumulées : environnement propriétaire, faire varier un levier
+    signifie éditer les équations, et les bugs silencieux ne se trouvent qu'en
+    refaisant le modèle. Aucune des trois seule n'aurait suffi.
+    La mesure est la TROISIÈME raison rendue vérifiable : `Eq_VE_PLUIE`
+    interdisait les vergers pluviaux sur tout le territoire, les deux ordres de
+    types de sol produisaient des coefficients faux et plausibles, et aucun des
+    deux n'était détectable en exécutant le GAMS — seulement en le réécrivant.
+    Une couche de scripts par-dessus aurait hérité des deux sans jamais les voir.
+
+- id: SOLV-B2
+  titre: "BRANCHE COUPÉE — un solveur commercial (Gurobi, CPLEX)"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [core/solve/solver.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    mesure-par: []
+  sans-mesure: >
+    Coupée sur une contrainte de destination, pas sur une performance : le modèle
+    doit pouvoir être relancé par un successeur d'une unité INRAE sans démarche
+    de licence, et c'est précisément le défaut qu'on reprochait au GAMS. Un
+    solveur plus rapide sous licence reconduirait l'obstacle qu'on venait de
+    lever. La mesure aurait renseigné le COÛT de ce choix, pas le choix lui-même.
+  critique: >
+    ⚠ ASSUMÉ, MAIS LA MESURE MANQUE VRAIMENT. Un test Gurobi sur une seule cellule
+    aurait chiffré ce que la gratuité coûte en temps de preuve — et vu le poids du
+    temps de solve dans ce stage (SOLV-10, SOLV-11), ce chiffre aurait eu de la
+    valeur pour quiconque reprend le modèle. C'est un manque à assumer à l'oral,
+    pas à masquer : la question « avez-vous essayé Gurobi ? » est certaine.
+
+# --- La dispersion du temps de solve ----------------------------------------
+
+- id: SOLV-10
+  titre: Le solve prend 30 à 55 min sur le territoire complet
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#B.1, .mosaica_solve_history.json]
+  chiffre: []
+  destination: [ch2, oral]
+  arcs:
+    parce-que: [SOLV-01]
+    justifie: [SOLV-11, SOLV-30, MET-10]
+
+- id: SOLV-11
+  titre: >
+    À taille constante, les 20 solves enregistrés s'étalent de 155 s à 1 007 s
+    — facteur 6,5, CV 64 %
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-01
+  source: [docs/04-vigilance.md#B.1, core/solve/timing.py]
+  chiffre: [mesSolveMin, mesSolveMax, mesSolveCV]
+  destination: [ch2, oral, article]
+  arcs:
+    parce-que: [SOLV-10]
+    justifie: [SOLV-12]
+  critique: >
+    Résultat sous-exploité. La dispersion à taille constante d'un MILP
+    d'allocation est exactement le genre de mesure qui manque dans la
+    littérature appliquée, où l'on publie un temps de calcul unique.
+
+- id: SOLV-12
+  titre: >
+    L'estimateur de durée ponctuel se trompait d'une médiane de 75 % ; il rend
+    désormais une fourchette, ou rien
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-08-01
+  source: [TODO.md, core/solve/timing.py, docs/04-vigilance.md#B.1]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [SOLV-11]
+    contredit: [SOLV-B3]
+    mesure-par: [VER-10]
+  critique: >
+    Quatre défauts cumulés dans 40 lignes : point au lieu de fourchette, tri
+    stable prenant les entrées les plus ANCIENNES (donc n'apprenant plus rien
+    après le 3ᵉ run), mélange warm/cold (720 s contre 209 s), et extrapolation
+    hors bande (même 456 s pour 200 000 et 331 044 variables). Le bug le plus
+    intéressant du dépôt : chacun est bénin, leur somme rend l'outil trompeur.
+
+- id: SOLV-B3
+  titre: "BRANCHE COUPÉE — jeter l'historique de solve, jugé inutile"
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-08-01
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    mesure-par: [SOLV-11]
+  critique: >
+    Verdict renversé après mesure : c'est le seul relevé empirique du coût de
+    résolution du dépôt, et une fourchette répond à la vraie question (« trois
+    minutes ou trois heures ? »). Ce qui devait mourir est l'estimation
+    ponctuelle, pas l'enregistrement.
+
+- id: SOLV-13
+  titre: L'enveloppe Pyomo→HiGHS coûte ~15 s, négligeable devant la recherche
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#B.1, scripts/profile_solver.py]
+  chiffre: []
+  destination: [ch2]
+  arcs:
+    parce-que: [SOLV-10]
+  critique: >
+    Mesure importante parce qu'elle FERME une piste d'optimisation évidente et
+    tentante (optimiser la construction du modèle) : le goulot est ailleurs.
+
+# --- L'incumbent faux --------------------------------------------------------
+
+- id: SOLV-20
+  titre: >
+    Un solve arrêté à la limite de temps rend un incumbent PROUVABLEMENT faux,
+    pas seulement imprécis
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: [docs/04-vigilance.md#B.2, scripts/repair_allocation.py]
+  chiffre: [mesIncumbentGain, mesIncumbentEcart]
+  destination: [ch2, ch4, oral, article]
+  arcs:
+    parce-que: [SOLV-10]
+    justifie: [SOLV-30, SOLV-21, PROS-40]
+    mesure-par: [VER-20]
+  critique: >
+    La démonstration est la partie qui compte : une solution faisable
+    construite À LA MAIN en quelques secondes vaut 80,91 M€ contre 76,46 M€
+    trouvés par HiGHS en une heure. Ce n'est pas une présomption. C'est le
+    résultat le plus publiable du stage parce qu'il ne dépend d'aucune donnée
+    guadeloupéenne.
+
+- id: SOLV-21
+  titre: >
+    Signature à reconnaître — une contrainte sur l'ananas qui fait reculer la
+    canne et la banane signale un branch-and-bound perdu, pas un effet de modèle
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: [docs/04-vigilance.md#B.2]
+  chiffre: []
+  destination: [ch2, oral, note, article]
+  arcs:
+    parce-que: [SOLV-20]
+  critique: >
+    Heuristique de diagnostic transférable : « une contrainte touche un poste
+    qu'elle n'a aucune raison de toucher ». C'est le seul test de plausibilité
+    qui ne demande ni borne ni re-solve.
+
+- id: SOLV-22
+  titre: >
+    ERREUR — deux leviers de calibration ont été diagnostiqués « bloqués par la
+    modélisation » alors qu'ils l'étaient par le solveur
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-29
+  source: [TODO.md, docs/archives/journal-vigilance.md]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    parce-que: [SOLV-20]
+    mesure-par: [VER-20]
+  verdict-anterieur: >
+    « Le plafond ananas et le plancher arboricole coûtent trop cher au modèle :
+    ces contraintes sont bloquées par la MODÉLISATION. » Elles étaient bloquées
+    par le SOLVEUR — les deux runs tapaient la limite d'une heure avec un
+    incumbent incohérent, et deux semaines de diagnostic reposaient sur des
+    résultats que rien ne disait faux à la lecture.
+  critique: >
+    Le plafond ananas et le plancher arboricole tapaient tous deux la limite
+    d'une heure avec un incumbent incohérent. Conclusion tirée : « ces
+    contraintes coûtent trop cher ». Conclusion vraie : « le solveur n'a pas
+    convergé ». Deux semaines de diagnostic reposaient sur des runs faux.
+
+# --- Amorçage à chaud --------------------------------------------------------
+
+- id: SOLV-30
+  titre: L'amorçage à chaud fait passer un même problème de 720 s à 209 s
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-29
+  source: [core/solve/warm_start.py, docs/04-vigilance.md#B.2]
+  chiffre: [mesWarmAvant, mesWarmApres]
+  destination: [ch2, oral]
+  arcs:
+    parce-que: [SOLV-20]
+    justifie: [SOLV-31, SOLV-33]
+
+- id: SOLV-31
+  titre: >
+    Un amorçage ne change jamais l'optimum, seulement la vitesse à laquelle il
+    est PROUVÉ
+  type: notion
+  statut: retenu
+  severite: null
+  source: [core/solve/warm_start.py, memoire/chapitres/02-porter.tex]
+  chiffre: []
+  destination: [ch2, annexeA]
+  arcs:
+    parce-que: [SOLV-30]
+  critique: >
+    À dire explicitement : sinon un lecteur soupçonne que l'amorçage biaise le
+    résultat vers la graine, ce qui ruinerait toute la campagne prospective.
+
+- id: SOLV-32
+  titre: >
+    HiGHS écarte SILENCIEUSEMENT une solution de départ inadmissible — sans
+    audit, un run paraît amorcé et se comporte comme à froid
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: [core/solve/warm_start.py, docs/04-vigilance.md]
+  chiffre: []
+  destination: [ch2, ch4, oral, note, article]
+  arcs:
+    parce-que: [SOLV-30]
+    justifie: [SOLV-33, VER-21]
+    mesure-par: [VER-21]
+  critique: >
+    Vérifié en vrai : la réparation par défaut cassait `Eq_BA_JA` sur 318
+    exploitations et l'audit l'a attrapée. Sans lui, on aurait publié des temps
+    de solve « avec warm start » qui étaient des solves froids.
+
+- id: SOLV-33
+  titre: >
+    Chaînage de l'amorçage le long d'un front — un point froid, six chauds au
+    lieu de sept froids
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [core/config.py#order_sweep_points, scripts/run_scenarios.py]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [SOLV-30]
+    justifie: [SOLV-34]
+  critique: >
+    Le gain propre de ce chaînage-ci n'a JAMAIS été mesuré séparément. Les
+    720 → 209 s viennent du warm start en général. Douze tests couvrent l'ordre
+    et le choix de graine, aucun ne couvre le solve. À dire dans le mémoire.
+
+- id: SOLV-34
+  titre: >
+    L'ordre du front se déduit du sens de la contrainte et s'abstient dès qu'il
+    ne peut pas conclure — s'abstenir ne coûte que du temps
+  type: choix
+  statut: retenu
+  severite: null
+  source: [core/config.py#order_sweep_points, CLAUDE.md]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [SOLV-33]
+  critique: >
+    Bon exemple d'un principe de conception : la correction repose sur l'audit,
+    jamais sur l'ordre. Abstention = perte de vitesse, jamais perte de justesse.
+    Trois cas d'abstention : matrice 2-D, contrainte sans `sense`, argument qui
+    n'est pas le niveau de la borne (`scale` INVERSE la direction).
+
+- id: SOLV-35
+  titre: >
+    La chaîne de warm start est INTERNE au batch : un run sur disque n'est
+    jamais une graine
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-09
+  source: [docs/04-vigilance.md#B.7, "scripts/run_scenarios.py:74", commit 0669560]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    parce-que: [SOLV-33]
+    justifie: [SOLV-36]
+  critique: >
+    Symptôme discret : la ligne « warm start depuis … » manque, le solve démarre
+    normalement, le batch ne dit rien. Conséquence opératoire : un lot de
+    reprise, qui ne rejoue que les cellules forcées, repart intégralement à
+    froid. Découvrir ça après avoir lancé des lots de reprise est coûteux.
+
+- id: SOLV-36
+  titre: >
+    Découper un lot par politique n'est pas de la coquetterie — `--warm-start-from`
+    est global au batch
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-08-09
+  source: [docs/04-vigilance.md#B.7]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [SOLV-35]
+
+- id: SOLV-37
+  titre: Un warm start peut DÉGRADER une cellule forcée
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-12
+  source: [docs/04-vigilance.md#B.9, commit 2117ddf]
+  chiffre: []
+  destination: [ch4, note, article]
+  arcs:
+    parce-que: [SOLV-30]
+    contredit: [SOLV-B4]
+    mesure-par: [VER-22]
+  critique: >
+    P8×F9 repris avec 3× plus de temps rend −1 678 357 contre −1 506 116 à
+    froid. La garantie du warm start est « ≥ la valeur de sa graine », jamais
+    « ≥ un run antérieur de la même cellule ». La graine était l'allocation de
+    P8×F0, optimale sous F0 et médiocre sous F9. Découvert le 12/08 — c'est le
+    dernier résultat du stage, et il oblige à ne jamais écraser un ancien run.
+
+- id: SOLV-B4
+  titre: >
+    BRANCHE COUPÉE — « l'allocation nominale d'une politique est toujours une
+    bonne graine pour ses cellules forcées »
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-08-12
+  source: [case_studies/guadeloupe/scenarios_forcages.yaml, docs/04-vigilance.md#B.9]
+  chiffre: []
+  destination: [ch4, note]
+  arcs:
+    mesure-par: [VER-22]
+  critique: >
+    Le raisonnement était juste sur la FAISABILITÉ (un forçage change des
+    coefficients, pas l'ensemble faisable) et faux sur la QUALITÉ. Confondre les
+    deux est une erreur de type exact — une garantie d'appartenance prise pour
+    une garantie d'optimalité.
+
+# --- Symétrie ----------------------------------------------------------------
+
+- id: SOLV-40
+  titre: >
+    Les 25 variantes maraîchères « Karusmart » sont identiques au bit près sur
+    tout ce que le modèle lit
+  type: donnee
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: [docs/04-vigilance.md#B.3, data/tables/]
+  chiffre: [mesBinairesRef, mesBinairesKarus]
+  destination: [ch2, ch5, oral, article]
+  arcs:
+    justifie: [SOLV-41, SOLV-42, PROS-B3]
+    mesure-par: [VER-30]
+
+- id: SOLV-41
+  titre: >
+    Conséquence algorithmique — les rouvrir ajoute 548 000 binaires de PURE
+    symétrie (879 162 contre 331 044)
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#B.3]
+  chiffre: [mesBinairesRef, mesBinairesKarus]
+  destination: [ch2]
+  arcs:
+    parce-que: [SOLV-40]
+  critique: >
+    La recherche arborescente passe son temps à permuter des solutions
+    équivalentes. C'est l'exemple pédagogique parfait de ce qu'est la symétrie
+    en branch-and-bound, et il est tombé du terrain, pas d'un manuel.
+
+- id: SOLV-42
+  titre: >
+    Conséquence de MODÉLISATION, plus grave — une part de bio bâtie sur ces
+    variantes est satisfaite à coût EXACTEMENT nul, par relabellisation
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-07-31
+  source: [docs/04-vigilance.md#B.3]
+  chiffre: []
+  destination: [ch2, ch5, oral, article]
+  arcs:
+    parce-que: [SOLV-40]
+    justifie: [PROS-B3, REF-20]
+  critique: >
+    « Une politique agroécologique qui ne contraint rien. » C'est le point où un
+    défaut de DONNÉES devient un artefact de POLITIQUE PUBLIQUE — et c'est ce
+    qui rend l'item central au mémoire plutôt qu'anecdotique.
+
+- id: SOLV-43
+  titre: >
+    Les seules vraies cultures bio du jeu sont MA_PLBIO et MA_MOBIO (azote 0,
+    IFT 0, 3 882 / 3 498 €/ha contre 27 929)
+  type: donnee
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#B.3, case_studies/guadeloupe/domain/agroecology.py]
+  chiffre: []
+  destination: [ch2, annexeC]
+  arcs:
+    parce-que: [SOLV-42]
+
+- id: SOLV-44
+  titre: >
+    Le contrôle avant vol détecte et signale tout groupe de cultures symétriques
+  type: methode
+  statut: retenu
+  severite: null
+  source: [scripts/check_scenario_feasibility.py]
+  chiffre: []
+  destination: [ch2, ch4, note]
+  arcs:
+    parce-que: [SOLV-40]
+  critique: >
+    Transformer un incident en garde-fou permanent : le meilleur usage d'un bug
+    découvert. À citer comme pratique, pas seulement comme outil.
+
+# --- Bornes et preuve --------------------------------------------------------
+
+- id: SOLV-50
+  titre: >
+    La relaxation LP coûte ~2 min contre 30-55 min pour le MILP, et
+    « infaisable en LP ⇒ infaisable en entiers » — l'inverse est faux
+  type: notion
+  statut: retenu
+  severite: null
+  source: [scripts/check_scenario_feasibility.py, memoire/chapitres/04-explorer.tex]
+  chiffre: []
+  destination: [ch4, annexeA, oral]
+  arcs:
+    justifie: [SOLV-51, VER-40]
+
+- id: SOLV-51
+  titre: >
+    La borne LP racine SURESTIME largement ce qu'un solve a laissé : le saut
+    d'intégralité vaut 2,78 % à lui seul
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-11
+  source: [docs/04-vigilance.md#B.8, commit 9585f43]
+  chiffre: [mesHuitOptimum, mesHuitBorneLp, mesHuitSautInt, mesHuitEcartApparent, mesHuitEcartReel]
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [SOLV-50]
+    justifie: [SOLV-52]
+    mesure-par: [VER-41]
+  critique: >
+    Un incumbent à 68 644 754 est à 3,41 % de la borne LP mais à 0,64 % de
+    l'optimum — facteur cinq entre les deux lectures. « Le solveur cale à 3,4 % »
+    est donc une phrase fausse qu'il était très naturel d'écrire.
+
+- id: SOLV-52
+  titre: PROUVER coûte plus cher que TROUVER — 8 981 s uniquement à fermer la borne duale
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-11
+  source: [docs/04-vigilance.md#B.8]
+  chiffre: []
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [SOLV-51]
+  critique: >
+    Réamorcé sur l'optimum LUI-MÊME, le solve met 2,5 h à prouver qu'il l'est.
+    Corollaire mesuré : le temps ne rend qu'EN CHAÎNE (68 445 374 en 1 h,
+    68 644 754 à +3 h, 69 088 438 prouvé à +2,2 h), là où trois heures d'un seul
+    tenant à graine fixe n'ont rapporté que 0,29 %. Contre-intuitif et net.
+
+- id: SOLV-53
+  titre: >
+    Trois solves du MÊME problème rendent trois valeurs différentes — trois
+    réponses à une seule question
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-08-11
+  source: [memoire/chapitres/04-explorer.tex#sec:limites]
+  chiffre: [mesHuitUneHeure, mesHuitTroisHeures, mesHuitOptimum]
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [SOLV-20]
+
+- id: SOLV-54
+  titre: >
+    L'écart d'optimalité a été porté à 1 % (`mip_rel_gap`) : l'objectif
+    Markowitz était intraitable au gap par défaut (> 37 h → 175 s)
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-23
+  source: [case_studies/guadeloupe/config.yaml, commit 8b3adf6]
+  chiffre: [mesGapMip]
+  destination: [ch2, ch3, annexeA]
+  arcs:
+    parce-que: [SOLV-04]
+    justifie: [CAL-50]
+  critique: >
+    Décision à fort effet, prise sous contrainte de temps. Le gap de 1 % est
+    ensuite ce qui permet de dire que le solveur est hors de cause dans la
+    calibration (l'écart à combler vaut 15 %, quinze fois le gap) — l'argument
+    dépend donc de ce réglage.
+
+- id: SOLV-55
+  titre: >
+    Trois graines HiGHS rendent des PAD de 48,44 / 48,29 / 48,31 % :
+    l'arbitraire de branchement vaut 0,15 point
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: [docs/04-vigilance.md#E.3]
+  chiffre: [mesGraineA, mesGraineB, mesGraineC, mesBruitPad]
+  destination: [ch2, ch3, annexeE]
+  arcs:
+    justifie: [VER-50, CAL-51]
+    mesure-par: [VER-50]
+  critique: >
+    Mesure du bruit avant d'interpréter un écart : c'est la pratique
+    expérimentale de base, rarement faite en modélisation appliquée. Elle fonde
+    la tolérance de 5 % du garde-fou de références.
+
+# --- Facteurs limitants ------------------------------------------------------
+
+- id: SOLV-60
+  titre: >
+    Le plafond de main d'œuvre est le vrai facteur limitant : 6 252 740 h,
+    soit 3 891 ETP à slack 1.0
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#B.4, case_studies/guadeloupe/config.yaml]
+  chiffre: []
+  destination: [ch3, ch4, annexeC]
+  arcs:
+    justifie: [SOLV-61, PROS-30]
+
+- id: SOLV-61
+  titre: >
+    Desserrer le slack ne suffit pas : ce ne sont pas les heures qui manquent
+    mais les cultures capables de les absorber sous les plafonds environnementaux
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-31
+  source: [docs/04-vigilance.md#B.4]
+  chiffre: []
+  destination: [ch4, annexeC]
+  arcs:
+    parce-que: [SOLV-60]
+    mesure-par: [VER-42]
+  critique: >
+    Établi par bissection : retirer l'IFT, l'azote ou les GES isolément laisse
+    l'infaisabilité. C'est la combinaison. Méthode de diagnostic réutilisable
+    et rarement appliquée à un modèle d'allocation.
+
+- id: SOLV-62
+  titre: >
+    P10 est hors d'atteinte sans être infaisable : LP faisable en 81 s,
+    aucun incumbent entier en 7 200 s, aucune graine réparable
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-08-03
+  source: [docs/04-vigilance.md#B.6, scripts/audit_warm_start_seed.py]
+  chiffre: [mesPdixBorneLp, mesPdixViolationsA, mesPdixViolationsP]
+  destination: [ch4, oral, article]
+  arcs:
+    parce-que: [SOLV-60, SOLV-61]
+    justifie: [PROS-41, REF-21]
+    mesure-par: [VER-43]
+  critique: >
+    Conséquence lourde et honnêtement assumée dans le Ch. 4 : l'axe politique
+    P1↔P10 est UNILATÉRAL. Seule la borne dérégulatrice a tourné. Un dispositif
+    conçu pour encadrer un débat n'en restitue qu'un côté.
+
+- id: SOLV-63
+  titre: >
+    Une zone sans terme est SILENCIEUSEMENT exemptée — sans conséquence pour un
+    plafond, mais un plancher dispense la zone au lieu de rendre le run infaisable
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#B.5, core/model/constraints.py]
+  chiffre: []
+  destination: [note, annexeA]
+  arcs:
+    parce-que: [ARCH-20]
+  critique: >
+    Variante du piège « booléen trivial » : une somme vide n'est pas une
+    contrainte satisfaite, c'est une contrainte absente. Contrôle : comparer le
+    nombre de zones produites au nombre déclaré.
+
+- id: SOLV-64
+  titre: >
+    Le piège du « booléen trivial » — une somme sur zéro paire rend un `0`
+    Python, et le comparer produit un `bool` que Pyomo rejette
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [CLAUDE.md, core/model/constraints.py]
+  chiffre: []
+  destination: [note, annexeA]
+  arcs:
+    justifie: [SOLV-63]
+  critique: >
+    Détail d'implémentation, mais il illustre une règle générale de portage :
+    une expression symbolique et une valeur numérique ne se comparent pas de la
+    même façon, et la dégénérescence arrive toujours sur les cas de bord réels
+    (une exploitation sans parcelle éligible).
+
+# --- Le solve dans l'outillage ----------------------------------------------
+
+- id: SOLV-70
+  titre: >
+    Le solve NE DOIT PAS être exécuté en arrière-plan derrière une barre de
+    progression — le conflit de fd corrompt stdout et fait planter tout run réel
+  type: piege
+  statut: retenu
+  severite: critique
+  quand: 2026-07-10
+  source: ["docs/superpowers/specs/2026-07-10-solver-progress-capture-fd-conflict.md"]
+  chiffre: []
+  destination: [note, annexeF]
+  arcs:
+    parce-que: [SOLV-10]
+  critique: >
+    Bug coûteux et instructif : une fonctionnalité de confort (voir la
+    progression) casse la fonctionnalité centrale. Le correctif est une
+    contrainte permanente sur l'architecture, consignée dans une spec dédiée —
+    c'est le type de savoir qui se perd si on ne l'écrit pas.
+
+- id: SOLV-71
+  titre: >
+    `zone_filter` permet des expériences en secondes : un run Marie-Galante
+    passe d'infaisable à optimal en 5 s
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [CLAUDE.md, "docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md"]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [SOLV-10]
+    justifie: [SOLV-72]
+  critique: >
+    Le vrai déblocage méthodologique du stage : sans lui, chaque essai coûte une
+    heure et le développement de scénarios est impossible. À raconter comme tel
+    et non comme une option de configuration.
+
+- id: SOLV-72
+  titre: >
+    `scale_territorial_bounds` est OPT-IN parce que réécrire un seuil change ce
+    que le scénario dit
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#G.1, CLAUDE.md]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [SOLV-71]
+  critique: >
+    Bon exemple de choix de conception à charge éthique : le défaut commode
+    (mettre à l'échelle automatiquement) aurait produit des scénarios dont
+    personne n'aurait su qu'ils ne disaient plus la même chose.
+
+# =============================================================================
+# DENSIFICATION — journal-vigilance.md, bloc « Résolu ».
+# =============================================================================
+
+- id: SOLV-B5
+  titre: >
+    BRANCHE COUPÉE — l'interface persistante APPSI, testée puis REVERTÉE
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-10
+  source: ["docs/archives/journal-vigilance.md:1011-1013", "commit de00f98"]
+  chiffre: []
+  destination: [ch2, note, article]
+  arcs:
+    parce-que: [SOLV-06]
+    mesure-par: [VER-12]
+  critique: >
+    ⚠ LE MEILLEUR EXEMPLE DU DÉPÔT D'UNE OPTIMISATION QUI NE PASSE PAS À
+    L'ÉCHELLE. Gain mesuré : ~25 % sur l'île 1 (un sous-ensemble). À pleine
+    échelle : 3 310 s, c'est-à-dire DANS LA FOURCHETTE HABITUELLE — donc
+    indiscernable du bruit (SOLV-11, CV 64 %). Retour à `SolverFactory`.
+    Leçon générale, et elle vaut pour tout le travail : sur un problème dont la
+    durée a un CV de 64 %, une mesure d'accélération faite sur UN run à pleine
+    échelle ne prouve rien, et une mesure faite sur un sous-ensemble ne se
+    transporte pas. C'est la raison profonde pour laquelle le gain propre du
+    chaînage d'amorçage n'a jamais été chiffré (PERSP-50) : il faudrait des
+    répétitions que le budget de calcul n'autorise pas.
+
+- id: SOLV-73
+  titre: >
+    Un run réduit peut mesurer un gain qui n'existe pas à pleine échelle
+  type: methode
+  statut: retenu
+  severite: majeur
+  source: [SOLV-B5, SOLV-11]
+  chiffre: [mesSolveCV]
+  destination: [ch2, ch5, oral, article]
+  arcs:
+    parce-que: [SOLV-B5]
+  critique: >
+    Corollaire méthodologique de SOLV-B5 et de SOLV-71 (`zone_filter`), qui se
+    contredisent en apparence : le sous-ensemble est INDISPENSABLE pour
+    développer (il ramène un essai de l'heure à la seconde) et TROMPEUR pour
+    mesurer une performance. Distinguer les deux usages est un item de méthode à
+    part entière, et le dépôt s'est fait prendre une fois.
+
+- id: SOLV-74
+  titre: >
+    `solver.py` charge désormais l'incumbent sur `maxTimeLimit` au lieu de lever
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:301-302"]
+  chiffre: []
+  destination: [ch2, note]
+  arcs:
+    parce-que: [SOLV-20]
+  critique: >
+    ⚠ DÉCISION À DOUBLE TRANCHANT, prise pour de bonnes raisons et qui a coûté
+    cher. Elle rend exploitable un solve non convergé — sans elle, une heure de
+    calcul est perdue. Mais c'est exactement ce qui permet à un incumbent
+    prouvablement faux d'entrer dans une grille de résultats et d'y être comparé
+    à des cellules convergées (PROS-46, PROS-47). Le correctif n'est pas de
+    revenir en arrière, c'est le drapeau `maxTimeLimit` porté jusqu'au recap et
+    signalé par la dague dans les tableaux — l'avertissement voyage avec le
+    chiffre (MET-40).
+
+- id: SOLV-75
+  titre: >
+    Le solve tenait en 140-175 s en juillet, contre 30-55 min pour les scénarios
+    prospectifs
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: ["docs/archives/journal-vigilance.md:329-331", "docs/archives/journal-vigilance.md:566"]
+  chiffre: []
+  destination: [ch2, annexeD]
+  arcs:
+    parce-que: [SOLV-41]
+  critique: >
+    ⚠ NUANCE IMPORTANTE ET FACILE À MANQUER. Après les suppressions `Eq_*_SUPP`
+    (309 000 variables), la configuration de CALIBRATION se résout en 140 à 175 s.
+    Les 30-55 min concernent les scénarios PROSPECTIFS, plus contraints. Citer
+    « le solve prend 30 à 55 min » sans préciser lequel mélange deux régimes
+    d'un facteur dix. Et le journal note un troisième régime : ~1 h aux seuils
+    INTERMÉDIAIRES du balayage de prairie — ce n'est donc pas la taille qui
+    commande la durée, c'est la difficulté combinatoire de la contrainte.
+
+- id: SOLV-76
+  titre: >
+    Un point de balayage a tapé la limite d'une heure et rend un incumbent
+    INFÉRIEUR à un point PLUS contraint
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-28
+  source: ["docs/archives/journal-vigilance.md:546-548"]
+  chiffre: []
+  destination: [ch3, ch4, annexeE, oral]
+  arcs:
+    parce-que: [SOLV-20]
+    justifie: [PROS-54]
+  critique: >
+    Le plancher à 7 218 ha rend 77,77 M€ quand celui à 8 341 ha, PLUS contraint,
+    atteint 78,99 M€. C'est algébriquement impossible à l'optimum : resserrer ne
+    peut pas améliorer. Détection gratuite d'un solve non convergé, et le journal
+    l'a repérée sur un balayage de CALIBRATION — bien avant que la règle soit
+    formalisée pour les fronts de Pareto (PROS-54). Le même test, découvert deux
+    fois indépendamment, sur deux objets différents.
+
+# =============================================================================
+# DENSIFICATION — corps des commits de juillet.
+# =============================================================================
+
+- id: SOLV-80
+  titre: >
+    POURQUOI un amorçage accélère — le branch-and-bound élague un nœud dès que sa
+    borne est moins bonne que le meilleur entier connu ; SANS INCUMBENT IL
+    N'ÉLAGUE RIEN
+  type: notion
+  statut: retenu
+  severite: null
+  quand: 2026-07-29
+  source: ["commit 0c51607"]
+  chiffre: []
+  destination: [ch2, annexeA, oral]
+  arcs:
+    parce-que: [SOLV-30]
+    justifie: [SOLV-31]
+  critique: >
+    ⚠ L'EXPLICATION PÉDAGOGIQUE QUI MANQUE AU BROUILLON. Elle tient en une phrase,
+    elle est exacte, et elle rend évident à la fois le gain (l'élagage commence
+    immédiatement) et la neutralité (« le solveur garantit toujours le même écart
+    de 1 % à la même borne »). C'est la formulation à reprendre pour expliquer le
+    warm start à un lecteur qui ne connaît pas la séparation-évaluation, et elle
+    évite d'avoir à décrire l'algorithme.
+
+- id: SOLV-81
+  titre: >
+    L'AUDIT A ATTRAPÉ UNE VRAIE FAUTE — la réparation par défaut cassait
+    `Eq_BA_JA` sur 318 exploitations
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: ["commit 0c51607"]
+  chiffre: []
+  destination: [ch2, oral]
+  arcs:
+    parce-que: [SOLV-32, VER-21]
+  critique: >
+    Détail complet, qui rend l'argument concret plutôt que théorique : le
+    `--freeze` par défaut convertissait 160 ha de jachère et 134 ha de banane,
+    ce qui violait la contrainte de rotation sur 318 exploitations. Le gel
+    corrigé donne un départ faisable à 80 322 115 €. Sans audit, ce départ aurait
+    été jeté en silence par HiGHS et le run se serait comporté comme un run
+    froid, en donnant l'impression d'être amorcé.
+
+- id: SOLV-82
+  titre: >
+    `apply_allocation` écrit le vecteur 0/1 COMPLET — HiGHS lit `var.value` sur
+    TOUTES les colonnes
+  type: piege
+  statut: retenu
+  severite: mineur
+  quand: 2026-07-29
+  source: ["commit 0c51607", core/solve/warm_start.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [SOLV-30]
+  critique: >
+    Piège d'implémentation typique : écrire seulement les variables à 1 laisserait
+    les autres à `None`, et le départ serait partiel donc rejeté. Le genre de
+    détail qui coûte une demi-journée et ne s'apprend qu'en le rencontrant —
+    exactement ce que `CLAUDE.md` conserve pour le suivant.
+
+- id: SOLV-83
+  titre: >
+    LE COÛT DES TROIS LEVIERS EST DU MÊME ORDRE — 0,7 %, 3,7 %, 0,39 à 1,19 %
+    d'objectif
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: ["commit 383fb1b", "commit 8205d64"]
+  chiffre: []
+  destination: [ch3, annexeE, oral]
+  arcs:
+    parce-que: [SOLV-20]
+  critique: >
+    Plancher de prairie 0,7 %, plafond plantain 3,7 %, plancher arboricole 0,39 %
+    à 200 ha et 1,19 % à 335 ha. Formulation du commit à retenir : « le levier est
+    BON MARCHÉ, c'est le SOLVEUR qui échoue ». C'est l'argument qui sépare
+    proprement une question de modélisation d'une question de calcul — et il
+    n'est disponible que parce que le coût réel a été mesuré HORS solveur, par
+    réparation gloutonne.
+
+- id: SOLV-84
+  titre: >
+    `read_allocation` porte un repli sur l'ancienne arborescence des runs
+    antérieurs au 13/07
+  type: choix
+  statut: retenu
+  severite: mineur
+  source: ["commit 0c51607", core/reporting/run_folder.py]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [ARCH-50]
+  critique: >
+    Compatibilité ascendante sur un format de dossier de run, pour qu'une
+    allocation vieille de deux semaines reste utilisable comme graine. Petit,
+    mais c'est ce qui fait qu'un dépôt de recherche garde ses résultats
+    exploitables au lieu de les périmer à chaque réorganisation.

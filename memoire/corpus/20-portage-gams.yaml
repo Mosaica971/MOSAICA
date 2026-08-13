@@ -1,0 +1,489 @@
+# =============================================================================
+# 20 — PORTAGE GAMS → PYTHON                                      préfixe : PORT
+#
+# Le mandat de parité, ce qu'il protège, ce qu'il interdit, les bugs portés
+# volontairement, les pièges de transcription, l'inventaire équation par
+# équation. C'est le domaine où le stage a inventé un PROTOCOLE, et c'est
+# probablement sa contribution méthodologique la plus transférable après les
+# résultats de solveur.
+# =============================================================================
+
+# --- Le mandat ---------------------------------------------------------------
+
+- id: PORT-01
+  titre: >
+    Mandat de parité — reproduire le comportement RÉEL du GAMS, y compris là où
+    il est manifestement involontaire
+  type: choix
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex#sec:mandat, CLAUDE.md]
+  chiffre: []
+  destination: [ch1, ch2, oral, article]
+  arcs:
+    parce-que: [CTX-22, PORT-02]
+    justifie: [PORT-03, PORT-10, PORT-20, SOLV-04, DON-B1]
+    ferme-la-branche: [PORT-B1]
+
+- id: PORT-02
+  titre: >
+    La justification du mandat — sans lui, tout désaccord ultérieur entre les
+    deux modèles devient indémêlable
+  type: choix
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/01-terrain-et-objet.tex#sec:mandat]
+  chiffre: []
+  destination: [ch1, oral]
+  arcs:
+    parce-que: [SOLV-06]
+    justifie: [PORT-01]
+  critique: >
+    L'argument à tenir : la parité n'est pas de la déférence, c'est ce qui rend
+    chaque divergence ATTRIBUABLE. Il porte tout le chapitre 1 et il est
+    vérifiable — PORT-20 en donne le cas concret.
+
+- id: PORT-B1
+  titre: "BRANCHE COUPÉE — un port « amélioré » qui corrige les bugs au passage"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [memoire/chapitres/02-porter.tex#sec:parite]
+  chiffre: []
+  destination: [ch1, ch2, oral]
+  arcs:
+    mesure-par: [PORT-20]
+  critique: >
+    La mesure qui tranche est PORT-20 (`Eq_VE_PLUIE`) : un port amélioré aurait
+    corrigé en silence une interdiction territoriale complète, et le désaccord
+    avec le GAMS serait devenu inexplicable. La branche est coupée par un cas
+    concret, pas par un principe — c'est ce qui la rend convaincante.
+
+- id: PORT-03
+  titre: >
+    La contrepartie qui rend le mandat vivable — chaque bug est porté ET
+    accompagné d'une variante « intention présumée » désactivée dans la config
+  type: choix
+  statut: retenu
+  severite: null
+  source: [case_studies/guadeloupe/config.yaml, memoire/chapitres/01-terrain-et-objet.tex]
+  chiffre: []
+  destination: [ch1, ch2, annexeB, oral, article]
+  arcs:
+    parce-que: [PORT-01]
+  critique: >
+    C'est l'invention méthodologique du stage : « basculer les deux lignes suffit
+    à tester l'autre lecture ». La parité cesse d'être une camisole et devient un
+    point de départ documenté. Transférable à tout portage de modèle hérité, et
+    à ma connaissance rarement formalisé ainsi dans la littérature de modélisation.
+
+- id: PORT-04
+  titre: >
+    Chaque équation reçoit un statut explicite : portée / implicite / différée /
+    écartée
+  type: methode
+  statut: retenu
+  severite: null
+  source: [docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [ch2, annexeB]
+  arcs:
+    parce-que: [PORT-01]
+    justifie: [PORT-05, PORT-40, PORT-50]
+  critique: >
+    L'inventaire est le livrable qui rend le portage AUDITABLE par un tiers.
+    C'est aussi le contenu tout prêt de l'annexe B — elle est aujourd'hui vide
+    alors que le fichier existe.
+
+- id: PORT-05
+  titre: >
+    L'inventaire a été mis à jour APRÈS coup et deux lignes étaient périmées de
+    trois semaines
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  quand: 2026-08-09
+  source: [docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [PORT-04]
+  verdict-anterieur: >
+    « L'inventaire de portage dit l'état du modèle. » Il le disait au moment où
+    il a été écrit, et rien dans le dépôt ne signalait qu'il avait cessé de le
+    dire — trois semaines de dérive silencieuse sur deux lignes.
+  critique: >
+    `Eq_MO_MAX_Expl` et « objectifs » étaient marqués inactifs alors qu'ils
+    étaient actifs depuis le 21/07. Petit fait, mais exemplaire d'un vrai risque :
+    une documentation de traçabilité qui dérive devient pire que pas de
+    documentation, parce qu'on lui fait confiance. Argument pour MET-20 (générer
+    plutôt que rédiger ce qui peut l'être).
+
+# --- Ce que le GAMS ne disait pas -------------------------------------------
+
+- id: PORT-10
+  titre: >
+    GAMS renvoie ZÉRO, sans avertissement, quand on interroge une table sur une
+    colonne qu'elle ne contient pas
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#D.1, "context/gams/MODELE.txt:305-307"]
+  chiffre: []
+  destination: [ch1, ch2, oral, article]
+  arcs:
+    parce-que: [PORT-01]
+    justifie: [PORT-20, PORT-21, DON-20]
+  critique: >
+    Le fait technique fondateur du mémoire. Il justifie la réécriture (Ch. 1,
+    troisième obstacle), le mandat de parité (Ch. 1 §4) et la thèse générale
+    « un paramètre absent ne laisse pas un trou, il laisse un nombre plausible »
+    (Ch. 2, encadré réflexif). Trois usages d'un seul mécanisme.
+
+- id: PORT-20
+  titre: >
+    `Eq_VE_PLUIE` interdit les vergers pluviaux sur TOUT le territoire — le test
+    `0 ≠ 1` est toujours vrai
+  type: erreur
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-20
+  source: [docs/04-vigilance.md#D.1, docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [ch1, ch2, annexeB, oral]
+  arcs:
+    parce-que: [PORT-10]
+    justifie: [PORT-B1]
+  critique: >
+    `VE_PLUIE` n'apparaîtra JAMAIS en sortie. Premier suspect si l'on compare un
+    jour à des données observées de vergers — or CAL-40 identifie précisément
+    les vergers (8 ha simulés contre 311 observés) comme un poste majeur du PAD
+    résiduel. LE LIEN N'EST PAS FAIT AUJOURD'HUI dans le mémoire, et il devrait
+    l'être : le déficit de vergers a peut-être une cause connue.
+
+- id: PORT-21
+  titre: >
+    `Eq_VE_BTGT` — le ban effectif est `REGION = 4` seulement, pas `{4, 5}`
+  type: erreur
+  statut: retenu
+  severite: mineur
+  source: [docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [annexeB]
+  arcs:
+    parce-que: [PORT-10]
+
+- id: PORT-22
+  titre: >
+    Deux ordres de types de sol incompatibles — indexer par position produit des
+    coefficients faux mais parfaitement plausibles
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#D.2, data/sets/SOL.set]
+  chiffre: []
+  destination: [ch2, oral, note, article]
+  arcs:
+    parce-que: [PORT-01]
+    justifie: [MET-30]
+  critique: >
+    `SOL.set` ordonne NITISOL, ANDOSOL, FERRALSOL, AUTRES, VERTISOL ; le GAMS
+    mappe 1→VERTISOL, 2→FERRALSOL, 3→ANDOSOL, 4→NITISOL, 5→AUTRES. Aucun test ne
+    signale l'erreur, aucune sortie n'a l'air anormale : des rendements crédibles
+    sur les mauvais sols. C'est LE meilleur argument du mémoire pour avoir gardé
+    le GAMS comme référence plutôt qu'une documentation intermédiaire. Règle
+    générale qui en sort : toujours mapper PAR NOM, jamais par position.
+
+- id: PORT-23
+  titre: >
+    ERREUR COMMISE — la règle de sol de l'ananas était inversée, et elle a vécu
+    plusieurs semaines
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-23
+  source: [commit 0e159df, TODO.md]
+  chiffre: []
+  destination: [ch3, ch5, note]
+  arcs:
+    parce-que: [PORT-22]
+    mesure-par: [VER-01]
+  verdict-anterieur: >
+    « Le piège des deux ordres de types de sol est identifié et documenté (PORT-22),
+    donc il ne me mordra pas. » Il a mordu, dans le port, sur l'ananas, et il y a
+    vécu plusieurs semaines — le seul cas du stage où une erreur a été commise
+    APRÈS que son propre mécanisme ait été écrit noir sur blanc.
+  critique: >
+    Exactement le défaut que PORT-22 décrit, commis pour de vrai dans le port.
+    À raconter : c'est la preuve que connaître le piège ne suffit pas à l'éviter,
+    et ça donne sa valeur au golden snapshot. Vérifier la date exacte et
+    l'ampleur de l'effet avant de le citer.
+
+- id: PORT-24
+  titre: >
+    Les commentaires de configuration décrivaient les bans chlordécone à
+    l'envers, alors que le code était juste
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: mineur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md"]
+  chiffre: []
+  destination: [ch5, note]
+  arcs:
+    parce-que: [MET-30]
+  verdict-anterieur: >
+    « Les bans chlordécone sont posés à l'envers dans la configuration » — verdict
+    tiré du COMMENTAIRE, qui était faux, alors que le code en dessous était juste.
+    Le diagnostic portait sur une prose, pas sur un comportement.
+  critique: >
+    Cas inverse de PORT-23 et tout aussi instructif : le commentaire ment, le
+    code dit vrai. Un lecteur (ou un auteur qui revient) fait confiance au
+    commentaire. Argument fort pour MET-31 (ce qui peut être vérifié
+    mécaniquement doit l'être, et ce qui ne peut pas l'être doit être bref).
+
+# --- Le bloc CALIB -----------------------------------------------------------
+
+- id: PORT-30
+  titre: >
+    Le modèle résolu par les auteurs n'est pas celui que l'article évalue —
+    le bloc `CALIB` est distinct du bloc `SCENARIO`
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-07-21
+  source: ["context/gams/MODELE.txt:450-565", "docs/superpowers/specs/2026-07-21-calibration-levers-design.md"]
+  chiffre: []
+  destination: [ch3, annexeB, oral]
+  arcs:
+    parce-que: [PORT-04]
+    justifie: [CAL-10, PORT-31, PORT-32]
+  critique: >
+    Découverte structurante : elle explique d'un coup pourquoi le premier
+    portage donnait 193 % de PAD. Le stage cherchait à reproduire un modèle qu'il
+    ne résolvait pas. Enquête à raconter comme telle au Ch. 3.
+
+- id: PORT-31
+  titre: >
+    `Eq_PN_PIQ_CLD` était appliqué à tort — il est commenté en SCENARIO, pas en
+    CALIB, contrairement à `Eq_IG_CLD`
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md", "context/gams/MODELE.txt:626"]
+  chiffre: []
+  destination: [ch3, annexeB]
+  arcs:
+    parce-que: [PORT-30]
+    mesure-par: [VER-02]
+  verdict-anterieur: >
+    « `Eq_PN_PIQ_CLD` et `Eq_IG_CLD` sont deux contraintes chlordécone de même
+    nature, donc actives dans le même bloc. » Elles ne le sont pas : le GAMS n'en
+    commente qu'une en CALIB. Erreur d'analogie — deux équations qui se ressemblent
+    ont été supposées avoir le même statut, sans le vérifier ligne à ligne.
+  critique: >
+    Effet : prairie éligible de 76,5 % à 90 % des parcelles. Effet MESURÉ sur la
+    calibration : PAD 49,3 → 49,0 %, types 63,3 → 63,8 %. Marginal — et c'est le
+    point intéressant : une correction de parité juste peut ne rien changer, ce
+    qui a servi à établir que la cause dominante était ailleurs.
+
+- id: PORT-32
+  titre: >
+    14 équations `Eq_*_SUPP` sont rendues IMPLICITES — elles annulent des codes
+    agrégats dont l'économie est nulle côté Python
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-23
+  source: [docs/gams_port_inventory.md, commit 7ea7e1f]
+  chiffre: []
+  destination: [ch2, annexeB]
+  arcs:
+    parce-que: [PORT-04]
+  critique: >
+    −29 % de variables. Justification à surveiller : l'implication « économie
+    nulle ⇒ jamais choisi ⇒ interdiction sans objet » est vraie tant que
+    l'économie reste nulle. C'est une hypothèse conditionnelle présentée comme un
+    fait dans l'inventaire ; il faudrait un test qui la garde.
+
+- id: PORT-33
+  titre: >
+    `Eq_MO_MAX_Expl` est la contrainte DOMINANTE : sans elle l'optimum réclame
+    21 593 ETP là où le territoire en comptait 3 598 (facteur 6)
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-21
+  source: [docs/gams_port_inventory.md, commit a924d2d]
+  chiffre: []
+  destination: [ch2, ch3, annexeB]
+  arcs:
+    parce-que: [PORT-30]
+    justifie: [SOLV-60, DON-11]
+  critique: >
+    Chiffre spectaculaire et sous-employé : facteur 6 sur l'emploi agricole d'un
+    territoire. Il dit d'un coup pourquoi un modèle d'allocation sans contrainte
+    de travail ne décrit rien. À mettre au Ch. 2 ou 3.
+
+- id: PORT-34
+  titre: >
+    L'obstacle à porter `Eq_MO_MAX_Expl` était que `MO_Expl_init` suppose
+    l'allocation fine 2017, qui n'a jamais existé
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [docs/gams_port_inventory.md, docs/04-vigilance.md#C.2]
+  chiffre: []
+  destination: [ch3, annexeB]
+  arcs:
+    parce-que: [PORT-33]
+    justifie: [DON-11]
+  critique: >
+    Levé par l'approximation « cultures représentantes » — qui introduit à son
+    tour DON-12 (la représentante est souvent inéligible sur la parcelle qu'elle
+    représente). Une contrainte portée au prix d'une hypothèse qui agit sur
+    l'optimum. Chaîne de dépendance à montrer explicitement : c'est un bon
+    exemple de ce que le graphe rend visible et qu'une prose linéaire cache.
+
+- id: PORT-40
+  titre: >
+    `Eq_CS_GFA` porté mais DÉSACTIVÉ — infaisable sur les données 2017 réelles,
+    comme le serait le GAMS
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#G.2, docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [ch2, annexeB]
+  arcs:
+    parce-que: [PORT-04, CTX-05]
+  critique: >
+    Trois fermes ont toutes leurs parcelles verrouillées en friche : la contrainte
+    exige 60 % de canne sur une exploitation qui n'en peut porter aucune —
+    ALGÉBRIQUEMENT infaisable. Le compromis retenu (`skip_when_no_eligible_area`)
+    perd 3 fermes sur 4 588 (0,07 %) plutôt que la contrainte entière. Bon exemple
+    de déviation minimale documentée, et de la différence entre « le modèle est
+    faux » et « les données rendent une contrainte vide ».
+
+- id: PORT-41
+  titre: >
+    `Eq_AN_PA` différé — il porte sur une taille d'EXPLOITATION, hors de portée
+    d'une règle sur attribut de parcelle
+  type: perspective
+  statut: differe
+  severite: null
+  source: [docs/gams_port_inventory.md, TODO.md]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-04, ARCH-30]
+  critique: >
+    ⚠ CONTRADICTION À TRANCHER : l'inventaire le dit « différé », mais la spec
+    du 27/07 le dit « porté (fait) — AN_PA interdit sur fermes < 10 ha via
+    SURF_EXPL_PARC ». Deux documents du dépôt se contredisent. À vérifier dans
+    `config.yaml` avant toute citation, et à corriger dans le perdant.
+
+- id: PORT-42
+  titre: >
+    `Eq_BA_QUOTA_Expl` écarté — sa RHS lit les variantes fines de banane,
+    absentes de l'observé agrégé, donc REF ≡ 0
+  type: choix
+  statut: ecarte
+  severite: null
+  source: ["docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md"]
+  chiffre: []
+  destination: [annexeB]
+  arcs:
+    parce-que: [DON-10]
+    mesure-par: [VER-02]
+  critique: >
+    Écart bien instruit : c'est un plafond, il ne peut de toute façon pas
+    RESTAURER une banane sous-plantée. La mesure ferme la branche proprement.
+
+- id: PORT-50
+  titre: >
+    Le bloc canne fibre (`CF`) est différé EN ENTIER — et le point bloquant
+    n'est pas le code, c'est le sens des données
+  type: perspective
+  statut: differe
+  severite: majeur
+  source: [docs/04-vigilance.md#G.3, docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [ch2, annexeB, note]
+  arcs:
+    parce-que: [PORT-04]
+  critique: >
+    `Prix_Cult_CF_{RESTIT,SMART}.txt` ne sont PAS des tables « prix des CF » :
+    ce sont des variantes TERRITOIRE ENTIER décrivant un monde où la filière
+    existe, qui diffèrent au-delà des CF et mettent contre-intuitivement les
+    `CF_*` à prix 0. Exemple parfait d'un différé qui n'est pas de la paresse :
+    câbler sans trancher le sens produirait un modèle faux et crédible.
+
+- id: PORT-51
+  titre: >
+    Les bans géographiques CF utilisent `REGION` là où la canne à sucre passe
+    par `COMMUNE` — mapping différent, à confirmer au câblage
+  type: donnee
+  statut: ouvert
+  severite: mineur
+  source: [docs/gams_port_inventory.md]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-50]
+
+- id: PORT-52
+  titre: >
+    Question ouverte — `Eq_ME_MG` (macro-région) vs la règle melon par
+    `REGION_CODE` : on ignore si la seconde devait remplacer la première
+  type: donnee
+  statut: ouvert
+  severite: mineur
+  source: [docs/gams_port_inventory.md, TODO.md]
+  chiffre: []
+  destination: [annexeB, note]
+  arcs:
+    parce-que: [PORT-04]
+  critique: >
+    Les deux référentiels sont distincts et les deux règles restrictives, donc
+    leur intersection est SÛRE. Bel exemple de décision prudente sous
+    incertitude : quand on ne sait pas, choisir la lecture qui ne peut pas
+    créer de faux positif. À expliciter comme principe.
+
+- id: PORT-53
+  titre: >
+    Deux contraintes absentes du bloc CALIB ont été instruites et sont INERTES
+    (+0 paire éligible)
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-27
+  source: [TODO.md]
+  chiffre: []
+  destination: [annexeB]
+  arcs:
+    parce-que: [PORT-30]
+    mesure-par: [VER-02]
+  critique: >
+    `SURF_PARC_MAX` et l'exemption d'irrigation manquante sur `PLUVIO_MIN`.
+    Résultat négatif utile : « le portage est propre de ce côté ». Les résultats
+    négatifs mesurés sont ce qui distingue un audit d'une déclaration.
+
+- id: PORT-54
+  titre: >
+    `Avers.txt` est délibérément ignoré : AVERS est recalculé en mémoire depuis
+    la cascade `TYPE_EXPL` (8 coefficients, Table 2 de l'article)
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [docs/gams_port_inventory.md, "context/gams/OPTIMISATION.txt:1745-1754"]
+  chiffre: []
+  destination: [ch3, annexeB]
+  arcs:
+    parce-que: [PORT-30]
+    justifie: [CAL-30]
+  critique: >
+    Le fichier sur disque est un stub uniforme. Décision juste, mais elle mérite
+    d'être dite : un lecteur qui ouvre `data/` trouve un fichier AVERS et croira
+    qu'il est lu.

@@ -1,0 +1,513 @@
+# =============================================================================
+# 96 — RÉFLEXIVITÉ                                                 préfixe : REF
+#
+# ⚠ CE FICHIER N'A PAS LA MÊME FORME QUE LES AUTRES, ET C'EST VOULU.
+#
+# Partout ailleurs le corpus consigne des faits vérifiables dans le dépôt. Ici,
+# le contenu est celui de Clément : sa position, ce qu'il a compris et quand,
+# ce qu'il assume. Je ne peux pas l'écrire — je peux seulement proposer des
+# ANGLES et dire, pour chacun, ce qui l'ancre dans une mesure plutôt que dans
+# une clause de style.
+#
+# Chaque entrée porte donc :
+#   ancrage  — le fait mesuré qui empêche l'axe d'être un lieu commun
+#   question — ce que seul Clément peut trancher
+#   risque   — comment l'axe échoue s'il est mal traité
+#
+# CRITÈRE DE TRI, à appliquer sans indulgence : un paragraphe réflexif qui
+# pourrait figurer à l'identique dans n'importe quel autre mémoire de stage ne
+# vaut pas la place qu'il prend. Ceux qui restent doivent être INDÉCOLLABLES de
+# ce projet-ci. Sur ~40 axes, le Ch. 5 en tient 8 à 10.
+# =============================================================================
+
+# --- A. La position : d'où je parle ------------------------------------------
+
+- id: REF-01
+  axe: >
+    Connaître un territoire par un jeu de tables — les 4 638 exploitations sont
+    des lignes
+  ancrage: >
+    Aucune enquête de terrain sur six mois. Les arbitrages des agriculteurs, que
+    le modèle prétend représenter, ne sont connus que par un coefficient
+    d'aversion au risque déduit d'une typologie à huit classes (PORT-54).
+  question: >
+    Est-ce que la position a changé au cours du stage — as-tu fini par
+    « voir » le territoire autrement, ou l'écart s'est-il creusé ?
+  risque: >
+    Formulation attendue et donc creuse (« je n'ai pas pu aller sur le terrain »).
+    Ce qui la sauve est la CONSÉQUENCE ÉPISTÉMIQUE précise : le travail peut dire
+    ce qu'implique un jeu d'hypothèses, avec une précision considérable, et ne
+    peut pas dire si ces hypothèses décrivent la façon dont on décide en
+    Guadeloupe de planter de l'igname plutôt que de la canne.
+  destination: [ch0, ch5]
+
+- id: REF-02
+  axe: >
+    Un ingénieur en mécanique des fluides portant un modèle bioéconomique
+    agronomique
+  ancrage: >
+    La grille d'évaluation MF2E note CI2 (systèmes environnementaux), CI5
+    (multi-échelles / stochastiques), C5 (méthodes numériques). Ce sont les
+    items SOLV-* et VER-* qui rattachent le stage à sa formation, pas le contenu
+    agronomique.
+  question: >
+    Qu'est-ce que la formation a réellement transporté ? Hypothèse à valider ou
+    à démentir : la culture de la MESURE et de l'incertitude (mesurer le bruit
+    avant d'interpréter un écart, refuser une estimation ponctuelle) est un
+    réflexe de mécanicien des fluides appliqué à un objet qui ne l'attendait pas.
+  risque: >
+    Se vendre comme « regard neuf » — argument gratuit. Il devient sérieux s'il
+    est adossé à un fait : trois graines de solveur pour mesurer le bruit
+    (SOLV-55), une fourchette au lieu d'un point (SOLV-12), une bissection pour
+    isoler une cause (VER-42).
+  destination: [ch0, ch5, oral]
+
+- id: REF-03
+  axe: Vivre en Guadeloupe six mois et l'écrire depuis des fichiers
+  ancrage: >
+    Le stage s'est déroulé à l'UR ASTRO, Petit-Bourg. Le territoire décrit au
+    Ch. 1 est connu par `data/tables/`, une bibliographie et la présence
+    physique dans un centre de recherche qui s'y trouve.
+  question: >
+    Qu'est-ce que la présence a apporté que les fichiers ne donnaient pas —
+    conversations de couloir, terrain informel, perception des filières ? Et
+    est-ce que cela a modifié une décision de modélisation, ou seulement le
+    confort de les prendre ?
+  risque: >
+    Deux écueils symétriques : l'exotisme (le décor), et le déni (faire comme si
+    le lieu n'avait rien changé). Le seul contenu défendable est un effet
+    IDENTIFIABLE sur le travail.
+  destination: [ch5]
+
+- id: REF-04
+  axe: >
+    Le coût MESURABLE de l'extériorité — l'absence de terrain a une trace dans
+    le nombre de variables du programme
+  ancrage: >
+    Les 25 variantes maraîchères vides portent le nom de la microferme
+    expérimentale où la lettre de mission prévoyait l'acquisition de données
+    technico-économiques (SOLV-40, CTX-21). Elles sont identiques au bit près.
+    Et toute contrainte de bio bâtie sur elles est satisfaite à coût nul.
+  question: >
+    Rien — c'est le seul axe de ce fichier entièrement établi par le dépôt.
+  risque: >
+    Aucun, sauf de le sous-employer. C'est l'axe le plus fort du chapitre :
+    l'aveu n'a pas la forme d'une confidence, il a la forme d'un résultat
+    technique. À placer tôt, il donne son régime à tout le reste.
+  destination: [ch2, ch5, oral]
+
+# --- B. La posture de modélisateur -------------------------------------------
+
+- id: REF-10
+  axe: >
+    Le débogage n'était pas préalable à la modélisation, il ÉTAIT la modélisation
+  ancrage: >
+    PORT-10 (GAMS rend 0 sur colonne absente), PORT-22 (deux ordres de sols
+    incompatibles), SOLV-40 (variantes identiques). Chaque défaut trouvé
+    renseigne sur ce que le projet savait et ignorait, pas seulement sur le code.
+  question: >
+    Quand ce basculement a-t-il eu lieu ? Il y a probablement un moment daté —
+    un bug particulier — où l'activité a changé de sens à tes yeux.
+  risque: >
+    Devenir un plaidoyer pro domo (« déboguer, c'est noble »). La formule qui le
+    tient : un paramètre absent ne laisse pas un trou, il laisse un NOMBRE
+    PLAUSIBLE. C'est une thèse sur les modèles, pas sur le métier de développeur.
+  destination: [ch2, ch5, oral]
+
+- id: REF-11
+  axe: Porter le modèle de ses propres encadrants
+  ancrage: >
+    Blazy et Guindé sont co-auteurs de Chopin et al. (2015) ET du livre blanc
+    CALALOU (2025). Le mandat de parité (PORT-01) oblige à reproduire des
+    comportements que le travail établit ensuite comme involontaires (PORT-20 :
+    une variante de verger interdite partout).
+  question: >
+    Comment cela s'est-il passé concrètement ? Annoncer à ses encadrants qu'on a
+    trouvé un bug dans leur modèle n'est pas neutre. Le mandat de parité a-t-il
+    été une protection (« je ne juge pas, je porte ») ou une gêne ?
+  risque: >
+    La flatterie et le règlement de comptes échouent tous les deux. L'angle
+    tenable est ÉPISTÉMIQUE : la parité rend chaque divergence attribuable, donc
+    elle transforme un désaccord potentiellement personnel en question technique
+    décidable. C'est un dispositif social autant que méthodologique.
+  destination: [ch1, ch5]
+
+- id: REF-12
+  axe: >
+    Fidélité à un ARTEFACT plutôt qu'à une réalité — ce que la parité protège et
+    ce qu'elle empêche
+  ancrage: >
+    DON-B1 : les rendements valent 2 à 4× ceux du territoire et sont
+    INTOUCHABLES, `Rdt_Cult` étant la Table 1 de l'article. Le travail sait que
+    la donnée est fausse et doit la garder.
+  question: >
+    Où placer la limite ? Le port CORRIGE pourtant au moins une chose (DON-54 :
+    le facteur 10 de la conversion mm→m³). Pourquoi celle-là et pas les autres ?
+  risque: >
+    Présenter la parité comme une règle absolue alors qu'elle souffre au moins
+    une exception non théorisée. Un relecteur attentif le verra. Mieux vaut
+    l'exposer et proposer le critère qui distingue les deux cas.
+  destination: [ch2, ch5]
+
+- id: REF-13
+  axe: >
+    Quatre verdicts renversés, tous par un protocole et jamais par une meilleure
+    intuition
+  ancrage: >
+    CAL-54 (trois : le plancher de prairie écarté à tort ; « une contrainte ne
+    peut pas améliorer le résultat » — faux, l'objectif est séparable mais les
+    contraintes ne le sont pas ; un écart attribué au solveur venant du modèle)
+    + SOLV-22 (le quatrième, symétrique : attribué au modèle, venant du solveur).
+  question: >
+    Lequel a été le plus coûteux, et as-tu changé de façon de travailler après ?
+  risque: >
+    Aucun — c'est l'axe le mieux étayé. Le point à ne pas manquer est la
+    SYMÉTRIE des cas 3 et 4 : deux fois la même erreur en sens inverse. Ce n'est
+    plus une liste d'anecdotes, c'est un motif.
+  destination: [ch3, ch5, oral]
+
+- id: REF-14
+  axe: >
+    Refuser de répondre comme mode de sortie légitime
+  ancrage: >
+    MET-03 : trois implémentations indépendantes — le tri de front s'abstient
+    quand il ne peut pas conclure, l'estimateur rend `None` hors bande, le module
+    de robustesse refuse de moyenner les forçages.
+  question: >
+    Est-ce une position construite, ou trois décisions locales dont tu découvres
+    la cohérence maintenant ? Les deux réponses sont intéressantes ; la seconde
+    est plus honnête si c'est le cas.
+  risque: >
+    Le confondre avec de la prudence ou de la modestie. C'est un choix
+    ÉPISTÉMIQUE coûteux : refuser de moyenner prive le lecteur d'un chiffre
+    unique qu'il réclamera.
+  destination: [ch5, oral]
+
+# --- C. Ce que le modèle fait au territoire ----------------------------------
+
+- id: REF-20
+  axe: >
+    Une politique agroécologique qui ne contraint rien — quand un défaut de
+    données devient un artefact de politique publique
+  ancrage: >
+    SOLV-42 / IND-35 : une part de bio bâtie sur les 25 variantes symétriques est
+    satisfaite à coût EXACTEMENT nul, par relabellisation. Rien dans les sorties
+    ne le signalerait.
+  question: >
+    Rien à trancher — mais tout à développer. C'est le point où technique et
+    politique se rejoignent sans transition rhétorique.
+  risque: >
+    Le laisser au rang d'anecdote technique. Sa portée est générale : tout
+    dispositif d'évaluation ex ante par optimisation peut produire une contrainte
+    de politique qui ne contraint rien, et personne ne le verrait.
+  destination: [ch2, ch5, oral, article]
+
+- id: REF-21
+  axe: >
+    L'axe politique du dispositif est UNILATÉRAL — seule la borne dérégulatrice
+    a tourné
+  ancrage: >
+    SOLV-62 / PROS-41 : P10 est faisable en relaxation (46,3 M€) mais aucun solve
+    n'en a trouvé de solution entière en une heure, et aucune graine n'est
+    réparable (124 à 407 contraintes violées). P1 (dérégulation totale) a tourné.
+  question: >
+    Comment le lire ? L'interprétation prudente est « une limite de calcul ».
+    L'interprétation forte est qu'un modèle bâti sur un optimum économique
+    trouve plus facilement les allocations qui LÈVENT des contraintes que celles
+    qui en empilent. Laquelle défends-tu ?
+  risque: >
+    L'interprétation forte est séduisante et peut être fausse — c'est peut-être
+    une pure question de tractabilité. Ne pas trancher plus que la mesure ne
+    permet ; poser la question est déjà un résultat.
+  destination: [ch4, ch5, oral]
+
+- id: REF-22
+  axe: >
+    Un catalogue de dix politiques publiques écrit seul, dans un fichier YAML,
+    par un stagiaire
+  ancrage: >
+    PROS-50 : les seuils sont des fractions choisies des totaux mesurés d'un run.
+    PROS-51 : l'axe dérégulation ↔ bifurcation est une hypothèse sur la structure
+    du débat guadeloupéen, pas une observation.
+    ⚠ ET CTX-15 : CALALOU avait mené la démarche participative (séminaire du
+    27/09/2024, World Café, questionnaire) — même laboratoire, même territoire,
+    deux ans plus tôt.
+  question: >
+    L'ajout de CTX-15 durcit considérablement l'axe. Assumes-tu la comparaison
+    avec le projet ancêtre, ou est-ce déloyal envers un stage de six mois qui
+    n'avait pas les moyens d'un projet financé ?
+  risque: >
+    L'autoflagellation. La défense est réelle et il faut la tenir : il faut bien
+    que quelqu'un écrive le premier catalogue, et le rendre explicite et
+    modifiable en YAML plutôt que codé en dur dans les équations est PRÉCISÉMENT
+    ce qui permet à quelqu'un d'autre de le contester ligne à ligne. La rigueur
+    du calcul ne se transmet pas aux hypothèses — mais la contestabilité, si.
+  destination: [ch4, ch5, oral]
+
+- id: REF-23
+  axe: >
+    La performativité — un modèle d'évaluation ex ante propose un futur autant
+    qu'il l'évalue
+  ancrage: >
+    PROS-32 : le résultat le plus direct du dispositif (desserrer l'enveloppe
+    publique réoriente ~2 100 ha vers le vivrier) est le genre d'énoncé qui
+    circule seul, sans sa réserve (PROS-44 : aucun débouché modélisé).
+  question: >
+    Axe le plus classique du lot et le plus difficile à traiter sans citer
+    Callon ou Desrosières pour la forme. Le tiens-tu, et sur quel appui ?
+  risque: >
+    Le placage théorique. S'il est tenu, il doit l'être par le dispositif MET-40
+    (l'avertissement voyage avec le chiffre) : la réponse concrète du dépôt à la
+    performativité n'est pas une précaution rhétorique, c'est du code qui
+    rattache la réserve au nombre.
+  destination: [ch5]
+
+- id: REF-24
+  axe: >
+    Le plan observé de 2017 vaut 15 % de moins que l'optimum — que représente-t-on
+    en écrivant « max marge ajustée du risque » ?
+  ancrage: >
+    CAL-51. Utilisé au Ch. 3 comme argument technique (le solveur est hors de
+    cause), alors qu'il porte une alternative lourde : soit les agriculteurs
+    laissent 15 % sur la table, soit l'objectif ne décrit pas ce qu'ils
+    maximisent.
+  question: >
+    Axe SOUS-EXPLOITÉ et à fort rendement. La seconde branche est de loin la plus
+    probable, et elle interroge le modèle à sa racine. Veux-tu l'ouvrir ?
+  risque: >
+    Ouvrir cette question au Ch. 5 fragilise rétrospectivement le Ch. 4. C'est un
+    arbitrage réel — mais un jury qui la pose lui-même et ne trouve pas de
+    réponse préparée fait plus de dégâts.
+  destination: [ch3, ch5, oral]
+
+# --- D. L'honnêteté épistémique comme livrable -------------------------------
+
+- id: REF-30
+  axe: Le catalogue des pièges est le vrai produit du stage
+  ancrage: >
+    `docs/04-vigilance.md`, 45 entrées typées Critique / Majeur / Mineur, chacune
+    avec sa mesure. Plus les quatre implémentations de MET-40. Plus REFERENCE.md,
+    qui documente d'abord ce que la référence NE PEUT PAS dire.
+  question: >
+    Est-ce une thèse que tu défends, ou une consolation ? La différence se voit à
+    l'usage qui en sera fait : PERSP-E (former les encadrants) est le test.
+  risque: >
+    « Mes limites sont mon résultat » sonne comme une échappatoire si ce n'est pas
+    adossé à un livrable. Ici ça l'est, et c'est vérifiable — mais il faut le
+    montrer, pas l'affirmer.
+  destination: [ch5, ch6, oral]
+
+- id: REF-31
+  axe: >
+    Le stage a construit plus vite qu'il ne pouvait mesurer
+  ancrage: >
+    MET-51 : cinq fois dans TODO.md, « livré, validé par N tests sans données,
+    aucun solve réel lancé ». Cause directe : SOLV-10, 30 à 55 min par solve.
+  question: >
+    Est-ce un défaut d'arbitrage ou une conséquence subie ? Autrement dit : avec
+    le recul, aurais-tu construit moins et mesuré plus ?
+  risque: >
+    Aucun s'il est posé franchement. C'est un des rares endroits où un mémoire
+    peut dire « voici comment j'ai mal réparti mon effort » sans que ce soit une
+    faute — la contrainte physique est documentée.
+  destination: [ch5, ch6]
+
+- id: REF-32
+  axe: >
+    Un garde-fou silencieux qui ne garde rien — le même défaut, deux fois, sur
+    deux objets sans rapport
+  ancrage: >
+    SOLV-32 : HiGHS écarte silencieusement une graine inadmissible, donc un run
+    paraît amorcé et se comporte comme à froid. VER-63 : `\typeout` n'expanse pas
+    `\pageref`, donc le contrôle des 30 pages du mémoire ne contrôlait rien
+    jusqu'au 11/08.
+  question: >
+    Rien à trancher — mais c'est un excellent moment d'oral : le même piège, dans
+    un solveur MILP et dans une chaîne LaTeX, découvert à six semaines d'écart.
+  risque: >
+    Le traiter comme une coïncidence amusante. C'est une classe de défaut :
+    tout dispositif qui échoue en silence est pire que son absence, parce qu'on
+    compte dessus.
+  destination: [ch5, oral]
+
+# --- E. Le rapport à Claude (décidé : section assumée au Ch. 5) --------------
+
+- id: REF-40
+  axe: >
+    Écrire pour une machine a produit une meilleure documentation technique
+    qu'écrire pour un humain
+  ancrage: >
+    MET-34 : `CLAUDE.md`, rédigé comme contrat de travail avec l'outil, documente
+    les pièges d'architecture (import pour effet de bord, booléen trivial,
+    conflit de fd, résolution par nom) mieux que `docs/`. Hypothèse : la machine
+    ne comble pas les non-dits, donc il faut tout dire.
+  question: >
+    Est-ce que tu le constates aussi ? Et l'écriture de `docs/` t'a-t-elle été
+    plus difficile, ou moins soignée, parce que tu supposais un lecteur capable
+    de deviner ?
+  risque: >
+    C'est l'angle le plus ORIGINAL de la section et le moins attendu par un jury.
+    Il est aussi le plus facile à surinterpréter : une observation sur un seul
+    dépôt, par un seul auteur.
+  destination: [ch5, oral]
+
+- id: REF-41
+  axe: >
+    Ce que l'outil a permis, et ce qu'il a DÉPLACÉ
+  ancrage: >
+    Le débit est visible dans le dépôt (~18 400 lignes de Python, 613 tests, 26
+    specs, 5 fichiers de documentation, 39 runs, en six mois dont une partie en
+    reconstruction). Le déplacement l'est aussi : l'activité dominante est
+    devenue la VÉRIFICATION (VER-*, MET-01) plutôt que l'écriture.
+  question: >
+    L'énoncé fort à valider ou à démentir : l'assistance déplace le goulot de la
+    production vers la vérification, et c'est exactement pourquoi le dépôt a
+    trois garde-fous disjoints et un fichier de vigilance de 45 entrées. Le
+    dispositif de vérification serait-il le même sans l'outil ?
+  risque: >
+    Le panégyrique et la dénégation échouent également. L'angle défendable est
+    causal et vérifiable : montrer que la STRUCTURE du dépôt porte la marque de
+    la façon dont il a été produit.
+  destination: [ch5, oral]
+
+- id: REF-42
+  axe: >
+    Le risque propre — vérifier une sortie PLAUSIBLE
+  ancrage: >
+    C'est exactement le défaut que le stage a passé six mois à traquer ailleurs :
+    PORT-10 (GAMS rend 0 sans avertir), PORT-22 (des rendements crédibles sur les
+    mauvais sols), SOLV-20 (un incumbent faux et d'apparence normale). Un
+    assistant produit du code plausible ; un solveur produit des résultats
+    plausibles ; une table mal indexée produit des coefficients plausibles.
+  question: >
+    Est-ce la même classe de problème ? Si oui, c'est l'articulation la plus
+    forte possible entre la section « Claude » et le reste du mémoire — elle
+    cesse d'être un aparté et devient une instance du thème central.
+  risque: >
+    Aucun, et c'est probablement l'axe à privilégier. Il transforme un sujet
+    délicat en continuité du propos plutôt qu'en digression.
+  destination: [ch5, oral]
+
+- id: REF-43
+  axe: >
+    L'attribution, et le fait que le brouillon de ce mémoire ait été produit par
+    l'outil avant d'être réécrit
+  ancrage: >
+    Fait vérifiable dans l'historique : `docs(memoire): chaine LaTeX, generateur
+    de chiffres, chapitres 1 a 3` (8cfff0b), puis chapitre 4 (513b871). La
+    réécriture par l'auteur est postérieure.
+  question: >
+    ⚠ SEULE DÉCISION VRAIMENT DÉLICATE DU FICHIER, et elle t'appartient
+    entièrement. Trois positions tenables : (a) ne rien dire du brouillon et
+    présenter le texte final comme le tien, ce qu'il sera ; (b) décrire le
+    dispositif d'écriture au même titre que le dispositif de calcul, dans la
+    logique de traçabilité qui est celle de tout le travail ; (c) en faire un
+    objet d'analyse (qu'est-ce qu'un brouillon produit par un outil fait à la
+    pensée de celui qui le réécrit ?).
+  risque: >
+    (a) est la position la plus courante et n'a rien d'illégitime — un brouillon
+    n'est pas un mémoire. Mais elle est en tension avec REF-30 : un mémoire dont
+    la thèse est que la traçabilité des origines est le vrai livrable se
+    fragilise s'il tait la sienne. (c) est le plus ambitieux et le plus risqué
+    devant un jury MF2E qui n'attend pas ce débat. Je recommande (b) : factuel,
+    bref, cohérent avec le reste, et il désamorce la question au lieu de la
+    laisser flotter.
+  destination: [ch5]
+
+- id: REF-44
+  axe: >
+    Ce que l'outil ne pouvait pas faire, et qui a décidé du travail
+  ancrage: >
+    Les quatre verdicts renversés (REF-13) l'ont été par des PROTOCOLES —
+    un balayage de seuil, trois graines de solveur, un calcul de charge animale
+    à l'hectare fait en dehors du modèle, une bissection sur les plafonds.
+    Aucune n'est une opération de rédaction ou de génération.
+  question: >
+    Est-ce la bonne ligne de partage ? Elle suggère que la contribution propre
+    porte sur le choix de CE QU'IL FAUT MESURER, pas sur la production de ce qui
+    est mesuré.
+  risque: >
+    Trop commode si ce n'est pas exact. À vérifier honnêtement cas par cas : qui
+    a proposé la bissection ? le calcul UGB/ha ? les trois graines ? Si la
+    réponse est mêlée, le dire est plus intéressant que la ligne nette.
+  destination: [ch5, oral]
+
+# --- F. Avant / pendant / après ----------------------------------------------
+
+- id: REF-50
+  axe: Ce que je pensais que modéliser voulait dire, en arrivant
+  ancrage: >
+    À écrire — le dépôt ne peut pas le fournir. Point d'appui possible : le
+    premier commit et l'ordre dans lequel les choses ont été tentées.
+  question: >
+    Quelle était l'idée de départ du stage — construire un modèle ? produire des
+    scénarios ? Et à quel moment précis s'est-elle défaite ?
+  risque: >
+    Le récit rétrospectif lissé, où tout mène logiquement au résultat. Le
+    `git log` est le garde-fou : il porte les impasses dans l'ordre réel.
+  destination: [ch0, ch5]
+
+- id: REF-51
+  axe: >
+    Le moment de la réorientation — décider de reconstruire avant de simuler
+  ancrage: >
+    CTX-22. Le dépôt garde la trace MATÉRIELLE (les commits) mais pas la
+    DÉCISION : avec qui, quand, sur quel constat.
+  question: >
+    C'est le `\arediger` le plus important du brouillon (§1.3, « le récit de
+    première main »). Personne d'autre ne peut l'écrire.
+  risque: >
+    Le présenter comme évident. Ce n'était pas évident : c'était l'abandon
+    partiel de la commande.
+  destination: [ch0, ch1, ch5]
+
+- id: REF-52
+  axe: Ce que je laisse, et à qui
+  ancrage: >
+    PERSP-E : si le port n'est interrogeable que par son auteur, il aura déplacé
+    le problème d'un environnement propriétaire vers une dépendance à une
+    personne. Le test décisif est simple et non fait — faire écrire à un
+    encadrant une politique dans `plan.yaml` et la lancer.
+  question: >
+    Peux-tu faire ce test AVANT la soutenance ? Le résultat, quel qu'il soit,
+    vaut mieux que la promesse — et il est bon marché.
+  risque: >
+    Conclure sur une liste de perspectives. La conclusion forte est une
+    PASSATION vérifiée, pas un programme de travail.
+  destination: [ch5, ch6, oral]
+
+- id: REF-53
+  axe: >
+    S'inscrire dans une lignée — CALALOU, TI-FIG, et la place d'un stage de six
+    mois dedans
+  ancrage: >
+    CTX-10 à CTX-16. Le stage ne commence pas à une page blanche : le projet
+    ancêtre a fait tourner MOSAICA en 2024, avec les encadrants co-auteurs, et
+    a produit des résultats que le dispositif retrouve par un autre chemin
+    (CTX-12).
+  question: >
+    Comment situer l'apport ? Hypothèse : le stage n'a pas produit de nouveaux
+    résultats sur le territoire, il a produit un INSTRUMENT permettant de les
+    contester, de les rejouer et d'en tracer les conditions. C'est plus modeste
+    et plus solide.
+  risque: >
+    Ignorer CALALOU serait la vraie faute — un jury qui l'ignore ne le verra pas,
+    mais les encadrants, si.
+  destination: [ch0, ch1, ch5, ch6]
+
+- id: REF-54
+  axe: >
+    Ce que le temps de calcul fait à l'organisation du travail de recherche
+  ancrage: >
+    MET-50 : 30 à 55 min par solve impose de développer le jour et de mesurer la
+    nuit. MET-51 : c'est ce qui explique que cinq chantiers soient livrés sans
+    solve réel. SOLV-71 : `zone_filter` a été le vrai déblocage, en ramenant un
+    essai de l'heure à la seconde.
+  question: >
+    Axe inhabituel et concret. Le temps de calcul n'est pas ici une contrainte
+    technique mais une contrainte de MÉTHODE DE TRAVAIL : il détermine combien
+    d'hypothèses on peut se permettre de tester, donc ce qu'on peut savoir.
+  risque: >
+    Le réduire à une plainte sur la lenteur. Ce qui l'intéresse, c'est le lien
+    entre coût d'une expérience et forme de la connaissance produite.
+  destination: [ch5, oral]

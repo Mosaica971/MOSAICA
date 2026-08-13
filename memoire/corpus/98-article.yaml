@@ -1,0 +1,395 @@
+# =============================================================================
+# 98 — VERS UN ARTICLE                                             préfixe : ART
+#
+# Question posée : que faudrait-il pour produire un article qui ne soit pas une
+# redite de Chopin et al. (2015) ?
+#
+# L'extraction a déplacé la question. Il y a DEUX antécédents à ne pas répéter,
+# pas un :
+#   - Chopin et al. (2015), Agricultural Systems — le modèle et sa validation ;
+#   - le livre blanc CALALOU (2025) — les scénarios de relocalisation,
+#     avec les encadrants du stage parmi les auteurs.
+#
+# ⚠ AVERTISSEMENT DE PORTÉE. Les jugements de nouveauté ci-dessous reposent sur
+# les deux sources présentes dans `context/` et sur ce que le dépôt contient.
+# AUCUNE revue de littérature ciblée n'a été faite. Chaque item marqué
+# `statut: ouvert` demande une vérification bibliographique avant d'être
+# revendiqué — c'est le premier travail à faire, pas le dernier.
+# =============================================================================
+
+# --- Ce qui n'est PAS un article ---------------------------------------------
+
+- id: ART-01
+  titre: >
+    Le portage lui-même n'est pas un résultat publiable en revue d'agronomie
+  type: choix
+  statut: retenu
+  severite: null
+  source: [PORT-01, CTX-22]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [PORT-01]
+    ferme-la-branche: [ART-B1]
+  critique: >
+    Réécrire un modèle existant dans un autre langage, sans changer ses
+    équations, ne produit aucune connaissance nouvelle sur le territoire. Le
+    portage est la CONDITION des résultats, pas un résultat. Il peut en revanche
+    fonder une contribution méthodologique (ART-30), qui est un autre objet et
+    vise un autre lectorat.
+
+- id: ART-B1
+  titre: >
+    BRANCHE COUPÉE — « MOSAICA-Py : une réimplémentation ouverte de MOSAICA »
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [ART-01]
+  chiffre: []
+  destination: [article]
+  arcs:
+    mesure-par: []
+  sans-mesure: >
+    L'absence de mesure EST la raison de l'écart, et c'est un cas rare où le vide
+    du champ est le contenu : un « software paper » revendique la réutilisabilité,
+    et la seule preuve recevable est un tiers qui reprend l'outil. Ce tiers
+    n'existe pas — un seul cas d'étude, un seul utilisateur, zéro reprise externe.
+    La séparation `core/` ↔ `case_studies/` (ARCH-04) rend la revendication
+    PLAUSIBLE, elle ne la démontre pas.
+  critique: >
+    Format « software paper » (JOSS, SoftwareX, Environmental Modelling &
+    Software section logicielle). ⚠ À ROUVRIR
+    si PERSP-E aboutit : un modèle repris et lancé par quelqu'un d'autre change
+    complètement la force de la revendication.
+
+- id: ART-10
+  titre: >
+    ⚠ « LES AIDES TIENNENT LA CANNE ET LA BANANE » N'EST PAS NEUF — CALALOU
+    l'écrit déjà
+  type: piege
+  statut: retenu
+  severite: critique
+  quand: 2026-08-12
+  source: ["context/Livre_Blanc_CALALOU.pdf §3.4", CTX-12, CTX-13]
+  chiffre: []
+  destination: [ch4, article]
+  arcs:
+    parce-que: [CTX-13]
+    justifie: [ART-11]
+  critique: >
+    CALALOU, scénario Reloc : banane export 1 717 → 4 ha, canne 12 908 → 3 159 ha.
+    Et la phrase explicite : « la disparition des cultures de canne à sucre et de
+    banane pourrait dégager des subsides importants ». Le résultat le plus
+    spectaculaire du dispositif prospectif a donc un antécédent DIRECT, publié
+    par la même équipe. Le revendiquer comme découverte serait relevé
+    immédiatement par un relecteur — et par les encadrants.
+
+- id: ART-11
+  titre: >
+    CE QUI EST NEUF sur cette question — la MESURE MARGINALE et sa lecture par
+    le risque
+  type: resultat
+  statut: ouvert
+  severite: null
+  source: [PROS-31, PROS-30, PROS-11]
+  chiffre: [frontsubvQuatreunMargeM, frontsubvQuatresixMargeM]
+  destination: [article]
+  arcs:
+    parce-que: [ART-10]
+  critique: >
+    Trois choses que CALALOU ne pouvait pas produire, faute de front :
+    (a) la PENTE — combien d'euros de marge ajustée par euro public engagé, sur
+    un intervalle et non en un point ; (b) le fait que la marge brute varie en
+    SENS INVERSE du plafond, de façon monotone sur sept points prouvés optimaux ;
+    (c) l'explication : la pénalité de risque passe de 18 à 34 % de la marge
+    brute, donc « l'aide publique n'achète pas de la marge, elle achète de la
+    stabilité ». C'est un énoncé ÉCONOMIQUE, pas descriptif, et il est
+    falsifiable. ⚠ À vérifier en littérature : l'effet « soutien couplé =
+    assurance implicite » est probablement documenté en économie agricole
+    européenne ; l'originalité porterait alors sur sa MESURE dans un contexte
+    insulaire ultramarin sous POSEI.
+
+# --- Le gisement méthodologique ----------------------------------------------
+
+- id: ART-30
+  titre: >
+    LA PISTE LA PLUS SOLIDE — un article de MÉTHODE sur ce qu'un MILP
+    d'allocation territoriale ne dit pas quand on croit qu'il le dit
+  type: perspective
+  statut: ouvert
+  severite: null
+  source: [SOLV-20, SOLV-51, SOLV-52, SOLV-37, PROS-40, IND-41]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-01]
+    justifie: [ART-31, ART-32, ART-33, ART-34, ART-35]
+  critique: >
+    Argument central possible : la littérature d'évaluation ex ante de politiques
+    agricoles publie des ALLOCATIONS OPTIMALES et des comparaisons de scénarios,
+    presque jamais l'état de convergence du solveur, la dispersion des temps, ni
+    l'écart mesuré entre incumbent et optimum prouvé. Or ce travail montre que
+    ces trois choses changent les CONCLUSIONS, pas seulement la précision. Le
+    dépôt fournit cinq mesures indépendantes qui vont dans ce sens, toutes
+    reproductibles. Lectorat : Environmental Modelling & Software, Agricultural
+    Systems (section méthodes), EJOR (applications).
+
+- id: ART-31
+  titre: >
+    Preuve 1 — un incumbent arrêté à la limite est PROUVABLEMENT faux, et
+    l'exhiber coûte quelques secondes
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [SOLV-20, VER-20]
+  chiffre: [mesIncumbentGain, mesIncumbentEcart]
+  destination: [article]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    80,91 M€ construits à la main contre 76,46 M€ trouvés par HiGHS en une heure.
+    Renversement de la charge de la preuve : on n'interroge pas le solveur, on
+    lui exhibe mieux. Et la signature de diagnostic (SOLV-21) est transférable —
+    « une contrainte touche un poste qu'elle n'a aucune raison de toucher ».
+
+- id: ART-32
+  titre: >
+    Preuve 2 — la borne LP ne mesure PAS ce qu'un branch-and-bound a laissé :
+    facteur cinq entre les deux lectures
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [SOLV-51, VER-41]
+  chiffre: [mesHuitSautInt, mesHuitEcartApparent, mesHuitEcartReel]
+  destination: [article]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    Le saut d'intégralité vaut 2,78 % à lui seul ; un incumbent est à 3,41 % de
+    la borne LP mais à 0,64 % de l'optimum. ⚠ Le fait que le saut d'intégralité
+    existe est ÉLÉMENTAIRE en recherche opérationnelle — l'apport n'est pas là.
+    Il est dans la démonstration que la pratique courante en modélisation
+    APPLIQUÉE (rapporter un gap relatif comme mesure de qualité) induit en erreur
+    d'un facteur cinq sur un cas réel. C'est un article destiné aux modélisateurs
+    agronomes, pas aux chercheurs en optimisation.
+
+- id: ART-33
+  titre: >
+    Preuve 3 — PROUVER coûte plus cher que TROUVER, et le temps ne rend qu'en
+    chaîne
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [SOLV-52, SOLV-53]
+  chiffre: [mesHuitPreuveDuree, mesHuitUneHeure, mesHuitTroisHeures, mesHuitOptimum]
+  destination: [article]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    Réamorcé sur l'optimum lui-même, le solve met 8 981 s à seulement fermer la
+    borne duale. Et trois heures d'un seul tenant à graine fixe ne rapportent que
+    0,29 %, là où trois étapes chaînées vont jusqu'à l'optimum prouvé. Résultat
+    contre-intuitif et directement actionnable pour quiconque planifie une
+    campagne de scénarios sous budget de calcul.
+
+- id: ART-34
+  titre: >
+    Preuve 4 — un warm start peut DÉGRADER une cellule forcée
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [SOLV-37, SOLV-B4]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    La garantie est « ≥ la valeur de la graine », jamais « ≥ un run antérieur de
+    la même cellule ». Confondre une garantie de FAISABILITÉ avec une garantie de
+    QUALITÉ est une erreur de type, et elle est facile à commettre : le
+    raisonnement « un forçage change des coefficients, pas l'ensemble faisable »
+    est juste et ne dit rien sur l'optimalité. Mesuré : −1 678 357 après reprise
+    contre −1 506 116 à froid, avec trois fois plus de temps.
+
+- id: ART-35
+  titre: >
+    Preuve 5 — un front ε-contrainte tracé SOUS une politique doit être
+    reparamétré sur la borne de sa politique hôte
+  type: resultat
+  statut: ouvert
+  severite: null
+  source: [PROS-40, PROS-33, docs/04-vigilance.md#A.7]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    ⚠ MEILLEUR CANDIDAT DE NOUVEAUTÉ MÉTHODOLOGIQUE, à vérifier en littérature.
+    Cinq des sept seuils d'un front étaient au-dessus du plafond que la politique
+    hôte s'impose déjà : le front rendait cinq fois la même allocation, et le
+    défaut ne se voit PAS à la lecture du fichier de scénarios. Le contrôle qui
+    l'attrape (PROS-33 : au point non mordant, l'objectif doit retomber au
+    centime sur le run non contraint) est simple, bon marché et générique. Un
+    article court sur « tracer des fronts de Pareto sous contrainte politique :
+    trois contrôles nécessaires » est plausible.
+
+- id: ART-36
+  titre: >
+    Preuve 6 — des activités symétriques rendent une contrainte de politique
+    publique satisfiable à coût NUL
+  type: resultat
+  statut: ouvert
+  severite: null
+  source: [SOLV-40, SOLV-42, IND-35]
+  chiffre: [mesBinairesRef, mesBinairesKarus]
+  destination: [article, ch5]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    ⚠ LE RÉSULTAT LE PLUS INTÉRESSANT DU LOT, parce qu'il n'est pas seulement
+    algorithmique. La symétrie en branch-and-bound est un sujet classique ; ce
+    qui l'est beaucoup moins, c'est qu'un défaut de RENSEIGNEMENT DES DONNÉES
+    (25 itinéraires déclarés distincts, identiques au bit près sur tout ce que le
+    modèle lit) produise une contrainte d'agroécologie que le solveur satisfait
+    par simple RELABELLISATION, à coût exactement nul. Un plancher de bio qui ne
+    contraint rien et dont personne ne pourrait le voir dans les sorties. C'est
+    un avertissement de portée générale pour l'évaluation ex ante de politiques
+    par optimisation, et il se démontre en une figure.
+
+- id: ART-37
+  titre: >
+    Preuve 7 — un score composite non pondéré par famille mesure la finesse du
+    découpage, pas la performance
+  type: resultat
+  statut: ouvert
+  severite: null
+  source: [IND-41, docs/04-vigilance.md#A.4]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-30]
+  critique: >
+    Onze ratios d'autonomie quasi colinéaires pèsent onze fois les GES. Défaut
+    générique de tout tableau de bord multicritère. ⚠ Probablement déjà documenté
+    en analyse multicritère (redondance des critères, pondération hiérarchique) —
+    vérifier avant de le revendiquer. Vaut au minimum comme illustration.
+
+# --- Ce qui manque pour chaque piste -----------------------------------------
+
+- id: ART-40
+  titre: >
+    MANQUE 1 — une validation indépendante de la calibration
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  source: [CAL-40, CAL-43, PERSP-48]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-11]
+  critique: >
+    La comparaison à l'article demande quatre corrections dont une
+    (l'année de base 2010) est structurellement hors d'atteinte. Le levier le
+    moins cher est PERSP-48 : obtenir les sorties du run GAMS de CALALOU. Sans
+    lui, la seule assise externe reste Agreste, déjà exploitée.
+
+- id: ART-41
+  titre: >
+    MANQUE 2 — la demande et les débouchés
+  type: perspective
+  statut: ouvert
+  severite: critique
+  source: [PROS-44, IND-51, PERSP-20]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-11]
+  critique: >
+    C'est le manque qui interdit la piste « article de politique agricole ». Tout
+    résultat de réallocation vers le vivrier repose sur une élasticité parfaite,
+    et un relecteur d'économie agricole s'y arrêtera d'abord. ⚠ CALALOU a ces
+    données (WP1 consommateurs, WP2 restauration collective, thèse Ben Ali 2023).
+    Une collaboration recolle exactement les deux moitiés : eux ont la demande,
+    ce dépôt a le dispositif d'exploration sous politique.
+
+- id: ART-42
+  titre: >
+    MANQUE 3 — la conception participative des scénarios
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  source: [CTX-15, PROS-51, REF-22]
+  chiffre: []
+  destination: [article, ch5]
+  arcs:
+    parce-que: [ART-11]
+  critique: >
+    Le catalogue de dix politiques a été écrit seul, sur lecture de la
+    littérature. CALALOU avait fait la démarche (séminaire du 27/09/2024, World
+    Café). Pour un article de politique publique, c'est disqualifiant ; pour un
+    article de MÉTHODE (ART-30), c'est sans objet — les preuves 1 à 7 ne
+    dépendent pas de la légitimité du catalogue. C'est un argument de plus pour
+    la piste méthodologique.
+
+- id: ART-43
+  titre: >
+    MANQUE 4 — la grille est creuse et cinq cellules sont non convergées
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  source: [PROS-45, PROS-46, PROS-47]
+  chiffre: [mesCellulesGrille, mesCellulesTotal]
+  destination: [article]
+  arcs:
+    parce-que: [ART-11]
+  critique: >
+    14 cellules sur 120. Et il y a une IRONIE méthodologique à exploiter plutôt
+    qu'à cacher : les cellules non convergées sont précisément ce qui a permis de
+    démontrer les preuves 1 à 4. Dans un article de politique c'est une faiblesse ;
+    dans un article de méthode, c'est le matériau.
+
+- id: ART-44
+  titre: >
+    MANQUE 5 — la dimension temporelle
+  type: perspective
+  statut: ouvert
+  severite: majeur
+  source: [PERSP-10]
+  chiffre: []
+  destination: [article]
+  arcs:
+    parce-que: [ART-11]
+  critique: >
+    Un scénario décrit un état, jamais une trajectoire. Toute affirmation sur une
+    « transition » est donc hors de portée, alors que c'est le mot que le sujet
+    appelle. Limite à énoncer, pas à combler pour un premier article.
+
+# --- Verdict provisoire ------------------------------------------------------
+
+- id: ART-50
+  titre: >
+    VERDICT — la piste méthodologique est PRÊTE ou presque ; la piste politique
+    demande une collaboration
+  type: choix
+  statut: ouvert
+  severite: null
+  source: [ART-30, ART-41]
+  chiffre: []
+  destination: [article, ch6]
+  arcs:
+    parce-que: [ART-30, ART-40, ART-41, ART-42, ART-43, ART-44]
+  critique: >
+    PISTE A (méthode, ART-30) : sept preuves déjà mesurées, aucune ne dépend des
+    manques 1 à 5, toutes reproductibles depuis le dépôt. Ce qui reste à faire
+    est une revue de littérature ciblée sur ART-35 et ART-36 pour établir la
+    nouveauté, et une ou deux mesures complémentaires pour consolider (PERSP-50).
+    C'est un article court, faisable, et il valorise ce que le stage a réellement
+    produit plutôt que ce qu'il avait prévu de produire.
+    PISTE B (politique, ART-11) : demande la demande (ART-41) et idéalement la
+    participation (ART-42). Elle passe donc par une collaboration avec l'équipe
+    CALALOU — ce qui est réaliste, les encadrants en étant co-auteurs, et ce qui
+    ferait de l'articulation entre les deux projets l'objet même de l'article.
+    ⚠ RECOMMANDATION : ne pas viser un seul article couvrant tout. Les deux
+    pistes ont des lectorats disjoints, et c'est vouloir les réunir qui produit
+    une redite de Chopin 2015 — un papier « modèle + scénarios + territoire » est
+    exactement la forme de l'article de 2015.

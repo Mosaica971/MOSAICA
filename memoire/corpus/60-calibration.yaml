@@ -1,0 +1,1645 @@
+# =============================================================================
+# 60 — CALIBRATION                                                 préfixe : CAL
+#
+# À quoi le modèle est comparé, avec quelle métrique, ce que chaque contrainte
+# apporte, et — la partie qui a pris le plus de temps — comment distinguer une
+# correction légitime d'un ajustement circulaire.
+#
+# C'est le chapitre où le mémoire prend son plus grand risque méthodologique :
+# il se donne une règle (« toute déviation doit avoir une source extérieure au
+# modèle ET à l'observé ») puis doit prouver qu'il la respecte.
+# =============================================================================
+
+# --- Ce à quoi on compare ----------------------------------------------------
+
+- id: CAL-01
+  titre: >
+    Un modèle d'optimisation ne se valide pas comme un modèle prédictif : il ne
+    reproduit pas ce qui a été fait, il représente comment on arbitre
+  type: notion
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/03-calibrer.tex]
+  chiffre: []
+  destination: [ch3, oral]
+  arcs:
+    justifie: [CAL-02, CAL-10]
+  critique: >
+    Cadrage épistémique qui porte tout le chapitre. Bien formulé : « si le modèle
+    laissé libre retrouve quelque chose qui ressemble au territoire, ses réponses
+    contrefactuelles méritent d'être écoutées ; sinon elles décrivent un autre
+    territoire ».
+
+- id: CAL-02
+  titre: >
+    L'état de référence 2017 est construit comme un ARTEFACT AUTONOME,
+    régénérable en ~5 s sans aucun solve
+  type: choix
+  statut: retenu
+  severite: null
+  quand: 2026-07-27
+  source: [scripts/build_reference_state.py, "docs/superpowers/specs/2026-07-27-reference-state-design.md"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-01]
+    justifie: [CAL-03]
+  critique: >
+    Décision qui a l'air technique et ne l'est pas : tant que l'observé n'existe
+    que comme le « côté entrée » d'un run, on ne peut pas l'examiner séparément,
+    donc on ne peut pas dire ce qu'il ignore. C'est l'argument le plus fin du
+    Ch. 3 et il se généralise à tout travail de validation.
+
+- id: CAL-03
+  titre: >
+    `REFERENCE.md` documente surtout ce que la référence NE PEUT PAS dire —
+    c'est la partie qui compte
+  type: methode
+  statut: retenu
+  severite: null
+  source: [outputs/reference_2017/REFERENCE.md]
+  chiffre: []
+  destination: [ch3, ch5, note]
+  arcs:
+    parce-que: [CAL-02]
+    justifie: [REF-30]
+
+- id: CAL-04
+  titre: >
+    Un plancher d'écart imposé par l'éligibilité : 348 ha sur 23 578 sont
+    irreproductibles par toute variante fine, soit 1,5 % de PAD incompressible
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#E.6, outputs/reference_2017/]
+  chiffre: [obsSurfaceIrreproductible, obsPlancherPad]
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-02, SOLV-02]
+  critique: >
+    Lecture décisive : tout écart au-delà de 1,5 % est un CHOIX d'optimisation,
+    pas une impossibilité agronomique. Le plancher est bas, donc l'argument
+    « c'est le masque qui empêche » tombe. Résultat négatif, très utile.
+
+# --- La métrique -------------------------------------------------------------
+
+- id: CAL-10
+  titre: >
+    Le PAD (pourcentage d'écart absolu) de Chopin et al. §2.6, à quatre échelles
+    emboîtées — territoire, sous-région, exploitation, île
+  type: methode
+  statut: retenu
+  severite: null
+  source: ["context/Chopin et al 2015 pour Hal.pdf §2.6", case_studies/guadeloupe/reporting/calibration.py]
+  chiffre: [mesArtPad]
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-01]
+    justifie: [CAL-11, CAL-12, CAL-13]
+
+- id: CAL-11
+  titre: >
+    Convention — le PAD d'une culture inventée là où rien n'était observé est
+    INDÉFINI, pas infini : la ligne est écartée, pas comptée comme échec maximal
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [memoire/chapitres/03-calibrer.tex#sec:pad, case_studies/guadeloupe/reporting/calibration.py]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-10]
+  critique: >
+    Choix qui FAVORISE le modèle : compter ces lignes comme des échecs maximaux
+    dégraderait le score. Il doit donc être annoncé par celui qui en profite,
+    faute de quoi un lecteur le découvrira lui-même et doutera du reste.
+
+- id: CAL-12
+  titre: >
+    Convention — le total est le rapport des SOMMES, pas la moyenne des rapports,
+    si bien que son verdict est indépendant des verdicts par culture
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [memoire/chapitres/03-calibrer.tex#sec:pad]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-10]
+  critique: >
+    Conséquence contre-intuitive à dire : un total sous le seuil ne signifie PAS
+    que les cultures y sont.
+
+- id: CAL-13
+  titre: >
+    Toute comparaison se fait au niveau des 12 groupes RPG — les 84 variantes
+    fines n'ont jamais été observées
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#C.2, case_studies/guadeloupe/domain/crop_families.py]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [DON-10]
+    justifie: [CAL-14]
+
+- id: CAL-14
+  titre: >
+    Le PAD par exploitation a une MÉDIANE de 18,5 % pour une MOYENNE de 51,5 % —
+    la moitié des fermes est sous le seuil de l'article
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#E.6]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-10]
+  critique: >
+    Lire la moyenne comme un écart uniforme serait faux. Quartiles 0 / 18,5 /
+    88,7 : la distribution est très asymétrique. Bon exemple de statistique
+    descriptive qui change complètement la conclusion.
+
+# --- L'échelle d'attribution -------------------------------------------------
+
+- id: CAL-20
+  titre: >
+    MÉTHODE — ajouter une contrainte à la fois et mesurer ce que chacune apporte,
+    plutôt que régler des paramètres jusqu'à ce que le résultat convienne
+  type: methode
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/03-calibrer.tex#sec:attribution, case_studies/guadeloupe/scenarios_calibration.yaml]
+  chiffre: []
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [CAL-01]
+    justifie: [CAL-21, CAL-30, CAL-40]
+  critique: >
+    C'est LA décision méthodologique du chapitre. Elle transforme la calibration
+    d'un réglage en une expérience à barreaux. Transférable, et rarement faite.
+
+- id: CAL-21
+  titre: >
+    Trois barreaux — parité GAMS stricte (PAD 48,4 %, types 64,0 %), + plafond
+    plantain, + plancher prairie (types 86,9 %, parcelles 67,6 %, surface 77,1 %)
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#E.1, case_studies/guadeloupe/references.yaml]
+  chiffre: [calibParitePad, calibPariteTypes, calibRetenuTypes, calibRetenuParcelles, calibRetenuSurface]
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-20]
+
+- id: CAL-22
+  titre: >
+    Le modèle atteint ou dépasse les trois métriques publiées par l'article
+    (81 % / 66 % / 77 %)
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#E.1]
+  chiffre: [mesArtTypes, mesArtParcelles, mesArtSurface]
+  destination: [ch3, ch6, oral]
+  arcs:
+    parce-que: [CAL-21]
+
+- id: CAL-23
+  titre: >
+    LE RÉSULTAT LE PLUS SOLIDE — la canne revient à 12 782 ha contre 12 813
+    observés (PAD 0,24 %) SANS qu'aucune contrainte ne la nomme
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#E.1, memoire/chapitres/03-calibrer.tex]
+  chiffre: [simRetenuCS, obsHaCS, padRetenuCS]
+  destination: [ch3, ch6, oral]
+  arcs:
+    parce-que: [CAL-21]
+  critique: >
+    Le seul endroit du travail où le modèle, laissé libre sur la culture qui
+    occupe plus de la moitié du territoire, retombe sur l'observé. Aucune des
+    deux déviations ne porte sur la canne. C'est l'argument de validation le
+    plus fort du mémoire et il doit être en évidence — il l'est.
+
+- id: CAL-24
+  titre: >
+    NE PAS citer le PAD territorial de 6,6 % comme un score — le plancher épingle
+    la prairie, dont le PAD est nul par construction, et la prairie pèse un quart
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#E.1, memoire/chapitres/03-calibrer.tex]
+  chiffre: [calibRetenuPad, padRetenuPN]
+  destination: [ch3, oral]
+  arcs:
+    parce-que: [CAL-31]
+  critique: >
+    Auto-mise-en-garde exemplaire : le mémoire refuse son propre meilleur chiffre.
+    C'est ce qui rend crédibles les trois autres.
+
+# --- Les deux déviations, et la règle qu'elles doivent respecter -------------
+
+- id: CAL-25
+  titre: >
+    LA RÈGLE — toute déviation doit avoir une source EXTÉRIEURE au modèle et à
+    l'observé ; une contrainte calée sur l'observé produit un écart nul et
+    n'apprend rien
+  type: methode
+  statut: retenu
+  severite: critique
+  source: [memoire/chapitres/03-calibrer.tex#sec:deviations]
+  chiffre: []
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [CAL-20]
+    justifie: [CAL-30, CAL-31, CAL-33, CAL-B1, CAL-B2]
+  critique: >
+    Règle que le travail s'impose à lui-même, donc règle sur laquelle il sera
+    jugé : il faut qu'elle tienne sur les DEUX déviations, et elle ne tient
+    aujourd'hui que sur une. Voir CAL-32, le point faible, et CAL-34, la mesure
+    qui le referme.
+
+- id: CAL-30
+  titre: >
+    Déviation 1 — plafond de commercialisation du plantain à 6 440 t
+    (`bc_quota_max`)
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-modalites-solveur-plantain-design.md", docs/04-vigilance.md#E.4]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-25, DON-01]
+    justifie: [CAL-33]
+    mesure-par: [CAL-33]
+  critique: >
+    Sourcé deux fois : chiffre de l'auteur du GAMS, ET Éq. 6 de l'article qui
+    pose un débouché de 4 650 t. L'équation existe dans le GAMS mais est
+    COMMENTÉE dans les deux blocs modèles, alors que l'article la décrit
+    explicitement — bel exemple d'écart entre le code publié et l'article publié.
+    Effet : PAD 48,4 → 31,7 %, types 64,0 → 67,0 %, et la banane export remonte
+    de 978 à 2 213 ha contre 1 921 observés SANS qu'aucune contrainte ne la nomme.
+
+- id: CAL-31
+  titre: >
+    Déviation 2 — plancher de surface en prairie à 6 096 ha (`pn_prod_min`)
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-28
+  source: ["docs/superpowers/specs/2026-07-28-plancher-prairie-design.md", "case_studies/guadeloupe/config.yaml:437-481"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-25, DON-30]
+    justifie: [CAL-24, CAL-32]
+    mesure-par: [CAL-34]
+
+- id: CAL-32
+  titre: >
+    ⚠ POINT FAIBLE D'EXPOSITION — le paramètre GAMS 6 096 est documenté PAR SON
+    PROPRE AUTEUR comme « = surface 2017 PN_PIQ », donc comme l'observé
+  type: piege
+  statut: ouvert
+  severite: critique
+  quand: 2026-08-12
+  source: ["context/gams/DONNEES.txt:66", "context/Livre_Blanc_CALALOU.pdf table 3", docs/04-vigilance.md#C.3]
+  chiffre: []
+  destination: [ch3, oral]
+  arcs:
+    parce-que: [CAL-31]
+    contredit: []
+    mesure-par: [CAL-34]
+  critique: >
+    TROIS SOURCES CONVERGENT SUR LE MÊME NOMBRE, ET C'EST L'OBSERVÉ :
+      - `DONNEES.txt:66` — « QUOTA_PN_PIQ_MIN Surface minimum de paturage naturel
+        à utiliser = surface 2017 PN_PIQ 6096 » (l'auteur le dit lui-même) ;
+      - notre propre prairie observée dans le RPG : 6 109 ha (13 ha d'écart) ;
+      - CALALOU, « Scénario Observé », Bovins : 6 096 ha exactement.
+    Or le Ch. 3 §3.4 écrit seulement : « c'est un paramètre présent dans le GAMS,
+    corroboré par la statistique agricole ». Un lecteur qui ouvre `DONNEES.txt`
+    y lit « = surface 2017 » et conclut que la déviation 2 VIOLE la règle CAL-25
+    que le mémoire vient de poser. Le travail a la réponse (CAL-34), le MÉMOIRE
+    ne la donne pas. À corriger en une phrase — c'est la correction la plus
+    rentable de tout le chapitre 3.
+
+- id: CAL-33
+  titre: >
+    LE TEST qui sépare une correction d'un ajustement — le balayage du seuil
+    plantain montre un palier plat de 4 650 à 9 240 t
+  type: methode
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#E.4, memoire/chapitres/03-calibrer.tex]
+  chiffre: []
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [CAL-25]
+  critique: >
+    Argument en deux temps, et les deux comptent : (a) facteur 2 sur le seuil
+    pour 0,5 point de PAD, à peine plus que le bruit du solveur ; (b) l'optimum
+    du palier est à l'extrémité HAUTE (×2,4 l'observé), pas au seuil le plus
+    serré — un paramètre servant de variable d'ajustement s'améliorerait de façon
+    monotone en se rapprochant de l'observé. Ce qui compte n'est pas la valeur du
+    plafond mais son EXISTENCE. Raisonnement transférable et publiable.
+
+- id: CAL-34
+  titre: >
+    LE TEST équivalent pour la prairie — les métriques que le plancher ne touche
+    pas TIENNENT sur tout l'intervalle exogène 6 096 → 9 595 ha
+  type: methode
+  statut: retenu
+  severite: critique
+  source: ["case_studies/guadeloupe/config.yaml:460-467"]
+  chiffre: []
+  destination: [ch3, oral]
+  arcs:
+    parce-que: [CAL-31]
+    justifie: [CAL-32]
+  critique: >
+    ⚠ CE TEST EXISTE, IL EST MESURÉ, ET IL N'EST PAS DANS LE MÉMOIRE.
+    Types 86,9 → 82,0 %, parcelles 67,6 → 65,2 %, surface 77,1 → 72,2 % —
+    TOUTES au-dessus des seuils publiés de l'article, sur toute la plage. Et le
+    PAD hors prairie EMPIRE quand on monte vers Agreste (14,9 → 18,5 → 24,0 %),
+    parce que le plancher prend alors de la terre à la canne, la culture que le
+    RPG mesure le MIEUX (98 % contre 87 % de couverture globale). C'est la
+    réponse complète à CAL-32 : la conclusion ne dépend pas du choix de 6 096.
+
+- id: CAL-B1
+  titre: "BRANCHE COUPÉE — recalibrer les coefficients d'aversion au risque"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [docs/04-vigilance.md#E.5, TODO.md]
+  chiffre: []
+  destination: [ch3, oral]
+  arcs:
+    mesure-par: [VER-02]
+    parce-que: [CAL-25]
+  critique: >
+    Descend le PAD à 39,9 % mais au prix de coefficients économiquement absurdes
+    — un exploitant spécialisé devenant « très averse ». C'est du surajustement,
+    et l'article dit lui-même (§2.5) que sa Table 2 EST déjà le résultat de sa
+    calibration par 100 itérations. Ce ne sont donc pas des coefficients à
+    re-tuner : branche coupée deux fois, par la mesure et par la source.
+
+- id: CAL-B2
+  titre: "BRANCHE COUPÉE — caler des plafonds de marché sur l'observé"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [docs/04-vigilance.md#E.5]
+  chiffre: []
+  destination: [ch3]
+  arcs:
+    mesure-par: [CAL-33]
+    parce-que: [CAL-25]
+  critique: >
+    Descend à 33,6 % et est circulaire par construction (PAD nul par
+    construction sur les postes calés). Branche coupée par principe ET chiffrée
+    — c'est ce qui rend le refus crédible plutôt que pudique.
+
+- id: CAL-B3
+  titre: "BRANCHE COUPÉE — incorporer l'élevage pour refermer l'écart"
+  type: choix
+  statut: ecarte
+  severite: null
+  source: [docs/04-vigilance.md#E.5]
+  chiffre: []
+  destination: [ch3, ch6, note]
+  arcs:
+    mesure-par: [CAL-80, CAL-83, CAL-84]
+    parce-que: [CAL-25]
+  critique: >
+    L'écart EST chiffré, contrairement à ce que je notais d'abord : la
+    décomposition des 3 489 ha de prairie perdus attribue 36 % au couplage avec
+    l'élevage (CAL-80), la ligne main d'œuvre de la prairie diverge de la Table 1
+    de 126 contre 70 h/ha (CAL-83), et ces 126 h/ha sont intégralement du travail
+    de TROUPEAU (CAL-84). Le mécanisme manquant est donc nommé ET mesuré ; ce qui
+    reste théorique est seulement la RAISON DE NE PAS L'AJOUTER — il faudrait une
+    variable d'état interdisant de liquider un cheptel sans coût, hors de portée
+    d'un modèle mono-période, limite que l'article reconnaît lui-même.
+    Chantier n°3 de la liste « à faire » : l'item fait le pont vers PERSP-10.
+
+- id: CAL-B4
+  titre: "BRANCHE COUPÉE — resserrer le gap MIP pour récupérer la prairie"
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    mesure-par: [VER-02]
+    parce-que: [SOLV-54]
+  critique: >
+    Testé (output_4, gap 1e-3) et abandonné : le solve tape la limite d'1 h avec
+    un incumbent IDENTIQUE à la solution 1 %, zéro prairie récupérée. « Le leak
+    de prairie est une limite d'intractabilité B&B, pas un bouton de réglage. »
+    Branche coupée par expérience, pas par raisonnement. Modèle du genre.
+
+# --- Se comparer à l'article -------------------------------------------------
+
+- id: CAL-40
+  titre: >
+    Se comparer à l'article demande QUATRE corrections, et il serait facile de
+    s'en arranger
+  type: methode
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#E.2, memoire/chapitres/03-calibrer.tex#sec:corrections]
+  chiffre: []
+  destination: [ch3, annexeE, oral, article]
+  arcs:
+    parce-que: [CAL-10]
+    justifie: [CAL-41, CAL-42, CAL-43, CAL-44]
+  critique: >
+    Section d'honnêteté maximale : elle DÉGRADE volontairement la comparaison
+    dont le mémoire aurait pu se prévaloir. C'est ce qui fonde REF-30
+    (« l'honnêteté épistémique comme livrable »).
+
+- id: CAL-41
+  titre: >
+    Correction 1 — l'article publie son PAD PAR CULTURE, jamais agrégé ; notre
+    PAD territorial est une ligne maison, et elle est PLUS SÉVÈRE
+  type: piege
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#E.2]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-40]
+  critique: >
+    La métrique réellement comparable est « nombre de cultures sous le seuil »,
+    et elle n'est PAS mise en avant dans le tableau d'attribution. À vérifier
+    qu'elle est bien calculée quelque part et citable en annexe E.
+
+- id: CAL-42
+  titre: >
+    Correction 2 — l'article compte les parcelles non cultivées au dénominateur,
+    nous les excluons : 4 points qui relevaient de la DÉFINITION
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#E.2]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-40]
+  critique: >
+    À sa convention, le portage strict afficherait 60,5 % et 67,8 % au lieu de
+    56,0 % et 64,3 %. Quatre points gratuits que le mémoire refuse de prendre.
+
+- id: CAL-43
+  titre: >
+    Correction 3 — l'année de base de l'article est 2010, pas 2017 : 5 336 fermes
+    contre 4 638 sur le même nombre de parcelles et d'hectares
+  type: donnee
+  statut: retenu
+  severite: critique
+  source: [docs/04-vigilance.md#E.2]
+  chiffre: [mesArtParcellesN, mesArtFermes, obsParcelles, obsExploitations]
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-40]
+  critique: >
+    Structurellement hors d'atteinte : `Data_RPG_Gwad` commence en 2012. Et la
+    lecture est fine — même parcelles, mêmes hectares, moins de fermes : c'est de
+    la CONCENTRATION FONCIÈRE, pas un échantillonnage différent. Ce diagnostic
+    est un résultat en soi sur le territoire, et il est enfoui dans une
+    correction méthodologique.
+
+- id: CAL-44
+  titre: >
+    Correction 4 — l'article ne publie aucune table de PAD par exploitation ;
+    notre quatrième échelle n'a pas de référence publiée
+  type: donnee
+  statut: retenu
+  severite: mineur
+  source: [docs/04-vigilance.md#E.2]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-40]
+
+# --- Le plateau --------------------------------------------------------------
+
+- id: CAL-50
+  titre: >
+    Le solveur est hors de cause, et cela se démontre de DEUX façons
+    indépendantes
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#E.3]
+  chiffre: [mesGapMip, mesGraineA, mesGraineB, mesGraineC]
+  destination: [ch3, oral]
+  arcs:
+    parce-que: [SOLV-54, SOLV-55]
+  critique: >
+    (a) Le plan OBSERVÉ de 2017 vaut 15 % de moins que l'optimum sous notre
+    propre objectif — l'écart à combler est quinze fois la tolérance de 1 %.
+    (b) Trois graines donnent 0,15 point de PAD. Deux arguments de nature
+    différente : l'un économique, l'autre statistique. C'est ce qui rend la
+    conclusion robuste.
+
+- id: CAL-51
+  titre: >
+    Le plan observé vaut 15 % de MOINS que l'optimum sous notre propre objectif
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#E.3]
+  chiffre: []
+  destination: [ch3, ch5, oral, article]
+  arcs:
+    parce-que: [CAL-50]
+  critique: >
+    ⚠ RÉSULTAT SOUS-EXPLOITÉ ET LOURD DE SENS. Il est utilisé au Ch. 3 comme
+    argument technique (« le solveur est hors de cause »), alors qu'il dit aussi
+    quelque chose sur le territoire ET sur le modèle : soit les agriculteurs
+    laissent 15 % sur la table, soit l'objectif ne décrit pas ce qu'ils
+    maximisent. Le second est bien plus probable, et c'est un item de Ch. 5
+    (que représente-t-on quand on écrit « max marge ajustée du risque » ?).
+
+- id: CAL-52
+  titre: >
+    Trois blocages diagnostiqués — données irréductibles, gap MIP non actionnable,
+    petites déviations CALIB d'effet marginal
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-40]
+    contredit: [CAL-53]
+
+- id: CAL-53
+  titre: >
+    ERREUR — le verdict du matin (« frontière plate prairie/canne, gap MIP ») a
+    été renversé le jour même : la cause dominante était le plantain
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-calib-parity-rootcause-design.md", commit e51f1cc]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    mesure-par: [CAL-30]
+  verdict-anterieur: >
+    « L'écart de calibration vient d'une frontière plate entre prairie et canne,
+    que le gap MIP laisse arbitrer au hasard. » Le verdict n'était pas FAUX — il
+    pesait 3 % du problème. La cause dominante était la substitution
+    banane → plantain, et elle a été trouvée le jour même.
+  critique: >
+    +20,9 M€ de plantain sur un écart total de 12,8 M€, et la substitution
+    banane→plantain de 1 298 ha explique à elle seule l'effondrement du Sud-Est
+    Basse-Terre. Le diagnostic « frontière plate » restait juste mais pesait 3 %
+    du problème. Une investigation systématique complète peut donc conclure
+    correctement sur une cause MINEURE et rater la majeure — c'est le meilleur
+    item réflexif du Ch. 3 avec CAL-54.
+
+- id: CAL-54
+  titre: >
+    TROIS verdicts renversés au cours de la calibration, tous par un protocole
+    et jamais par une meilleure intuition
+  type: reflexivite
+  statut: retenu
+  severite: null
+  source: [memoire/chapitres/03-calibrer.tex encadré réflexif]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    parce-que: [CAL-53, SOLV-22]
+    justifie: [REF-30]
+  critique: >
+    (1) plancher de prairie écarté pour une mauvaise raison, avant de trouver la
+    donnée exogène ; (2) « une contrainte ne peut pas améliorer le résultat » —
+    faux, l'objectif est séparable mais les contraintes ne le sont pas ;
+    (3) écart attribué au solveur, prouvé venir du modèle. Ajouter SOLV-22
+    (l'inverse : attribué au modèle, venait du solveur) fait un quatrième cas et
+    complète la symétrie — le motif devient un résultat sur la méthode, pas une
+    liste d'anecdotes.
+
+- id: CAL-55
+  titre: >
+    L'écart résiduel se concentre sur les petites cultures et recoupe les limites
+    que l'article reconnaît pour son propre modèle
+  type: resultat
+  statut: retenu
+  severite: null
+  source: [docs/04-vigilance.md#E.5, TODO.md]
+  chiffre: []
+  destination: [ch3]
+  arcs:
+    parce-que: [CAL-52]
+  critique: >
+    Ananas 461 ha contre 133 observés, vergers 8 contre 311, melon ~0 contre 189,
+    jachère 418 contre 621. ⚠ Le déficit de VERGERS a peut-être une cause
+    identifiée et non reliée : PORT-20 (`Eq_VE_PLUIE` interdit les vergers
+    pluviaux partout). Lien à instruire avant de le publier.
+
+- id: CAL-56
+  titre: >
+    Plusieurs indicateurs simulés tombent DANS la fourchette d'incertitude de
+    l'observé lui-même — l'écart au « central » n'y démontre rien
+  type: piege
+  statut: retenu
+  severite: majeur
+  source: [docs/04-vigilance.md#E.6]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [DON-10]
+  critique: >
+    Subvention, revenu, azote, travail. Conséquence de C.2 (l'assolement 2017
+    n'est connu qu'au niveau agrégé, d'où une borne basse/haute sur tout
+    indicateur d'entrée). Honnêteté rare : refuser de compter un accord comme
+    une preuve quand l'incertitude le rend automatique.
+
+- id: CAL-60
+  titre: >
+    Les runs de référence sont DÉCLARÉS, nommés et gardés contre la dérive
+    (`references.yaml`, `check_references.py`)
+  type: organisation
+  statut: retenu
+  severite: null
+  quand: 2026-08-01
+  source: [case_studies/guadeloupe/references.yaml, scripts/check_references.py]
+  chiffre: []
+  destination: [ch2, annexeE, note]
+  arcs:
+    parce-que: [CAL-20]
+    justifie: [VER-50]
+  critique: >
+    Un run peut nommer son dossier (`calib_retenu` et non `output_7`), la
+    découverte se faisant sur la présence d'un `recap.json`. Détail
+    d'ergonomie qui change la lisibilité d'un dépôt de 39 runs.
+
+- id: CAL-61
+  titre: >
+    Les runs ANTÉRIEURS au 27/07 ne sont plus comparables au défaut actuel
+  type: piege
+  statut: retenu
+  severite: mineur
+  source: [TODO.md]
+  chiffre: []
+  destination: [note]
+  arcs:
+    parce-que: [CAL-30]
+
+- id: CAL-62
+  titre: >
+    Piste ouverte — obtenir le jeu de coefficients ou les résultats du vrai run
+    GAMS trancherait le doute sur l'aversion
+  type: perspective
+  statut: ouvert
+  severite: null
+  source: [TODO.md]
+  chiffre: []
+  destination: [ch3, ch6, note]
+  arcs:
+    parce-que: [CAL-B1]
+  critique: >
+    ⚠ Or CTX-11 établit que CALALOU a fait tourner MOSAICA en 2024, avec les
+    encadrants du stage parmi les auteurs. Les sorties de ce run existent
+    peut-être. Question concrète à poser à l'encadrement avant la soutenance :
+    ça transformerait une « piste ouverte » en comparaison directe.
+
+# =============================================================================
+# DENSIFICATION — extraite de docs/archives/journal-vigilance.md (76 Ko).
+#
+# Ce qui suit ne figure PAS dans la synthèse `04-vigilance.md` : ce sont les
+# chemins explorés puis abandonnés, les mesures intermédiaires, et les verdicts
+# successifs sur une même question. C'est la matière qui rend le graphe
+# démonstratif plutôt que déclaratif.
+# =============================================================================
+
+# --- Le point de départ, et son ampleur --------------------------------------
+
+- id: CAL-70
+  titre: >
+    L'état initial était bien pire que « 51 % » — PAD 193 %, types 7,3 %,
+    parcelles 7,0 %, surface 4,5 %
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: ["docs/archives/journal-vigilance.md:174-187"]
+  chiffre: []
+  destination: [ch3, annexeE, oral]
+  arcs:
+    justifie: [CAL-71, PORT-30]
+  critique: >
+    DIX des onze cultures observées disparaissent ENTIÈREMENT — 12 813 ha de
+    canne, 6 109 de prairie, 1 921 de banane tombent à zéro — et le maraîchage
+    passe de 1 087 à 24 155 ha, soit un PAD de 2 122 %. La matrice de confusion
+    montre neuf types d'exploitation s'effondrant sur trois, presque tous vers
+    « Maraîchers ». Point de départ spectaculaire, et bien plus parlant que le
+    « 48,4 % » du barreau de parité qui sert aujourd'hui de départ au récit.
+
+- id: CAL-71
+  titre: >
+    Le diagnostic initial a nommé DEUX causes probables, et les deux étaient
+    justes
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: ["docs/archives/journal-vigilance.md:189-195"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-70]
+    justifie: [PORT-33, SOLV-04]
+  critique: >
+    (1) l'objectif actif était `maximize_gross_margin`, pas Markowitz ;
+    (2) `Eq_MO_MAX_Expl` n'était pas portée — or le maraîchage demande 990 à
+    1 560 h/ha contre 15 pour la canne mécanisée, donc rien ne limitait la
+    bascule. Un cas où l'ordre de grandeur SUFFIT au diagnostic, avant toute
+    mesure fine. À citer : c'est un raisonnement qu'un lecteur peut refaire.
+
+- id: CAL-72
+  titre: >
+    Lecture arithmétique du PAD territorial — 48,4 % signifie que 24,2 % de la
+    surface observée porte la mauvaise culture
+  type: notion
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:350-351"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-12]
+  critique: >
+    Les totaux entrée/sortie s'équilibrant, un écart absolu compte chaque hectare
+    déplacé DEUX FOIS (une fois en manque, une fois en excès). Traduction
+    indispensable pour un lecteur non spécialiste, et absente du brouillon.
+
+- id: CAL-73
+  titre: >
+    L'erreur est LOCALISÉE, pas diffuse — six sous-régions sur sept sont à
+    4-13 points de l'article, une seule s'effondre
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:362-364"]
+  chiffre: []
+  destination: [ch3, annexeE, oral]
+  arcs:
+    justifie: [CAL-74]
+  critique: >
+    Sud-Est Basse-Terre : 36,9 % contre 61,4 % (surface 38 % contre 66 %). C'est
+    ce constat de LOCALISATION qui a permis de remonter à une cause unique plutôt
+    que de conclure à un plateau diffus. Méthode transférable : avant de chercher
+    une cause globale, vérifier si l'erreur est concentrée.
+
+- id: CAL-74
+  titre: >
+    LE MÉCANISME DU PLANTAIN, à l'euro près — il gagne de 4,9 % à cause d'une
+    contrainte de rotation qui ne pèse que sur son concurrent
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:378-391"]
+  chiffre: []
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [CAL-73]
+    justifie: [CAL-30]
+  critique: >
+    ⚠ LE PLUS BEAU RAISONNEMENT DU DOSSIER DE CALIBRATION, et il n'est nulle part
+    dans le brouillon. `BC_BT` vaut 11 386 €/ha à `Var_Rdt` 0,20, sans subvention
+    ET SANS ROTATION OBLIGATOIRE. `BA_INT` est MEILLEUR à l'unité (9 099 contre
+    7 971 à AVERS 1,2) — mais `Eq_BA_JA` lui impose 20 % de jachère à 116 €/ha,
+    ce qui ramène le mélange à 7 602 €/ha. Le plantain gagne donc de 4,9 %, non
+    pas parce qu'il est meilleur, mais parce que son concurrent traîne une
+    contrainte agronomique qu'il n'a pas. Substitution mesurée : banane export →
+    plantain, 1 298 ha, concentrée dans la sous-région qui s'effondre. Et le
+    plafond de main d'œuvre n'y est pour rien (saturation médiane 48,6 % sur les
+    138 exploitations qui basculent).
+
+- id: CAL-75
+  titre: >
+    Décomposition de l'écart de 12,8 M€ par groupe — le plantain vaut À LUI SEUL
+    plus que la totalité de l'écart
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:379-381"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-74]
+  critique: >
+    BC +20,9 M€, CS +4,0, AN +3,7, MA +1,9, contre BA −9,4, PN −5,7, ME −1,5.
+    Les postes se compensent, d'où un total trompeusement modeste. Décomposer un
+    écart NET en contributions signées est ce qui a désigné la cible.
+
+# --- Le balayage du plafond plantain, en entier -------------------------------
+
+- id: CAL-76
+  titre: >
+    Le balayage complet du plafond plantain — sept seuils, de 4 650 t à désactivé
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:407-421"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-33]
+  critique: >
+    PAD : 31,7 / 31,7 / 31,2 / 34,4 / 36,4 / 38,1 / 48,4 aux seuils 4 650 /
+    6 440 / 9 240 / 15 000 / 25 000 / 40 000 / désactivé. Plantain : 179 / 247 /
+    355 / 577 / 960 / 1 527 / 2 875 ha. Le tableau complet appartient à
+    l'annexe E — c'est la preuve visuelle du palier, et elle vaut mieux que sa
+    description.
+
+- id: CAL-77
+  titre: >
+    LE SEUIL RETENU N'EST PAS CELUI QUI NOTE LE MIEUX — 6 440 t plutôt que
+    9 240 t, délibérément
+  type: choix
+  statut: retenu
+  severite: critique
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:423-428"]
+  chiffre: []
+  destination: [ch3, oral, article]
+  arcs:
+    parce-que: [CAL-76, CAL-25]
+  critique: >
+    ⚠ ITEM DE MÉTHODE MAJEUR, absent du brouillon. 9 240 t donne le meilleur PAD
+    (31,2), le meilleur taux de types (67,1) et la meilleure surface (69,3).
+    6 440 t a été retenu PARCE QU'IL EST SOURÇABLE (chiffre de l'auteur du GAMS),
+    et le journal le dit explicitement : « prendre 9 240 t pour 0,5 point serait
+    précisément le sur-ajustement qu'on évite ». Refuser le meilleur score au
+    profit de la traçabilité est exactement ce que la règle CAL-25 exige, et
+    c'est la preuve qu'elle a été appliquée contre son propre intérêt.
+
+- id: CAL-78
+  titre: >
+    Trois valeurs candidates, toutes EXOGÈNES à l'assolement observé
+  type: resultat
+  statut: retenu
+  severite: null
+  source: ["docs/archives/journal-vigilance.md:403-405"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-30]
+  critique: >
+    40 000 t (paramètre GAMS), 6 440 t (commentaire de l'auteur), 4 650 t
+    (Éq. 6 de l'article). Notre propre production observée vaut 3 827 t et n'a
+    PAS servi. Contraste explicite avec les plafonds écartés le 23/07, qui
+    étaient calés SUR l'observé.
+
+- id: CAL-79
+  titre: >
+    Même au plafond le plus serré, le plantain reste au-dessus de l'observé
+    (247 ha contre 147) — la contrainte ne force pas la culture
+  type: resultat
+  statut: retenu
+  severite: majeur
+  source: ["docs/archives/journal-vigilance.md:400-403"]
+  chiffre: []
+  destination: [ch3, oral]
+  arcs:
+    parce-que: [CAL-30]
+  critique: >
+    Test de non-forçage direct et convaincant : une contrainte qui recopiait la
+    réponse ramènerait le plantain À l'observé. Il reste 68 % au-dessus.
+
+# --- Les branches coupées de la calibration ----------------------------------
+
+- id: CAL-B5
+  titre: "BRANCHE COUPÉE — desserrer ou resserrer le `slack` du plafond de main d'œuvre"
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-23
+  source: ["docs/archives/journal-vigilance.md:218-219"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [PORT-33]
+    mesure-par: [VER-02]
+  critique: >
+    Balayage complet : `slack: 1.0` DOMINE tout, et toute valeur inférieure
+    dégrade PAD ET types de façon MONOTONE. Le plafond est donc optimal tel quel.
+    Résultat négatif propre, et il ferme définitivement l'hypothèse « le plafond
+    de travail est le levier du plantain ».
+
+- id: CAL-B6
+  titre: >
+    BRANCHE COUPÉE — re-tuner l'aversion du type 4 (canniers diversifiés) pour
+    récupérer la prairie
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-23
+  source: ["docs/archives/journal-vigilance.md:240-241"]
+  chiffre: []
+  destination: [annexeE]
+  arcs:
+    parce-que: [CAL-B1]
+    mesure-par: [VER-02]
+  critique: >
+    Gain marginal mesuré : ~2 % de PAD, prairie +261 ha. Raison : les variantes
+    de canne à très forte marge (jusqu'à 3 531 €/ha) RÉSISTENT même à un AVERS
+    porté à 2,5. Le levier est saturé avant d'être efficace — argument plus fort
+    que « ça ne marche pas ».
+
+- id: CAL-B7
+  titre: >
+    BRANCHE COUPÉE — une contrainte d'INERTIE DE CHEPTEL par exploitation
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-23
+  source: ["docs/archives/journal-vigilance.md:242-244", "docs/archives/journal-vigilance.md:263-267"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-B3]
+    mesure-par: [VER-02]
+  critique: >
+    Deux motifs cumulés : elle rend le MILP INTRAITABLE (> 10 min même à 5 %
+    d'écart, contre 175 s sans) et c'est une invention hors `CALIB` ancrée sur
+    l'observé. TESTÉE EN QUATRE FORMULATIONS. ⚠ Et le verdict d'intraitabilité
+    a plus tard été établi comme PÉRIMÉ (CAL-B9) — il datait du modèle à
+    900 000+ variables.
+
+- id: CAL-B8
+  titre: >
+    BRANCHE COUPÉE — la recalibration §2.5 par descente de coordonnées, avec ses
+    coefficients exacts
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-23
+  source: ["docs/archives/journal-vigilance.md:253-259"]
+  chiffre: []
+  destination: [ch3, annexeE, oral]
+  arcs:
+    parce-que: [CAL-B1]
+    mesure-par: [VER-02]
+  critique: >
+    Résultat : PAD 39,9 %, types 69 %, prairie +1 250 ha. Les coefficients
+    obtenus, à citer parce qu'ils rendent l'absurdité PALPABLE : cannier
+    spécialisé 0,30 → 2,50 (×8), cannier diversifié 1,40 → 3,20, éleveur
+    2,40 → 3,60. Un spécialiste devenu « très averse » contredit la définition
+    même du type — l'article les met à 0,30 PARCE QU'ils s'engagent sur une
+    culture rentable. Diagnostic du journal, meilleur que « overfitting » :
+    « l'aversion sert de variable d'ajustement pour compenser une absence
+    structurelle — l'élevage — pas un vrai paramètre de risque ».
+
+- id: CAL-B9
+  titre: >
+    VERDICT PÉRIMÉ — « le plancher de prairie rend le MILP intraitable » datait
+    du modèle à 900 000 variables
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-28
+  source: ["docs/archives/journal-vigilance.md:565-568"]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    contredit: [CAL-B7]
+    mesure-par: [SOLV-41]
+  critique: >
+    Le solve prend 170 s à 309 000 variables. Le verdict d'intraitabilité avait
+    été rendu AVANT les suppressions `Eq_*_SUPP` qui ont divisé la taille par
+    trois, et personne ne l'avait rouvert. ⚠ LEÇON GÉNÉRALE : un verdict de
+    faisabilité est daté par l'état du modèle au moment où il est rendu, et il
+    devient faux sans que rien ne le signale. Aucun dispositif du dépôt ne garde
+    contre ça.
+
+- id: CAL-B10
+  titre: >
+    VERDICT PÉRIMÉ (2) — « le plancher de prairie est circulaire » était mon
+    propre verdict, et il était juste avant d'être levé
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: majeur
+  quand: 2026-07-28
+  source: ["docs/archives/journal-vigilance.md:499-509", "docs/archives/journal-vigilance.md:565-568"]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    mesure-par: [DON-31]
+  verdict-anterieur: >
+    Deux verdicts successifs, tous deux miens, tous deux renversés. (1) 23/07 :
+    « le plancher de prairie est rejeté pour intraitabilité » — mauvaise raison,
+    aucune mesure derrière. (2) 27/07 : « il est faisable mais circulaire, donc
+    inutilisable » — juste au moment où il a été écrit, et levé ensuite par la
+    mesure de l'invariance sur tout l'intervalle exogène 6 096 → 9 595 ha.
+  critique: >
+    ⚠ SÉQUENCE COMPLÈTE, ET C'EST LE MEILLEUR RÉCIT DU CHAPITRE 3. (1) 23/07 :
+    rejeté pour « intraitabilité » — mauvaise raison. (2) 27/07 : le rejet est
+    MAINTENU mais la raison est CORRIGÉE — vérification faite, 0 exploitation sur
+    4 638 est incapable de porter sa propre prairie observée, donc le plancher
+    est faisable ; il reste circulaire, son seuil GAMS étant l'assolement observé.
+    (3) Le journal écrit alors CE QU'IL FAUDRAIT pour lever l'objection : « une
+    statistique externe de cheptel × chargement donnerait un plancher exogène —
+    le seul correctif non circulaire. Donnée absente du dépôt. » (4) 28/07 : la
+    donnée est trouvée (Agreste SAA 2017) et le plancher est activé. Une objection
+    formulée assez précisément pour DIRE CE QUI LA LÈVERAIT, puis levée quatre
+    jours plus tard. C'est la démonstration parfaite de MET-01.
+
+- id: CAL-B11
+  titre: >
+    BRANCHE COUPÉE — adopter le plancher ARBORICOLE, pourtant mesuré comme peu
+    coûteux
+  type: choix
+  statut: ecarte
+  severite: majeur
+  quand: 2026-07-29
+  source: ["docs/archives/journal-vigilance.md:663-670"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-25]
+    mesure-par: [SOLV-30]
+  critique: >
+    Il est NEUTRE sur le score (PAD 6,60 → 6,54 %, types 86,89 → 86,83 %) tout en
+    portant l'arboriculture de 18 à 335 ha, et son coût réel n'est que de 0,13 %
+    d'objectif. Écarté pour deux raisons de FORME : (a) ce serait une déviation
+    de forme et non plus de seuil — `Eq_PLU_PROD_MIN` existe en TONNES côté GAMS,
+    pas en surface ; (b) le gain de réalisme ne se lit pas dans le PAD, qui se
+    mesure contre le RPG. Et la variante mieux formée est déjà écrite : le même
+    plancher EN TONNES à 1 848 t (Agreste : 1 467 t d'agrumes + 657 t d'autres
+    fruits, × 87 % de couverture). Refuser une amélioration gratuite pour une
+    raison de forme est un choix fort, et défendable.
+
+- id: CAL-B12
+  titre: "BRANCHE COUPÉE — plafond igname, plafond melon, plancher jachère"
+  type: choix
+  statut: ecarte
+  severite: null
+  quand: 2026-07-29
+  source: ["docs/archives/journal-vigilance.md:680-684"]
+  chiffre: []
+  destination: [annexeE]
+  arcs:
+    parce-que: [CAL-25]
+    mesure-par: [DON-01]
+  critique: >
+    Trois écarts, trois raisons DIFFÉRENTES, ce qui est le signe d'un tri réel et
+    non d'un renoncement en bloc. IGNAME : 259 ha simulés contre 227 attestés
+    (114 %), et le plafond de l'auteur (4 600 t) mordrait juste au niveau produit
+    (4 604 t) — gain nul. MELON : sous-planté, un plafond n'y peut rien, et
+    l'article échoue aussi à 100 % sur cette culture pour une cause hors modèle
+    (terres louées à un exportateur). JACHÈRE : aucune source externe.
+
+# --- Le déficit de prairie, décomposé ----------------------------------------
+
+- id: CAL-80
+  titre: >
+    Décomposition des 3 489 ha de prairie perdus — 62 % d'économie légitime,
+    36 % de couplage, 2 % de résidu
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:459-464"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    justifie: [CAL-81]
+  critique: >
+    2 149 ha où le modèle préfère franchement autre chose (+2,42 M€) ; 1 258 ha
+    où le choix est MOINS BON à l'hectare (−0,45 M€) mais où le retour est
+    impossible à solution figée, faute d'heures — la prairie demande 126 h/ha
+    contre 12,7 pour la canne, donc rebasculer coûte +113 h/ha déjà dépensées
+    ailleurs ; 66 ha (49 k€) de résidu inexpliqué. Décomposition d'un écart en
+    trois régimes causaux distincts : c'est ce qui distingue un diagnostic d'un
+    constat.
+
+- id: CAL-81
+  titre: >
+    L'ERREUR DE RAISONNEMENT, nommée précisément — l'objectif est séparable, les
+    contraintes ne le sont pas
+  type: erreur
+  statut: erreur-a-posteriori
+  severite: critique
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:466-472"]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    parce-que: [CAL-80]
+    contredit: [CAL-52]
+    mesure-par: [SOLV-55]
+  critique: >
+    Le verdict du matin — « 1 403 ha partent en canne alors que la prairie était
+    éligible ET meilleure, donc impossible à l'optimum exact, donc c'est le gap
+    MIP » — comparait des marges ajustées PARCELLE PAR PARCELLE en oubliant que
+    `Eq_MO_MAX_Expl` COUPLE toutes les parcelles d'une exploitation. Et la preuve
+    que ce n'est pas le solveur est indépendante : les trois graines donnent la
+    prairie à 2 576 / 2 581 / 2 571 ha. C'est le deuxième des quatre verdicts
+    renversés, et le seul qui soit une erreur de RAISONNEMENT plutôt que de
+    mesure — donc le plus instructif.
+
+- id: CAL-82
+  titre: >
+    30 % du déficit de prairie tient sur un écart de 0,94 % entre deux cultures
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:474-478"]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    parce-que: [CAL-80]
+  critique: >
+    `CS_MG_NISM` vaut 1 617,1 €/ha, `PN_PIQ` 1 602,0, tous deux à `Var_Rdt` nul :
+    la canne gagne de 15 €/ha, soit 0,94 %, INDÉPENDAMMENT de l'aversion. Cela
+    décide de 1 042 ha à Marie-Galante. « Fragile, pas faux » : resserrer le gap
+    ne changerait rien puisque la canne gagne vraiment, mais un point de
+    subvention en plus ou en moins inverserait le résultat. ⚠ Item de portée
+    générale sur la SENSIBILITÉ d'un modèle d'allocation : une part importante du
+    résultat peut reposer sur des écarts inférieurs à l'incertitude des données.
+
+- id: CAL-83
+  titre: >
+    La main d'œuvre de la prairie diverge de la Table 1 (126 h/ha contre 70) —
+    seule ligne dans ce cas, et ce n'est PAS un bug
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:480-489"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-80]
+    mesure-par: [VER-02]
+  critique: >
+    Contrôle des six systèmes de la Table 1 : rendements, marges ET main d'œuvre
+    collent partout (banane 1 558 vs 1 560 h, igname 991 vs 990, plantain 609 vs
+    620, ananas 436 vs 450, canne 12,7 vs 15) — sauf la prairie, +80 %.
+    Recalculée à la main depuis `Data_OTK` avec la formule GAMS, la valeur tombe
+    EXACTEMENT sur 126,0 (abreuvement 72 h, déplacement du piquet 45, saillies 6,
+    traitements bovins 3). C'est une divergence entre les tables 2017 et l'article
+    de 2010, pas une erreur de portage. Et sans effet décisif : même à 70 h/ha la
+    prairie serait à 22,9 €/h contre 99-156 pour la canne.
+
+- id: CAL-84
+  titre: >
+    LE MÉCANISME MANQUANT, nommé exactement — les 126 h/ha de la prairie sont
+    entièrement du travail de TROUPEAU
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:491-497"]
+  chiffre: []
+  destination: [ch3, ch5, ch6, oral, article]
+  arcs:
+    parce-que: [CAL-83]
+    justifie: [CAL-B3, PERSP-10]
+  critique: >
+    ⚠ L'ARGUMENT LE PLUS FORT POUR LE MULTI-PÉRIODES, ET IL EST ENFOUI.
+    Abreuvement, déplacement du piquet, saillies, traitements bovins : AUCUNE
+    opération agronomique. Le modèle peut donc LIQUIDER UN CHEPTEL GRATUITEMENT
+    et redéployer 126 h/ha de travail d'éleveur vers la canne (12,7 h/ha). Ce qui
+    manque n'est pas l'économie de l'élevage — elle est bien dans la marge de
+    `PN_PIQ`, bœuf inclus, 0,66 t/ha à 5 400 €/t — mais une VARIABLE D'ÉTAT
+    interdisant la liquidation sans coût. L'article le reconnaît en §4.5. La
+    démonstration passe par la décomposition d'un chiffre d'heures : c'est
+    concret, vérifiable, et ça transforme « il faudrait du multi-périodes » en
+    « voici précisément ce que le modèle autorise et qui est impossible ».
+
+# --- L'arboriculture ---------------------------------------------------------
+
+- id: CAL-85
+  titre: >
+    POURQUOI L'ARBORICULTURE DISPARAÎT — ce n'est pas l'éligibilité, c'est le
+    rendement HORAIRE
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: ["docs/archives/journal-vigilance.md:607-615"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [PORT-33]
+  critique: >
+    `VE_BTGT` est possible sur 11 060 parcelles et `AG` sur 3 154 — l'éligibilité
+    n'est pas en cause. Le classement en €/h l'est : canne mécanisée 179-204,
+    ananas paillé 33, plantain 17,3, igname 14,7, maraîchage 13,6, vergers 11,0,
+    agrumes 11,1. Les fruitiers sont le PIRE €/h de toutes les cultures
+    intensives ; sous plafond de main d'œuvre ils sortent les premiers. Même
+    mécanisme de couplage que la prairie : sur 405 ha perdus, 137 vont à mieux,
+    102 à moins bon dont 99 bloqués faute d'heures.
+
+- id: CAL-86
+  titre: >
+    EFFET DE BORD MESURÉ — le plancher de prairie se sert en partie sur les
+    terres arboricoles (136 ha)
+  type: resultat
+  statut: retenu
+  severite: mineur
+  quand: 2026-07-29
+  source: ["docs/archives/journal-vigilance.md:613-615"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-31]
+  critique: >
+    Une contrainte adoptée la veille déplace un poste que personne ne surveillait.
+    Argument concret pour le diff d'allocation (ARCH-41) : le diff de config
+    n'aurait jamais montré ça.
+
+- id: CAL-87
+  titre: >
+    SIGNAL D'IMPLAUSIBILITÉ — 430 ha d'ananas intensif surgissant chez des
+    canniers et des bananiers
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: ["docs/archives/journal-vigilance.md:617-621"]
+  chiffre: []
+  destination: [ch3, ch5, oral]
+  arcs:
+    parce-que: [DON-01]
+  critique: >
+    L'ananas se concentre sur `AN_PA` (430 des 461 ha), variante à paillage
+    plastique, 16 363 €/ha et 33 €/h — meilleur rendement horaire des cultures
+    intensives. Elle est plantée chez des bananiers (137 ha), canniers
+    diversifiés (108) et canniers spécialisés (106), presque nulle part chez des
+    arboriculteurs. ⚠ TEST DE PLAUSIBILITÉ QUALITATIF, sans métrique : « qui
+    ferait ça ? » Un modèle peut être numériquement optimal et sociologiquement
+    absurde, et aucun indicateur du dépôt ne le détecte.
+
+- id: CAL-88
+  titre: >
+    DÉCOUVERTE INCIDENTE — sur l'arboriculture, le modèle est plus proche
+    d'Agreste que notre propre référence
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-29
+  source: ["docs/archives/journal-vigilance.md:672-678"]
+  chiffre: []
+  destination: [ch3, ch5, oral, article]
+  arcs:
+    parce-que: [CAL-85]
+  critique: >
+    ⚠ RÉSULTAT RETOURNÉ, ET IL EST RARE. Le RPG donne AG 101 ha / VE 311 ha ;
+    Agreste donne agrumes 283 / autres fruits 102 — soit à peu près l'INVERSE.
+    Sous le seul plancher agrégé, aucune contrainte ne distinguant les deux, le
+    modèle répartit 228 / 107 : la répartition d'Agreste. La ventilation
+    agrumes/vergers du RPG est donc douteuse, et le PAD la concernant mesure une
+    erreur DE LA RÉFÉRENCE autant qu'une erreur du modèle. Conséquence
+    épistémique : la référence à laquelle on compare n'est pas la vérité, et il
+    existe au moins un cas où le modèle a raison contre elle.
+
+- id: CAL-89
+  titre: >
+    Le melon a un PAD de 100 % qui est ÉCONOMIQUE, pas structurel — éligible sur
+    7 721 parcelles, planté sur zéro
+  type: resultat
+  statut: retenu
+  severite: mineur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:436-439"]
+  chiffre: []
+  destination: [annexeE]
+  arcs:
+    parce-que: [CAL-55]
+  critique: >
+    Distinction utile et généralisable : un écart de 100 % peut venir d'une
+    interdiction (structurel) ou d'un arbitrage (économique), et les deux se
+    corrigent différemment. L'article échoue aussi à 100 % sur le melon, pour une
+    cause hors modèle — des terres louées à un exportateur.
+
+- id: CAL-90
+  titre: >
+    Le plan observé demande 5,68 M h contre un plafond de 6,25 M — la main
+    d'œuvre n'interdit pas non plus l'assolement réel
+  type: resultat
+  statut: retenu
+  severite: null
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:375-376"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-50]
+  critique: >
+    Troisième argument, indépendant des deux autres, pour établir que l'écart
+    n'est pas une impossibilité : l'assolement observé est réalisable sous toutes
+    les contraintes du modèle. Il est simplement moins bon selon l'objectif.
+
+- id: CAL-91
+  titre: >
+    Les Tables 4 et 5 de l'article sont des RAPPORTS DE SOMMES — vérifié par le
+    calcul
+  type: methode
+  statut: retenu
+  severite: mineur
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:356-361"]
+  chiffre: []
+  destination: [annexeE]
+  arcs:
+    parce-que: [CAL-40]
+  critique: >
+    La moyenne de leurs sept taux de surface donnerait 71 %, pas les 77 %
+    publiés : c'est donc un rapport de sommes, comme nos lignes TOTAL. Vérifier
+    par recalcul la convention d'agrégation d'un article plutôt que la supposer —
+    petit geste, et il évite une comparaison faussée.
+
+- id: CAL-92
+  titre: >
+    La reproductibilité sur machine neuve a été vérifiée — mêmes chiffres au
+    dixième
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-27
+  source: ["docs/archives/journal-vigilance.md:329-331"]
+  chiffre: []
+  destination: [ch2, annexeE]
+  arcs:
+    parce-que: [VER-50]
+  critique: >
+    `output_1` sur une machine neuve redonne exactement l'état documenté (PAD
+    48,4 %, types 64,0 %, parcelles 56,0 %, surface 64,3 %). Et le solve tient en
+    140 s à 308 847 variables, très loin des 30-55 min historiques — mesure qui
+    date d'avant les scénarios prospectifs, plus lourds.
+
+# =============================================================================
+# DENSIFICATION — specs « état de référence » et « calibration & validation ».
+# =============================================================================
+
+- id: CAL-93
+  titre: >
+    La référence RÉUTILISE les fonctions du modèle plutôt que de les
+    réimplémenter proprement
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-reference-state-design.md:23-26"]
+  chiffre: []
+  destination: [ch3, note]
+  arcs:
+    parce-que: [CAL-02]
+  critique: >
+    « Une deuxième implémentation *propre* aurait divergé silencieusement. »
+    Corollaire VOULU et explicitement assumé : l'estimation centrale de la
+    référence **est** le côté entrée d'un run, au chiffre près. On perd
+    l'indépendance des deux calculs — donc la référence ne peut pas servir de
+    contre-vérification du pipeline — et on gagne l'impossibilité d'une dérive
+    silencieuse entre les deux. Arbitrage assumé dans le bon sens, vu ce que le
+    dépôt sait de la dérive silencieuse (ARCH-63).
+
+- id: CAL-94
+  titre: >
+    DEUX LECTURES de l'assolement observé sont publiées, parce que la règle de
+    friche en reclasse 1 208 ha
+  type: choix
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-reference-state-design.md:28-34"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-02]
+  critique: >
+    La règle GAMS de continuité de friche bascule en `NC` toute parcelle dont
+    `cult_2016` ET `cult_2017` sont en jachère : **1 208 ha passent de JA à NC**.
+    C'est la lecture qu'utilisent le modèle, la typologie et le PAD — mais ce
+    n'est pas ce que dit le RPG brut. « Publier la seule lecture résolue aurait
+    rendu la reclassification INVISIBLE. » Et le procédé pour obtenir la lecture
+    brute est élégant : passer à la fonction un `cult_2016` jamais en jachère,
+    plutôt que dupliquer la table code → groupe — on réutilise la fonction en
+    neutralisant son entrée, au lieu d'en écrire une seconde (cf. CAL-93).
+
+- id: CAL-95
+  titre: >
+    LE CENTRAL SORT DE LA FOURCHETTE PAR LE HAUT — et c'est le résultat le plus
+    utile du lot
+  type: resultat
+  statut: retenu
+  severite: critique
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-reference-state-design.md:36-45"]
+  chiffre: [mesRepCanne]
+  destination: [ch3, ch5, oral, article]
+  arcs:
+    parce-que: [DON-13, DON-14]
+  critique: >
+    ⚠ TROUVAILLE MÉTHODOLOGIQUE DE PREMIER ORDRE, absente du brouillon.
+    L'encadrement rejoue chaque parcelle avec la variante la moins puis la plus
+    intense **parmi celles qui y sont éligibles**. Résultat : sur ventes, revenu,
+    heures, azote, GES et IFT, l'estimation centrale tombe **au-dessus de la
+    borne haute** — parce que la représentante n'est souvent pas éligible là où
+    elle est comptée (canne 31 %, maraîchage 61 %). « Un encadrement SYMÉTRIQUE
+    autour du central aurait masqué exactement ce que l'on cherchait. » Autrement
+    dit : la fourchette n'a pas servi à exprimer une incertitude, elle a servi à
+    RÉVÉLER UN BIAIS, et elle n'a pu le faire que parce qu'elle était construite
+    indépendamment du central. Transférable à toute quantification d'incertitude.
+
+- id: CAL-96
+  titre: >
+    Le plancher de PAD rend un verdict À DOUBLE SENS — il innocente le modèle sur
+    les vergers et l'accuse partout ailleurs
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["docs/superpowers/specs/2026-07-27-reference-state-design.md:47-55"]
+  chiffre: [obsPlancherPad]
+  destination: [ch3, annexeE, oral]
+  arcs:
+    parce-que: [CAL-04, PORT-20]
+  critique: >
+    ⚠ LE LIEN QUE JE SIGNALAIS COMME MANQUANT (PORT-20 ↔ CAL-55) EST FAIT ICI, ET
+    N'A PAS REMONTÉ. Les vergers et agrumes sont irreproductibles POUR CAUSE DE
+    PORTAGE D'UN BUG GAMS (`Eq_VE_PLUIE` interdit la culture partout), donc leur
+    PAD n'accuse pas le modèle. Partout ailleurs, l'éligibilité n'explique rien —
+    1,5 % de plancher contre 48 % d'écart. Une même mesure qui disculpe sur un
+    poste et charge sur les autres est bien plus convaincante qu'une mesure qui
+    ne fait que l'un des deux.
+
+- id: CAL-97
+  titre: >
+    Les parcelles `NC` ne peuvent PAS être ignorées — elles diminuent le
+    dénominateur et remontent toutes les parts
+  type: piege
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-21
+  source: ["docs/superpowers/specs/2026-07-21-calibration-validation-design.md:256-268"]
+  chiffre: []
+  destination: [annexeE, note]
+  arcs:
+    parce-que: [CAL-10]
+  critique: >
+    `compute_type_expl` calcule `denom = surf_cultiv − surf_non`. Reconstruire la
+    typologie depuis `allocation_input.csv`, qui écarte les `NC`, traiterait ces
+    parcelles comme INEXISTANTES et non comme NON CULTIVÉES — ce qui décale les
+    parts et **peut faire basculer un type d'exploitation**. D'où la décision de
+    prendre le `Dataset` et de recalculer sur l'univers complet. Piège de
+    dénominateur classique, avec une conséquence discrète : un type mal attribué
+    fausse l'AVERS, donc l'objectif, donc l'optimum.
+
+- id: CAL-98
+  titre: >
+    Les deux allocations ne couvrent PAS le même jeu de parcelles — le PAD
+    travaille sur l'UNION
+  type: choix
+  statut: retenu
+  severite: majeur
+  source: ["docs/superpowers/specs/2026-07-21-calibration-validation-design.md:270-275"]
+  chiffre: []
+  destination: [annexeE]
+  arcs:
+    parce-que: [CAL-97]
+  critique: >
+    22 197 lignes observées non `NC` contre 22 779 simulées. « Une parcelle `NC`
+    en 2017 qui reçoit une culture est un CHANGEMENT RÉEL, pas une anomalie de
+    données. » Convention : l'absence d'un côté vaut surface nulle pour la
+    culture concernée. Décision qui a l'air technique et qui encode un choix de
+    sens — le modèle a le droit de mettre en culture une parcelle qui ne l'était
+    pas, et le compter comme une erreur serait faux.
+
+- id: CAL-99
+  titre: >
+    Le diagnostic était ANNONCÉ dans la spec avant d'être mesuré
+  type: methode
+  statut: retenu
+  severite: null
+  quand: 2026-07-21
+  source: ["docs/superpowers/specs/2026-07-21-calibration-validation-design.md:283-296"]
+  chiffre: []
+  destination: [ch3, ch5]
+  arcs:
+    parce-que: [CAL-70, CAL-71]
+  critique: >
+    La spec écrit, AVANT le premier run de calibration : « Le simulé est
+    intégralement en maraîchage : zéro canne, zéro prairie, zéro banane. Le PAD
+    régional sortira proche de 100 % sur toutes les cultures majeures » — avec
+    les deux causes probables. C'est exactement ce qui s'est produit (CAL-70).
+    Prédire le résultat d'un dispositif de mesure avant de le lancer est le
+    meilleur test de sa compréhension, et c'est ce qui distingue « on découvre un
+    mauvais score » de « on installe un thermomètre en sachant ce qu'il va lire ».
+
+# =============================================================================
+# DENSIFICATION — corps des commits de juillet.
+# =============================================================================
+
+- id: CAL-100
+  titre: >
+    ⚠ LA MÉTRIQUE RÉELLEMENT COMPARABLE À L'ARTICLE VAUT 4 / 11, CONTRE 8 / 10 —
+    et elle n'est citée nulle part
+  type: piege
+  statut: ouvert
+  severite: critique
+  quand: 2026-08-12
+  source: ["commit 8205d64", docs/04-vigilance.md#E.2]
+  chiffre: []
+  destination: [ch3, annexeE, oral]
+  arcs:
+    parce-que: [CAL-41]
+  critique: >
+    ⚠ TROU D'HONNÊTETÉ À COMBLER, ET IL EST DE TAILLE. Le chapitre 3 établit que
+    « la métrique réellement comparable est le nombre de cultures sous le seuil »
+    — puis ne donne jamais le chiffre. Il est dans le commit du plancher de
+    prairie : **cultures sous seuil 2 → 4 sur 11**, quand l'article annonce
+    8 sur 10. Autrement dit, sur la SEULE métrique que le mémoire lui-même
+    désigne comme comparable, le modèle est à la moitié du score publié — alors
+    que les trois métriques mises en avant (types 86,9 %, parcelles 67,6 %,
+    surface 77,1 %) atteignent ou dépassent l'article. Les deux lectures sont
+    vraies et elles disent des choses opposées. Ne pas citer la première tout en
+    ayant écrit qu'elle est la bonne est intenable devant un jury : il faut soit
+    la donner et l'expliquer (le PAD par culture pénalise les petits postes, où
+    se concentre tout l'écart résiduel — CAL-55), soit renoncer à écrire qu'elle
+    est la métrique comparable.
+
+- id: CAL-101
+  titre: >
+    La prairie pesait 42 % de la déviation totale avant son plancher
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-28
+  source: ["commit 8205d64"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-24]
+  critique: >
+    Le chiffre qui quantifie exactement pourquoi le PAD territorial de 6,6 % est
+    incitable : le poste que le plancher épingle représentait 42 % de l'écart.
+    Bien plus parlant que « la prairie pèse un quart de la surface cultivée ».
+
+- id: CAL-102
+  titre: >
+    Deux signatures ÉMERGENTES en deux jours — la banane revient sous le plafond
+    plantain, la canne sous le plancher de prairie
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-28
+  source: ["commit e51f1cc", "commit 8205d64"]
+  chiffre: [simRetenuCS, obsHaCS]
+  destination: [ch3, ch6, oral]
+  arcs:
+    parce-que: [CAL-23, CAL-30]
+  critique: >
+    Le commit du plancher de prairie le nomme lui-même : « même signature
+    émergente que la banane sous le plafond plantain la veille ». Banane export
+    978 → 2 213 ha contre 1 921 observés sous une contrainte qui porte sur le
+    PLANTAIN ; canne 12 782 contre 12 813 observés sous une contrainte qui porte
+    sur la PRAIRIE. Deux fois, une contrainte sur un poste ramène un AUTRE poste
+    à sa valeur observée. C'est le seul type de validation qui ne puisse pas être
+    de l'ajustement — et le fait qu'elle se produise DEUX FOIS, sur deux
+    mécanismes indépendants, est bien plus fort qu'une occurrence isolée.
+
+- id: CAL-103
+  titre: >
+    Marie-Galante s'effondrait de 1 357 à 228 ha de prairie — 83 % de perte sur
+    une île entière
+  type: resultat
+  statut: retenu
+  severite: majeur
+  quand: 2026-07-27
+  source: ["commit e06d7b1"]
+  chiffre: []
+  destination: [ch3, annexeE]
+  arcs:
+    parce-que: [CAL-80, CAL-82]
+  critique: >
+    À rapprocher de CAL-82 : `CS_MG_NISM` absorbe à elle seule 1 042 ha, et son
+    avantage sur la prairie est de 15 €/ha (0,94 %). Une île entière bascule sur
+    un écart inférieur à la tolérance du solveur et à toute incertitude de
+    données plausible. C'est l'illustration la plus frappante de la SENSIBILITÉ
+    d'un modèle d'allocation — et elle est géographiquement lisible, donc
+    cartographiable.

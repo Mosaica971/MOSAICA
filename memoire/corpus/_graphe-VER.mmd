@@ -1,0 +1,51 @@
+flowchart LR
+  VER_01["VER-01 — Les tests unitaires ne lisent JAMAIS les données rée"]
+  VER_02["VER-02 — Les tests exercent les constructeurs sur des configu"]
+  VER_03["VER-03 — ⚠ La suite complète dure ~29 min parce que quelques "]
+  VER_30["VER-30 — LE GOLDEN SNAPSHOT — ~570 sommes de contrôle sur le "]
+  VER_31["VER-31 — Le golden vit dans `.golden/`, GITIGNORÉ, parce qu'i"]
+  VER_50["VER-50 — `check_references.py` — le SEUL garde-fou du dépôt s"]
+  VER_51["VER-51 — Sa tolérance est de 5 % PARCE QUE le bruit de branch"]
+  VER_52["VER-52 — ⚠ `check_references.py` reste une commande à lancer "]:::ouvert
+  VER_20["VER-20 — `repair_allocation.py` — construire À LA MAIN une so"]
+  VER_21["VER-21 — `constraint_violations` — auditer une graine contre "]
+  VER_22["VER-22 — `audit_warm_start_seed.py` — chiffrer la DISTANCE d'"]
+  VER_40["VER-40 — `check_scenario_feasibility.py` — le contrôle avant "]
+  VER_41["VER-41 — Mesurer le SAUT D'INTÉGRALITÉ en résolvant le même p"]
+  VER_42["VER-42 — LA BISSECTION — retirer les plafonds un par un pour "]
+  VER_43["VER-43 — Établir qu'une politique est HORS D'ATTEINTE demande"]
+  VER_10["VER-10 — `SolveHistory` — le seul relevé empirique du coût de"]
+  VER_11["VER-11 — L'estimateur refuse de répondre HORS de sa bande de "]
+  VER_12["VER-12 — `profile_solver.py` — run chronométré par phase sur "]
+  VER_13["VER-13 — `shadow_prices.py` — et le piège qu'il documente : f"]
+  VER_60["VER-60 — `display_datasets.py` — inspecter le jeu de données "]
+  VER_61["VER-61 — Un test de SYNCHRONISATION garde la cohérence entre "]
+  VER_62["VER-62 — ⚠ CE QUI N'EST GARDÉ PAR RIEN — la chaîne solve → ge"]:::ouvert
+  VER_63["VER-63 — Le compte de pages du cœur est vérifié MÉCANIQUEMENT"]
+  VER_B1["VER-B1 — BRANCHE COUPÉE — un run de référence AVEC SOLVE comm"]:::ecarte
+  VER_32["VER-32 — Ce qu'il fallait prouver se réduit à : entrées du so"]
+  VER_33["VER-33 — Le golden coûte 7 s là où un run avec solve coûte 30"]
+  VER_34["VER-34 — `build_model` seul coûte 188 s sur le territoire com"]:::ouvert
+  VER_35["VER-35 — Le piège du mapping des sols a reçu un correctif STR"]
+  VER_36["VER-36 — Les tests vérifient LES DEUX BORNES d'un indicateur,"]
+  VER_01 --> VER_02
+  VER_01 --> VER_03
+  VER_01 --> VER_30
+  VER_30 --> VER_31
+  VER_50 --> VER_51
+  VER_50 --> VER_52
+  VER_21 --> VER_22
+  VER_40 --> VER_41
+  VER_40 --> VER_42
+  VER_22 --> VER_43
+  VER_40 --> VER_43
+  VER_30 --> VER_62
+  VER_50 --> VER_62
+  VER_30 --> VER_B1
+  VER_B1 --> VER_32
+  VER_32 --> VER_33
+  VER_33 --> VER_34
+  VER_02 --> VER_36
+  classDef ecarte fill:#ffebee,stroke:#b71c1c;
+  classDef renverse fill:#f3e5f5,stroke:#6a1b9a;
+  classDef ouvert fill:#e1f5fe,stroke:#01579b;
