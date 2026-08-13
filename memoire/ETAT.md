@@ -113,11 +113,16 @@ PowerShell transforme en échec.
       variables MOSAICA_v2.docx`, jamais ouvert avant, et le livre blanc CALALOU). 482 items.
 - [x] **Phase 2 — Graphe et audits.** Script, trois règles, trois échappatoires déclarées,
       7 branches coupées documentées. Commit `123b7a2`.
-- [ ] **Phase 3 — Réflexivité.** Les 27 axes de `96-reflexivite.yaml` attendent l'arbitrage
-      de Clément : valider / écarter / ajouter. **Lui seul peut écrire ce contenu** — chaque
-      axe porte un `ancrage` (le fait mesuré qui l'empêche d'être un lieu commun), une
-      `question` (ce que lui seul peut trancher) et un `risque` (comment l'axe rate). Sur 27,
-      le Ch. 5 en tient 8 à 10.
+- [~] **Phase 3 — Réflexivité.** `96-reflexivite.yaml` porte **35 axes** : 27 issus du
+      dépouillement, plus 8 ajoutés par Clément le 13/08 (race et position coloniale,
+      composition de l'institution, le vécu réduit à un scalaire, co-construction, effet réel
+      sur la société, refus de la thèse, forme du rendu ×2). Chaque axe porte un `ancrage`
+      (le fait mesuré qui l'empêche d'être un lieu commun), une `question` (ce que lui seul
+      peut trancher) et un `risque` (comment l'axe rate). **Reste à faire : l'arbitrage** —
+      le Ch. 5 en tient 8 à 10, et le contenu ne peut être écrit que par lui.
+      Deux axes appellent une action AVANT le 26/08, pas une rédaction : `REF-26` (demander
+      à Blazy et Guindé ce que CALALOU a réellement déplacé) et `REF-61` (instruire auprès du
+      tuteur école la forme de la soutenance).
 - [ ] **Phase 4 — Plan détaillé.** Dériver le plan de la topologie du graphe plutôt que du
       goût, et arbitrer le budget de 30 pages. La charge par destination est déjà dans
       `_audit.md` (ch3 : 106 items, ch4 : 100, ch2 : 98, ch5 : 90 — il faudra couper).
