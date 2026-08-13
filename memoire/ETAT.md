@@ -123,6 +123,10 @@ PowerShell transforme en échec.
       Deux axes appellent une action AVANT le 26/08, pas une rédaction : `REF-26` (demander
       à Blazy et Guindé ce que CALALOU a réellement déplacé) et `REF-61` (instruire auprès du
       tuteur école la forme de la soutenance).
+      **`memoire/questions-encadrants.md`** porte les questions préparées, en huit blocs, avec
+      les cinq réponses qui changeraient le contenu du mémoire. Y consigner les réponses au
+      fur et à mesure : plusieurs items du corpus (`REF-05`, `REF-25`, `REF-26`, `REF-52`)
+      attendent des faits que seul cet échange peut fournir.
 - [ ] **Phase 4 — Plan détaillé.** Dériver le plan de la topologie du graphe plutôt que du
       goût, et arbitrer le budget de 30 pages. La charge par destination est déjà dans
       `_audit.md` (ch3 : 106 items, ch4 : 100, ch2 : 98, ch5 : 90 — il faudra couper).
