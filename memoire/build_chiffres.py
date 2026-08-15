@@ -85,7 +85,12 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     # Garde-fous -- denombrements du depot au 2026-08-09
     "mesTests":           ("613",     "fonctions de test"),
     "mesTestsFichiers":   ("58",      "fichiers de test"),
-    "mesChecksums":       ("570",     "checksums du golden snapshot"),
+    # 681, verifie par `golden_snapshot.py --check` le 2026-08-12. La valeur 570 qui figurait
+    # ici etait PERIMEE : elle datait du refactor du 2026-07-21, avant l'ajout des blocs
+    # intensity / agroecology / P-K / Rpest. Cas d'ecole de MET-14 -- un chiffre de
+    # documentation qui derive sans que rien ne le signale, dans le fichier meme dont la
+    # raison d'etre est d'empecher les chiffres de deriver.
+    "mesChecksums":       ("681",     "checksums du golden snapshot (verifie 2026-08-12)"),
     "mesLignesCode":      ("18377",   "lignes de Python hors .venv"),
     # Solveur hors de cause -- 04-vigilance E.3
     "mesGraineA":         ("48,44",   "PAD territorial, graine HiGHS 1 (E.3)"),
@@ -102,6 +107,24 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     "mesUgbHaAgreste":    ("3,10",    "UGB/ha sur les 9 595 ha d'Agreste"),
     "mesPrairieAgreste":  ("9595",    "prairie Agreste 2017, ha"),
     "mesPrairieRpg":      ("6109",    "prairie observee dans notre jeu parcellaire, ha"),
+    # LE PLANCHER DE PRAIRIE EST-IL UNE VARIABLE D'AJUSTEMENT ? -- balayage du 2026-07-28
+    # (config.yaml:450-473, spec 2026-07-28-plancher-prairie-design.md).
+    # Il faut le dire franchement : 6 096 EST l'observe. Le GAMS le documente lui-meme
+    # ("QUOTA_PN_PIQ_MIN ... = surface 2017 PN_PIQ", DONNEES.txt:66), il tombe a 13 ha de
+    # notre propre prairie de reference (6 109), et le livre blanc CALALOU releve 6 096 ha de
+    # surface bovine observee. La regle du chapitre 3 -- une deviation se source HORS du
+    # modele ET hors de l'observe -- l'interdirait donc. Ce qui autorise malgre tout la
+    # deviation est le balayage : sur toute la plage exogene 6 096 -> 9 595 ha, les trois
+    # metriques que le plancher NE TOUCHE PAS restent au-dessus des seuils publies, et le PAD
+    # hors prairie EMPIRE quand on remonte vers la statistique. La conclusion ne depend pas
+    # du seuil ; c'est le meme argument que le palier plat du plafond plantain.
+    "mesPrairieExogene":  ("8341",    "prairie Agreste ramenee a notre couverture de 87 %, ha"),
+    "mesPrairieHautTypes": ("82,0",   "types reproduits avec un plancher a 9 595 ha, en %"),
+    "mesPrairieHautParcelles": ("65,2", "parcelles bien simulees, meme plancher, en %"),
+    "mesPrairieHautSurface": ("72,2",  "surface bien simulee, meme plancher, en %"),
+    "mesPadHorsPrairieBas": ("14,9",  "PAD hors prairie a un plancher de 7 218 ha, en %"),
+    "mesPadHorsPrairieHaut": ("24,0", "le meme a 9 595 ha -- il EMPIRE quand le seuil monte, en %"),
+    "mesCalalouBovins":   ("6096",    "surface bovine observee par CALALOU (Livre blanc, tab. 3), ha"),
     # Calibration : les seuils de l'article -- Chopin et al. (2015)
     "mesArtPad":          ("15",      "seuil de PAD de l'article, en %"),
     "mesArtTypes":        ("81",      "types d'exploitation reproduits par l'article, en %"),

@@ -159,12 +159,21 @@ une source \emph{extérieure} au modèle et à l'observé.
 
 Le \textbf{plafond de production de plantain} vaut \SI{6440}{\tonne}. Il vient d'un chiffre de
 l'auteur du \gls{gams} d'origine, corroboré par l'équation~6 de l'article, qui pose un
-débouché de \SI{4650}{\tonne}. Le \textbf{plancher de surface en prairie} vaut
-\SI{6096}{\ha} : c'est un paramètre présent dans le \gls{gams}, corroboré par la statistique
-agricole.
+débouché de \SI{4650}{\tonne}.
 
-Cette corroboration mérite d'être détaillée, parce qu'elle est la meilleure preuve du
-chapitre et qu'elle ne passe pas par le modèle. Notre jeu parcellaire couvre
+Le \textbf{plancher de surface en prairie} vaut \SI{6096}{\ha}, et il faut dire d'emblée ce
+que ce nombre est. Le \gls{gams} le documente lui-même comme
+\guillemotleft~la surface 2017 de \texttt{PN\_PIQ}~\guillemotright ; il tombe à \SI{13}{\ha}
+de la prairie de notre propre référence (\SI{\mesPrairieRpg}{\ha}) ; et le livre blanc du
+projet qui a précédé celui-ci relève la même valeur pour la surface bovine observée
+(\SI{\mesCalalouBovins}{\ha}). \textbf{C'est donc l'observé}, et la règle que je viens de
+poser l'interdirait. Ce qui autorise malgré tout cette déviation n'est pas la provenance du
+seuil, qui est mauvaise, mais le fait --- mesuré plus bas --- que la conclusion n'en dépende
+pas.
+
+Qu'un plancher soit \emph{nécessaire} est, en revanche, établi hors du modèle et hors de
+l'observé --- et cette démonstration mérite d'être détaillée, parce qu'elle est la meilleure
+preuve du chapitre. Notre jeu parcellaire couvre
 \SI{\mesCouvertureSau}{\percent} de la surface agricole du territoire et restitue la canne à
 \SI{98}{\percent} --- mais la prairie à \SI{64}{\percent} seulement
 (\SI{\mesPrairieRpg}{\ha} contre \SI{\mesPrairieAgreste}{\ha}). Ce n'est pas une erreur
@@ -188,6 +197,21 @@ l'observé, non au seuil le plus serré. Ce qui compte n'est donc pas la valeur 
 son \emph{existence} : le modèle a besoin qu'un débouché borne le plantain, et il est
 indifférent à l'endroit exact où on le pose. C'est la différence de fond avec les plafonds de
 marché calés sur l'observé, qui ont été instruits puis écartés pour circularité.
+
+Le même test s'applique au plancher de prairie, et il y est plus exigeant puisque le seuil,
+lui, \emph{est} l'observé. En le faisant varier de \SI{6096}{\ha} jusqu'à la statistique
+exogène (\SI{\mesPrairieAgreste}{\ha}), les trois métriques que le plancher ne touche pas
+restent au-dessus des seuils publiés sur \emph{toute} la plage : les types passent de
+\SIrange{\calibRetenuTypes}{\mesPrairieHautTypes}{\percent}, les parcelles de
+\SIrange{\calibRetenuParcelles}{\mesPrairieHautParcelles}{\percent}, la surface de
+\SIrange{\calibRetenuSurface}{\mesPrairieHautSurface}{\percent}. Surtout, le \gls{pad}
+calculé \emph{hors} prairie ne s'améliore pas quand on remonte le seuil vers la statistique :
+il \textbf{empire}, de \SIrange{\mesPadHorsPrairieBas}{\mesPadHorsPrairieHaut}{\percent},
+parce que le plancher prend alors sa terre à la canne --- la culture que notre jeu parcellaire
+restitue le mieux (\SI{98}{\percent}, contre \SI{\mesCouvertureSau}{\percent} de couverture
+globale). Un seuil calé sur l'observé pour flatter le résultat se comporterait exactement à
+l'inverse. Ce que le plancher encode n'est donc pas la valeur de la prairie en 2017, c'est le
+fait qu'un cheptel de \num{\mesBovins} bovins doit pâturer quelque part.
 
 \section{Se comparer à l'article demande quatre corrections}
 \label{sec:corrections}

@@ -321,6 +321,23 @@ GAMS renvoie 0 sur colonne manquante, donc **la pluie n'a jamais été déduite*
 → L'indicateur est un besoin en eau **brut des cultures**, pas un besoin net d'irrigation.
 **Ne pas l'étiqueter « irrigation ».**
 
+⚠ **CORRIGÉ le 2026-08-12 — la donnée mensuelle EXISTE, et elle est dans le dépôt.** Cette
+entrée affirmait (comme la spec eau/carbone) que le déblocage demandait « une série
+pluviométrique mensuelle par parcelle, qui n'existe pas aujourd'hui ». C'est faux.
+`context/Rapport technique variables MOSAICA_v2.docx` §5 porte une section « Calcul de la
+répartition mensuelle des précipitations annuelles » et publie la clé, moyennée sur trois
+stations INRA (Gardel, Duclos, Godet) et neuf années complètes communes :
+
+| J | F | M | A | M | J | J | A | S | O | N | D |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 7,4 % | 3,8 % | 4,6 % | 9,1 % | 10,3 % | 6,8 % | 8,2 % | 11,4 % | 9,6 % | 11,7 % | 9,9 % | 7,3 % |
+
+`PLUVIO_01..12_PARC` valait donc `PLUVIO_PARC × clé`. Les colonnes sont absentes de la table
+livrée, mais la méthode et les coefficients sont versionnés. Le besoin net d'irrigation est
+calculable — attention toutefois : `PLUVIO_PARC` est une **normale 1981-2010**, pas la pluie
+de l'année simulée, et le bug `max(0, ·)` manquant (entrée D.3) se réveillera dès que la pluie
+sera effectivement déduite.
+
 Corollaire : les 12 colonnes `BESOIN_EAU_01..12` sont **identiques pour les 84 cultures** — tout
 indicateur mensuel est dégénéré (le « mois de pointe » vaut toujours le total / 12). C'est
 pourquoi il est exclu du score composite.

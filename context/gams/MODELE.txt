@@ -2,8 +2,8 @@
 
 SEMICONT VARIABLE
 *Positive variable
-X(P,C)                    Surface optimisée par parcelle et par culture;
-*Borne inférieure de la surface optimisée par parcelle et par culture fixée à la surface initiale de la parcelle
+X(P,C)                    Surface optimisï¿½e par parcelle et par culture;
+*Borne infï¿½rieure de la surface optimisï¿½e par parcelle et par culture fixï¿½e ï¿½ la surface initiale de la parcelle
 X.lo(P,C)=Data_Parc_Gwad(P,"SURF_HA");
 
 VARIABLE
@@ -15,7 +15,7 @@ REV_MARKOVITZ_GWAD        Revenu comme somme des marges brutes par hectare(avec 
 EQUATIONS
 *oooooooooooooooooooooooooo Equations parcelles oooooooooooooooooooooooooooooooo
 
-Eq_SURF_MAX_Parc(P)       Limitation de la surface cultivée par parcelle à la surface initiale de la parcelle
+Eq_SURF_MAX_Parc(P)       Limitation de la surface cultivï¿½e par parcelle ï¿½ la surface initiale de la parcelle
 Eq_SURF_INIT_Parc(P,C)
 Eq_NOCULT_NC(P,C)
 
@@ -34,157 +34,157 @@ Eq_ALTIMAX_Parc(P,C)      Altitude maximum pour l'implantation d'une culture
 Eq_PENTEMIN_Parc(P,C)     Pente minimum pour l'implantation d'une culture
 Eq_PENTEMAX_Parc(P,C)     Pente maximum pour l'implantation d'une culture
 
-Eq_PLUVIOMIN_Parc(P,C)    Pluviométrie minimum ou accès à l'irrigation pour l'implantation d'une culture
-Eq_PLUVIOMAX_Parc(P,C)    Pluviométrie maximum pour l'implantation d'une culture
+Eq_PLUVIOMIN_Parc(P,C)    Pluviomï¿½trie minimum ou accï¿½s ï¿½ l'irrigation pour l'implantation d'une culture
+Eq_PLUVIOMAX_Parc(P,C)    Pluviomï¿½trie maximum pour l'implantation d'une culture
 
 
-*oooooooooooooooooooooooooo Equations systèmes ooooooooooooooooooooooooooooooooo
+*oooooooooooooooooooooooooo Equations systï¿½mes ooooooooooooooooooooooooooooooooo
 *****ANANAS
-Eq_AN_PA                  Interdiction de l'ITK ananas paillé dans les petites exploitations
+Eq_AN_PA                  Interdiction de l'ITK ananas paillï¿½ dans les petites exploitations
 
 *****MARAICHAGE
-Eq_MA_ROTA_IRR(P,C)       Interdiction de l'ITK maraichage en roation MA_ROTA hors périmètre d'irrigation en Grande-Terre
-Eq_MA_TO_CHOU_JA_LOC(P,C) Interdiction de l'ITK maraichage-tomates-chou-jachère hors Basse-Terre
+Eq_MA_ROTA_IRR(P,C)       Interdiction de l'ITK maraichage en roation MA_ROTA hors pï¿½rimï¿½tre d'irrigation en Grande-Terre
+Eq_MA_TO_CHOU_JA_LOC(P,C) Interdiction de l'ITK maraichage-tomates-chou-jachï¿½re hors Basse-Terre
 
 *****MELON
-Eq_ME_IRR(P,C)            Interdiction de l'ITK melon sur les parcelles non-irriguées
-Eq_ME_MG(P,C)             Interdiction de l'ITK melon à Marie-galante
+Eq_ME_IRR(P,C)            Interdiction de l'ITK melon sur les parcelles non-irriguï¿½es
+Eq_ME_MG(P,C)             Interdiction de l'ITK melon ï¿½ Marie-galante
 
 *****IGNAME
-Eq_IG_PLA_ILE(P,C)        Interdiction de l'ITK igname à plat en Basse-Terre
-Eq_IG_TUT_ILE(P,C)        Interdiction de l'ITK igname tuteurée hors Basse-terre
-Eq_IG_CLD(P,C)            Interdiction de l'ITK igname sur des sols dont le risque de pollution par la CLD<=3 (Moyen-Fort-Très fort)
+Eq_IG_PLA_ILE(P,C)        Interdiction de l'ITK igname ï¿½ plat en Basse-Terre
+Eq_IG_TUT_ILE(P,C)        Interdiction de l'ITK igname tuteurï¿½e hors Basse-terre
+Eq_IG_CLD(P,C)            Interdiction de l'ITK igname sur des sols dont le risque de pollution par la CLD<=3 (Moyen-Fort-Trï¿½s fort)
 
 *****CANNE
-Eq_CS_IRR(P,C)            Interdiction des ITK de canne à sucre irriguée sur les parcelles sans irriguation +++++++++++++++++++++++++++++++++++++++++++++++ mais également sur parcelles avec irrigation
-Eq_CS_SOL_SQUE(P,C)       Interdiction des ITK de canne à sucre mécanisées sur les sols squelettique (SOL_COURT = 1)
-Eq_CS_CONFORM(P,C)        Interdiction des ITK de canne à sucre mécanisées sur parcelles trop biscornues (CONFORM > 1500)
+Eq_CS_IRR(P,C)            Interdiction des ITK de canne ï¿½ sucre irriguï¿½e sur les parcelles sans irriguation +++++++++++++++++++++++++++++++++++++++++++++++ mais ï¿½galement sur parcelles avec irrigation
+Eq_CS_SOL_SQUE(P,C)       Interdiction des ITK de canne ï¿½ sucre mï¿½canisï¿½es sur les sols squelettique (SOL_COURT = 1)
+Eq_CS_CONFORM(P,C)        Interdiction des ITK de canne ï¿½ sucre mï¿½canisï¿½es sur parcelles trop biscornues (CONFORM > 1500)
 
-Eq_CS_BT(P,C)             Interdiction des ITK de canne à sucre de Basse-Terre hors Nord Basse-Terre et Sud-Ouest Basse-Terre
-Eq_CS_SBT(P,C)            Interdiction des ITK de canne à sucre de Sud Basse-Terre hors Sud Basse-Terre
-Eq_CS_NGT(P,C)            Interdiction des ITK de canne à sucre de Nord Grande-Terre hors Nord Grande-Terre
-Eq_CS_CGT(P,C)            Interdiction des ITK de canne à sucre de Centre Grande-Terre hors Centre Grande-Terre
-Eq_CS_EGT(P,C)            Interdiction des ITK de canne à sucre de Est Grande-Terre hors Est Grande-Terre
-Eq_CS_MG(P,C)             Interdiction des ITK de canne à sucre de Marie-Galante hors Marie-Galante
+Eq_CS_BT(P,C)             Interdiction des ITK de canne ï¿½ sucre de Basse-Terre hors Nord Basse-Terre et Sud-Ouest Basse-Terre
+Eq_CS_SBT(P,C)            Interdiction des ITK de canne ï¿½ sucre de Sud Basse-Terre hors Sud Basse-Terre
+Eq_CS_NGT(P,C)            Interdiction des ITK de canne ï¿½ sucre de Nord Grande-Terre hors Nord Grande-Terre
+Eq_CS_CGT(P,C)            Interdiction des ITK de canne ï¿½ sucre de Centre Grande-Terre hors Centre Grande-Terre
+Eq_CS_EGT(P,C)            Interdiction des ITK de canne ï¿½ sucre de Est Grande-Terre hors Est Grande-Terre
+Eq_CS_MG(P,C)             Interdiction des ITK de canne ï¿½ sucre de Marie-Galante hors Marie-Galante
 
 **** CANNE FIBRE
-Eq_CF_SOL_SQUE(P,C)       Interdiction des ITK de canne fibre mécanisées sur les sols squelettique (SOL_COURT = 1)
-Eq_CF_CONFORM(P,C)        Interdiction des ITK de canne fibre mécanisées sur parcelles trop biscornues (CONFORM > 1500)
+Eq_CF_SOL_SQUE(P,C)       Interdiction des ITK de canne fibre mï¿½canisï¿½es sur les sols squelettique (SOL_COURT = 1)
+Eq_CF_CONFORM(P,C)        Interdiction des ITK de canne fibre mï¿½canisï¿½es sur parcelles trop biscornues (CONFORM > 1500)
 
 Eq_CF_BT(P,C)             Interdiction des ITK de canne fibre de Basse-Terre hors Nord Basse-Terre et Sud-Ouest Basse-Terre
 Eq_CF_SBT(P,C)            Interdiction des ITK de canne fibre de Sud Basse-Terre hors Sud Basse-Terre
 Eq_CF_NGT(P,C)            Interdiction des ITK de canne fibre de Nord Grande-Terre hors Nord Grande-Terre
 Eq_CF_CGT(P,C)            Interdiction des ITK de canne fibre de Centre Grande-Terre hors Centre Grande-Terre
 Eq_CF_EGT(P,C)            Interdiction des ITK de canne fibre de Est Grande-Terre hors Est Grande-Terre
-Eq_CF_MG(P,C)             Interdiction des ITK de canne fibre à Marie-Galante
+Eq_CF_MG(P,C)             Interdiction des ITK de canne fibre ï¿½ Marie-Galante
 
 *****BANANE
-Eq_BA_IRR(P,C)            Interdiction de la culture de la banane irriguée sur les parcelles sans irriguation
-Eq_BA_IRR_BT(P,C)         Interdiction de la culture de la banane irriguée en BT (seulement autorisée en GT)
-Eq_BA_JA(E,C)             Surface en jachère superieure ou égale à 20% de la surface en banane (jachère obligatoire une année sur 5 sur les parcelles en banane)
+Eq_BA_IRR(P,C)            Interdiction de la culture de la banane irriguï¿½e sur les parcelles sans irriguation
+Eq_BA_IRR_BT(P,C)         Interdiction de la culture de la banane irriguï¿½e en BT (seulement autorisï¿½e en GT)
+Eq_BA_JA(E,C)             Surface en jachï¿½re superieure ou ï¿½gale ï¿½ 20% de la surface en banane (jachï¿½re obligatoire une annï¿½e sur 5 sur les parcelles en banane)
 Eq_BA_ROTA(E,C)
 
 *****PLANTAIN
 Eq_BC_IRR_BT(P,C)         Interdiction de la culture de la banane plantain sans irrigation en Basse-Terre
-Eq_BC_IRR_GTMG(P,C)       Interdiction de la culture de la banane plantain sans irrigation en Grande-Terre et à Marie-Galante
+Eq_BC_IRR_GTMG(P,C)       Interdiction de la culture de la banane plantain sans irrigation en Grande-Terre et ï¿½ Marie-Galante
 Eq_BC_BT(P,C)             Interdiction de la culture de la banane plantain de Basse-Terre ailleurs hors Basse-Terre
-Eq_BC_GTMG(P,C)           Interdiction de la culture de la banane plantain de Grande-Terre et de Marie-Galante ailleurs qu'en Grande-Terre et à Marie-Galante
+Eq_BC_GTMG(P,C)           Interdiction de la culture de la banane plantain de Grande-Terre et de Marie-Galante ailleurs qu'en Grande-Terre et ï¿½ Marie-Galante
 
 
 *****PN_PIQ
-Eq_PN_PIQ_CLD(P,C)            Interdiction de l'ITK igname sur des sols dont le risque de pollution par la CLD<=3 (Moyen-Fort-Très fort)
+Eq_PN_PIQ_CLD(P,C)            Interdiction de l'ITK igname sur des sols dont le risque de pollution par la CLD<=3 (Moyen-Fort-Trï¿½s fort)
 
 
 ***** FRICHES
-Eq_FRICHE(P,C)            Parcelles en non-cultivés ou en jachère depuis 2008 considérées comme en friche
+Eq_FRICHE(P,C)            Parcelles en non-cultivï¿½s ou en jachï¿½re depuis 2008 considï¿½rï¿½es comme en friche
 
 ***** AGRUMES
 Eq_AG_IRR(P,C)            Interdiction de la culture d'agrumes sans irrigation
 Eq_AG_BT(P,C)
 
 ***** VERGERS
-Eq_VE_IRR(P,C)            Interdiction de la culture de vergers sans irrigation si la pluviométrie annuelle est inferieure à 2700mm
+Eq_VE_IRR(P,C)            Interdiction de la culture de vergers sans irrigation si la pluviomï¿½trie annuelle est inferieure ï¿½ 2700mm
 Eq_VE_BTGT(P,C)           Interdiction de la culture VE_BTGT en Nord Basse-Terre et Sud-Est Basse-Terre
 Eq_VE_PLUIE(P,C)          Interdiction de la culture VE_PLUIE hors de la Basse-Terre et hors du Sud-Ouest de la Basse-Terre
 
 *****GENERAL
-Eq_AN_SUPP(P,C)           Interdiction de la culture de l'ananas uniquement utilisée dans la base initiale
-Eq_BA_SUPP(P,C)           Interdiction de la culture de la banane export uniquement utilisée dans la base initiale
-Eq_BC_SUPP(P,C)           Interdiction de la culture de la banane plantain uniquement utilisée dans la base initiale
-Eq_CS_SUPP(P,C)           Interdiction de la culture de la canne à sucre uniquement utilisée dans la base initiale
-Eq_IG_SUPP(P,C)           Interdiction de la culture de l'igname uniquement utilisée dans la base initiale
-Eq_MA_SUPP(P,C)           Interdiction de la culture maraichaire uniquement utilisée dans la base initiale
-Eq_PN_SUPP(P,C)           Interdiction de la culture de prairie naturelle uniquement utilisée dans la base initiale
-Eq_VE_SUPP(P,C)           Interdiction de la culture de vergers uniquement utilisée dans la base initiale
+Eq_AN_SUPP(P,C)           Interdiction de la culture de l'ananas uniquement utilisï¿½e dans la base initiale
+Eq_BA_SUPP(P,C)           Interdiction de la culture de la banane export uniquement utilisï¿½e dans la base initiale
+Eq_BC_SUPP(P,C)           Interdiction de la culture de la banane plantain uniquement utilisï¿½e dans la base initiale
+Eq_CS_SUPP(P,C)           Interdiction de la culture de la canne ï¿½ sucre uniquement utilisï¿½e dans la base initiale
+Eq_IG_SUPP(P,C)           Interdiction de la culture de l'igname uniquement utilisï¿½e dans la base initiale
+Eq_MA_SUPP(P,C)           Interdiction de la culture maraichaire uniquement utilisï¿½e dans la base initiale
+Eq_PN_SUPP(P,C)           Interdiction de la culture de prairie naturelle uniquement utilisï¿½e dans la base initiale
+Eq_VE_SUPP(P,C)           Interdiction de la culture de vergers uniquement utilisï¿½e dans la base initiale
 
-Eq_MA_EXP_SUPP(P,C)       Interdiction de faire les activités experimentales de maraichage Karusmart
+Eq_MA_EXP_SUPP(P,C)       Interdiction de faire les activitï¿½s experimentales de maraichage Karusmart
 
-Eq_CF_SUPP(P,C)           Interdiction de la culture de canne fibre en scénario classique
-Eq_PN_TOUR_SUPP(P,C)      Interdiction de la culture de paturages tournant mal renseignée
-Eq_TH_SUPP(P,C)           Interdiction de la culture de tomates d'hivernage mal renseignée
+Eq_CF_SUPP(P,C)           Interdiction de la culture de canne fibre en scï¿½nario classique
+Eq_PN_TOUR_SUPP(P,C)      Interdiction de la culture de paturages tournant mal renseignï¿½e
+Eq_TH_SUPP(P,C)           Interdiction de la culture de tomates d'hivernage mal renseignï¿½e
 
-Eq_CS_SBT_NISM_SUPP       Interdiction de l'ITK Canne à sucre non irriguée semi-mécanisée en Sud Basse-Terre
-Eq_CS_MG_NIM_SUPP         Interdiction de l'ITK Canne à sucre non irriguée mécanisée à Marie-Galante
+Eq_CS_SBT_NISM_SUPP       Interdiction de l'ITK Canne ï¿½ sucre non irriguï¿½e semi-mï¿½canisï¿½e en Sud Basse-Terre
+Eq_CS_MG_NIM_SUPP         Interdiction de l'ITK Canne ï¿½ sucre non irriguï¿½e mï¿½canisï¿½e ï¿½ Marie-Galante
 
 
 *oooooooooooooooooooooooooo Equations exploitations oooooooooooooooooooooooooooo
 
-Eq_CS_GFA(E)              Part minimum de SAU initiale en canne à sucre dans les exploitations en GFA
+Eq_CS_GFA(E)              Part minimum de SAU initiale en canne ï¿½ sucre dans les exploitations en GFA
 
 Eq_IG_AGRO_MAX_Expl(E)    Proportion maximum de la surface de l'exploitation en ignames
 Eq_AN_AGRO_MAX_Expl(E)    Proportion maximum de la surface de l'exploitation en ananas
-Eq_BA_QUOTA_Expl(E)       Quota de production de banane export fixé à la production initiale
+Eq_BA_QUOTA_Expl(E)       Quota de production de banane export fixï¿½ ï¿½ la production initiale
 
-Eq_MO_MAX_Expl(E)         Main d'oeuvre par exploitation inférieure ou égale à la main d'oeuvre initialement évaluée
+Eq_MO_MAX_Expl(E)         Main d'oeuvre par exploitation infï¿½rieure ou ï¿½gale ï¿½ la main d'oeuvre initialement ï¿½valuï¿½e
 
-Eq_BC_PROD_MIN           Volume minimum de banane plantain à produire = production 2017 BC_BT+BC_GTMG
-Eq_IG_PROD_MIN           Volume minimum d'ignames à produire = production 2017 IG_PLA+IG_TUT
-Eq_MA_PROD_MIN           Volume minimum de maraichage à produire = production 2017 MA_ROTA+MA_TO_CO_JA
-Eq_AN_PROD_MIN           Volume minimum d'ananas à produire = production 2017 AN_NU+AN_PA
-Eq_PLU_PROD_MIN          Volume minimum d'arboriculture à produire = production 2017 VE_BTGT+VE_PLUIE+AG
-Eq_ME_PROD_MIN           Volume minimum de melon à produire = production 2017 ME (2000t export + reste autoconsommé)
-Eq_PN_PROD_MIN           Surface minimum de paturage naturel à utiliser = surface 2017 PN_PIQ
+Eq_BC_PROD_MIN           Volume minimum de banane plantain ï¿½ produire = production 2017 BC_BT+BC_GTMG
+Eq_IG_PROD_MIN           Volume minimum d'ignames ï¿½ produire = production 2017 IG_PLA+IG_TUT
+Eq_MA_PROD_MIN           Volume minimum de maraichage ï¿½ produire = production 2017 MA_ROTA+MA_TO_CO_JA
+Eq_AN_PROD_MIN           Volume minimum d'ananas ï¿½ produire = production 2017 AN_NU+AN_PA
+Eq_PLU_PROD_MIN          Volume minimum d'arboriculture ï¿½ produire = production 2017 VE_BTGT+VE_PLUIE+AG
+Eq_ME_PROD_MIN           Volume minimum de melon ï¿½ produire = production 2017 ME (2000t export + reste autoconsommï¿½)
+Eq_PN_PROD_MIN           Surface minimum de paturage naturel ï¿½ utiliser = surface 2017 PN_PIQ
 
 
-Eq_LEG_PROD_OBJ           Volume minimum de maraichage à produire = production 2017 MA_ROTA+MA_TO_CO_JA
-Eq_TUB_PROD_OBJ           Volume minimum de tubercules à produire = production 2017 IG_PLA+IG_TUT
-Eq_FRU_PROD_OBJ           Volume minimum de fruits à produire = production 2017 BC_BT+BC_GTMG+AN_NU+AN_PA+VE_BTGT+VE_PLUIE+AG+ME
-Eq_PAT_SURF_OBJ           Surface minimum de paturage naturel à utiliser = production 2017 PN_PIQ
+Eq_LEG_PROD_OBJ           Volume minimum de maraichage ï¿½ produire = production 2017 MA_ROTA+MA_TO_CO_JA
+Eq_TUB_PROD_OBJ           Volume minimum de tubercules ï¿½ produire = production 2017 IG_PLA+IG_TUT
+Eq_FRU_PROD_OBJ           Volume minimum de fruits ï¿½ produire = production 2017 BC_BT+BC_GTMG+AN_NU+AN_PA+VE_BTGT+VE_PLUIE+AG+ME
+Eq_PAT_SURF_OBJ           Surface minimum de paturage naturel ï¿½ utiliser = production 2017 PN_PIQ
 
 
 
 *oooooooooooooooooooooooooo Equations Petites Regions oooooooooooooooooooooooooo
 
-Eq_ME_Reg(R,P)            Interdiction de la culture du melon dans les communes non melonnières
+Eq_ME_Reg(R,P)            Interdiction de la culture du melon dans les communes non melonniï¿½res
 
 
 *oooooooooooooooooooooooooo Equations guadeloupe ooooooooooooooooooooooooooooooo
 
-Eq_BA_QUOTA_MAX           Volume maximum de banane export à exporter
-Eq_ME_QUOTA_MAX           Volume maximum de melon à exporter
-Eq_AN_QUOTA_MAX           Volume maximum d'ananas à produire
-Eq_IG_QUOTA_MAX           Volume maximum d'ignames à produire
-Eq_BC_QUOTA_MAX           Volume maximum de banane plantain à produire
+Eq_BA_QUOTA_MAX           Volume maximum de banane export ï¿½ exporter
+Eq_ME_QUOTA_MAX           Volume maximum de melon ï¿½ exporter
+Eq_AN_QUOTA_MAX           Volume maximum d'ananas ï¿½ produire
+Eq_IG_QUOTA_MAX           Volume maximum d'ignames ï¿½ produire
+Eq_BC_QUOTA_MAX           Volume maximum de banane plantain ï¿½ produire
 
-Eq_CS_QUOTA_MAX           Volume maximum de canne à sucre à produire
+Eq_CS_QUOTA_MAX           Volume maximum de canne ï¿½ sucre ï¿½ produire
 
 **** EQUATIONS AUTRES
-Eq_REV                    Calcul du revenu total à l'echelle du territoire
+Eq_REV                    Calcul du revenu total ï¿½ l'echelle du territoire
 
-Eq_REV_MARKOVITZ          Calcul du revenu de Markovitz à l'echelle de l'exploitation (coeff avers diminue la MB tot de l'expl = rev_markovitz)
-Eq_REV_MARKOVITZ_GWAD     Calcul du revenu de Markovitz à l'échelle de la Guadeloupe -  Variable à maximiser
-
-
+Eq_REV_MARKOVITZ          Calcul du revenu de Markovitz ï¿½ l'echelle de l'exploitation (coeff avers diminue la MB tot de l'expl = rev_markovitz)
+Eq_REV_MARKOVITZ_GWAD     Calcul du revenu de Markovitz ï¿½ l'ï¿½chelle de la Guadeloupe -  Variable ï¿½ maximiser
 
 
-*oooooooooooooooooooooooooo Scénarios Canne Energie oooooooooooooooooooooooooooo
+
+
+*oooooooooooooooooooooooooo Scï¿½narios Canne Energie oooooooooooooooooooooooooooo
 Eq_CF_MIN
 Eq_CF_CS_NBT_NISM
 Eq_CF_CS_SEBT_NISM
 Eq_CF_CS_NGT_NISM
 Eq_CF_CS_CGT_NISM
 Eq_CF_CS_EGT_NISM
-Eq_CF_NC             Equation qui interdit de cultiver sur les terres initialement non cultivées
+Eq_CF_NC             Equation qui interdit de cultiver sur les terres initialement non cultivï¿½es
 
 Eq_CF_T0(E)
 Eq_CF_T1(E)
@@ -237,7 +237,7 @@ Eq_PLUVIOMIN_PARC(SP,SC)$( Data_Parc_Gwad(SP,"PLUVIO_PARC")<Data_Cult("PLUVIO_MI
 Eq_PLUVIOMAX_Parc(SP,SC)$( Data_Parc_Gwad(SP,"PLUVIO_PARC")>Data_Cult("PLUVIO_MAX",SC)).. X(SP,SC)=l=0;
 
 
-*oooooooooooooooooooooooooo Equations systèmes ooooooooooooooooooooooooooooooooo
+*oooooooooooooooooooooooooo Equations systï¿½mes ooooooooooooooooooooooooooooooooo
 
 *****ANANAS
 Eq_AN_PA(SP,"AN_PA")$( Surf_Expl_Parc_init(SP) < AN_SURF_EXPL_MIN ).. X(SP,"AN_PA")=l=0;
@@ -430,7 +430,7 @@ Eq_REV_MARKOVITZ(SE)..   sum(SP$Expl_Parc(SE,SP), sum(SC, X(SP,SC)*MB_Ha_Cult(SC
 Eq_REV_MARKOVITZ_GWAD.. sum(SE,REV_MARKOVITZ(SE)) =e= REV_MARKOVITZ_GWAD;
 
 
-*oooooooooooooooooooooooooo Scénarios Canne Energie oooooooooooooooooooooooooooo
+*oooooooooooooooooooooooooo Scï¿½narios Canne Energie oooooooooooooooooooooooooooo
 Eq_CF_MIN.. SUM((SP, SC_CF), X(SP,SC_CF)*RDT_Cult_CF(SC_CF)) =g= Q_CF_MIN;
 
 Eq_CF_CS_NBT_NISM(SP,SC_CF)$MATRICE_Parc_Cult(SP,"CS_BT_NISM").. X(SP,SC_CF)=l=0;
