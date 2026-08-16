@@ -4,7 +4,26 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-08-13**. Dépôt le **26/08** (J-13), soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-08-16 (soir)**. Dépôt le **26/08** (J-10), soutenance **1-4 sept**.
+> **Le mémoire est entièrement rédigé et compile** : **33 pages de cœur** (⚠ 3 de trop, voir
+> § 6.2), 17 pages d'annexes sur 20 ; zéro encadré `MATIÈRE`, zéro `A REDIGER`, zéro
+> `Overfull hbox`, zéro référence non résolue.
+>
+> **Session du 2026-08-16 (soir) — six changements de fond, tous vérifiés contre les données :**
+> 1. **§ 3.2 réécrit** : le PAD y est désormais *défini*, ses **cinq angles morts** tabulés
+>    (`tab:pad-limites`), et l'écart au PAD de l'article expliqué en quatre causes chiffrées.
+>    L'argument central ajouté : le modèle prescrit, le plan observé vaut 15 % de moins que
+>    l'optimum, donc **un PAD nul serait un signal d'alerte, pas un succès**.
+> 2. **Nouvelle § 3.4 « la cause commune : les rendements »** + `tab:rendements` généré. Les
+>    rendements du modèle valent 1 à 4× ceux du territoire, et **le melon — seule culture à
+>    itinéraire unique — est la seule ligne où les deux coïncident**, ce qui prouve que l'écart
+>    est « potentiel vs moyen » et non un défaut de données.
+> 3. **Trois erreurs de chiffres corrigées** — voir § 7.
+> 4. **`REF-05` écrit** (§ 5.6). Draft à valider ou à couper par Clément, personne d'autre.
+> 5. **`fig:spectre`** : les 10 politiques et les 12 forçages sur deux axes, avec ce qui a
+>    tourné et ce qui n'a jamais tourné.
+> 6. **Bibliographie vérifiée** contre les notices d'éditeur ; l'ordre des auteurs de
+>    `chopin2015` était faux.
 
 ---
 
@@ -23,7 +42,7 @@ la passation à l'équipe.
 | décision | choix retenu | conséquence |
 |---|---|---|
 | **Ampleur du corpus** | exhaustif, 600-900 items visés | 482 produits, jugés suffisants ; le dépouillement est **clos** |
-| **Rapport à Claude** | une **section assumée** dans le Ch. 5 | ni passé sous silence, ni un chapitre entier |
+| **Rapport à Claude** | une **section assumée** dans le Ch. 5 | ni passé sous silence, ni un chapitre entier — c'est le § *Le rapport à l'outil* |
 | **Budget calcul** | **gelé** au 2026-08-12 | plus aucun solve neuf ; on écrit avec les runs existants |
 
 ## 3. Deux contraintes permanentes
@@ -39,32 +58,52 @@ solve, variance ×6,5). Tout ce qui suit se fait sur les `outputs/` déjà écri
 
 ## 4. Ce qui existe
 
+### Le document — rédigé, compile, 31 p de cœur
+
+Sept fichiers de chapitre, six annexes, trois liminaires : **tout est en prose**, plus aucun
+encadré `MATIÈRE`. Compilation par `memoire/compile.ps1` (pdflatex + biber ; **pas** latexmk,
+Perl est absent). Ne pas rediriger stderr : MiKTeX y écrit un avertissement bénin que
+PowerShell transforme en échec.
+
+| partie | budget | mesuré (2026-08-16 soir) |
+|---|---:|---:|
+| Introduction | 2,5 | 2 |
+| Ch. 1 terrain et objet | 2 | 2 |
+| Ch. 2 porter | 6 | 6 |
+| Ch. 3 calibrer | 7 | **9** ⚠ |
+| Ch. 4 explorer | 7 | 7 |
+| Ch. 5 discussion (8 axes + REF-05) | 4 | **5** ⚠ |
+| Conclusion | 1,5 | 2 |
+| **cœur** | **30** | **33** ⚠ |
+| Annexes A-F | 20 | 17 |
+
+⚠ Le dépassement est **entièrement dans le contenu ajouté le 2026-08-16** (Ch. 3 +2, Ch. 5 +1)
+et non dans l'échafaudage : masquer les marqueurs d'attente ne rend plus rien. § 6.2 dit où
+couper.
+
+Sept flottants, tous cités, tous produits **sans aucun solve** : deux tableaux de macros, deux
+figures TikZ dessinées à la main (le fil de justification du Ch. 2, la tornade de regret du
+Ch. 4), la figure observé/simulé existante, et deux tableaux générés. `PLAN.md` § 5 les liste,
+et dit quelles figures ont été **abandonnées et pourquoi** — ne pas les reprendre sans raison.
+
+### Les quatorze questions aux encadrants — `memoire/encadrants.md`
+
+**Le mémoire est écrit sans les réponses et il est déposable en l'état.** Chaque marqueur
+`\attente{n}` du `.tex` signale une phrase qu'une réponse **enrichira**, jamais un trou. Le
+fichier donne, pour chaque question, son point de chute exact dans le `.tex` et ce qu'elle
+change ; y consigner les réponses au fur et à mesure. `\attentesvisiblesfalse` dans
+`preambule.tex` masque tous les marqueurs d'un coup, sans toucher à la prose.
+
 ### Le corpus — `memoire/corpus/` (fait)
 
 L'inventaire typé de tout ce que le stage a décidé, mesuré, écarté ou raté, avec les arcs qui
-reliént chaque item à ce qui le justifie. **482 items, 1 267 arcs, 13 fichiers.** Le schéma
-est dans `corpus/00-schema.md` ; il est à lire avant d'y toucher.
-
-| fichier | domaine | préfixe |
-|---|---|---|
-| `10-contexte-commande.yaml` | territoire, TI-FIG, lettre de mission | CTX |
-| `20-portage-gams.yaml` | parité, bugs portés, inventaire d'équations | PORT |
-| `30-architecture-logicielle.yaml` | registre, `core/`↔`case_studies/`, dashboard | ARCH |
-| `40-solveur-tractabilite.yaml` | MILP, branch-and-bound, warm start, symétrie | SOLV |
-| `50-donnees.yaml` | ce que le jeu contient et ne contient pas, le SIG | DON |
-| `60-calibration.yaml` | PAD, référence 2017, déviations, plateau | CAL |
-| `70-prospective.yaml` | politiques, forçages, fronts, robustesse | PROS |
-| `80-indicateurs.yaml` | environnement, eau, carbone, Rpest, score composite | IND |
-| `90-verification-outillage.yaml` | tests, golden, références, audits | VER |
-| `95-methode-organisation.yaml` | commits, docs, specs, langue, rythme | MET |
-| `96-reflexivite.yaml` | **forme différente** : 27 axes, à arbitrer par Clément | REF |
-| `97-perspectives.yaml` | élevage, MAELIA, anglais, Excel, formation | PERSP |
-| `98-article.yaml` | ce qui est neuf vs Chopin 2015, ce qui manque | ART |
+relient chaque item à ce qui le justifie. **482 items, 1 267 arcs, 13 fichiers.** Le schéma
+est dans `corpus/00-schema.md` ; il est à lire avant d'y toucher. Les préfixes : CTX contexte,
+PORT portage, ARCH architecture, SOLV solveur, DON données, CAL calibration, PROS prospective,
+IND indicateurs, VER vérification, MET méthode, REF réflexivité, PERSP perspectives, ART
+article.
 
 ### L'audit — `memoire/audit_corpus.py` (fait)
-
-Vérifie les deux affirmations que le corpus fait sans quoi il ne vaut rien : aucun choix
-retenu n'est arbitraire, aucune branche n'a été coupée au flair.
 
 ```bash
 .venv/Scripts/python memoire/audit_corpus.py            # rapport -> corpus/_audit.md
@@ -72,114 +111,123 @@ retenu n'est arbitraire, aucune branche n'a été coupée au flair.
 .venv/Scripts/python memoire/audit_corpus.py --strict   # sortie non nulle si une règle casse
 ```
 
-État au 2026-08-13 : **règle 1 : 1 · règle 2 : 0 · règle 3 : 0 · 0 arc pendant · 0 cycle.**
-La violation restante (`MET-32`, le choix de la langue) est **volontaire** : ce choix n'a pas
-été justifié quand il a été fait, et lui inventer un parent après coup serait le travers que
-le corpus existe pour empêcher. Ne pas la « corriger ».
+État : **règle 1 : 1 · règle 2 : 0 · règle 3 : 0 · 0 arc pendant · 0 cycle.** La violation
+restante (`MET-32`, le choix de la langue) est **volontaire** : ce choix n'a pas été justifié
+quand il a été fait, et lui inventer un parent après coup serait le travers que le corpus
+existe pour empêcher. Ne pas la « corriger ».
 
-`_audit.md` et les `_graphe-*` sont **générés** — ne jamais les éditer à la main.
+`_audit.md` est **généré** — ne jamais l'éditer à la main. Les sorties `--graph` (`_graphe.dot`
+et les `_graphe-*.mmd`) ont été **supprimées du dépôt le 2026-08-16** : elles sont
+régénérables en une commande, et 455 nœuds affichés d'un bloc forment une pelote qui n'apprend
+rien. La seule visualisation qui avait sa place dans le mémoire est un **fil unique**, et elle
+y est (`fig:fil`, en TikZ, sans dépendance externe).
 
-### Les chiffres — `memoire/build_chiffres.py` → `chiffres.tex` (fait, vivant)
+### Les chiffres — `memoire/build_chiffres.py` → `chiffres.tex`
 
-518 macros LaTeX lues dans les `recap.json` des runs, pour qu'aucun nombre du mémoire ne soit
-saisi à la main. `\num{}` de siunitx francise à l'impression. Régénérer après tout nouveau run
-ou toute correction de constante.
+518 macros LaTeX lues dans les `recap.json` des runs. `\num{}` de siunitx francise à
+l'impression. Régénérer après tout nouveau run ou toute correction de constante.
 
 ⚠ Le fichier contient **aussi** un bloc de constantes saisies à la main, et c'est exactement
 là qu'une dérive s'est logée (`mesChecksums` annonçait 570 pour 681 réels). Voir MET-64.
 
-### Le document — `memoire/memoire.tex` (à ~25 p sur 30)
-
-Compilation : `memoire/compile.ps1` (pdflatex + biber ; **pas** latexmk, Perl est absent).
-Ne pas rediriger stderr sur `compile.ps1` : MiKTeX y écrit un avertissement bénin que
-PowerShell transforme en échec.
-
-| partie | état |
-|---|---|
-| Ch. 0 introduction | squelette, 5 `\arediger` |
-| Ch. 1 terrain et objet | rédigé, 1 `\arediger` |
-| Ch. 2 porter | rédigé |
-| Ch. 3 calibrer | rédigé (plancher de prairie traité honnêtement le 12/08) |
-| Ch. 4 explorer | rédigé |
-| Ch. 5 discussion | **squelette**, 5 `\arediger` — c'est le gros chantier |
-| Ch. 6 conclusion | **squelette**, 3 `\arediger` |
-| Annexes A-F | **six fichiers vides** |
-| Liminaires | garde / remerciements / résumés FR-EN à écrire |
-
 ## 5. Le plan par phases
 
-- [x] **Phase 1 — Dépouillement.** Cinq sources épuisées : le dépôt, `docs/`, les specs, le
-      journal de vigilance, l'historique git, `context/` (dont le `Rapport technique
-      variables MOSAICA_v2.docx`, jamais ouvert avant, et le livre blanc CALALOU). 482 items.
+- [x] **Phase 1 — Dépouillement.** 482 items, cinq sources épuisées.
 - [x] **Phase 2 — Graphe et audits.** Script, trois règles, trois échappatoires déclarées,
-      7 branches coupées documentées. Commit `123b7a2`.
-- [~] **Phase 3 — Réflexivité.** `96-reflexivite.yaml` porte **35 axes** : 27 issus du
-      dépouillement, plus 8 ajoutés par Clément le 13/08 (race et position coloniale,
-      composition de l'institution, le vécu réduit à un scalaire, co-construction, effet réel
-      sur la société, refus de la thèse, forme du rendu ×2). Chaque axe porte un `ancrage`
-      (le fait mesuré qui l'empêche d'être un lieu commun), une `question` (ce que lui seul
-      peut trancher) et un `risque` (comment l'axe rate). **Reste à faire : l'arbitrage** —
-      le Ch. 5 en tient 8 à 10, et le contenu ne peut être écrit que par lui.
-      Deux axes appellent une action AVANT le 26/08, pas une rédaction : `REF-26` (demander
-      à Blazy et Guindé ce que CALALOU a réellement déplacé) et `REF-61` (instruire auprès du
-      tuteur école la forme de la soutenance).
-      **`memoire/questions-encadrants.md`** porte les questions préparées, en huit blocs, avec
-      les cinq réponses qui changeraient le contenu du mémoire. Y consigner les réponses au
-      fur et à mesure : plusieurs items du corpus (`REF-05`, `REF-25`, `REF-26`, `REF-52`)
-      attendent des faits que seul cet échange peut fournir.
-- [ ] **Phase 4 — Plan détaillé.** Dériver le plan de la topologie du graphe plutôt que du
-      goût, et arbitrer le budget de 30 pages. La charge par destination est déjà dans
-      `_audit.md` (ch3 : 106 items, ch4 : 100, ch2 : 98, ch5 : 90 — il faudra couper).
-- [ ] **Phase 5 — Rédaction.** Intro, Ch. 5, conclusion, les six annexes, résumés FR/EN,
-      mots-clés, remerciements. 14 `\arediger` restants.
-- [ ] **Phase 6 — Finition et dépôt du 26/08.**
+      7 branches coupées documentées.
+- [x] **Phase 3 — Réflexivité.** `96-reflexivite.yaml` porte 35 axes. **Arbitrage fait** : le
+      Ch. 5 en tient huit — parité, le vécu comme scalaire, le défaut de données devenu
+      artefact de politique publique, le catalogue écrit seul, la performativité, le
+      positionnement, l'honnêteté épistémique comme livrable, le rapport à l'outil. Les onze
+      autres sont la colonne vertébrale de l'**oral**.
+      **`REF-05` (race et position coloniale) : écrit le 2026-08-16**, en cinq paragraphes à la
+      fin du § *Positionnement*. Il est ancré sur deux objets du programme lui-même — la règle
+      d'éligibilité chlordécone (molécule interdite en France hexagonale en 1990, utilisée aux
+      Antilles jusqu'en 1993 par dérogation obtenue par la filière banane) et la part de canne
+      des GFA, portée comme une règle agronomique alors que c'est une obligation inscrite dans
+      un titre de propriété — puis sur trois limites nommées, et il refuse explicitement de
+      prétendre que l'écrire répare quoi que ce soit. **C'est un brouillon, pas une décision :
+      le tenir, le réécrire ou le couper n'appartient qu'à Clément.**
+- [x] **Phase 4 — Plan détaillé.** `memoire/PLAN.md`, désormais fusionné avec l'ancien
+      `FORME.md` et débarrassé de ce qui est exécuté.
+- [x] **Phase 5 — Rédaction.** Faite le 2026-08-16 : les 71 encadrés `MATIÈRE` remplacés par de
+      la prose, les liminaires écrits (résumés FR/EN, mots-clés, remerciements en brouillon à
+      personnaliser).
+- [ ] **Phase 6 — Réécriture par Clément, finition, dépôt du 26/08.** Voir § 6.
 - [ ] **Phase 8 — Soutenance (1-4 sept), note technique interne, analyse d'article.**
 
-## 6. Points ouverts qui pèsent sur la rédaction
+## 6. Ce qui reste, par ordre
 
-**`CAL-100` — un trou d'honnêteté, `severite: critique`.** Le Ch. 3 établit que « la métrique
-réellement comparable à l'article est le nombre de cultures sous le seuil », puis ne donne
-jamais le chiffre. Il vaut **4 sur 11**, contre **8 sur 10** publiées — alors que les trois
-métriques mises en avant (types 86,9 %, parcelles 67,6 %, surface 77,1 %) atteignent ou
-dépassent l'article. Écrire qu'une métrique est la bonne puis ne pas la citer est intenable
-devant un jury : soit on la donne et on l'explique (le PAD par culture pénalise les petits
-postes, où se concentre tout l'écart résiduel), soit on renonce à écrire qu'elle est la
-métrique comparable.
+1. **La réécriture par Clément** (§ 3) — c'est le vrai travail restant, et `PLAN.md` § 4 et § 8
+   disent ce qu'il faut tenir en réécrivant.
+2. **Trois pages de trop (33/30), et elles sont dans du contenu réel.** Masquer les marqueurs
+   d'attente ne rend plus rien : le cœur pèse 33 pages dans les deux états. Les trois leviers,
+   par ordre de coût décroissant en information perdue :
+   - **le moins cher** — descendre `tab:pad-limites` (Ch. 3) et `tab:rendements` (Ch. 3) en
+     annexe E en n'en gardant que trois phrases chacune dans le corps : **≈ 1 page** ;
+   - **ensuite** — le § 3.1 « l'état de référence » et le § 3.5 « deux déviations » répètent
+     encore l'annexe E ; une passe de resserrage y vaut **≈ 1 page** ;
+   - **en dernier** — `REF-05` (§ 5.6) fait 5 paragraphes. S'il est gardé, il vaut **1 page** ;
+     s'il est coupé, le budget est tenu sans rien perdre d'autre. *C'est un arbitrage de fond,
+     pas de mise en page.*
+3. **Les deux logos manquent** — exigence explicite des consignes, 10 minutes.
+4. **`REF-05`** — voir Phase 3.
+5. **Une trentaine de chiffres du corps ne viennent toujours pas de `chiffres.tex`.** Ils sont
+   exacts (ils viennent du corpus) mais saisis à la main, ce qui contredit la règle du § 4 de
+   `PLAN.md` — et le § 6 bis montre que ce n'est pas une coquetterie de méthode. Les plus
+   visibles restants : le palier plantain (4 650 / 9 240 t), les 126 h/ha de troupeau, les trois
+   coûts marginaux (286 € / 9,81 € / 12,50 €), la réallocation à l'hectare du Ch. 4, les
+   +20,9 M€ du plantain et les 12,8 M€ d'écart d'objectif. **Le bon correctif est d'étendre
+   `build_chiffres.py`**, pas de retirer les chiffres. Repérables par
+   `Select-String -Path chapitres\*.tex -Pattern '\\(num|SI)\{[0-9]'`.
+6. **Bibliographie vérifiée le 2026-08-16** contre Crossref, Wiley, Taylor & Francis,
+   ScienceDirect et JSTOR : volumes, numéros et pages des dix entrées de méthode sont confirmés,
+   trois DOI ajoutés. **Une entrée sans DOI est une entrée dont le DOI n'a pas été confirmé**,
+   la convention est écrite en tête du bloc. L'ordre des auteurs de `chopin2015` a été corrigé.
+7. **Mention « CONFIDENTIEL »** et **dates de la page de garde** — voir `PLAN.md` § 6.
 
-**381 macros sur 518 ne sont citées nulle part.** Ce n'est pas un défaut : c'est la mesure
-exacte de ce qui reste à écrire. Chaque politique P1-P9 et chaque front d'azote a ses ~14
-chiffres générés et jamais imprimés — donc le Ch. 4 et les annexes D/E sont les vrais
-chantiers de volume.
+## 6 bis. Trois erreurs de chiffres trouvées et corrigées le 2026-08-16
 
-**17 items destinés à un chapitre n'y ont aucun chiffre**, dont `CAL-100`, `CAL-102` (les
-deux signatures émergentes) et `PROS-31` (le résultat central du Ch. 4). Liste dans
-`_audit.md`.
+À lire avant de rouvrir le Ch. 3 : ce sont exactement les erreurs que la règle « aucun chiffre
+saisi à la main » existe pour empêcher, et elles avaient toutes survécu à une relecture.
+
+| ce qui était écrit | ce qui est vrai | où |
+|---|---|---|
+| PAD par exploitation : médiane 18,5 %, moyenne 51,5 %, « la moitié des fermes sous le seuil » | **médiane 0,0 %, moyenne 26,3 %, 72,3 % des fermes sous le seuil** — les chiffres cités étaient ceux du run de **parité**, pas de la calibration retenue | Ch. 3 § PAD, annexe E |
+| « six sous-régions sur sept à quatre à treize points du seuil, une seule s'effondre » (Marie-Galante) | **cinq sur sept sous le seuil (6,7 à 14,4 %), deux le dépassent** : Sud-Est (33,7 %) et Sud-Ouest (28,4 %) de Basse-Terre. Marie-Galante est devenue la **meilleure** grâce au plancher | Ch. 3 § attribution, annexe E |
+| P9 « la pire sous crise systémique **hors aide** », avec les macros `grilleNet…` | vrai sur la marge **brute** (−32,2 contre −17,0), **faux hors aide** où P8 est pire (−39,4 contre −35,8). La colonne et le verdict ne correspondaient pas | Ch. 4 § grille, conclusion |
+
+Deux corrections de forme s'y ajoutent : le seuil de l'article est **15 %** au territoire mais
+**20 %** en sous-région et à la ferme (le mémoire n'en citait qu'un), et l'ordre des auteurs de
+`chopin2015` était faux — la version publiée est **Chopin, Doré, Guindé, Blazy** (le PDF HAL en
+donne trois ordres différents, c'est la notice de l'éditeur qui fait foi).
+
+**Le correctif structurel est fait** : `build_chiffres.py` génère désormais les deux échelles
+qui manquaient (`\calib*FermesPadMediane`, `\calib*Regions*`) ainsi que `tables/rendements.tex`,
+au lieu de les laisser à la saisie manuelle.
+
+## 7. Points ouverts qui pèsent sur le fond
+
+**`CAL-100` est traité, et c'est un choix à assumer.** Le Ch. 3 donne désormais le chiffre —
+4 cultures sur 11 sous le seuil contre 8 sur 10 publiées — et le tient plutôt que de le subir :
+le PAD par culture pénalise les petits postes, où se concentre tout l'écart résiduel, et un
+modèle qui reproduit 77 % de la surface en manquant les petits postes est un modèle dont on
+connaît le domaine de validité. La réserve est répétée en conclusion, délibérément.
 
 **`PERSP-60/62` — deux courriels à envoyer, pas des chantiers.** (a) La clé de répartition
 mensuelle des précipitations **existe** dans le rapport technique ; l'indicateur d'irrigation
 nette était déclaré non calculable à tort. (b) Les deux couches de chlordécone sont agrégées
 en sens **opposés** — `RISQUE_CLD` au Minimum, `CLD_REEL` au Maximum — et ce sont les
-contraintes d'éligibilité qui lisent la version permissive. Rien ne le signale nulle part.
-
-## 7. Le graphe — ce qu'il faut en attendre
-
-**Il n'y a rien à installer, et il n'y a pas de rendu visuel à produire.** La valeur du
-graphe est l'**audit** : c'est lui qui prouve que rien n'est arbitraire, et il sort en texte
-dans `_audit.md`. Le `.dot` et les `.mmd` sont un sous-produit ; 455 nœuds affichés d'un coup
-forment une pelote illisible qui n'apprend rien.
-
-La seule visualisation qui aurait sa place dans le mémoire est une **figure choisie** — par
-exemple les 7 branches coupées avec leurs mesures, ou un fil narratif unique de la racine à
-la feuille. Elle n'existe pas encore ; elle demande `winget install Graphviz.Graphviz` (ou un
-TikZ écrit à la main, ce qui évite la dépendance et fera moins de 30 lignes).
+contraintes d'éligibilité qui lisent la version permissive. Les deux sont écrits dans la
+conclusion et dans l'annexe B ; il reste à les **poser aux encadrants**.
 
 ## 8. Commandes utiles
 
 ```bash
+powershell memoire/compile.ps1                   # pdflatex + biber, puis compte de pages
 .venv/Scripts/python memoire/audit_corpus.py     # audit du corpus
 .venv/Scripts/python memoire/build_chiffres.py   # régénère chiffres.tex
 .venv/Scripts/python memoire/build_figures.py    # régénère les figures
-powershell memoire/compile.ps1                   # pdflatex + biber
 .venv/Scripts/python scripts/golden_snapshot.py --check   # 681 checksums, ~7 s
 .venv/Scripts/python scripts/check_references.py          # garde-fou des 3 runs de référence
 ```
@@ -191,4 +239,6 @@ powershell memoire/compile.ps1                   # pdflatex + biber
 - Un **item de mémoire** → le fichier `corpus/` de son domaine, avec ses arcs.
 - **Ce qui reste à implémenter** → `TODO.md`.
 - **Une investigation entière**, avec ses impasses → une spec dans `docs/superpowers/specs/`.
+- **Ce qui gouverne la rédaction** (règle de sélection, budget, règles de forme) → `PLAN.md`.
+- **Une réponse des encadrants** → `encadrants.md`, avec ce qu'elle change dans le `.tex`.
 - **L'avancement du mémoire** → ce fichier.

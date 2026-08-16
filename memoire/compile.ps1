@@ -55,6 +55,33 @@ if ($core) {
 $todo = (Select-String -Path memoire.log -Pattern '^A REDIGER : ' | Measure-Object).Count
 Write-Host "Sections a rediger restantes : $todo"
 
+# Les encadres MATIERE sont l'echafaudage de redaction (cf. memoire/PLAN.md) : ils portent la
+# liste des items du corpus qui reviennent a chaque section. Tant qu'il en reste, le compte de
+# pages ci-dessus mesure l'echafaudage et non la prose -- ne pas le lire comme un budget tenu.
+$mat = (Select-String -Path memoire.log -Pattern '^MATIERE : ' | Measure-Object).Count
+Write-Host "Encadres MATIERE restants   : $mat"
+if ($mat -gt 0) {
+    Write-Host "  (le compte de pages ci-dessus inclut l'echafaudage, pas la prose finale)"
+}
+
+# Marqueurs d'attente des reponses des encadrants (memoire/encadrants.md). Ils sont VISIBLES
+# tant que \attentesvisiblestrue : ce ne sont pas des trous, ce sont des phrases qu'une reponse
+# enrichira. Les masquer avant depot si les reponses ne sont pas arrivees.
+$att = (Select-String -Path memoire.log -Pattern '^ATTENTE : ' | Measure-Object).Count
+Write-Host "Marqueurs d'attente encadrants : $att"
+
+# Le sommaire donne la page de depart de chaque chapitre : c'est le controle du budget par
+# chapitre defini dans PLAN.md section 4.
+if (Test-Path memoire.toc) {
+    Write-Host ""
+    Write-Host "Depart de chaque chapitre (page) :"
+    Select-String -Path memoire.toc -Pattern '\\contentsline \{chapter\}\{(?:\\numberline \{[^}]*\})?([^}]*)\}\{(\d+)\}' |
+        ForEach-Object {
+            $m = $_.Matches[0]
+            "{0,-42} p. {1}" -f $m.Groups[1].Value, $m.Groups[2].Value
+        }
+}
+
 $over = Select-String -Path memoire.log -Pattern 'Overfull \\hbox \((\d+\.\d+)pt'
 $bad  = @($over | Where-Object { [double]$_.Matches[0].Groups[1].Value -gt 5 })
 Write-Host "Overfull hbox > 5 pt : $($bad.Count)"

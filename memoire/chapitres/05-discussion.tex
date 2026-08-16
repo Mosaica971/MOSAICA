@@ -1,24 +1,232 @@
-\chapter{Discussion réflexive}
+\chapter{Discussion}
 \label{ch:discussion}
-% BUDGET : 4 pages.
+% BUDGET : 4 pages -- HUIT axes, 0,5 page chacun (cf. memoire/PLAN.md, section 5).
+% THESE DU CHAPITRE : ce qui rend ce travail utilisable n'est pas ce qu'il AFFIRME, c'est ce
+% qu'il DELIMITE -- et cette delimitation a un cout de position que je peux nommer.
+%
+% REGLE DE REDACTION, mecanique : chaque section s'ouvre sur le FAIT MESURE, et ensuite
+% seulement sur ce qu'il engage. JAMAIS l'inverse. Le risque de ce chapitre n'est pas de ne
+% pas etre compris, c'est l'auto-flagellation -- qui est une autre forme de complaisance
+% (REF-60). Le fait technique reste le fait technique.
 
-\section{Ce que le modèle fait au territoire qu'il représente}
-\arediger{la performativité du modèle}
+Les trois chapitres précédents disent ce que le modèle fait. Celui-ci dit ce que le fait de
+l'avoir construit ainsi engage : sur le territoire représenté, sur la position depuis laquelle
+il l'a été, et sur ce que l'outil produit quand personne ne le conteste. Ce n'est ni une
+confession ni un chapitre d'opinions. Chaque section s'ouvre sur un fait mesuré des
+chapitres~\ref{ch:porter}, \ref{ch:calibrer} et~\ref{ch:explorer}, et ne discute qu'ensuite ce
+que ce fait implique.
 
-\section{Porter le modèle de ses propres encadrants}
-% La parite comme contrainte epistemique : fidelite a un artefact plutot qu'a une
-% realite. Ce que cela protege, ce que cela empeche.
-\arediger{la posture d'ingénieur-modélisateur}
+\section{Ce que la parité protège, et ce qu'elle empêche}
 
-\section{Positionnement : ce que je n'ai pas vu}
-% Six mois, extériorite, aucune enquete de terrain, des donnees produites ailleurs et
-% pour autre chose. Le cout mesurable de cette position : les 25 variantes Karusmart
-% vides, le volet cantines differe. Ce n'est pas une clause de style.
-\arediger{positionnement en Guadeloupe}
+Quatre défauts du \gls{gams} d'origine ont été portés sciemment, dont un qui interdit une
+variante de verger pluvial sur la totalité du territoire. Le modèle Python reproduit donc
+aujourd'hui, volontairement, des comportements que je sais faux.
+
+Le mandat de parité m'a rendu fidèle à un \textbf{artefact} — une implémentation — et non à une
+réalité agronomique. C'est ce qui rend le travail attribuable : toute divergence future entre
+les deux programmes s'impute à une décision et non à une maladresse de transcription. C'est
+aussi ce qui lui interdit de corriger ce qu'il sait faux, et il faut mesurer ce que cela veut
+dire : les résultats de calibration du chapitre~\ref{ch:calibrer} sont ceux d'un modèle qui
+s'interdit une variante de verger, ce qui pèse sur le poste où son écart est le plus grand.
+
+Ce qui rend la position tenable est la contrepartie : chaque défaut porté a, à côté de lui, la
+variante \enquote{intention présumée} qu'il suffit d'activer pour mesurer l'autre lecture. La
+parité est un point de départ documenté, pas un point d'arrivée. Reste une question ouverte que
+je ne peux pas trancher seul, et qu'il serait malhonnête de laisser implicite : jusqu'où la
+tenir maintenant que le port est fini ? Elle appartient à l'équipe. Elle est d'autant plus
+sérieuse que certains de ces comportements sont dans le modèle d'origine depuis dix ans.\attente{2}
+
+\section{Le vécu agricole comme scalaire}
+
+Tout ce que ce modèle sait du comportement des agriculteurs tient dans un nombre par type
+d'exploitation : le coefficient d'aversion au risque $a_f$ de l'équation~\eqref{eq:objectif}.
+Huit types, huit scalaires.
+
+L'ancrage le plus net de cet axe n'est pas ce coefficient, c'est le point où la calibration a
+buté. Les \SI{126}{\hour\per\ha} de la prairie — seule ligne du jeu de données à diverger de la
+table publiée — sont entièrement du travail de \textbf{troupeau}. Le modèle ne sait pas ce
+qu'est un troupeau : il voit des heures et une marge à l'hectare, et il en conclut que la
+prairie est une mauvaise affaire. Le mécanisme qui manque a donc un nom, et ce nom désigne un
+métier, pas un paramètre. C'est la raison pour laquelle l'élevage figure en tête des chantiers
+déclarés, et non par souci de complétude.
+
+Le second ancrage est plus dérangeant. Le plan réellement observé en 2017 vaut
+\SI{15}{\percent} de moins que l'optimum sous notre propre objectif. Ce que le modèle appelle
+une sous-optimalité de quinze points est peut-être, du côté des exploitations, une préférence
+pour ce qu'on sait faire, un contrat déjà signé, une main d'\oe uvre qu'on ne licencie pas, ou
+un risque que personne ne prend deux fois. Le modèle ne peut pas trancher entre ces lectures,
+parce qu'il n'a rien pour les représenter.
+
+\section{Quand un défaut de données devient un artefact de politique publique}
+
+Les vingt-cinq variantes maraîchères identiques au bit près du §~\ref{sec:tractabilite} ne sont
+pas n'importe lesquelles : ce sont précisément les systèmes \emph{agroécologiques} du jeu de
+données. Une politique publique exigeant une part minimale de ces systèmes est donc satisfaite
+à coût exactement nul, par relabellisation.
+
+C'est le cas le plus démonstratif du mémoire, et il vaut d'être formulé sans atténuation : le
+dispositif produit une politique agroécologique \textbf{qui ne contraint rien}. Que la cause
+soit un défaut de données et non un défaut de modélisation ne change rien à ce qu'un décideur
+en aurait tiré — le tableau aurait montré une contrainte respectée à coût nul, et la conclusion
+naturelle aurait été que l'agroécologie ne coûte rien.
+
+Le plus instructif est que le vrai arbitrage existe dans les mêmes données, ailleurs. Un
+itinéraire maraîcher intensif y vaut \SI{27929}{\euros\per\ha} pour \SI{277}{\kilogram} d'azote
+et un \gls{ift} de \num{15} ; son équivalent biologique vaut \SI{3882}{\euros\per\ha} pour un
+azote et un \gls{ift} nuls. L'arbitrage agroécologique est donc massif, il n'est simplement pas
+là où le nom des cultures le suggère — d'où le choix de définir l'agroécologie par les
+\gls{mae}, qui en donnent une définition sourcée, et le biologique par les opérations de
+fertilisation correspondantes, en rapportant les deux séparément.
+
+La portée de ce résultat dépasse \gls{mosaica}, et c'est ce qui en fait la meilleure candidate
+de ce travail à une publication : \emph{dans tout modèle d'allocation, des activités symétriques
+rendent une contrainte de politique publique satisfiable à coût nul}. Le problème n'est pas
+propre à un jeu de données, il est propre à la rencontre d'une nomenclature de politique
+publique et d'une nomenclature technique qui ne se recouvrent pas.
+
+\section{Un catalogue de politiques publiques écrit seul}
+
+Dix politiques publiques, leurs leviers et leurs seuils, ont été écrits par un stagiaire dans
+un fichier de configuration, sur la base de sa lecture de la littérature.
+
+L'ancrage mesuré de cet axe est cruel, et il ne relève pas de l'intention : l'axe est
+\textbf{unilatéral}. La borne dérégulatrice a tourné et donne le résultat le plus spectaculaire
+du chapitre~\ref{ch:explorer} ; la borne de bifurcation n'a jamais rendu la moindre solution
+entière. \emph{Le dispositif explore mieux la dérégulation que la transition}, non par choix
+mais par tractabilité — et cette asymétrie oriente les résultats disponibles à la lecture. Ce
+qui limite l'arbitraire du reste est que les seuils sont des fractions de totaux mesurés
+(annexe~\ref{ann:scenarios}) ; ce qui ne le limite pas est l'axe lui-même, qui suppose que le
+débat agricole guadeloupéen s'organise entre dérégulation et bifurcation. C'est une hypothèse
+sur la structure d'un débat public, formulée depuis un laboratoire.
+
+Il ne faut pas conclure trop vite pour autant. Un catalogue explicite, écrit en clair et
+modifiable ligne à ligne, est \emph{contestable} — ce qu'un modèle dont les leviers sont codés
+en dur dans les équations n'est pas. L'argument tient. Il ne suffit pas : la co-construction
+n'est pas absente ici par manque de temps, elle est absente par construction du stage, et le
+projet qui a précédé celui-ci avait, lui, mené une démarche participative.\attente{3}\attente{9}
+\attentebloc{1}{Ce paragraphe doit se conclure sur ce que le projet précédent a réellement
+déplacé — une décision, une aide, une reprise institutionnelle, une suite donnée au livre
+blanc — et sur l'existence ou non d'une évaluation d'impact de ces projets~\textnormal{(Q4)}.
+En l'absence de réponse, le mémoire s'en tient à ce que le dépôt documente : une démarche
+participative a eu lieu, ses effets ne sont pas consignés là où j'ai pu regarder.}\attente{4}
+
+\section{Performativité}
+
+Un modèle d'évaluation \emph{ex ante} ne se contente pas de mesurer les conséquences d'une
+politique : il fournit le vocabulaire dans lequel elle sera discutée, et donc une partie de ce
+qui sera discuté. L'écart de \SI{15}{\percent} de la section précédente en donne la version
+numérique. \emph{Qu'affirme-t-on sur les agriculteurs guadeloupéens en écrivant \enquote{maximiser
+la marge ajustée du risque} ?} Soit ils se trompent de quinze points, soit l'objectif ne décrit
+pas ce qu'ils maximisent — et le modèle ne peut pas trancher. La seule position tenable est de
+le dire ainsi, plutôt que de laisser le lecteur choisir la première lecture, qui est la plus
+flatteuse pour le modèle.
+
+Le résultat le plus performatif de ce mémoire est d'ailleurs identifiable :
+\enquote{ce qui tient la banane et la canne sur la terre guadeloupéenne, c'est l'enveloppe
+publique} est une phrase qui, sortie de son contexte de réserves, s'utilise telle quelle dans un
+débat public, et dans les deux sens. Un précédent du même ordre a été assumé pendant le stage :
+un indicateur a été retiré du rapport de run \emph{parce qu'il serait mal lu}, non parce qu'il
+était faux — décision éditoriale prise sur un objet technique.\attente{7}
+
+\section{Positionnement}
+
+L'extériorité de ce travail a une trace dans le nombre de variables du programme, et pas
+seulement dans le ton de ce paragraphe : les vingt-cinq variantes maraîchères sont vides parce
+que l'acquisition de données prévue par la lettre de mission n'a pas eu lieu. Le coût de la
+position est donc \emph{mesurable}, pas seulement déclarable. Le volet consacré à la
+restauration collective, lui, est resté différé faute d'accès à des données externes.
+
+Six mois en Guadeloupe, aucune enquête, un territoire connu par des tables produites par
+d'autres et pour autre chose. J'ai vécu sur le terrain que je décris et je l'ai décrit depuis
+des fichiers ; les deux sont vrais en même temps, et c'est le second qui a produit ce
+mémoire.\attente{12}
+
+Il faut alors dire la chose directement, parce que toute autre formulation serait une esquive.
+Je suis un homme blanc métropolitain, et une unité de recherche métropolitaine par sa
+composition produit ici des prescriptions d'usage du sol pour une société antillaise dont
+l'histoire foncière commence par l'esclavage et la plantation. Cette phrase n'est pas une
+précaution oratoire : elle a une traduction dans le programme lui-même, et c'est cette
+traduction qui la rend discutable techniquement et pas seulement moralement.
+
+Le modèle contient une règle d'éligibilité qui interdit certaines cultures sur certaines
+parcelles à cause de la chlordécone. Du point de vue du code, c'est une ligne de configuration
+comparable à un seuil de pente. Du point de vue du territoire, c'est la trace d'un insecticide
+interdit aux États-Unis en \num{1976}, retiré du marché en France hexagonale en \num{1990}, et
+utilisé en Guadeloupe et en Martinique jusqu'en \num{1993} par dérogation obtenue à la demande
+de la filière banane \parencite{opecst2009} ; il contamine aujourd'hui environ \SI{14200}{\ha}
+pour plusieurs siècles \parencite{daafchlordecone}. \emph{J'encode cette contrainte ; je ne la
+subis pas.} La même asymétrie vaut pour les \gls{gfa}, dont j'ai porté la part minimale de canne
+comme une règle agronomique parmi d'autres alors que c'est une obligation inscrite dans un titre
+de propriété — un arbitrage politique sur qui cultive quoi.\attente{13}
+
+De cette position découlent trois limites précises. \textbf{Un}, je n'ai aucun moyen, depuis les
+tables, de distinguer une contrainte agronomique d'une contrainte héritée : les deux arrivent
+dans le même fichier, sous la même forme, et le mandat de parité m'ordonne de les porter
+également. \textbf{Deux}, tout ce que le modèle sait de la façon dont on décide, en Guadeloupe,
+de planter de l'igname plutôt que de la canne tient dans huit coefficients d'aversion au risque,
+issus d'une typologie construite par des chercheurs et calibrée sur un panel d'experts
+\parencite{chopin2015} : aucun agriculteur n'a validé un seuil de ce travail. \textbf{Trois},
+l'écart de \SI{\mesPlanEcart}{\percent} entre le plan observé et l'optimum est la mesure
+agrégée de tout ce que je ne représente pas, et je ne peux pas dire ce qu'il contient.
+
+Il serait malhonnête de laisser croire que l'écrire répare quoi que ce soit : le dire ne change
+ni qui a écrit le catalogue de politiques publiques, ni qui en a choisi les seuils, ni depuis
+où. La seule chose qui déplacerait cette position est que le modèle soit repris, contesté et
+reparamétré par des gens du territoire — ce que le dépôt rend matériellement possible et que
+rien dans ce stage n'a organisé. C'est aussi le seul axe du chapitre dont l'ancrage n'est pas
+une mesure, et il est placé en dernier pour cette raison.\attente{14}
 
 \section{L'honnêteté épistémique comme livrable}
-% Pourquoi le catalogue des pieges est le vrai produit du stage, et pas un aveu.
-\arediger{la vigilance documentée comme résultat}
 
-\section{Limites et transférabilité}
-\arediger{limites et portage à un autre territoire}
+Quatre verdicts ont été renversés au cours de ce stage, tous par une mesure et jamais par une
+meilleure intuition (§~\ref{sec:plateau} et §~\ref{sec:limites}). Cette statistique est le
+meilleur argument dont je dispose sur la méthode, et elle mène à une affirmation qui peut
+surprendre : ce qui sera réutilisé de ce travail n'est pas l'assolement optimal de telle
+politique, c'est le catalogue documenté de ce qu'il ne faut pas conclure. \textbf{Ce n'est pas
+un aveu, c'est le livrable.}
+
+Trois règles l'ont produit. Mesurer avant de conclure — ce sont les quatre verdicts. Consigner
+un résultat négatif avec le même soin qu'un résultat positif — P10 hors d'atteinte, quatre
+cultures sur onze sous le seuil, la marge négative sous crise. Et considérer que
+\textbf{s'abstenir est un mode de sortie légitime}, ce qui est implémenté trois fois dans le
+dépôt : l'estimateur de durée refuse de répondre hors de sa bande de validité, le tri des points
+de front s'abstient dès qu'il ne peut pas conclure, et le générateur de chiffres de ce mémoire
+refuse d'émettre un \gls{pad} pour un run prospectif. À quoi s'ajoute un motif récurrent :
+l'avertissement voyage avec le chiffre.
+
+Il faut donner le contre-exemple, parce qu'il est le plus instructif de tous. Le nombre de
+sommes de contrôle annoncé dans le générateur de chiffres était périmé : le garde-fou chargé
+d'empêcher les chiffres de dériver contenait lui-même un chiffre qui avait dérivé — et le même
+défaut s'est produit deux fois, sur deux objets sans rapport. La leçon n'est pas qu'il faut être
+plus attentif : c'est qu'un garde-fou silencieux ne garde rien.
+
+\section{Le rapport à l'outil}
+
+Le brouillon de ce mémoire a été produit par un assistant de programmation fondé sur un grand
+modèle de langage, avant d'être réécrit. Le dire ici est la seule position tenable, et cette
+section est courte et factuelle par choix.
+
+Ce que l'outil a permis est visible : un portage de \num{\mesLignesCode} lignes,
+\num{\mesTests} tests, \num{\mesChecksums} sommes de contrôle et un dispositif prospectif
+complet en six mois, pour une personne. Ce qu'il a \emph{déplacé} l'est autant : le stage a
+construit plus vite qu'il ne pouvait mesurer, et une partie des garde-fous du
+chapitre~\ref{ch:porter} n'existe que parce que la production avait pris de l'avance sur la
+validation.
+
+Le risque propre à cet outil mérite d'être nommé précisément, parce qu'il n'est pas celui qu'on
+imagine. Ce n'est pas de produire des résultats faux, qui se repèrent : c'est de produire des
+résultats \emph{plausibles}. Vérifier une sortie plausible est bien plus difficile que vérifier
+une sortie fausse — et c'est exactement le problème de l'indexation des types de sol du
+§~\ref{sec:parite}, qui produisait des rendements crédibles sur les mauvais sols. La même
+vigilance, pour la même raison.
+
+Reste ce que l'outil ne pouvait pas faire, et qui a décidé du travail : lire les données contre
+leur source, arbitrer un mandat de parité, établir qu'un seuil est exogène, décider qu'un
+résultat n'est pas citable. Un effet secondaire, contre-intuitif, mérite d'être signalé pour
+finir : écrire pour une machine a produit une meilleure documentation d'architecture qu'écrire
+pour un humain.
+
+\bigskip
+
+Ces huit axes ont un point commun, et c'est la conclusion de ce chapitre : \emph{ce qui rend ce
+travail utilisable n'est pas ce qu'il affirme, c'est ce qu'il délimite}.

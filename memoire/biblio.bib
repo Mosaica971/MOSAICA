@@ -3,8 +3,12 @@
 % `sorting=nyt` s'occupe de l'ordre ; ne pas trier a la main.
 
 % --- Le modele de reference ------------------------------------------------
+% ORDRE DES AUTEURS : celui de la version publiee (Crossref, doi ci-dessous) et de la ligne
+% « Authors name » du manuscrit HAL, soit Chopin, Dore, Guinde, Blazy. La page de couverture
+% HAL et la ligne « To cite this version » du meme PDF en donnent DEUX AUTRES ordres ; c'est
+% la version de l'editeur qui fait foi. Verifie le 2026-08-16.
 @article{chopin2015,
-  author  = {Chopin, Pierre and Blazy, Jean-Marc and Guind{\'e}, Lo{\"i}c and Dor{\'e}, Thierry},
+  author  = {Chopin, Pierre and Dor{\'e}, Thierry and Guind{\'e}, Lo{\"i}c and Blazy, Jean-Marc},
   title   = {{MOSAICA}: A multi-scale bioeconomic model for the design and
              ex ante assessment of cropping system mosaics},
   journal = {Agricultural Systems},
@@ -15,12 +19,18 @@
 }
 
 % --- Statistique agricole du territoire ------------------------------------
+% Edition 2019 = Statistique agricole annuelle 2017, c'est-a-dire NOTRE annee de base.
+% Usage du territoire p. 5, cheptels p. 10, productions vegetales p. 16-17 (superficie,
+% rendement ET production par culture -- la colonne « rendement » est publiee telle quelle,
+% elle n'est pas de notre fait).
 @techreport{agreste2019,
   author      = {{Agreste}},
-  title       = {M{\'e}mento de la statistique agricole --- Guadeloupe},
+  title       = {M{\'e}mento de la statistique agricole --- Guadeloupe, {\'e}dition 2019},
   institution = {Direction de l'Alimentation, de l'Agriculture et de la For{\^e}t
                  de la Guadeloupe},
   year        = {2019},
+  url         = {https://daaf.guadeloupe.agriculture.gouv.fr/Memento-2019-de-la-statistique},
+  urldate     = {2026-08-16},
 }
 
 @techreport{agreste2022,
@@ -59,6 +69,22 @@
 }
 
 % --- Chlordecone -----------------------------------------------------------
+% La chronologie reglementaire de la chlordecone (interdite aux Etats-Unis en 1976, retiree du
+% marche en France hexagonale en 1990, utilisee aux Antilles jusqu'en 1993 par derogation) est
+% etablie par ce rapport parlementaire. Cite au chapitre 5, section Positionnement.
+@techreport{opecst2009,
+  author      = {{Office parlementaire d'{\'e}valuation des choix scientifiques
+                  et technologiques}},
+  title       = {Impacts de l'utilisation de la chlord{\'e}cone et des pesticides aux
+                 {Antilles} : bilan et perspectives d'{\'e}volution},
+  institution = {Assembl{\'e}e nationale et S{\'e}nat},
+  type        = {Rapport},
+  number      = {487 (2008--2009)},
+  year        = {2009},
+  url         = {https://www.senat.fr/rap/r08-487/r08-487.html},
+  urldate     = {2026-08-16},
+}
+
 @online{daafchlordecone,
   author  = {{DAAF Guadeloupe}},
   title   = {Cartographie des teneurs en chlord{\'e}cone des sols},
@@ -88,4 +114,126 @@
   publisher = {Springer},
   year      = {2021},
   doi       = {10.1007/978-3-030-68928-5},
+}
+
+% ===========================================================================
+% MÉTHODE -- ajouté le 2026-08-15.
+%
+% Neuf références, c'était trop peu pour un mémoire qui emploie l'ε-contrainte, le regret de
+% Savage, le pire cas de Wald, le domaine de Starr et une pénalité dite « de Markowitz » :
+% chacune de ces méthodes était utilisée SANS ÊTRE SOURCÉE, ce qui est le défaut de forme le
+% plus facile à reprocher en soutenance -- « d'où vient cette méthode ? ».
+%
+% VÉRIFIÉ LE 2026-08-16 contre les notices des éditeurs (Crossref, Wiley, Taylor & Francis,
+% ScienceDirect, JSTOR). Volume, numéro et pagination des dix entrées sont confirmés ; les DOI
+% ont été ajoutés là où ils ont été vérifiés un par un — une entrée sans DOI ici est une
+% entrée dont le DOI n'a PAS été confirmé, et non une entrée qui n'en a pas.
+% ===========================================================================
+
+% --- L'epsilon-contrainte (chapitre 4) -------------------------------------
+@article{haimes1971,
+  author  = {Haimes, Yacov Y. and Lasdon, Leon S. and Wismer, David A.},
+  title   = {On a bicriterion formulation of the problems of integrated system
+             identification and system optimization},
+  journal = {IEEE Transactions on Systems, Man, and Cybernetics},
+  volume  = {SMC-1},
+  number  = {3},
+  pages   = {296--297},
+  year    = {1971},
+}
+
+@article{mavrotas2009,
+  author  = {Mavrotas, George},
+  title   = {Effective implementation of the $\varepsilon$-constraint method in
+             multi-objective mathematical programming problems},
+  journal = {Applied Mathematics and Computation},
+  volume  = {213},
+  number  = {2},
+  pages   = {455--465},
+  year    = {2009},
+  doi     = {10.1016/j.amc.2009.03.037},
+}
+
+% --- Décision sous incertitude : les trois critères de robustesse ----------
+@article{wald1945,
+  author  = {Wald, Abraham},
+  title   = {Statistical decision functions which minimize the maximum risk},
+  journal = {Annals of Mathematics},
+  volume  = {46},
+  number  = {2},
+  pages   = {265--280},
+  year    = {1945},
+}
+
+@article{savage1951,
+  author  = {Savage, Leonard J.},
+  title   = {The theory of statistical decision},
+  journal = {Journal of the American Statistical Association},
+  volume  = {46},
+  number  = {253},
+  pages   = {55--67},
+  year    = {1951},
+  doi     = {10.1080/01621459.1951.10500768},
+}
+
+@book{starr1963,
+  author    = {Starr, Martin K.},
+  title     = {Product Design and Decision Theory},
+  publisher = {Prentice-Hall},
+  address   = {Englewood Cliffs, NJ},
+  year      = {1963},
+}
+
+% --- L'objectif dit « Markowitz » (chapitre 2, SOLV-04) --------------------
+% À citer PRÉCISÉMENT là où le mémoire explique que la pénalité du modèle n'est PAS un
+% arbitrage moyenne-variance : c'est la référence qui rend l'écart lisible.
+@article{markowitz1952,
+  author  = {Markowitz, Harry},
+  title   = {Portfolio selection},
+  journal = {The Journal of Finance},
+  volume  = {7},
+  number  = {1},
+  pages   = {77--91},
+  year    = {1952},
+}
+
+% --- Programmation mathématique en économie agricole -----------------------
+% Hazell & Norton est LA référence du domaine : sans elle, le mémoire donne l'impression
+% d'avoir réinventé une classe de modèles vieille de quarante ans.
+@book{hazellnorton1986,
+  author    = {Hazell, Peter B. R. and Norton, Roger D.},
+  title     = {Mathematical Programming for Economic Analysis in Agriculture},
+  publisher = {Macmillan},
+  address   = {New York},
+  year      = {1986},
+}
+
+% Howitt est la question que le jury POSERA au chapitre 3 : « pourquoi ne pas avoir calibré
+% par programmation mathématique positive ? ». Y répondre en une phrase (la PMP recale la
+% fonction objectif sur l'observé, c'est-à-dire exactement la circularité que le chapitre
+% refuse) vaut mieux que de laisser la question ouverte.
+@article{howitt1995,
+  author  = {Howitt, Richard E.},
+  title   = {Positive mathematical programming},
+  journal = {American Journal of Agricultural Economics},
+  volume  = {77},
+  number  = {2},
+  pages   = {329--342},
+  year    = {1995},
+  doi     = {10.2307/1243543},
+}
+
+% --- Rpest, l'arbre flou (annexe A) ----------------------------------------
+% Titre complet (sous-titre compris) et pagination confirmés sur ScienceDirect le 2026-08-16.
+@article{tixier2007,
+  author  = {Tixier, Philippe and Mal{\'e}zieux, Eric and Dorel, Marc and
+             Bockstaller, Christian and Girardin, Philippe},
+  title   = {Rpest --- an indicator linked to a crop model to assess the dynamics
+             of the risk of pesticide water pollution: {Application} to
+             banana-based cropping systems},
+  journal = {European Journal of Agronomy},
+  volume  = {26},
+  number  = {1},
+  pages   = {71--81},
+  year    = {2007},
 }

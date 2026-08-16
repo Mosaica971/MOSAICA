@@ -126,7 +126,10 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     "mesPadHorsPrairieHaut": ("24,0", "le meme a 9 595 ha -- il EMPIRE quand le seuil monte, en %"),
     "mesCalalouBovins":   ("6096",    "surface bovine observee par CALALOU (Livre blanc, tab. 3), ha"),
     # Calibration : les seuils de l'article -- Chopin et al. (2015)
-    "mesArtPad":          ("15",      "seuil de PAD de l'article, en %"),
+    # DEUX seuils, et le memoire les confondait. §2.6, p. 16 du manuscrit HAL : « less than
+    # 15% for the primary crops at the regional scale, and 20% in the sub-regions and farms ».
+    "mesArtPad":          ("15",      "seuil de PAD de l'article a l'echelle du territoire, en %"),
+    "mesArtPadZone":      ("20",      "le meme seuil a l'echelle sous-regionale et a la ferme, en %"),
     "mesArtTypes":        ("81",      "types d'exploitation reproduits par l'article, en %"),
     "mesArtParcelles":    ("66",      "parcelles bien simulees par l'article, en %"),
     "mesArtSurface":      ("77",      "surface bien simulee par l'article, en %"),
@@ -135,6 +138,14 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     # Eligibilite et representantes -- 04-vigilance C.2 et REFERENCE.md
     "mesRepCanne":        ("31",      "part de la canne observee ou sa representante est eligible, en %"),
     "mesPlancherPad":     ("1,5",     "plancher de PAD impose par l'eligibilite, en %"),
+    # LE PLAN OBSERVE, VALORISE SOUS NOTRE PROPRE OBJECTIF (journal 2026-07-27). Chaque
+    # parcelle recoit la meilleure variante fine eligible de sa famille observee -- c'est donc
+    # une BORNE HAUTE de ce que l'assolement reel vaut, les contraintes de ferme etant ignorees.
+    "mesPlanObserveM":    ("72,2",    "plan observe 2017 valorise sous notre objectif, en M EUR"),
+    "mesPlanOptimumM":    ("85,0",    "l'optimum du meme modele, en M EUR"),
+    "mesPlanEcart":       ("15",      "de combien le plan observe est en dessous, en %"),
+    "mesMoObserve":       ("5,68",    "heures demandees par le plan observe, en millions"),
+    "mesMoPlafond":       ("6,25",    "plafond de main d'oeuvre du territoire, en millions d'heures"),
     # Le dispositif prospectif -- denombrements des catalogues au 2026-08-10
     "mesPolitiques":      ("10",      "politiques declarees dans scenarios_politiques.yaml"),
     "mesForcages":        ("12",      "forcages declares dans scenarios_forcages.yaml"),
@@ -162,7 +173,145 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     "mesHuitSautInt":     ("2,78",     "saut d'integralite seul, en % de la borne LP"),
     "mesHuitEcartApparent": ("3,41",   "ecart du run de 3 h a la BORNE LP, en %"),
     "mesHuitEcartReel":   ("0,64",     "son ecart a l'optimum reel, en % -- cinq fois moins"),
+    # LE CYCLE DE L'ANANAS. `Rdt_Cult` est un rendement PAR CYCLE ; l'economie l'annualise
+    # (`/Duree_Cycle_Cult*12`, OPTIMISATION.txt:22-41), les TONNAGES non (PROD_*, TONNE_*,
+    # NUTRI_* lisent Rdt_Cult brut). Sur 84 cultures, `Duree_Cycle_Cult.txt` ne porte qu'une
+    # seule valeur differente de 12 : l'ananas, a 18 mois. C'est la seule culture pour
+    # laquelle un tonnage du modele n'est PAS un tonnage annuel.
+    "mesCycleAnanas":     ("18",       "duree de cycle de l'ananas, en mois (Duree_Cycle_Cult.txt)"),
 }
+
+
+# --- Rendements : le modele contre la statistique agricole ------------------
+# POURQUOI CE TABLEAU. L'ecart residuel de calibration se concentre sur les petits postes,
+# et sa cause commune est la meme partout : `Rdt_Cult` decrit des itineraires techniques
+# SPECIFIES, la statistique agricole moyenne TOUS les producteurs et rapporte la production
+# a la surface DECLAREE (jeunes vergers non entres en production compris). Les deux
+# grandeurs ne mesurent pas la meme chose, et l'ecart se lit directement en marge a
+# l'hectare : une culture dont le rendement est surevalue couvre l'ile des qu'aucun
+# debouche ne la borne.
+#
+# COLONNE AGRESTE : *Memento de la statistique agricole -- Guadeloupe*, edition 2019
+# (Statistique agricole annuelle 2017), p. 16-17. Agreste publie lui-meme une colonne
+# `Rendement (t/ha)` -- ce n'est donc pas une division de notre fait. Recoupe contre le
+# Memento 2020 (donnees 2019), qui donne les memes ordres de grandeur : ananas 12,91,
+# plantain 9,3, igname 10,0, melon 19,3, agrumes 5,1, autres fruits 5,9.
+#
+# COLONNE MODELE : calculee ci-dessous sur le run retenu (production / surface par groupe),
+# donc c'est le rendement effectivement porte par l'assolement simule, mixte de variantes
+# fines compris -- pas une ligne de table choisie a la main.
+_RDT_AGRESTE: dict[str, float] = {
+    "AN": 12.3, "BC": 9.0, "MA": 10.8, "AG": 5.2, "IG": 10.0, "ME": 19.9, "VE": 6.4,
+}
+# Mois de cycle par groupe, quand ce n'est pas 12 (cf. `mesCycleAnanas`).
+_CYCLE_MOIS: dict[str, int] = {"AN": 18}
+
+
+def _table_rendements(run: str) -> list[str]:
+    """Rendement simule (t/ha) par groupe RPG, confronte a la statistique agricole.
+
+    Le rendement simule est `production / surface` sur le run, ce qui integre le melange de
+    variantes fines que l'optimisation a retenu. Il est ensuite ANNUALISE (x 12 / cycle) :
+    sans cette correction l'ananas serait compare a 18 mois contre 12, et le rapport
+    surestime de moitie. C'est exactement l'erreur que l'entree C.1 de `docs/04-vigilance.md`
+    a portee jusqu'au 2026-08-16.
+    """
+    def _somme(fichier: str, cle: str, valeur: str) -> dict[str, float]:
+        chemin = OUTPUTS / run / "csv" / fichier
+        total: dict[str, float] = {}
+        with chemin.open(encoding="utf8", newline="") as f:
+            for r in csv.DictReader(f):
+                total[r[cle]] = total.get(r[cle], 0.0) + float(r[valeur])
+        return total
+
+    surfaces = _somme("calibration_pad_by_crop.csv", "crop", "simulated_ha")
+    # production_by_crop est indexe par variante FINE ; on le replie sur les groupes RPG en
+    # reutilisant le repli du depot plutot qu'une table recopiee ici.
+    import sys
+
+    sys.path.insert(0, str(ROOT))
+    from case_studies.guadeloupe.domain.crop_families import base_group_for
+
+    productions: dict[str, float] = {}
+    chemin = OUTPUTS / run / "csv" / "production_by_crop_output.csv"
+    with chemin.open(encoding="utf8", newline="") as f:
+        for r in csv.DictReader(f):
+            groupe = base_group_for(r["crop"])
+            productions[groupe] = productions.get(groupe, 0.0) + float(r["production_tonnes"])
+
+    lignes = []
+    for code, agreste in _RDT_AGRESTE.items():
+        ha = surfaces.get(code, 0.0)
+        if ha <= 0:
+            continue
+        cycle = _CYCLE_MOIS.get(code, 12)
+        par_cycle = productions.get(code, 0.0) / ha
+        lignes.append((code, agreste, cycle, par_cycle, par_cycle * 12 / cycle))
+
+    corps, macros = [], []
+    # Trie par RAPPORT decroissant : c'est le rapport qui porte l'argument, et le melon --
+    # seule culture ou les deux chiffres coincident -- doit se lire en dernier.
+    for code, agreste, cycle, par_cycle, annuel in sorted(lignes, key=lambda t: -t[4] / t[1]):
+        note = f" ({cycle} mois)" if cycle != 12 else ""
+        corps.append(
+            f"  {_NOMS_GROUPES.get(code, code)}{note} & \\num{{{_fmt(agreste, 1)}}} & "
+            f"\\num{{{_fmt(par_cycle, 1)}}} & \\num{{{_fmt(annuel, 1)}}} & "
+            f"$\\times$\\num{{{_fmt(annuel / agreste, 1)}}} \\\\"
+        )
+        macros += [
+            f"\\newcommand{{\\rdtAgreste{code}}}{{{_fmt(agreste, 1)}}}",
+            f"\\newcommand{{\\rdtModele{code}}}{{{_fmt(annuel, 1)}}}",
+            f"\\newcommand{{\\rdtRapport{code}}}{{{_fmt(annuel / agreste, 1)}}}",
+        ]
+    _ecrire_tabular(
+        "rendements", "@{}lrrrr@{}",
+        ["Groupe", "Agreste 2017", "Modèle, par cycle", "Modèle, annualisé", "Rapport"],
+        corps,
+    )
+    return macros
+
+
+def _echelles_calibration(prefixe: str, run: str) -> list[str]:
+    """Les deux echelles que le `recap.json` ne resume pas : exploitation et sous-region.
+
+    Ces chiffres etaient SAISIS A LA MAIN dans le chapitre 3 et l'annexe E, et ils y etaient
+    FAUX : la mediane de 18,5 % et la moyenne de 51,5 % sont celles du run de PARITE, citees
+    comme si elles etaient celles de la calibration retenue (qui donne 0,0 et 26,4). Les
+    generer supprime la classe d'erreur entiere.
+    """
+    def _colonne(fichier: str) -> list[dict[str, str]]:
+        with (OUTPUTS / run / "csv" / fichier).open(encoding="utf8", newline="") as f:
+            return list(csv.DictReader(f))
+
+    fermes = sorted(float(r["pad_pct"]) for r in _colonne("calibration_pad_by_farm.csv"))
+    n = len(fermes)
+    mediane = fermes[n // 2] if n % 2 else (fermes[n // 2 - 1] + fermes[n // 2]) / 2
+    moyenne = sum(fermes) / n
+
+    # PAD agrege par sous-region : somme des ecarts absolus / somme des observes, c'est-a-dire
+    # la meme convention "rapport de sommes" que le PAD territorial.
+    obs: dict[str, float] = {}
+    dev: dict[str, float] = {}
+    for r in _colonne("calibration_pad_by_crop_and_region.csv"):
+        obs[r["region"]] = obs.get(r["region"], 0.0) + float(r["observed_ha"])
+        dev[r["region"]] = dev.get(r["region"], 0.0) + float(r["abs_deviation_ha"])
+    pads = sorted(100 * dev[k] / obs[k] for k in obs if obs[k] > 0)
+    seuil = 20.0  # seuil sous-regional de Chopin et al. (2015) -- ce n'est PAS le 15 % regional
+
+    return [
+        f"\\newcommand{{\\{prefixe}FermesPadMediane}}{{{_fmt(mediane, 1)}}}",
+        f"\\newcommand{{\\{prefixe}FermesPadMoyenne}}{{{_fmt(moyenne, 1)}}}",
+        f"\\newcommand{{\\{prefixe}FermesOkPct}}"
+        f"{{{_fmt(100 * sum(1 for p in fermes if p <= seuil) / n, 1)}}}",
+        f"\\newcommand{{\\{prefixe}RegionsTotal}}{{{len(pads)}}}",
+        f"\\newcommand{{\\{prefixe}RegionsOk}}{{{sum(1 for p in pads if p <= seuil)}}}",
+        f"\\newcommand{{\\{prefixe}RegionsPadMin}}{{{_fmt(pads[0], 1)}}}",
+        f"\\newcommand{{\\{prefixe}RegionsPadMax}}{{{_fmt(pads[-1], 1)}}}",
+        f"\\newcommand{{\\{prefixe}RegionsPadOkMax}}"
+        f"{{{_fmt(max([p for p in pads if p <= seuil], default=0.0), 1)}}}",
+        f"\\newcommand{{\\{prefixe}RegionsPadHorsMin}}"
+        f"{{{_fmt(min([p for p in pads if p > seuil], default=0.0), 1)}}}",
+    ]
 
 
 # --- Les politiques citees au chapitre 4 ------------------------------------
@@ -554,6 +703,9 @@ def main() -> int:
                     f"\\newcommand{{\\pad{prefix}{code}}}"
                     f"{{{_fmt(float(row['pad_pct']), 1)}}}"
                 )
+        # Les deux echelles que le recap ne resume pas -- exploitation et sous-region. Elles
+        # etaient saisies a la main, et a la main elles etaient fausses (cf. la docstring).
+        lines += _echelles_calibration(f"calib{prefix}", folder)
         lines.append("")
 
     # L'etat observe 2017 n'est pas un run : il ecrit `reference.json`, dont le schema est
@@ -742,6 +894,13 @@ def main() -> int:
         "realloc-budget", "p4_statu_quo",
         "p4_statu_quo_pareto_subventions_threshold_35900000",
     )
+    lines.append("")
+
+    # Le rendement du modele contre celui du territoire : la cause commune de l'ecart
+    # residuel du chapitre 3, et la raison pour laquelle les plafonds de marche ne sont pas
+    # des bequilles.
+    lines.append("% --- rendements : modele contre statistique agricole " + "-" * 21)
+    lines += _table_rendements("calib_retenu")
     lines.append("")
 
     lines.append("% --- mesures hors recap (voir build_chiffres.py pour les sources) -----")

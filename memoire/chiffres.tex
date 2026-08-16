@@ -56,6 +56,15 @@
 \newcommand{\padParitePN}{57.8}
 \newcommand{\simPariteVE}{18}
 \newcommand{\padPariteVE}{94.1}
+\newcommand{\calibPariteFermesPadMediane}{18.5}
+\newcommand{\calibPariteFermesPadMoyenne}{51.5}
+\newcommand{\calibPariteFermesOkPct}{50.4}
+\newcommand{\calibPariteRegionsTotal}{7}
+\newcommand{\calibPariteRegionsOk}{0}
+\newcommand{\calibPariteRegionsPadMin}{26.6}
+\newcommand{\calibPariteRegionsPadMax}{122.7}
+\newcommand{\calibPariteRegionsPadOkMax}{0.0}
+\newcommand{\calibPariteRegionsPadHorsMin}{26.6}
 
 % --- calib_bc_seul -----------------------------------------------------
 \newcommand{\calibBcSeulObjectif}{81794674}
@@ -107,6 +116,15 @@
 \newcommand{\padBcSeulPN}{51.2}
 \newcommand{\simBcSeulVE}{33}
 \newcommand{\padBcSeulVE}{89.3}
+\newcommand{\calibBcSeulFermesPadMediane}{9.8}
+\newcommand{\calibBcSeulFermesPadMoyenne}{46.2}
+\newcommand{\calibBcSeulFermesOkPct}{52.9}
+\newcommand{\calibBcSeulRegionsTotal}{7}
+\newcommand{\calibBcSeulRegionsOk}{0}
+\newcommand{\calibBcSeulRegionsPadMin}{25.6}
+\newcommand{\calibBcSeulRegionsPadMax}{64.3}
+\newcommand{\calibBcSeulRegionsPadOkMax}{0.0}
+\newcommand{\calibBcSeulRegionsPadHorsMin}{25.6}
 
 % --- calib_retenu ------------------------------------------------------
 \newcommand{\calibRetenuObjectif}{81222224}
@@ -158,6 +176,15 @@
 \newcommand{\padRetenuPN}{0.2}
 \newcommand{\simRetenuVE}{8}
 \newcommand{\padRetenuVE}{97.4}
+\newcommand{\calibRetenuFermesPadMediane}{0.0}
+\newcommand{\calibRetenuFermesPadMoyenne}{26.3}
+\newcommand{\calibRetenuFermesOkPct}{72.3}
+\newcommand{\calibRetenuRegionsTotal}{7}
+\newcommand{\calibRetenuRegionsOk}{5}
+\newcommand{\calibRetenuRegionsPadMin}{6.7}
+\newcommand{\calibRetenuRegionsPadMax}{33.7}
+\newcommand{\calibRetenuRegionsPadOkMax}{14.4}
+\newcommand{\calibRetenuRegionsPadHorsMin}{28.4}
 
 % --- reference_2017 (etat observe) ----------------------------------------
 \newcommand{\obsParcelles}{24734}
@@ -480,6 +507,29 @@
 % --- reallocation sous plafond de subventions ------------------------------
 \newcommand{\reallocReallocBudgetLignes}{10}
 
+% --- rendements : modele contre statistique agricole ---------------------
+\newcommand{\rdtAgresteMA}{10.8}
+\newcommand{\rdtModeleMA}{43.9}
+\newcommand{\rdtRapportMA}{4.1}
+\newcommand{\rdtAgresteAG}{5.2}
+\newcommand{\rdtModeleAG}{20.0}
+\newcommand{\rdtRapportAG}{3.8}
+\newcommand{\rdtAgresteBC}{9.0}
+\newcommand{\rdtModeleBC}{26.0}
+\newcommand{\rdtRapportBC}{2.9}
+\newcommand{\rdtAgresteVE}{6.4}
+\newcommand{\rdtModeleVE}{14.5}
+\newcommand{\rdtRapportVE}{2.3}
+\newcommand{\rdtAgresteAN}{12.3}
+\newcommand{\rdtModeleAN}{22.7}
+\newcommand{\rdtRapportAN}{1.8}
+\newcommand{\rdtAgresteIG}{10.0}
+\newcommand{\rdtModeleIG}{17.8}
+\newcommand{\rdtRapportIG}{1.8}
+\newcommand{\rdtAgresteME}{19.9}
+\newcommand{\rdtModeleME}{20.0}
+\newcommand{\rdtRapportME}{1.0}
+
 % --- mesures hors recap (voir build_chiffres.py pour les sources) -----
 \newcommand{\mesBinaires}{308847}  % variables binaires, configuration de calibration (04-vigilance B.1)
 \newcommand{\mesBinairesKarus}{879162}  % binaires si les 25 variantes Karusmart sont rouvertes (B.3)
@@ -515,7 +565,8 @@
 \newcommand{\mesPadHorsPrairieBas}{14,9}  % PAD hors prairie a un plancher de 7 218 ha, en %
 \newcommand{\mesPadHorsPrairieHaut}{24,0}  % le meme a 9 595 ha -- il EMPIRE quand le seuil monte, en %
 \newcommand{\mesCalalouBovins}{6096}  % surface bovine observee par CALALOU (Livre blanc, tab. 3), ha
-\newcommand{\mesArtPad}{15}  % seuil de PAD de l'article, en %
+\newcommand{\mesArtPad}{15}  % seuil de PAD de l'article a l'echelle du territoire, en %
+\newcommand{\mesArtPadZone}{20}  % le meme seuil a l'echelle sous-regionale et a la ferme, en %
 \newcommand{\mesArtTypes}{81}  % types d'exploitation reproduits par l'article, en %
 \newcommand{\mesArtParcelles}{66}  % parcelles bien simulees par l'article, en %
 \newcommand{\mesArtSurface}{77}  % surface bien simulee par l'article, en %
@@ -523,6 +574,11 @@
 \newcommand{\mesArtParcellesN}{25057}  % parcelles de l'article (base 2010)
 \newcommand{\mesRepCanne}{31}  % part de la canne observee ou sa representante est eligible, en %
 \newcommand{\mesPlancherPad}{1,5}  % plancher de PAD impose par l'eligibilite, en %
+\newcommand{\mesPlanObserveM}{72,2}  % plan observe 2017 valorise sous notre objectif, en M EUR
+\newcommand{\mesPlanOptimumM}{85,0}  % l'optimum du meme modele, en M EUR
+\newcommand{\mesPlanEcart}{15}  % de combien le plan observe est en dessous, en %
+\newcommand{\mesMoObserve}{5,68}  % heures demandees par le plan observe, en millions
+\newcommand{\mesMoPlafond}{6,25}  % plafond de main d'oeuvre du territoire, en millions d'heures
 \newcommand{\mesPolitiques}{10}  % politiques declarees dans scenarios_politiques.yaml
 \newcommand{\mesForcages}{12}  % forcages declares dans scenarios_forcages.yaml
 \newcommand{\mesBalayages}{2}  % fronts declares dans scenarios_pareto.yaml
@@ -543,4 +599,5 @@
 \newcommand{\mesHuitSautInt}{2,78}  % saut d'integralite seul, en % de la borne LP
 \newcommand{\mesHuitEcartApparent}{3,41}  % ecart du run de 3 h a la BORNE LP, en %
 \newcommand{\mesHuitEcartReel}{0,64}  % son ecart a l'optimum reel, en % -- cinq fois moins
+\newcommand{\mesCycleAnanas}{18}  % duree de cycle de l'ananas, en mois (Duree_Cycle_Cult.txt)
 

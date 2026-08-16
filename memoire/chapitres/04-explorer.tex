@@ -1,153 +1,310 @@
-﻿\chapter{Explorer}
+\chapter{Explorer}
 \label{ch:explorer}
-% BUDGET : 6 pages.
+% BUDGET : 7 pages (cf. memoire/PLAN.md, section 4).
+% THESE DU CHAPITRE : un classement de politiques publiques n'a de sens que relativement a un
+% forcage, et le dispositif qui le produit doit enoncer ce qu'il ne peut PAS trancher.
+%
+% NOTE : les trois tableaux (grille, front budget, realloc) sont CONSERVES -- ils sont
+% entierement bases sur des macros generees, il n'y a rien a retaper.
 
-Le modèle porté et calibré, la commande peut enfin être posée : que produirait telle politique,
-et que produirait-elle si le contexte se dégradait ? Ce chapitre décrit le dispositif construit
-pour y répondre, puis ce qu'il a effectivement mesuré --- et, avec autant de soin, ce qu'il ne
-permet pas de conclure.
+Le modèle porté et calibré, la commande initiale peut enfin être posée : que produirait telle
+politique publique, et que produirait-elle si le contexte se dégradait ? Ce chapitre présente
+le dispositif construit pour y répondre, ce qu'il a effectivement mesuré, et — avec autant de
+soin — ce qu'il ne permet pas de conclure.
 
 \section{Le dispositif expérimental}
 \label{sec:dispositif}
 
-Un scénario prospectif se décompose ici en trois objets, séparés parce qu'ils n'ont pas le même
-auteur. Une \textbf{politique} est ce qu'une puissance publique décide : un plafond d'azote, un
-redéploiement d'aides, un plancher d'emploi. Un \textbf{forçage} est ce que le climat et les
-marchés imposent : un cyclone, un choc sur le prix des intrants, une crise systémique. Un
-\textbf{balayage} enfin fait varier un seul seuil sur un intervalle et trace le front
-correspondant. Le catalogue compte \num{\mesPolitiques} politiques, \num{\mesForcages} forçages
-et \num{\mesBalayages} balayages.
+Un scénario, ici, n'est pas un objet mais trois, et ils sont séparés \emph{parce qu'ils n'ont
+pas le même auteur}. Une \textbf{politique} est ce qu'une puissance publique décide : un
+plafond d'azote, une enveloppe de subventions, un plancher d'emploi, une part d'inertie par
+rapport à l'assolement existant. Un \textbf{forçage} est ce que le climat et les marchés
+imposent : des prix, des rendements, des coûts d'intrants multipliés par un facteur. Un
+\textbf{balayage} fait varier un seul seuil et trace le front des compromis atteignables. Le
+catalogue déclare \num{\mesPolitiques} politiques, \num{\mesForcages} forçages et
+\num{\mesBalayages} fronts.
 
-Cette séparation n'est pas cosmétique : elle décide de ce que coûte une campagne. Le produit
-cartésien complet vaudrait \num{\mesCellulesTotal} cellules, soit --- à une heure de solve la
-cellule --- cinq jours de calcul continu pour la seule grille, sans les fronts. Le dispositif
-retenu déclare donc, politique par politique, quels forçages la traversent et quels fronts se
-tracent sous elle. \textbf{Un front n'est en particulier jamais croisé avec la liste de forçages
-de sa cellule} : un front est déjà un solve par point, et le multiplier par quatre forçages
-transforme une après-midi en semaine. Un front forcé se demande explicitement, et se paie
-explicitement.
+La figure~\ref{fig:spectre} situe les uns et les autres. Elle sert à deux choses : montrer
+que le catalogue de politiques est ordonné le long d'un \emph{axe} — et non pas assemblé au
+hasard —, et montrer d'un coup d'\oe il quelles cases ont effectivement été calculées. Ce
+second point est une limite du travail, et il vaut mieux la voir tout de suite que la
+découvrir au §~\ref{sec:limites}.
 
-\paragraph{Méthode numérique : l'\emph{$\varepsilon$}-contrainte.} Le modèle n'a qu'une fonction
-objectif, la marge ajustée du risque de l'équation~\eqref{eq:objectif}. Pour explorer un
-arbitrage entre cette marge et un second critère --- l'azote épandu, l'argent public dépensé
---- on ne pondère pas les deux dans une somme : on garde l'objectif inchangé et on impose au
-second critère un plafond $\varepsilon$, que l'on fait varier. Chaque valeur de $\varepsilon$
-donne un point Pareto-optimal, et l'ensemble des points dessine le front. L'avantage sur une
-somme pondérée est double : les poids n'ont pas à être choisis --- et ils encoderaient une
-valeur politique déguisée en paramètre technique --- et le front reste correct même là où il
-n'est pas convexe.
+\begin{figure}[tbp]
+  \centering
+  \begin{tikzpicture}[
+      x=1mm, y=1mm, font=\scriptsize,
+      >={Stealth[length=1.8mm]},
+      axe/.style     = {<->, thick, black!75},
+      resolu/.style  = {circle, draw=black!80, fill=black!80, inner sep=1.1pt},
+      absent/.style  = {circle, draw=black!55, fill=white, inner sep=1.1pt},
+      etiq/.style    = {align=center, text width=24mm, inner sep=1pt},
+      borne/.style   = {align=center, text width=24mm, inner sep=1pt, font=\scriptsize\itshape}]
 
-\paragraph{Méthode numérique : l'amorçage en chaîne et son audit.} Sept points, c'est sept
-\gls{milp} à \num{\mesBinaires} binaires. Ils ne sont pourtant pas indépendants : sous un
-plafond de type \enquote{au plus $\varepsilon$}, une solution admissible pour un $\varepsilon$
-serré l'est encore pour tout $\varepsilon$ plus lâche. En résolvant le front du plus serré au
-plus lâche, chaque point fournit donc une solution de départ admissible au suivant. Un point
-froid, six chauds, au lieu de sept froids. Le sens de la relation dépend du sens de la
-contrainte et s'inverse pour un plancher, ce qui explique que le tri s'abstienne dès qu'il ne
-peut pas conclure --- s'abstenir ne coûte que du temps.
+    % ================= LES DIX POLITIQUES =================
+    % L'axe va de 12 a 138 et non de 0 a 142 : les etiquettes sont centrees sur leur repere et
+    % debordent donc de la moitie de `text width` de chaque cote. Sans cette marge de 12 mm, la
+    % figure est plus large que la justification et TeX signale un Overfull hbox de 47 pt.
+    \draw[axe] (12,0) -- (138,0);
+    \node[anchor=north west, font=\scriptsize\itshape, text=black!60] at (0,-4)
+      {moins de contrainte publique};
+    \node[anchor=north east, font=\scriptsize\itshape, text=black!60] at (150,-4)
+      {davantage de contrainte publique};
+    \foreach \x in {12,30,52,70,90,106,122,138} \draw[black!45] (\x,-1.5) -- (\x,1.5);
 
-Cet amorçage exige une précaution qui n'est pas facultative : \gls{highs} \emph{écarte
-silencieusement} une solution de départ inadmissible. Un run mal amorcé ne signale rien, il se
-contente d'être lent. Chaque graine est donc auditée contre les contraintes du modèle avant le
-solve, et le compte de violations est journalisé. C'est ce mécanisme qui a établi, plutôt que
-supposé, qu'une des politiques du catalogue était hors d'atteinte (§\ref{sec:limites}).
+    \node[resolu] at (12,0)  {}; \node[etiq, above=2mm] at (12,0)  {\textbf{P1}\\dérégulation totale};
+    \node[absent] at (30,0)  {}; \node[etiq, above=2mm] at (30,0)  {\textbf{P2}\\accélérationnisme industriel};
+    \node[resolu] at (70,0)  {}; \node[etiq, above=2mm] at (70,0)  {\textbf{P4}\\statu quo};
+    \node[resolu] at (106,0) {}; \node[etiq, above=2mm] at (106,0) {\textbf{P7}\\Écophyto réglementaire};
+    \node[absent] at (138,0) {}; \node[etiq, above=2mm] at (138,0) {\textbf{P10}\\bifurcation agroécologique};
 
-\paragraph{Méthode numérique : le test de faisabilité en relaxation linéaire.} Avant d'engager
-des heures de solve, chaque spécification passe par sa relaxation \gls{lp} --- les binaires
-relâchés dans $[0,1]$, environ deux minutes contre une heure. La logique est asymétrique et il
-faut la dire : \textbf{infaisable en \gls{lp} implique infaisable en entiers, mais l'inverse est
-faux}. Le test est donc un filtre, pas une garantie. Il a néanmoins écarté une erreur de
-conception avant qu'aucun batch ne tourne, et il a mesuré la borne supérieure qui a permis de
-diagnostiquer la politique inatteignable.
+    \node[resolu] at (30,0)  {}; \node[etiq, below=6mm] at (30,0)  {\textbf{P5}\\austérité budgétaire};
+    \node[absent] at (52,0)  {}; \node[etiq, below=6mm] at (52,0)  {\textbf{P3}\\intensification modérée};
+    \node[resolu] at (90,0)  {}; \node[etiq, below=6mm] at (90,0)  {\textbf{P6}\\verdissement incitatif};
+    \node[resolu] at (122,0) {}; \node[etiq, below=6mm] at (122,0) {\textbf{P8}\\transition agroécologique};
+
+    \node[resolu] at (2,-22) {};
+    \node[anchor=north west, align=left, text width=142mm] at (5,-20)
+      {\textbf{P9} souveraineté alimentaire --- \emph{hors axe} : elle contraint la destination
+       de la production, pas son intensité};
+
+    % ================= LES DOUZE FORÇAGES =================
+    \draw[axe] (12,-38) -- (138,-38);
+    \foreach \x in {12,39,138} \draw[black!45] (\x,-39.5) -- (\x,-36.5);
+    \node[absent] at (12,-38)  {};
+    \node[resolu] at (39,-38)  {};
+    \node[resolu] at (138,-38) {};
+    \node[borne, above=2mm] at (12,-38)  {\textbf{F10}\\conjoncture favorable};
+    \node[borne, above=2mm] at (39,-38)  {\textbf{F0}\\nominal (témoin nul)};
+    \node[borne, above=2mm] at (138,-38) {\textbf{F9}\\crise systémique};
+
+    \draw[black!55] (52,-40) -- (52,-43) -- (126,-43) -- (126,-40);
+    \node[align=center, text width=130mm, below=0.5mm] at (75,-43)
+      {\textbf{huit forçages à un seul levier} --- climat et sanitaire : F1 cyclone
+       majeur$^{\bullet}$, F2 sécheresse sévère, F3 dérive climatique, F4 choc sanitaire ;
+       marchés et politique : F5 effondrement des prix d'export, F6 choc sur les
+       intrants$^{\bullet}$, F7 inflation alimentaire$^{\bullet}$, F8 retrait du
+       \textsc{posei}, F11 artificialisation des terres};
+  \end{tikzpicture}
+  \caption{Les politiques et les forçages du catalogue, situés les uns par rapport aux autres.
+  Un disque plein signale qu'au moins une cellule a été résolue (marque $^{\bullet}$ pour les
+  forçages), un cercle vide qu'aucune ne l'a été. La position sur l'axe des politiques est
+  \emph{ordinale} : elle traduit la sévérité des contraintes imposées, non une distance
+  mesurée. P2 et P5 partagent une abscisse parce qu'aucune des deux n'impose de contrainte
+  environnementale ; elles s'opposent sur les aides, dimension que cet axe unique ne porte pas.
+  La répartition des cercles vides n'est pas neutre : \textbf{la borne dérégulatrice de l'axe a
+  été calculée, sa borne de bifurcation non} (§~\ref{sec:limites}).}
+  \label{fig:spectre}
+\end{figure}
+
+Cette séparation n'est pas seulement conceptuelle : elle décide de ce que coûte une campagne.
+Le produit cartésien complet vaudrait \num{\mesCellulesTotal} cellules, soit environ cinq jours
+de calcul continu pour la seule grille, sans les fronts. Un plan explicite désigne donc, pour
+chaque politique, les forçages qu'elle traverse et les fronts qu'on trace sous elle ; et
+surtout, \textbf{un front n'est jamais croisé avec les forçages de sa cellule}, puisqu'un front
+est déjà une résolution par point. \num{\mesCellulesGrille} cellules de grille et
+\num{\mesSolvesProspectifs} dossiers de résultats prospectifs au total constituent le matériau
+de ce chapitre. Cette grille est \emph{creuse}, et c'est une limite du travail plutôt qu'un
+choix de méthode : une cellule coûte une heure.
+
+Trois décisions de méthode méritent d'être défendues. \textbf{Un}, les seuils du catalogue sont
+des \emph{fractions choisies de totaux mesurés} sur un run de référence, et non des chiffres
+inventés : un plancher d'emploi est un pourcentage d'un maximum mesuré, un plafond d'azote une
+fraction de l'azote effectivement épandu. L'annexe~\ref{ann:scenarios} donne, pour chaque
+seuil, la fraction \emph{et} le total dont elle est tirée. \textbf{Deux}, les forçages ne sont
+\textbf{pas moyennés} : une moyenne affirmerait une distribution de probabilité que personne n'a
+choisie. Une politique est donc décrite par le vecteur de ses résultats sous chaque forçage,
+avec les critères classiques de décision dans l'incertain — pire cas \parencite{wald1945},
+regret maximal \parencite{savage1951}, domaine de viabilité \parencite{starr1963} — et
+l'infaisabilité y compte comme le \emph{pire} résultat, non comme une donnée manquante.
+\textbf{Trois}, les fronts sont tracés par $\varepsilon$-contrainte \parencite{haimes1971,
+mavrotas2009} et non par somme pondérée. La raison est un théorème, pas un banc d'essai : une
+somme pondérée ne peut atteindre que les points situés sur l'enveloppe convexe du front, et ses
+poids encoderaient une valeur politique déguisée en paramètre technique.
+
+Deux précautions numériques s'y ajoutent, sans lesquelles les chiffres de la suite ne
+vaudraient rien, et l'annexe~\ref{ann:scenarios} en donne le détail. La première est
+l'amorçage en chaîne : sous une contrainte du type \enquote{au plus $\varepsilon$}, une
+solution admissible pour un $\varepsilon$ serré l'est encore pour tout $\varepsilon$ plus
+lâche, ce qui permet de ne payer qu'une résolution à froid pour six à chaud — à condition de
+résoudre du plus serré au plus lâche, c'est-à-dire dans l'ordre \emph{inverse} de la lecture du
+fichier. La seconde est le contrôle de faisabilité en relaxation \gls{lp} — deux minutes contre
+une heure —, dont la logique est à sens unique : \emph{infaisable en \gls{lp} implique
+infaisable en entiers, la réciproque est fausse}. C'est un filtre, non une garantie, et il a
+suffi à écarter une erreur de conception avant qu'aucun lot ne tourne.
 
 \section{Ce que la grille montre}
 \label{sec:grille}
 
-\num{\mesCellulesGrille} cellules ont été résolues, couvrant \num{\mesPolitiquesVues} politiques
-et \num{\mesForcagesVus} forçages sur les \num{\mesPolitiques} et \num{\mesForcages} déclarés.
-La grille est \emph{creuse}, et c'est une limite du travail plutôt qu'un choix de méthode : une
-cellule coûte une heure.
+Le résultat central de la grille tient en une phrase : \textbf{le classement des politiques
+dépend du forçage}. Une politique n'est pas \enquote{bonne} dans l'absolu ; elle est performante
+dans un contexte et exposée dans un autre. C'est ce qu'une grille est faite de montrer, et
+c'est exactement ce qu'un scénario unique masque.
 
-\begin{table}[htbp]
+Le tableau~\ref{tab:grille} donne les cellules résolues. Trois lectures s'en dégagent, dont une
+ne tient pas.
+
+\textbf{La première tient, et elle est brutale.} Sous crise systémique, la marge brute du
+territoire devient \emph{négative} pour les trois politiques testées. C'est le pire cas au sens
+de Wald, et il est atteint par toutes : aucune des politiques instruites n'offre d'abri contre
+ce forçage-là.
+
+\textbf{La deuxième tient, et c'est la plus instructive.} La politique de souveraineté
+alimentaire P9 est la \emph{meilleure} sous le forçage nominal — \num{\grillePneufFzero} contre
+\num{\grillePquatreFzero} millions d'euros de marge brute pour le statu quo — et la
+\emph{pire} sous crise systémique, avec \num{\grillePneufFneuf} contre
+\num{\grillePquatreFneuf} millions. Le classement s'inverse complètement d'une colonne à
+l'autre. Le regret de Savage, calculé contre la meilleure politique \emph{du même forçage} —
+\enquote{qu'aurais-je perdu à choisir celle-ci, sachant que ce contexte-là est survenu} — rend
+l'inversion visible d'un coup d'\oe il (figure~\ref{fig:regret}) : P9 passe d'un regret nul
+sous F0 à \SI{\regretPneufFneuf}{\percent} sous F9, tandis que le statu quo fait exactement
+l'inverse.
+
+\textbf{La troisième ne tient pas.} La marge brute \emph{contient} la subvention : classer sur
+cette colonne des politiques dont l'objet même est de déplacer les aides, c'est en partie
+constater qu'elles subventionnent davantage. La colonne \enquote{hors aide} isole ce que
+l'assolement produit par lui-même, et le classement change — sous crise systémique, c'est
+alors P8 qui devient la plus exposée (\num{\grilleNetPhuitFneuf} millions) et non P9
+(\num{\grilleNetPneufFneuf}). Aucune des deux lectures n'est fausse : elles répondent à deux
+questions différentes. Ce qui serait fautif serait d'en choisir une en silence, et c'est
+pourquoi le tableau porte les deux.
+
+Reste à nommer ce qui, dans ce modèle, limite réellement les politiques. Ce n'est ni la terre
+ni l'azote, c'est le \textbf{travail}. Le plafond de main d'\oe uvre autorise
+\SI{6252740}{\hour}, soit \SI{3891}{\etp} au desserrement nominal, et le run de référence en
+sature déjà \SI{90}{\percent} ; le desserrer ne suffit d'ailleurs pas, car ce ne sont pas les
+heures qui manquent mais \emph{les cultures capables de les absorber} sous les autres plafonds.
+Il en découle un résultat de politique publique et non une observation technique :
+\textbf{dans ce modèle, une politique environnementale ambitieuse plafonne l'emploi agricole
+qu'elle peut soutenir}. On se gardera de l'explication trop rapide — \enquote{le travail et
+l'\gls{ift} sont corrélés} est vrai dans la table des itinéraires et ne suffit pas à rendre
+compte d'un résultat qui passe par le jeu des contraintes.
+
+Un dernier fait, contre-intuitif : un \emph{forçage} peut annuler une politique. Sous crise
+systémique, le plafond d'azote de P8 ne mord jamais, la crise réduisant d'elle-même les surfaces
+intensives. La politique environnementale ne coûte alors rien — et n'apporte rien.
+
+\begin{table}[tbp]
   \centering
   \caption{Marge brute par cellule (M\eur). \emph{Brute} inclut la subvention ;
   \emph{hors aide} en déduit le transfert. La dague marque un solve arrêté à la limite de temps,
   donc prouvablement sous-optimal.}
   \label{tab:grille}
   \small
-  \begin{tabularx}{\textwidth}{@{}Xrrrrrr@{}}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrrrr@{}}
     \toprule
     & \multicolumn{2}{c}{\textbf{F0 nominal}} & \multicolumn{2}{c}{\textbf{F6 intrants}}
     & \multicolumn{2}{c}{\textbf{F9 crise}} \\
     \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
     & brute & hors aide & brute & hors aide & brute & hors aide \\
     \midrule
-    P4 statu quo            & \grillePquatreFzero\grillePquatreFzeroFlag & \grilleNetPquatreFzero
-                            & \grillePquatreFsix\grillePquatreFsixFlag   & \grilleNetPquatreFsix
-                            & \grillePquatreFneuf\grillePquatreFneufFlag & \grilleNetPquatreFneuf \\
-    P6 verdissement         & \grillePsixFzero\grillePsixFzeroFlag       & \grilleNetPsixFzero
-                            & \grillePsixFsix\grillePsixFsixFlag         & \grilleNetPsixFsix
-                            & --- & --- \\
-    P7 Écophyto             & \grillePseptFzero\grillePseptFzeroFlag     & \grilleNetPseptFzero
-                            & \grillePseptFsix\grillePseptFsixFlag       & \grilleNetPseptFsix
-                            & --- & --- \\
-    P8 agroécologie         & \grillePhuitFzero\grillePhuitFzeroFlag     & \grilleNetPhuitFzero
-                            & --- & ---
-                            & \grillePhuitFneuf\grillePhuitFneufFlag     & \grilleNetPhuitFneuf \\
-    P9 souveraineté         & \grillePneufFzero\grillePneufFzeroFlag     & \grilleNetPneufFzero
-                            & --- & ---
-                            & \grillePneufFneuf\grillePneufFneufFlag     & \grilleNetPneufFneuf \\
+    P4 statu quo & \num{\grillePquatreFzero}\grillePquatreFzeroFlag & \num{\grilleNetPquatreFzero}
+                 & \num{\grillePquatreFsix}\grillePquatreFsixFlag   & \num{\grilleNetPquatreFsix}
+                 & \num{\grillePquatreFneuf}\grillePquatreFneufFlag & \num{\grilleNetPquatreFneuf} \\
+    P6 verdissement & \num{\grillePsixFzero}\grillePsixFzeroFlag & \num{\grilleNetPsixFzero}
+                 & \num{\grillePsixFsix}\grillePsixFsixFlag & \num{\grilleNetPsixFsix}
+                 & --- & --- \\
+    P7 Écophyto  & \num{\grillePseptFzero}\grillePseptFzeroFlag & \num{\grilleNetPseptFzero}
+                 & \num{\grillePseptFsix}\grillePseptFsixFlag & \num{\grilleNetPseptFsix}
+                 & --- & --- \\
+    P8 agroécologie & \num{\grillePhuitFzero}\grillePhuitFzeroFlag & \num{\grilleNetPhuitFzero}
+                 & --- & ---
+                 & \num{\grillePhuitFneuf}\grillePhuitFneufFlag & \num{\grilleNetPhuitFneuf} \\
+    P9 souveraineté & \num{\grillePneufFzero}\grillePneufFzeroFlag & \num{\grilleNetPneufFzero}
+                 & --- & ---
+                 & \num{\grillePneufFneuf}\grillePneufFneufFlag & \num{\grilleNetPneufFneuf} \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Trois lectures se dégagent, dont deux tiennent et une ne tient pas.
+\begin{figure}[tbp]
+  \centering
+  \begin{tikzpicture}[x=1.25mm, y=1mm, font=\scriptsize]
+    % Regret en % de la meilleure politique du MEME forcage. Barres empilees par politique :
+    % F0 en fonce, F6 en gris moyen, F9 en gris clair. Un regret nul est marque par un trait.
+    \foreach \g in {0,10,20,30,40,50} {
+      \draw[black!12] (\g,2) -- (\g,-46);
+      \node[below, inner sep=1.5pt] at (\g,-46) {\g};
+    }
+    \draw[black!50] (0,2) -- (0,-46);
+    % --- P4 statu quo
+    \node[left, inner xsep=3pt] at (0,-2) {P4 statu quo};
+    \fill[black!70] (0,0)    rectangle (\regretPquatreFzero,-1.6);
+    \fill[black!40] (0,-2)   rectangle (\regretPquatreFsix,-3.6);
+    \fill[black!15] (0,-4)   rectangle (0.2,-5.6);
+    % --- P6 verdissement
+    \node[left, inner xsep=3pt] at (0,-11) {P6 verdissement};
+    \fill[black!70] (0,-9)   rectangle (\regretPsixFzero,-10.6);
+    \fill[black!40] (0,-11)  rectangle (0.2,-12.6);
+    % --- P7 Ecophyto
+    \node[left, inner xsep=3pt] at (0,-20) {P7 Écophyto};
+    \fill[black!70] (0,-18)  rectangle (\regretPseptFzero,-19.6);
+    \fill[black!40] (0,-20)  rectangle (\regretPseptFsix,-21.6);
+    % --- P8 agroecologie
+    \node[left, inner xsep=3pt] at (0,-29) {P8 agroécologie};
+    \fill[black!70] (0,-27)  rectangle (\regretPhuitFzero,-28.6);
+    \fill[black!15] (0,-29)  rectangle (\regretPhuitFneuf,-30.6);
+    % --- P9 souverainete
+    \node[left, inner xsep=3pt] at (0,-38) {P9 souveraineté};
+    \fill[black!70] (0,-36)  rectangle (0.2,-37.6);
+    \fill[black!15] (0,-38)  rectangle (\regretPneufFneuf,-39.6);
+    % --- Legende
+    \fill[black!70] (0,-52)  rectangle (2.5,-53.6); \node[right] at (2.5,-52.8) {F0 nominal};
+    \fill[black!40] (16,-52) rectangle (18.5,-53.6); \node[right] at (18.5,-52.8) {F6 intrants};
+    \fill[black!15] (33,-52) rectangle (35.5,-53.6); \node[right] at (35.5,-52.8) {F9 crise};
+  \end{tikzpicture}
+  \caption{Regret par politique et par forçage, en pourcentage de la meilleure politique du même
+  forçage. Une barre nulle (trait) signifie \enquote{c'était le meilleur choix, sachant ce qui
+  est arrivé} ; les cellules non résolues n'ont pas de barre. La lecture qui compte est
+  \emph{verticale} : P9 est sans regret sous le forçage nominal et le plus regretté sous crise,
+  P4 fait l'inverse. Aucune politique n'est courte partout.}
+  \label{fig:regret}
+\end{figure}
 
-La première tient. \textbf{Sous crise systémique, la marge brute du territoire devient négative
-pour les trois politiques testées} --- de \num{\grillePquatreFneuf} à
-\num{\grillePneufFneuf}~M\eur. Le forçage F9 cumule effondrement des prix, renchérissement des
-intrants et perte de rendement ; aucune des politiques disponibles ne laisse au modèle de quoi
-rester à l'équilibre. C'est le pire cas au sens de Wald, et il est atteint par toutes.
-
-La deuxième tient aussi, et elle est plus instructive. \textbf{Le classement des politiques
-dépend du forçage.} P9, la souveraineté alimentaire, est la meilleure cellule sous F0
-(\num{\grillePneufFzero}~M\eur) et la pire sous F9 hors aide
-(\num{\grilleNetPneufFneuf}~M\eur). Une politique n'est donc pas \enquote{bonne} dans l'absolu ;
-elle est performante dans un contexte et exposée dans un autre, ce qui est précisément ce qu'une
-grille est faite de montrer et qu'un scénario unique masque.
-
-La troisième ne tient pas, et il faut expliquer pourquoi. Lue sur la marge brute seule, P9
-dépasse le statu quo de \num{\regretPquatreFzero}~M\eur\ sous F0 --- un écart considérable. Mais
-\textbf{la marge brute contient la subvention} : le produit brut est la somme des ventes et des
-aides, dont on retranche les charges. Classer sur cette colonne des politiques qui déplacent
-justement les aides, c'est en partie constater qu'elles subventionnent davantage. La colonne
-\enquote{hors aide} isole ce que l'assolement produit, indépendamment de ce que la collectivité
-y met, et le classement change : sous F9, P8 devance P9 sur la marge brute
-(\num{\grillePhuitFneuf} contre \num{\grillePneufFneuf}) et l'ordre s'inverse hors aide
-(\num{\grilleNetPhuitFneuf} contre \num{\grilleNetPneufFneuf}). Aucune des deux lectures n'est
-fausse ; elles répondent à deux questions différentes, et le dispositif expose les deux plutôt
-que d'en choisir une en silence.
-
-\paragraph{Le regret de Savage, et sa convention.} Le regret d'une politique sous un forçage est
-son écart à la \emph{meilleure politique du même forçage} --- jamais à un optimum global. La
-question posée est \enquote{qu'aurais-je perdu à avoir choisi celle-ci, sachant que ce
-contexte-là est survenu}, et elle n'a de sens qu'à contexte fixé. Sous F6, P6 est la référence
-et le statu quo regrette \num{\regretPquatreFsix}~M\eur ; sous F9, l'ordre est renversé et c'est
-P4 qui devient la référence. Deux autres conventions sont assumées avec celle-là :
-l'infaisabilité compte comme le \emph{pire} résultat et non comme une donnée manquante --- une
-politique qui ne laisse aucune solution est un échec, pas une absence de mesure --- et les
-forçages ne sont \emph{pas moyennés}, car une moyenne affirmerait une distribution de
-probabilité que personne n'a choisie.
-
-\section{Le coût marginal : azote et euro public}
+\section{Le coût marginal : euro public et azote}
 \label{sec:fronts}
 
-\subsection{L'enveloppe publique}
+\subsection*{L'enveloppe publique}
 
-Le front budgétaire fait varier le plafond de subventions sous le statu quo, en
-\num{\frontsubvQuatrePoints} points tous prouvés optimaux.
+Le résultat central de ce chapitre est un front, et il est contre-intuitif : \textbf{la marge
+brute varie en sens inverse du plafond de subventions}, de façon monotone sur les sept points
+(tableau~\ref{tab:front-budget}). Serrer l'enveloppe publique de
+\SI{\frontsubvQuatreSeuilHaut}{\euros} à \SI{\frontsubvQuatreunSeuil}{\euros}
+\emph{augmente} la marge brute du territoire de plus de \SI{14}{\mega\euros}, tout en faisant
+reculer l'objectif de \num{\frontsubvQuatreObjHaut} à \num{\frontsubvQuatreObjBas} millions.
 
-\begin{table}[htbp]
+Les deux mouvements ne se contredisent pas, et leur écart est instructif. L'objectif est une
+marge \emph{ajustée du risque} : la pénalité de risque passe de \SI{18}{\percent} de la marge
+brute au plafond le plus haut à \SI{34}{\percent} au plus bas. Autrement dit, privé
+d'enveloppe, le modèle va chercher des cultures plus rémunératrices et plus exposées.
+\textbf{Dans ce modèle, l'aide publique n'achète pas de la marge, elle achète de la stabilité.}
+
+Avant d'en tirer quoi que ce soit, le front se valide par ses points de contrôle. Deux des sept
+points portent un plafond supérieur à ce que le statu quo dépense spontanément : ils ne
+contraignent donc rien, et l'objectif doit y retomber exactement sur le run non balayé
+(\num{\frontsubvQuatreTemoin} millions). C'est le cas, au centime. Un front dont les points de
+contrôle ne se comportent pas ainsi est un front mal paramétré — et c'est un défaut qui s'est
+effectivement produit lors de cette campagne (§~\ref{sec:limites}).
+
+Le front donne aussi quelque chose que le prix dual ne donne pas : au point le plus serré, le
+dual vaut près du double de la pente \emph{moyenne} du front, si bien que l'extrapoler sur tout
+l'intervalle surestimerait l'effet d'environ trois quarts. Le front étant convexe, le dual n'est
+valable qu'au voisinage de son point.
+
+Ce que l'enveloppe maintient se lit enfin à l'hectare près (tableau~\ref{tab:ann-realloc}).
+Entre le statu quo libre et le plafond le plus serré, la banane d'exportation passe de
+\SI{2004}{\ha} à \SI{95}{\ha}, soit \SI{-95}{\percent} ; la canne recule de \SI{2231}{\ha} ; le
+maraîchage double, les agrumes passent de \SI{9}{\ha} à \SI{657}{\ha}, l'igname double et la
+prairie gagne \SI{1539}{\ha}. C'est l'énoncé le plus direct que ce mémoire produise sur la
+question du projet : \emph{dans les termes du modèle, ce qui tient la banane et la canne sur la
+terre guadeloupéenne, c'est l'enveloppe publique} — et desserrer cette contrainte réoriente
+environ \SI{2100}{\ha} vers des cultures vivrières.
+
+Cette phrase appelle immédiatement sa réserve, et il serait malhonnête de la reporter à la fin
+du chapitre : rien, dans le modèle, ne demande si les \SI{2237}{\ha} de maraîchage ainsi
+produits trouvent un acheteur (§~\ref{sec:limites}).
+
+\begin{table}[tbp]
   \centering
   \caption{Front marge $\times$ enveloppe publique sous P4, en euros. L'astérisque marque les
   points de contrôle : l'objectif y retombe exactement sur le run non balayé
@@ -159,162 +316,114 @@ Le front budgétaire fait varier le plafond de subventions sous le statu quo, en
   \input{tables/front-subvQuatre}
 \end{table}
 
-Les deux derniers points valident le dispositif avant d'en lire quoi que ce soit : à
-\SI{\frontsubvQuatresixSeuil}{\euros} et \SI{\frontsubvQuatreseptSeuil}{\euros}, l'objectif retombe
-au centime sur celui du statu quo non contraint. Le plafond a cessé de mordre, et le point de
-bascule --- la subvention que le statu quo consomme spontanément --- se lit dans la colonne du
-milieu. Un front dont les points de contrôle ne se comportent pas ainsi est un front mal
-paramétré, et c'est un défaut observé lors de cette campagne (§\ref{sec:limites}).
+\subsection*{L'azote}
 
-Sur la partie mordante, entre \SI{\frontsubvQuatrePenteBas}{\euros} et
-\SI{\frontsubvQuatrePenteHaut}{\euros}, la pente vaut \textbf{\SI{\frontsubvQuatrePente}{\euros} de
-marge ajustée par euro public engagé}. C'est là que le front donne ce qu'un prix dual ne donne
-pas. Au point le plus serré, le dual de la contrainte vaut
-\SI{\frontsubvQuatreDualBas}{\euros}~par~euro : la pente \emph{locale} est presque le double de la
-pente \emph{moyenne}. Extrapoler le dual sur tout l'intervalle surestimerait l'effet d'environ
-trois quarts. Le front est convexe, le dual n'est valable qu'au voisinage de son point, et c'est
-une raison suffisante pour tracer un front plutôt que de lire un dual.
+Le second front porte sur l'azote, et il a été tracé deux fois : sous la configuration de
+référence, et sous la politique agroécologique P8. La comparaison donne un résultat qu'aucun
+des deux fronts ne donnerait seul : \textbf{le kilogramme d'azote est \emph{moins} cher à
+retirer sous une politique déjà contraignante}. La pente moyenne vaut
+\num{\frontazoteRefPente} euros par kilogramme sous la référence, contre
+\num{\frontazoteHuitPente} sous P8 — parce que P8 impose simultanément un plafond d'\gls{ift},
+un plafond d'eau, un plancher d'emploi et une inertie de \SI{40}{\percent} par rapport à
+l'assolement existant : l'assolement qu'elle autorise a déjà renoncé aux usages les plus
+intensifs, et les hectares faciles à décarboner ont déjà été pris.
 
-Le résultat le plus frappant n'est pourtant pas dans l'objectif. \textbf{La marge brute varie en
-sens inverse du plafond} : elle vaut \num{\frontsubvQuatreunMargeM}~M\eur\ sous le plafond le
-plus serré et \num{\frontsubvQuatresixMargeM}~M\eur\ quand le plafond ne mord plus, et la
-progression est monotone sur les sept points. Serrer l'enveloppe publique \emph{augmente} la
-marge brute du territoire de plus de \num{14}~M\eur\ dans le modèle, tout en faisant reculer
-l'objectif. Les deux ne se contredisent pas : l'objectif est une marge \emph{ajustée du risque},
-et la pénalité de risque passe de \SI{18}{\percent} de la marge brute au plafond haut à
-\SI{34}{\percent} au plafond bas. Autrement dit, dans ce modèle, \textbf{l'aide publique
-n'achète pas de la marge, elle achète de la stabilité} --- elle maintient sur les parcelles des
-cultures à faible variabilité de rendement.
+Ce résultat est invisible sans tracer les fronts. Les duals locaux des deux configurations sont
+quasi identiques — \num{\frontazoteRefDualBas} et \num{\frontazoteHuitDualBas} euros par
+kilogramme au point le plus serré — et l'on aurait conclu à l'égalité des coûts marginaux. Un
+verdict a d'ailleurs dû être renversé en cours de route : un front par $\varepsilon$-contrainte
+ne se paramètre pas sur le réalisé de la configuration de référence, mais sur la borne de sa
+\textbf{politique hôte}. Le coût marginal de l'azote n'est pas le même à \SI{70}{\percent} et à
+\SI{30}{\percent} d'inertie, et c'est précisément ce qui rend l'objet intéressant.
 
-Ce que l'aide maintient se lit à l'hectare près.
-
-\begin{table}[htbp]
-  \centering
-  \caption{Réallocation entre le statu quo libre et le plafond le plus serré
-  (\SI{\frontsubvQuatreunSeuil}{\euros}), en hectares par groupe \gls{rpg}.}
-  \label{tab:realloc-budget}
-  \small
-  \input{tables/realloc-budget}
-\end{table}
-
-\textbf{La banane d'exportation passe de \SI{2004}{\ha} à \SI{95}{\ha}} --- elle disparaît à
-\SI{95}{\percent} --- et la canne recule de \SI{2231}{\ha}. En face, le maraîchage double, les
-agrumes passent de \SI{9}{\ha} à \SI{657}{\ha}, l'igname double, la prairie gagne
-\SI{1539}{\ha}. C'est l'énoncé le plus direct que le modèle produise sur la question du projet :
-dans ses termes, \emph{ce qui tient la banane et la canne sur la terre guadeloupéenne, c'est
-l'enveloppe publique}, et desserrer cette contrainte-là réoriente environ \SI{2100}{\ha} vers
-des cultures vivrières. La réserve qui accompagne ce résultat est développée
-en~\S\ref{sec:limites} et elle est sérieuse : rien dans le modèle ne demande si ces
-\SI{2237}{\ha} de maraîchage trouvent un acheteur.
-
-\subsection{L'azote}
-
-Le front azote a été tracé deux fois : contre la configuration de référence, et
-\emph{sous} la politique agroécologique P8. La comparaison est l'objet intéressant, car le coût
-marginal d'un kilo d'azote n'a aucune raison d'être le même selon ce que la politique laisse par
-ailleurs comme marge de manœuvre.
-
-Contre la configuration de référence, sur \num{\frontazoteRefPoints} points tous prouvés
-optimaux, la pente vaut \SI{\frontazoteRefPente}{\euros} par kilogramme d'azote évité. Sous P8, sur
-\num{\frontazoteHuitPoints} points, elle vaut \SI{\frontazoteHuitPente}{\euros}. Le kilo d'azote
-est donc \emph{moins} cher à retirer sous une politique déjà contraignante --- P8 impose
-simultanément un plafond d'\gls{ift}, un plafond d'eau, un plancher d'emploi et une inertie de
-\SI{40}{\percent}, et l'assolement qu'elle autorise a déjà renoncé aux usages les plus intensifs.
-Les deux fronts partent d'ailleurs de duals locaux quasi identiques
-(\num{\frontazoteRefDualBas} et \num{\frontazoteHuitDualBas}~\eur/kg) : sans les tracer, on
-aurait conclu à l'égalité des coûts marginaux.
-
-Ce second front porte une réserve que je ne peux pas lever. Sur ses
-\num{\frontazoteHuitPoints} points, \num{\frontazoteHuitProuves} sont prouvés optimaux --- les
-deux extrémités ; entre elles, deux points rendent \emph{exactement} le même objectif pour
-\emph{exactement} le même azote. La chaîne de warm start les a épinglés sur l'incumbent du plus
-serré et aucun n'a su s'en détacher dans son heure : ce palier est un artefact de solveur, pas
-un plateau économique. La pente y est sous-estimée et le saut vers le point le plus lâche
-sur-estimé d'autant. Le front \textbf{borne} le coût marginal de l'azote, il ne le mesure pas
-point par point.
+Une réserve, enfin, que je ne peux pas lever. Sur le front tracé sous P8, seules
+\num{\frontazoteHuitProuves} des \num{\frontazoteHuitPoints} extrémités sont prouvées optimales,
+contre \num{\frontazoteRefProuves} sur \num{\frontazoteRefPoints} pour le front de référence.
+Entre elles, deux points rendent \emph{exactement} le même objectif pour \emph{exactement} la
+même quantité d'azote : la chaîne d'amorçage les a épinglés sur l'incumbent du point le plus
+serré. \textbf{Ce palier est un artefact de solveur, pas un plateau économique.} Le front
+\emph{borne} le coût marginal ; il ne le mesure pas point par point. Pour mémoire, les prix
+duals des contraintes nommées, lus sur la relaxation linéaire, situent un point d'\gls{ift} à
+\SI{286}{\euros}, un kilogramme d'azote à \SI{9.81}{\euros} et une heure de travail à
+\SI{12.50}{\euros}.
 
 \section{Ce que le dispositif ne permet pas de conclure}
 \label{sec:limites}
 
-\begin{vigilance}
-\textbf{Un solve arrêté à la limite de temps est faux, pas seulement imprécis --- et l'écart à
-la borne de relaxation ne le mesure pas.} P8 non forcée a été résolue trois fois sur le
-\emph{même} ensemble faisable, chaque solve amorcé sur le précédent :
-\SI{\mesHuitUneHeure}{\euros}, \SI{\mesHuitTroisHeures}{\euros}, puis
-\SI{\mesHuitOptimum}{\euros} \emph{prouvé optimal} --- trois réponses à une seule question. Mais
-la relaxation linéaire, qui borne à \SI{\mesHuitBorneLp}{\euros}, aurait dit le deuxième faux de
-\SI{\mesHuitEcartApparent}{\percent} quand il l'était de \SI{\mesHuitEcartReel}{\percent} : le
-saut d'intégralité en absorbe \SI{\mesHuitSautInt}{\percent} à lui seul. Une borne LP prouve une
-infaisabilité, elle ne chiffre pas ce qu'un \emph{branch-and-bound} a laissé. La grille portait la
-même erreur --- F0 étant le forçage \emph{nul}, le statu quo et le statu quo${}\times{}$F0 sont le
-même problème, et ils différaient de \SI{\prosEcartFzero}{\euros}. Repris depuis une graine
-correcte, le second a rendu l'optimum \emph{prouvé} en \SI{\prosEcartFzeroDuree}{\second} : l'écart
-n'était pas un coût de taille du problème, il était entièrement imputable au hasard du
-branchement. Toute comparaison entre une cellule convergée et une cellule daguée porte cet écart,
-sans garantie qu'il soit du même ordre partout.
-\end{vigilance}
+Cette section n'est pas une liste d'excuses, et c'est ce qui la distingue d'une clause de
+style : chaque limite y est \emph{établie par une mesure}. C'est aussi ce qui rend le reste du
+chapitre citable.
 
-\paragraph{Un front peut être entièrement inactif.} Le catalogue paramétrait les seuils du front
-azote en fractions de la consommation de la configuration de référence
-(\SI{1930903}{\kilogram}). Sous P8, qui plafonne l'azote à \SI{1351632}{\kilogram}, cinq des sept
-seuils étaient supérieurs au plafond que la politique s'impose déjà : ils ne contraignaient rien,
-et le front aurait rendu cinq fois la même allocation. Le défaut est dans le plan, pas dans le
-modèle, et il ne se voit pas à la lecture --- il se voit au contrôle décrit
-en~\S\ref{sec:fronts}. Reparamétrés sur le plafond de la politique hôte, les mêmes points
-tracent le front présenté ci-dessus.
+\paragraph{Un solve arrêté est faux, pas imprécis.} La politique P8 non forcée a été résolue
+trois fois sur le \emph{même} ensemble faisable : \SI{\mesHuitUneHeure}{\euros} après une
+heure, \SI{\mesHuitTroisHeures}{\euros} après trois heures en repartant de la précédente, et
+\SI{\mesHuitOptimum}{\euros} finalement prouvés optimaux. Trois réponses à une seule question.
+Et la borne \gls{lp} ne mesure pas ce défaut : elle aurait annoncé le deuxième run à
+\SI{\mesHuitEcartApparent}{\percent} de l'optimum quand son écart réel était de
+\SI{\mesHuitEcartReel}{\percent} — cinq fois moins —, le saut d'intégralité de
+\SI{\mesHuitSautInt}{\percent} en absorbant l'essentiel. \emph{Une borne \gls{lp} prouve une
+infaisabilité ; elle ne chiffre pas ce qu'une recherche arborescente a laissé.} Le même
+problème, avec la même graine, a par ailleurs demandé \SI{\mesHuitPreuveDuree}{\second} puis
+\SI{10856}{\second} pour être prouvé : la durée elle-même n'est pas une donnée stable.
 
-\paragraph{Un forçage peut annuler une politique.} Sous crise systémique, les cinq points du
-front azote rendent tous la même valeur : le plafond d'azote ne mord jamais. La crise rend
-l'intensification non rentable et fait, gratuitement, le travail que la politique
-environnementale prétendait faire. Le résultat est intéressant, mais il signifie surtout qu'un
-front n'a pas de sens dans ce contexte-là, et le lot correspondant a été abandonné plutôt que
-tracé.
+\paragraph{La même erreur s'est produite dans la grille, et sa correction a été prédite.} F0
+étant le forçage \emph{nul}, le statu quo et le statu quo croisé avec F0 sont le même problème
+et doivent donner le même chiffre. Ils différaient de \SI{\prosEcartFzero}{\euros}, soit
+\SI{\prosEcartFzeroPct}{\percent}. La prédiction faite alors — l'écart est entièrement
+imputable au hasard du branchement, une reprise depuis une graine correcte doit le ramener à
+zéro — a été vérifiée au centime, en \SI{\prosEcartFzeroDuree}{\second} de calcul. Ce que cet
+épisode a coûté est instructif : le classement des politiques avait tenu, mais \emph{sa
+magnitude était fausse d'un facteur deux}, une cellule ayant dû être corrigée de
+\SI{13.66}{\percent}.
 
-\paragraph{Une politique peut être hors d'atteinte sans être infaisable.} P10, la borne
-\enquote{bifurcation} de l'axe, est faisable en relaxation --- sa borne \gls{lp} vaut
-\SI{\mesPdixBorneLp}{\euros} --- mais aucun solve n'en a trouvé la moindre solution entière en une
-heure, et aucune graine disponible n'était à distance de réparation :
-\num{\mesPdixViolationsA} contraintes violées pour la plus proche,
-\num{\mesPdixViolationsP} pour la plus éloignée. L'axe politique du dispositif est donc
-\emph{unilatéral} : sa borne dérégulatrice a tourné, sa borne bifurcation non. Ce qui reste
-citable est la borne \gls{lp}, qui est un majorant, et non un résultat.
+\paragraph{Un front peut être entièrement inactif.} Sous P8, cinq des sept seuils du balayage
+d'azote étaient supérieurs au plafond que la politique s'impose déjà : ils ne contraignaient
+rien, et le front aurait rendu cinq fois la même allocation. Le défaut est dans le plan, pas
+dans le modèle, et il ne se voit pas à la lecture du fichier — il se voit au contrôle des
+points décrit au §~\ref{sec:fronts}.
 
-\paragraph{Trois lectures sont interdites.} \emph{Un indicateur qu'une contrainte fixe est une
-hypothèse du scénario, pas son résultat} : noter P8 sur son plafond d'azote, qu'elle atteint à
-\SI{10}{\kilogram} près sur \num{1.35} million, revient à la féliciter d'avoir respecté sa
-propre consigne. \emph{Un total n'est pas une intensité} : un scénario qui cultive moins
-d'hectares réduit l'azote total sans rien changer aux pratiques. \emph{Le \gls{pad} ne s'applique
-pas ici} : il mesure l'écart à 2017, or un scénario prospectif est construit pour s'en écarter,
-et son \gls{pad} n'est pas un mauvais score mais une grandeur sans objet --- le générateur de
-chiffres de ce mémoire refuse d'ailleurs de l'émettre pour un run prospectif.
+\paragraph{Une politique peut être hors d'atteinte sans être infaisable.} La politique de
+bifurcation P10 est faisable en relaxation \gls{lp}, dont la borne vaut
+\SI{\mesPdixBorneLp}{\euros}, mais aucun solve n'en a trouvé la moindre solution entière en
+\SI{7200}{\second}, et aucune graine disponible n'était à distance de réparation — la meilleure
+violait encore \num{\mesPdixViolationsA} contraintes. Il en résulte que \textbf{l'axe politique
+du dispositif est unilatéral} : sa borne dérégulatrice a tourné, sa borne de bifurcation non.
+Ce qui reste citable de P10 est une borne supérieure, ce qui n'est pas un résultat.
 
-\paragraph{Enfin, aucun débouché n'est modélisé au-delà de deux filières.} Le modèle porte un
-plafond de commercialisation sur le plantain et un plancher de production fourragère ; partout
-ailleurs, il suppose que ce qui est produit est vendu au prix de la table. Le résultat le plus
-spectaculaire du chapitre --- l'effondrement de la banane et le doublement du maraîchage sous
-contrainte budgétaire --- repose donc sur une hypothèse de marché parfaitement élastique pour le
-maraîchage, les agrumes et l'igname. Il dit ce que l'\emph{agronomie et l'économie de la
-production} rendent possible ; il ne dit pas si le territoire absorberait cette production, ni à
-quel prix. C'est exactement l'information que les enquêtes prévues par la lettre de mission
-devaient apporter.
+\paragraph{Trois lectures sont interdites.} Premièrement, un indicateur qu'une \emph{contrainte
+fixe} est une hypothèse du scénario et non son résultat : noter P8 sur son plafond d'azote
+revient à la féliciter d'avoir respecté sa propre consigne. Deuxièmement, un total n'est pas une
+intensité — un scénario qui cultive moins d'hectares réduit l'azote total sans rien changer aux
+pratiques. Troisièmement, le \gls{pad} du chapitre~\ref{ch:calibrer} ne s'applique pas ici : un
+scénario prospectif est construit pour s'écarter de 2017, et le générateur de chiffres de ce
+mémoire refuse d'ailleurs d'émettre un \gls{pad} pour un run prospectif. À quoi s'ajoutent deux
+indicateurs à manier avec précaution : un ratio d'autonomie alimentaire suppose une
+\emph{demande}, et la demande n'est pas modélisée ; et une part minimale de cultures
+biologiques bâtie sur les vingt-cinq variantes symétriques du §~\ref{sec:tractabilite} est
+satisfaite \textbf{à coût exactement nul}, par relabellisation.
+
+\paragraph{Et la réserve la plus lourde, qui conditionne le résultat le plus spectaculaire.}
+Aucun débouché n'est modélisé au-delà des deux filières d'exportation. Le basculement de
+\SI{2100}{\ha} vers le vivrier décrit au §~\ref{sec:fronts} repose donc sur une hypothèse de
+marché \emph{parfaitement élastique} pour le maraîchage, les agrumes et l'igname. Le modèle dit
+ce que l'agronomie et l'économie de la \emph{production} rendent possible ; il ne dit pas si le
+territoire absorberait cette production, ni à quel prix. C'est très exactement l'information que
+les enquêtes prévues par la lettre de mission devaient apporter.
 
 \begin{reflexion}
-Le catalogue de dix politiques que ce chapitre exploite, je l'ai écrit seul. L'axe qui va de la
-dérégulation totale à la bifurcation agroécologique, les seuils qui définissent chaque barreau,
-le choix de faire de P4 le statu quo et donc l'implicite point de référence de toute comparaison
---- ce sont des décisions politiques, prises par un stagiaire dans un fichier \gls{yaml}, sur la
-base de sa lecture de la littérature et de rien d'autre.
-
-Je ne crois pas qu'il y ait là une faute méthodologique : il faut bien que quelqu'un écrive le
-premier catalogue, et le rendre explicite et modifiable en \gls{yaml} plutôt que codé en dur dans
-les équations est précisément ce qui permet à quelqu'un d'autre de le contester ligne à ligne.
-Mais la conception participative de scénarios que prévoyait la lettre de mission n'aurait pas été
-un supplément d'âme. Elle aurait changé le contenu du catalogue --- probablement les seuils, très
-certainement les leviers, peut-être l'axe lui-même, qui suppose que le débat agricole
-guadeloupéen s'organise entre dérégulation et bifurcation, ce qui est une hypothèse et non une
-observation.
-
-Ce que le dispositif produit, il faut donc le lire pour ce qu'il est : les conséquences
-rigoureusement calculées d'hypothèses que personne du territoire n'a validées. La rigueur du
-calcul ne se transmet pas aux hypothèses.
+Le catalogue de dix politiques publiques que ce chapitre exploite, je l'ai écrit seul :
+l'axe, les seuils, et le choix de faire du statu quo P4 le point de référence implicite de
+toute comparaison. Ce sont des décisions politiques, prises par un stagiaire dans un fichier
+\gls{yaml}, sur la base de sa lecture de la littérature et de rien d'autre. Ce qui empêche que
+ce soit une faute est qu'il faut bien que quelqu'un écrive le premier catalogue, et que le
+rendre explicite et modifiable ligne à ligne est précisément ce qui permet à quelqu'un d'autre
+de le contester. Mais l'argument ne suffit pas. L'axe qui organise le catalogue — de la
+dérégulation à la bifurcation — suppose que le débat agricole guadeloupéen s'ordonne ainsi :
+c'est une hypothèse, pas une observation. Et l'ancrage mesuré est cruel, puisque seule la borne
+dérégulatrice a effectivement tourné. Le projet qui a précédé celui-ci avait mené une démarche
+participative — séminaire, \emph{World Café}, questionnaire ; la conception participative des
+scénarios n'aurait pas été un supplément d'âme, elle aurait changé les seuils, très probablement
+les leviers, peut-être l'axe lui-même.\attente{3} Ce que le dispositif produit doit donc être lu
+pour ce qu'il est : les conséquences rigoureusement calculées d'hypothèses que personne du
+territoire n'a validées. \textbf{La rigueur du calcul ne se transmet pas aux hypothèses.}
 \end{reflexion}

@@ -260,25 +260,56 @@ de la graine, jamais sa **qualité**.
 
 ## C. Données : ce que le jeu ne contient pas
 
-### C.1 — Majeur — Les rendements du modèle sont 2 à 4× ceux du territoire
+### C.1 — Majeur — Les rendements du modèle valent 1 à 4× ceux du territoire
 
-Confronté à la Statistique agricole annuelle 2017 (Agreste), qui donne production **et** surface :
+Confronté à la Statistique agricole annuelle 2017 (Agreste, *Mémento de la statistique
+agricole — Guadeloupe*, éd. 2019, p. 16-17), qui publie superficie, **rendement** et production
+par culture — la colonne rendement est publiée telle quelle, ce n'est pas une division de notre
+fait. Colonne « modèle » = production simulée / surface simulée sur `calib_retenu`, donc mélange
+de variantes fines compris.
 
-| | rdt Agreste | rdt modèle | | | rdt Agreste | rdt modèle |
-|---|---|---|---|---|---|---|
-| Ananas | 12,3 t/ha | **34,0** | | Agrumes | 5,2 | **20,0** |
-| Plantain | 9,0 | **26,0** | | Maraîchage | 10,8 | **43,9** |
-| Igname | 10,0 | 17,8 | | Melon | 19,9 | 20,0 ✓ |
+| | Agreste | modèle /cycle | modèle /an | rapport |
+|---|---:|---:|---:|---:|
+| Maraîchage | 10,8 t/ha | 43,9 | 43,9 | ×4,1 |
+| Agrumes | 5,2 | 20,0 | 20,0 | ×3,8 |
+| Plantain | 9,0 | 26,0 | 26,0 | ×2,9 |
+| Vergers | 6,4 | 14,5 | 14,5 | ×2,3 |
+| **Ananas (cycle 18 mois)** | 12,3 | 34,0 | **22,7** | ×1,8 |
+| Igname | 10,0 | 17,8 | 17,8 | ×1,8 |
+| Melon | 19,9 | 20,0 | 20,0 | ×1,0 ✓ |
 
-Une part de l'écart est légitime (Agreste moyenne tous les producteurs, `Rdt_Cult` décrit des
-itinéraires spécifiés), mais un facteur 3–4 ne s'explique pas par cela seul — et le melon, lui,
-tombe juste.
+⚠ **CORRIGÉ le 2026-08-16 — cette entrée annonçait « 2 à 4× » et comparait des unités
+différentes sur l'ananas.** `Rdt_Cult` est un rendement **par cycle**. Le GAMS annualise
+(`/Duree_Cycle_Cult*12`) tout ce qui est monétaire — CA, subventions, marge — mais **pas** les
+tonnages (`PROD_*`, `TONNE_*`, `NUTRI_*` lisent `Rdt_Cult` brut ; le portage Python fait
+pareil, cf. `compute_production_tonnes_by_crop`). Sur les 84 cultures, `Duree_Cycle_Cult.txt`
+ne porte qu'une valeur ≠ 12 : l'ananas, à **18 mois**. C'est donc la seule culture dont un
+tonnage du modèle n'est pas un tonnage annuel, et l'ancien ×2,8 sur l'ananas était surestimé
+de moitié. Corollaire : **toute confrontation d'un tonnage du modèle à une statistique annuelle
+doit annualiser l'ananas** — quotas de production compris.
+
+**Recoupement.** Le Mémento 2020 (données 2019) donne les mêmes ordres de grandeur : ananas
+12,91, plantain 9,3, igname 10,0, melon 19,3, agrumes 5,1 (64 ha citrons + 79 clémentines +
+104 oranges + 36 pamplemousses), autres fruits 5,9. Le constat est stable sur deux éditions.
+
+**Deux réserves à ne pas taire.** (a) *Maraîchage* : le modèle décrit une **rotation annuelle**
+de plusieurs légumes sur le même hectare (`MA_ROTA` 54 t/ha, `MA_TO_CO_JA` 36) alors qu'Agreste
+compte une surface par légume — le ×4,1 est donc en partie une différence d'unité, pas un écart
+de productivité. (b) *Agrumes* : le rendement simulé porte sur ~10 ha, et le dénominateur
+Agreste inclut les vergers non entrés en production.
+
+**Ce qui rend le constat solide malgré ces réserves : le melon.** C'est la seule culture
+produite presque entièrement par un opérateur unique sous un itinéraire spécifié — donc la
+seule dont la moyenne territoriale *est* un itinéraire technique. Et c'est exactement la seule
+ligne où les deux chiffres coïncident. L'écart n'est pas un défaut de données : c'est la
+différence entre un **rendement potentiel** et un **rendement moyen**, et elle disparaît là où
+les deux notions se confondent.
 
 → **Conséquence directe : la marge de ces cultures est mécaniquement surestimée, donc le modèle
 en couvre l'île dès qu'aucun débouché ne les borne.** C'est la cause commune du plantain, de
-l'ananas et de l'igname. Sous mandat de parité on n'y touche pas, mais cela explique *pourquoi*
-des plafonds de marché sont nécessaires : **ce ne sont pas des béquilles**, ils compensent une
-productivité surévaluée en amont.
+l'ananas et de l'igname. Sous mandat de parité on n'y touche pas (ce sont les rendements de la
+Table 1 de l'article), mais cela explique *pourquoi* des plafonds de marché sont nécessaires :
+**ce ne sont pas des béquilles**, ils compensent une productivité surévaluée en amont.
 
 ### C.2 — Majeur — L'allocation fine 2017 en entrée n'a jamais existé
 

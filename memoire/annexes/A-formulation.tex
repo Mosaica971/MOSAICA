@@ -1,3 +1,178 @@
 \chapter{Formulation complète du programme}
 \label{ann:formulation}
-\arediger{ensembles, paramètres, variables, objectif, contraintes}
+% BUDGET : 5 pages. 40 items du corpus destines ici.
+% ROLE : couche de PREUVE du chapitre 2. Le corps affirme, l'annexe etablit.
+
+Cette annexe donne la formulation complète du programme résolu, dans l'ordre où un lecteur
+qui voudrait le reconstruire en aurait besoin : les ensembles, les paramètres et leur
+provenance, puis l'objectif et les cinq familles de contraintes, puis les indicateurs calculés
+après la résolution. La correspondance équation par équation avec le \gls{gams} d'origine —
+avec le statut de chacune — fait l'objet de l'annexe~\ref{ann:portage}.
+
+\section{Ensembles, paramètres, variables}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ensembles et variable de décision.}
+  \label{tab:ann-ensembles}
+  \small
+  \begin{tabularx}{\textwidth}{@{}llX@{}}
+    \toprule
+    \textbf{Symbole} & \textbf{Nom dans le code} & \textbf{Contenu} \\
+    \midrule
+    $P$ & \texttt{PLOTS} & parcelles du \gls{rpg} 2017, identifiants synthétiques
+      \texttt{P1..Pn} \\
+    $C$ & \texttt{CROPS} & activités \enquote{culture $\times$ itinéraire technique},
+      84 codes fins \\
+    $F$ & \texttt{FARMS} & exploitations ; $f(p)$ désigne celle de la parcelle $p$ \\
+    $E$ & \texttt{PAIRS} & couples \emph{éligibles} $(p,c)$, seuls déclarés au solveur \\
+    $Y_{p,c}$ & \texttt{model.Y} & variable binaire d'affectation, $(p,c) \in E$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Paramètres du programme. La colonne de droite indique d'où vient la valeur ---
+  c'est elle qui permet de savoir ce qui est observé, ce qui est tabulé et ce qui est calculé.}
+  \label{tab:ann-parametres}
+  \small
+  \begin{tabularx}{\textwidth}{@{}llX@{}}
+    \toprule
+    \textbf{Symbole} & \textbf{Unité} & \textbf{Origine} \\
+    \midrule
+    $s_p$ & ha & surface de la parcelle, table parcellaire \\
+    $m_c$ & \eur/ha & marge brute unitaire, calculée par \texttt{domain/economics.py} à partir
+      des produits, des charges et des aides \gls{posei} ; dépend de l'année économique
+      choisie en configuration \\
+    $a_f$ & --- & coefficient d'aversion au risque, déduit du type d'exploitation
+      \texttt{TYPE\_EXPL} lui-même déduit du groupe de cultures dominant
+      (\texttt{domain/farm\_typology.py}) ; huit valeurs, Table~2 de
+      \textcite{chopin2015} \\
+    $v_c$ & --- & fraction de marge perdue en cas d'aléa (\texttt{Var\_Rdt\_Cult}).
+      \textbf{Ce n'est pas une variance} : aucune covariance entre cultures n'intervient,
+      et la pénalité est linéaire en surface \\
+    $h_c$ & h/ha & besoin en travail de l'itinéraire technique, Table~1 de l'article \\
+    $H_f$ & h & main d'\oe uvre de l'exploitation, calculée sur son assolement 2017 observé \\
+    $\sigma$ & --- & facteur de desserrement du plafond de travail, levier de scénario \\
+    $r_c$ & (unité)/ha & taux par hectare d'un indicateur : azote, \gls{ift}, \gls{ges}, eau,
+      heures, euros de subvention \\
+    $w_p$ & --- & poids de parcelle : vaut 1, ou l'indicatrice d'irrigabilité pour l'eau \\
+    $T$ & (unité) & niveau de la borne, fixé par le scénario \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Objectif et cinq familles de contraintes}
+
+L'objectif est l'équation~\eqref{eq:objectif} du chapitre~\ref{ch:porter}. Une variante
+\emph{marge brute pure}, sans pénalité de risque, existe et n'est activée que par la politique
+de dérégulation totale — ce qui rend sa colonne d'objectif incomparable aux autres, et impose
+de la comparer sur les grandeurs physiques.
+
+Les contraintes se rangent en cinq familles, toutes paramétrées depuis la configuration :
+
+\begin{enumerate}
+\item \textbf{Affectation} : au plus une culture par parcelle, équation~\eqref{eq:unicite}.
+\item \textbf{Règles par exploitation} : parts de surface maximales ou minimales entre groupes
+  de cultures (\texttt{farm\_area\_share\_max}, \texttt{farm\_area\_ratio\_min}), jachère et
+  rotation obligatoires de la banane d'exportation, part minimale de canne des \gls{gfa}, et le
+  plafond de travail de l'équation~\eqref{eq:mo}.
+\item \textbf{Bornes de production territoriales} (\texttt{territory\_production\_bound}) :
+  quotas et planchers exprimés en tonnes de produit, obtenus en multipliant la surface allouée
+  par le rendement de la culture. Deux d'entre elles sont exprimées en \emph{surface} et non en
+  production — le plancher de prairie et l'objectif de surface pâturée — au moyen d'un
+  paramètre qui désactive la multiplication par le rendement.
+\item \textbf{Bornes d'indicateur}, équation~\eqref{eq:indicateur}. Une seule famille borne
+  n'importe quel taux par hectare exposé par l'étude de cas, à l'échelle du territoire
+  (\texttt{territory\_\allowbreak indicator\_\allowbreak bound}) ou d'une zone — île, région,
+  bassin versant ou \emph{exploitation} (\texttt{zone\_\allowbreak indicator\_\allowbreak bound}). C'est cette dernière forme qui permet
+  d'écrire une directive nitrates : un plafond de kilogrammes d'azote par hectare, vérifié
+  ferme par ferme.
+\item \textbf{Inertie} (\texttt{baseline\_inertia\_min}) : une part minimale de la surface
+  allouée doit rester dans le groupe de cultures qu'elle portait en 2017. C'est le levier qui
+  distingue une transition d'une rupture.
+\end{enumerate}
+
+\subsection*{L'éligibilité}
+
+La matrice d'éligibilité est l'intersection de deux mécanismes. D'une part des bornes
+numériques : l'altitude, la pente, la pluviométrie et la surface de la parcelle doivent tomber
+dans l'intervalle admissible de la culture. D'autre part des \emph{règles catégorielles}, au
+nombre de cinq dans le noyau : interdiction pure d'une culture, exigence d'irrigation,
+interdiction sur une valeur d'attribut, seuil ou valeur exacte sur un indicateur de risque, et
+interdiction régionale. Une sixième règle, spécifique à l'étude de cas, verrouille les parcelles
+en friche selon leur historique.
+
+Le point de méthode qui importe pour lire la configuration est le suivant : chaque règle
+interdit son propre sous-ensemble, et le masque conserve l'\textbf{union} des interdictions. Une
+entrée unique conjugue donc ses conditions par un ET, et une disjonction s'écrit
+nécessairement en \emph{plusieurs entrées} — c'est ainsi qu'est écrite l'interdiction du melon,
+qui porte à la fois sur des types de sol et sur une île.
+
+\begin{vigilance}
+\textbf{Le piège du booléen trivial.} Lorsque la somme d'une contrainte ne rencontre aucun
+couple $(p,c)$ éligible, elle vaut le \texttt{0} entier de Python et non une expression
+symbolique ; la comparer à un seuil produit un booléen nu que le modeleur rejette. Toute
+contrainte dont l'ensemble de termes peut être vide doit donc rendre explicitement
+\enquote{faisable} ou \enquote{infaisable} à la place. Deux contraintes du dépôt s'en gardent ;
+toute nouvelle contrainte doit le faire.
+\end{vigilance}
+
+\section{Indicateurs}
+
+Tous les indicateurs sont des \emph{taux par hectare} appliqués à l'allocation \textbf{après}
+la résolution : ils n'entrent dans le programme que lorsqu'une borne les y fait entrer
+explicitement. Trois sont hérités du \gls{gams} — azote, \gls{ges} et \gls{ift}. Le phosphore
+et la potasse ont été ajoutés en lisant les \emph{noms} des engrais NPK des itinéraires
+techniques, lecture validée contre la colonne d'azote existante, qui la confirme au millième.
+
+Quatre méritent une réserve explicite.
+
+\begin{itemize}
+\item \textbf{L'eau} est un besoin \emph{brut} des cultures, jamais un besoin net d'irrigation :
+  la clé de répartition mensuelle des précipitations n'était pas utilisée. Elle existe pourtant
+  dans la documentation technique des données, et c'est une correction immédiate signalée en
+  conclusion.
+\item \textbf{Le carbone organique du sol} est le seul indicateur à dépendre de la
+  \emph{parcelle} — par son type de sol — et non seulement de la culture ; il ne passe donc pas
+  par l'aide au calcul commune aux autres taux.
+\item \textbf{Le Rpest}, arbre flou de \textcite{tixier2007}, est le seul à dépendre du
+  \textbf{couple} $(p,c)$ : il croise les produits phytosanitaires de la culture avec le
+  ruissellement et le drainage de la parcelle.
+\item \textbf{L'agroécologie et le biologique} sont rapportés séparément, et pour cause : les
+  \gls{mae} donnent une définition sourcée de l'agroécologie, les opérations de fertilisation
+  organique une définition du biologique. La canne récoltée en vert n'est pas biologique, et la
+  prairie domine le biologique par itinéraire — deux raisons de ne pas confondre les deux
+  colonnes.
+\end{itemize}
+
+Enfin, le score composite qui agrège ces indicateurs pondère \textbf{par famille}. Sans cela,
+les onze ratios d'autonomie alimentaire, quasi colinéaires entre eux, pèseraient onze fois les
+émissions de \gls{ges}, et le score mesurerait la finesse du découpage des indicateurs plutôt
+que la performance des politiques. Un indicateur qu'une contrainte du scénario \emph{fixe} est
+par ailleurs exclu du score, sur détection automatique : le noter reviendrait à féliciter une
+politique d'avoir respecté sa propre consigne.
+
+\section{Le registre, en une page}
+
+Ce qui mérite d'être retenu de l'architecture du chapitre~\ref{ch:porter} tient dans un
+exemple. Ajouter au modèle un plafond d'azote territorial de \SI{1351632}{\kilogram} par an
+s'écrit ainsi :
+
+\begin{quote}\ttfamily\footnotesize\raggedright
+- name: territory\_indicator\_bound \\
+\phantom{- }args: \{label: plafond\_azote, indicator: azote, \\
+\phantom{- args: \{}sense: le, threshold: 1351632\}
+\end{quote}
+
+Aucune ligne de Python n'est écrite. Le nom \texttt{territory\_indicator\_bound} est celui sous
+lequel une fonction constructrice s'est enregistrée dans le registre du noyau au moment de
+l'import de son module ; la configuration en sélectionne les entrées actives et transmet les
+arguments. Le même motif sert aux objectifs — dont un et un seul doit être actif —, aux
+critères d'éligibilité et aux règles catégorielles.
+
+Le revers, déjà signalé dans le corps, est le mode de défaillance : un nom mal orthographié
+n'échoue qu'à l'interrogation du registre, et une famille dont le module n'est jamais importé
+est silencieusement absente. C'est le prix de l'indirection, et il explique pourquoi le dépôt
+tient autant à ses garde-fous.

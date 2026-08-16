@@ -1,220 +1,324 @@
 \chapter{Porter et rendre traçable}
 \label{ch:porter}
-% BUDGET : 5 pages.
+% BUDGET : 6 pages (cf. memoire/PLAN.md, section 4).
+% THESE DU CHAPITRE : la fidelite a l'ARTEFACT -- et non a une realite supposee -- est ce qui
+% rend opposable tout desaccord ulterieur entre les deux modeles.
+%
+% NOTE : les blocs mathematiques sont CONSERVES. Ce ne sont pas de la prose a reecrire, ce
+% sont les objets formels du memoire, et \eqref{eq:objectif}, \eqref{eq:mo} et
+% \eqref{eq:indicateur} sont appeles depuis les chapitres 3 et 4.
 
-Porter un modèle n'est pas le traduire. Une traduction fidèle ligne à ligne aurait reproduit
-un programme que personne, sept ans après sa dernière exécution, ne savait plus faire tourner
-ni interroger. Ce que la commande demandait était différent : un modèle qu'on puisse
-\emph{questionner} --- changer un plafond, ajouter un indicateur, comparer deux politiques ---
-sans rouvrir le code à chaque fois. Ce chapitre décrit le programme obtenu, l'architecture qui
-le rend interrogeable, le protocole qui garantit qu'il dit la même chose que l'original, et le
-travail qu'il a fallu pour que sa résolution reste possible.
+Porter n'est pas traduire. Une traduction ligne à ligne aurait reproduit, dans un autre
+langage, un programme que personne ne savait plus faire tourner et dont on ne pouvait
+interroger aucun levier sans rouvrir les équations. Ce que la commande supposait est autre
+chose : un modèle qu'on puisse \emph{questionner} sans le réécrire. Ce chapitre présente le
+programme obtenu, l'architecture qui le rend interrogeable, le protocole qui garantit qu'il dit
+la même chose que l'original — bugs compris — et le travail qu'il a fallu pour que sa
+résolution reste possible.
 
 \section{Formulation du programme}
 \label{sec:formulation}
 
-Le modèle décide, pour chaque parcelle du territoire, quelle culture y implanter. C'est un
-programme linéaire en nombres entiers (\gls{milp}) purement binaire.
-
 Soit $P$ l'ensemble des parcelles, $C$ celui des cultures, et $E \subseteq P \times C$
-l'ensemble des couples \emph{éligibles} --- ceux qu'un masque agronomique autorise
-(§\ref{sec:architecture}). La variable de décision est
+l'ensemble des couples \emph{éligibles} (§~\ref{sec:architecture}). La variable de décision est
 \[
   Y_{p,c} \in \{0,1\}, \qquad (p,c) \in E,
 \]
-qui vaut 1 si la parcelle $p$ porte la culture $c$. Restreindre les variables aux seuls
-couples éligibles n'est pas une optimisation d'implémentation : c'est ce qui ramène
-$|P| \times |C| \approx \num{2000000}$ colonnes potentielles aux $\num{\mesBinaires}$ effectivement
-déclarées, et c'est la première raison pour laquelle le problème est abordable.
-
-L'objectif est la marge brute agrégée, corrigée du risque à la manière de Markowitz :
+qui vaut 1 si la parcelle $p$ porte la culture $c$. L'objectif est la marge brute agrégée,
+corrigée du risque :
 \begin{equation}
   \max \; \sum_{(p,c) \in E} Y_{p,c} \; s_p \; m_c \; \bigl(1 - a_{f(p)} \, v_c \bigr),
   \label{eq:objectif}
 \end{equation}
-où $s_p$ est la surface de la parcelle (ha), $m_c$ la marge brute unitaire de la culture
-(\eur/ha), $f(p)$ l'exploitation à laquelle la parcelle appartient, $a_f$ le coefficient
-d'aversion au risque de cette exploitation --- déduit de son type dominant --- et $v_c$ un
-coefficient de perte propre à la culture. Un avertissement s'impose ici, car le paramètre
-porte dans les données un nom trompeur : $v_c$ n'est \emph{pas} une variance. C'est une
-fraction de marge perdue, la pénalité est donc linéaire en surface, sans terme quadratique ni
-covariance entre cultures. L'équation~\eqref{eq:objectif} reste par conséquent linéaire, et
-c'est heureux --- mais elle ne réalise pas l'arbitrage moyenne-variance que son nom d'origine
-suggère.
-
-Les contraintes se rangent en cinq familles. À chaque parcelle, au plus une culture :
+où $s_p$ est la surface de la parcelle (ha), $m_c$ la marge brute unitaire (\eur/ha), $f(p)$
+l'exploitation de la parcelle, $a_f$ son coefficient d'aversion au risque et $v_c$ un
+coefficient de perte propre à la culture. À chaque parcelle, au plus une culture :
 \begin{equation}
   \sum_{c \,:\, (p,c) \in E} Y_{p,c} \;\le\; 1, \qquad \forall p \in P.
   \label{eq:unicite}
 \end{equation}
-Par exploitation, des règles agronomiques de rotation et de part maximale --- l'ananas au plus
-sur 75\,\% de la surface, la jachère au moins à 20\,\% de la banane export --- toutes de la
-forme
-$\sum_{p \in P_f} \sum_{c \in G} Y_{p,c} s_p \lesseqgtr \alpha \sum_{p \in P_f} s_p$
-pour un groupe de cultures $G$ et une exploitation $f$. Par exploitation encore, un plafond de
-main d'\oe uvre,
+Par exploitation, un plafond de main d'\oe uvre,
 \begin{equation}
   \sum_{p \in P_f} \sum_{c} Y_{p,c} \, s_p \, h_c \;\le\; \sigma \, H_f,
   \label{eq:mo}
 \end{equation}
-où $h_c$ est le besoin en travail de la culture (h/ha), $H_f$ la main d'\oe uvre observée sur
-l'exploitation et $\sigma$ un facteur de desserrement. Au niveau du territoire, des bornes de
-production $\sum_{(p,c) \in E, c \in G} Y_{p,c} s_p y_c \lesseqgtr T$ avec $y_c$ le rendement
-(t/ha) --- ce sont les quotas de filière. Enfin, des bornes portant non sur une production mais
-sur un \emph{indicateur} quelconque exposé par le modèle,
+où $h_c$ est le besoin en travail (h/ha), $H_f$ la main d'\oe uvre observée et $\sigma$ un
+facteur de desserrement. Enfin, des bornes portant sur un \emph{indicateur} quelconque,
 \begin{equation}
   \sum_{(p,c) \in E} Y_{p,c} \, s_p \, w_p \, r_c \;\lesseqgtr\; T,
   \label{eq:indicateur}
 \end{equation}
-où $r_c$ est un taux par hectare (kg d'azote, \gls{ift}, heures de travail, euros de
-subvention) et $w_p$ un poids de parcelle. Ce dernier détail n'est pas cosmétique : l'eau
-n'est prélevée que sur les parcelles irrigables, et omettre $w_p$ fait compter
-\num{56} millions de mètres cubes là où le territoire en consomme \num{35}.
-L'équation~\eqref{eq:indicateur} déclinée par zone --- île, région, bassin, exploitation ---
-donne la forme de la directive nitrates, avec un seuil exprimé par hectare de la zone.
+où $r_c$ est un taux par hectare (kg d'azote, \gls{ift}, heures, euros de subvention) et $w_p$
+un poids de parcelle.
 
-Le programme résolu pour la calibration compte ainsi $\num{\mesBinaires}$ variables binaires ;
-selon la politique simulée, les scénarios prospectifs restent dans la plage
-\numrange{310000}{335000}.
+Le programme est donc un \gls{milp} purement binaire : il n'y a aucune variable continue, et
+l'unicité~\eqref{eq:unicite} est une inégalité — une parcelle peut rester sans culture. Ce qui
+le rend abordable n'est pas le solveur, c'est l'ensemble $E$. Le produit $P \times C$
+compterait environ deux millions de colonnes ; restreindre aux couples agronomiquement
+éligibles en déclare \num{\mesBinaires} (tableau~\ref{tab:programme}). Ce n'est pas une
+optimisation d'implémentation, c'est une décision de modélisation : ce que le masque
+d'éligibilité retire, aucune contrainte ne peut plus le rendre, et le
+chapitre~\ref{ch:calibrer} montrera qu'il impose à lui seul un plancher d'écart à l'observé.
+
+Deux précisions sur l'objectif, qui évitent deux contresens. La première est que la pénalité
+$a_f v_c$, souvent appelée \enquote{de Markowitz} par analogie avec l'arbitrage
+moyenne-variance \parencite{markowitz1952}, n'en est pas un : $v_c$ est une fraction de marge
+perdue en cas d'aléa, la pénalité est linéaire en surface, et aucune covariance entre cultures
+n'intervient. C'est précisément cette linéarité qui garde le programme dans la classe
+\gls{milp} plutôt que quadratique, donc résoluble par \gls{highs}. La seconde est que la main
+d'\oe uvre n'est \textbf{pas} monétisée dans les coûts variables hérités du \gls{gams} : elle
+n'apparaît que comme la ressource plafonnée de~\eqref{eq:mo}. Le revenu net que produit le
+rapport de run est donc un ajout de restitution, pas la quantité maximisée.
+
+Le poids $w_p$ de~\eqref{eq:indicateur} n'est pas cosmétique. L'eau, par exemple, n'est
+prélevée que sur les parcelles irrigables : borner la consommation sans ce poids compte
+\SI{56}{\mega\metre\cubed} là où le territoire en consomme \SI{35}{\mega\metre\cubed}, et
+rend le plafond inopérant. L'annexe~\ref{ann:formulation} donne l'inventaire complet des
+ensembles, paramètres et contraintes, avec pour chacun le nom qu'il porte dans le \gls{gams}
+d'origine — c'est cette colonne qui permet à un successeur de retrouver une équation dans la
+source.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Taille du programme et coût de sa résolution. Les durées sont mesurées sur le
+  territoire complet ; l'étendue \emph{min--max} porte sur vingt résolutions du \emph{même}
+  problème, à taille constante.}
+  \label{tab:programme}
+  \small
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
+    \toprule
+    Couples parcelle $\times$ culture potentiels & $\sim$\num{2000000} \\
+    Variables binaires déclarées (calibration retenue) & \num{\mesBinaires} \\
+    Variables binaires déclarées (configuration prospective) & \num{\mesBinairesRef} \\
+    \dots{} si les \num{25} variantes symétriques sont rouvertes (§~\ref{sec:tractabilite})
+      & \num{\mesBinairesKarus} \\
+    \midrule
+    Résolution la plus rapide des vingt enregistrées & \SI{\mesSolveMin}{\second} \\
+    Résolution la plus lente des vingt enregistrées & \SI{\mesSolveMax}{\second} \\
+    Coefficient de variation des durées & \SI{\mesSolveCV}{\percent} \\
+    Même problème, amorçage à froid puis à chaud
+      & \SI{\mesWarmAvant}{\second} $\rightarrow$ \SI{\mesWarmApres}{\second} \\
+    Écart d'optimalité relatif imposé au solveur & \SI{\mesGapMip}{\percent} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Le mandat de parité comme protocole}
+\label{sec:parite}
+
+Le portage s'est fait sous un mandat explicite : reproduire le comportement \emph{réel} du
+\gls{gams}, y compris lorsqu'il est involontaire. Un défaut identifié n'est pas corrigé au
+passage ; il est porté, et documenté comme tel.
+
+Cette règle surprend, et elle mérite sa justification, parce qu'elle a gouverné six mois de
+travail. Un port qui corrige au passage produit un modèle dont on ne peut plus rien dire :
+lorsque les deux programmes divergent sur un chiffre — et ils divergent —, on ne sait plus
+attribuer l'écart à une correction voulue ou à une erreur de transcription, puisque la seule
+référence disponible a elle-même été modifiée. \textbf{Le mandat de parité n'est pas de la
+déférence envers l'artefact : c'est ce qui rend chaque divergence attribuable.} La branche
+alternative — un port \enquote{amélioré} corrigeant les défauts au fil de l'eau — a été fermée
+sur ce raisonnement (figure~\ref{fig:fil}).
+
+Ce que la parité rend supportable, c'est sa contrepartie. Chaque défaut porté est accompagné
+d'une variante \enquote{intention présumée} — la lecture que l'équation avait manifestement
+pour but — écrite à côté et désactivée dans la configuration ; basculer deux lignes de
+\gls{yaml} suffit à mesurer ce que l'autre lecture change. La parité est donc un point de
+départ documenté, pas un point d'arrivée, et savoir jusqu'où la tenir maintenant que le port
+est fini appartient à l'équipe (chapitre~\ref{ch:discussion}).
+
+Le même souci de traçabilité a conduit à donner à \emph{chaque} équation du \gls{gams} un
+statut explicite : portée, implicite, différée ou écartée. Quatorze équations
+\texttt{Eq\_*\_SUPP} sont déclarées implicites — elles annulent des codes agrégats dont
+l'économie est nulle, et l'auteur du \gls{gams} les supprimait déjà en bloc.
+\texttt{Eq\_CS\_GFA}, qui impose la part minimale de canne des \gls{gfa}, est portée mais
+désactivée : elle rend le problème infaisable sur les données 2017 réelles, comme le ferait le
+\gls{gams}. Le bloc de la canne fibre est différé en entier, non par difficulté de code mais
+parce que le sens de ses données d'entrée n'a pu être établi. L'annexe~\ref{ann:portage} donne
+la table complète avec le motif de chaque statut : c'est elle qui rend le mandat vérifiable par
+quelqu'un d'autre que son auteur.
+
+\begin{figure}[tbp]
+  \centering
+  \begin{tikzpicture}[
+      >={Stealth[length=2mm]},
+      fait/.style   = {draw, rounded corners=1pt, align=left, inner sep=4pt,
+                       font=\footnotesize, text width=44mm},
+      choix/.style  = {draw, thick, align=left, inner sep=4pt,
+                       font=\footnotesize, text width=44mm},
+      coupee/.style = {draw, dashed, align=left, inner sep=4pt,
+                       font=\footnotesize, text width=44mm, text=black!55},
+      lien/.style   = {->, shorten >=1pt}]
+    \node[fait] (a) {\textbf{Fait mesuré}\\ \gls{gams} renvoie zéro, sans avertissement, sur
+      une colonne absente};
+    \node[fait, below=7mm of a] (b) {\textbf{Conséquence}\\ \texttt{Eq\_VE\_PLUIE} interdit une
+      variante de verger pluvial sur \emph{tout} le territoire};
+    \node[choix, right=16mm of a] (c) {\textbf{Choix retenu}\\ mandat de parité : reproduire le
+      comportement réel, défauts compris};
+    \node[coupee, right=16mm of b] (d) {\textbf{Branche fermée}\\ port \enquote{amélioré} :
+      corriger les défauts au passage};
+    \draw[lien] (a) -- (b) node[midway, left, font=\scriptsize] {produit};
+    \draw[lien] (b) -- (c) node[midway, sloped, above, font=\scriptsize] {justifie};
+    \draw[lien] (b) -- (d) node[midway, above, font=\scriptsize] {ferme};
+    \draw[<->, dashed] (c) -- (d) node[midway, right, font=\scriptsize] {exclusives};
+  \end{tikzpicture}
+  \caption{Un fil de justification, du fait mesuré à la branche fermée. Le graphe complet des
+  décisions du stage compte plus de quatre cents n\oe uds et n'apprend rien affiché d'un bloc ;
+  ce qui se lit, et ce que l'annexe~\ref{ann:portage} tabule pour les sept branches fermées,
+  c'est un fil unique — \emph{ce qui a été retenu, ce que cela a fermé, et par quelle mesure}.}
+  \label{fig:fil}
+\end{figure}
+
+\subsection*{Le cas d'école}
+
+Le défaut qui a réorienté le stage se raconte en quatre temps, et le quatrième est le mien.
+
+\textbf{Un.} \gls{gams} ne signale pas l'accès à une colonne absente d'une table : il renvoie
+zéro. Le paramètre manquant ne laisse donc aucune trace — ni erreur, ni avertissement, ni
+valeur aberrante.
+
+\textbf{Deux.} L'équation \texttt{Eq\_VE\_PLUIE} teste ce zéro contre la valeur~1 pour décider
+si une parcelle peut porter un verger pluvial. Le test $0 \neq 1$ étant toujours vrai, la
+variante est interdite sur \emph{toutes} les parcelles du territoire. Aucune sortie du modèle
+ne peut la contenir, et rien dans les résultats ne le signale — un verger de moins dans un
+assolement guadeloupéen n'a pas l'air d'une anomalie.
+
+\textbf{Trois.} Le portage a lui-même son piège symétrique, de même famille. Les types de sol
+apparaissent dans deux fichiers sources dans deux ordres différents. Les indexer par position
+produit non pas une erreur, mais des coefficients faux et parfaitement plausibles : des
+rendements crédibles attribués aux mauvais sols. Là encore, la sortie ne trahit rien.
+
+\textbf{Quatre.} La règle d'éligibilité pédologique de l'ananas a été portée à l'envers, et
+elle a vécu plusieurs semaines dans le dépôt. Le piège de l'indexation par position était
+\emph{déjà documenté} quand il a mordu — la documentation ne protège pas de ce qu'elle décrit.
+Le correctif adopté n'est donc pas un commentaire supplémentaire mais une correction
+structurelle : les tables sont désormais jointes par nom, l'indexation par position n'étant
+plus possible. L'erreur inverse s'est produite une fois aussi, et vaut d'être dite : les
+commentaires de configuration décrivaient les interdictions liées à la chlordécone dans le
+mauvais sens alors que le code, lui, était juste — et le verdict avait d'abord été tiré du
+commentaire.
+
+\begin{vigilance}
+\textbf{Ces quatre défauts n'ont pas de signature dans les sorties.} Ils ne produisent ni
+erreur, ni valeur manquante, ni chiffre aberrant : ils produisent un résultat vraisemblable.
+C'est ce qui interdit de les chercher en relisant les résultats ou en relisant le code, et ce
+qui obligeait à reconstruire le modèle contre ses données. \emph{Un paramètre absent ne laisse
+pas un trou, il laisse un nombre plausible} — la phrase vaut pour tout ce mémoire, et le
+chapitre~\ref{ch:discussion} la retrouvera à propos d'un autre outil.
+\end{vigilance}
 
 \section{Une architecture qui sépare le générique du territoire}
 \label{sec:architecture}
 
-La formulation ci-dessus ne mentionne la Guadeloupe nulle part. Elle parle de parcelles, de
-cultures et d'exploitations. Cette observation, banale une fois faite, est le principe
-d'organisation du code : un noyau générique qui ne connaît ni la canne, ni la chlordécone, ni
-les groupements fonciers, et une couche d'étude de cas qui apporte les données, les règles
-agronomiques et les indicateurs propres au territoire. Une troisième couche, strictement en
-lecture, ne fait qu'exploiter des résultats déjà écrits.
+La formulation~\eqref{eq:objectif}--\eqref{eq:indicateur} ne mentionne la Guadeloupe nulle
+part. Cette observation, banale une fois faite, est devenue le principe d'organisation du code,
+réparti en trois couches : un noyau générique, qui ne connaît que des parcelles, des cultures
+et des exploitations ; une étude de cas, qui fournit les données guadeloupéennes, les règles
+héritées du \gls{gams} et la restitution ; et une couche en lecture seule, qui ouvre les
+dossiers de résultats déjà écrits. La séparation n'est pas qu'une intention de rangement :
+\emph{un test vérifie} que le noyau ne prononce aucun terme guadeloupéen, ce qui transforme une
+convention en garantie.
 
-Le noyau ne définit pas des contraintes, il définit des \emph{familles} de contraintes,
-enregistrées sous un nom. Poser un plafond d'azote à \SI{1351632}{\kilogram} ne demande alors
-pas d'écrire du code, mais une ligne de configuration nommant la famille, l'indicateur, le
-sens de l'inégalité et le seuil. Le même mécanisme sert aux objectifs, aux critères
-d'éligibilité et aux règles catégorielles. La conséquence pratique est que la totalité du
-dispositif expérimental du chapitre~\ref{ch:explorer} --- dix politiques, douze forçages, deux
-fronts de Pareto --- est écrite en \gls{yaml} et n'a demandé aucune modification du
-constructeur de modèle.
+Le noyau ne définit pas des contraintes, il définit des \textbf{familles} de contraintes,
+enregistrées sous un nom et instanciées depuis la configuration — le même mécanisme servant aux
+objectifs, aux critères d'éligibilité et aux règles catégorielles. Une seule famille, celle de
+l'équation~\eqref{eq:indicateur}, borne \emph{n'importe quel} taux par hectare que l'étude de
+cas expose : un plafond nitrates, une enveloppe de dépense publique et un plancher d'emploi
+sont le même constructeur appelé avec trois arguments différents. La démonstration de ce choix
+est au chapitre~\ref{ch:explorer} : la totalité du dispositif prospectif — dix politiques,
+douze forçages, deux fronts de Pareto — est écrite en \gls{yaml} et n'a demandé \emph{aucune}
+modification du constructeur de modèle.
 
-Cette séparation a un coût qu'il faut nommer. Un nom mal orthographié dans une configuration
-ne devient une erreur qu'au moment où le registre est interrogé, c'est-à-dire tard ; et une
-famille de contraintes dont le module n'a pas été importé est simplement absente du registre,
-donc introuvable. C'est le prix ordinaire de l'indirection, et il se paie en discipline de
-vérification --- ce qui est l'objet de la section~\ref{sec:gardefous}.
-
-\section{La parité comme protocole}
-\label{sec:parite}
-
-La consigne était de reproduire le comportement du \gls{gams} d'origine, pas de l'améliorer.
-Cette contrainte a paru d'abord une gêne ; elle s'est révélée être la seule façon de savoir,
-à chaque désaccord entre les deux modèles, lequel des deux se trompait.
-
-Le portage a donc été conduit équation par équation, chacune recevant un statut explicite :
-\emph{portée} (un équivalent Python actif), \emph{implicite} (obtenue sans équation dédiée),
-\emph{différée} (identifiée, non faite) ou \emph{écartée} (délibérément non portée). Toute la
-couche d'éligibilité --- bornes numériques, règles catégorielles, vingt-quatre interdictions
-géographiques d'itinéraire technique --- est portée ; quatorze équations sont implicites parce
-qu'elles annulent des codes agrégats dont l'économie est nulle côté Python, si bien que le
-solveur ne les choisit jamais et que l'interdiction est sans objet ; le bloc de canne fibre
-est différé en entier, ses données n'étant pas lues.
-
-Le cas intéressant est celui des \emph{bugs}. \texttt{MODELE.txt} interroge une table sur des
-colonnes qu'elle ne contient pas ; \gls{gams} renvoie zéro sans avertissement, et le test
-$0 \neq 1$ devient toujours vrai. La conséquence réelle est qu'une variante de verger pluvial
-est interdite sur \emph{toutes} les parcelles du territoire, ce que personne n'a jamais voulu.
-Un port \guillemotleft~amélioré~\guillemotright{} aurait corrigé cela en silence, et tout
-écart ultérieur entre les deux modèles serait devenu indémêlable. Le choix retenu est de
-porter le comportement réel, et d'écrire la variante \guillemotleft~intention
-présumée~\guillemotright{} juste à côté dans la configuration, désactivée : basculer les deux
-lignes suffit à tester l'autre lecture. Le mandat de parité cesse alors d'être une contrainte
-subie pour devenir un protocole : il rend chaque divergence attribuable.
-
-Un piège de portage mérite d'être signalé pour ce qu'il enseigne. Le fichier des types de sol
-les énumère dans un ordre, et le \gls{gams} associe la colonne numérique correspondante dans
-un ordre \emph{différent}. Indexer par position produit des coefficients faux mais
-parfaitement plausibles --- des rendements crédibles sur les mauvais sols. Aucun test ne
-signale une telle erreur, aucune sortie n'a l'air anormale. C'est le genre de défaut qu'on ne
-trouve qu'en relisant la source, et il justifie à lui seul que le \gls{gams} d'origine soit
-resté la référence tout au long du travail plutôt qu'une documentation intermédiaire.
-
-\section{Les garde-fous}
-\label{sec:gardefous}
-
-Trois dispositifs, qui n'attrapent pas les mêmes choses.
-
-Les tests unitaires --- $\num{\mesTests}$ fonctions réparties sur $\num{\mesTestsFichiers}$
-fichiers --- exercent chaque famille de contraintes sur des configurations minuscules
-construites à la main. Ils ne lisent \emph{jamais} les données réelles, et c'est délibéré :
-un test qui dépend d'un jeu de données de production échoue pour des raisons qui n'ont rien à
-voir avec la logique testée, et devient un test qu'on désactive. Le revers est net : ils
-vérifient que chaque contrainte fait ce qu'elle dit, jamais que le résultat global est le bon.
-
-Cette seconde question est celle du \emph{golden snapshot}. Le dispositif construit le jeu de
-données réel complet et calcule tous les blocs d'indicateurs sur une allocation fixée, puis
-sérialise environ $\num{\mesChecksums}$ sommes de contrôle numériques. Il ne résout aucun
-\gls{milp}, il est donc exactement reproductible, et il se compare d'une exécution à l'autre :
-toute dérive numérique introduite par un remaniement apparaît immédiatement, y compris là où
-aucun test unitaire ne regarde.
-
-Reste ce qu'aucun des deux ne couvre : la résolution elle-même. Un garde-fou distinct rejoue
-les métriques des trois runs de référence déclarés et les compare aux valeurs attendues. Sa
-tolérance est fixée à 5\,\%, et cette valeur n'est pas arbitraire : trois exécutions du même
-modèle avec trois graines \gls{highs} différentes rendent des \gls{pad} territoriaux de
-\num{\mesGraineA}, \num{\mesGraineB} et \num{\mesGraineC}~\%. L'arbitraire de branchement du
-solveur vaut donc environ \num{\mesBruitPad} point, et une garde à l'égalité exacte échouerait
-sur une simple ré-exécution.
+Ce que l'indirection coûte est le revers exact du gain : un nom mal orthographié dans la
+configuration n'échoue qu'à l'interrogation du registre, donc tard, et une famille dont le
+module n'est jamais importé est simplement absente du registre, sans que rien ne le signale.
+Ce prix se paie en discipline de vérification (§~\ref{sec:gardefous}).
 
 \section{Rendre le problème traitable}
 \label{sec:tractabilite}
 
-À l'échelle du territoire complet, la résolution demande de trente à cinquante-cinq minutes.
-Cette fourchette est large parce que la dispersion est réelle : à \emph{taille constante},
-les vingt résolutions enregistrées s'étalent de \SI{\mesSolveMin}{\second} à
-\SI{\mesSolveMax}{\second}, soit un facteur \num{6.5} et un coefficient de variation de
-\SI{\mesSolveCV}{\percent}. Le goulot n'est pas l'enveloppe logicielle, négligeable, mais la
-recherche par séparation et évaluation elle-même. La conséquence méthodologique est qu'aucune
-estimation ponctuelle de durée n'est honnête, et l'outil de suivi affiche donc un intervalle
-issu des exécutions comparables plutôt qu'un chiffre.
+Une résolution complète sur le territoire demande de trente à cinquante-cinq minutes, mais ce
+n'est pas le chiffre intéressant. Le chiffre intéressant est qu'à \emph{taille constante et
+problème identique}, les vingt résolutions enregistrées s'étalent de \SI{\mesSolveMin}{\second}
+à \SI{\mesSolveMax}{\second} — un facteur \num{6.5}, un coefficient de variation de
+\SI{\mesSolveCV}{\percent}. La variabilité ne vient ni de la machine ni de l'enveloppe
+logicielle, dont le coût est d'une quinzaine de secondes : elle vient de la recherche par
+séparation et évaluation elle-même. La conséquence a été implémentée : l'estimateur de durée du
+dépôt, qui rendait une valeur ponctuelle fausse d'une médiane de \SI{75}{\percent}, rend
+désormais une \emph{fourchette}, ou rien du tout faute de run comparable. S'abstenir est une
+réponse valide ; se tromper d'un facteur deux avec assurance ne l'est pas.
 
-Plus gênant : un solve qui atteint sa limite de temps ne rend pas une solution
-\emph{imprécise}, il rend une solution \emph{prouvablement fausse}. La démonstration est
-directe. En partant d'une allocation existante et en basculant, vers le meilleur fruitier
-éligible, les parcelles où cela coûte le moins, on construit en quelques secondes une solution
-réalisable meilleure de \num{\mesIncumbentGain} millions d'euros --- soit
-\SI{\mesIncumbentEcart}{\percent} --- que celle trouvée par \gls{highs} en une heure. Il ne
-s'agit donc pas d'une présomption. La signature à reconnaître est caractéristique : une
-contrainte portant sur l'ananas fait reculer la canne et la banane, c'est-à-dire touche des
-postes qu'elle n'a aucune raison de toucher.
+Cette variabilité a une conséquence bien plus lourde qu'un inconfort d'organisation. Un solve
+arrêté à la limite de temps ne rend pas une solution \emph{imprécise} : il rend une solution
+\textbf{prouvablement fausse}. Il a suffi de construire à la main, par un script de réparation,
+une solution admissible strictement meilleure que l'incumbent rendu par le solveur — l'écart
+atteignait \SI{\mesIncumbentEcart}{\percent}, soit \SI{\mesIncumbentGain}{\mega\euros}. La
+signature de ce défaut est reconnaissable une fois qu'on l'a vue : une contrainte portant sur
+l'ananas fait reculer la canne et la banane, des postes qu'elle n'a aucune raison de toucher.
+Ce n'est pas un effet économique, c'est un incumbent médiocre.
 
-Le correctif est l'amorçage à chaud. Fournir au solveur une allocation réalisable issue d'une
-exécution antérieure fait passer un même problème de \SI{\mesWarmAvant}{\second} à
-\SI{\mesWarmApres}{\second} pour un optimum identique --- car un amorçage ne change jamais
-l'optimum, seulement la vitesse à laquelle il est \emph{prouvé}. Une précaution est ici
-essentielle et facile à manquer : \gls{highs} rejette silencieusement une solution initiale
-non réalisable. Sans audit, une exécution paraît amorcée et se comporte exactement comme une
-exécution à froid. Chaque graine est donc évaluée contre les contraintes du modèle avant le
-solve, et une graine rejetée est annoncée comme telle plutôt que supposée bonne.
+Le remède est l'amorçage à chaud : le solveur reçoit l'allocation d'un run passé comme point de
+départ. Sur un même problème, la preuve d'optimalité passe de \SI{\mesWarmAvant}{\second} à
+\SI{\mesWarmApres}{\second}, pour un optimum identique — un amorçage ne change jamais
+\emph{ce qui} est trouvé, seulement la vitesse à laquelle c'est \emph{prouvé}. Il vient
+toutefois avec une précaution non facultative : \gls{highs} écarte \emph{silencieusement} une
+graine inadmissible. Sans audit préalable, un run paraît amorcé et se comporte exactement comme
+un run froid. Chaque graine est donc vérifiée contre les contraintes du modèle avant le solve,
+et cet audit a effectivement attrapé une faute réelle — une réparation d'allocation qui violait
+une contrainte de rotation de la banane sur \num{318} exploitations. Enfin, l'écart
+d'optimalité demandé au solveur a dû être porté à \SI{\mesGapMip}{\percent} : l'objectif ajusté
+du risque est intraitable à la tolérance par défaut.
 
-Une dernière source d'intraitabilité mérite mention parce qu'elle relie ce chapitre au
-suivant. Vingt-cinq variantes maraîchères, censées décrire des itinéraires agroécologiques
-distincts, sont \emph{identiques au bit près} sur tous les paramètres que le modèle lit :
-même marge, même rendement, même besoin en travail, même azote, même empreinte d'éligibilité.
-Les rouvrir ferait passer le problème de $\num{\mesBinairesRef}$ à $\num{\mesBinairesKarus}$
-variables, dont plus d'un demi-million de pure symétrie --- la recherche arborescente passant
-son temps à permuter des solutions équivalentes. Mais la conséquence de modélisation est plus
-grave que la conséquence algorithmique : une contrainte imposant une part de production
-biologique bâtie sur ces variantes est satisfaite \emph{à coût exactement nul}, en choisissant
-la copie dont le nom contient \guillemotleft~bio~\guillemotright. Une politique agroécologique
-qui ne contraint rien.
+\subsection*{La symétrie, ou comment une donnée manquante devient un objet mathématique}
+
+Le contrôle avant vol du dépôt signale les groupes de cultures que le modèle ne peut pas
+distinguer, c'est-à-dire celles qui sont égales sur tous les paramètres qu'il lit. Il en a
+trouvé un, et il est de taille : les vingt-cinq variantes maraîchères expérimentales sont
+identiques au bit près sur onze paramètres, empreinte d'éligibilité comprise.
+
+La conséquence algorithmique est immédiate : les rouvrir ferait passer le programme de
+\num{\mesBinairesRef} à \num{\mesBinairesKarus} variables binaires, dont plus d'un demi-million
+de pure symétrie — la recherche arborescente passerait son temps à permuter des solutions
+équivalentes. La conséquence de modélisation est plus grave, et c'est elle qui reviendra au
+chapitre~\ref{ch:explorer}. Une politique publique exigeant une part minimale de ces cultures
+est satisfaite \textbf{à coût exactement nul}, par simple relabellisation : il suffit de
+rebaptiser des hectares déjà cultivés. Une contrainte agroécologique qui ne contraint rien.
+
+\section{Les garde-fous}
+\label{sec:gardefous}
+
+Trois dispositifs veillent sur ce code, et ils n'attrapent pas les mêmes choses ; il vaut la
+peine de dire aussi ce que chacun laisse passer.
+
+Les \num{\mesTests} tests unitaires, répartis en \num{\mesTestsFichiers} fichiers, ne lisent
+\emph{jamais} les données réelles : ils construisent des configurations minuscules à la main.
+C'est délibéré — ils restent rapides et exécutables sur une machine sans les données, qui ne
+sont pas versionnées. Le revers est net : ils vérifient que chaque contrainte fait ce qu'elle
+dit, jamais que le résultat global est juste.
+
+Le \emph{golden snapshot} comble une partie de ce trou : il construit le vrai jeu de données et
+tous les blocs d'indicateurs sur une allocation réelle, puis sérialise \num{\mesChecksums}
+sommes de contrôle — \textbf{sans résoudre le moindre \gls{milp}}, donc de façon exactement
+reproductible. Sept secondes contre trente à cinquante-cinq minutes, et exhaustif sur les
+vraies données : c'est l'outil à passer après toute retouche du pipeline ou des indicateurs.
+
+Reste le solve lui-même, que rien de ce qui précède ne couvre. Un unique script y veille, en
+comparant trois runs de référence déclarés à leurs métriques attendues. Sa tolérance de
+\SI{5}{\percent} est un résultat et non un réglage : le bruit de la recherche arborescente vaut
+\num{\mesBruitPad} point de \gls{pad} (§~\ref{sec:plateau}), et une garde à l'égalité exacte
+échouerait sur une simple ré-exécution. Une quatrième garde a été envisagée puis écartée — un
+run de référence \emph{avec solve}, dont la demi-heure par exécution le rendait inutilisable
+dans une boucle de développement. Enfin, ce qui n'est gardé par rien doit être nommé : la
+chaîne qui va du solve à l'écriture du dossier de résultats n'a aucun test de bout en bout.
+C'est un trou assumé, et il figure comme tel dans la liste des chantiers.
 
 \begin{reflexion}
-Ces vingt-cinq variantes portent le nom de la microferme expérimentale sur laquelle la lettre
-de mission prévoyait que j'aille acquérir des données technico-économiques. Elles sont vides
-parce que ce terrain n'a pas eu lieu --- absorbé par la reconstruction dont ce chapitre rend
-compte. Le constat n'est pas une confidence ajoutée après coup : il a la forme d'un résultat
-technique, mesurable dans le nombre de variables du programme et dans le fait qu'une
-contrainte de bio y soit un artefact. C'est aussi ce qui m'a fait comprendre que le débogage,
-dans ce travail, n'était pas une activité subalterne préalable à la modélisation, mais la
-manière dont le modèle rendait compte de ce que le projet savait et de ce qu'il ignorait. Un
-paramètre absent ne laisse pas de trou : il laisse un nombre plausible.
+Le débogage n'a pas été, dans ce stage, une activité subalterne préalable à la modélisation :
+il \textbf{était} la modélisation. Chercher pourquoi une variante de verger disparaît, c'est
+découvrir ce que le projet savait et ce qu'il ignorait de ses propres données ; établir que
+vingt-cinq systèmes maraîchers sont indiscernables, c'est établir qu'un terrain n'a pas eu
+lieu. Ces vingt-cinq variantes portent le nom de la microferme expérimentale sur laquelle la
+lettre de mission prévoyait une acquisition de données : elles sont vides parce que cette
+acquisition a été absorbée par la reconstruction. Le constat prend ainsi la forme d'un résultat
+technique — il se lit dans le nombre de variables du programme, et dans le fait qu'une
+contrainte agroécologique y soit un artefact.
 \end{reflexion}
