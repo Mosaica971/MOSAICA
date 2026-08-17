@@ -4,10 +4,25 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-08-16 (soir)**. Dépôt le **26/08** (J-10), soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-08-17**. Dépôt le **26/08** (J-9), soutenance **1-4 sept**.
 > **Le mémoire est entièrement rédigé et compile** : **33 pages de cœur** (⚠ 3 de trop, voir
 > § 6.2), 17 pages d'annexes sur 20 ; zéro encadré `MATIÈRE`, zéro `A REDIGER`, zéro
 > `Overfull hbox`, zéro référence non résolue.
+>
+> **Session du 2026-08-17 — deux changements :**
+> 1. **`fig:spectre` refaite** : plus de double axe, mais **deux tableaux ordonnés** (12 forçages
+>    à gauche, 10 politiques à droite), un dégradé vert → sable → brique qui porte le rang, et
+>    quatre encadrés (témoins F0/P4, bloc climat et sanitaire, bloc marchés et politique, P9 hors
+>    gradient). La palette est **daltonien-compatible** et documentée dans `preambule.tex` : le
+>    vert tire vers le turquoise et le rouge vers la brique, le trait des encadrés double la
+>    couleur (plein / tireté / pointillé), et l'information est de toute façon redondante avec
+>    l'ordre des lignes. La figure coûtait une page ; la légende a été resserrée d'autant, le
+>    cœur reste à 33.
+> 2. **L'écart de prix de l'introduction corrigé** : 32,9 % → **41,8 %** (Insee Première 1958,
+>    indice de Fisher 2022, Guadeloupe, produits alimentaires), avec le +15,8 % tous postes pour
+>    montrer que l'écart est *d'abord alimentaire*. L'ancien chiffre venait du Livre blanc
+>    CALALOU via `viepublique2023` : moyenne DOM, campagne antérieure, non attribuable à la
+>    Guadeloupe. Nouvelle entrée `insee2023prix`, item `CTX-02` mis à jour.
 >
 > **Session du 2026-08-16 (soir) — six changements de fond, tous vérifiés contre les données :**
 > 1. **§ 3.2 réécrit** : le PAD y est désormais *défini*, ses **cinq angles morts** tabulés
@@ -20,8 +35,8 @@ refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémo
 >    est « potentiel vs moyen » et non un défaut de données.
 > 3. **Trois erreurs de chiffres corrigées** — voir § 7.
 > 4. **`REF-05` écrit** (§ 5.6). Draft à valider ou à couper par Clément, personne d'autre.
-> 5. **`fig:spectre`** : les 10 politiques et les 12 forçages sur deux axes, avec ce qui a
->    tourné et ce qui n'a jamais tourné.
+> 5. **`fig:spectre`** : les 10 politiques et les 12 forçages, avec ce qui a tourné et ce qui
+>    n'a jamais tourné (redessinée en tableaux le 17/08, voir ci-dessus).
 > 6. **Bibliographie vérifiée** contre les notices d'éditeur ; l'ordre des auteurs de
 >    `chopin2015` était faux.
 
@@ -81,9 +96,9 @@ PowerShell transforme en échec.
 et non dans l'échafaudage : masquer les marqueurs d'attente ne rend plus rien. § 6.2 dit où
 couper.
 
-Sept flottants, tous cités, tous produits **sans aucun solve** : deux tableaux de macros, deux
-figures TikZ dessinées à la main (le fil de justification du Ch. 2, la tornade de regret du
-Ch. 4), la figure observé/simulé existante, et deux tableaux générés. `PLAN.md` § 5 les liste,
+Huit flottants, tous cités, tous produits **sans aucun solve** : deux tableaux de macros, trois
+figures TikZ dessinées à la main (le fil de justification du Ch. 2, les deux catalogues et la
+tornade de regret du Ch. 4), la figure observé/simulé existante, et deux tableaux générés. `PLAN.md` § 5 les liste,
 et dit quelles figures ont été **abandonnées et pourquoi** — ne pas les reprendre sans raison.
 
 ### Les quatorze questions aux encadrants — `memoire/encadrants.md`

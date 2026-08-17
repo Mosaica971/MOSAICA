@@ -105,6 +105,29 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 
+% --- Palette des deux catalogues (fig:spectre, Ch. 4) ----------------------
+% Un degrade « favorable -> defavorable » se dessine spontanement en VERT-JAUNE-ROUGE,
+% qui est precisement la paire que 8 % des hommes ne distinguent pas (deuteranopie,
+% protanopie). La palette ci-dessous garde la SEMANTIQUE (vert = favorable /
+% agroecologique, jaune = temoin, rouge = defavorable / deregulateur) mais decale les
+% deux extremes vers des teintes que le daltonisme rouge-vert separe encore : le vert
+% tire vers le turquoise (composante bleue) et le rouge vers la brique (composante
+% jaune), sur le modele de la rampe BrBG de ColorBrewer, declaree colorblind-safe.
+% Les nuances intermediaires se composent par melange avec le sable (`scenVert!58!scenSable`),
+% ce qui garantit une luminance croissante du centre vers les extremes -- second canal de
+% lecture, independant de la teinte.
+% La couleur n'est de toute facon JAMAIS le seul porteur d'information ici : les lignes
+% sont ordonnees, et chacune porte son abreviation et son nom.
+\definecolor{scenVert}{HTML}{2E9B7A}   % turquoise-vert : favorable / agroecologique
+\definecolor{scenSable}{HTML}{F2E3B3}  % sable : le temoin, ni l'un ni l'autre
+\definecolor{scenRouge}{HTML}{C4562F}  % brique : defavorable / deregulateur
+\definecolor{scenGris}{HTML}{E2E2E2}   % hors gradient (P9)
+% Couleurs de cadre, prises a la palette Okabe-Ito (concue pour le daltonisme). Elles
+% sont DOUBLEES d'un style de trait (plein / tirete / pointille) pour que les groupes
+% restent distincts meme imprimes en noir et blanc.
+\definecolor{cadreClimat}{HTML}{0072B2} % bleu
+\definecolor{cadreMarche}{HTML}{6A3D9A} % violet
+
 % --- Encadres reflexifs ----------------------------------------------------
 % La reflexivite est TISSEE dans chaque chapitre, pas reportee a la fin : chaque
 % chapitre se clot sur un encadre. Style sobre, filet a gauche, pas de couleur

@@ -25,17 +25,29 @@
 - id: CTX-02
   titre: >
     ~80 % des produits alimentaires consommés dans les DOM sont importés ;
-    prix supérieurs de 32,9 % à l'Hexagone pour un niveau de vie inférieur de 20-23 %
+    en Guadeloupe les produits alimentaires coûtent 41,8 % de plus qu'en France
+    métropolitaine (2022), contre 15,8 % tous postes confondus, pour un niveau de
+    vie inférieur de 20-23 %
   type: donnee
   statut: retenu
   severite: null
-  source: [context/Livre_Blanc_CALALOU.pdf, biblio.bib viepublique2023, odeadom2019]
+  quand: 2026-08-17
+  source: [context/Livre_Blanc_CALALOU.pdf, biblio.bib insee2023prix,
+           biblio.bib viepublique2023, odeadom2019]
   chiffre: []
   destination: [ch0, ch1]
   arcs:
     parce-que: [CTX-01]
   critique: >
-    CALALOU ajoute la dimension que le mémoire ne traite pas : la dépendance
+    CHIFFRE CORRIGE LE 2026-08-17. L'introduction citait 32,9 %, une moyenne DOM
+    dont cet item lui-même ne disait pas laquelle des trois sources la portait :
+    ni territorialisée, ni traçable. La source primaire (Insee Première 1958,
+    indice de Fisher, comparaison spatiale 2022) donne 41,8 % pour la Guadeloupe
+    sur les produits alimentaires et boissons non alcoolisées — le plus élevé des
+    cinq DOM (Martinique 40,2 ; Guyane 39,4 ; La Réunion 36,7 ; Mayotte 30,2) —
+    contre 15,8 % tous postes confondus, ce qui est le fait intéressant : l'écart
+    de prix guadeloupéen est d'abord un écart alimentaire.
+    Par ailleurs, CALALOU ajoute la dimension que le mémoire ne traite pas : la dépendance
     alimentaire est aussi un problème de SANTÉ PUBLIQUE (obésité, diabète,
     hypertension) et d'INÉGALITÉ D'ACCÈS. Le modèle ne porte ni l'une ni l'autre
     — il optimise une marge, pas une diète. À dire en introduction.

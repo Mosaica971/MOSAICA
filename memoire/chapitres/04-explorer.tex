@@ -24,76 +24,118 @@ imposent : des prix, des rendements, des coûts d'intrants multipliés par un fa
 catalogue déclare \num{\mesPolitiques} politiques, \num{\mesForcages} forçages et
 \num{\mesBalayages} fronts.
 
-La figure~\ref{fig:spectre} situe les uns et les autres. Elle sert à deux choses : montrer
-que le catalogue de politiques est ordonné le long d'un \emph{axe} — et non pas assemblé au
-hasard —, et montrer d'un coup d'\oe il quelles cases ont effectivement été calculées. Ce
-second point est une limite du travail, et il vaut mieux la voir tout de suite que la
-découvrir au §~\ref{sec:limites}.
+La figure~\ref{fig:spectre} donne les deux catalogues. Elle sert à deux choses : montrer que
+celui des politiques est \emph{ordonné} — d'une dérégulation complète à une rupture
+agroécologique, et non pas assemblé au hasard —, et montrer d'un coup d'\oe il quelles cases
+ont effectivement été calculées. Ce second point est une limite du travail, et il vaut mieux
+la voir tout de suite que la découvrir au §~\ref{sec:limites}.
 
 \begin{figure}[tbp]
   \centering
+  % Une ligne de catalogue = un rectangle plein (la teinte porte le rang), trois noeuds :
+  % marqueur de calcul, abreviation, nom.
+  %   #1 x du panneau  #2 y du haut de la ligne  #3 teinte  #4 marqueur  #5 abrev.  #6 nom
+  \newcommand{\scenrow}[6]{%
+    \fill[#3] (#1,#2) rectangle ++(69,-4.2);
+    \node[anchor=west, inner sep=0] at (#1+2.2,#2-2.1) {#4};
+    \node[anchor=west, inner sep=0, font=\scriptsize\bfseries] at (#1+5.8,#2-2.1) {#5};
+    \node[anchor=west, inner sep=0] at (#1+14,#2-2.1) {#6};}
+  \newcommand{\calc}{$\bullet$}%   au moins une cellule resolue
+  \newcommand{\jamais}{$\circ$}%   jamais calcule
   \begin{tikzpicture}[
       x=1mm, y=1mm, font=\scriptsize,
-      >={Stealth[length=1.8mm]},
-      axe/.style     = {<->, thick, black!75},
-      resolu/.style  = {circle, draw=black!80, fill=black!80, inner sep=1.1pt},
-      absent/.style  = {circle, draw=black!55, fill=white, inner sep=1.1pt},
-      etiq/.style    = {align=center, text width=24mm, inner sep=1pt},
-      borne/.style   = {align=center, text width=24mm, inner sep=1pt, font=\scriptsize\itshape}]
+      % Les quatre encadres se distinguent par la COULEUR *et* par le trait : imprimee en
+      % noir et blanc, la figure reste lisible.
+      temoin/.style  = {draw=black,       line width=0.9pt, rounded corners=0.7mm},
+      climat/.style  = {draw=cadreClimat, line width=0.8pt, rounded corners=0.7mm},
+      marche/.style  = {draw=cadreMarche, line width=0.8pt, rounded corners=0.7mm,
+                        dash pattern=on 1.4mm off 0.9mm},
+      horsgrad/.style= {draw=black!65,    line width=0.8pt, rounded corners=0.7mm,
+                        dash pattern=on 0.35mm off 0.7mm}]
 
-    % ================= LES DIX POLITIQUES =================
-    % L'axe va de 12 a 138 et non de 0 a 142 : les etiquettes sont centrees sur leur repere et
-    % debordent donc de la moitie de `text width` de chaque cote. Sans cette marge de 12 mm, la
-    % figure est plus large que la justification et TeX signale un Overfull hbox de 47 pt.
-    \draw[axe] (12,0) -- (138,0);
-    \node[anchor=north west, font=\scriptsize\itshape, text=black!60] at (0,-4)
-      {moins de contrainte publique};
-    \node[anchor=north east, font=\scriptsize\itshape, text=black!60] at (150,-4)
-      {davantage de contrainte publique};
-    \foreach \x in {12,30,52,70,90,106,122,138} \draw[black!45] (\x,-1.5) -- (\x,1.5);
+    % ================= PANNEAU GAUCHE : LES DOUZE FORÇAGES =================
+    % Ordre : les deux bornes en tete, les deux blocs thematiques au milieu (c'est eux
+    % qu'on encadre, donc leurs lignes doivent etre contigues), la borne basse en pied.
+    % A l'interieur d'un bloc, les lignes vont du moins au plus severe.
+    \node[anchor=south west, font=\scriptsize] at (1,-0.3)
+      {\textbf{Forçages} --- ce qu'imposent le climat et les marchés};
+    \draw[black!45, line width=0.3pt] (1,-0.9) -- (70,-0.9);
 
-    \node[resolu] at (12,0)  {}; \node[etiq, above=2mm] at (12,0)  {\textbf{P1}\\dérégulation totale};
-    \node[absent] at (30,0)  {}; \node[etiq, above=2mm] at (30,0)  {\textbf{P2}\\accélérationnisme industriel};
-    \node[resolu] at (70,0)  {}; \node[etiq, above=2mm] at (70,0)  {\textbf{P4}\\statu quo};
-    \node[resolu] at (106,0) {}; \node[etiq, above=2mm] at (106,0) {\textbf{P7}\\Écophyto réglementaire};
-    \node[absent] at (138,0) {}; \node[etiq, above=2mm] at (138,0) {\textbf{P10}\\bifurcation agroécologique};
+    \scenrow{1}{-1.5} {scenVert!75!scenSable}{\jamais}{F10}{conjoncture favorable}
+    \scenrow{1}{-6.1} {scenSable}            {\calc}  {F0} {nominal (forçage nul)}
 
-    \node[resolu] at (30,0)  {}; \node[etiq, below=6mm] at (30,0)  {\textbf{P5}\\austérité budgétaire};
-    \node[absent] at (52,0)  {}; \node[etiq, below=6mm] at (52,0)  {\textbf{P3}\\intensification modérée};
-    \node[resolu] at (90,0)  {}; \node[etiq, below=6mm] at (90,0)  {\textbf{P6}\\verdissement incitatif};
-    \node[resolu] at (122,0) {}; \node[etiq, below=6mm] at (122,0) {\textbf{P8}\\transition agroécologique};
+    \scenrow{1}{-12.5}{scenRouge!30!scenSable}{\jamais}{F3}{dérive climatique}
+    \scenrow{1}{-17.1}{scenRouge!35!scenSable}{\jamais}{F4}{choc sanitaire}
+    \scenrow{1}{-21.7}{scenRouge!55!scenSable}{\calc}  {F1}{cyclone majeur}
+    \scenrow{1}{-26.3}{scenRouge!60!scenSable}{\jamais}{F2}{sécheresse sévère}
 
-    \node[resolu] at (2,-22) {};
-    \node[anchor=north west, align=left, text width=142mm] at (5,-20)
-      {\textbf{P9} souveraineté alimentaire --- \emph{hors axe} : elle contraint la destination
-       de la production, pas son intensité};
+    \scenrow{1}{-32.7}{scenVert!35!scenSable} {\calc}  {F7}{inflation alimentaire}
+    \scenrow{1}{-37.3}{scenRouge!40!scenSable}{\jamais}{F8}{retrait du \textsc{posei}}
+    \scenrow{1}{-41.9}{scenRouge!45!scenSable}{\jamais}{F5}{effondrement des prix d'export}
+    \scenrow{1}{-46.5}{scenRouge!50!scenSable}{\calc}  {F6}{choc sur les intrants}
 
-    % ================= LES DOUZE FORÇAGES =================
-    \draw[axe] (12,-38) -- (138,-38);
-    \foreach \x in {12,39,138} \draw[black!45] (\x,-39.5) -- (\x,-36.5);
-    \node[absent] at (12,-38)  {};
-    \node[resolu] at (39,-38)  {};
-    \node[resolu] at (138,-38) {};
-    \node[borne, above=2mm] at (12,-38)  {\textbf{F10}\\conjoncture favorable};
-    \node[borne, above=2mm] at (39,-38)  {\textbf{F0}\\nominal (témoin nul)};
-    \node[borne, above=2mm] at (138,-38) {\textbf{F9}\\crise systémique};
+    \scenrow{1}{-53.1}{scenRouge!30!scenSable}{\jamais}{F11}{artificialisation des terres}
+    \scenrow{1}{-57.7}{scenRouge!80!scenSable}{\calc}  {F9} {crise systémique}
 
-    \draw[black!55] (52,-40) -- (52,-43) -- (126,-43) -- (126,-40);
-    \node[align=center, text width=130mm, below=0.5mm] at (75,-43)
-      {\textbf{huit forçages à un seul levier} --- climat et sanitaire : F1 cyclone
-       majeur$^{\bullet}$, F2 sécheresse sévère, F3 dérive climatique, F4 choc sanitaire ;
-       marchés et politique : F5 effondrement des prix d'export, F6 choc sur les
-       intrants$^{\bullet}$, F7 inflation alimentaire$^{\bullet}$, F8 retrait du
-       \textsc{posei}, F11 artificialisation des terres};
+    \draw[temoin] (0.1,-5.3)  rectangle (70.9,-11.1);
+    \draw[climat] (0.1,-11.7) rectangle (70.9,-31.3);
+    \draw[marche] (0.1,-31.9) rectangle (70.9,-51.5);
+
+    % ================= PANNEAU DROIT : LES DIX POLITIQUES =================
+    \node[anchor=south west, font=\scriptsize] at (80,-0.3)
+      {\textbf{Politiques} --- ce que décide la puissance publique};
+    \draw[black!45, line width=0.3pt] (80,-0.9) -- (149,-0.9);
+
+    \scenrow{80}{-1.5} {scenVert!75!scenSable} {\jamais}{P10}{bifurcation agroécologique}
+    \scenrow{80}{-6.1} {scenVert!58!scenSable} {\calc}  {P8} {transition agroécologique}
+    \scenrow{80}{-10.7}{scenVert!42!scenSable} {\calc}  {P7} {Écophyto réglementaire}
+    \scenrow{80}{-15.3}{scenVert!25!scenSable} {\calc}  {P6} {verdissement incitatif}
+    \scenrow{80}{-19.9}{scenSable}             {\calc}  {P4} {statu quo}
+    \scenrow{80}{-26.3}{scenRouge!25!scenSable}{\jamais}{P3} {intensification modérée}
+    \scenrow{80}{-30.9}{scenRouge!42!scenSable}{\calc}  {P5} {austérité budgétaire}
+    \scenrow{80}{-35.5}{scenRouge!58!scenSable}{\jamais}{P2} {accélérationnisme industriel}
+    \scenrow{80}{-40.1}{scenRouge!75!scenSable}{\calc}  {P1} {dérégulation totale}
+    \scenrow{80}{-47.5}{scenGris}              {\calc}  {P9} {souveraineté alimentaire}
+
+    \draw[temoin]   (79.1,-19.1) rectangle (149.9,-24.9);
+    \draw[horsgrad] (79.1,-46.7) rectangle (149.9,-52.5);
+
+    % ================= LÉGENDE =================
+    % Le degrade se lit comme une bande : sept pastilles, du vert au rouge.
+    \fill[scenVert!75!scenSable]  (1,-65.5)  rectangle ++(5,-2.9);
+    \fill[scenVert!50!scenSable]  (6,-65.5)  rectangle ++(5,-2.9);
+    \fill[scenVert!25!scenSable]  (11,-65.5) rectangle ++(5,-2.9);
+    \fill[scenSable]              (16,-65.5) rectangle ++(5,-2.9);
+    \fill[scenRouge!25!scenSable] (21,-65.5) rectangle ++(5,-2.9);
+    \fill[scenRouge!50!scenSable] (26,-65.5) rectangle ++(5,-2.9);
+    \fill[scenRouge!75!scenSable] (31,-65.5) rectangle ++(5,-2.9);
+    \node[anchor=west, inner sep=0] at (38,-67)
+      {\textbf{teinte} : du plus favorable, ou du plus agroécologique, au plus défavorable};
+
+    \draw[temoin]   (1,-71.5)   rectangle ++(6,-2.9);
+    \node[anchor=west, inner sep=0] at (8.5,-73) {témoin (F0, P4)};
+    \draw[climat]   (32,-71.5)  rectangle ++(6,-2.9);
+    \node[anchor=west, inner sep=0] at (39.5,-73) {climat et sanitaire};
+    \draw[marche]   (69,-71.5)  rectangle ++(6,-2.9);
+    \node[anchor=west, inner sep=0] at (76.5,-73) {marchés et politique};
+    \draw[horsgrad] (107,-71.5) rectangle ++(6,-2.9);
+    \node[anchor=west, inner sep=0] at (114.5,-73) {hors gradient};
+
+    \node[anchor=west, inner sep=0] at (1,-78)
+      {\calc~au moins une cellule de la grille a été résolue \qquad
+       \jamais~aucune : la ligne n'a jamais été calculée};
   \end{tikzpicture}
-  \caption{Les politiques et les forçages du catalogue, situés les uns par rapport aux autres.
-  Un disque plein signale qu'au moins une cellule a été résolue (marque $^{\bullet}$ pour les
-  forçages), un cercle vide qu'aucune ne l'a été. La position sur l'axe des politiques est
-  \emph{ordinale} : elle traduit la sévérité des contraintes imposées, non une distance
-  mesurée. P2 et P5 partagent une abscisse parce qu'aucune des deux n'impose de contrainte
-  environnementale ; elles s'opposent sur les aides, dimension que cet axe unique ne porte pas.
-  La répartition des cercles vides n'est pas neutre : \textbf{la borne dérégulatrice de l'axe a
-  été calculée, sa borne de bifurcation non} (§~\ref{sec:limites}).}
+  \caption{Les deux catalogues. \textbf{La teinte donne un rang, pas une mesure} : de la
+  conjoncture la plus favorable (F10) à la plus défavorable (F9), et de la rupture
+  agroécologique (P10) à la dérégulation (P1). Cet ordre est celui de la \emph{contrainte
+  publique imposée}, en rien un classement de performance --- le §~\ref{sec:grille} montre
+  qu'aucune politique n'est la meilleure sous tous les forçages. Les témoins encadrés en noir
+  sont les points de comparaison : F0 est le forçage \emph{nul}, P4 le statu quo. F7 est le seul
+  forçage favorable ; F11 n'appartient à aucun bloc, c'est le seul qui retire de la \emph{terre}
+  plutôt que de changer un coefficient ; P9 est hors gradient, elle contraint la destination de
+  la production et non son intensité. La colonne de marqueurs, enfin, porte une limite du
+  travail plutôt qu'un résultat : \textbf{la borne dérégulatrice a été calculée, sa borne de
+  bifurcation non} (§~\ref{sec:limites}).}
   \label{fig:spectre}
 \end{figure}
 
