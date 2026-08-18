@@ -5,100 +5,53 @@
 % THESE DU CHAPITRE : sur ce territoire, l'allocation des terres est un probleme de choix
 % sous contraintes serrees -- et l'outil cense le traiter n'etait pas exploitable en l'etat.
 
-\section{Très peu de choses sont libres}
+\section{Pertinence d'un modèle d'allocation en Guadeloupe}
 \label{sec:territoire}
 
-Ce qui rend un modèle d'allocation pertinent en Guadeloupe n'est pas l'étendue des
-possibilités, c'est leur étroitesse. Le climat et le sol fixent ce qui pousse où ; la
-chlordécone en retire une part durablement ; le foncier et le travail bornent chaque
-exploitation ; les aides orientent le reste. Il n'y a d'arbitrage que sous contrainte, et
-c'est exactement ce que sait représenter un programme d'optimisation — c'est aussi, on le
-verra au chapitre~\ref{ch:calibrer}, ce qui rend sa calibration difficile, puisqu'une
-contrainte bien placée peut expliquer un résultat qu'on croyait dû au comportement des
-agriculteurs.
+Les possibilités d'allocation de cultures par parcelles sont restreintes par le climat, le sol, la pollution au chlordécone, le foncier et le travail. Les aides orientent le reste.
 
-Le premier verrou est sanitaire et il est irréversible à l'échelle humaine. Environ
-\SI{14200}{\ha} sont classés à risque de contamination par la chlordécone, dont près de
-\SI{7300}{\ha} encore en usage agricole ; la molécule persiste dans les sols pour des siècles
-\parencite{daafchlordecone}. Elle n'interdit pas la culture, elle interdit \emph{certaines}
-cultures — celles dont l'organe récolté est en contact avec le sol — ce qui en fait, du point
-de vue du modèle, une règle d'éligibilité par parcelle et non un abattement de rendement.
+Environ 14 200 ha sont classés à risque de contamination par la chlordécone, dont près de 7 300 ha encore en usage agricole. C'est un phénomène irréversible à l'échelle humaine car la molécule persiste dans les sols pour des siècles (DAAF Guadeloupe 2025). Cela interdit les cultures dont l'organe récolté est en contact avec le sol. 
+C'est une règle d'éligibilité par parcelle.
 
-Le deuxième est foncier. Le parcellaire est fragmenté : \num{\obsParcelles} parcelles pour
-\num{\obsExploitations} exploitations, soit une taille médiane qui interdit de raisonner en
-exploitation moyenne. Une partie de ce foncier relève du régime des \gls{gfa}, qui impose
-contractuellement une part minimale de canne à sucre aux exploitations concernées : une
-contrainte de politique publique inscrite dans le titre de propriété plutôt que dans un
-règlement agricole.
+On compte 24 734 parcelles pour 4 638 exploitations. Le parcellaire est fragmenté donc on ne peut a priori pas raisonner en exploitation moyenne. Le régime des Groupement Foncier Agricole (GFA) impose contractuellement une part minimale de canne à sucre à une partie de ce foncier. 
+C'est une contrainte de politique publique.
 
-Le troisième est structurel. Sur les \SI{\obsSurfaceCultivee}{\ha} cultivés du jeu de données,
-la canne occupe \SI{\obsHaCS}{\ha}, la prairie \SI{\obsHaPN}{\ha} et la banane
-\SI{\obsHaBA}{\ha} : les trois postes historiques représentent près de neuf dixièmes de la
-surface. Le vivrier que le projet cherche à développer est résiduel \emph{en surface} avant
-d'être résiduel en valeur, et toute réallocation en sa faveur doit prendre sa terre à l'un des
-trois.
+D'après le jeu de données, sur les 23 578 ha cultivés, la canne occupe 12 813 ha, la prairie 6 109 ha et la banane 1 921 ha. Ces trois postes correspondent à 90% de la surface totale. Un développement du vivrier passe nécessairement par leur diminution, au profit de la surface vivrière, pour l'instant résiduelle.
+C'est une réallocation.
+
+On peut arbitrer sous contrainte. Le programme d'optimisation est donc pertinent en tant que modèle d'allocation en Guadeloupe.
+
 
 \section{\glsentryshort{mosaica} : ce que le modèle promet}
 \label{sec:mosaica}
 
-L'objet que manipule \gls{mosaica} n'est ni l'exploitation moyenne ni la région agrégée : c'est
-la \emph{mosaïque} — l'affectation simultanée de chaque parcelle à une culture, sur tout un
-territoire, sous les contraintes propres à chaque exploitation. Cette échelle est ce qui
-autorise une évaluation \emph{ex ante} : un scénario n'y est pas une hypothèse sur des
-moyennes, c'est une carte, dont on peut calculer la marge, l'emploi, l'azote épandu et l'eau
-prélevée parce qu'on sait quelle culture est sur quelle parcelle.
+MOSAICA manipule une mosaïque, c'est-à-dire une affectation simultanée de chaque parcelle à une culture, sur tout un territoire, sous les contraintes propres à chaque exploitation.
+On peut créer des scénarios (ex: ajout d'une contrainte, baisse de prix, etc.) et les évaluer selon des indicateurs calculables depuis la mosaïque finale (ex: la marge, l’emploi, l’azote épandu, l’eau prélevée, etc.). On peut donc réaliser des évaluations ex ante (§4).
 
-Deux propriétés du modèle méritent d'être relevées dès maintenant. La première est que sa
-formulation ne mentionne la Guadeloupe nulle part : elle parle de parcelles, de cultures et
-d'exploitations. Cette observation, banale une fois faite, s'est révélée être le principe
-d'organisation du portage (§~\ref{sec:architecture}). La seconde est que le modèle
-\emph{accepte d'être confronté à un état de fait}. \textcite{chopin2015} publie, en~§2.6, une
-procédure de comparaison entre l'assolement simulé et l'assolement observé, avec ses seuils.
-C'est une exigence forte pour un modèle normatif — rien n'oblige un modèle qui dit ce qu'il
-\emph{faudrait} faire à ressembler à ce qui \emph{est} fait — et c'est elle qui rend le
-chapitre~\ref{ch:calibrer} possible.
+La formulation du modèle parle de parcelles, de cultures et d'exploitations mais jamais de la Guadeloupe. En langage de développeur, on appelle ça le " soft coding". C'est volontaire et c'est un des principes importants du portage (§2.3).
+
+Chopin et al. (2015) publie une procédure de comparaison entre l’assolement simulé et l’assolement observé, avec ses seuils (§2.6). Cela permet de scorer la qualité de la calibration du modèle (§3).
+
 
 \section{Le \glsentryshort{gams} existant, et pourquoi il a fallu reconstruire}
 \label{sec:gams}
 
-Le modèle existait donc, sous la forme d'environ \num{646}~ko de source \gls{gams} répartis en
-douze fichiers. Trois obstacles ont conduit à le réécrire plutôt qu'à l'utiliser, et ils ne
-sont pas de même nature.
+Le modèle GAMS pèse 646 ko répartis en 12 fichiers. On distingue 3 raisons qui justifient sa réécriture.
 
-Le premier est un obstacle d'\textbf{accès}. \gls{gams} est un environnement propriétaire, et
-le modèle n'était plus exécuté couramment dans l'unité. Un modèle qu'on ne peut plus interroger
-sans démarche préalable n'est pas un modèle : c'est une archive.
 
-Le deuxième est un obstacle de \textbf{structure}. Faire varier un levier — un plafond, une
-part minimale, un prix — suppose d'éditer les équations elles-mêmes. Une campagne de scénarios
-devient alors une suite de modifications manuelles dont il ne reste aucune trace, et dont on ne
-peut plus dire, trois semaines plus tard, laquelle a produit quel chiffre. Ce n'est pas une
-critique de l'auteur : c'est ce que le paradigme impose.
+/GAMS est un environnement propriétaire qui fonctionne par licences. Cela crée des problèmes de compatibilité de versions et crée une dépendance au logiciel.
 
-Le troisième a changé la nature du stage, et c'est un obstacle de \textbf{silence}. Le
-comportement décrit en introduction — zéro renvoyé sans avertissement sur une colonne absente,
-et l'interdiction territoriale des vergers pluviaux qui en découle — est invisible à la fois
-dans les résultats, qui restent plausibles, et dans le code, qui reste correct d'apparence. Le
-découvrir suppose de refaire le modèle contre ses données. La branche consistant à rester en
-\gls{gams} en n'ajoutant qu'une couche de scripts autour du programme existant a donc été
-fermée, et elle l'a été par une \emph{mesure} et non par une préférence : trois défauts de ce
-type ont été trouvés au cours du portage, dont un qui a survécu plusieurs semaines à sa propre
-documentation (§~\ref{sec:parite}).
+On préfère adopter une approche open-source. On choisit Python comme langage de programmation pour plusieurs raisons.
+- Beaucoup de personnes sont formés à Python. Cela peut évacuer la question de la formation à un nouveau langage à la fois pour des collaborations entre équipes ou bien lors de recrutements.
+- La forte concurrence entre les bibliothèques Python et leur modèle open-source assurent un large choix de modules optimisés et maintenus grâce à des mises à jour gratuites régulières. On choisit la bibliothèque d'optimisation Pyomo qui propose le solveur non-commercial HiGHS.
+- Python permet très efficacement de faire de l'analyse de données approfondie et fait facilement le lien avec des SIG (système d'information géographique).
+- Python est parfaitement compatible avec l'utilisation de GitHub. Cela permet de simplifier la collaboration en proposant des outils de gestion de projet et en rendant le code accessible à des équipes extérieures.
 
-Le choix de Python/Pyomo avec le solveur \gls{highs} plutôt qu'un solveur commercial obéit,
-lui, à une contrainte de \emph{destination} et non de performance : le modèle doit pouvoir être
-relancé par un successeur, dans une unité \gls{inrae}, sans démarche de licence. Cette branche
-est la seule du mémoire à avoir été coupée sans mesure comparative, et l'annexe~\ref{ann:portage}
-le déclare comme telle.
+
+/Dans le modèle GAMS, faire varier un levier suppose d'éditer le code lui-même. Réaliser une campagne de scénarios suppose un nombre considérable de modifications manuelles. La traçabilité est faible, bricolée au cas par cas.
+
+--- EXPLIQUE MIEUX LA TROISIEME RAISON ---
 
 \begin{reflexion}
-Les \num{\obsExploitations} exploitations qui viennent d'être décrites sont des lignes de
-table, et leurs arbitrages me sont connus par un coefficient d'aversion au risque déduit d'une
-typologie. Ce n'est pas disqualifiant en soi : un modèle territorial est précisément fait pour
-agréger ce qu'aucun observateur ne peut voir en entier, et l'échelle parcellaire y gagne une
-précision qu'aucune enquête ne donnerait à ce coût. Mais cela fixe ce que le travail peut
-\emph{affirmer}. Il peut dire ce qu'implique un jeu d'hypothèses, avec une précision
-considérable ; il ne peut pas dire si ces hypothèses décrivent la façon dont on décide, en
-Guadeloupe, de planter de l'igname plutôt que de la canne. Le chapitre~\ref{ch:discussion}
-reprend cet écart, qui est la limite la plus constante de ce mémoire.
+REFLEXIVITE
 \end{reflexion}
