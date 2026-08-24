@@ -9,6 +9,15 @@
 % NOTE : le tableau d'attribution, la figure observe/simule et l'equation du PAD sont
 % CONSERVES -- ce sont des objets, pas de la prose.
 
+\minisommaire{%
+  \ms{sec:reference}{l'assolement observé et ses trois défauts}%
+  \ms{sec:pad}{la métrique, et ce qu'elle ne peut pas dire}%
+  \ms{sec:attribution}{à quelle échelle le modèle tombe juste}%
+  \ms{sec:rendements}{la cause commune de l'écart résiduel}%
+  \ms{sec:deviations}{corriger ou ajuster : le test qui sépare les deux}%
+  \ms{sec:plateau}{ce qui reste inexpliqué}%
+  \ms{sec:emergence}{deux postes retrouvés sans être nommés}}
+
 Un modèle d'optimisation ne se valide pas comme un modèle prédictif. Il ne prétend pas
 reproduire ce que les agriculteurs \emph{ont} fait, mais représenter la façon dont ils
 arbitrent ; lui demander de retrouver l'assolement observé serait lui demander d'être ce qu'il
@@ -21,43 +30,70 @@ qui a occupé le plus de temps — comment distinguer une \emph{correction} lég
 \section{L'état de référence, et ce qu'il ne dit pas}
 \label{sec:reference}
 
-L'assolement observé de 2017 a été construit comme un artefact autonome, produit et documenté à
-part, plutôt que comme le \enquote{côté entrée} d'un run. Ce n'est pas une décision technique :
-tant qu'une référence n'existe que comme sous-produit d'une simulation, on ne peut pas
-l'examiner séparément, donc on ne peut pas dire ce qu'elle ignore. Or elle ignore trois choses,
-et c'est la partie utile.
+L'assolement observé de 2017 constitue l'état de référence contre laquelle le modèle est noté.
+Cette référence présente trois défauts :
 
-\textbf{La finesse.} L'assolement fin de 2017 n'a jamais existé : la donnée parcellaire
-n'encode que douze groupes agrégés, quand le modèle manipule quatre-vingt-quatre variantes
-techniques. Ce n'est pas une lacune du portage — le \gls{gams} faisait de même — mais cela fixe
-la résolution de tout ce chapitre : toute comparaison se fait au niveau des douze groupes, et
-tout indicateur simulé se lit comme une fourchette plutôt que comme une valeur.
+\begin{itemize}[leftmargin=1.2em,itemsep=8pt]
 
-\textbf{Une part du territoire, par construction.} Pour comparer des indicateurs, il faut
-attribuer à chaque groupe observé une culture fine \emph{représentante}. L'hypothèse est
-documentée et configurable, mais elle ne concerne plus seulement la restitution : le plafond de
-main d'\oe uvre~\eqref{eq:mo} est calculé à travers elle, donc changer une représentante change
-l'optimum. Et cette représentante est souvent une culture que le modèle interdirait sur la
-parcelle même qu'elle représente — celle de la canne n'est éligible que sur
-\SI{\mesRepCanne}{\percent} de la surface cannière observée.
+\item \textbf{La finesse}, car la donnée parcellaire n'encode que \num{12} groupes agrégés,
+  quand le modèle manipule \num{84} variantes techniques. Ces variantes doivent être réparties
+  en ces \num{12} groupes avant toute comparaison. La lecture des indicateurs doit se faire avec
+  prudence du fait de cette approximation.
 
-\textbf{Ses propres corrections manuelles.} La documentation technique des données en fait
-état : \num{419} parcelles reclassées de café et cacao vers la canne, trois parcelles de plus
-de \SI{45}{\degree} de pente ramenées à \SI{45}{\degree} — la note précise \enquote{pour ne pas
-avoir à modifier les seuils dans \gls{mosaica}}. La référence contre laquelle le modèle est
-noté a donc déjà été ajustée, en partie pour lui plaire.\attente{14}
+\item \textbf{La main d'\oe uvre} est une contrainte car elle est plafonnée. Elle s'estime comme
+  tel : pour chaque variante technique, connaitre son itinéraire technique et le nombre d'heure
+  de travail par hectare de chaque opération et rapporter cela à la surface totale. L'itinéraire
+  technique change d'une variante technique à l'autre. On doit choisir une variante technique
+  pour représenter une culture agrégée dans l'état de référence. Mais en faisant ça, on fait un
+  arbitrage dans l'estimation du plafond de main d'\oe uvre et donc de l'optimum final.
 
-De ces trois ignorances, une seule se chiffre exactement, et c'est celle qui borne ce qu'on
-peut espérer : \SI{\obsSurfaceIrreproductible}{\ha} sur \SI{\obsSurfaceCultivee}{\ha} ne sont
-reproductibles par \emph{aucune} variante fine du modèle, parce qu'aucune n'est éligible sur
-les parcelles concernées. Il en résulte un \textbf{plancher d'écart de \num{\obsPlancherPad}
-point} sur la métrique définie ci-dessous, quoi que fasse l'optimisation. Ce ne sont pas des
-parcelles mal étiquetées, ce sont des parcelles absentes de l'univers du modèle. La lecture qui
-en découle vaut pour tout le chapitre : \emph{tout écart au-delà de ce plancher est un choix
-d'optimisation, pas une impossibilité agronomique}. À l'inverse, le jeu parcellaire couvre
-\SI{\mesCouvertureSau}{\percent} de la \gls{sau} déclarée par la statistique agricole
-\parencite{agreste2019} — la canne à \SI{98}{\percent}, les fruits à \SI{90}{\percent} — ce qui
-donne à la référence une assise externe qu'aucune vérification interne ne pourrait fournir.
+  De plus, le modèle interdit souvent cette culture sur la parcelle même qu'elle représente. Par
+  exemple, La représentante de la canne n'est éligible que sur \SI{\mesRepCanne}{\percent} de la
+  surface cannière observée.
+
+\item \textbf{Les corrections manuelles} sont présentées dans la documentation technique du
+  modèle \gls{gams}. \num{419} parcelles sont reclassées de café et cacao vers la canne.
+  \num{3} parcelles de plus de \SI{45}{\degree} de pente ramenées à \SI{45}{\degree}
+  \enquote{pour ne pas avoir à modifier les seuils dans \gls{mosaica}}. On observe que la
+  référence contre laquelle le modèle est noté a été ajustée au modèle.
+
+\end{itemize}
+
+Sur certaines parcelles, aucune variante fine n'est éligible. Cela correspond à
+\SI{\obsSurfaceIrreproductible}{\ha} sur \SI{\obsSurfaceCultivee}{\ha}. Cela implique un
+plancher de \gls{pad} de \SI{\obsPlancherPad}{\percent}, qu'importe l'optimisation.
+
+Les données parcellaires couvrent \SI{\mesCouvertureSau}{\percent} de la \gls{sau} déclarée par
+la statistique agricole \parencite{agreste2019}, avec la canne à \SI{98}{\percent} et les fruits
+à \SI{90}{\percent}.
+
+\begin{questionreponse}{Réexplique pourquoi aucune variante fine n'est éligible.}
+D'abord une précision de vocabulaire, parce qu'elle change la phrase : il ne s'agit pas de
+parcelles où \emph{aucune culture} n'est possible, mais de parcelles où aucune variante fine
+\textbf{du groupe qui y était observé} n'est éligible. La parcelle reste allouable ; elle est
+seulement condamnée à porter autre chose que ce qu'elle portait. C'est cela qui rend l'écart
+incompressible.
+
+Les \SI{\obsSurfaceIrreproductible}{\ha} ne sont pas répartis au hasard. Vergers :
+\SI{167}{\ha} sur \SI{\obsHaVE}{\ha}, soit moins de la moitié de reproductible. Agrumes :
+\SI{52}{\ha} sur \SI{\obsHaAG}{\ha}. Canne : \SI{84}{\ha} sur \SI{\obsHaCS}{\ha}. Plantain
+\SI{26}{\ha}, ananas \SI{10}{\ha}, igname \SI{8}{\ha}. Les cinq autres groupes sont
+reproductibles à \SI{100}{\percent}.
+
+La cause n'est pas la même des deux côtés. Les \SI{84}{\ha} de canne relèvent des interdictions
+agronomiques ordinaires — pente, sol, mécanisation. Les vergers et les agrumes, eux, sont
+irreproductibles \textbf{pour une raison de portage} : le masque d'éligibilité embarque
+fidèlement les suppressions du \gls{gams} et l'équation \texttt{Eq\_VE\_PLUIE}, celle-là même
+qui interdit les vergers pluviaux sur tout le territoire à cause du défaut décrit au
+chapitre~\ref{ch:terrain}. Autrement dit, les deux groupes que le modèle rate le plus sont
+aussi les deux que le portage à parité lui interdit.
+
+Ce qu'il faut en conclure est mesuré : \num{\obsPlancherPad} point de \gls{pad}, et jusqu'au
+double si l'on compte l'excès créé ailleurs par ces hectares déplacés. À comparer aux
+\SI{\calibParitePad}{\percent} du run de parité. \emph{L'écart observé\slash simulé ne
+s'explique donc pas par l'éligibilité} : au-delà de ce plancher, tout écart est un choix
+d'optimisation et non une impossibilité agronomique.
+\end{questionreponse}
 
 \section{La métrique : le \glsentryshort{pad}, et ce qu'il ne peut pas dire}
 \label{sec:pad}
@@ -69,23 +105,27 @@ observée à la surface simulée \parencite[§2.6]{chopin2015} :
                                         {S^{\text{obs}}_u}.
   \label{eq:pad}
 \end{equation}
-Zéro signifie que le modèle retrouve exactement la surface observée de cet usage,
-\SI{50}{\percent} qu'il se trompe de la moitié. Au niveau agrégé, on somme séparément les
-numérateurs et les dénominateurs — le rapport des sommes, et non la moyenne des rapports.
-L'article fixe deux seuils d'acceptabilité qu'il ne faut pas confondre :
-\SI{\mesArtPad}{\percent} pour les cultures principales à l'échelle du territoire,
-\SI{\mesArtPadZone}{\percent} à l'échelle des sous-régions et des exploitations. Le modèle est
-évalué aux quatre échelles — territoire, sous-région, exploitation, île — auxquelles s'ajoutent
-la matrice de confusion des huit types d'exploitation et le taux de correspondance parcellaire,
-compté en parcelles \emph{et} en hectares.
+\SI{0}{\percent} signifie que le modèle retrouve exactement la surface observée de cet usage,
+\SI{50}{\percent} qu'il se trompe de la moitié.
+
+L'article fixe deux seuils d'acceptabilité :
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \SI{\mesArtPad}{\percent} pour les cultures principales à l'échelle du territoire ;
+  \item \SI{\mesArtPadZone}{\percent} à l'échelle des sous-régions et des exploitations.
+\end{itemize}
+
+Le modèle est évalué aux échelles du territoire, des îles, des sous-régions et des
+exploitations. On produit aussi la matrice de confusion des huit types d'exploitation ainsi
+qu'un taux de correspondance parcellaire, compté en parcelles et en hectares.
 
 \subsection*{Cinq raisons de ne pas en faire un score}
 
-Le \gls{pad} est la métrique de l'article, c'est donc celle qu'emploie ce chapitre. Mais il
-mesure moins qu'il n'en a l'air, et l'essentiel des précautions de lecture de ce mémoire vient
-de là. Le tableau~\ref{tab:pad-limites} rassemble ses cinq angles morts ; chacun est invoqué
-plus loin, ce qui est la raison de les poser ici.
+Le \gls{pad} est la métrique de l'article Chopin et al., mais il présente des angles morts que
+le tableau~\ref{tab:pad-limites} présente.
 
+% TODO CLEMENT (note laissee en marge le 2026-08-18) : « CHANGER TABLE 3.1 » -- le tableau
+% ci-dessous est a reprendre. Supprimer ce commentaire une fois la reprise faite.
 \begin{table}[tbp]
   \centering
   \caption{Ce que le \glsentryshort{pad} laisse passer. Ce n'est pas une mise en garde
@@ -112,110 +152,152 @@ plus loin, ce qui est la raison de les poser ici.
   \end{tabularx}
 \end{table}
 
-S'y ajoute une objection de principe, la plus lourde. Un modèle d'optimisation ne prédit pas,
-il prescrit. Or le plan réellement suivi en 2017, évalué sous son objectif, vaut
-\SI{\mesPlanEcart}{\percent} de moins que l'optimum (§~\ref{sec:plateau}) : un \gls{pad} nul
-supposerait donc que les agriculteurs maximisent exactement ce que le modèle maximise, ce que
-la mesure dément. \emph{Un \gls{pad} parfait serait un signal d'alerte, pas un succès.} La
-question utile n'est pas \enquote{de combien s'écarte-t-il ?} mais \enquote{où s'écarte-t-il,
-et est-ce que cela s'explique ?}
+De plus, un modèle d'optimisation prescrit mais ne prédit pas. La question utile n'est pas
+\enquote{de combien s'écarte-t-il ?} mais \enquote{où s'écarte-t-il, et est-ce que cela
+s'explique ?}. Tous ces éléments invitent à ne pas voir le \gls{pad} comme un score robuste.
+
+\begin{questionreponse}{Pourquoi essayer d'avoir un \glsentryshort{pad} bas, alors ? Ce n'est
+pas un score, mais c'est quand même un score ?}
+Non : c'est un \textbf{détecteur}, et c'est une autre fonction. Un \gls{pad} élevé n'est pas une
+mauvaise note, c'est une obligation d'aller chercher la cause. Ce chapitre ne produit pas un
+chiffre, il produit une liste de causes nommées — rendements potentiels, débouché de plantain
+absent, élevage absent. Le \gls{pad} sert à ouvrir cette liste, pas à la résumer.
+
+D'où la seule chose qu'on cherche vraiment à faire baisser : \emph{la part de l'écart qu'on ne
+sait pas nommer}. Un \gls{pad} qui tombe de \SI{193}{\percent} à \SI{\calibParitePad}{\percent}
+parce qu'on a trouvé quatre défauts de portage est un résultat ; le même chiffre obtenu en
+serrant un seuil jusqu'à ce que ça tombe juste n'en est pas un.
+
+Ensuite, ce n'est pas le niveau qui compte mais sa \textbf{forme}. Cinq sous-régions sur sept
+sous le seuil et deux qui échouent à une adresse identifiée valent mieux qu'un écart moyen
+uniformément médiocre : dans le premier cas on connaît le domaine de validité du modèle, dans le
+second on n'a rien appris.
+
+Enfin, un \gls{pad} nul serait un \textbf{mauvais} signe, et c'est le point contre-intuitif. Le
+plan réellement suivi en 2017 vaut \SI{\mesPlanEcart}{\percent} de moins que l'optimum sous
+notre propre objectif (§~\ref{sec:plateau}). Un modèle qui retomberait exactement sur l'observé
+aurait donc cessé d'optimiser — il aurait été forcé. Il existe une zone utile, pas une cible :
+assez bas pour montrer que la structure économique du programme est juste, jamais nul, et
+surtout obtenu sans aucune contrainte calée sur l'observé.
+\end{questionreponse}
 
 \subsection*{Ce qui est comparable à l'article, et ce qui ne l'est pas}
 
-L'article publie un \gls{pad} \emph{par culture} et jamais un agrégat. La seule métrique
-directement comparable est donc le nombre de cultures passant sous le seuil de
-\SI{\mesArtPad}{\percent}. \textbf{Il vaut \num{\calibRetenuCulturesOk} sur
-\num{\calibRetenuCulturesTotal}, contre \num{8} sur \num{10} publiées} — alors même que les
-trois autres métriques de l'article sont atteintes ou dépassées (§~\ref{sec:attribution}).
-C'est le résultat le plus défavorable de ce mémoire, et il n'y a aucun intérêt à le
-dissimuler : il s'explique, et son explication est elle-même un résultat.
+L'article publie un \gls{pad} par culture et propose un seuil de \SI{\mesArtPad}{\percent} en
+dessous duquel on considère la calibration satisfaisante. Dans l'article, \num{8} cultures sur
+\num{10} passent le test, contre seulement \num{\calibRetenuCulturesOk} cultures sur
+\num{\calibRetenuCulturesTotal} pour le modèle Python. En parallèle, les trois autres métriques
+de l'article sont atteintes ou dépassées (§~\ref{sec:attribution}). De plus, on propose un
+\gls{pad} territorial qui n'est pas présent dans l'article. Cette métrique correspond à un
+\gls{pad} toutes cultures confondues à l'échelle de la Guadeloupe.
 
-Reste que le portage à parité stricte donne un \gls{pad} territorial de
+On distingue \num{2} calibration différentes. La première correspond à un portage à parité
+stricte, c'est-à-dire une fidélité totale au modèle \gls{gams}. La seconde, de meilleur qualité,
+correspond à ce même portage auquel on ajoute deux modifications (§~\ref{sec:deviations}).
+
+Pour un portage à parité stricte, le \gls{pad} territorial est de
 \SI{\calibParitePad}{\percent} et \num{\calibPariteCulturesOk} culture sur
-\num{\calibPariteCulturesTotal} sous le seuil. Un tel écart avec l'article demande une
-explication, sous peine de laisser croire à une erreur de transcription. Il n'y en a pas : le
-portage a été vérifié source à source sur l'objectif, les coefficients d'aversion, l'économie,
-le mapping des codes et le sens des interdictions. Quatre causes le produisent, et l'annexe
-\ref{ann:calibration} les détaille.
+\num{\calibPariteCulturesTotal} sous le seuil. \num{4} choses expliquent l'écart avec les
+résultats de l'article (cf. annexe~\ref{ann:calibration}) :
 
-\begin{enumerate}
-\item \textbf{Ce que nous appelons \enquote{parité} n'est pas le modèle que l'article valide.}
-  L'article valide un modèle qui \emph{contient} le plafond de plantain — c'est son
-  équation~6. Notre run de parité le désactive, précisément pour mesurer ce qu'il apporte ;
-  sans lui, le plantain monte à \SI{\simPariteBC}{\ha} contre \SI{\obsHaBC}{\ha} observés.
-  C'est la cause dominante, et elle disparaît dès la section suivante.
-\item \textbf{Le jeu de données n'est pas le même, et ne peut pas l'être.}
-  \num{\mesArtParcellesN} parcelles et \num{\mesArtFermes} exploitations en \num{2010} chez
-  l'article, \num{\obsParcelles} et \num{\obsExploitations} en \num{2017} ici : à hectares
-  comparables, \SI{14}{\percent} d'exploitations en moins, c'est-à-dire de la concentration
-  foncière réelle. Or les coefficients d'aversion au risque de sa Table~2 sont, l'article le
-  dit lui-même, le \emph{résultat} d'une calibration menée sur ces \num{\mesArtFermes}
-  fermes : les réutiliser sur \num{2017} n'est pas un calage, c'est un \textbf{transfert hors
-  échantillon}. Recalibrer sur \num{2017} a été essayé, et écarté (§~\ref{sec:plateau}).
-\item \textbf{La métrique de tête n'est pas la même.} L'agrégat territorial n'existe nulle
-  part dans l'article et il est plus sévère que le \gls{pad} par culture.
-\item \textbf{Une part est du bruit de solveur.} La tolérance d'optimalité de
-  \SI{\mesGapMip}{\percent} laisse le solveur indifférent entre prairie et canne sur environ
-  \SI{3000}{\ha}, où leurs marges diffèrent de moins de \SI{1}{\percent} : environ
-  \SI{3}{\percent} de l'écart, mesurés.
+\begin{enumerate}[leftmargin=1.6em,itemsep=6pt]
+
+\item L'article ne valide pas le modèle à parité. Le modèle de l'article contient le plafond de
+  plantain. Sans lui, le plantain monte à \SI{\simPariteBC}{\ha} contre \SI{\obsHaBC}{\ha}
+  observés. On le désactive pour mesurer ce qu'il apporte.
+
+\item Le jeu de données de l'article est différent du nôtre. Il présente
+  \num{\mesArtParcellesN} parcelles et \num{\mesArtFermes} exploitation alors que notre jeu
+  comporte \num{\obsParcelles} parcelles et \num{\obsExploitations} exploitations. Cela
+  correspond à \SI{14}{\percent} d'exploitations en moins à d'hectares comparables donc de la
+  concentration foncière.
+
+\begin{questionreponse}{Les coefficients d'aversion doivent rester les mêmes quel que soit
+l'échantillon, non ? Ils mesurent le comportement des agriculteurs. On considère que celui-ci
+change avec la concentration foncière ?}
+En principe, oui, et c'est exactement pour cette raison qu'on les a gardés. Le problème n'est
+pas qu'ils changeraient, c'est qu'ils n'ont \textbf{jamais été mesurés}.
+
+La Table~2 de l'article n'est pas une enquête de terrain : c'est le \emph{résultat} d'une
+calibration, une descente de coordonnées d'une centaine d'itérations qui ajuste les coefficients
+jusqu'à ce que le modèle retrouve l'assolement de 2010. Ils ne mesurent donc pas un
+comportement, ils \textbf{absorbent tout ce qui manquait au modèle en 2010} — l'élevage en
+premier. Un coefficient d'ajustement n'a pas de raison d'être stable hors de l'échantillon où il
+a été ajusté.
+
+Ce qui change avec la concentration foncière n'est pas la psychologie des agriculteurs : c'est
+la \emph{composition} des types. Les \SI{14}{\percent} d'exploitations disparues entre 2010 et
+2017 ne sont pas un échantillon au hasard des \num{\mesArtFermes} de départ. Les réutiliser en
+2017 n'est donc pas faux, c'est \textbf{non testé} — un transfert hors échantillon, qu'il faut
+déclarer comme tel.
+
+Le vérifier a d'ailleurs été fait, et le résultat tranche dans l'autre sens : recalibrer les
+coefficients sur 2017 descend le \gls{pad} à \SI{39.9}{\percent}, mais donne un cannier
+spécialisé à \num{2.50} d'aversion là où l'article le met à \num{0.30}. Un spécialiste
+\enquote{très averse} contredit la définition même de son type. C'est du surajustement :
+l'aversion sert de variable d'ajustement pour compenser une absence structurelle. Le transfert
+hors échantillon est donc assumé, et sa seule alternative testée était pire.
+\end{questionreponse}
+
+\item L'agrégat territorial est plus sévère que le \gls{pad} par culture. L'article ne le
+  propose pas.
+
+\item La tolérance d'optimalité du solveur est de \SI{\mesGapMip}{\percent}. Ce bruit rend
+  indifférent l'allocation de prairie ou de canne sur environ \SI{3000}{\ha} sur lesquelles
+  leurs marges diffèrent de moins de \SI{1}{\percent}. Cela correspond à environ
+  \SI{3}{\percent} du \gls{pad}.
+
 \end{enumerate}
 
 \subsection*{Ce qu'il faut en retenir pour lire la suite}
 
-Tout l'écart résiduel du modèle est concentré sur les petits postes — arboriculture, vergers,
-cultures maraîchères de niche —, c'est-à-dire là où le \gls{pad} est mécaniquement le plus
-sévère et où le plancher d'éligibilité mord le plus fort. Ce plancher rend d'ailleurs un
-verdict à double sens : il innocente le modèle sur les vergers, dont une part est inaccessible
-par construction, et il l'accuse partout ailleurs, où rien n'interdisait de faire mieux. Un
-modèle qui reproduit \SI{\calibRetenuSurface}{\percent} de la surface et
-\SI{\calibRetenuTypes}{\percent} des types d'exploitation en manquant les petits postes n'est
-pas un mauvais modèle : c'est un modèle \textbf{dont on connaît le domaine de validité}, et
-dont on sait qu'il ne faut pas se servir pour arbitrer entre deux cultures marginales.
+L'écart résiduel du modèle est concentré sur l'arboriculture, les vergers et les cultures
+maraîchères de niche. Le \gls{pad} y est mécaniquement plus sévère.
 
-À l'échelle des exploitations, enfin, la distribution est très asymétrique et la moyenne y
-trompe : le \gls{pad} par exploitation a une \emph{médiane} de
-\SI{\calibRetenuFermesPadMediane}{\percent} pour une \emph{moyenne} de
-\SI{\calibRetenuFermesPadMoyenne}{\percent}, et \SI{\calibRetenuFermesOkPct}{\percent} des
-exploitations passent sous le seuil de \SI{\mesArtPadZone}{\percent}. Lire la moyenne comme un
-écart uniformément réparti conduirait à sous-estimer très largement ce que le modèle
-reproduit. Les tables complètes, aux quatre échelles, sont en
-annexe~\ref{ann:calibration}.
+Au final, le modèle reproduit \SI{\calibRetenuSurface}{\percent} de la surface et
+\SI{\calibRetenuTypes}{\percent} des types d'exploitation et manque les petits postes. C'est un
+modèle dont on connaît le domaine de validité : il ne faut pas l'utiliser pour arbitrer entre
+deux cultures marginales.
+
+Le \gls{pad} par exploitation a une médiane de \SI{\calibRetenuFermesPadMediane}{\percent}, une
+moyenne de \SI{\calibRetenuFermesPadMoyenne}{\percent}, et
+\SI{\calibRetenuFermesOkPct}{\percent} des exploitations passent sous le seuil de
+\SI{\mesArtPadZone}{\percent}. Lire la moyenne seule conduit à sous-estimer la qualité réelle du
+modèle. Les tables complètes, aux quatre échelles, sont en annexe~\ref{ann:calibration}.
 
 \section{L'échelle d'attribution}
 \label{sec:attribution}
 
-La calibration n'a pas consisté à régler des paramètres jusqu'à ce que le résultat convienne,
-mais à \textbf{ajouter une contrainte à la fois et à mesurer ce que chacune apporte}. Trois
-runs, trois barreaux, chacun déclaré et gardé contre la dérive par un script de vérification.
+La calibration a consisté à ajouter une contrainte à la fois et à mesurer ce que chacune
+apporte. Ce n'est pas un bidouillage de paramètre jusqu'à ce que le résultat convienne.
 
-Le point de départ mérite d'être donné tel quel, parce qu'il rend la suite lisible : le premier
-état du portage, avant que la parité ne soit complète, donnait un \gls{pad} territorial de
-\SI{193}{\percent}, \SI{7.3}{\percent} de types d'exploitation reproduits,
+Le premier état du portage, avant que la parité ne soit complète, donnait un \gls{pad}
+territorial de \SI{193}{\percent}, \SI{7.3}{\percent} de types d'exploitation reproduits,
 \SI{7.0}{\percent} de parcelles et \SI{4.5}{\percent} de surface. Le
-tableau~\ref{tab:attribution} donne les trois barreaux qui ont suivi. Le troisième atteint ou
-dépasse les trois métriques publiées. Il a un coût, qu'il faut nommer : l'objectif recule de
-\num{\calibPariteObjectifM} à \num{\calibRetenuObjectifM} millions d'euros. C'est exactement
-ce que la fidélité au territoire coûte en marge théorique, et c'est une information sur le
-territoire autant que sur le modèle.
+tableau~\ref{tab:attribution} présente les métriques des trois états suivant par ordre
+chronologique ainsi que les métriques de l'article.
 
-Un point de méthode enfin, qui vaut plus que le score : \textbf{l'erreur est localisée, pas
-diffuse}. Sur les \num{\calibRetenuRegionsTotal} sous-régions, \num{\calibRetenuRegionsOk}
-passent sous le seuil sous-régional de \SI{\mesArtPadZone}{\percent} — de
-\SI{\calibRetenuRegionsPadMin}{\percent} à \SI{\calibRetenuRegionsPadOkMax}{\percent} — et deux
-le dépassent nettement, le Sud-Est et le Sud-Ouest de Basse-Terre, à
-\SI{\calibRetenuRegionsPadHorsMin}{\percent} et \SI{\calibRetenuRegionsPadMax}{\percent}. Deux
-remarques rendent ce résultat plus intéressant qu'un simple décompte.
-
-D'abord, l'article échoue au même endroit que nous : sa sous-région la moins bien reproduite
+Le dernier état (parité \gls{gams} + plafond plantain + plancher prairie) présente une erreur
+est localisée, pas diffuse. Sur les \num{\calibRetenuRegionsTotal} sous-régions,
+\num{\calibRetenuRegionsOk} passent sous le seuil sous-régional de
+\SI{\mesArtPadZone}{\percent} — de \SI{\calibRetenuRegionsPadMin}{\percent} à
+\SI{\calibRetenuRegionsPadOkMax}{\percent} — et deux le dépassent nettement, le Sud-Est et le
+Sud-Ouest de Basse-Terre, à \SI{\calibRetenuRegionsPadHorsMin}{\percent} et
+\SI{\calibRetenuRegionsPadMax}{\percent}. La sous-région la moins bien reproduite dans l'article
 est également le Sud-Est de Basse-Terre (\SI{56}{\percent} de surface correctement simulée
-contre \SI{70}{\percent} à \SI{76}{\percent} ailleurs), et il en donne la raison — la rotation
-banane/canne forme un seul système technique réparti sur plusieurs parcelles, que le modèle
-traite comme des choix indépendants. Deux implémentations distinctes butant sur la même
-sous-région pour une raison identifiée : c'est un argument de fidélité du portage plus fort
-qu'une égalité de score. Ensuite, Marie-Galante est passée du pire au meilleur rang
-(\SI{\calibRetenuRegionsPadMin}{\percent}) : sa prairie y tombait de \SI{1357}{\ha} à
-\SI{228}{\ha} avant l'ajout du plancher, soit \SI{83}{\percent} de perte sur une île entière.
-C'est ce que le plancher a réparé, et la section suivante examine s'il en avait le droit.
+contre \SI{70}{\percent} à \SI{76}{\percent} ailleurs). L'article explique que la rotation
+banane/canne forme un seul système technique réparti sur plusieurs parcelles, alors que le
+modèle traite cela comme des choix indépendants. Cette similitude entre le modèle \gls{gams} et
+le modèle Python appuie la fidélité du portage.
+
+Marie-Galante est passée du pire au meilleur rang (\SI{\calibRetenuRegionsPadMin}{\percent}) :
+sa prairie y tombait de \SI{1357}{\ha} à \SI{228}{\ha} avant l'ajout du plancher, soit
+\SI{83}{\percent} de perte sur une île entière.
+
+Le plancher de prairie force la prairie à sa valeur. L'écart est donc nul par construction et la
+prairie pèse un quart de la surface cultivée. Les chiffres défendables sont les trois premières
+lignes du tableau~\ref{tab:attribution} — types, parcelles, surface — et le retour de la canne,
+qu'aucune contrainte ne produit. Le \gls{pad} territorial n'est pas un score pertinent.
 
 \begin{table}[tbp]
   \centering
@@ -274,14 +356,10 @@ retour de la canne, qu'aucune contrainte ne produit.
 \section{La cause commune de l'écart résiduel : les rendements}
 \label{sec:rendements}
 
-Les cultures que le modèle rate sont toujours les mêmes, et il les rate toujours dans le même
-sens : il en plante trop. Il y a une explication unique à cela, et elle ne se trouve pas dans
-le modèle mais dans ses données d'entrée.
-
-La statistique agricole publie, pour chaque culture, une surface \emph{et} une production,
-donc un rendement territorial observé \parencite{agreste2019}. Le
-tableau~\ref{tab:rendements} le confronte au rendement que porte l'assolement simulé.
-L'ordre de grandeur est un facteur \num{2} à \num{4} sur les cultures diversifiées.
+La statistique agricole publie, pour chaque culture, une surface et une production, donc un
+rendement territorial observé \parencite{agreste2019}. Le tableau~\ref{tab:rendements} le
+confronte au rendement que porte l'assolement simulé. L'ordre de grandeur est un facteur
+\num{2} à \num{4} sur les cultures diversifiées.
 
 \begin{table}[tbp]
   \centering
@@ -296,182 +374,392 @@ L'ordre de grandeur est un facteur \num{2} à \num{4} sur les cultures diversifi
   \input{tables/rendements}
 \end{table}
 
-Une part de cet écart est légitime et attendue : la statistique moyenne \emph{tous} les
-producteurs et rapporte la production à la surface \emph{déclarée}, jeunes vergers non encore
-entrés en production compris, tandis que les coefficients du modèle décrivent des itinéraires
-techniques \emph{spécifiés}, conduits comme le manuel le prévoit. Deux lignes demandent en
-outre une réserve : le maraîchage du modèle est une \emph{rotation annuelle} de plusieurs
-légumes sur le même hectare quand la statistique compte une surface par légume, si bien que le
-rapport de \num{4} y est en partie une différence d'unité ; et le rendement simulé des agrumes
-porte sur quelques hectares seulement.
+Une part de cet écart est prévisible. La statistique fait la moyenne de tous les producteurs et
+rapporte la production à la surface déclarée. On considère donc les jeunes vergers non encore
+entrés en production, on propose des coefficient en postulant le respect des itinéraires
+techniques spécifiés.
 
-Ce qui rend le constat solide malgré ces réserves, c'est le melon. C'est la seule culture du
-territoire produite presque entièrement par un seul opérateur sous un itinéraire unique — donc
-la seule dont la moyenne territoriale \emph{est} un itinéraire technique. Et c'est exactement
-la seule ligne où les deux chiffres coïncident. \emph{L'écart n'est donc pas un défaut de
-données : c'est la signature de la différence entre un rendement potentiel et un rendement
-moyen}, et elle disparaît là où les deux notions se confondent.
+Le maraîchage du modèle est une rotation annuelle de plusieurs légumes sur le même hectare alors
+que la statistique compte une surface par légume. Le rendement simulé des agrumes porte sur
+quelques hectares seulement.
 
-La conséquence est directe. Le rendement entre dans la marge à l'hectare : une culture dont le
-rendement est deux à quatre fois trop élevé a une marge deux à quatre fois trop attractive, et
-le modèle en couvre l'île dès qu'aucun débouché ne la borne. Sous mandat de parité on n'y
-touche pas — ce sont les rendements de la Table~1 de l'article. Mais cela change le statut des
-contraintes de marché de la section suivante : \textbf{ce ne sont pas des béquilles ajoutées
-pour flatter le score, ce sont les bornes qui manquaient à une productivité surévaluée en
-amont}.
+\begin{questionreponse}{Explique mieux ce paragraphe, pour les agrumes et pour le facteur~4 et
+la rotation, etc.}
+Il y a trois choses différentes dans le même paragraphe, et elles n'ont pas la même force. Les
+séparer rend le raisonnement lisible.
+
+\textbf{1. L'écart normal, celui qui ne prouve rien.} Agreste moyenne \emph{tous} les
+producteurs et rapporte la production à la surface \emph{déclarée} — jeunes vergers non encore
+entrés en production compris. Le modèle, lui, décrit un itinéraire technique conduit comme le
+manuel le prévoit. C'est du rendement \emph{potentiel} contre du rendement \emph{moyen} : les
+deux nombres sont justes, ils ne mesurent pas la même chose.
+
+\textbf{2. Le maraîchage, où le $\times$\,\num{\rdtRapportMA} est en partie une différence
+d'unité.} Le modèle décrit une \emph{rotation annuelle} : plusieurs légumes se succèdent sur le
+même hectare dans l'année, et leurs récoltes s'additionnent — d'où \SI{\rdtModeleMA}{\tonne} par
+hectare et par an. Agreste compte une surface par légume et un rendement par légume : un hectare
+qui porte trois légumes successifs y compte trois fois, une fois par ligne. Le rapport de
+\num{\rdtRapportMA} n'est donc pas entièrement un écart de productivité.
+
+\textbf{3. Les agrumes, où la ligne est fragile.} Le rendement \enquote{modèle} est la
+production simulée divisée par la surface simulée — et cette surface vaut \SI{\simRetenuAG}{\ha}
+contre \SI{\obsHaAG}{\ha} observés. C'est une moyenne sur une dizaine d'hectares confrontée à
+une moyenne territoriale : le rapport de \num{\rdtRapportAG} est réel mais mal estimé, et il ne
+faut pas le citer seul.
+
+\textbf{Ce qui rend le constat solide malgré ces réserves, c'est le melon.} C'est la seule
+culture du territoire produite presque entièrement par un seul opérateur sous un itinéraire
+unique — donc la seule dont la moyenne territoriale \emph{est} un itinéraire technique. Et c'est
+exactement la seule ligne où les deux chiffres coïncident (\num{\rdtModeleME} contre
+\num{\rdtAgresteME}). Là où les deux notions se confondent, l'écart disparaît. C'est ce contrôle
+qui transforme une liste d'écarts en démonstration : ce n'est pas un défaut de données, c'est la
+signature d'une différence de définition.
+\end{questionreponse}
+
+Le melon est la seule culture du territoire produite presque entièrement par un seul opérateur à
+partir d'un unique itinéraire technique. L'écart ne vient pas d'un défaut de données mais plutôt
+de la différence entre un rendement potentiel et un rendement moyen. Quand les deux coïncident
+comme c'est le cas pour le melon, l'écart disparaît.
+
+Une culture dont le rendement est \num{2} à \num{4} fois trop élevé a une marge \num{2} à
+\num{4} trop attractive et le modèle en couvre l'île dès qu'aucun débouché ne la borne.
+
+\begin{questionreponse}{Pourquoi ne pas changer les données, les rendements, etc.\ pour mieux
+coller à Agreste et éviter les bornes ?}
+Trois raisons, de la plus contraignante à la plus intéressante.
+
+\textbf{Le mandat de parité l'interdit.} La table \texttt{Rdt\_Cult}, c'est la Table~1 de
+l'article. Y toucher, c'est perdre la seule chose que le portage garantit : pouvoir attribuer
+n'importe quel écart soit au \gls{gams} d'origine, soit à une modification déclarée. Une
+retouche de rendement rend tout désaccord ultérieur indémêlable — c'est la thèse du
+chapitre~\ref{ch:porter}.
+
+\textbf{Ce ne serait pas une correction, mais un changement d'objet.} Agreste publie un
+rendement par \emph{culture}, le modèle porte un rendement par \emph{itinéraire technique}.
+Substituer l'un à l'autre revient à donner la même valeur aux \num{84} variantes d'un même
+groupe : le modèle ne saurait plus distinguer une canne mécanisée d'une canne manuelle, ni une
+banane irriguée d'une banane pluviale. Les \num{84} variantes retombent sur \num{12} groupes, et
+tout ce que le chapitre~\ref{ch:explorer} fait varier disparaît avec.
+
+\textbf{Et ce serait circulaire, de la même famille que le reste.} Caler les entrées sur la
+statistique agricole puis noter le modèle contre l'assolement observé, c'est régler la moitié
+des données sur une source qui sert aussi de juge — exactement le reproche que
+\textcite{howitt1995} s'attire.
+
+Reste le fond, et c'est le contrôle du melon qui le donne : \textbf{ces rendements ne sont pas
+faux}. Un rendement potentiel est ce qu'un itinéraire produit quand il est conduit comme prévu ;
+il n'a pas à valoir la moyenne territoriale. Ce qui manque au modèle n'est donc pas un meilleur
+coefficient, c'est le \textbf{débouché} — la raison pour laquelle personne, sur le territoire,
+ne plante \SI{\simPariteBC}{\ha} de plantain. Les plafonds de marché ne sont pas des béquilles
+ajoutées pour flatter le score : ce sont les bornes qui manquaient à une productivité
+surévaluée en amont.
+
+La bonne façon de faire, si l'on voulait vraiment rapprocher les deux, serait d'introduire un
+\emph{taux de réalisation} par culture — la part de l'itinéraire effectivement conduite sur le
+territoire — plutôt que d'écraser le rendement. Elle demande une donnée qu'on n'a pas.
+\end{questionreponse}
 
 \section{Deux déviations, et le test qui les sépare d'un ajustement}
 \label{sec:deviations}
 
-Rien n'interdit d'ajouter une contrainte à un modèle pour l'approcher du réel :
-\textbf{tout dépend d'où vient sa valeur}. Une contrainte calée sur l'observé produit
-mécaniquement un écart nul sur le poste qu'elle vise, et n'apprend donc rien — c'est de
-l'ajustement déguisé en résultat, et c'est exactement le reproche que la programmation
-mathématique positive \parencite{howitt1995} s'attire lorsqu'elle recale la fonction objectif
-sur la situation observée. La règle posée ici est donc la suivante : \emph{toute déviation par
-rapport à la parité doit avoir une source extérieure au modèle et à l'observé}. Deux déviations
-ont été retenues. Elles ne satisfont pas cette règle de la même façon, et c'est instructif.
+Toute déviation par rapport à la parité doit avoir une source extérieure au modèle et à
+l'observé. L'ajout d'une contrainte à un modèle pour l'approcher du réel doit être justifié. Une
+contrainte calée sur l'observé produit mécaniquement un écart nul sur le poste qu'elle vise.
+C'est de l'ajustement déguisé en résultat \parencite{howitt1995}. On a retenu \num{2}
+déviations.
 
 \subsection*{Première déviation : le plafond de plantain}
 
-Sans contrainte, le modèle envoie massivement de la terre vers le plantain :
-\SI{\simPariteBC}{\ha} contre \SI{\obsHaBC}{\ha} observés. Deux mécanismes s'y ajoutent. Le
-premier est le rendement de la section précédente. Le second est indirect et a été établi à
-l'euro près : le plantain gagne parce qu'une contrainte de rotation pèse sur son
-\emph{concurrent}, la banane, et non sur lui, ce qui lui vaut un avantage relatif de
-\SI{4.9}{\percent}. Ce seul poste contribue pour \SI{+20.9}{\mega\euros} à l'écart d'objectif
-entre l'optimum et le plan observé, écart qui ne vaut au total que
-\SI{12.8}{\mega\euros} — les autres groupes le compensent en sens inverse.
+Sans contrainte, le modèle donne \SI{\simPariteBC}{\ha} de plantain contre \SI{\obsHaBC}{\ha}
+observés. Cela s'explique par la différence de rendement vu précédemment ainsi que par la
+contrainte de rotation qui pèse sur son concurrent, la banane. Cela crée, pour le plantain, un
+avantage relatif de \SI{4.9}{\percent}. Ce poste correspond pour \SI{20.9}{\mega\euros} à
+l'écart d'objectif entre l'optimum et l'observé.
 
-La valeur du plafond, elle, vient de l'extérieur : trois candidates existaient, toutes exogènes
-à l'assolement observé, dont le débouché de \SI{4650}{\tonne} de l'équation~6 de l'article.
-Plutôt que de choisir, le seuil a été \emph{balayé} (annexe~\ref{ann:calibration}), et le
-balayage donne un palier plat de \SI{4650}{\tonne} à \SI{9240}{\tonne} : doubler le seuil
-déplace le \gls{pad} d'un demi-point, à peine plus que le bruit du solveur. Deux détails
-achèvent d'écarter le soupçon de circularité — l'optimum du palier se trouve à son extrémité
-\emph{haute}, et même au plafond le plus contraignant le plantain reste au-dessus de l'observé
-(\SI{247}{\ha} contre \SI{\obsHaBC}{\ha}). \textbf{La contrainte ne pousse donc pas la culture
-vers l'observé} : ce qui compte n'est pas la valeur du plafond, c'est son existence. C'est une
+Au lieu de choisir arbitrairement, on a balayé des valeurs de plafond
+(annexe~\ref{ann:calibration}). Le balayage donne un palier plat de \SI{4650}{\tonne} (débouché
+de l'équation~6 de l'article) jusqu'à \SI{9240}{\tonne}. C'est-à-dire que le \gls{pad} ne change
+pas. L'optimum du palier est atteint en son maximum.
+
+\begin{questionreponse}{Réexplique quelles sont les valeurs testées. Y en a-t-il d'autres que
+le palier plat ? Explique ce qu'est le soupçon de circularité et pourquoi il est écarté.}
+\textbf{La valeur retenue} est \SI{6440}{\tonne} : c'est le chiffre de l'auteur du \gls{gams},
+et il est corroboré par le débouché de \SI{4650}{\tonne} que porte l'équation~6 de l'article.
+Deux sources, toutes deux extérieures à l'assolement observé.
+
+\textbf{Le balayage} couvre toute la plage des candidates exogènes, et il n'est pas plat
+partout. En dessous de \SI{4650}{\tonne}, on quitte les valeurs qu'une source extérieure
+justifie : on choisirait alors le seuil pour son effet, ce qui est précisément ce qu'on
+s'interdit. Au-dessus de \SI{9240}{\tonne}, le plafond cesse de mordre et on retombe sur le run
+de parité, plantain à \SI{\simPariteBC}{\ha}. Entre les deux, un palier : facteur deux sur le
+seuil, un demi-point de \gls{pad}, à peine plus que le bruit du solveur.
+
+\textbf{Le soupçon de circularité}, maintenant. Une contrainte calée sur la valeur observée
+donne un écart nul sur le poste qu'elle vise, mécaniquement, sans rien apprendre : on a mesuré
+la contrainte, pas le modèle. C'est le reproche adressé à la programmation mathématique
+positive, qui recale sa fonction objectif sur la situation observée
+\parencite{howitt1995}. Il faut donc pouvoir montrer que la contrainte ne tire pas la culture
+vers l'observé.
+
+\textbf{Deux faits l'écartent ici}, et ce sont eux qui font la démonstration :
+\begin{itemize}[leftmargin=1.2em,itemsep=3pt]
+  \item l'optimum du palier est à son extrémité \emph{haute} (\SI{9240}{\tonne}, soit deux fois
+    et demie le débouché observé). Un seuil choisi pour coller à l'observé se trouverait à
+    l'extrémité basse ;
+  \item même au plafond le plus contraignant, le plantain simulé (\SI{\simRetenuBC}{\ha}) reste
+    \emph{au-dessus} de l'observé (\SI{\obsHaBC}{\ha}). La contrainte le freine, elle ne le
+    ramène pas.
+\end{itemize}
+
+Ce qui compte n'est donc pas la valeur du plafond, c'est son \textbf{existence}. C'est une
 correction, pas un ajustement.
+\end{questionreponse}
 
 \subsection*{Seconde déviation : le plancher de prairie}
 
-Le cas est plus embarrassant, et il faut le poser franchement : le seuil de
-\SI{\mesCalalouBovins}{\ha} \textbf{est} la surface observée de 2017, et la règle qu'on vient
-d'énoncer devrait l'interdire. Le \gls{gams} d'origine le documentait d'ailleurs lui-même
-ainsi. Ce qui autorise malgré tout à le retenir n'est pas la provenance du seuil, qui est
-mauvaise, mais le fait — mesuré — que \emph{la conclusion n'en dépende pas}.
+Le seuil de \SI{\mesCalalouBovins}{\ha} est égal à la surface observé de 2017. La règle
+mentionnée plus haut devrait l'interdire. La subtilité est qu'on établi la nécessité du plancher
+hors du modèle, par un calcul de charge animale.
 
-Que le plancher soit nécessaire s'établit entièrement \emph{hors} du modèle, par un calcul de
-charge animale. Le territoire portait \num{\mesBovins} bovins en 2017, soit environ
-\num{\mesUgb} \gls{ugb} \parencite{agreste2019} : rapportées aux \SI{\mesPrairieAgreste}{\ha}
-de prairie de la statistique agricole, cela donne \num{\mesUgbHaAgreste} \gls{ugb} par hectare,
-conforme aux recensements ; rapportées aux \SI{2980}{\ha} que le modèle sans plancher laisse à
-la prairie, \num{\mesUgbHaSansPlancher} \gls{ugb} par hectare, ce qui est agronomiquement
-impossible. Et il ne s'agit pas d'un problème d'étiquetage : si les hectares manquants étaient
-classés en canne dans notre jeu, notre canne dépasserait la statistique, ce qu'elle ne fait pas.
+Le territoire portait \num{\mesBovins} bovins en 2017, soit environ \num{\mesUgb} \gls{ugb}
+\parencite{agreste2019}. Si on rapporte cela aux \SI{\mesPrairieAgreste}{\ha} de prairie de la
+statistique agricole, on obtient \num{\mesUgbHaAgreste} \gls{ugb} par hectare. De même, si on
+rapporte cela aux \SI{2980}{\ha} que le modèle sans plancher laisse à la prairie, on obtient
+\num{\mesUgbHaSansPlancher} \gls{ugb} par hectare, ce qui est agronomiquement impossible. On
+pourrait penser que les hectares manquant sont étiquetés avec d'autres cultures. Or, les
+cultures les plus importantes en surface, et en particulier la canne, ne dépassent pas
+l'observé.
 
-Le test de non-circularité est ici plus exigeant que pour le plantain, puisque le seuil est
-mauvais par construction. Il consiste à faire varier le plancher depuis sa valeur retenue
-jusqu'à la statistique exogène, puis à regarder les métriques que le plancher \emph{ne touche
-pas}. Elles restent au-dessus des seuils publiés sur toute la plage. Et surtout, le \gls{pad}
-calculé \emph{hors prairie} \textbf{empire} quand on remonte le seuil, de
-\SI{\mesPadHorsPrairieBas}{\percent} à \SI{\mesPadHorsPrairieHaut}{\percent} : le plancher
-prend alors sa terre à la canne, c'est-à-dire à la culture que le modèle restitue le mieux. Un
-seuil calé pour flatter le résultat se comporterait exactement à l'inverse.
+Pour trouver une valeur satisfaisante de plancher, on fait varier sa valeur de
 
-Reste à savoir \emph{pourquoi} le modèle abandonne la prairie. La décomposition des
-\SI{3489}{\ha} perdus est en annexe~\ref{ann:calibration} ; deux de ses détails en disent plus
-que le total. D'abord, \SI{30}{\percent} du déficit tient sur un écart de \SI{0.94}{\percent}
-entre les marges de deux cultures : à cette échelle, l'arbitrage du modèle n'est plus un
-arbitrage économique, c'est un départage numérique. Ensuite, la prairie est la seule ligne du
-jeu de données dont le besoin en main d'\oe uvre diverge nettement de la Table~1 de l'article —
-\SI{126}{\hour\per\ha} contre \SI{70}{\hour\per\ha} — et ce n'est pas un bug de portage : ces
-\SI{126}{\hour\per\ha} sont \textbf{entièrement du travail de troupeau}.
+\begin{questionreponse}{C'est quoi la valeur retenue, et c'est quoi la statistique exogène ?
+Statistique = Agreste ?}
+\textbf{La valeur retenue est \SI{\mesCalalouBovins}{\ha}} — c'est le paramètre \gls{gams}
+\texttt{QUOTA\_PN\_PIQ\_MIN}, et c'est aussi, exactement, la surface de prairie observée en
+2017. C'est ce qui rend ce cas gênant et pourquoi il demande un test plus exigeant que le
+plantain.
 
-C'est là que le diagnostic s'arrête et que la nomination commence. Le modèle ne connaît pas les
-troupeaux ; il connaît des heures par hectare. La prairie n'existe pour lui que comme une
-culture peu rentable et coûteuse en travail, alors qu'elle est, sur ce territoire, le support
-d'une activité qu'il ne représente pas. \emph{Ce qui résiste au diagnostic ne désigne pas une
-erreur de réglage, il désigne un mécanisme absent} — et ce mécanisme a un nom.
+\textbf{Oui, la statistique exogène est Agreste} \parencite{agreste2019}, et elle fournit deux
+nombres indépendants du jeu parcellaire comme du modèle : \SI{\mesPrairieAgreste}{\ha} de
+prairie, et \num{\mesBovins} bovins. C'est le second qui fait l'argument — un cheptel ne se loge
+pas sur \SI{2980}{\ha}.
 
-Pour finir de situer ces deux déviations, il faut les mettre à l'échelle du reste : le coût en
-objectif des trois leviers de calibration est du même ordre de grandeur —
-\SI{0.7}{\percent}, \SI{3.7}{\percent} et \SI{0.39}{\percent} à \SI{1.19}{\percent} selon le
-levier. Aucun n'est une correction massive imposée au modèle. Un signal d'implausibilité mérite
-d'ailleurs d'être consigné : \SI{430}{\ha} d'ananas intensif surgissent chez des canniers et
-des bananiers, ce qu'aucun agronome ne validerait, et qu'aucune contrainte actuelle n'interdit.
+\textbf{Le balayage va donc de \SI{\mesCalalouBovins}{\ha} à \SI{\mesPrairieAgreste}{\ha}}, avec
+un repère intermédiaire utile : \SI{\mesPrairieExogene}{\ha}, c'est-à-dire Agreste ramené à la
+couverture de \SI{\mesCouvertureSau}{\percent} du jeu parcellaire.
 
-\section{Le solveur est hors de cause}
+\textbf{Ce que le balayage montre}, et c'est là que se joue la non-circularité : les trois
+métriques que le plancher ne touche pas restent au-dessus des seuils publiés sur toute la plage
+— au plancher le plus haut, encore \SI{\mesPrairieHautTypes}{\percent} de types,
+\SI{\mesPrairieHautParcelles}{\percent} de parcelles et \SI{\mesPrairieHautSurface}{\percent} de
+surface. Et surtout, le \gls{pad} calculé \emph{hors prairie} \textbf{empire} quand on remonte
+le seuil, de \SI{\mesPadHorsPrairieBas}{\percent} à \SI{\mesPadHorsPrairieHaut}{\percent} : le
+plancher prend alors sa terre à la canne, c'est-à-dire à la culture que le modèle restitue le
+mieux. Un seuil calé pour flatter le résultat se comporterait exactement à l'inverse.
+
+Donc : la valeur retenue est le \emph{bas} de la plage, pas son optimum. Ce n'est pas le seuil
+qu'on défend, c'est la conclusion — et elle ne dépend pas de lui.
+\end{questionreponse}
+
+La décomposition des \SI{3489}{\ha} perdus est en annexe~\ref{ann:calibration}.
+\SI{30}{\percent} de cette surface perdue est due à un écart de \SI{0.94}{\percent} entre les
+marges de deux cultures. À cette échelle, l'arbitrage du modèle est plus numérique
+qu'économique. Cette perte de surface est également due à une divergence entre le besoin en main
+d'\oe uvre pour la prairie de la Table~1 de l'article qui est de \SI{70}{\hour\per\ha} contre
+\SI{126}{\hour\per\ha} pour notre jeu de données. Ça n'est pas un bug de portage et ces
+\SI{126}{\hour\per\ha} sont entièrement du travail de troupeau.
+
+\begin{questionreponse}{Ça veut dire quoi \enquote{entièrement du travail de troupeau}, et
+comment tu as cette statistique de 126 h/ha ?}
+\textbf{D'où vient le chiffre.} Il n'est lu nulle part : il se recompose depuis l'itinéraire
+technique lui-même. La matrice des opérations donne, pour la prairie au piquet
+(\texttt{PN\_PIQ}), la fréquence annuelle de chaque opération ; la table des opérations donne le
+temps unitaire de chacune. Le produit se somme à \SI{126}{\hour\per\ha} :
+
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+  \item abreuvement : \num{360} passages $\times$ \SI{0.2}{\hour} $=$ \SI{72}{\hour} ;
+  \item déplacement du piquet : \num{180} $\times$ \SI{0.25}{\hour} $=$ \SI{45}{\hour} ;
+  \item saillies : \num{1} $\times$ \SI{6}{\hour} $=$ \SI{6}{\hour} ;
+  \item traitements bovins : \num{12} $\times$ \SI{0.25}{\hour} $=$ \SI{3}{\hour}.
+\end{itemize}
+
+\textbf{Ce que veut dire \enquote{entièrement du troupeau}.} Sur les sept opérations que compte
+l'itinéraire, \textbf{aucune n'est un travail du sol}. Ni labour, ni semis, ni fertilisation, ni
+récolte, ni fauche. Abreuver les bêtes, déplacer le piquet auquel elles sont attachées, les
+faire saillir, les traiter : ce sont des soins aux animaux, comptés à l'hectare de prairie faute
+d'une variable de cheptel où les loger.
+
+\textbf{Pourquoi cela explique l'écart avec l'article.} Les \SI{70}{\hour\per\ha} de sa Table~1
+et nos \SI{126}{\hour\per\ha} ne comptent pas la même chose : l'un compte le travail de la
+surface, l'autre le travail du troupeau qui la pâture. Ce n'est donc pas une erreur de
+transcription — et c'est bien pire pour le modèle, parce que ces heures entrent dans le plafond
+de main d'\oe uvre comme un coût de culture. \emph{Le modèle paie le troupeau sans jamais le
+posséder}, ce qui rend la prairie chère sans la rendre rentable.
+\end{questionreponse}
+
+La prairie n'existe pour le modèle que comme une culture peu rentable est coûteuse en travail.
+La réalité est qu'elle est le support d'une activité que le modèle ne représente pas. Le
+mécanisme d'élevage est absent et
+
+\begin{questionreponse}{Pourquoi la prairie gagne de l'argent ? On modélise quoi comme gain
+grâce à elle, si ce n'est pas l'élevage de bétail ?}
+On modélise bien le produit animal — mais comme un \textbf{coefficient à l'hectare}, jamais
+comme une activité. Les tables donnent, pour la prairie au piquet, un rendement de
+\SI{0.66}{\tonne\per\ha} vendu \SI{5000}{\euros\per\tonne}, plus \SI{550}{\euros\per\ha} de
+\gls{posei} surfacique. À ce prix-là, la \enquote{tonne} n'est pas de l'herbe : c'est de la
+viande. Marge résultante, environ \SI{1602}{\euros\per\ha}, et une variance de rendement
+\emph{nulle}.
+
+Donc l'élevage est présent comme \emph{produit} et absent comme \emph{activité}. Le modèle n'a
+ni tête de bétail, ni stock, ni report d'une année sur l'autre. Trois conséquences, et c'est là
+qu'est le mécanisme manquant :
+
+\begin{enumerate}[leftmargin=1.4em,itemsep=3pt]
+  \item Retirer \SI{3489}{\ha} de prairie, pour le modèle, c'est renoncer à
+    \SI{1602}{\euros\per\ha}. Dans la réalité, c'est \textbf{vendre un cheptel} : un acte
+    irréversible, étalé sur des années, que rien ici ne pénalise.
+  \item Variance nulle \emph{aide} la prairie : le terme d'aversion au risque ne la pénalise
+    pas, et les éleveurs (aversion \num{2.4}) la gardent déjà. Ce n'est donc pas l'aversion qui
+    manque — c'est pour cela que la recalibrer ne répare rien.
+  \item À \SI{1602}{\euros\per\ha} contre \SIrange{2400}{3500}{\euros\per\ha} pour la canne
+    mécanisée, la prairie perd \textbf{légitimement} l'arbitrage. Le modèle a raison dans ses
+    termes ; ce sont ses termes qui sont incomplets.
+\end{enumerate}
+
+La formule, si tu en veux une : \emph{le modèle vend la viande sans élever la bête}. Ce qui lui
+manque n'est pas un prix, c'est une variable d'état — celle qui interdirait de liquider un
+troupeau gratuitement, et que \textcite{chopin2015} reconnaît comme sa propre limite.
+\end{questionreponse}
+
+\begin{questionreponse}{C'est quoi la différence entre les deux déviations et les trois leviers
+de calibration ?}
+\textbf{Attention, il y a une confusion dans la phrase qui suit, et elle change la conclusion.}
+
+\textbf{Les deux déviations} sont les deux contraintes réellement \emph{adoptées} : le plafond
+de plantain, qui coûte \SI{3.7}{\percent} d'objectif, et le plancher de prairie, qui coûte
+\SI{0.7}{\percent}. Ce sont les deux colonnes du tableau~\ref{tab:attribution}.
+
+\textbf{Les \SIrange{0.39}{1.19}{\percent} ne sont pas \enquote{trois leviers}} : c'est le coût
+mesuré d'\emph{un} troisième levier \textbf{candidat}, le plancher arboricole, à deux seuils
+différents — \SI{0.39}{\percent} à \SI{200}{\ha}, \SI{1.19}{\percent} à \SI{335}{\ha}. Il n'a
+\emph{pas} été adopté : les runs qui le portaient tapaient la limite d'une heure avec un
+incumbent incohérent, et aucun n'est exploitable en l'état.
+
+L'argument que tu veux faire reste valable, mais il se dit autrement : \emph{les deux
+corrections adoptées coûtent \SI{0.7}{\percent} et \SI{3.7}{\percent} de l'objectif, du même
+ordre de grandeur que le troisième levier envisagé et non retenu
+(\SIrange{0.39}{1.19}{\percent}). Aucune n'est une correction massive imposée au modèle} — elles
+corrigent, elles ne réécrivent pas.
+\end{questionreponse}
+
+Le coût en objectif de deux déviations est de \SI{0.7}{\percent}, \SI{3.7}{\percent}. Celui des
+trois leviers de calibration varie de \SI{0.39}{\percent} à \SI{1.19}{\percent}. On retrouve le
+même ordre de grandeur donc aucune n'est une correction massive imposée au modèle.
+
+Pour finir, on remarque que \SI{430}{\ha} d'ananas intensif apparaissent chez les canniers et
+les bananiers. Aucune contrainte actuelle n'interdit cette situation.
+
+\begin{questionreponse}{Explique pourquoi un agronome ne validerait pas ça.}
+Ce que le modèle vérifie sur une exploitation tient en deux lignes : des hectares éligibles, et
+un total \emph{annuel} d'heures de travail. Les \SI{430}{\ha} passent ces deux tests. Ce qu'un
+agronome regarderait, le modèle ne le porte pas :
+
+\begin{itemize}[leftmargin=1.2em,itemsep=4pt]
+  \item \textbf{Le calendrier.} Le cycle de l'ananas dure \num{\mesCycleAnanas} mois, quand le
+    modèle est mono-période annuel. Une exploitation cannière a déjà ses pointes de plantation
+    et de récolte, et un total annuel d'heures ne dit rien de la semaine où elles tombent.
+  \item \textbf{Le matériel végétal.} L'ananas se plante par rejets, produits par les
+    plantations existantes. Passer à \SI{430}{\ha} suppose un stock de rejets qui n'existe pas
+    sur le territoire et qui met plusieurs cycles à se constituer.
+  \item \textbf{L'équipement et le savoir-faire.} Une exploitation cannière possède des machines
+    de canne et une main d'\oe uvre formée à la canne. Le modèle n'a ni capital, ni compétence,
+    ni coût d'apprentissage : changer de culture y est gratuit et instantané.
+  \item \textbf{Le débouché.} L'ananas intensif est une filière organisée, avec ses circuits.
+    \SI{430}{\ha} de plus ne trouvent pas d'acheteur par construction.
+\end{itemize}
+
+Ce n'est donc pas une erreur de calcul, c'est une \textbf{contrainte manquante} — de la même
+famille que l'élevage. Le modèle ignore qu'un métier ne se change pas en une saison, et rien
+dans ses sorties ne le signale : le résultat reste plausible tant qu'on ne regarde pas qui
+cultive quoi.
+\end{questionreponse}
+
+\section{Explications de l'écart résiduel}
 \label{sec:plateau}
 
-Devant un écart résiduel, la tentation est d'incriminer la résolution — il resterait un
-meilleur optimum que le solveur n'a pas trouvé. Cette hypothèse est fausse, et elle se réfute
-de \textbf{deux façons indépendantes}.
+La résolution n'est pas responsable de l'écart résiduel. L'hypothèse qu'il existerait un
+meilleur optimum que le solveur n'a pas trouvé est fausse.
 
-La première est décisive. Le plan réellement observé en 2017, évalué sous notre propre
-objectif, vaut \SI{\mesPlanObserveM}{\mega\euros} contre \SI{\mesPlanOptimumM}{\mega\euros}
-pour l'optimum, soit \SI{\mesPlanEcart}{\percent} de moins. L'écart à combler est donc quinze
-fois la tolérance d'optimalité imposée au solveur : ce n'est pas un défaut de convergence,
-c'est que le modèle et les agriculteurs ne maximisent pas la même chose. La seconde preuve est
-expérimentale : trois graines de branchement différentes rendent \SI{\mesGraineA}{\percent},
+\begin{questionreponse}{Explique comment le modèle peut savoir qu'il est à 1 \% du résultat
+final.}
+Il ne le sait pas \emph{du} résultat final : il le sait \emph{autour} de lui. À tout instant, le
+solveur tient deux nombres.
+
+\begin{itemize}[leftmargin=1.2em,itemsep=3pt]
+  \item \textbf{L'incumbent} : la meilleure allocation entière trouvée jusque-là. Elle existe,
+    elle est faisable, donc l'optimum vaut au moins ça. C'est un \emph{plancher}.
+  \item \textbf{La meilleure borne} : la meilleure valeur que puissent encore atteindre les
+    branches non explorées, calculée sur leurs relaxations linéaires. Aucune allocation ne peut
+    la dépasser. C'est un \emph{plafond}.
+\end{itemize}
+
+L'optimum est quelque part entre les deux, et l'écart relatif entre les deux est le
+\emph{gap}. Il ne dit pas où est l'optimum : il dit \textbf{de combien on peut se tromper au
+pire}. À \SI{\mesGapMip}{\percent}, on sait qu'aucune allocation, dans tout l'espace des
+solutions, ne fait mieux que \SI{1}{\percent} au-dessus de celle qu'on affiche. Le solveur
+s'arrête donc sans avoir jamais vu l'optimum — il a prouvé qu'il ne reste pas la place pour
+mieux (§~\ref{sec:tractabilite}).
+
+Deux précisions comptent ici. D'abord, le gap affiché \textbf{majore} l'erreur réelle : mesuré
+sur une politique du chapitre~\ref{ch:explorer}, \SI{\mesHuitEcartApparent}{\percent} affichés
+contre \SI{\mesHuitEcartReel}{\percent} réels — cinq fois moins. Ensuite, ce
+\SI{\mesGapMip}{\percent} n'est pas une imprécision subie mais un \textbf{choix} : la tolérance
+par défaut de \gls{highs} (\num{1e-4}) n'a pas terminé en \SI{37}{\hour}.
+\end{questionreponse}
+
+La situation observée de 2017 donne un objectif de \SI{\mesPlanObserveM}{\mega\euros} alors que
+l'optimum est de \SI{\mesPlanOptimumM}{\mega\euros}. Cette écart de \SI{\mesPlanEcart}{\percent}
+correspond à \num{15} fois la tolérance d'optimalité imposée au solveur. On peut donc dire que
+le modèle converge bien mais qu'il ne maximise pas la même chose que les agriculteurs.
+
+De plus, \num{3} optimisations de même configurations donnent \SI{\mesGraineA}{\percent},
 \SI{\mesGraineB}{\percent} et \SI{\mesGraineC}{\percent} de \gls{pad}. L'arbitraire du solveur
-vaut \num{\mesBruitPad} point — c'est ce chiffre qui fixe la tolérance des garde-fous du dépôt
-(§~\ref{sec:gardefous}). Le plafond de main d'\oe uvre est lui aussi hors de cause : le plan
-observé demande \SI{\mesMoObserve}{\mega\hour} pour un plafond de
-\SI{\mesMoPlafond}{\mega\hour}, il n'interdit donc pas l'assolement réel.
+vaut \SI{\mesBruitPad}{\percent} de \gls{pad} et c'est ce chiffre qui fixe la tolérance des
+garde-fous du dépôt (§~\ref{sec:gardefous}).
 
-Trois voies ont ensuite été instruites jusqu'au bout, puis écartées, et elles valent d'être
-dites parce que deux d'entre elles \emph{fonctionnaient}. Recalibrer sur 2017 les coefficients
-d'aversion au risque — ce qui répondrait au transfert hors échantillon du §~\ref{sec:pad} —
-amène le \gls{pad} à \SI{39.9}{\percent}, mais au prix de coefficients économiquement
-absurdes : c'est du surajustement. Caler des plafonds de marché sur l'observé descend à
-\SI{33.6}{\percent}, et c'est circulaire par construction, puisque la contrainte \emph{est}
-l'observé. Incorporer l'élevage, enfin, est la bonne réponse, et c'est pourquoi elle est
-écartée ici plutôt que bâclée : elle demande une variable d'état que le modèle mono-période ne
-porte pas, et \textcite{chopin2015} la reconnaît comme sa propre limite.
+Concernant la main d'\oe uvre, la situation observée demande \SI{\mesMoObserve}{\mega\hour} pour
+un plafond de \SI{\mesMoPlafond}{\mega\hour}. Le plafond n'interdit pas l'assolement réel.
+
+La recalibration sur 2017 des coefficients d'aversion au risque donne un \gls{pad} de
+\SI{39.9}{\percent} mais au prix d'un surajustement qui rend les coefficients économiquement
+absurdes. La piste est abandonnée.
+
+Caler des plafonds de marché sur l'observé descend à \SI{33.6}{\percent}, et c'est circulaire
+par construction, puisque la contrainte est l'observé. La piste est abandonnée.
+
+Implémenter l'élevage semble être la bonne piste mais c'est un chantier important. Il a donc été
+écarté ici plutôt que bâclé. Il correspond à la seconde partie du stage qui n'est pas encore
+réalisée et \textcite{chopin2015} reconnaît son absence comme sa propre limite.
 
 \section{Deux signatures émergentes}
 \label{sec:emergence}
 
-Le résultat le plus solide de ce chapitre n'est dans aucune ligne du
-tableau~\ref{tab:attribution}.
+La canne à sucre est à \SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés
+(\SI{\padRetenuCS}{\percent} de \gls{pad}) sans qu'aucune contrainte ne la nomme. Le modèle,
+laissé entièrement libre sur la culture qui occupe plus de la moitié du territoire, retombe sur
+l'observé.
 
-La canne à sucre revient à \SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés — un
-\gls{pad} de \SI{\padRetenuCS}{\percent} — \textbf{sans qu'aucune contrainte ne la nomme}. Elle
-n'a ni plafond, ni plancher, ni part minimale ; la contrainte des \gls{gfa} qui aurait pu la
-soutenir est désactivée. C'est le seul endroit du travail où le modèle, laissé entièrement
-libre sur la culture qui occupe plus de la moitié du territoire, retombe sur l'observé. Un
-score obtenu par contrainte mesure la contrainte ; celui-ci mesure le modèle.
+De même, la banane revient sous le plafond de plantain, et la canne sous le plancher de prairie.
+Pour ces deux cultures, le modèle se rapproche de l'observé grâce à des contraintes agissant sur
+d'autres postes. Cela semble indiquer que la structure économique du programme est juste,
+indépendamment des seuils qu'on lui impose.
 
-Le fait s'est reproduit une seconde fois, à deux jours d'intervalle et dans l'autre sens : la
-banane revient sous le plafond de plantain, et la canne sous le plancher de prairie. Deux
-signatures émergentes, c'est-à-dire deux postes que le modèle retrouve en réponse à une
-contrainte portant sur un \emph{autre} poste. C'est la meilleure indication dont on dispose que
-la structure économique du programme est juste, indépendamment des seuils qu'on lui impose.
-
-Deux observations complètent le tableau, dans l'autre sens, et l'annexe~\ref{ann:calibration}
-en donne une troisième. Sur l'arboriculture, le modèle est plus proche de la statistique
-agricole que de notre propre référence parcellaire : l'écart mesuré y est donc en partie un
-écart de la référence et non du modèle. Et le déficit d'arboriculture ne vient pas de
-l'éligibilité mais du rendement \emph{horaire} — sous un plafond de main d'\oe uvre, ce qui
-compte n'est pas la marge à l'hectare mais la marge à l'heure.
-
-Deux faits, enfin, appellent le chapitre~\ref{ch:discussion} plutôt qu'une correction
-supplémentaire : le plan observé vaut \SI{\mesPlanEcart}{\percent} de moins que l'optimum sous
-notre objectif, et le mécanisme qui manque au modèle porte un nom qui désigne un métier. On
-s'arrête donc ici, et l'on sait pourquoi.
+Sur l'arboriculture, le modèle est plus proche de la statistique agricole que de notre propre
+référence parcellaire. L'écart mesuré est en partie un écart entre la référence et la réalité ce
+qui relativise la responsabilité du modèle dans ce cas précis. À noter que le déficit
+d'arboriculture ne vient pas de l'inéligibilité mais du rendement horaire. Avec un plafond de
+main d'\oe uvre, ce qui compte n'est pas la marge à l'hectare mais la marge à l'heure.
 
 \begin{reflexion}
-Trois verdicts ont été renversés au cours de cette calibration, et \textbf{tous l'ont été par
-un protocole, jamais par une meilleure intuition}. Le plancher de prairie avait été écarté pour
-une mauvaise raison — cru circulaire — jusqu'à ce qu'une donnée exogène l'établisse ;
-\enquote{une contrainte ne peut pas améliorer le résultat} tenait à un raisonnement parcelle
-par parcelle qui oubliait que l'objectif est séparable mais pas les contraintes ; et un écart
-attribué au solveur s'est révélé venir du modèle. Le point commun des trois est un raisonnement
-plausible, tenu pour acquis. Ce qui les a démentis n'a rien de spectaculaire : un balayage de
-seuil, trois graines de branchement, un calcul de charge animale à l'hectare fait \emph{en
-dehors} du modèle. Je suis entré dans ce stage en pensant que modéliser consistait à
-construire ; j'en retiens que cela consiste surtout à organiser les conditions dans lesquelles
-on peut avoir tort \emph{de façon visible}.
+réflexivité
 \end{reflexion}

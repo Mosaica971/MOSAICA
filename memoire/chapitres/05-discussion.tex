@@ -9,224 +9,210 @@
 % pas etre compris, c'est l'auto-flagellation -- qui est une autre forme de complaisance
 % (REF-60). Le fait technique reste le fait technique.
 
-Les trois chapitres précédents disent ce que le modèle fait. Celui-ci dit ce que le fait de
-l'avoir construit ainsi engage : sur le territoire représenté, sur la position depuis laquelle
-il l'a été, et sur ce que l'outil produit quand personne ne le conteste. Ce n'est ni une
-confession ni un chapitre d'opinions. Chaque section s'ouvre sur un fait mesuré des
-chapitres~\ref{ch:porter}, \ref{ch:calibrer} et~\ref{ch:explorer}, et ne discute qu'ensuite ce
-que ce fait implique.
+\minisommaire{%
+  \ms{sec:disc-stage}{ce que le stage n'a pas fait, et ce qui reste à faire}%
+  \ms{sec:disc-position}{d'où ce travail est écrit, et ce que cela lui interdit}%
+  \ms{sec:disc-ia}{ce que l'assistant de programmation a permis et déplacé}}
 
-\section{Ce que la parité protège, et ce qu'elle empêche}
+% AJOUT (2 phrases, a supprimer si tu n'en veux pas) : le chapitre entrait directement dans
+% la premiere section, sans dire de quoi il parle.
+Ce chapitre porte sur les angles morts du travail et non sur ses résultats : ce que le stage
+n'a pas fait, ce que ma position engage, et ce que l'outil d'assistance a déplacé.
 
-Quatre défauts du \gls{gams} d'origine ont été portés sciemment, dont un qui interdit une
-variante de verger pluvial sur la totalité du territoire. Le modèle Python reproduit donc
-aujourd'hui, volontairement, des comportements que je sais faux.
+\section{Discussions sur le stage}
+\label{sec:disc-stage}
 
-Le mandat de parité m'a rendu fidèle à un \textbf{artefact} — une implémentation — et non à une
-réalité agronomique. C'est ce qui rend le travail attribuable : toute divergence future entre
-les deux programmes s'impute à une décision et non à une maladresse de transcription. C'est
-aussi ce qui lui interdit de corriger ce qu'il sait faux, et il faut mesurer ce que cela veut
-dire : les résultats de calibration du chapitre~\ref{ch:calibrer} sont ceux d'un modèle qui
-s'interdit une variante de verger, ce qui pèse sur le poste où son écart est le plus grand.
+Il existe \num{25} variantes maraîchères qui sont vides parce que l'acquisition de données
+prévue par la lettre de mission n'a pas eu lieu. Le volet consacré à la restauration collective,
+lui, est resté différé faute d'accès à des données externes. Les données liées à la demande
+nutritive du territoire sont disponibles mais non implémentées, via des scores ou des seuils,
+dans le modèle.
 
-Ce qui rend la position tenable est la contrepartie : chaque défaut porté a, à côté de lui, la
-variante \enquote{intention présumée} qu'il suffit d'activer pour mesurer l'autre lecture. La
-parité est un point de départ documenté, pas un point d'arrivée. Reste une question ouverte que
-je ne peux pas trancher seul, et qu'il serait malhonnête de laisser implicite : jusqu'où la
-tenir maintenant que le port est fini ? Elle appartient à l'équipe. Elle est d'autant plus
-sérieuse que certains de ces comportements sont dans le modèle d'origine depuis dix ans.\attente{2}
+\begin{questionreponse}{Quelles sont ces variantes ?}
+Ce sont les \num{25} itinéraires maraîchers qui portent le nom de la microferme expérimentale :
+trois paillages (bagasse, bois raméal fragmenté, paille), quatre régimes de fertilisation
+(biologique, végétale, fertilisée, aucune) et deux régimes d'irrigation. Sur le papier, une
+combinatoire d'agriculture de conservation.
 
-\section{Le vécu agricole comme scalaire}
+Dans les tables, elles sont \textbf{identiques au bit près} à l'itinéraire maraîcher de
+référence sur tous les paramètres que le modèle lit : même marge (\SI{20825}{\euros\per\ha}),
+même rendement (\SI{36}{\tonne\per\ha}), même travail (\SI{1128}{\hour\per\ha}), même azote
+(\SI{75.6}{\kilogram\per\ha}), même \gls{ift} (\num{10}), même empreinte d'éligibilité. Les
+distinctions paillage / fertilisation / irrigation ne portent aucune donnée : ce sont des noms.
 
-Tout ce que ce modèle sait du comportement des agriculteurs tient dans un nombre par type
-d'exploitation : le coefficient d'aversion au risque $a_f$ de l'équation~\eqref{eq:objectif}.
-Huit types, huit scalaires.
+Les deux conséquences ont mordu. D'abord, les rouvrir ajoute \num{548000} variables binaires de
+pure symétrie (\num{\mesBinairesKarus} contre \num{\mesBinairesRef}) : le solveur passe son
+temps à permuter des solutions équivalentes. Ensuite, \emph{toute part de bio bâtie sur elles
+est satisfaite à coût exactement nul}, par relabellisation — une politique agroécologique qui ne
+contraint rien. Les seules vraies cultures biologiques du jeu sont \texttt{MA\_PLBIO} et
+\texttt{MA\_MOBIO} (azote nul, \gls{ift} nul, \SI{3882}{\euros\per\ha} contre
+\SI{27929}{\euros\per\ha} pour le maraîchage intensif), et c'est sur elles seules que les
+scénarios bâtissent une part biologique.
+\end{questionreponse}
 
-L'ancrage le plus net de cet axe n'est pas ce coefficient, c'est le point où la calibration a
-buté. Les \SI{126}{\hour\per\ha} de la prairie — seule ligne du jeu de données à diverger de la
-table publiée — sont entièrement du travail de \textbf{troupeau}. Le modèle ne sait pas ce
-qu'est un troupeau : il voit des heures et une marge à l'hectare, et il en conclut que la
-prairie est une mauvaise affaire. Le mécanisme qui manque a donc un nom, et ce nom désigne un
-métier, pas un paramètre. C'est la raison pour laquelle l'élevage figure en tête des chantiers
-déclarés, et non par souci de complétude.
+Trois chantiers en découlent. Le premier est une interface : un format de données attendu très
+clair et facile à compléter ou à produire — un document tableur où l'on saisit les valeurs des
+tableaux, façon \enquote{bilan carbone}. Le deuxième est d'inclure l'élevage, la pêche et les
+cycles associés (méthanisation, compostage, etc.). Le troisième est d'incorporer le modèle
+MAELIA de l'\gls{inrae} pour simuler les rendements et les itinéraires techniques physiquement,
+plutôt que de tabuler ces valeurs.
 
-Le second ancrage est plus dérangeant. Le plan réellement observé en 2017 vaut
-\SI{15}{\percent} de moins que l'optimum sous notre propre objectif. Ce que le modèle appelle
-une sous-optimalité de quinze points est peut-être, du côté des exploitations, une préférence
-pour ce qu'on sait faire, un contrat déjà signé, une main d'\oe uvre qu'on ne licencie pas, ou
-un risque que personne ne prend deux fois. Le modèle ne peut pas trancher entre ces lectures,
-parce qu'il n'a rien pour les représenter.
+\begin{questionreponse}{Pourquoi est-ce un problème de voir le travail de troupeau comme des
+heures et une marge à l'hectare ? Ce n'est pas exactement la même chose pour les cultures ?
+Pourquoi cela ferait-il de la prairie une mauvaise affaire ?}
+Pour une culture, décrire l'activité par des heures et une marge à l'hectare est \emph{fidèle},
+parce que l'objet qui produit \textbf{est} l'hectare : on travaille la parcelle, on récolte la
+parcelle. Pour un troupeau, non : l'objet qui produit est l'animal, et l'hectare ne fait que le
+porter.
 
-\section{Quand un défaut de données devient un artefact de politique publique}
+Or le modèle n'a aucune variable pour un animal. Il achète \SI{126}{\hour\per\ha} de travail sur
+la prairie et vend \SI{0.66}{\tonne\per\ha} de \enquote{rendement} à \SI{5000}{\euros\per\tonne}
+— à ce prix, la tonne est de la viande. \emph{Le produit animal est donc bien dans le modèle,
+mais sous forme de coefficient surfacique.} L'élevage y est présent comme produit et absent
+comme activité.
 
-Les vingt-cinq variantes maraîchères identiques au bit près du §~\ref{sec:tractabilite} ne sont
-pas n'importe lesquelles : ce sont précisément les systèmes \emph{agroécologiques} du jeu de
-données. Une politique publique exigeant une part minimale de ces systèmes est donc satisfaite
-à coût exactement nul, par relabellisation.
+Trois conséquences, dont la dernière est la vraie. \textbf{Un}, les \SI{126}{\hour\per\ha} sont
+le double des \SI{70}{\hour\per\ha} de la table publiée, et les sept opérations de l'itinéraire
+sont des soins aux animaux — abreuvement, déplacement du piquet, saillies, traitements : aucun
+travail du sol. Le modèle paie le troupeau sans jamais le posséder. \textbf{Deux}, en face, la
+prairie rapporte de l'ordre de \SI{1602}{\euros\per\ha} (produit animal et \gls{posei}
+surfacique), contre deux fois plus pour une canne mécanisée : dans les termes du modèle, elle
+perd donc légitimement. \textbf{Trois}, et c'est là que la représentation casse, la décision que
+cela suppose n'existe pas. Libérer des hectares de prairie, pour le modèle, c'est renoncer à
+\SI{1602}{\euros\per\ha}, hectare par hectare, en continu ; dans la réalité, c'est \textbf{vendre
+un troupeau} — une décision discrète, irréversible, et que rien ici ne pénalise.
 
-C'est le cas le plus démonstratif du mémoire, et il vaut d'être formulé sans atténuation : le
-dispositif produit une politique agroécologique \textbf{qui ne contraint rien}. Que la cause
-soit un défaut de données et non un défaut de modélisation ne change rien à ce qu'un décideur
-en aurait tiré — le tableau aurait montré une contrainte respectée à coût nul, et la conclusion
-naturelle aurait été que l'agroécologie ne coûte rien.
+Dernier point, qui ferme une fausse piste : la variabilité de rendement de la prairie vaut
+\emph{zéro} dans les tables, ce qui l'\textbf{avantage} à l'objectif. Le problème n'est donc pas
+un mauvais réglage de l'aversion au risque, c'est une unité manquante — et c'est pour cela que
+l'élevage est le premier chantier et non un souci de complétude.
+\end{questionreponse}
 
-Le plus instructif est que le vrai arbitrage existe dans les mêmes données, ailleurs. Un
-itinéraire maraîcher intensif y vaut \SI{27929}{\euros\per\ha} pour \SI{277}{\kilogram} d'azote
-et un \gls{ift} de \num{15} ; son équivalent biologique vaut \SI{3882}{\euros\per\ha} pour un
-azote et un \gls{ift} nuls. L'arbitrage agroécologique est donc massif, il n'est simplement pas
-là où le nom des cultures le suggère — d'où le choix de définir l'agroécologie par les
-\gls{mae}, qui en donnent une définition sourcée, et le biologique par les opérations de
-fertilisation correspondantes, en rapportant les deux séparément.
+Deux tâches, enfin, ne portent pas sur le modèle mais sur sa reprise : former mes encadrants au
+projet et à Python, et faire une note technique sur le projet pour l'équipe en interne, avec des
+similitudes avec ce mémoire.
 
-La portée de ce résultat dépasse \gls{mosaica}, et c'est ce qui en fait la meilleure candidate
-de ce travail à une publication : \emph{dans tout modèle d'allocation, des activités symétriques
-rendent une contrainte de politique publique satisfiable à coût nul}. Le problème n'est pas
-propre à un jeu de données, il est propre à la rencontre d'une nomenclature de politique
-publique et d'une nomenclature technique qui ne se recouvrent pas.
+\section{Discussions sur le positionnement}
+\label{sec:disc-position}
 
-\section{Un catalogue de politiques publiques écrit seul}
+J'ai passé cinq mois en Guadeloupe, dont quatre en stage. Je n'ai pas de liens spécifiques avec
+la Guadeloupe et je n'ai pas réalisé d'enquête. Je ne connais le territoire que par des tables
+produites par d'autres personnes, les gens par mes rencontres pendant ces quelques mois,
+l'histoire et la culture par mes recherches personnelles. Mes connaissances sont lacunaires et
+ma vie, éloignée de la vie guadeloupéenne.
 
-Dix politiques publiques, leurs leviers et leurs seuils, ont été écrits par un stagiaire dans
-un fichier de configuration, sur la base de sa lecture de la littérature.
+De plus, il y a quelque chose d'insensible dans la démarche de description numérique du
+territoire. Derrière les lignes de code, il y a pour l'instant un rapport froid et déconnecté à
+la situation.
 
-L'ancrage mesuré de cet axe est cruel, et il ne relève pas de l'intention : l'axe est
-\textbf{unilatéral}. La borne dérégulatrice a tourné et donne le résultat le plus spectaculaire
-du chapitre~\ref{ch:explorer} ; la borne de bifurcation n'a jamais rendu la moindre solution
-entière. \emph{Le dispositif explore mieux la dérégulation que la transition}, non par choix
-mais par tractabilité — et cette asymétrie oriente les résultats disponibles à la lecture. Ce
-qui limite l'arbitraire du reste est que les seuils sont des fractions de totaux mesurés
-(annexe~\ref{ann:scenarios}) ; ce qui ne le limite pas est l'axe lui-même, qui suppose que le
-débat agricole guadeloupéen s'organise entre dérégulation et bifurcation. C'est une hypothèse
-sur la structure d'un débat public, formulée depuis un laboratoire.
+Au niveau du code, l'interdiction des cultures sur certaines parcelles à cause du chlordécone est
+une contrainte comme une autre. Pour le territoire et ses habitants, c'est la conséquence d'un
+insecticide interdit aux États-Unis en 1976, retiré du marché en France hexagonale en 1990, et
+utilisé en Guadeloupe et en Martinique jusqu'en 1993 par dérogation obtenue à la demande de la
+filière banane \parencite{opecst2009}. Cette contamination touche aujourd'hui environ
+\SI{14200}{\ha} pour plusieurs siècles \parencite{daafchlordecone}.
+% TODO CLEMENT : la phrase suivante commencait par « Le » et s'arretait la. Rien n'a ete
+% invente pour la finir -- a completer ou a laisser tomber.
 
-Il ne faut pas conclure trop vite pour autant. Un catalogue explicite, écrit en clair et
-modifiable ligne à ligne, est \emph{contestable} — ce qu'un modèle dont les leviers sont codés
-en dur dans les équations n'est pas. L'argument tient. Il ne suffit pas : la co-construction
-n'est pas absente ici par manque de temps, elle est absente par construction du stage, et le
-projet qui a précédé celui-ci avait, lui, mené une démarche participative.\attente{3}\attente{9}
-\attentebloc{1}{Ce paragraphe doit se conclure sur ce que le projet précédent a réellement
-déplacé — une décision, une aide, une reprise institutionnelle, une suite donnée au livre
-blanc — et sur l'existence ou non d'une évaluation d'impact de ces projets~\textnormal{(Q4)}.
-En l'absence de réponse, le mémoire s'en tient à ce que le dépôt documente : une démarche
-participative a eu lieu, ses effets ne sont pas consignés là où j'ai pu regarder.}\attente{4}
+Le catalogue, tel qu'il est construit, suppose que le débat agricole guadeloupéen s'organise
+entre dérégulation et bifurcation. Ça n'est pas vérifié et c'est simplement un arbitrage de ma
+part pour pouvoir commencer à explorer des scénarios politiques.
 
-\section{Performativité}
+Je n'ai aucun moyen, depuis les tables, de distinguer une contrainte agronomique d'une contrainte
+héritée comme celle des \gls{gfa}.
 
-Un modèle d'évaluation \emph{ex ante} ne se contente pas de mesurer les conséquences d'une
-politique : il fournit le vocabulaire dans lequel elle sera discutée, et donc une partie de ce
-qui sera discuté. L'écart de \SI{15}{\percent} de la section précédente en donne la version
-numérique. \emph{Qu'affirme-t-on sur les agriculteurs guadeloupéens en écrivant \enquote{maximiser
-la marge ajustée du risque} ?} Soit ils se trompent de quinze points, soit l'objectif ne décrit
-pas ce qu'ils maximisent — et le modèle ne peut pas trancher. La seule position tenable est de
-le dire ainsi, plutôt que de laisser le lecteur choisir la première lecture, qui est la plus
-flatteuse pour le modèle.
+\begin{questionreponse}{Quelles conséquences ?}
+\textbf{Sur le modèle.} La part minimale de canne imposée aux terres \gls{gfa} existe bien dans
+le dépôt — c'est la transcription de l'équation \texttt{Eq\_CS\_GFA} du \gls{gams} — mais elle
+est \textbf{désactivée} : l'activer rend le problème infaisable sur les données 2017, parce que
+trois exploitations \gls{gfa} ont toutes leurs parcelles verrouillées en friche et que sept
+autres demanderaient plus de main d'\oe uvre que le plafond ne leur en accorde. En pratique, le
+modèle ne porte donc pas la règle foncière : \emph{il retrouve la canne sans elle}. C'est une
+bonne nouvelle pour la calibration — la canne n'est pas imposée, elle est retrouvée — et une
+mauvaise pour l'analyse, puisque le levier n'est pas manipulable.
 
-Le résultat le plus performatif de ce mémoire est d'ailleurs identifiable :
-\enquote{ce qui tient la banane et la canne sur la terre guadeloupéenne, c'est l'enveloppe
-publique} est une phrase qui, sortie de son contexte de réserves, s'utilise telle quelle dans un
-débat public, et dans les deux sens. Un précédent du même ordre a été assumé pendant le stage :
-un indicateur a été retiré du rapport de run \emph{parce qu'il serait mal lu}, non parce qu'il
-était faux — décision éditoriale prise sur un objet technique.\attente{7}
+\textbf{Sur ce qu'on peut demander au modèle.} La question \enquote{que se passerait-il si le
+régime \gls{gfa} était levé ?} est une vraie question de politique publique — elle porte sur
+\SI{5286}{\ha}, à comparer aux \SI{\obsHaCS}{\ha} de canne observés, soit \SI{41}{\percent} de
+couverture. Elle est hors d'atteinte tant que la règle héritée et la règle agronomique arrivent
+dans le même fichier, sous la même forme : on ne peut pas retirer l'une sans retirer l'autre.
 
-\section{Positionnement}
+\textbf{Sur la lecture.} Une contrainte héritée est alors présentée avec l'autorité d'une
+contrainte agronomique. Le lecteur qui voit \enquote{la canne est possible ici et pas là} ne peut
+pas savoir si c'est le sol qui parle ou un titre de propriété.
+\end{questionreponse}
 
-L'extériorité de ce travail a une trace dans le nombre de variables du programme, et pas
-seulement dans le ton de ce paragraphe : les vingt-cinq variantes maraîchères sont vides parce
-que l'acquisition de données prévue par la lettre de mission n'a pas eu lieu. Le coût de la
-position est donc \emph{mesurable}, pas seulement déclarable. Le volet consacré à la
-restauration collective, lui, est resté différé faute d'accès à des données externes.
+Le choix de telle culture plutôt qu'une autre est guidé par \num{8} coefficients d'aversion au
+risque, issus d'une typologie construite par des chercheurs et calibrée sur un panel d'experts
+\parencite{chopin2015} : aucun agriculteur n'a validé un seuil de ce travail.
 
-Six mois en Guadeloupe, aucune enquête, un territoire connu par des tables produites par
-d'autres et pour autre chose. J'ai vécu sur le terrain que je décris et je l'ai décrit depuis
-des fichiers ; les deux sont vrais en même temps, et c'est le second qui a produit ce
-mémoire.\attente{12}
+\begin{questionreponse}{Ce n'est pas uniquement lié à un calcul d'optimisation de la marge ?
+Comment intervient cette aversion au risque ?}
+Non, et c'est même le seul endroit du programme où un comportement est représenté. L'objectif
+n'est pas la marge, c'est la marge \emph{décotée} : chaque euro est multiplié par
+$(1 - a_f v_c)$ dans l'équation~\eqref{eq:objectif}, où $v_c$ est la variabilité de rendement de
+la culture et $a_f$ l'aversion de l'exploitation qui détient la parcelle. Une exploitation neutre
+($a_f = 0$) maximise la marge nue ; une exploitation prudente sur une culture volatile voit la
+même marge fortement décotée, et préfère une culture moins rentable mais plus sûre.
 
-Il faut alors dire la chose directement, parce que toute autre formulation serait une esquive.
-Je suis un homme blanc métropolitain, et une unité de recherche métropolitaine par sa
-composition produit ici des prescriptions d'usage du sol pour une société antillaise dont
-l'histoire foncière commence par l'esclavage et la plantation. Cette phrase n'est pas une
-précaution oratoire : elle a une traduction dans le programme lui-même, et c'est cette
-traduction qui la rend discutable techniquement et pas seulement moralement.
+\textbf{L'effet est massif, pas cosmétique.} Sur le run retenu, la décote vaut \SI{18}{\percent}
+de la marge brute, et monte à \SI{34}{\percent} quand on serre l'enveloppe publique
+(§~\ref{sec:fronts}). Ce n'est donc pas une correction de second ordre : c'est ce qui sépare ce
+modèle d'un simple classement des cultures par marge à l'hectare.
 
-Le modèle contient une règle d'éligibilité qui interdit certaines cultures sur certaines
-parcelles à cause de la chlordécone. Du point de vue du code, c'est une ligne de configuration
-comparable à un seuil de pente. Du point de vue du territoire, c'est la trace d'un insecticide
-interdit aux États-Unis en \num{1976}, retiré du marché en France hexagonale en \num{1990}, et
-utilisé en Guadeloupe et en Martinique jusqu'en \num{1993} par dérogation obtenue à la demande
-de la filière banane \parencite{opecst2009} ; il contamine aujourd'hui environ \SI{14200}{\ha}
-pour plusieurs siècles \parencite{daafchlordecone}. \emph{J'encode cette contrainte ; je ne la
-subis pas.} La même asymétrie vaut pour les \gls{gfa}, dont j'ai porté la part minimale de canne
-comme une règle agronomique parmi d'autres alors que c'est une obligation inscrite dans un titre
-de propriété — un arbitrage politique sur qui cultive quoi.\attente{13}
+Et c'est bien là que porte ta phrase. Ces huit nombres ne sont mesurés sur aucun agriculteur :
+ils sont le \emph{résultat} d'un ajustement numérique — une centaine d'itérations de descente
+par coordonnées — qui a fait coller le modèle à l'assolement de 2010. Ils absorbent donc tout ce
+que le modèle ne représentait pas cette année-là, l'élevage en premier. Ce que l'objectif appelle
+\enquote{aversion au risque} est pour partie un résidu de calage.
+\end{questionreponse}
 
-De cette position découlent trois limites précises. \textbf{Un}, je n'ai aucun moyen, depuis les
-tables, de distinguer une contrainte agronomique d'une contrainte héritée : les deux arrivent
-dans le même fichier, sous la même forme, et le mandat de parité m'ordonne de les porter
-également. \textbf{Deux}, tout ce que le modèle sait de la façon dont on décide, en Guadeloupe,
-de planter de l'igname plutôt que de la canne tient dans huit coefficients d'aversion au risque,
-issus d'une typologie construite par des chercheurs et calibrée sur un panel d'experts
-\parencite{chopin2015} : aucun agriculteur n'a validé un seuil de ce travail. \textbf{Trois},
-l'écart de \SI{\mesPlanEcart}{\percent} entre le plan observé et l'optimum est la mesure
-agrégée de tout ce que je ne représente pas, et je ne peux pas dire ce qu'il contient.
+L'écart de \SI{\mesPlanEcart}{\percent} entre le plan observé et l'optimum est la mesure agrégée
+de tout ce que je ne représente pas dans le modèle : une préférence pour ce qu'on sait faire, un
+contrat déjà signé, une main d'\oe uvre qu'on ne licencie pas, ou un risque que personne ne prend
+deux fois.
 
-Il serait malhonnête de laisser croire que l'écrire répare quoi que ce soit : le dire ne change
-ni qui a écrit le catalogue de politiques publiques, ni qui en a choisi les seuils, ni depuis
-où. La seule chose qui déplacerait cette position est que le modèle soit repris, contesté et
-reparamétré par des gens du territoire — ce que le dépôt rend matériellement possible et que
-rien dans ce stage n'a organisé. C'est aussi le seul axe du chapitre dont l'ancrage n'est pas
-une mesure, et il est placé en dernier pour cette raison.\attente{14}
+Une manière de dépasser les angles morts de mon stage et du projet, en matière de réalisme et
+d'impact, est d'organiser de la co-construction avec les acteurs du territoire. Il faut qu'ils
+donnent leur avis, reprennent, contestent et reparamètrent le modèle. C'est rendu possible par la
+forme du dépôt : la construction des scénarios et la modification des paramètres sont
+techniquement simples, mais rien dans ce stage ne l'a encore organisé.
 
-\section{L'honnêteté épistémique comme livrable}
+\section{Discussion sur l'IA générative}
+\label{sec:disc-ia}
 
-Quatre verdicts ont été renversés au cours de ce stage, tous par une mesure et jamais par une
-meilleure intuition (§~\ref{sec:plateau} et §~\ref{sec:limites}). Cette statistique est le
-meilleur argument dont je dispose sur la méthode, et elle mène à une affirmation qui peut
-surprendre : ce qui sera réutilisé de ce travail n'est pas l'assolement optimal de telle
-politique, c'est le catalogue documenté de ce qu'il ne faut pas conclure. \textbf{Ce n'est pas
-un aveu, c'est le livrable.}
+J'ai utilisé Claude Code tout au long de ce stage. C'est un grand modèle de langage (LLM)
+spécialisé pour le développement de code. L'outil a permis un portage de
+\num{\mesLignesCode} lignes, \num{\mesTests} tests, \num{\mesChecksums} sommes de contrôle et un
+dispositif de prospection opérationnel en six mois avec une seule personne.
 
-Trois règles l'ont produit. Mesurer avant de conclure — ce sont les quatre verdicts. Consigner
-un résultat négatif avec le même soin qu'un résultat positif — P10 hors d'atteinte, quatre
-cultures sur onze sous le seuil, la marge négative sous crise. Et considérer que
-\textbf{s'abstenir est un mode de sortie légitime}, ce qui est implémenté trois fois dans le
-dépôt : l'estimateur de durée refuse de répondre hors de sa bande de validité, le tri des points
-de front s'abstient dès qu'il ne peut pas conclure, et le générateur de chiffres de ce mémoire
-refuse d'émettre un \gls{pad} pour un run prospectif. À quoi s'ajoute un motif récurrent :
-l'avertissement voyage avec le chiffre.
+Les résultats faux sont plutôt faciles à repérer. Le vrai risque de cet outil est de produire des
+résultats plausibles, difficiles à vérifier. C'est l'intérêt de produire des tests et des sommes
+de contrôle.
 
-Il faut donner le contre-exemple, parce qu'il est le plus instructif de tous. Le nombre de
-sommes de contrôle annoncé dans le générateur de chiffres était périmé : le garde-fou chargé
-d'empêcher les chiffres de dériver contenait lui-même un chiffre qui avait dérivé — et le même
-défaut s'est produit deux fois, sur deux objets sans rapport. La leçon n'est pas qu'il faut être
-plus attentif : c'est qu'un garde-fou silencieux ne garde rien.
+\begin{questionreponse}{Explique \enquote{écrire pour une machine a produit une meilleure
+documentation d'architecture qu'écrire pour un humain}, et explique ce qu'est une somme de
+contrôle.}
+\textbf{La phrase.} Le dépôt contient un fichier que l'assistant relit au début de \emph{chaque}
+session, parce qu'il n'a aucune mémoire d'une fois sur l'autre : il y trouve l'architecture, les
+commandes, et surtout les pièges. Ce dispositif a une propriété que la documentation pour humains
+n'a pas — \emph{si elle est fausse ou périmée, la sanction est immédiate}. L'assistant applique
+la consigne à la lettre et produit du code faux dans la minute. Une documentation pour humains,
+elle, pourrit en silence : le lecteur compense avec sa mémoire, son habitude et le collègue d'à
+côté, et personne ne s'aperçoit qu'elle ne décrit plus le programme. Écrire pour une machine,
+c'est donc écrire \textbf{sous contrôle} : ce n'est pas que la prose soit meilleure, c'est que
+l'erreur y est détectée.
 
-\section{Le rapport à l'outil}
+\textbf{Une somme de contrôle.} C'est un nombre calculé à partir d'un résultat, dont la seule
+fonction est de \emph{changer si le résultat change}. Ici : un script reconstruit tout le jeu de
+données et tous les indicateurs sur une allocation fixée, \emph{sans résoudre} le \gls{milp} —
+donc en sept secondes et de façon exactement reproductible — et enregistre
+\num{\mesChecksums} nombres. Après une modification du code, on rejoue : si un seul de ces
+nombres a bougé, le script sort en erreur et dit lequel. Ce n'est pas un test de justesse (il ne
+dit pas que le nombre est \emph{bon}), c'est un détecteur de dérive (il dit qu'il n'a pas
+\emph{bougé}). C'est exactement ce qui manque quand un outil produit beaucoup et vite : le moyen
+de savoir qu'un changement d'apparence anodine a déplacé un chiffre trois modules plus loin.
 
-Le brouillon de ce mémoire a été produit par un assistant de programmation fondé sur un grand
-modèle de langage, avant d'être réécrit. Le dire ici est la seule position tenable, et cette
-section est courte et factuelle par choix.
-
-Ce que l'outil a permis est visible : un portage de \num{\mesLignesCode} lignes,
-\num{\mesTests} tests, \num{\mesChecksums} sommes de contrôle et un dispositif prospectif
-complet en six mois, pour une personne. Ce qu'il a \emph{déplacé} l'est autant : le stage a
-construit plus vite qu'il ne pouvait mesurer, et une partie des garde-fous du
-chapitre~\ref{ch:porter} n'existe que parce que la production avait pris de l'avance sur la
-validation.
-
-Le risque propre à cet outil mérite d'être nommé précisément, parce qu'il n'est pas celui qu'on
-imagine. Ce n'est pas de produire des résultats faux, qui se repèrent : c'est de produire des
-résultats \emph{plausibles}. Vérifier une sortie plausible est bien plus difficile que vérifier
-une sortie fausse — et c'est exactement le problème de l'indexation des types de sol du
-§~\ref{sec:parite}, qui produisait des rendements crédibles sur les mauvais sols. La même
-vigilance, pour la même raison.
-
-Reste ce que l'outil ne pouvait pas faire, et qui a décidé du travail : lire les données contre
-leur source, arbitrer un mandat de parité, établir qu'un seuil est exogène, décider qu'un
-résultat n'est pas citable. Un effet secondaire, contre-intuitif, mérite d'être signalé pour
-finir : écrire pour une machine a produit une meilleure documentation d'architecture qu'écrire
-pour un humain.
-
-\bigskip
-
-Ces huit axes ont un point commun, et c'est la conclusion de ce chapitre : \emph{ce qui rend ce
-travail utilisable n'est pas ce qu'il affirme, c'est ce qu'il délimite}.
+Le contre-exemple vaut d'être gardé : le nombre de sommes de contrôle annoncé dans le générateur
+de chiffres de ce mémoire était lui-même périmé. \emph{Un garde-fou silencieux ne garde rien.}
+\end{questionreponse}

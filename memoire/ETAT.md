@@ -4,7 +4,59 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-08-17**. Dépôt le **26/08** (J-9), soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-08-23**. Dépôt le **26/08** (J-3), soutenance **1-4 sept**.
+>
+> **Session du 2026-08-23 (suite) — chapitres 04 et 05, encadrement de tous les chapitres.**
+> Trois changements. (1) **Ch. 04** : même traitement que 01-03, plus les fautes **corrigées**
+> cette fois (Clément l'a demandé) ; **neuf encadrés `questionreponse`**. Deux erreurs de fond
+> corrigées dans le texte avec un commentaire `% CORRIGE` en regard : le regret de P4 passe de
+> 29,84 % à **0 %** entre F0 et F9 (il écrivait « de 30 % à 10 % » — les 9,82 % sont son regret
+> sous F6), et le front d'azote de référence est tracé sous la **calibration retenue**
+> (objectif témoin 81,22 M€) et **non sous P4** (81,04 M€). (2) **Ch. 05** : réagencé en
+> paragraphes à sa demande, ses formulations conservées, listes converties en prose, trois
+> `\label` créés, cinq encadrés. (3) **Tous les chapitres numérotés portent un mini-sommaire
+> encadré** (`\minisommaire` / `\ms` dans `preambule.tex`), une ligne courante, ~0,1 page pièce.
+>
+> ⚠ **Le § 4.4 « ce que le dispositif ne permet pas de conclure » a disparu** de la version de
+> Clément, alors que l'introduction annonce que le Ch. 4 sert à mesurer ce qu'on ne peut pas
+> conclure, et que **quatre renvois d'annexes** pointaient dessus (C ×2, D, F) — retargetés
+> faute de cible. Le récapitulatif des six limites qu'il portait est dans le dernier encadré du
+> chapitre, à replacer ici ou au Ch. 5. **Ne pas le réécrire à sa place.**
+>
+> **Nouveau : `\questionsvisiblesfalse` dans `preambule.tex`** fait disparaître les 35 encadrés
+> de travail sans toucher au texte (le contenu est composé dans une boîte jetée). C'est ce qui
+> donne le vrai compte : **cœur à 40 / 30 pages avec les encadrés, 23 / 30 sans** — Intro 2,
+> Ch. 1 2, Ch. 2 3, Ch. 3 8, Ch. 4 4, Ch. 5 2, Conclusion 2. Il reste donc **7 pages** une fois
+> les réponses reformulées, et les chapitres 2 et 5 sont les plus loin sous leur budget.
+>
+> **Session du 2026-08-23 — le chapitre 03 est passé de la main de Clément (Phase 6, suite).**
+> Même traitement que 01 et 02 : **mise en page seulement**, aucun mot de sa prose modifié.
+> Listes, chiffres par `chiffres.tex`, `\gls`, `\ref` (les « § 3.3 », « annexe E », « tableau
+> 3.2 » écrits en dur sont tous devenus des renvois). Les objets conservés — `eq:pad`,
+> `tab:pad-limites`, `tab:attribution`, `fig:calibration`, `tab:rendements`, l'encadré
+> `vigilance` — sont intacts.
+> **Douze encadrés `questionreponse`** de plus (total 21 dans le document, tous **à supprimer**
+> après reformulation). Ils coûtent ~6 des 13 pages du chapitre : Ch. 3 tient donc en ~7 p nettes,
+> exactement son budget. **Cœur à 39 / 30 pages avec les encadrés, ~30 sans.**
+> **Trois erreurs de fond repérées dans sa prose et NON corrigées** (elles sont dans les
+> encadrés et dans la réponse de session, à lui de trancher) : (a) « les trois leviers de
+> calibration varient de 0,39 % à 1,19 % » — c'est en fait **un** levier candidat, le plancher
+> arboricole, à deux seuils, et il n'a **pas** été adopté ; (b) « l'arbitraire du solveur vaut
+> 0,15 % de PAD » — c'est 0,15 **point** ; (c) le plafond de plantain retenu est **6 440 t**
+> (chiffre de l'auteur du GAMS), pas 4 650 t, qui est le débouché de l'équation 6 de l'article
+> et la borne basse du palier.
+>
+> **Session du 2026-08-18 — la réécriture par Clément a commencé (Phase 6).**
+> Les chapitres **01 et 02 sont désormais de sa main** (commit `a1f9102`), style concis et
+> vulgarisé, et remplacent la prose de Claude. Mon intervention s'est limitée à la **mise en
+> page** : listes `itemize`/`enumerate`, chiffres passés par `chiffres.tex` (`\num`/`\SI`),
+> acronymes par `\gls`, renvois par `\ref` (plus aucun « §2.3 » écrit en dur), `\texttt` sur
+> les noms d'équations GAMS. **Aucun mot de sa prose n'a été modifié** — les fautes d'accord
+> repérées sont listées dans la réponse de session, pas corrigées.
+> Neuf **encadrés `questionreponse`** (nouvel environnement dans `preambule.tex`) portent ses
+> questions `--- ... ---` et leur réponse. Ce sont des encadrés de **travail, à supprimer** une
+> fois la réponse reformulée dans sa prose : ils pèsent ~3 pages sur les 35 comptées.
+> Hors encadrés, Ch. 1 + Ch. 2 tiennent en ~6 p contre 8 budgétées.
 > **Le mémoire est entièrement rédigé et compile** : **33 pages de cœur** (⚠ 3 de trop, voir
 > § 6.2), 17 pages d'annexes sur 20 ; zéro encadré `MATIÈRE`, zéro `A REDIGER`, zéro
 > `Overfull hbox`, zéro référence non résolue.

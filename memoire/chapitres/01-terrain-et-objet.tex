@@ -5,52 +5,117 @@
 % THESE DU CHAPITRE : sur ce territoire, l'allocation des terres est un probleme de choix
 % sous contraintes serrees -- et l'outil cense le traiter n'etait pas exploitable en l'etat.
 
+\minisommaire{%
+  \ms{sec:territoire}{climat, sol, chlordécone, foncier : un problème d'allocation}%
+  \ms{sec:mosaica}{ce que le modèle promet}%
+  \ms{sec:gams}{trois raisons de le réécrire}}
+
 \section{Pertinence d'un modèle d'allocation en Guadeloupe}
 \label{sec:territoire}
 
-Les possibilités d'allocation de cultures par parcelles sont restreintes par le climat, le sol, la pollution au chlordécone, le foncier et le travail. Les aides orientent le reste.
+Les possibilités d'allocation de cultures par parcelles sont restreintes par le climat, le sol,
+la pollution au chlordécone, le foncier et le travail. Les aides orientent le reste.
 
-Environ 14 200 ha sont classés à risque de contamination par la chlordécone, dont près de 7 300 ha encore en usage agricole. C'est un phénomène irréversible à l'échelle humaine car la molécule persiste dans les sols pour des siècles (DAAF Guadeloupe 2025). Cela interdit les cultures dont l'organe récolté est en contact avec le sol. 
+Environ \SI{14200}{\ha} sont classés à risque de contamination par la chlordécone, dont près de
+\SI{7300}{\ha} encore en usage agricole. C'est un phénomène irréversible à l'échelle humaine car
+la molécule persiste dans les sols pour des siècles \parencite{daafchlordecone}. Cela interdit
+les cultures dont l'organe récolté est en contact avec le sol.
+
 C'est une règle d'éligibilité par parcelle.
 
-On compte 24 734 parcelles pour 4 638 exploitations. Le parcellaire est fragmenté donc on ne peut a priori pas raisonner en exploitation moyenne. Le régime des Groupement Foncier Agricole (GFA) impose contractuellement une part minimale de canne à sucre à une partie de ce foncier. 
+On compte \num{\obsParcelles} parcelles pour \num{\obsExploitations} exploitations. Le
+parcellaire est fragmenté donc on ne peut a priori pas raisonner en exploitation moyenne. Le
+régime des \gls{gfa} impose contractuellement une part minimale de canne à sucre à une partie de
+ce foncier.
+
 C'est une contrainte de politique publique.
 
-D'après le jeu de données, sur les 23 578 ha cultivés, la canne occupe 12 813 ha, la prairie 6 109 ha et la banane 1 921 ha. Ces trois postes correspondent à 90% de la surface totale. Un développement du vivrier passe nécessairement par leur diminution, au profit de la surface vivrière, pour l'instant résiduelle.
+D'après le jeu de données, sur les \SI{\obsSurfaceCultivee}{\ha} cultivés, la canne occupe
+\SI{\obsHaCS}{\ha}, la prairie \SI{\obsHaPN}{\ha} et la banane \SI{\obsHaBA}{\ha}. Ces trois
+postes correspondent à \SI{90}{\percent} de la surface totale. Un développement du vivrier passe
+nécessairement par leur diminution, au profit de la surface vivrière, pour l'instant résiduelle.
+
 C'est une réallocation.
 
-On peut arbitrer sous contrainte. Le programme d'optimisation est donc pertinent en tant que modèle d'allocation en Guadeloupe.
-
+On peut arbitrer sous contrainte. Le programme d'optimisation est donc pertinent en tant que
+modèle d'allocation en Guadeloupe.
 
 \section{\glsentryshort{mosaica} : ce que le modèle promet}
 \label{sec:mosaica}
 
-MOSAICA manipule une mosaïque, c'est-à-dire une affectation simultanée de chaque parcelle à une culture, sur tout un territoire, sous les contraintes propres à chaque exploitation.
-On peut créer des scénarios (ex: ajout d'une contrainte, baisse de prix, etc.) et les évaluer selon des indicateurs calculables depuis la mosaïque finale (ex: la marge, l’emploi, l’azote épandu, l’eau prélevée, etc.). On peut donc réaliser des évaluations ex ante (§4).
+\gls{mosaica} manipule une mosaïque, c'est-à-dire une affectation simultanée de chaque parcelle
+à une culture, sur tout un territoire, sous les contraintes propres à chaque exploitation. On
+peut créer des scénarios (ex : ajout d'une contrainte, baisse de prix, etc.) et les évaluer
+selon des indicateurs calculables depuis la mosaïque finale (ex : la marge, l'emploi, l'azote
+épandu, l'eau prélevée, etc.). On peut donc réaliser des évaluations \emph{ex ante}
+(chapitre~\ref{ch:explorer}).
 
-La formulation du modèle parle de parcelles, de cultures et d'exploitations mais jamais de la Guadeloupe. En langage de développeur, on appelle ça le " soft coding". C'est volontaire et c'est un des principes importants du portage (§2.3).
+La formulation du modèle parle de parcelles, de cultures et d'exploitations mais jamais de la
+Guadeloupe. En langage de développeur, on appelle ça le \enquote{soft coding}. C'est volontaire
+et c'est un des principes importants du portage (§~\ref{sec:architecture}).
 
-Chopin et al. (2015) publie une procédure de comparaison entre l’assolement simulé et l’assolement observé, avec ses seuils (§2.6). Cela permet de scorer la qualité de la calibration du modèle (§3).
-
+\textcite[§~2.6]{chopin2015} publie une procédure de comparaison entre l'assolement simulé et
+l'assolement observé, avec ses seuils. Cela permet de scorer la qualité de la calibration du
+modèle (chapitre~\ref{ch:calibrer}).
 
 \section{Le \glsentryshort{gams} existant, et pourquoi il a fallu reconstruire}
 \label{sec:gams}
 
-Le modèle GAMS pèse 646 ko répartis en 12 fichiers. On distingue 3 raisons qui justifient sa réécriture.
+Le modèle \gls{gams} pèse \num{646}~ko répartis en \num{12} fichiers. On distingue
+\num{3} raisons qui justifient sa réécriture.
 
+\begin{enumerate}[leftmargin=1.6em,itemsep=6pt]
 
-/GAMS est un environnement propriétaire qui fonctionne par licences. Cela crée des problèmes de compatibilité de versions et crée une dépendance au logiciel.
+\item \gls{gams} est un environnement propriétaire qui fonctionne par licences. Cela crée des
+problèmes de compatibilité de versions et crée une dépendance au logiciel.
 
-On préfère adopter une approche open-source. On choisit Python comme langage de programmation pour plusieurs raisons.
-- Beaucoup de personnes sont formés à Python. Cela peut évacuer la question de la formation à un nouveau langage à la fois pour des collaborations entre équipes ou bien lors de recrutements.
-- La forte concurrence entre les bibliothèques Python et leur modèle open-source assurent un large choix de modules optimisés et maintenus grâce à des mises à jour gratuites régulières. On choisit la bibliothèque d'optimisation Pyomo qui propose le solveur non-commercial HiGHS.
-- Python permet très efficacement de faire de l'analyse de données approfondie et fait facilement le lien avec des SIG (système d'information géographique).
-- Python est parfaitement compatible avec l'utilisation de GitHub. Cela permet de simplifier la collaboration en proposant des outils de gestion de projet et en rendant le code accessible à des équipes extérieures.
+On préfère adopter une approche open-source. On choisit Python comme langage de programmation
+pour plusieurs raisons.
 
+\begin{itemize}[leftmargin=1.2em,itemsep=3pt]
+  \item Beaucoup de personnes sont formés à Python. Cela peut évacuer la question de la
+    formation à un nouveau langage à la fois pour des collaborations entre équipes ou bien lors
+    de recrutements.
+  \item La forte concurrence entre les bibliothèques Python et leur modèle open-source assurent
+    un large choix de modules optimisés et maintenus grâce à des mises à jour gratuites
+    régulières. On choisit la bibliothèque d'optimisation Pyomo \parencite{pyomo2021} qui propose
+    le solveur non-commercial \gls{highs} \parencite{highs2018}.
+  \item Python permet très efficacement de faire de l'analyse de données approfondie et fait
+    facilement le lien avec des SIG (système d'information géographique).
+  \item Python est parfaitement compatible avec l'utilisation de GitHub. Cela permet de
+    simplifier la collaboration en proposant des outils de gestion de projet et en rendant le
+    code accessible à des équipes extérieures.
+\end{itemize}
 
-/Dans le modèle GAMS, faire varier un levier suppose d'éditer le code lui-même. Réaliser une campagne de scénarios suppose un nombre considérable de modifications manuelles. La traçabilité est faible, bricolée au cas par cas.
+\item Dans le modèle \gls{gams}, faire varier un levier suppose d'éditer le code lui-même.
+Réaliser une campagne de scénarios suppose un nombre considérable de modifications manuelles. La
+traçabilité est faible, bricolée au cas par cas.
 
---- EXPLIQUE MIEUX LA TROISIEME RAISON ---
+\item % troisieme raison : a rediger a partir de la reponse ci-dessous.
+
+\begin{questionreponse}{Explique mieux la troisième raison.}
+La troisième raison n'est ni l'accès ni le confort : c'est que le \gls{gams} \textbf{ne signale
+pas ses propres défauts}.
+
+Interrogé sur une colonne absente d'une table, \gls{gams} ne renvoie ni erreur ni avertissement :
+il renvoie zéro. L'équation \texttt{Eq\_VE\_PLUIE} teste ce zéro contre la valeur~1 pour décider
+si une parcelle peut porter un verger pluvial. Le test $0 \neq 1$ étant toujours vrai, la
+variante est interdite sur \emph{toutes} les parcelles du territoire.
+
+Ce défaut est invisible des deux côtés à la fois : le code reste correct d'apparence, et le
+résultat reste plausible --- un verger de moins dans un assolement guadeloupéen n'a l'air de
+rien. \emph{Un paramètre absent ne laisse pas un trou, il laisse un nombre crédible.} Le
+découvrir suppose donc de refaire le modèle contre ses données, ligne à ligne : c'est la seule
+lecture qui confronte chaque paramètre à la table qui est censée le porter.
+
+Trois défauts de cette famille ont été trouvés pendant le portage
+(§~\ref{sec:parite}, annexe~\ref{ann:portage}). La branche \enquote{rester en \gls{gams} et
+n'ajouter qu'une couche de scripts autour} a donc été fermée par une \emph{mesure} et non par une
+préférence de langage : une couche de scripts n'aurait rien révélé, puisqu'elle laisse le
+programme intact.
+\end{questionreponse}
+
+\end{enumerate}
 
 \begin{reflexion}
 REFLEXIVITE

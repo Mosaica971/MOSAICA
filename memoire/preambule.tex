@@ -157,6 +157,62 @@
   #1
 }
 
+% --- QUESTION / REPONSE : les questions laissees en marge de la redaction ---
+% Encadre de TRAVAIL, pas de contenu : il porte une question posee dans le .tex
+% (marqueurs "--- ... ---") et la reponse. Il est destine a DISPARAITRE une fois la
+% reponse reformulee dans la prose -- ne pas le laisser dans la version deposee.
+% Le .log les compte via "QUESTION :".
+% Interrupteur : \questionsvisiblesfalse fait DISPARAITRE les 35 encadres sans toucher au
+% texte -- c'est ainsi qu'on lit le vrai compte de pages du coeur, et c'est ce qu'il faudra
+% basculer au depot si les reponses n'ont pas encore ete reformulees.
+\newif\ifquestionsvisibles
+\questionsvisiblestrue
+\newtcolorbox{questionreponse}[1]{%
+  enhanced, breakable, sharp corners,
+  colback = cadreClimat!4, colframe = cadreClimat!65,
+  boxrule = 0pt, leftrule = 2pt,
+  left = 8pt, right = 8pt, top = 6pt, bottom = 6pt,
+  fontupper = \small,
+  before upper = {\typeout{QUESTION}},
+  title = {\sffamily\bfseries\footnotesize QUESTION\ \textperiodcentered\ \normalfont\itshape #1},
+  coltitle = black, colbacktitle = cadreClimat!14,
+  fonttitle = \small,
+  attach title to upper = {\\[3pt]},
+}
+% Le contenu est compose dans une boite jetee : rien ne s'imprime, et aucune commande du
+% document (\ref, \gls, \SI) n'est desactivee -- donc rien ne casse.
+\newsavebox{\poubellequestion}
+\ifquestionsvisibles\else
+  \renewenvironment{questionreponse}[1]%
+    {\setbox\poubellequestion=\vbox\bgroup\hsize=\linewidth\begingroup\noindent}%
+    {\par\endgroup\egroup}%
+\fi
+
+% --- MINI-SOMMAIRE : l'entree en matiere de chaque chapitre -----------------
+% Un filet en haut, un filet en bas, une seule ligne courante : le lecteur sait ou il va
+% sans qu'on lui vende une demi-page de table des matieres locale. Le budget des 30 pages
+% interdit une liste a puces ici -- sept chapitres x une demi-page couteraient 3 pages.
+% Usage :
+%   \minisommaire{\ms{sec:dispositif}{ce qui compose un scenario} \ms{sec:grille}{...}}
+% \ms compose le numero de section en gras puis son resume ; le separateur est automatique.
+\newtcolorbox{minisommaireboite}{%
+  enhanced, sharp corners, breakable,
+  colback = black!3, colframe = black!45,
+  boxrule = 0pt, toprule = 0.7pt, bottomrule = 0.7pt,
+  left = 6pt, right = 6pt, top = 4pt, bottom = 4pt,
+  fontupper = \footnotesize,
+}
+\newif\ifmspremier
+\newcommand{\ms}[2]{%
+  \ifmspremier\mspremierfalse\else\ \textperiodcentered\ \fi
+  \textbf{\ref{#1}}~#2}
+\newcommand{\minisommaire}[1]{%
+  \begin{minisommaireboite}%
+    \mspremiertrue
+    {\scriptsize\sffamily\bfseries DANS CE CHAPITRE}\quad #1%
+  \end{minisommaireboite}%
+  \par\smallskip}
+
 % --- Bibliographie ---------------------------------------------------------
 \usepackage[backend=biber,style=authoryear,maxcitenames=2,maxbibnames=99,
             giveninits=true,uniquename=init,sorting=nyt]{biblatex}
