@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,marge_brute,subventions,etp,production_t,surface_ha,azote_kg,ift,ges_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+P6_verdissement_incitatif__F0_nominal,P6_verdissement_incitatif,F0_nominal,maxTimeLimit,65005778.312823646,78390017.65,53375933.78,2821.07,709939.4,22292.76,1476371.19,51462.53,124172922.86,22168666.8,0.03,0.12,20.96,18562,10839.1,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\p6_verdissement_incitatif_f0_nominal,

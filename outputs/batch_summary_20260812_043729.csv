@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,marge_brute,subventions,etp,production_t,surface_ha,azote_kg,ift,ges_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+P4_statu_quo__F0_nominal,P4_statu_quo,F0_nominal,optimal,81036579.52940662,98354588.03,71277791.04,3476.0,910703.51,26023.45,1917319.88,66575.23,141924732.36,34393101.6,0.03,0.11,6.43,24561,674.8,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\p4_statu_quo_f0_nominal,

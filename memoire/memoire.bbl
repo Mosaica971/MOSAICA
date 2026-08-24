@@ -1,0 +1,740 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global/global}
+    \entry{agreste2019}{report}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=624f35d305d23d68581b9fa1ee96483b}{%
+           family={{Agreste}},
+           familyi={A\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Direction de l'Alimentation, de l'Agriculture et de la Forêt de la Guadeloupe}%
+      }
+      \strng{namehash}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{fullhash}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{fullhashraw}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{bibnamehash}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{authorbibnamehash}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{authornamehash}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{authorfullhash}{624f35d305d23d68581b9fa1ee96483b}
+      \strng{authorfullhashraw}{624f35d305d23d68581b9fa1ee96483b}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Mémento de la statistique agricole --- Guadeloupe, édition 2019}
+      \field{type}{techreport}
+      \field{urlday}{16}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2019}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://daaf.guadeloupe.agriculture.gouv.fr/Memento-2019-de-la-statistique
+      \endverb
+      \verb{url}
+      \verb https://daaf.guadeloupe.agriculture.gouv.fr/Memento-2019-de-la-statistique
+      \endverb
+    \endentry
+    \entry{pyomo2021}{book}{}{}
+      \name{author}{8}{}{%
+        {{un=0,uniquepart=base,hash=fe133d5b71e8c526ed170e6242dd8844}{%
+           family={Bynum},
+           familyi={B\bibinitperiod},
+           given={Michael\bibnamedelima L.},
+           giveni={M\bibinitperiod\bibinitdelim L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=6a817c5a7f736cf5013ed3734d97eb44}{%
+           family={Hackebeil},
+           familyi={H\bibinitperiod},
+           given={Gabriel\bibnamedelima A.},
+           giveni={G\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=bc874e1729ad1546f15a50a5d5781523}{%
+           family={Hart},
+           familyi={H\bibinitperiod},
+           given={William\bibnamedelima E.},
+           giveni={W\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=fe4330a8eb741cb60176c01236ec044f}{%
+           family={Laird},
+           familyi={L\bibinitperiod},
+           given={Carl\bibnamedelima D.},
+           giveni={C\bibinitperiod\bibinitdelim D\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=0b6126c51097470676f5fc7c4fbf9894}{%
+           family={Nicholson},
+           familyi={N\bibinitperiod},
+           given={Bethany\bibnamedelima L.},
+           giveni={B\bibinitperiod\bibinitdelim L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=56a744a01a7a808030086b81758a6a4c}{%
+           family={Siirola},
+           familyi={S\bibinitperiod},
+           given={John\bibnamedelima D.},
+           giveni={J\bibinitperiod\bibinitdelim D\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=674ebab2a61476821ad4b4bcd4d9c524}{%
+           family={Watson},
+           familyi={W\bibinitperiod},
+           given={Jean-Paul},
+           giveni={J\bibinithyphendelim P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=1968e7a8afc0a428e3d702a8ee380e73}{%
+           family={Woodruff},
+           familyi={W\bibinitperiod},
+           given={David\bibnamedelima L.},
+           giveni={D\bibinitperiod\bibinitdelim L\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{1319c5d6a1754893dacf6941fb1a653e}
+      \strng{fullhash}{d5d06442967f23e5ab296ef9fc179116}
+      \strng{fullhashraw}{d5d06442967f23e5ab296ef9fc179116}
+      \strng{bibnamehash}{d5d06442967f23e5ab296ef9fc179116}
+      \strng{authorbibnamehash}{d5d06442967f23e5ab296ef9fc179116}
+      \strng{authornamehash}{1319c5d6a1754893dacf6941fb1a653e}
+      \strng{authorfullhash}{d5d06442967f23e5ab296ef9fc179116}
+      \strng{authorfullhashraw}{d5d06442967f23e5ab296ef9fc179116}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3}
+      \field{title}{Pyomo --- Optimization Modeling in Python}
+      \field{year}{2021}
+      \verb{doi}
+      \verb 10.1007/978-3-030-68928-5
+      \endverb
+    \endentry
+    \entry{chopin2015}{article}{}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=29c0690b2a62f378cfe00e72f1c27b1e}{%
+           family={Chopin},
+           familyi={C\bibinitperiod},
+           given={Pierre},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=fa3691f3ee4f32a1701386333a63b795}{%
+           family={Doré},
+           familyi={D\bibinitperiod},
+           given={Thierry},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=558bbdc922915dec98d0510c94818340}{%
+           family={Guindé},
+           familyi={G\bibinitperiod},
+           given={Loïc},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=82e9ce47ef361354a97fd52ee2826c20}{%
+           family={Blazy},
+           familyi={B\bibinitperiod},
+           given={Jean-Marc},
+           giveni={J\bibinithyphendelim M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{05883388d300548b075dde413fb87738}
+      \strng{fullhash}{d904ae4aa8aed4e03c09eebcbf630f58}
+      \strng{fullhashraw}{d904ae4aa8aed4e03c09eebcbf630f58}
+      \strng{bibnamehash}{d904ae4aa8aed4e03c09eebcbf630f58}
+      \strng{authorbibnamehash}{d904ae4aa8aed4e03c09eebcbf630f58}
+      \strng{authornamehash}{05883388d300548b075dde413fb87738}
+      \strng{authorfullhash}{d904ae4aa8aed4e03c09eebcbf630f58}
+      \strng{authorfullhashraw}{d904ae4aa8aed4e03c09eebcbf630f58}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Agricultural Systems}
+      \field{title}{{MOSAICA}: A multi-scale bioeconomic model for the design and ex ante assessment of cropping system mosaics}
+      \field{volume}{140}
+      \field{year}{2015}
+      \field{pages}{26\bibrangedash 39}
+      \range{pages}{14}
+      \verb{doi}
+      \verb 10.1016/j.agsy.2015.08.006
+      \endverb
+    \endentry
+    \entry{daafchlordecone}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=b71ff722acab25ed0d9b76a1f631e44c}{%
+           family={{DAAF Guadeloupe}},
+           familyi={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{fullhash}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{fullhashraw}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{bibnamehash}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{authorbibnamehash}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{authornamehash}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{authorfullhash}{b71ff722acab25ed0d9b76a1f631e44c}
+      \strng{authorfullhashraw}{b71ff722acab25ed0d9b76a1f631e44c}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Cartographie des teneurs en chlordécone des sols}
+      \field{urlday}{9}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://daaf.guadeloupe.agriculture.gouv.fr/cartographie-des-teneurs-en-chlordecone-des-sols-a1304.html
+      \endverb
+      \verb{url}
+      \verb https://daaf.guadeloupe.agriculture.gouv.fr/cartographie-des-teneurs-en-chlordecone-des-sols-a1304.html
+      \endverb
+    \endentry
+    \entry{insee2023prix}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=e1e23dab1f7804f96e0d546d8597bb60}{%
+           family={Dufour},
+           familyi={D\bibinitperiod},
+           given={Karine},
+           giveni={K\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5fe30bef9a45bf231c1f0a94ce5b7b29}{%
+           family={Monziols},
+           familyi={M\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{fullhash}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{fullhashraw}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{bibnamehash}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{authorbibnamehash}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{authornamehash}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{authorfullhash}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \strng{authorfullhashraw}{5ed3b83d3a78d6904f56bf2d98623a00}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Insee Première}
+      \field{number}{1958}
+      \field{title}{En 2022, les prix restent plus élevés dans les {DOM} qu'en {France} métropolitaine, en particulier pour les produits alimentaires}
+      \field{urlday}{17}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.insee.fr/fr/statistiques/7648939
+      \endverb
+      \verb{url}
+      \verb https://www.insee.fr/fr/statistiques/7648939
+      \endverb
+    \endentry
+    \entry{haimes1971}{article}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=cf0a6ea825844fc35a72852afcaa22f0}{%
+           family={Haimes},
+           familyi={H\bibinitperiod},
+           given={Yacov\bibnamedelima Y.},
+           giveni={Y\bibinitperiod\bibinitdelim Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e3a7fc02908cdb0857351fc91972a2f0}{%
+           family={Lasdon},
+           familyi={L\bibinitperiod},
+           given={Leon\bibnamedelima S.},
+           giveni={L\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=7d79baa0711cdd44592e6d555b36d5c9}{%
+           family={Wismer},
+           familyi={W\bibinitperiod},
+           given={David\bibnamedelima A.},
+           giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{ed4187d5154860aaa52c8f39ab2511ad}
+      \strng{fullhash}{ba748de914516fe4133215ea33e78731}
+      \strng{fullhashraw}{ba748de914516fe4133215ea33e78731}
+      \strng{bibnamehash}{ba748de914516fe4133215ea33e78731}
+      \strng{authorbibnamehash}{ba748de914516fe4133215ea33e78731}
+      \strng{authornamehash}{ed4187d5154860aaa52c8f39ab2511ad}
+      \strng{authorfullhash}{ba748de914516fe4133215ea33e78731}
+      \strng{authorfullhashraw}{ba748de914516fe4133215ea33e78731}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Systems, Man, and Cybernetics}
+      \field{number}{3}
+      \field{title}{On a bicriterion formulation of the problems of integrated system identification and system optimization}
+      \field{volume}{SMC-1}
+      \field{year}{1971}
+      \field{pages}{296\bibrangedash 297}
+      \range{pages}{2}
+    \endentry
+    \entry{howitt1995}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=e8d3bf665c2e9605451f0aa0eca8f4cb}{%
+           family={Howitt},
+           familyi={H\bibinitperiod},
+           given={Richard\bibnamedelima E.},
+           giveni={R\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{fullhash}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{fullhashraw}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{bibnamehash}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{authorbibnamehash}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{authornamehash}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{authorfullhash}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \strng{authorfullhashraw}{e8d3bf665c2e9605451f0aa0eca8f4cb}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{American Journal of Agricultural Economics}
+      \field{number}{2}
+      \field{title}{Positive mathematical programming}
+      \field{volume}{77}
+      \field{year}{1995}
+      \field{pages}{329\bibrangedash 342}
+      \range{pages}{14}
+      \verb{doi}
+      \verb 10.2307/1243543
+      \endverb
+    \endentry
+    \entry{highs2018}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=c717029f6b70cf7c1026f315880ca282}{%
+           family={Huangfu},
+           familyi={H\bibinitperiod},
+           given={Qi},
+           giveni={Q\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=4bef926b4d65e71e3368fbd88d8b805f}{%
+           family={Hall},
+           familyi={H\bibinitperiod},
+           given={J.\bibnamedelimi A.\bibnamedelimi Julian},
+           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{217f62034a2d625dc6f9f224367635cb}
+      \strng{fullhash}{217f62034a2d625dc6f9f224367635cb}
+      \strng{fullhashraw}{217f62034a2d625dc6f9f224367635cb}
+      \strng{bibnamehash}{217f62034a2d625dc6f9f224367635cb}
+      \strng{authorbibnamehash}{217f62034a2d625dc6f9f224367635cb}
+      \strng{authornamehash}{217f62034a2d625dc6f9f224367635cb}
+      \strng{authorfullhash}{217f62034a2d625dc6f9f224367635cb}
+      \strng{authorfullhashraw}{217f62034a2d625dc6f9f224367635cb}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Mathematical Programming Computation}
+      \field{number}{1}
+      \field{title}{Parallelizing the dual revised simplex method}
+      \field{volume}{10}
+      \field{year}{2018}
+      \field{pages}{119\bibrangedash 142}
+      \range{pages}{24}
+      \verb{doi}
+      \verb 10.1007/s12532-017-0130-5
+      \endverb
+    \endentry
+    \entry{markowitz1952}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=bdfa1c8585b5a4ae901315043a00f2f2}{%
+           family={Markowitz},
+           familyi={M\bibinitperiod},
+           given={Harry},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{fullhash}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{fullhashraw}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{bibnamehash}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{authorbibnamehash}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{authornamehash}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{authorfullhash}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \strng{authorfullhashraw}{bdfa1c8585b5a4ae901315043a00f2f2}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Journal of Finance}
+      \field{number}{1}
+      \field{title}{Portfolio selection}
+      \field{volume}{7}
+      \field{year}{1952}
+      \field{pages}{77\bibrangedash 91}
+      \range{pages}{15}
+    \endentry
+    \entry{mavrotas2009}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=576760c68fc2e21f2397597258c633a2}{%
+           family={Mavrotas},
+           familyi={M\bibinitperiod},
+           given={George},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{576760c68fc2e21f2397597258c633a2}
+      \strng{fullhash}{576760c68fc2e21f2397597258c633a2}
+      \strng{fullhashraw}{576760c68fc2e21f2397597258c633a2}
+      \strng{bibnamehash}{576760c68fc2e21f2397597258c633a2}
+      \strng{authorbibnamehash}{576760c68fc2e21f2397597258c633a2}
+      \strng{authornamehash}{576760c68fc2e21f2397597258c633a2}
+      \strng{authorfullhash}{576760c68fc2e21f2397597258c633a2}
+      \strng{authorfullhashraw}{576760c68fc2e21f2397597258c633a2}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Applied Mathematics and Computation}
+      \field{number}{2}
+      \field{title}{Effective implementation of the $\varepsilon$-constraint method in multi-objective mathematical programming problems}
+      \field{volume}{213}
+      \field{year}{2009}
+      \field{pages}{455\bibrangedash 465}
+      \range{pages}{11}
+      \verb{doi}
+      \verb 10.1016/j.amc.2009.03.037
+      \endverb
+    \endentry
+    \entry{odeadom2019}{report}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=63457b8943fb638bfb30ca6ff3123687}{%
+           family={{ODEADOM}},
+           familyi={O\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Office de développement de l'économie agricole d'outre-mer}%
+      }
+      \strng{namehash}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{fullhash}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{fullhashraw}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{bibnamehash}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{authorbibnamehash}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{authornamehash}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{authorfullhash}{63457b8943fb638bfb30ca6ff3123687}
+      \strng{authorfullhashraw}{63457b8943fb638bfb30ca6ff3123687}
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Quelles conditions pour améliorer la couverture des besoins alimentaires dans les {DOM} ?}
+      \field{type}{techreport}
+      \field{urlday}{9}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2019}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.odeadom.fr/wp-content/uploads/2019/01/Couverture-des-besoins-alimentaires-dans-les-DOM.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.odeadom.fr/wp-content/uploads/2019/01/Couverture-des-besoins-alimentaires-dans-les-DOM.pdf
+      \endverb
+    \endentry
+    \entry{opecst2009}{report}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=a1ce762042a96fe505b2cfd24c9842b7}{%
+           family={{Office parlementaire d'évaluation des choix scientifiques et technologiques}},
+           familyi={O\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Assemblée nationale et Sénat}%
+      }
+      \strng{namehash}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{fullhash}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{fullhashraw}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{bibnamehash}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{authorbibnamehash}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{authornamehash}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{authorfullhash}{a1ce762042a96fe505b2cfd24c9842b7}
+      \strng{authorfullhashraw}{a1ce762042a96fe505b2cfd24c9842b7}
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{487 (2008--2009)}
+      \field{title}{Impacts de l'utilisation de la chlordécone et des pesticides aux {Antilles} : bilan et perspectives d'évolution}
+      \field{type}{Rapport}
+      \field{urlday}{16}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2009}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.senat.fr/rap/r08-487/r08-487.html
+      \endverb
+      \verb{url}
+      \verb https://www.senat.fr/rap/r08-487/r08-487.html
+      \endverb
+    \endentry
+    \entry{savage1951}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=4c0baad1638fc0e232b6285b4cb38eef}{%
+           family={Savage},
+           familyi={S\bibinitperiod},
+           given={Leonard\bibnamedelima J.},
+           giveni={L\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{fullhash}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{fullhashraw}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{bibnamehash}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{authorbibnamehash}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{authornamehash}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{authorfullhash}{4c0baad1638fc0e232b6285b4cb38eef}
+      \strng{authorfullhashraw}{4c0baad1638fc0e232b6285b4cb38eef}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the American Statistical Association}
+      \field{number}{253}
+      \field{title}{The theory of statistical decision}
+      \field{volume}{46}
+      \field{year}{1951}
+      \field{pages}{55\bibrangedash 67}
+      \range{pages}{13}
+      \verb{doi}
+      \verb 10.1080/01621459.1951.10500768
+      \endverb
+    \endentry
+    \entry{starr1963}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=3fd22744b1a18d89d2a02289fc4a4a56}{%
+           family={Starr},
+           familyi={S\bibinitperiod},
+           given={Martin\bibnamedelima K.},
+           giveni={M\bibinitperiod\bibinitdelim K\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Englewood Cliffs, NJ}%
+      }
+      \list{publisher}{1}{%
+        {Prentice-Hall}%
+      }
+      \strng{namehash}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{fullhash}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{fullhashraw}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{bibnamehash}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{authorbibnamehash}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{authornamehash}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{authorfullhash}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \strng{authorfullhashraw}{3fd22744b1a18d89d2a02289fc4a4a56}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Product Design and Decision Theory}
+      \field{year}{1963}
+    \endentry
+    \entry{tixier2007}{article}{}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=306edaf666ab062ef4e4ccdfbd629860}{%
+           family={Tixier},
+           familyi={T\bibinitperiod},
+           given={Philippe},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=81279fee82ae28b2c9a9e60815e4e916}{%
+           family={Malézieux},
+           familyi={M\bibinitperiod},
+           given={Eric},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=19fb49c273c5bbe120a27ada04ef4bb3}{%
+           family={Dorel},
+           familyi={D\bibinitperiod},
+           given={Marc},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=670044ca53c3cb178fa2aa957440617b}{%
+           family={Bockstaller},
+           familyi={B\bibinitperiod},
+           given={Christian},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=51d95e04466da8da5e0c17c3108fa47a}{%
+           family={Girardin},
+           familyi={G\bibinitperiod},
+           given={Philippe},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{c89f81d1c50747461b9955b193f04043}
+      \strng{fullhash}{8ace75f2c80c39a68a7015b01e970860}
+      \strng{fullhashraw}{8ace75f2c80c39a68a7015b01e970860}
+      \strng{bibnamehash}{8ace75f2c80c39a68a7015b01e970860}
+      \strng{authorbibnamehash}{8ace75f2c80c39a68a7015b01e970860}
+      \strng{authornamehash}{c89f81d1c50747461b9955b193f04043}
+      \strng{authorfullhash}{8ace75f2c80c39a68a7015b01e970860}
+      \strng{authorfullhashraw}{8ace75f2c80c39a68a7015b01e970860}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{European Journal of Agronomy}
+      \field{number}{1}
+      \field{title}{Rpest --- an indicator linked to a crop model to assess the dynamics of the risk of pesticide water pollution: {Application} to banana-based cropping systems}
+      \field{volume}{26}
+      \field{year}{2007}
+      \field{pages}{71\bibrangedash 81}
+      \range{pages}{11}
+    \endentry
+    \entry{touteleurope2024}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=14361947d3b8c0f3055149500d4745b0}{%
+           family={{Toute l'Europe}},
+           familyi={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{14361947d3b8c0f3055149500d4745b0}
+      \strng{fullhash}{14361947d3b8c0f3055149500d4745b0}
+      \strng{fullhashraw}{14361947d3b8c0f3055149500d4745b0}
+      \strng{bibnamehash}{14361947d3b8c0f3055149500d4745b0}
+      \strng{authorbibnamehash}{14361947d3b8c0f3055149500d4745b0}
+      \strng{authornamehash}{14361947d3b8c0f3055149500d4745b0}
+      \strng{authorfullhash}{14361947d3b8c0f3055149500d4745b0}
+      \strng{authorfullhashraw}{14361947d3b8c0f3055149500d4745b0}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Le {POSEI}, une aide européenne pour l'agriculture d'outre-mer}
+      \field{urlday}{9}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2024}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.touteleurope.eu/l-europe-en-region/le-posei-une-aide-europeenne-pour-l-agriculture-d-outre-mer/
+      \endverb
+      \verb{url}
+      \verb https://www.touteleurope.eu/l-europe-en-region/le-posei-une-aide-europeenne-pour-l-agriculture-d-outre-mer/
+      \endverb
+    \endentry
+    \entry{viepublique2023}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=bdd57d11f2cff0f0bd9bb4ce2fa03a34}{%
+           family={{Vie publique}},
+           familyi={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{fullhash}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{fullhashraw}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{bibnamehash}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{authorbibnamehash}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{authornamehash}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{authorfullhash}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \strng{authorfullhashraw}{bdd57d11f2cff0f0bd9bb4ce2fa03a34}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Outre-mer : une forte dépendance aux importations alimentaires}
+      \field{urlday}{9}
+      \field{urlmonth}{8}
+      \field{urlyear}{2026}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.vie-publique.fr/en-bref/290380-outre-mer-une-autonomie-alimentaire-limitee
+      \endverb
+      \verb{url}
+      \verb https://www.vie-publique.fr/en-bref/290380-outre-mer-une-autonomie-alimentaire-limitee
+      \endverb
+    \endentry
+    \entry{wald1945}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=b032e56ba5a956c54d709f1b0be78be6}{%
+           family={Wald},
+           familyi={W\bibinitperiod},
+           given={Abraham},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{fullhash}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{fullhashraw}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{bibnamehash}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{authorbibnamehash}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{authornamehash}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{authorfullhash}{b032e56ba5a956c54d709f1b0be78be6}
+      \strng{authorfullhashraw}{b032e56ba5a956c54d709f1b0be78be6}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Annals of Mathematics}
+      \field{number}{2}
+      \field{title}{Statistical decision functions which minimize the maximum risk}
+      \field{volume}{46}
+      \field{year}{1945}
+      \field{pages}{265\bibrangedash 280}
+      \range{pages}{16}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

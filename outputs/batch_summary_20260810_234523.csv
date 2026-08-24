@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,marge_brute,subventions,etp,production_t,surface_ha,azote_kg,ift,ges_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+P8_transition_agroecologique__pareto_azote__threshold=1351632,P8_transition_agroecologique,,optimal,69088437.54066803,81393701.12,39270659.06,4199.98,479054.12,26051.78,1351310.98,40081.66,171863049.95,27699903.6,0.04,0.13,74.74,24579,7773.9,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\p8_transition_agroecologique_pareto_azote_threshold_1351632,

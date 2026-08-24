@@ -1,0 +1,777 @@
+{
+  "run_name": "P4_statu_quo__F0_nominal",
+  "run_policy": "P4_statu_quo",
+  "run_forcing": "F0_nominal",
+  "run_sweep": null,
+  "timestamp": "2026-08-12T08:37:27.834661+00:00",
+  "solve_duration_seconds": 674.7649999999994,
+  "termination_condition": "optimal",
+  "solver": {
+    "name": "appsi_highs",
+    "args": {
+      "mip_rel_gap": 0.01,
+      "time_limit": 10800
+    }
+  },
+  "data": {
+    "year": "2017",
+    "scenario": "RESTIT"
+  },
+  "objective": {
+    "name": "maximize_risk_adjusted_gross_margin",
+    "args": {},
+    "value": 81036579.52940662
+  },
+  "constraints": [
+    {
+      "name": "at_most_one_crop_per_plot",
+      "args": {}
+    },
+    {
+      "name": "farm_area_share_max",
+      "args": {
+        "label": "an_agro_max_expl",
+        "crops": [
+          "AN",
+          "AN_NU",
+          "AN_PA"
+        ],
+        "max_share": 0.75
+      }
+    },
+    {
+      "name": "farm_area_share_max",
+      "args": {
+        "label": "ig_agro_max_expl",
+        "crops": [
+          "IG",
+          "IG_PLA",
+          "IG_TUT"
+        ],
+        "max_share": 0.66
+      }
+    },
+    {
+      "name": "farm_area_ratio_min",
+      "args": {
+        "label": "ba_ja",
+        "numerator_crops": [
+          "JA"
+        ],
+        "denominator_crops": [
+          "BA_INT",
+          "BA_IRR",
+          "BA_SINT"
+        ],
+        "ratio": 0.2
+      }
+    },
+    {
+      "name": "farm_area_ratio_min",
+      "args": {
+        "label": "ba_rota",
+        "numerator_crops": [
+          "JA",
+          "CS",
+          "CS_BT_NISM",
+          "CS_BT_NIM",
+          "CS_BT_IM",
+          "CS_SBT_NISM",
+          "CS_SBT_NIM",
+          "CS_SBT_IM",
+          "CS_NGT_NISM",
+          "CS_NGT_NIM",
+          "CS_NGT_IM",
+          "CS_CGT_NISM",
+          "CS_CGT_NIM",
+          "CS_CGT_IM",
+          "CS_EGT_NISM",
+          "CS_EGT_NIM",
+          "CS_EGT_IM",
+          "CS_MG_NISM",
+          "CS_MG_NIM",
+          "CS_MG_IM",
+          "CF_NBT_NISM",
+          "CF_NBT_NIM",
+          "CF_SBT_NISM",
+          "CF_SBT_NIM",
+          "CF_NGT_NISM",
+          "CF_NGT_NIM",
+          "CF_CGT_NISM",
+          "CF_CGT_NIM",
+          "CF_EGT_NISM",
+          "CF_EGT_NIM"
+        ],
+        "denominator_crops": [
+          "BA_INT",
+          "BA_IRR",
+          "BA_SINT"
+        ],
+        "ratio": 0.2
+      }
+    },
+    {
+      "name": "farm_labor_hours_max",
+      "args": {
+        "label": "mo_max_expl",
+        "slack": 1.0
+      }
+    },
+    {
+      "name": "territory_production_bound",
+      "args": {
+        "label": "ba_quota_max",
+        "groups": [
+          {
+            "crops": [
+              "BA",
+              "BA_INT",
+              "BA_IRR",
+              "BA_PER",
+              "BA_SINT"
+            ],
+            "use_yield": true,
+            "rate_multiplier": 1.0
+          }
+        ],
+        "sense": "le",
+        "threshold": 77877
+      }
+    },
+    {
+      "name": "territory_production_bound",
+      "args": {
+        "label": "bc_quota_max",
+        "groups": [
+          {
+            "crops": [
+              "BC",
+              "BC_BT",
+              "BC_GTMG"
+            ],
+            "use_yield": true,
+            "rate_multiplier": 1.0
+          }
+        ],
+        "sense": "le",
+        "threshold": 6440
+      }
+    },
+    {
+      "name": "territory_production_bound",
+      "args": {
+        "label": "cs_quota_max",
+        "groups": [
+          {
+            "crops": [
+              "CS",
+              "CS_BT_NISM",
+              "CS_BT_NIM",
+              "CS_BT_IM",
+              "CS_SBT_NISM",
+              "CS_SBT_NIM",
+              "CS_SBT_IM",
+              "CS_NGT_NISM",
+              "CS_NGT_NIM",
+              "CS_NGT_IM",
+              "CS_CGT_NISM",
+              "CS_CGT_NIM",
+              "CS_CGT_IM",
+              "CS_EGT_NISM",
+              "CS_EGT_NIM",
+              "CS_EGT_IM",
+              "CS_MG_NISM",
+              "CS_MG_NIM",
+              "CS_MG_IM"
+            ],
+            "use_yield": true,
+            "rate_multiplier": 0.072
+          }
+        ],
+        "sense": "le",
+        "threshold": 107000
+      }
+    },
+    {
+      "name": "territory_production_bound",
+      "args": {
+        "label": "pn_prod_min",
+        "groups": [
+          {
+            "crops": [
+              "PN_PIQ"
+            ],
+            "use_yield": false,
+            "rate_multiplier": 1.0
+          }
+        ],
+        "sense": "ge",
+        "threshold": 6096
+      }
+    },
+    {
+      "name": "baseline_inertia_min",
+      "args": {
+        "label": "inertie",
+        "min_share": 0.7
+      }
+    },
+    {
+      "name": "territory_indicator_bound",
+      "args": {
+        "label": "budget_subventions",
+        "indicator": "subvention",
+        "sense": "le",
+        "threshold": 72000000
+      }
+    },
+    {
+      "name": "territory_indicator_bound",
+      "args": {
+        "label": "plafond_ift",
+        "indicator": "ift",
+        "sense": "le",
+        "threshold": 67000
+      }
+    },
+    {
+      "name": "territory_indicator_bound",
+      "args": {
+        "label": "plafond_azote",
+        "indicator": "azote",
+        "sense": "le",
+        "threshold": 1950000
+      }
+    },
+    {
+      "name": "territory_indicator_bound",
+      "args": {
+        "label": "plancher_emploi",
+        "indicator": "travail",
+        "sense": "ge",
+        "threshold": 3400,
+        "scale": 0.00062228
+      }
+    }
+  ],
+  "input": {
+    "total_surface_ha": 23577.989999999998,
+    "active_plot_count": 22197,
+    "farm_count": 4588
+  },
+  "output": {
+    "total_surface_ha": 26023.45,
+    "active_plot_count": 24561,
+    "farm_count": 4638
+  },
+  "delta": {
+    "total_surface_ha": 2445.4600000000028,
+    "active_plot_count": 2364,
+    "farm_count": 50
+  },
+  "economics": {
+    "input": {
+      "total_production_tonnes": 722093.5048000001,
+      "total_subsidy": 68977158.52548571,
+      "total_revenue": 229766228.7671924,
+      "total_gross_margin": 87558952.47521858,
+      "total_variable_cost": 142207276.29197383,
+      "total_labor_cost": 96917465.52474405,
+      "total_net_revenue": -9358513.04952547,
+      "total_etp": 3890.9394594112073
+    },
+    "output": {
+      "total_production_tonnes": 910703.5136,
+      "total_subsidy": 71277791.03628857,
+      "total_revenue": 227027981.9530819,
+      "total_gross_margin": 98354588.03300059,
+      "total_variable_cost": 128673393.92008132,
+      "total_labor_cost": 86581852.69451664,
+      "total_net_revenue": 11772735.338483945,
+      "total_etp": 3475.996254070564
+    },
+    "delta": {
+      "total_production_tonnes": 188610.00879999984,
+      "total_subsidy": 2300632.510802865,
+      "total_revenue": -2738246.8141104877,
+      "total_gross_margin": 10795635.55778201,
+      "total_variable_cost": -13533882.371892512,
+      "total_labor_cost": -10335612.830227405,
+      "total_net_revenue": 21131248.388009414,
+      "total_etp": -414.9432053406431
+    }
+  },
+  "environment": {
+    "input": {
+      "rpest_mean": 5.013956741232289,
+      "rpest_surface_at_risk_ha": 2660.17,
+      "rpest_surface_at_risk_share": 0.11282429078984257,
+      "rpest_max": 9.948,
+      "total_azote": 2065681.7056666669,
+      "total_phosphore": 987510.9435,
+      "total_potasse": 3331020.0760000004,
+      "total_ges": 178071029.99552476,
+      "total_ift": 68133.19647619048,
+      "surface_cld": 691.49,
+      "azote_per_ha": 87.61059384903747,
+      "ges_per_ha": 7552.426224437485,
+      "ift_per_ha": 2.8896948584756585,
+      "total_water_need_m3": 35629950.0,
+      "water_need_peak_month_m3": 2969162.5,
+      "soil_carbon_balance": -11836.919108310416,
+      "soil_carbon_mineralization": 48445.41331330042
+    },
+    "output": {
+      "rpest_mean": 4.737329735992277,
+      "rpest_surface_at_risk_ha": 2624.0599999999995,
+      "rpest_surface_at_risk_share": 0.10083443970726401,
+      "rpest_max": 9.948,
+      "total_azote": 1917319.8829333333,
+      "total_phosphore": 812180.0896,
+      "total_potasse": 3121770.4604999996,
+      "total_ges": 141924732.35982472,
+      "total_ift": 66575.2277142857,
+      "surface_cld": 611.15,
+      "azote_per_ha": 73.67662177510412,
+      "ges_per_ha": 5453.724712127897,
+      "ift_per_ha": 2.5582783110727325,
+      "total_water_need_m3": 34393101.6,
+      "water_need_peak_month_m3": 2866091.8000000003,
+      "soil_carbon_balance": -14511.833416542291,
+      "soil_carbon_mineralization": 54160.027488328284
+    },
+    "delta": {
+      "rpest_mean": -0.2766270052400124,
+      "rpest_surface_at_risk_ha": -36.11000000000058,
+      "rpest_surface_at_risk_share": -0.011989851082578565,
+      "rpest_max": 0.0,
+      "total_azote": -148361.82273333357,
+      "total_phosphore": -175330.8539000001,
+      "total_potasse": -209249.61550000077,
+      "total_ges": -36146297.63570005,
+      "total_ift": -1557.9687619047763,
+      "surface_cld": -80.34000000000003,
+      "azote_per_ha": -13.933972073933347,
+      "ges_per_ha": -2098.701512309588,
+      "ift_per_ha": -0.33141654740292603,
+      "total_water_need_m3": -1236848.3999999985,
+      "water_need_peak_month_m3": -103070.69999999972,
+      "soil_carbon_balance": -2674.914308231875,
+      "soil_carbon_mineralization": 5714.614175027862
+    }
+  },
+  "food_autonomy": {
+    "input": {
+      "population": 400736.0,
+      "crop_only": {
+        "kcal": 0.08202283568383067,
+        "lip": 0.05296043393251332,
+        "glu": 0.12503100573649764,
+        "prot": 0.08641883277154905,
+        "fibres": 0.25829560838551463,
+        "ca": 0.11904785488194872,
+        "p": 0.32355435961584644,
+        "mg": 0.20517694867641625,
+        "k": 0.630323805275572,
+        "fe": 0.22371831584288043
+      },
+      "with_fishing": {
+        "kcal": 0.10198610327146942,
+        "lip": 0.06072945151798917,
+        "glu": 0.12503100573649764,
+        "prot": 0.22230950085923035,
+        "fibres": 0.25829560838551463,
+        "ca": 0.13955806130760495,
+        "p": 0.6653911333767838,
+        "mg": 0.2616939619382246,
+        "k": 0.690145240683736,
+        "fe": 0.25790199321897417
+      },
+      "limiting_crop_only": 0.05296043393251332,
+      "limiting_with_fishing": 0.06072945151798917
+    },
+    "output": {
+      "population": 400736.0,
+      "crop_only": {
+        "kcal": 0.08154537635717114,
+        "lip": 0.0202222236405134,
+        "glu": 0.14444457751345757,
+        "prot": 0.061761813505099676,
+        "fibres": 0.1939925749149204,
+        "ca": 0.0727585714682245,
+        "p": 0.24825176609354888,
+        "mg": 0.15718434148252047,
+        "k": 0.47405743500011543,
+        "fe": 0.15458295349082152
+      },
+      "with_fishing": {
+        "kcal": 0.10150864394480989,
+        "lip": 0.027991241225989248,
+        "glu": 0.14444457751345757,
+        "prot": 0.19765248159278095,
+        "fibres": 0.1939925749149204,
+        "ca": 0.09326877789388074,
+        "p": 0.5900885398544863,
+        "mg": 0.21370135474432878,
+        "k": 0.5338788704082795,
+        "fe": 0.18876663086691525
+      },
+      "limiting_crop_only": 0.0202222236405134,
+      "limiting_with_fishing": 0.027991241225989248
+    },
+    "delta": {
+      "population": 0.0,
+      "crop_only": {
+        "kcal": -0.0004774593266595323,
+        "lip": -0.032738210291999914,
+        "glu": 0.01941357177695993,
+        "prot": -0.024657019266449372,
+        "fibres": -0.06430303347059424,
+        "ca": -0.04628928341372422,
+        "p": -0.07530259352229757,
+        "mg": -0.04799260719389578,
+        "k": -0.15626637027545653,
+        "fe": -0.06913536235205892
+      },
+      "with_fishing": {
+        "kcal": -0.0004774593266595323,
+        "lip": -0.03273821029199992,
+        "glu": 0.01941357177695993,
+        "prot": -0.024657019266449393,
+        "fibres": -0.06430303347059424,
+        "ca": -0.04628928341372421,
+        "p": -0.07530259352229751,
+        "mg": -0.04799260719389581,
+        "k": -0.15626637027545642,
+        "fe": -0.06913536235205892
+      },
+      "limiting_crop_only": -0.032738210291999914,
+      "limiting_with_fishing": -0.03273821029199992
+    }
+  },
+  "resilience": {
+    "input": {
+      "climate_margin_at_risk": 28890131.72109798,
+      "climate_margin_at_risk_ratio": 0.3299506321672204,
+      "revenue_concentration_hhi": 0.24911071045970168,
+      "price_shock_margin_loss": 31050776.896341335,
+      "price_shock_margin_loss_ratio": 0.3546270943011738
+    },
+    "output": {
+      "climate_margin_at_risk": 30622581.085772373,
+      "climate_margin_at_risk_ratio": 0.31134878095872537,
+      "revenue_concentration_hhi": 0.1094190148501079,
+      "price_shock_margin_loss": 29832262.31535867,
+      "price_shock_margin_loss_ratio": 0.3033133777689064
+    },
+    "delta": {
+      "climate_margin_at_risk": 1732449.364674393,
+      "climate_margin_at_risk_ratio": -0.018601851208495057,
+      "revenue_concentration_hhi": -0.13969169560959377,
+      "price_shock_margin_loss": -1218514.5809826665,
+      "price_shock_margin_loss_ratio": -0.051313716532267406
+    }
+  },
+  "intensity": {
+    "input": {
+      "gross_margin_per_ha": 3713.588498223071,
+      "etp_per_ha": 0.16502422214154844,
+      "production_per_ha": 30.62574480691527,
+      "gross_margin_per_etp": 22503.293456143456,
+      "azote_per_tonne": 2.8606845123732327,
+      "ift_per_tonne": 0.09435508839684341,
+      "subsidy_per_tonne": 95.52385953754074,
+      "subsidy_per_etp": 17727.63602338948,
+      "subsidy_per_euro_margin": 0.7877796224778729,
+      "subsidy_per_ha": 2925.489345168342
+    },
+    "output": {
+      "gross_margin_per_ha": 3779.459988318251,
+      "etp_per_ha": 0.1335716922264559,
+      "production_per_ha": 34.99549497088203,
+      "gross_margin_per_etp": 28295.366520554355,
+      "azote_per_tonne": 2.1053173225984283,
+      "ift_per_tonne": 0.07310307550161374,
+      "subsidy_per_tonne": 78.26673552024448,
+      "subsidy_per_etp": 20505.715721879373,
+      "subsidy_per_euro_margin": 0.724702247874527,
+      "subsidy_per_ha": 2738.98314928607
+    },
+    "delta": {
+      "gross_margin_per_ha": 65.87149009517998,
+      "etp_per_ha": -0.031452529915092536,
+      "production_per_ha": 4.369750163966756,
+      "gross_margin_per_etp": 5792.073064410899,
+      "azote_per_tonne": -0.7553671897748044,
+      "ift_per_tonne": -0.02125201289522967,
+      "subsidy_per_tonne": -17.257124017296263,
+      "subsidy_per_etp": 2778.0796984898916,
+      "subsidy_per_euro_margin": -0.06307737460334595,
+      "subsidy_per_ha": -186.5061958822721
+    }
+  },
+  "diversity": {
+    "output": {
+      "shannon": 2.4610459885619265
+    },
+    "input": {
+      "shannon": 1.3346880676200985
+    },
+    "delta": {
+      "shannon": 1.126357920941828
+    }
+  },
+  "agroecology": {
+    "output": {
+      "surface_mae_ha": 14465.779999999999,
+      "surface_mae_share": 0.555874797538374,
+      "mae_spending": 2161488.68,
+      "surface_bio_ha": 6096.0599999999995,
+      "surface_bio_share": 0.23425256835661679,
+      "surface_bio_hors_prairie_ha": 0.0,
+      "surface_bio_hors_prairie_share": 0.0
+    },
+    "input": {
+      "surface_mae_ha": 14733.73,
+      "surface_mae_share": 0.6248933857381397,
+      "mae_spending": 2314546.66,
+      "surface_bio_ha": 6109.43,
+      "surface_bio_share": 0.2591158109745572,
+      "surface_bio_hors_prairie_ha": 0.0,
+      "surface_bio_hors_prairie_share": 0.0
+    },
+    "delta": {
+      "surface_mae_ha": -267.9500000000007,
+      "surface_mae_share": -0.0690185881997657,
+      "mae_spending": -153057.97999999998,
+      "surface_bio_ha": -13.3700000000008,
+      "surface_bio_share": -0.02486324261794043,
+      "surface_bio_hors_prairie_ha": 0.0,
+      "surface_bio_hors_prairie_share": 0.0
+    }
+  },
+  "shadow_prices": {
+    "an_agro_max_expl": {
+      "dual": 3552.70649191579,
+      "max_dual": 1426.061650727448,
+      "members": 4638,
+      "binding": 3679,
+      "is_binding": true
+    },
+    "ig_agro_max_expl": {
+      "dual": 25432.493033828858,
+      "max_dual": 1123.1270325517044,
+      "members": 4638,
+      "binding": 411,
+      "is_binding": true
+    },
+    "ba_ja": {
+      "dual": 1416757.2757973543,
+      "max_dual": 7035.003718604875,
+      "members": 13914,
+      "binding": 12244,
+      "is_binding": true
+    },
+    "ba_rota": {
+      "dual": 293340.2985617787,
+      "max_dual": 9013.644620827828,
+      "members": 13914,
+      "binding": 3319,
+      "is_binding": true
+    },
+    "mo_max_expl": {
+      "dual": 46204.744838984334,
+      "max_dual": 170.46497277024451,
+      "members": 4638,
+      "binding": 4419,
+      "is_binding": true
+    },
+    "ba_quota_max": {
+      "dual": 0.0,
+      "max_dual": 0.0,
+      "members": 1,
+      "binding": 0,
+      "is_binding": false
+    },
+    "bc_quota_max": {
+      "dual": 144.16190649444107,
+      "max_dual": 144.16190649444107,
+      "members": 1,
+      "binding": 1,
+      "is_binding": true
+    },
+    "cs_quota_max": {
+      "dual": 0.0,
+      "max_dual": 0.0,
+      "members": 1,
+      "binding": 0,
+      "is_binding": false
+    },
+    "pn_prod_min": {
+      "dual": -194.3635284763336,
+      "max_dual": 194.3635284763336,
+      "members": 1,
+      "binding": 1,
+      "is_binding": true
+    },
+    "inertie": {
+      "dual": 0.0,
+      "max_dual": 0.0,
+      "members": 1,
+      "binding": 0,
+      "is_binding": false
+    },
+    "budget_subventions": {
+      "dual": 0.05596273467968534,
+      "max_dual": 0.05596273467968534,
+      "members": 1,
+      "binding": 1,
+      "is_binding": true
+    },
+    "plafond_ift": {
+      "dual": 99.81605079420218,
+      "max_dual": 99.81605079420218,
+      "members": 1,
+      "binding": 1,
+      "is_binding": true
+    },
+    "plafond_azote": {
+      "dual": 0.0,
+      "max_dual": 0.0,
+      "members": 1,
+      "binding": 0,
+      "is_binding": false
+    },
+    "plancher_emploi": {
+      "dual": 0.0,
+      "max_dual": 0.0,
+      "members": 1,
+      "binding": 0,
+      "is_binding": false
+    }
+  },
+  "calibration": {
+    "thresholds": {
+      "regional_pad_max": 15.0,
+      "subregional_pad_max": 20.0,
+      "farm_pad_max": 20.0,
+      "farm_type_match_min": 80.0
+    },
+    "regional_pad_pct": 6.428071264768544,
+    "regional_within_threshold": true,
+    "crops_evaluated": 11,
+    "crops_within_threshold": 4,
+    "subregional_cells_evaluated": 70,
+    "subregional_cells_within_threshold": 21,
+    "farms_evaluated": 4588,
+    "farms_within_threshold": 3329,
+    "farm_type_match_pct": 86.54592496765848,
+    "farm_type_within_threshold": true,
+    "farm_type_recall_by_type": {
+      "Sans surface cultivee": 100.0,
+      "Arboriculteurs": 2.985074626865672,
+      "Bananiers": 76.71232876712328,
+      "Canniers specialises": 98.54121079504012,
+      "Canniers diversifies": 78.19025522041764,
+      "Diversifies": 69.14893617021276,
+      "Eleveurs": 95.41547277936962,
+      "Maraichers": 92.12962962962963,
+      "Canniers-eleveurs": 72.36180904522612
+    },
+    "matched_plots": 14834,
+    "total_plots": 22197,
+    "plot_match_pct": 66.82885074559626,
+    "matched_ha": 18008.37,
+    "total_ha": 23577.989999999998,
+    "area_match_pct": 76.37788462884241
+  },
+  "gini_revenue_by_farm": 0.7446758245658851,
+  "total_plots": 24734,
+  "total_farms": 4638,
+  "crop_universe": [
+    "AG",
+    "AN",
+    "AN_NU",
+    "AN_PA",
+    "BA",
+    "BA_INT",
+    "BA_IRR",
+    "BA_PER",
+    "BA_SINT",
+    "BC",
+    "BC_BT",
+    "BC_GTMG",
+    "CF_CGT_NIM",
+    "CF_CGT_NISM",
+    "CF_EGT_NIM",
+    "CF_EGT_NISM",
+    "CF_NBT_NIM",
+    "CF_NBT_NISM",
+    "CF_NGT_NIM",
+    "CF_NGT_NISM",
+    "CF_SBT_NIM",
+    "CF_SBT_NISM",
+    "CS",
+    "CS_BT_IM",
+    "CS_BT_NIM",
+    "CS_BT_NISM",
+    "CS_CGT_IM",
+    "CS_CGT_NIM",
+    "CS_CGT_NISM",
+    "CS_EGT_IM",
+    "CS_EGT_NIM",
+    "CS_EGT_NISM",
+    "CS_MG_IM",
+    "CS_MG_NIM",
+    "CS_MG_NISM",
+    "CS_NGT_IM",
+    "CS_NGT_NIM",
+    "CS_NGT_NISM",
+    "CS_SBT_IM",
+    "CS_SBT_NIM",
+    "CS_SBT_NISM",
+    "IG",
+    "IG_PLA",
+    "IG_TUT",
+    "JA",
+    "MA",
+    "MA_BAG_BIO_I",
+    "MA_BAG_BIO_NI",
+    "MA_BAG_FER_I",
+    "MA_BAG_FER_NI",
+    "MA_BAG_NON_I",
+    "MA_BAG_NON_NI",
+    "MA_BAG_VEG_I",
+    "MA_BAG_VEG_NI",
+    "MA_BRF_BIO_I",
+    "MA_BRF_BIO_NI",
+    "MA_BRF_FER_I",
+    "MA_BRF_FER_NI",
+    "MA_BRF_NON_I",
+    "MA_BRF_NON_NI",
+    "MA_BRF_VEG_I",
+    "MA_BRF_VEG_NI",
+    "MA_MOBIO",
+    "MA_PAI_BIO_I",
+    "MA_PAI_BIO_NI",
+    "MA_PAI_FER_I",
+    "MA_PAI_FER_NI",
+    "MA_PAI_NON_I",
+    "MA_PAI_NON_NI",
+    "MA_PAI_VEG_I",
+    "MA_PAI_VEG_NI",
+    "MA_PLBIO",
+    "MA_ROTA",
+    "MA_TO_CHOU_JA",
+    "MA_TO_CO_JA",
+    "ME",
+    "NC",
+    "PN",
+    "PN_PIQ",
+    "PN_TOUR",
+    "TH",
+    "VE",
+    "VE_BTGT",
+    "VE_PLUIE"
+  ]
+}

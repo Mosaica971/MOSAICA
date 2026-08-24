@@ -11,8 +11,5 @@ venv/
 .claude/*.lock
 # Golden snapshot de refactor : derive de data/, reste local
 .golden/
-/outputs/
 /data/
-/context/
-/student_context/
-/memoire/
+

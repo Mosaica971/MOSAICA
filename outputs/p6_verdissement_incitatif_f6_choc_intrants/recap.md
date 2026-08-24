@@ -1,0 +1,54 @@
+# Recap de simulation
+
+- Scenario : P6_verdissement_incitatif__F6_choc_intrants
+- Horodatage : 2026-08-03T12:39:57.141439+00:00
+- Duree de resolution : 827.19s
+- Condition de terminaison : optimal
+- Solveur : appsi_highs
+- Annee / scenario : 2017 / SMART
+- Nombre de parcelles (total) : 24734
+- Nombre d'exploitations (total) : 4638
+
+## Objectif
+- maximize_risk_adjusted_gross_margin = 47,227,356.91
+
+## Contraintes activees
+- at_most_one_crop_per_plot {}
+- farm_area_share_max {'label': 'an_agro_max_expl', 'crops': ['AN', 'AN_NU', 'AN_PA'], 'max_share': 0.75}
+- farm_area_share_max {'label': 'ig_agro_max_expl', 'crops': ['IG', 'IG_PLA', 'IG_TUT'], 'max_share': 0.66}
+- farm_area_ratio_min {'label': 'ba_ja', 'numerator_crops': ['JA'], 'denominator_crops': ['BA_INT', 'BA_IRR', 'BA_SINT'], 'ratio': 0.25}
+- farm_area_ratio_min {'label': 'ba_rota', 'numerator_crops': ['JA', 'CS', 'CS_BT_NISM', 'CS_BT_NIM', 'CS_BT_IM', 'CS_SBT_NISM', 'CS_SBT_NIM', 'CS_SBT_IM', 'CS_NGT_NISM', 'CS_NGT_NIM', 'CS_NGT_IM', 'CS_CGT_NISM', 'CS_CGT_NIM', 'CS_CGT_IM', 'CS_EGT_NISM', 'CS_EGT_NIM', 'CS_EGT_IM', 'CS_MG_NISM', 'CS_MG_NIM', 'CS_MG_IM', 'CF_NBT_NISM', 'CF_NBT_NIM', 'CF_SBT_NISM', 'CF_SBT_NIM', 'CF_NGT_NISM', 'CF_NGT_NIM', 'CF_CGT_NISM', 'CF_CGT_NIM', 'CF_EGT_NISM', 'CF_EGT_NIM'], 'denominator_crops': ['BA_INT', 'BA_IRR', 'BA_SINT'], 'ratio': 0.2}
+- farm_labor_hours_max {'label': 'mo_max_expl', 'slack': 1.2}
+- territory_production_bound {'label': 'ba_quota_max', 'groups': [{'crops': ['BA', 'BA_INT', 'BA_IRR', 'BA_PER', 'BA_SINT'], 'use_yield': True, 'rate_multiplier': 1.0}], 'sense': 'le', 'threshold': 77877}
+- territory_production_bound {'label': 'bc_quota_max', 'groups': [{'crops': ['BC', 'BC_BT', 'BC_GTMG'], 'use_yield': True, 'rate_multiplier': 1.0}], 'sense': 'le', 'threshold': 6440}
+- territory_production_bound {'label': 'cs_quota_max', 'groups': [{'crops': ['CS', 'CS_BT_NISM', 'CS_BT_NIM', 'CS_BT_IM', 'CS_SBT_NISM', 'CS_SBT_NIM', 'CS_SBT_IM', 'CS_NGT_NISM', 'CS_NGT_NIM', 'CS_NGT_IM', 'CS_CGT_NISM', 'CS_CGT_NIM', 'CS_CGT_IM', 'CS_EGT_NISM', 'CS_EGT_NIM', 'CS_EGT_IM', 'CS_MG_NISM', 'CS_MG_NIM', 'CS_MG_IM'], 'use_yield': True, 'rate_multiplier': 0.072}], 'sense': 'le', 'threshold': 107000}
+- territory_production_bound {'label': 'pn_prod_min', 'groups': [{'crops': ['PN_PIQ'], 'use_yield': False, 'rate_multiplier': 1.0}], 'sense': 'ge', 'threshold': 6096}
+- crop_share_bound {'label': 'bio_min', 'numerator_crops': ['MA_PLBIO', 'MA_MOBIO'], 'denominator_crops': ['MA', 'MA_PLBIO', 'MA_MOBIO', 'MA_ROTA', 'MA_TO_CHOU_JA', 'MA_TO_CO_JA', 'MA_BAG_BIO_I', 'MA_BAG_BIO_NI', 'MA_BAG_VEG_I', 'MA_BAG_VEG_NI', 'MA_BAG_FER_I', 'MA_BAG_FER_NI', 'MA_BAG_NON_I', 'MA_BAG_NON_NI', 'MA_BRF_BIO_I', 'MA_BRF_BIO_NI', 'MA_BRF_VEG_I', 'MA_BRF_VEG_NI', 'MA_BRF_FER_I', 'MA_BRF_FER_NI', 'MA_BRF_NON_I', 'MA_BRF_NON_NI', 'MA_PAI_BIO_I', 'MA_PAI_BIO_NI', 'MA_PAI_VEG_I', 'MA_PAI_VEG_NI', 'MA_PAI_FER_I', 'MA_PAI_FER_NI', 'MA_PAI_NON_I', 'MA_PAI_NON_NI'], 'sense': 'ge', 'share': 0.1}
+- territory_indicator_bound {'label': 'budget_subventions', 'indicator': 'subvention', 'sense': 'le', 'threshold': 85000000}
+- baseline_inertia_min {'label': 'inertie', 'min_share': 0.5}
+
+## Entree vs sortie (surface)
+- Surface cultivee (ha) : 23577.99 -> 26105.42 (delta +2527.43)
+- Parcelles actives : 22197 -> 24668 (delta +2471)
+- Exploitations actives : 4588 -> 4638 (delta +50)
+
+## Entree vs sortie (economie)
+_Entree = baseline 2017 a economie representative par famille (voir docs/04-vigilance.md point 4)._
+- Production (t) : 722,094 -> 941,322 (delta +219,228)
+- Subvention (EUR) : 68,977,159 -> 40,619,430 (delta -28,357,729)
+- Revenu / produit brut (EUR) : 229,766,229 -> 259,691,859 (delta +29,925,630)
+- Cout variable (EUR) : 206,124,856 -> 190,099,955 (delta -16,024,900)
+- Marge brute (EUR) : 23,641,373 -> 69,591,904 (delta +45,950,531)
+- Cout main d'oeuvre (EUR) : 96,859,669 -> 96,463,994 (delta -395,675)
+- Revenu net (marge brute - cout MO, EUR) : -73,218,296 -> -26,872,090 (delta +46,346,205)
+- Emploi (ETP) : 3,888.6 -> 3,872.7 (delta -15.9)
+
+## Calibration (observe 2017 vs simule)
+_Ecart mesure au niveau des 12 groupes RPG observes. Seuils : Chopin et al. 2015 section 2.6. Voir docs/superpowers/specs/2026-07-21-calibration-validation-design.md._
+- PAD territorial : 26.1% (seuil 15%) -> HORS SEUIL
+- Cultures sous seuil : 2 / 11
+- Cellules sous-regionales sous seuil : 12 / 70 (seuil 20%)
+- Exploitations sous seuil : 2945 / 4588 (seuil 20%)
+- Types d'exploitation correctement simules : 73.6% (seuil 80%) -> HORS SEUIL
+- Parcelles avec la bonne culture : 54.1% (12019 / 22197)
+- Surface avec la bonne culture : 62.7% (14,783 / 23,578 ha)
