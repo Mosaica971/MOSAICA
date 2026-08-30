@@ -91,29 +91,16 @@ pour plusieurs raisons.
 Réaliser une campagne de scénarios suppose un nombre considérable de modifications manuelles. La
 traçabilité est faible, bricolée au cas par cas.
 
-\item % troisieme raison : a rediger a partir de la reponse ci-dessous.
+\item Le \gls{gams} ne signale pas ses défauts (§~\ref{sec:parite},
+annexe~\ref{ann:portage}). Par exemple, si l'on interroge \gls{gams} sur une colonne absente
+d'une table, il préférera renvoyer \num{0} plutôt qu'une erreur ou un avertissement. La
+conséquence concrète, identifiée et résolue durant le portage, est que l'équation
+\texttt{Eq\_VE\_PLUIE} testait l'éligibilité du verger pluvial sur une parcelle en comparant ce
+\num{0} avec la valeur~\num{1}. La variante était donc interdite sur toutes les parcelles du
+territoire.
 
-\begin{questionreponse}{Explique mieux la troisième raison.}
-La troisième raison n'est ni l'accès ni le confort : c'est que le \gls{gams} \textbf{ne signale
-pas ses propres défauts}.
-
-Interrogé sur une colonne absente d'une table, \gls{gams} ne renvoie ni erreur ni avertissement :
-il renvoie zéro. L'équation \texttt{Eq\_VE\_PLUIE} teste ce zéro contre la valeur~1 pour décider
-si une parcelle peut porter un verger pluvial. Le test $0 \neq 1$ étant toujours vrai, la
-variante est interdite sur \emph{toutes} les parcelles du territoire.
-
-Ce défaut est invisible des deux côtés à la fois : le code reste correct d'apparence, et le
-résultat reste plausible --- un verger de moins dans un assolement guadeloupéen n'a l'air de
-rien. \emph{Un paramètre absent ne laisse pas un trou, il laisse un nombre crédible.} Le
-découvrir suppose donc de refaire le modèle contre ses données, ligne à ligne : c'est la seule
-lecture qui confronte chaque paramètre à la table qui est censée le porter.
-
-Trois défauts de cette famille ont été trouvés pendant le portage
-(§~\ref{sec:parite}, annexe~\ref{ann:portage}). La branche \enquote{rester en \gls{gams} et
-n'ajouter qu'une couche de scripts autour} a donc été fermée par une \emph{mesure} et non par une
-préférence de langage : une couche de scripts n'aurait rien révélé, puisqu'elle laisse le
-programme intact.
-\end{questionreponse}
+Le code reste correct et le résultat est plausible, ce qui rend la résolution des problèmes
+difficile.
 
 \end{enumerate}
 

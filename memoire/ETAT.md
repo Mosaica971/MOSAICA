@@ -4,7 +4,25 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-08-23**. Dépôt le **26/08** (J-3), soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-08-29**. Dépôt le **26/08**, soutenance **1-4 sept**.
+>
+> **Session du 2026-08-29 — mise au propre des reformulations de Clément (ch. 1 à 4).**
+> Il a remplacé quatorze encadrés `questionreponse` par sa propre prose, en **texte brut** :
+> macros perdues, `Eq_VE_PLUIE` avec des `_` nus (erreur de compilation), `2^(308 847)`,
+> `(1 − 𝑎 𝑓 𝑣𝑐)` en unicode mathématique, `0%` non échappé, renvois écrits en dur
+> (« § 2.2, annexe B », « paragraphe 2.4 »), listes à tirets, et **paragraphes séparés par un
+> seul retour à la ligne** (donc collés à l'impression). Tout est repassé : `\num`/`\SI`,
+> `\gls`, `\ref`, `\texttt`, `itemize`, sauts de paragraphe. **Le sens n'a pas été touché**,
+> seules les fautes d'accord et deux tournures cassées (« les jeunes vergers […] compris »,
+> « plusieurs légumes sur succèdent ») l'ont été.
+> **Une erreur de fond corrigée avec `% CORRIGE` en regard** (ch. 2, § tractabilité) : la
+> relaxation linéaire a des variables **continues** entre 0 et 1, pas « entières » — un entier
+> entre 0 et 1 vaut 0 ou 1, il n'y aurait aucune relaxation.
+> **Une question `--- … ---` laissée en clair au ch. 4** (forçages non moyennés, variance des
+> paramètres) a été mise en `questionreponse` et répondue : le résultat d'une politique est un
+> vecteur, il n'y a **aucune loi de probabilité** dans le modèle, $v_c$ est un coefficient
+> constant par culture, et un forçage est un jeu de coefficients, pas un tirage.
+> Compile proprement : **0 `Overfull hbox`, 0 référence non résolue, cœur à 33 / 30**.
 >
 > **Session du 2026-08-23 (suite) — chapitres 04 et 05, encadrement de tous les chapitres.**
 > Trois changements. (1) **Ch. 04** : même traitement que 01-03, plus les fautes **corrigées**

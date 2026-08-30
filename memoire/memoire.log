@@ -1,7 +1,6 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  23 AUG 2026 21:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  30 AUG 2026 16:40
 entering extended mode
  restricted \write18 enabled.
- file:line:error style messages enabled.
  %&-line parsing enabled.
 **./memoire.tex
 (memoire.tex
@@ -2359,7 +2358,7 @@ fonts/enc/dvips/tex-gyre/q-ts1.enc}]) (memoire.toc [3] [4])
 
 
 Package glossaries Info: Preparing to sort glossary `acronym' (total number of
-(glossaries)             referenced entries: 19)
+(glossaries)             referenced entries: 18)
 
 [5] [6
 
@@ -2403,279 +2402,245 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
 (Font)              scaled to size 10.0pt on input line 11.
 [3]
+LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
+(Font)              scaled to size 12.0pt on input line 98.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.95pt on input line 96.
+(Font)              scaled to size 10.95pt on input line 108.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
+(Font)              scaled to size 10.95pt on input line 108.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/it' will be
+(Font)              scaled to size 10.95pt on input line 108.
+LaTeX Font Info:    Font shape `TS1/ntxtlf/b/it' will be
+(Font)              scaled to size 10.95pt on input line 108.
+ [4]) (chapitres/02-porter.tex
+Chapitre 2.
+
+Underfull \hbox (badness 10000) in paragraph at lines 24--32
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 36--38
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 43--48
+
+ []
+
+[5{C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ot
+1-tlf.enc}]
+Underfull \hbox (badness 10000) in paragraph at lines 53--55
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--63
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--71
+
+ []
+
+[6] [7]
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 10.95pt on input line 188.
+ [8]) (chapitres/03-calibrer.tex
+Chapitre 3.
+[9]
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 8.8pt on input line 80.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 6.6pt on input line 80.
+ [10] [11]
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
+(Font)              scaled to size 10.95pt on input line 231.
+Package microtype Info: Character `029' is missing
+(microtype)             in font `T1/ntxtlf/m/sc/10.95'.
+(microtype)             Ignoring protrusion settings for this character.
+ [12]
+<figures/calibration-observe-simule.pdf, id=622, 434.99513pt x 266.3073pt>
+File: figures/calibration-observe-simule.pdf Graphic file (type pdf)
+<use figures/calibration-observe-simule.pdf>
+Package pdftex.def Info: figures/calibration-observe-simule.pdf  used on input 
+line 262.
+(pdftex.def)             Requested size: 375.57846pt x 229.94221pt.
+ (tables/rendements.tex)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[13 <./figures/calibration-observe-simule.pdf>] [14] [15] [16]
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 427.
+
+(C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg
+File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
+(RS)
+)
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 427.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 441.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 441.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 442.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 443.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 447.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 450.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 451.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 451.
+ [17] [18]) (chapitres/04-explorer.tex
+Chapitre 4.
+[19]
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 8.0pt on input line 69.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 6.0pt on input line 72.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 5.5pt on input line 72.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
+(Font)              scaled to size 8.0pt on input line 81.
+Package microtype Info: Character `029' is missing
+(microtype)             in font `T1/ntxtlf/m/sc/8'.
+(microtype)             Ignoring protrusion settings for this character.
+
+! Undefined control sequence.
+l.155 \itemb
+             On décrit une politique par ses résultats sous chaque forçag...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+[20]
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 179.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 180.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 192.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 193.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 235.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 235.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 235.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 235.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 235.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 235.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[21]
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 304.
+ (tables/front-subvQuatre.tex
+LaTeX Font Info:    Font shape `U/eurosym/b/n' in size <10.95> not available
+(Font)              Font shape `U/eurosym/bx/n' tried instead on input line 4.
+) [22]
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 334.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 335.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 342.
+LaTeX Info: Symbol \textminus not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 343.
+) (chapitres/05-discussion.tex
+Chapitre 5.
+[23]
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 96.
+(Font)              scaled to size 10.29301pt on input line 31.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 10.29301pt on input line 96.
+(Font)              scaled to size 10.29301pt on input line 31.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 9.40002pt on input line 96.
-LaTeX Font Info:    Trying to load font information for TS1+qhv on input line 9
-6.
+(Font)              scaled to size 9.40002pt on input line 31.
+LaTeX Font Info:    Trying to load font information for TS1+qhv on input line 3
+1.
 
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/tex-gyre\ts1qhv.fd
 File: ts1qhv.fd 2009/09/25 v1.2 font definition file for TS1/qhv
 )
 LaTeX Font Info:    Font shape `TS1/qhv/b/n' will be
-(Font)              scaled to size 9.40002pt on input line 96.
+(Font)              scaled to size 9.40002pt on input line 31.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `qhv' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
-(Font)              scaled to size 10.0pt on input line 96.
-LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
-(Font)              scaled to size 10.95pt on input line 98.
-LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
-(Font)              scaled to size 10.95pt on input line 101.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 10.95pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 8.0pt on input line 102.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 6.1pt on input line 102.
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
-(Font)              scaled to size 10.95pt on input line 103.
-
-[4{C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ot
-1-tlf.enc}]
-LaTeX Font Info:    Font shape `T1/ntxtlf/b/it' will be
-(Font)              scaled to size 10.95pt on input line 121.
-LaTeX Font Info:    Font shape `TS1/ntxtlf/b/it' will be
-(Font)              scaled to size 10.95pt on input line 121.
-) (chapitres/02-porter.tex
-Chapitre 2.
-[5]
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
-(Font)              scaled to size 10.95pt on input line 86.
-Package microtype Info: Character `029' is missing
-(microtype)             in font `T1/ntxtlf/m/sc/10.95'.
-(microtype)             Ignoring protrusion settings for this character.
- [6]
-LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
-(Font)              scaled to size 12.0pt on input line 145.
- [7] [8] [9]
-LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.95pt on input line 305.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 305.
-
-(C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg
-File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
-(RS)
-) [10] [11]
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.1pt on input line 383.
-) (chapitres/03-calibrer.tex
-Chapitre 3.
-[12] [13]
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.8pt on input line 105.
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.6pt on input line 105.
- [14] [15] [16]
-<figures/calibration-observe-simule.pdf, id=663, 434.99513pt x 266.3073pt>
-File: figures/calibration-observe-simule.pdf Graphic file (type pdf)
-<use figures/calibration-observe-simule.pdf>
-Package pdftex.def Info: figures/calibration-observe-simule.pdf  used on input 
-line 336.
-(pdftex.def)             Requested size: 375.57846pt x 229.94221pt.
- [17] (tables/rendements.tex) [18 <./figures/calibration-observe-simule.pdf>] [
-19] [20] [21]
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 568.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 569.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 570.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 577.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 592.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 593.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 608.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 608.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 608.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 610.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 619.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 624.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 624.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 624.
- [22] [23]
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 717.
- [24])
-(chapitres/04-explorer.tex
-Chapitre 4.
-[25]
-LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
-(Font)              scaled to size 8.0pt on input line 86.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 6.0pt on input line 89.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 5.5pt on input line 89.
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
-(Font)              scaled to size 8.0pt on input line 98.
-Package microtype Info: Character `029' is missing
-(microtype)             in font `T1/ntxtlf/m/sc/8'.
-(microtype)             Ignoring protrusion settings for this character.
- [26] [27] [28]
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 236.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 237.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 249.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 250.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 314.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 314.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 314.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 314.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 314.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 314.
- [29] [30]
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 409.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 427.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 427.
- [31] (tables/front-subvQuatre.tex
-LaTeX Font Info:    Font shape `U/eurosym/b/n' in size <10.95> not available
-(Font)              Font shape `U/eurosym/bx/n' tried instead on input line 4.
-)
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 452.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 453.
- [32]
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 485.
-LaTeX Info: Symbol \textminus not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 486.
- [33])
-(chapitres/05-discussion.tex
-Chapitre 5.
+(Font)              scaled to size 10.0pt on input line 31.
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 38.
@@ -2688,13 +2653,14 @@ LaTeX Info: Symbol \textminus not provided by
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 40.
+LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
+(Font)              scaled to size 10.95pt on input line 47.
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 48.
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 49.
-[34]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 68.
@@ -2716,14 +2682,15 @@ LaTeX Info: Symbol \textminus not provided by
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 82.
- [35] [36] [37]) (chapitres/06-conclusion.tex [38]
+
+[24] [25] [26]) (chapitres/06-conclusion.tex [27] [28]
 ATTENTE : Q11
 ATTENTE : Q8 (bloc)
-[39])
+)
 
-===== PAGES DU COEUR : 40 / 30 =====
+===== PAGES DU COEUR : 29 / 30 =====
 
-[40] [41
+[29] [30
 
 ] (annexes/A-formulation.tex
 Annexe A.
@@ -2739,7 +2706,7 @@ Underfull \hbox (badness 3128) in paragraph at lines 63--63
 oupe de cultures do-mi-nant
  []
 
-[42] [43] [44]) (annexes/B-portage-gams.tex
+[31] [32] [33]) (annexes/B-portage-gams.tex
 Annexe B.
 
 Underfull \hbox (badness 1762) in paragraph at lines 75--75
@@ -2752,7 +2719,7 @@ Overfull \hbox (1.09224pt too wide) in paragraph at lines 75--75
 []|\T1/ntxtt/m/n/8 Eq_AN_AGRO_MAX_Expl\T1/ntxtlf/m/n/8 (-20) , 
  []
 
-[45] [46]
+[34] [35]
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 8
 6.
 
@@ -2767,9 +2734,9 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             See the microtype manual for details.
 
 ATTENTE : Q14
-[47]) (annexes/C-scenarios.tex
+[36]) (annexes/C-scenarios.tex
 Annexe C.
-[48]
+[37]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 69.
@@ -2781,9 +2748,9 @@ Underfull \hbox (badness 1728) in paragraph at lines 69--69
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 69.
-[49]) (annexes/D-resultats.tex
+[38]) (annexes/D-resultats.tex
 Annexe D.
-[50] [51] (tables/realloc-budget.tex
+[39] [40] (tables/realloc-budget.tex
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 12.
@@ -2797,9 +2764,9 @@ LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 15.
 ) (tables/front-azoteRef.tex)
-(tables/front-azoteHuit.tex) [52] [53]) (annexes/E-calibration.tex
+(tables/front-azoteHuit.tex) [41] [42]) (annexes/E-calibration.tex
 Annexe E.
-[54] [55] [56]) (annexes/F-chronologie.tex
+[43] [44] [45]) (annexes/F-chronologie.tex
 Annexe F.
 
 Underfull \hbox (badness 10000) in paragraph at lines 38--38
@@ -2816,7 +2783,7 @@ Underfull \hbox (badness 2865) in paragraph at lines 38--38
 []|\T1/ntxtlf/m/n/10.95 (+20) plus au-cune r�-so-lu-tion
  []
 
-[57] [58]) [59] (memoire.aux)
+[46] [47]) [48] (memoire.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
@@ -2828,19 +2795,19 @@ Package logreq Info: Writing requests to 'memoire.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 60575 strings out of 467871
- 1273122 string characters out of 5416925
- 2142945 words of memory out of 5000000
- 87674 multiletter control sequences out of 15000+600000
- 812563 words of font info for 532 fonts, out of 8000000 for 9000
+ 60369 strings out of 467871
+ 1269871 string characters out of 5416925
+ 2143074 words of memory out of 5000000
+ 87617 multiletter control sequences out of 15000+600000
+ 802740 words of font info for 467 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  91i,15n,120p,2515b,3043s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\t
 crm0600.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec
-/dpi600\tcrm1095.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jk
-nappen/ec/dpi600\tcrm1200.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/
-ljfour/jknappen/ec/dpi600\tcrm0900.pk> <C:\Users\Clément\AppData\Local\MiKTeX\
-fonts/pk/ljfour/jknappen/ec/dpi600\tcrm0800.pk><C:/Users/Clément/AppData/Local
+/dpi600\tcrm0800.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jk
+nappen/ec/dpi600\tcrm1095.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/
+ljfour/jknappen/ec/dpi600\tcrm1200.pk> <C:\Users\Clément\AppData\Local\MiKTeX\
+fonts/pk/ljfour/jknappen/ec/dpi600\tcrm0900.pk><C:/Users/Clément/AppData/Local
 /Programs/MiKTeX/fonts/type1/public/newtx/NewTXMI.pfb><C:/Users/Clément/AppDat
 a/Local/Programs/MiKTeX/fonts/type1/public/newtx/NewTXMI7.pfb><C:/Users/Clémen
 t/AppData/Local/Programs/MiKTeX/fonts/type1/public/eurosym/feybr10.pfb><C:/User
@@ -2860,9 +2827,9 @@ Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmbi.pfb
 ><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmr
 .pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/
 ztmri.pfb>
-Output written on memoire.pdf (66 pages, 749686 bytes).
+Output written on memoire.pdf (55 pages, 681328 bytes).
 PDF statistics:
- 1298 PDF objects out of 1440 (max. 8388607)
- 215 named destinations out of 1000 (max. 500000)
- 90242 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 1196 PDF objects out of 1200 (max. 8388607)
+ 193 named destinations out of 1000 (max. 500000)
+ 88194 words of extra memory for PDF output out of 89155 (max. 10000000)
 

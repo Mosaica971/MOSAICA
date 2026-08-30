@@ -38,24 +38,7 @@ explorés. Le produit cartésien complet donne \num{\mesCellulesTotal} combinais
 correspond à environ cinq jours de calcul continu, sans compter les fronts. Un plan explicite
 désigne, pour chaque politique, ses forçages et ses fronts.
 
-\begin{questionreponse}{Explique pourquoi un front n'est jamais croisé avec les forçages de sa
-cellule. On pourrait tout à fait croiser les deux, non ?}
-Oui, on peut, et le plan sait l'écrire : un front forcé se nomme explicitement, à côté du
-balayage. \textbf{Ce n'est donc pas une impossibilité de méthode, c'est une règle de coût} — et
-le \emph{défaut} est mis du côté qui ne fait pas exploser la campagne.
-
-L'arithmétique tient en trois lignes. Une cellule ordinaire vaut une résolution. Un front vaut
-\emph{une résolution par point} : \num{\frontsubvQuatrePoints} pour l'enveloppe publique,
-\num{\frontazoteRefPoints} pour l'azote. Croiser un front de sept points avec les quatre
-forçages d'une politique, c'est vingt-huit résolutions au lieu de sept : à une heure de calcul
-par point, un après-midi devient une semaine.
-
-Ce que le croisement dirait est pourtant intéressant — le coût marginal de l'azote sous crise
-systémique n'a aucune raison d'être celui du nominal. C'est précisément pourquoi le plan permet
-de l'écrire : un par un, en le sachant, plutôt qu'en multipliant par défaut.
-\end{questionreponse}
-
-\begin{figure}[tbp]
+\begin{figure}[h]
   \centering
   % Une ligne de catalogue = un rectangle plein (la teinte porte le rang), trois noeuds :
   % marqueur de calcul, abreviation, nom.
@@ -150,17 +133,10 @@ de l'écrire : un par un, en le sachant, plutôt qu'en multipliant par défaut.
       {\calc~au moins une cellule de la grille a été résolue \qquad
        \jamais~aucune : la ligne n'a jamais été calculée};
   \end{tikzpicture}
-  \caption{Les deux catalogues. \textbf{La teinte donne un rang, pas une mesure} : de la
+  \caption{Les deux catalogues. La teinte va de la
   conjoncture la plus favorable (F10) à la plus défavorable (F9), et de la rupture
-  agroécologique (P10) à la dérégulation (P1). Cet ordre est celui de la \emph{contrainte
-  publique imposée}, en rien un classement de performance --- le §~\ref{sec:grille} montre
-  qu'aucune politique n'est la meilleure sous tous les forçages. Les témoins encadrés en noir
-  sont les points de comparaison : F0 est le forçage \emph{nul}, P4 le statu quo. F7 est le seul
-  forçage favorable ; F11 n'appartient à aucun bloc, c'est le seul qui retire de la \emph{terre}
-  plutôt que de changer un coefficient ; P9 est hors gradient, elle contraint la destination de
-  la production et non son intensité. La colonne de marqueurs, enfin, porte une limite du
-  travail plutôt qu'un résultat : \textbf{la borne dérégulatrice a été calculée, sa borne de
-  bifurcation non}.}
+  agroécologique (P10) à la dérégulation (P1). Les témoins encadrés en noir
+  sont les points de comparaison. F0 est le forçage \emph{nul}, P4 le statu quo.}
   \label{fig:spectre}
 \end{figure}
 
@@ -176,11 +152,9 @@ On distingue trois décisions au niveau de la méthode :
 référence, et non des chiffres inventés. L'annexe~\ref{ann:scenarios} donne, pour chaque seuil,
 la fraction et le total dont elle est tirée.
 
-\item Les forçages ne sont pas moyennés, ils possèdent des variances propres qui se ressentent
-au niveau local, afin de ne pas imposer une distribution de probabilité arbitraire. On décrit
-une politique par ses résultats sous chaque forçage. On mobilise les critères classiques de
-décision dans l'incertain : pire cas \parencite{wald1945}, regret maximal \parencite{savage1951},
-domaine de viabilité \parencite{starr1963}. L'infaisabilité correspond au pire résultat.
+\item On décrit une politique par ses résultats sous chaque forçage. On mobilise les 
+critères classiques de décision dans l'incertain : pire cas \parencite{wald1945}, 
+regret maximal \parencite{savage1951}, domaine de viabilité \parencite{starr1963}. L'infaisabilité correspond au pire résultat.
 
 \item Les fronts sont tracés par $\varepsilon$-contrainte \parencite{haimes1971,mavrotas2009} et
 non par somme pondérée. La raison est qu'une somme pondérée ne peut atteindre que les points
@@ -188,38 +162,7 @@ situés sur l'enveloppe convexe du front.
 
 \end{enumerate}
 
-\begin{questionreponse}{Explique comment on rend les forçages non moyennés, le rapport avec les
-critères de décision, et ce que sont l'epsilon-contrainte, la somme pondérée et le théorème.}
-\textbf{Ce qu'on fait pour ne pas moyenner : rien, et c'est le point.} Chaque case
-(politique, forçage) est une résolution séparée, et elle le reste jusqu'au bout — le tableau
-garde une colonne par forçage, et l'agrégation ne calcule jamais de moyenne : pire cas,
-rétention, coefficient de variation, regret maximal, domaine de viabilité. La ligne d'une
-politique est donc un \emph{vecteur} de résultats, pas un nombre.
 
-\smallskip
-\textbf{Pourquoi c'est la même décision que les critères.} Moyenner suppose une probabilité par
-forçage, que personne n'a estimée : la moyenne affirmerait une distribution qui n'existe nulle
-part. Mais refuser la moyenne a un prix immédiat — \emph{un vecteur ne se classe pas}. Il faut
-donc un critère qui ordonne des vecteurs sans probabilités, et c'est exactement ce que sont les
-trois cités : Wald note une politique sur son \emph{pire} forçage, Savage sur ce qu'elle aurait
-fait regretter forçage par forçage, Starr sur le \emph{nombre} de forçages où elle reste viable.
-Les deux moitiés de l'item sont donc une seule décision : le jugement de valeur est déplacé
-d'une pondération invisible vers un critère nommé, que le lecteur peut refuser.
-
-\smallskip
-\textbf{$\varepsilon$-contrainte, somme pondérée, théorème.} Il y a deux objectifs, la marge et
-l'azote. La somme pondérée en fait un seul : maximiser $\text{marge} - \lambda \times
-\text{azote}$, en faisant varier $\lambda$. L'$\varepsilon$-contrainte en garde un et transforme
-l'autre en contrainte : maximiser la marge sous \enquote{azote $\le \varepsilon$}, en faisant
-varier $\varepsilon$. Le théorème dit ceci : \emph{quel que soit $\lambda$, l'optimum d'une
-somme pondérée est un point de l'enveloppe convexe du front}. Tout ce qui se trouve dans un
-creux du front est donc inatteignable, à n'importe quel poids — et sur un problème en nombres
-entiers, dont le front est fait de points isolés, ces creux sont la règle et non l'exception.
-L'$\varepsilon$-contrainte, elle, atteint n'importe quel point non dominé. La seconde raison est
-moins technique et vaut peut-être autant : $\lambda$ est un \emph{taux de change} entre un euro
-et un kilogramme d'azote, c'est-à-dire une valeur politique déguisée en paramètre technique,
-tandis que $\varepsilon$ est un seuil — la forme même sous laquelle une réglementation s'écrit.
-\end{questionreponse}
 
 \section{Ce que la grille montre}
 \label{sec:grille}
@@ -250,42 +193,20 @@ classement change. Sous F9, P8 (\SI{\grilleNetPhuitFneuf}{\mega\euros}) est plus
 (\SI{\grilleNetPneufFneuf}{\mega\euros}). Les métriques \enquote{brute} et \enquote{hors aide}
 se complètent et ne donnent pas les mêmes informations.
 
-Ce qui limite les politiques, c'est le travail. Le plafond de main d'\oe uvre autorise
-\SI{6252740}{\hour}, c'est-à-dire \SI{3891}{\etp} pour le run nominal (P4-F0). Le run de
-référence atteint \SI{90}{\percent} du plafond.
-
-\begin{questionreponse}{C'est quoi un desserrement nominal ? Y a-t-il trop de main d'\oe uvre et
-pas assez de travail ? Créer du travail en plus est-il impossible à cause des autres plafonds ?}
-\textbf{Le desserrement}, c'est le facteur $\sigma$ de l'équation~\eqref{eq:mo}. Le plafond de
-travail n'est pas un chiffre du territoire : c'est la main d'\oe uvre \emph{observée de chaque
-exploitation}, multipliée par $\sigma$. Nominal veut dire $\sigma = 1$, c'est-à-dire le plafond
-pris au pied de la lettre. Une politique d'installation le desserre (P8 : $\sigma = 1{,}5$), une
-politique d'austérité le resserre (P5 : $\sigma = 0{,}9$).
-
-\textbf{Y a-t-il trop de main d'\oe uvre ?} Non, il en reste peu : le plan observé demande
-\SI{\mesMoObserve}{\mega\hour} pour un plafond de \SI{\mesMoPlafond}{\mega\hour}. Mais la marge
-restante n'est pas le sujet, et c'est le troisième point qui compte.
-
-\textbf{Créer du travail est-il impossible à cause des autres plafonds ?} C'est exactement cela,
-et c'est mesuré : P10 était infaisable avec un plancher à \SI{6000}{\etp} alors que son propre
-desserrement en autorisait \num{8561}. \emph{Ce ne sont pas les heures qui manquaient, ce sont
-les cultures capables de les absorber} — les itinéraires les plus intensifs en travail sont
-aussi les plus intensifs en azote et en \gls{ift}, donc les plafonds environnementaux de la même
-politique les écartent. Conséquence pratique, valable pour tout scénario à écrire : un plancher
-d'emploi au-dessus de \SI{3891}{\etp} est infaisable si le même scénario ne desserre pas
-$\sigma$ — et le desserrer ne suffit pas toujours.
-\end{questionreponse}
+Ce qui limite les politiques, c'est la contradiction entre hausse des \gls{etp} et régulation
+des pratiques. Les itinéraires les plus intensifs en travail sont aussi les plus intensifs en
+azote et en \gls{ift}. En somme, créer du travail peut devenir impossible à cause des autres
+plafonds.
 
 À noter qu'un forçage peut rendre une politique inutile, c'est-à-dire qu'elle ne coûte et
 n'apporte rien. Les contraintes imposées par la politique peuvent être déjà contenues dans les
 contraintes imposées par les forçages. Sous crise systémique, le plafond d'azote de P8 ne mord
 jamais car la crise réduit les surfaces intensives.
 
-\begin{table}[tbp]
+\begin{table}[h]
   \centering
-  \caption{Marge brute par cellule (M\eur). \emph{Brute} inclut la subvention ;
-  \emph{hors aide} en déduit le transfert. La dague marque un solve arrêté à la limite de temps,
-  donc prouvablement sous-optimal.}
+  \caption{Marge brute par cellule (M\eur).
+  \emph{hors aide} exclut les subventions de la marge brute. La dague marque un solve sous-optimal car arrêté à la limite de temps.}
   \label{tab:grille}
   \small
   \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrrrr@{}}
@@ -314,7 +235,7 @@ jamais car la crise réduit les surfaces intensives.
   \end{tabularx}
 \end{table}
 
-\begin{figure}[tbp]
+\begin{figure}[h]
   \centering
   \begin{tikzpicture}[x=1.25mm, y=1mm, font=\scriptsize]
     % Regret en % de la meilleure politique du MEME forcage. Barres empilees par politique :
@@ -351,10 +272,7 @@ jamais car la crise réduit les surfaces intensives.
     \fill[black!15] (33,-52) rectangle (35.5,-53.6); \node[right] at (35.5,-52.8) {F9 crise};
   \end{tikzpicture}
   \caption{Regret par politique et par forçage, en pourcentage de la meilleure politique du même
-  forçage. Une barre nulle (trait) signifie \enquote{c'était le meilleur choix, sachant ce qui
-  est arrivé} ; les cellules non résolues n'ont pas de barre. La lecture qui compte est
-  \emph{verticale} : P9 est sans regret sous le forçage nominal et le plus regretté sous crise,
-  P4 fait l'inverse. Aucune politique n'est courte partout.}
+  forçage. Une barre nulle correspond au meilleur choix de politique, sachant le forçage. Aucune politique n'est courte partout.}
   \label{fig:regret}
 \end{figure}
 
@@ -373,29 +291,6 @@ la marge brute pour le plafond haut de subventions et \SI{34}{\percent} pour le 
 subventions. On constate que le modèle va chercher des cultures plus rémunératrices et exposées.
 L'aide publique achète la stabilité et non la marge.
 
-\begin{questionreponse}{Comment sont simulées l'instabilité et l'exposition dans le modèle ?}
-Par un seul terme, la \textbf{décote de risque} $(1 - a_{f} v_{c})$ de
-l'équation~\eqref{eq:objectif}, et par rien d'autre. $v_c$ est la variabilité de rendement de la
-culture, lue dans la table du \gls{gams} ; $a_f$ est l'aversion au risque de l'exploitation,
-donnée par son type. Une culture \enquote{exposée} est donc simplement une culture dont la marge
-est fortement décotée \emph{à l'objectif}, sans que rien ne change à la marge brute effectivement
-comptée ensuite.
-
-C'est ce qui fait diverger les deux colonnes quand l'enveloppe se serre : la marge brute monte,
-l'objectif baisse, et l'écart entre les deux \emph{est} la décote — \SI{18}{\percent} au plafond
-haut, \SI{34}{\percent} au plafond bas. Le modèle n'a pas changé d'avis sur le risque, il a
-changé d'assolement.
-
-\textbf{Ce que ce n'est pas}, et qu'il vaut mieux dire avant qu'on ne le demande : aucune loi de
-probabilité, aucune covariance entre cultures, aucune dynamique. Le risque est ici un
-coefficient constant par culture. Les forçages ne simulent pas davantage l'instabilité : ils
-déplacent des prix et des rendements une fois pour toutes, puis on résout à nouveau — un cyclone
-est un jeu de coefficients, pas un aléa. Et il existe un troisième objet à ne pas confondre avec
-les deux premiers : le bloc \emph{résilience} du rapport de run applique un choc de prix à une
-allocation \emph{déjà figée}, c'est-à-dire qu'il répond à \enquote{que perd-on si personne ne
-réagit}, là où la grille laisse le modèle réoptimiser.
-\end{questionreponse}
-
 On considère maintenant les points de contrôle du balayage de l'enveloppe publique afin de
 valider le front. \num{\frontsubvQuatrePlateau} des \num{\frontsubvQuatrePoints} points ont un
 plafond supérieur à ce que le statu quo dépense spontanément, donc ils ne contraignent rien.
@@ -408,29 +303,16 @@ La différence entre le statu quo avec un plafond de subvention libre et le plaf
 est claire. La banane d'exportation passe de \SI{2004}{\ha} à \SI{95}{\ha}
 (\SI{-95}{\percent}), la canne diminue de \SI{2231}{\ha}, le maraîchage et l'igname doublent, les
 agrumes passent de \SI{9}{\ha} à \SI{657}{\ha}, la prairie gagne \SI{1539}{\ha}
-(tableau~\ref{tab:ann-realloc}). Le modèle dit que l'enveloppe publique maintient la banane
-d'exportation sur le sol guadeloupéen et joue un rôle important dans l'existence de la culture
-de canne. En revanche, le modèle ne vérifie pas que les \SI{2237}{\ha} de maraîchage qui
-apparaissent trouvent un acheteur (chapitre~\ref{ch:discussion}).
+(tableau~\ref{tab:ann-realloc}). Retirer l'aide ne transforme donc pas l'export en vivrier
+hectare pour hectare : l'export libère \SI{4140}{\ha} (\SI{1909}{\ha} de banane, \SI{2231}{\ha}
+de canne), et le vivrier n'en reprend qu'environ la moitié.
 
-\begin{questionreponse}{Explique \enquote{et desserrer cette contrainte réoriente environ
-2 100 ha vers des cultures vivrières}.}
-C'est une addition, et elle vaut la peine d'être refaite parce qu'elle dit aussi ce qu'elle ne
-compte pas. Entre le plafond libre et le plafond le plus serré, quatre groupes vivriers gagnent
-de la surface : le maraîchage \num{+1092}, les agrumes \num{+649}, l'igname \num{+298} et les
-vergers \num{+58} hectares. Total : \SI{2097}{\ha}, arrondis à \num{2100}.
+Le modèle dit que l'enveloppe publique maintient la banane d'exportation sur le sol
+guadeloupéen et joue un rôle important dans l'existence de la culture de canne. En revanche, le
+modèle ne vérifie pas que les \SI{2237}{\ha} de maraîchage qui apparaissent trouvent un acheteur
+(chapitre~\ref{ch:discussion}).
 
-Ne sont \emph{pas} comptés les \SI{+1539}{\ha} de prairie, qui nourrissent un troupeau et non des
-gens, ni les \SI{+127}{\ha} de jachère, qui ne sont pas une culture.
-
-La comparaison qui donne son sens à la phrase est celle des deux côtés du bilan. L'export libère
-\SI{4140}{\ha} (banane \num{-1909}, canne \num{-2231}), et le vivrier n'en reprend qu'environ la
-moitié ; le reste part en prairie, en jachère, ou sort de la production. \emph{Retirer l'aide ne
-transforme donc pas l'export en vivrier hectare pour hectare} — c'est un basculement partiel, et
-c'est un résultat plus prudent que la phrase seule ne le laisse croire.
-\end{questionreponse}
-
-\begin{table}[tbp]
+\begin{table}[h]
   \centering
   \caption{Front marge $\times$ enveloppe publique sous P4, en euros. L'astérisque marque les
   points de contrôle : l'objectif y retombe exactement sur le run non balayé
@@ -456,86 +338,11 @@ d'\gls{ift}, un plafond d'eau, un plancher d'emploi et une inertie de \SI{40}{\p
 rapport à l'assolement existant. Cela veut dire que les usages les plus intensifs sont déjà
 écartés et que les hectares faciles à désazoter ont déjà été pris.
 
-\begin{questionreponse}{Pourquoi \enquote{décarboner} ? Ce n'est pas \enquote{désazoter}, ici ?}
-Si, et c'est corrigé dans la phrase ci-dessus : le front fait varier un plafond d'\emph{azote},
-donc les hectares en question sont faciles à \emph{désazoter}. Les deux ne sont pas indépendants
-— l'azote minéral pèse dans les \gls{ges} par le protoxyde d'azote qu'il dégage — mais ce sont
-deux indicateurs distincts du modèle, et celui que le balayage contraint est l'azote. Les
-\gls{ges} ne bougent ici que par ricochet.
-\end{questionreponse}
-
-\begin{questionreponse}{Explique ce qu'est une inertie de 40 \% par rapport à l'assolement
-existant.}
-C'est une contrainte qui exige qu'au moins \SI{40}{\percent} de la surface allouée reste dans le
-groupe de culture qu'elle portait en 2017. Deux précisions techniques comptent : la comparaison
-se fait sur les \num{12} groupes observés, pas sur les \num{84} variantes fines ; et la part se
-calcule sur la surface \emph{effectivement allouée}, pas sur le territoire — sinon la contrainte
-forcerait à mettre des terres en culture uniquement pour satisfaire un ratio.
-
-Ce qu'elle représente est plus important que sa forme. Sans elle, le modèle a le droit de
-replanter toute la Guadeloupe en une fois, ce qui ne lui coûte rien : le programme ne connaît ni
-coût de conversion, ni apprentissage, ni plantation encore debout. \textbf{L'inertie est donc le
-curseur du temps}, et c'est ainsi qu'il faut lire le catalogue : \SI{70}{\percent} (statu quo)
-décrit une décennie de transition, \SI{40}{\percent} (P8) un plan volontariste,
-\SI{30}{\percent} (P9) une rupture partielle, et \SI{0}{\percent} (P10) une rupture assumée —
-qui n'a jamais rendu la moindre solution entière.
-\end{questionreponse}
-
 Sans tracer les fronts, on serait passé à côté de ce résultat car les duaux au point le plus
 serré des deux configurations sont de \SI{\frontazoteRefDualBas}{\euros\per\kilogram} et
 \SI{\frontazoteHuitDualBas}{\euros\per\kilogram}. On aurait conclu à l'égalité des coûts
 marginaux, ce qui est réfuté par les fronts.
 
-\begin{questionreponse}{Explique la relaxation LP.}
-On enlève une seule contrainte, la plus dure : $Y_{p,c} \in \{0,1\}$ devient $Y_{p,c} \in [0,1]$.
-Une parcelle peut alors porter \SI{30}{\percent} de canne et \SI{70}{\percent} de banane, ce qui
-n'a aucun sens agronomique — mais le problème devient un programme linéaire ordinaire, résolu en
-quelques minutes au lieu de trente à cinquante, sans exploration arborescente.
-
-On s'en sert pour trois choses. \textbf{Un}, filtrer la faisabilité, à sens unique : infaisable
-en \gls{lp} implique infaisable en entiers, tandis que faisable en \gls{lp} ne prouve rien. Deux
-minutes contre une heure, et cela a suffi à écarter une erreur de conception avant qu'aucun lot
-ne tourne. \textbf{Deux}, borner : l'optimum relâché est toujours au moins aussi bon que
-l'optimum entier, et c'est cette borne que le solveur compare à sa meilleure solution pour
-annoncer un écart d'optimalité. \textbf{Trois}, lire les prix duaux, qui n'existent que là : le
-modèle étant purement binaire, figer les entiers ne laisse aucune variable libre et tous les
-duaux valent zéro.
-
-\textbf{La limite est dans l'écart entre les deux mondes.} Le saut d'intégralité vaut ici
-\SI{\mesHuitSautInt}{\percent} : la borne \gls{lp} est donc très au-dessus de l'optimum entier,
-et l'écart qu'elle affiche surestime largement ce qu'une recherche arrêtée a réellement laissé —
-\SI{\mesHuitEcartApparent}{\percent} annoncés pour \SI{\mesHuitEcartReel}{\percent} réels.
-\end{questionreponse}
-
-\begin{questionreponse}{Le §~4.4 \enquote{ce que le dispositif ne permet pas de conclure} a
-disparu du chapitre --- récapitulatif de ce qu'il portait.}
-Ce n'est pas une question que tu as posée, mais il faut que tu le saches avant de relire : quatre
-renvois d'annexes pointaient vers cette section, ils ont été redirigés faute de cible. Le
-chapitre ne contient donc plus aucune limite, alors que l'introduction annonce que le
-chapitre~\ref{ch:explorer} sert à \enquote{mesurer ce qu'il ne permet pas de conclure}. Voici ce
-qu'il y avait, chaque point étant appuyé sur une mesure, à replacer ici ou au
-chapitre~\ref{ch:discussion} :
-\begin{enumerate}[leftmargin=1.4em,itemsep=3pt]
-  \item \textbf{Un solve arrêté est faux, pas imprécis.} P8 non forcée, résolue trois fois sur le
-    \emph{même} ensemble faisable : \SI{\mesHuitUneHeure}{\euros}, puis
-    \SI{\mesHuitTroisHeures}{\euros}, puis \SI{\mesHuitOptimum}{\euros} prouvés optimaux.
-  \item \textbf{La même erreur dans la grille, et sa correction prédite.} F0 étant le forçage
-    nul, P4 et P4$\times$F0 sont le même problème ; ils différaient de
-    \SI{\prosEcartFzero}{\euros} (\SI{\prosEcartFzeroPct}{\percent}), ramenés à zéro par une
-    reprise depuis une graine correcte. Une cellule avait dû être corrigée de \SI{13.66}{\percent}.
-  \item \textbf{Un front peut être entièrement inactif.} Sous P8, cinq des sept seuils du
-    balayage d'azote dépassaient le plafond que la politique s'impose déjà.
-  \item \textbf{Une politique peut être hors d'atteinte sans être infaisable.} P10 est faisable
-    en \gls{lp} (borne \SI{\mesPdixBorneLp}{\euros}) et n'a rendu aucune solution entière en
-    \SI{7200}{\second} : l'axe politique du dispositif est \emph{unilatéral}.
-  \item \textbf{Trois lectures interdites.} Un indicateur qu'une contrainte fixe est une
-    hypothèse et non un résultat ; un total n'est pas une intensité ; le \gls{pad} du
-    chapitre~\ref{ch:calibrer} ne s'applique pas à un run prospectif.
-  \item \textbf{La réserve la plus lourde.} Aucun débouché n'est modélisé au-delà des deux
-    filières d'export : les \SI{2237}{\ha} de maraîchage supposent un marché parfaitement
-    élastique. C'est la seule des six que ta version garde, en une demi-phrase.
-\end{enumerate}
-\end{questionreponse}
 
 \begin{reflexion}
 reflexivité

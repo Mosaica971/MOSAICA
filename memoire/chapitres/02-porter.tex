@@ -18,78 +18,57 @@
 \section{Formulation du programme}
 \label{sec:formulation}
 
+Le programme est un Mixed Integer Linear Program – programme linéaire
+en nombres entiers (MILP) purement binaire : il n’y a aucune variable continue
+
 Soit $P$ l'ensemble des parcelles, $C$ l'ensemble des cultures, et $E \subseteq P \times C$
-l'ensemble des couples \emph{éligibles} (§~\ref{sec:architecture}). La variable de décision est
+l'ensemble des couples \emph{éligibles} (§~\ref{sec:architecture}). 
+L’ensemble $E$ rend le problème traitable computationnellement. Le produit $P \times C$ compte environ deux millions
+de couples. Restreindre cet ensemble aux couples agronomiquement éligibles réduit le
+compte à 308 847 (tableau 2.1). C’est une décision de modélisation qui intervient avant
+l’optimisation : les couples écartés par le masque d’éligibilité ne pourront pas réapparaître
+grâce à une contrainte. Le chapitre 3 montrera que le masque impose à lui seul un plancher
+d’écart à l’observé. \\
+
+La variable de décision est
 \[
   Y_{p,c} \in \{0,1\}, \qquad (p,c) \in E,
 \]
-qui vaut 1 si la parcelle $p$ porte la culture $c$. L'objectif est la marge brute agrégée,
-corrigée du risque :
+qui vaut 1 si la parcelle $p$ porte la culture $c$. \\
+
+On utilise une fonction objective, c’est-à-dire une quantité que l’on cherche à optimiser. L'objectif à maximiser est la marge brute agrégée, corrigée du risque, appelée fonction de Markowitz :
 \begin{equation}
   \max \; \sum_{(p,c) \in E} Y_{p,c} \; s_p \; m_c \; \bigl(1 - a_{f(p)} \, v_c \bigr),
   \label{eq:objectif}
 \end{equation}
 où $s_p$ est la surface de la parcelle (ha), $m_c$ la marge brute unitaire (\eur/ha), $f(p)$
 l'exploitation de la parcelle, $a_f$ son coefficient d'aversion au risque et $v_c$ un
-coefficient de perte propre à la culture. À chaque parcelle, au plus une culture :
+coefficient de perte propre à la culture. Une exploitation neutre au risque ($a_f = 0$) maximise la marge brute. 
+Une exploitation prudente sur une culture volatile voit cette même marge fortement décotée. \\
+
+À chaque parcelle, au plus une culture :
 \begin{equation}
   \sum_{c \,:\, (p,c) \in E} Y_{p,c} \;\le\; 1, \qquad \forall p \in P.
   \label{eq:unicite}
 \end{equation}
+\\
+
 Par exploitation, un plafond de main d'\oe uvre,
 \begin{equation}
   \sum_{p \in P_f} \sum_{c} Y_{p,c} \, s_p \, h_c \;\le\; \sigma \, H_f,
   \label{eq:mo}
 \end{equation}
 où $h_c$ est le besoin en travail (h/ha), $H_f$ la main d'\oe uvre observée et $\sigma$ un
-facteur de desserrement. Enfin, des bornes portant sur un \emph{indicateur} quelconque,
+facteur de desserrement. \\
+
+Enfin, des bornes portant sur un \emph{indicateur} quelconque,
 \begin{equation}
   \sum_{(p,c) \in E} Y_{p,c} \, s_p \, w_p \, r_c \;\lesseqgtr\; T,
   \label{eq:indicateur}
 \end{equation}
 où $r_c$ est un taux par hectare (kg d'azote, \gls{ift}, heures, euros de subvention) et $w_p$
-un poids de parcelle.
+un poids de parcelle.\\
 
-Le programme est donc un \gls{milp} purement binaire : il n'y a aucune variable continue, et
-l'unicité~\eqref{eq:unicite} est une inégalité --- une parcelle peut rester sans culture.
-L'ensemble $E$ rend le problème traitable computationnellement. Le produit $P \times C$ compte
-environ deux millions de couples. Restreindre cet ensemble aux couples agronomiquement éligibles
-réduit le compte à \num{\mesBinaires} (tableau~\ref{tab:programme}). C'est une décision de
-modélisation qui intervient avant l'optimisation : les couples écartés par le masque
-d'éligibilité ne pourront pas réapparaître grâce à une contrainte. Le
-chapitre~\ref{ch:calibrer} montrera que le masque impose à lui seul un plancher d'écart à
-l'observé.
-
-On utilise une fonction objective, c'est-à-dire une quantité que l'on cherche à optimiser. On
-choisit la fonction de Markowitz que l'on cherchera ici à maximiser.
-
-\begin{questionreponse}{Insère ici la fonction coût, définis et explique brièvement ce qui la
-compose.}
-C'est l'équation~\eqref{eq:objectif} ci-dessus : il n'y a rien à insérer, seulement à la
-commenter. Elle se lit de gauche à droite comme une phrase.
-\begin{itemize}
-  \item $Y_{p,c}$, la \textbf{décision} : 1 si la parcelle $p$ porte la culture $c$, 0 sinon.
-    Tout le reste est une donnée d'entrée.
-  \item $s_p \, m_c$, la \textbf{marge brute} que rapporte ce choix : la surface de la parcelle
-    (ha) multipliée par la marge brute unitaire de la culture (\eur/ha).
-  \item $\bigl(1 - a_{f(p)} v_c\bigr)$, la \textbf{décote de risque}. $v_c$ est la variabilité de
-    rendement de la culture, $a_f$ l'aversion au risque de l'exploitation qui détient la parcelle,
-    déduite de sa typologie. Le produit des deux est la fraction de marge que l'exploitation
-    renonce à compter parce qu'elle n'est pas sûre de l'encaisser.
-\end{itemize}
-Une exploitation neutre au risque ($a_f = 0$) maximise donc la marge brute nue ; une exploitation
-prudente sur une culture volatile voit la même marge fortement décotée. \emph{C'est le seul
-endroit du programme où le comportement de l'agriculteur est représenté}, et il l'est par un
-scalaire.
-
-\textbf{Deux réserves, si tu veux les garder.} (a) L'appellation \enquote{Markowitz} est une
-analogie avec l'arbitrage moyenne-variance \parencite{markowitz1952}, pas une identité : $v_c$
-est une fraction de marge perdue, la pénalité est linéaire en surface, et aucune covariance entre
-cultures n'intervient. (b) Le facteur $(1 - a_f v_c)$ peut devenir \emph{négatif} pour une
-exploitation prudente sur une culture très variable. Les coefficients de l'objectif changent donc
-de signe, ce qui rend la relaxation linéaire profondément fractionnaire --- et c'est la cause de
-l'écart d'optimalité de \SI{\mesGapMip}{\percent} discuté plus bas.
-\end{questionreponse}
 
 Deux précisions concernant la fonction objective :
 \begin{itemize}
@@ -105,30 +84,6 @@ Deux précisions concernant la fonction objective :
 L'annexe~\ref{ann:formulation} donne l'inventaire complet des ensembles, paramètres et
 contraintes, avec pour chacun le nom qu'il porte dans le \gls{gams} d'origine.
 
-\begin{table}[tbp]
-  \centering
-  \caption{Taille du programme et coût de sa résolution. Les durées sont mesurées sur le
-  territoire complet ; l'étendue \emph{min--max} porte sur vingt résolutions du \emph{même}
-  problème, à taille constante.}
-  \label{tab:programme}
-  \small
-  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
-    \toprule
-    Couples parcelle $\times$ culture potentiels & $\sim$\num{2000000} \\
-    Variables binaires déclarées (calibration retenue) & \num{\mesBinaires} \\
-    Variables binaires déclarées (configuration prospective) & \num{\mesBinairesRef} \\
-    \dots{} si les \num{25} variantes symétriques sont rouvertes (§~\ref{sec:tractabilite})
-      & \num{\mesBinairesKarus} \\
-    \midrule
-    Résolution la plus rapide des vingt enregistrées & \SI{\mesSolveMin}{\second} \\
-    Résolution la plus lente des vingt enregistrées & \SI{\mesSolveMax}{\second} \\
-    Coefficient de variation des durées & \SI{\mesSolveCV}{\percent} \\
-    Même problème, amorçage à froid puis à chaud
-      & \SI{\mesWarmAvant}{\second} $\rightarrow$ \SI{\mesWarmApres}{\second} \\
-    Écart d'optimalité relatif imposé au solveur & \SI{\mesGapMip}{\percent} \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
 
 \section{Protocole}
 \label{sec:parite}
@@ -160,7 +115,7 @@ un des principes d'organisation du code, réparti en trois couches :
     \gls{gams} et la restitution ;
   \item une couche en lecture seule, qui ouvre les dossiers de résultats déjà écrits.
 \end{itemize}
-Le respect de ce principe est garantie via un test de \emph{soft coding} appliqué au noyau.
+Le respect de ce principe est garanti via un test de \emph{soft coding} appliqué au noyau.
 
 Le noyau définit des constructeurs d'objets. Chaque typologie d'objet a un constructeur propre.
 Par exemple, les contraintes qui partagent le formalisme de l'équation~\eqref{eq:indicateur}
@@ -179,58 +134,39 @@ simplifier l'exploration prospective.
 \section{Rendre le problème traitable}
 \label{sec:tractabilite}
 
-Un résolution complète sur le territoire demande entre \SI{30}{\minute} et \SI{55}{\minute}. De
-plus, à taille constante et problème identique, \num{20} résolutions enregistrées s'étalent de
-\SI{\mesSolveMin}{\second} à \SI{\mesSolveMax}{\second}.
+Une résolution complète sur le territoire demande entre \SI{30}{\minute} et \SI{55}{\minute}.
+C'est un ordre de grandeur, toutes configurations confondues, pour de la calibration ou de la
+prospective, à froid ou à chaud. C'est l'ordre de grandeur d'organisation qu'il faut prévoir
+avant de lancer un run.
 
-\begin{questionreponse}{Pourquoi deux fourchettes de temps différentes ? Ce ne sont pas les mêmes
-résolutions ?}
-Non, ce ne sont pas les mêmes résolutions, et les deux fourchettes ne mesurent pas la même chose.
-\begin{itemize}
-  \item \SI{30}{\minute}--\SI{55}{\minute} est la durée d'un run complet sur le territoire,
-    \emph{toutes configurations confondues} : calibration et prospective, à froid comme à chaud,
-    y compris des runs qui touchent la limite de temps. C'est un ordre de grandeur d'organisation
-    --- ce qu'il faut prévoir avant de lancer.
-  \item \SI{\mesSolveMin}{\second}--\SI{\mesSolveMax}{\second} est une \emph{mesure contrôlée} :
-    les vingt solves enregistrés à \textbf{taille constante} (\num{\mesBinaires} variables) sur le
-    \textbf{même} problème.
-\end{itemize}
-Seule la seconde soutient l'affirmation qui suit, celle que la variabilité vient de la recherche
-et non de la taille du problème : sur la première, un lecteur pourrait toujours objecter que les
-runs longs sont simplement les plus gros. Il vaut donc mieux les étiqueter explicitement
-(\enquote{un run complet} / \enquote{le même problème vingt fois}) plutôt que de les juxtaposer,
-sans quoi le lecteur croit lire deux mesures contradictoires du même objet.
-\end{questionreponse}
+De plus, à taille constante (\num{\mesBinaires} variables) et problème identique, \num{20}
+résolutions enregistrées se sont étalées de \SI{\mesSolveMin}{\second} à
+\SI{\mesSolveMax}{\second}. Cette variabilité vient de la recherche par séparation et évaluation
+(le coût de l'enveloppe logicielle étant de \SI{15}{\second}).
 
-Cette variabilité vient de la recherche par séparation et évaluation (le coût de l'enveloppe
-logiciel étant de \SI{15}{\second}).
+--- Pourquoi on ne retrouve pas les 30min-55min classiques ? ---
 
-\begin{questionreponse}{Explique le principe de cette recherche et explique ce qu'est l'enveloppe
-logicielle.}
-\textbf{La recherche par séparation et évaluation} (\emph{branch and bound}) est ce qui permet de
-ne pas énumérer les $2^{\num{\mesBinaires}}$ combinaisons possibles.
+% CORRIGE : « variables entières entre 0 et 1 » -> « continues ». Un entier entre 0 et 1 vaut 0
+% ou 1 : il n'y aurait alors aucune relaxation.
+La recherche par séparation et évaluation (\emph{branch and bound}) permet de ne pas explorer
+les $2^{\num{\mesBinaires}}$ combinaisons possibles. Elle permet plutôt l'exploration organisée
+en arbre. Chaque niveau correspond au resserrement du problème d'une variable. On abandonne une
+branche dès qu'on peut prouver, grâce à sa relaxation linéaire, c'est-à-dire sa résolution comme
+problème à variables continues entre \num{0} et \num{1}, qu'elle ne battra jamais la meilleure
+solution déjà trouvée. Si le solveur trouve rapidement une première solution, celle-ci devient
+automatiquement la meilleure déjà trouvée, et il peut rapidement écarter des branches et gagner
+du temps d'exploration.
 
-Le solveur commence par résoudre la \emph{relaxation linéaire} du problème : il autorise
-$Y_{p,c}$ à prendre n'importe quelle valeur entre 0 et 1 au lieu de 0 ou 1. Ce problème-là se
-résout vite, et sa valeur est une \textbf{borne} --- aucune solution en nombres entiers ne peut
-faire mieux. Si la solution obtenue est fractionnaire, le solveur \textbf{sépare} : il choisit une
-variable fractionnaire et crée deux sous-problèmes, l'un où elle vaut 0, l'autre où elle vaut 1.
-Il recommence sur chacun, ce qui construit un arbre. L'\textbf{évaluation} est l'élagage : tout
-n\oe ud dont la borne est moins bonne que la meilleure solution entière déjà trouvée est
-abandonné sans être exploré, puisqu'aucune de ses descendantes ne pourra la battre.
+Le solveur s'arrête dès que l'écart relatif entre l'\emph{incumbent}, c'est-à-dire la meilleure
+solution déjà trouvée, et la meilleure valeur de relaxation parmi les n\oe uds encore ouverts
+est suffisamment proche de \SI{0}{\percent}.
 
-C'est cet élagage qui explique la dispersion des durées. Si une bonne solution entière apparaît
-tôt, des pans entiers de l'arbre meurent immédiatement ; si elle apparaît tard, il a fallu les
-explorer. Or l'ordre dans lequel les n\oe uds sortent dépend d'heuristiques internes et de
-départages numériques, pas de la taille du problème --- d'où \SI{\mesSolveMin}{\second} ou
-\SI{\mesSolveMax}{\second} pour un problème rigoureusement identique.
-
-\textbf{L'enveloppe logicielle} est tout ce qui entoure cette recherche : lire les tables,
-construire le modèle Pyomo, le traduire en la matrice que \gls{highs} attend, puis relire la
-solution. Elle coûte une quinzaine de secondes. Le mot sert à écarter une objection : le temps de
-calcul n'est pas un défaut de Python, c'est le problème combinatoire lui-même. À
-\SI{\mesSolveMax}{\second} de recherche, l'enveloppe pèse \SI{1.5}{\percent} du total.
-\end{questionreponse}
+Le facteur $(1 - a_{f} v_{c})$ de l'équation~\eqref{eq:objectif} peut devenir négatif pour une
+exploitation prudente sur une culture très variable. Cela peut rendre la relaxation linéaire
+très fractionnaire et donc rallonger le temps nécessaire à la recherche d'optimum. On fixe donc
+cette tolérance à \SI{\mesGapMip}{\percent} au lieu de la valeur par défaut de \gls{highs}, qui
+est de \SI{0.01}{\percent}. On passe d'un solve de \SI{37}{\hour} qui n'avait pas terminé à des
+solves d'\SI{1}{\hour} qui trouvent un optimum.
 
 Une limite de temps de calcul existe pour éviter un débordement trop important. Le problème est
 qu'un solve arrêté à cause de la limite de temps n'est pas fiable car il sous-estime probablement
@@ -243,79 +179,32 @@ recherche d'optimum mais ne change pas la nature du résultat. Par exemple, sur 
 et pour un optimum identique, on passe de \SI{\mesWarmAvant}{\second} à
 \SI{\mesWarmApres}{\second} de temps de calcul.
 
-\begin{questionreponse}{Explique comment prouver l'optimalité d'un optimum.}
-On ne prouve pas l'optimalité en trouvant la bonne solution : on la prouve en \textbf{fermant
-l'écart entre deux nombres} que le solveur tient à jour en permanence.
-\begin{itemize}
-  \item L'\textbf{incumbent} : la meilleure solution \emph{admissible} trouvée jusqu'ici. C'est
-    une borne inférieure sur le maximum --- on sait qu'on peut faire au moins ça.
-  \item La \textbf{meilleure borne} : la meilleure valeur de relaxation parmi les n\oe uds encore
-    ouverts. C'est une borne supérieure --- on sait qu'on ne peut pas faire mieux que ça.
-\end{itemize}
-L'écart relatif entre les deux est le \emph{gap}. Quand il tombe à zéro, les deux nombres se
-rejoignent : l'incumbent \emph{est} l'optimum, et c'est démontré. Sous la tolérance demandée
-(\SI{\mesGapMip}{\percent}), \gls{highs} s'arrête et déclare l'optimalité à cette tolérance près.
+La Table 2.1 récapitule ces informations :
 
-Conséquence de lecture : un solve arrêté par la limite de temps ne dit pas \enquote{l'optimum vaut
-$x$}, il dit \enquote{l'optimum est entre $x$ et $y$}. Le cas mesuré sur P8 :
-\SI{\mesHuitUneHeure}{\euros} après \SI{1}{\hour}, \SI{\mesHuitTroisHeures}{\euros} après
-\SI{3}{\hour}, et \SI{\mesHuitOptimum}{\euros} prouvé optimal --- le premier était à \SI{\mesHuitEcartPct}{\percent} en dessous.
-
-Deux pièges méritent d'être signalés au lecteur. \emph{Le gap affiché surestime l'erreur réelle} :
-la borne LP est lâche (saut d'intégralité de \SI{\mesHuitSautInt}{\percent}), si bien que le run de
-\SI{3}{\hour} paraissait à \SI{\mesHuitEcartApparent}{\percent} de la borne alors qu'il était à
-\SI{\mesHuitEcartReel}{\percent} de l'optimum réel --- cinq fois moins. Et \emph{prouver coûte plus
-cher que trouver} : amorcé sur l'optimum lui-même, P8 a encore demandé
-\SI{\mesHuitPreuveDuree}{\second} pour le démontrer. C'est exactement ce que l'amorçage à chaud
-accélère : la preuve, jamais la valeur.
-\end{questionreponse}
-
-\begin{questionreponse}{Explique les graines admissibles, et si le \emph{warm start} peut prendre
-une graine d'un scénario pour l'utiliser pour un autre scénario.}
-Une \textbf{graine} est l'allocation d'un run passé, écrite dans les variables $Y$ avant le solve.
-Elle est \textbf{admissible} si elle satisfait \emph{toutes} les contraintes du \emph{nouveau}
-modèle. Le point critique est que \gls{highs} écarte une graine inadmissible \textbf{sans le
-dire} : le run paraît amorcé et se comporte exactement comme un run froid. Chaque graine est donc
-auditée contre les contraintes du modèle avant le solve, et le run refuse bruyamment plutôt que
-de mentir sur son état.
-
-Oui, une graine peut traverser les scénarios, à une condition : que l'allocation reste dans le
-domaine admissible du nouveau scénario. Trois cas, du plus sûr au moins sûr.
-\begin{itemize}
-  \item \textbf{Entre forçages} : oui, toujours. Un forçage change les \emph{coefficients} (prix,
-    rendements, subventions), pas les contraintes : le domaine admissible est le même.
-    L'allocation non forcée d'une politique amorce donc tous ses forçages.
-  \item \textbf{Le long d'un front de Pareto} : oui, si on va du seuil le plus serré vers le plus
-    lâche. Une solution admissible sous un plafond bas l'est encore sous un plafond haut. Les
-    points d'un front sont donc réordonnés du plus serré au plus lâche avant le lancement : un
-    seul solve à froid, tous les autres à chaud.
-  \item \textbf{Entre politiques} : non, en général. Une politique ajoute des contraintes que la
-    graine n'a jamais eu à respecter. Mesuré : la graine P8 viole \num{\mesPdixViolationsP}
-    contraintes sous P10.
-\end{itemize}
-Quand la graine est inadmissible, on ne la jette pas : on la \textbf{répare}, en basculant le
-minimum de parcelles nécessaire pour satisfaire la nouvelle contrainte, puis on la réaudite.
-\end{questionreponse}
-
-Pour finir, le solveur admet un écart d'optimalité pour la fonction objective ajustée du risque.
-Cette tolérance possède une valeur par défaut qui rend raisonnablement impossible la terminaison
-du calcul. On fixe donc cette valeur à \SI{\mesGapMip}{\percent}.
-
-\begin{questionreponse}{\enquote{Impossible} = trop long ?}
-Oui : trop long, pas hors d'atteinte. La tolérance par défaut de \gls{highs} vaut \num{1e-4}, soit
-\SI{0.01}{\percent}. À cette tolérance, le solve sur le territoire complet \textbf{n'avait pas
-terminé au bout de \SI{37}{\hour}}. Ce n'est pas l'optimum qui manque, c'est sa \emph{preuve} : la
-borne descend très lentement, pour la raison donnée plus haut --- les coefficients
-$(1 - a_f v_c)$ changent de signe et rendent la relaxation profondément fractionnaire.
-
-Deux chiffres pour situer le prix de ce réglage. Ce que la tolérance concède : \SI{1}{\percent}
-vaut \SI{859}{\kilo\euros} sur un objectif de \SI{86}{\mega\euros}. Ce qu'un réglage intermédiaire
-donnerait : \SI{0.1}{\percent} a été \emph{testé}, et le solve a tapé la limite d'une heure en
-rendant un incumbent identique à celui du \SI{1}{\percent}. Le \SI{1}{\percent} n'est donc pas un
-confort, c'est le point de fonctionnement traitable --- avec un coût connu et documenté au
-chapitre~\ref{ch:calibrer} : à cette tolérance le solveur est indifférent le long de la frontière
-de marge prairie / canne et y gare des hectares arbitrairement.
-\end{questionreponse}
+\begin{table}[h]
+  \centering
+  \caption{Taille du programme et coût de sa résolution. Les durées sont mesurées sur le
+  territoire complet ; l'étendue \emph{min--max} porte sur vingt résolutions du \emph{même}
+  problème, à taille constante.}
+  \label{tab:programme}
+  \small
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
+    \toprule
+    Couples parcelle $\times$ culture potentiels & $\sim$\num{2000000} \\
+    Variables binaires déclarées (calibration retenue) & \num{\mesBinaires} \\
+    Variables binaires déclarées (configuration prospective) & \num{\mesBinairesRef} \\
+    \dots{} si les \num{25} variantes symétriques sont rouvertes (§~\ref{sec:tractabilite})
+      & \num{\mesBinairesKarus} \\
+    \midrule
+    Résolution la plus rapide des vingt enregistrées & \SI{\mesSolveMin}{\second} \\
+    Résolution la plus lente des vingt enregistrées & \SI{\mesSolveMax}{\second} \\
+    Coefficient de variation des durées & \SI{\mesSolveCV}{\percent} \\
+    Même problème, amorçage à froid puis à chaud
+      & \SI{\mesWarmAvant}{\second} $\rightarrow$ \SI{\mesWarmApres}{\second} \\
+    Écart d'optimalité relatif imposé au solveur & \SI{\mesGapMip}{\percent} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \section{Les garde-fous}
 \label{sec:gardefous}
@@ -324,66 +213,20 @@ Il existe trois dispositifs différents qui contrôlent la robustesse du code :
 \begin{itemize}
   \item \num{\mesTests} tests unitaires, répartis en \num{\mesTestsFichiers} fichiers dont le but
     est de vérifier que chaque contrainte fait ce qu'elle prétend. Ces tests sont rapides et
-    exécutable sans données. Ils ne permettent pas de vérifier que le résultat global est juste.
-  \item le \emph{golden snapshot}, construit le vrai jeu de données et produits des indicateurs
-    sur une allocation réelle. Puis, il sérialise \num{\mesChecksums} sommes de contrôle. Le
-    \emph{golden snapshot} se résout en \SI{7}{\second} contre \SI{30}{\minute} à
-    \SI{55}{\minute} pour un run classique.
+    exécutables sans données. Ils ne permettent pas de vérifier que le résultat global est juste.
+  \item le \emph{golden snapshot} fixe sur chaque parcelle l'allocation de la culture
+    représentative qu'elle porte réellement en \num{2017}. Le but ici est de comparer des
+    indicateurs entre la référence et l'allocation que le \emph{golden snapshot} fixe. Les deux
+    côtés sont censés être rigoureusement identiques. On sérialise ainsi \num{\mesChecksums}
+    sommes de contrôle : sommes de colonnes, tailles de tables, etc. Ce script permet
+    d'identifier les dérives numériques silencieuses du pipeline ou des indicateurs après une
+    retouche. Il ne renseigne pas sur la justesse du modèle. Le \emph{golden snapshot} se résout
+    en \SI{7}{\second} contre \SI{30}{\minute} à \SI{55}{\minute} pour un run classique.
   \item un script compare \num{3} runs de références déclarés à leurs métriques attendues. Le
     bruit de la recherche arborescente vaut \num{\mesBruitPad} point de \gls{pad}
     (§~\ref{sec:plateau}). Cela correspond à environ \SI{5}{\percent} de bruit sur l'objectif
-    final. Le script à donc une tolérance de \SI{5}{\percent}.
+    final. Le script a donc une tolérance de \SI{5}{\percent}.
 \end{itemize}
-
-\begin{questionreponse}{Explique mieux le \emph{golden snapshot} : c'est un calcul ou bien c'est le
-choix d'une allocation au hasard ? Et les \emph{checksums}, c'est des comparaisons d'ordre de
-grandeur ? Et \num{\mesChecksums}, c'est le nombre de grandeurs comparées ?}
-C'est un \textbf{calcul}, entièrement déterministe, et il n'y a \emph{aucun} hasard --- ni dans
-l'allocation, ni dans les nombres comparés.
-
-\textbf{L'allocation est fixée, pas tirée.} C'est l'allocation \enquote{représentante} : chaque
-parcelle reçoit la culture représentative du groupe qu'elle porte réellement en 2017. Elle
-s'obtient sans résoudre le moindre \gls{milp}. Ce n'est pas l'optimum, et c'est sans importance :
-les deux côtés de la comparaison utilisent la \emph{même} allocation. Tout l'intérêt est là ---
-comme aucun solve n'intervient, aucun bruit de recherche arborescente ne peut entrer, et deux
-exécutions donnent rigoureusement les mêmes nombres.
-
-\textbf{Les sommes de contrôle sont des valeurs exactes, pas des ordres de grandeur.} Le script
-construit le vrai jeu de données et tous les blocs d'indicateurs sur cette allocation, puis écrit
-\num{\mesChecksums} nombres dans un fichier : sommes de colonnes, tailles de tables, empreintes
-des collections de couples éligibles, scalaires. La vérification compare chacun d'eux à la valeur
-enregistrée, arrondie à six décimales --- l'arrondi absorbe la ré-association des sommes
-flottantes, rien d'autre. \textbf{Oui}, \num{\mesChecksums} est bien le nombre de grandeurs
-comparées, et la moindre différence sur l'une d'elles fait échouer la vérification.
-
-Ce qu'il attrape : toute dérive numérique silencieuse du pipeline ou des indicateurs après une
-retouche. Ce qu'il n'attrape pas, et qu'il faut dire : il ne dit pas que le modèle est
-\emph{juste}, seulement qu'il fait aujourd'hui ce qu'il faisait hier --- la référence est un état
-du code, pas une vérité. Et il ne couvre pas le solve.
-\end{questionreponse}
-
-\begin{questionreponse}{Pourquoi appeler ça \enquote{\gls{pad}} ? Ça devrait être
-\enquote{pourcentage d'erreur} en français et \emph{percentage error} en anglais, non ?}
-Deux réponses, et la seconde est la vraie.
-
-\textbf{Le nom vient de l'article.} \textcite[§~2.6, éq.~7]{chopin2015} définit la métrique sous
-le nom de \emph{percentage of absolute deviation}. La garder permet de poser notre chiffre à côté
-de leur seuil de \SI{\mesArtPad}{\percent} sans traduction intermédiaire. Renommer une métrique
-publiée coûte plus de confusion que ça n'en épargne.
-
-\textbf{Mais \enquote{erreur} serait faux, pas seulement moins français.} Une erreur suppose une
-vérité que le modèle devrait prédire. Or ce modèle est \emph{normatif} : il dit ce qui maximise la
-marge, pas ce que les agriculteurs ont fait. Le plan observé de 2017 vaut
-\SI{\mesPlanObserveM}{\mega\euros} sous notre propre objectif, contre
-\SI{\mesPlanOptimumM}{\mega\euros} à l'optimum --- \SI{\mesPlanEcart}{\percent} en dessous. Un \gls{pad} nul signifierait donc
-que le modèle a cessé d'optimiser, pas qu'il a raison. \enquote{Écart} nomme une distance entre
-deux objets ; \enquote{erreur} désignerait un coupable.
-
-Techniquement, ce n'est d'ailleurs pas une erreur relative par culture : c'est la somme des
-$|\text{observé} - \text{simulé}|$ sur les cultures, rapportée à la surface totale observée ---
-une distance $L^1$ entre deux vecteurs d'assolement, normalisée. Le français juste est donc
-exactement celui de la table des acronymes : \emph{pourcentage d'écart absolu}.
-\end{questionreponse}
 
 \begin{reflexion}
 REFLEXIVITE
