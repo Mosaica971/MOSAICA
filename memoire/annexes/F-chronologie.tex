@@ -9,7 +9,7 @@
 \begin{table}[htbp]
   \centering
   \caption{Les jalons du stage. La troisième colonne est ce qui distingue une chronologie d'un
-  journal : ce n'est pas ce qui a été fait, c'est ce que cela a \emph{établi}.}
+  journal : ce n'est pas ce qui a été fait, c'est ce que cela a établi.}
   \label{tab:ann-chrono}
   \small
   \begin{tabularx}{\textwidth}{@{}p{26mm}p{40mm}X@{}}
@@ -23,8 +23,8 @@
       un modèle interrogeable sans rouvrir les équations, et quatre défauts documentés plutôt
       que corrigés en silence \\
     Tractabilité & masque d'éligibilité, amorçage à chaud, audit des graines &
-      qu'un solve arrêté est \emph{prouvablement faux} ; et que la variabilité à taille
-      constante vaut un facteur \num{6.5} \\
+      qu'un solve arrêté est prouvablement faux ; et que la variabilité à taille
+      constante vaut un facteur \num{\mesSolveFacteur} \\
     Calibration & trois barreaux, deux balayages de seuil, trois graines &
       que l'écart est localisé, que les deux déviations sont des corrections, et que le solveur
       est hors de cause \\
@@ -46,31 +46,31 @@ annexes~\ref{ann:calibration} et~\ref{ann:resultats}.
 
 \section{Comment le travail a été organisé}
 
-Un \textbf{commit égale un fait mesuré}, et le message en porte le chiffre — parfois la
-\emph{prédiction}, ce qui permet de vérifier après coup si elle tenait ; c'est ainsi que la
+Un commit égale un fait mesuré, et le message en porte le chiffre — parfois la
+prédiction, ce qui permet de vérifier après coup si elle tenait ; c'est ainsi que la
 correction de l'erreur d'ancrage du forçage nul a pu être vérifiée au centime.
 
 Quatre lieux d'écriture coexistent, avec une règle de tri explicite entre eux : les pièges et
 limites de données dans le fichier de vigilance, ce qui reste à implémenter dans la liste des
 chantiers, une investigation entière — avec ses impasses — dans une spécification datée, et
 l'avancement du mémoire dans son propre fichier d'état. Le journal d'investigation a été
-\emph{synthétisé} plutôt que maintenu, ce qui est une décision et non un abandon : un journal de
+synthétisé plutôt que maintenu, ce qui est une décision et non un abandon : un journal de
 mille lignes n'est plus lu.
 
 Trois règles d'écriture méritent d'être citées parce qu'elles ont produit des effets mesurables.
-\textbf{Générer plutôt que rédiger} tout ce qui peut l'être : les \num{518} macros de ce mémoire
+Générer plutôt que rédiger tout ce qui peut l'être : les \num{\mesMacros} macros de ce mémoire
 sont lues dans les fichiers de résultats des runs, et aucun chiffre du corps n'est saisi à la
-main. \textbf{Échouer bruyamment} : le générateur refuse d'émettre une valeur périmée plutôt que
+main. Échouer bruyamment : le générateur refuse d'émettre une valeur périmée plutôt que
 de la produire silencieusement, et il lit aussi la version écartée en quarantaine pour qu'une
-démonstration survive à sa propre correction. \textbf{Commenter le pourquoi, jamais le
-comment} : un commentaire qui paraphrase un comportement est destiné à dériver, et il est cru
-sur parole — c'est exactement ce qui s'est produit sur les interdictions liées à la chlordécone.
+démonstration survive à sa propre correction. Commenter le pourquoi, jamais le
+comment : un commentaire qui paraphrase un comportement est destiné à dériver, et il est cru
+sur parole — c'est exactement ce qui s'est produit sur les interdictions liées au chlordécone.
 
 Deux limites de méthode doivent être consignées ici plutôt qu'ailleurs. La première est
 organisationnelle : ne lancer une résolution complète qu'en fin de journée, et itérer sur des
 sous-territoires et des tests ciblés, structure le travail bien au-delà du confort — le temps de
 calcul décide de ce qu'on peut essayer dans une journée, donc de ce qu'on essaie. La seconde est
-que \textbf{les tests ne lisent jamais les données réelles}, ce qui les rend rapides et
+que les tests ne lisent jamais les données réelles, ce qui les rend rapides et
 portables mais laisse un dispositif validé de bout en bout nulle part ; le dépôt le reconnaît à
 cinq reprises. Enfin, un choix du corpus n'a jamais reçu de justification consignée — le code en
 anglais et la documentation en français —, et l'audit le signale comme tel plutôt que de lui

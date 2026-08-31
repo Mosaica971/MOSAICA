@@ -1,0 +1,2461 @@
+ logo Toulouse INP-N7                                                 logo INRAE
+figures/logo-n7.pdf                                             figures/logo-inrae.pdf
+
+
+
+
+                           Projet de Fin d’Études
+               Toulouse INP-ENSEEIHT — Département MF2E
+                  Mécanique des Fluides, Énergétique et Environnement
+
+
+
+
+        Reconstruire pour pouvoir simuler
+          Portage, calibration et usage prospectif du modèle
+             bioéconomique MOSAICA en Guadeloupe
+
+
+
+
+                        Clément Le Borgne-Larivière
+
+
+     Structure d’accueil INRAE, Centre Régional des Antilles-Guyane
+                         ASTRO — Domaine de Duclos, 97170 Petit-Bourg
+                  Projet TI-FIG
+Responsable scientifique    Dr Jean-Marc Blazy, directeur de recherches
+           Co-encadrant     Loïc Guindé, ingénieur d’études
+                 Période    mai — octobre 2026
+
+
+
+
+                           Soutenance : septembre 2026
+Résumé                                                                                        i
+
+
+
+Remerciements
+    Je remercie Loïc Guindé et Jean-Marc Blazy de m’avoir confié ce travail et de m’avoir
+laissé le réorienter.
+    Je remercie également les personnes qui m’ont accueilli en Guadeloupe et qui m’ont
+aidé à m’y sentir bien. Je voudrais remercier Vanessa Léa, qui m’a aidé dans mes réflexions
+sur le stage, sur la recherche et sur l’engagement.
+    Enfin, je voudrais remercier particulièrement Pauline Chambéry, qui me soutient et
+m’inspire tous les jours.
+
+
+Résumé
+    La Guadeloupe importe près de 80 % de son alimentation à des prix supérieurs d’un
+tiers à ceux de l’Hexagone, tandis que la canne à sucre et la banane d’exportation occupent
+l’essentiel de ses terres agricoles. Le projet projet interdisciplinaire sur les aliments
+traditionnels et la sécurité alimentaire en Guadeloupe (TI-FIG), mené par l’unité Unité de
+Recherche sur les Agrosystèmes Tropicaux (ASTRO) de l’Institut National de Recherche
+pour l’Agriculture, l’Alimentation et l’Environnement (INRAE), cherche à évaluer ex ante
+des scénarios de développement des productions vivrières ; l’outil prévu pour cela était
+Multi-scale bioeconomic model for the design and ex ante assessment of cropping system
+mosaics (MOSAICA), modèle bioéconomique d’allocation de cultures publié en 2015, qui
+affecte chaque parcelle d’un territoire à une culture de manière à maximiser la marge brute
+ajustée du risque, sous contraintes agronomiques, foncières et de main d’œuvre.
+    Cet outil n’était pas exploitable en l’état, et la raison n’est pas celle qu’on attend.
+Écrit en General Algebraic Modeling System (GAMS), un langage qui renvoie zéro sans
+avertissement lorsqu’une table est interrogée sur une colonne absente, il contenait des
+comportements invisibles à la fois dans son code, correct d’apparence, et dans ses résultats,
+parfaitement plausibles — l’un d’eux interdit une variante de verger pluvial sur la totalité
+du territoire. Le stage a donc été réorienté : reconstruire l’instrument avant de s’en servir.
+    Le travail présenté porte MOSAICA en Python/Pyomo — un programme linéaire
+en nombres entiers d’environ 308 847 variables binaires, résolu par solveur open source
+de programmation linéaire et en nombres entiers (HiGHS) — sous un mandat de parité
+qui reproduit le comportement réel du modèle d’origine, défauts compris, chacun étant
+documenté et doublé d’une variante corrigée désactivée. Le modèle est ensuite calibré
+contre l’assolement observé de 2017 selon la métrique de l’article de référence, puis
+employé sur une grille de politiques publiques croisées avec des forçages climatiques et de
+marché, complétée par deux fronts de Pareto tracés par 𝜀-contrainte.
+    Trois résultats tiennent sans réserve. La calibration atteint ou dépasse les trois métriques
+publiées (86,9 % de types d’exploitation reproduits, 67,6 % de parcelles, 77,1 % de surface),
+et surtout la canne à sucre — plus de la moitié du territoire — revient à 12 782 ha contre
+12 813 ha observés sans qu’aucune contrainte ne la nomme. Le classement des politiques
+publiques dépend du forçage : la politique de souveraineté alimentaire est la meilleure en
+Résumé                                                                                      ii
+
+
+
+conjoncture nominale et la pire sous crise systémique hors aide, ce qu’un scénario unique
+ne peut pas montrer. Enfin, la marge brute du territoire varie en sens inverse du plafond de
+subventions, de façon monotone sur sept points prouvés optimaux : dans ce modèle, l’aide
+publique n’achète pas de la marge, elle achète de la stabilité — et desserrer cette contrainte
+réoriente environ 2 100 ha de l’export vers le vivrier.
+    Ce que le dispositif ne permet pas de conclure a été mesuré avec le même soin.
+Aucun débouché n’est modélisé au-delà des deux filières d’exportation, si bien que tout
+basculement vers le vivrier suppose un marché parfaitement élastique. Quatre cultures sur
+onze seulement passent sous le seuil d’écart de l’article, l’erreur résiduelle se concentrant
+sur les petits postes. Une politique environnementale bâtie sur les systèmes agroécologiques
+du jeu de données serait satisfaite à coût exactement nul, ceux-ci étant indiscernables les
+uns des autres. Le livrable opposable de ce travail n’est donc pas un jeu de scénarios : c’est
+un instrument dont on sait exactement ce qu’il peut et ne peut pas dire.
+
+
+
+
+Mots-clés — allocation de cultures · optimisation en nombres entiers · modèle bioécono-
+mique · calibration · évaluation ex ante · politique agricole · Guadeloupe · agroécologie
+Abstract                                                                                   iii
+
+
+
+Abstract
+    Guadeloupe imports close to 80 % of its food, at prices about one third higher than in
+mainland France, while sugarcane and export banana occupy most of its farmland. The
+TI-FIG project, run by INRAE’s ASTRO research unit, aims to assess ex ante scenarios
+for developing local food crops. The tool intended for that purpose was MOSAICA,
+a bioeconomic crop-allocation model published in 2015, which assigns each field of a
+territory to at most one crop so as to maximise risk-adjusted gross margin under agronomic,
+land-tenure and labour constraints.
+    That tool turned out not to be usable as it stood, and not for the reason one would
+expect. Written in GAMS — a language that silently returns zero when a table is queried
+on a missing column — it contained behaviours invisible both in its code, which looks
+correct, and in its outputs, which look plausible. One of them forbids a rainfed orchard
+system across the entire territory. The internship was therefore redirected: rebuild the
+instrument before using it.
+    This work ports MOSAICA to Python/Pyomo — a purely binary mixed-integer linear
+program of about 308 847 variables, solved with HiGHS — under a parity mandate that
+reproduces the original model’s actual behaviour, defects included, each one documented
+and paired with a disabled « intended reading » variant. The model is then calibrated
+against the observed 2017 land use using the percentage absolute deviation of the reference
+article, and finally used over a grid of public policies crossed with climate and market
+forcings, complemented by two Pareto fronts traced by 𝜀-constraint.
+    Three results hold without qualification. Calibration matches or exceeds the three
+published metrics (86,9 % of farm types reproduced, 67,6 % of fields, 77,1 % of area);
+above all, sugarcane — more than half the territory — returns to 12 782 ha against 12 813 ha
+observed without any constraint naming it. Second, the ranking of public policies depends
+on the forcing: the food-sovereignty policy is the best under nominal conditions and
+the worst under systemic crisis once subsidies are netted out, which a single scenario
+cannot reveal. Third, territorial gross margin varies inversely with the subsidy ceiling,
+monotonically over seven points all proven optimal: in this model public support does
+not buy margin, it buys stability — and relaxing that constraint shifts about 2 100 ha from
+export crops to food crops.
+    What the framework does not allow one to conclude was measured with equal care.
+No market outlet is modelled beyond the two export sectors, so any shift towards food
+crops assumes a perfectly elastic market. Only four crops out of eleven fall below the
+article’s deviation threshold, the residual error concentrating on the smallest crops. And an
+environmental policy built on the dataset’s agroecological systems would be satisfied at
+exactly zero cost, those systems being indistinguishable from one another. The defensible
+deliverable of this work is therefore not a set of scenarios: it is an instrument whose limits
+are known precisely.
+Keywords — crop allocation · mixed-integer programming · bioeconomic model · model
+calibration · ex ante assessment · agricultural policy · Guadeloupe · agroecology
+Table des matières                                                                        iv
+
+
+
+Table des matières
+
+Remerciements                                                                               i
+
+Résumé                                                                                      i
+
+Abstract                                                                                  iii
+
+Introduction                                                                               1
+
+1 Terrain et objet                                                                         3
+  1.1 Pertinence d’un modèle d’allocation en Guadeloupe . . . . . . . . . . . .            3
+  1.2 MOSAICA : ce que le modèle promet . . . . . . . . . . . . . . . . . . .              3
+  1.3 Le GAMS existant, et pourquoi il a fallu reconstruire . . . . . . . . . . .          4
+
+2   Porter et rendre traçable                                                              5
+    2.1 Formulation du programme . . . . . . . . . . . . . . . . . . . . . . . . .         5
+    2.2 Protocole . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      6
+    2.3 Une architecture qui sépare le générique du territoire . . . . . . . . . . .       7
+    2.4 Rendre le problème traitable . . . . . . . . . . . . . . . . . . . . . . . .       7
+    2.5 Les garde-fous . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     8
+
+3   Calibrer                                                                               9
+    3.1 L’état de référence, et ce qu’il ne dit pas . . . . . . . . . . . . . . . . . .    9
+    3.2 La métrique : le PAD, et ce qu’il ne peut pas dire . . . . . . . . . . . . .      10
+    3.3 L’échelle d’attribution . . . . . . . . . . . . . . . . . . . . . . . . . . . .   12
+    3.4 La cause commune de l’écart résiduel : les rendements . . . . . . . . . .         13
+    3.5 Deux déviations, et le test qui les sépare d’un ajustement . . . . . . . . .      15
+    3.6 Explications de l’écart résiduel . . . . . . . . . . . . . . . . . . . . . . .    17
+    3.7 Deux signatures émergentes . . . . . . . . . . . . . . . . . . . . . . . .        18
+
+4   Explorer                                                                              18
+    4.1 Le dispositif expérimental . . . . . . . . . . . . . . . . . . . . . . . . .      18
+    4.2 Ce que la grille montre . . . . . . . . . . . . . . . . . . . . . . . . . . .     20
+    4.3 Le coût marginal : euro public et azote . . . . . . . . . . . . . . . . . . .     21
+
+5   Discussion                                                                            22
+    5.1 Discussions sur le stage . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+    5.2 Discussions sur le positionnement . . . . . . . . . . . . . . . . . . . . .       24
+    5.3 Discussion sur l’IA générative . . . . . . . . . . . . . . . . . . . . . . .      26
+
+Conclusion                                                                                26
+
+Références bibliographiques                                                               29
+Table des matières                                                                       v
+
+
+
+A Formulation complète du programme                                                     30
+  A.1 Ensembles, paramètres, variables . . . . . . . . . . . . . . . . . . . . . .      30
+  A.2 Objectif et cinq familles de contraintes . . . . . . . . . . . . . . . . . . .    30
+  A.3 Indicateurs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   32
+  A.4 Le registre, en une page . . . . . . . . . . . . . . . . . . . . . . . . . . .    33
+
+B Inventaire de portage GAMS                                                            33
+  B.1 Statut des équations, bloc par bloc . . . . . . . . . . . . . . . . . . . . .     33
+  B.2 Les quatre défauts portés, et leur variante « intention présumée » . . . . .      35
+  B.3 Les sept branches fermées . . . . . . . . . . . . . . . . . . . . . . . . .       36
+
+C Catalogue des scénarios                                                               36
+  C.1 Les dix politiques . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    37
+  C.2 Les douze forçages . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      38
+  C.3 Les balayages et le plan . . . . . . . . . . . . . . . . . . . . . . . . . . .    38
+  C.4 Le contrôle de faisabilité . . . . . . . . . . . . . . . . . . . . . . . . . .    38
+
+D Grille complète des résultats                                                         39
+  D.1 Les politiques non forcées, tous indicateurs . . . . . . . . . . . . . . . .      39
+  D.2 Robustesse . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      40
+  D.3 Les fronts, point par point . . . . . . . . . . . . . . . . . . . . . . . . . .   40
+  D.4 Coûts marginaux et prix duals . . . . . . . . . . . . . . . . . . . . . . .       40
+
+E Tableaux de calibration                                                               42
+  E.1 PAD par culture, aux trois barreaux . . . . . . . . . . . . . . . . . . . .       42
+  E.2 Les autres échelles, et comment se comparer à l’article . . . . . . . . . .       43
+  E.3 Les balayages de seuil . . . . . . . . . . . . . . . . . . . . . . . . . . . .    44
+  E.4 Ce que le solveur n’explique pas . . . . . . . . . . . . . . . . . . . . . .      45
+
+F Chronologie et méthode de travail                                                     45
+  F.1 Le déroulé . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    45
+  F.2 Comment le travail a été organisé . . . . . . . . . . . . . . . . . . . . . .     46
+  F.3 Le corpus qui a produit ce mémoire . . . . . . . . . . . . . . . . . . . .        47
+Abréviations et acronymes                                                                  vi
+
+
+
+Abréviations et acronymes
+ASTRO Unité de Recherche sur les Agrosystèmes Tropicaux
+
+ETP Équivalent Temps Plein
+
+GAMS General Algebraic Modeling System
+GES Gaz à Effet de Serre
+GFA Groupement Foncier Agricole
+
+HiGHS solveur open source de programmation linéaire et en nombres entiers
+
+IFT Indice de Fréquence de Traitements phytosanitaires
+INRAE Institut National de Recherche pour l’Agriculture, l’Alimentation et l’Environne-
+     ment
+
+MAE Mesure Agro-Environnementale
+MILP Mixed Integer Linear Program – programme linéaire en nombres entiers
+MOSAICA Multi-scale bioeconomic model for the design and ex ante assessment of
+    cropping system mosaics
+
+PAD Pourcentage d’Écart Absolu (percentage absolute deviation)
+POSEI Programme d’Options Spécifiques à l’Éloignement et à l’Insularité
+
+RPG Registre Parcellaire Graphique
+
+SAU Surface Agricole Utile
+
+TI-FIG projet interdisciplinaire sur les aliments traditionnels et la sécurité alimentaire en
+     Guadeloupe
+
+UGB Unité Gros Bétail
+
+YAML YAML Ain’t Markup Language – format de configuration
+Introduction                                                                                  1
+
+
+
+Introduction
+    La Guadeloupe cultive 23 578 ha et importe l’essentiel de ce qu’elle mange. Près de
+80 % des produits alimentaires consommés dans les départements d’outre-mer viennent
+de l’extérieur (Vie publique 2023 ; ODEADOM 2019), et l’écart de prix qui en résulte
+est d’abord alimentaire : en 2022, l’alimentation coûtait en Guadeloupe 41,8 % de plus
+qu’en France métropolitaine, contre 15,8 % tous postes confondus (Dufour et Monziols
+2023). Ce n’est pas un déficit de potentiel agronomique : c’est un effet d’organisation. Sur
+les 24 734 parcelles que compte le jeu de données parcellaire, la canne à sucre en occupe
+12 813 ha et la banane d’exportation 1 921 ha — deux filières tournées vers l’extérieur,
+structurées par des organisations de producteurs et par un soutien public dont l’ordre de
+grandeur décide de tout le reste : le Programme d’Options Spécifiques à l’Éloignement
+et à l’Insularité (POSEI) représente environ les trois quarts de la marge brute agricole
+du territoire (Toute l’Europe 2024). Le vivrier, celui-là même que les politiques de
+souveraineté alimentaire cherchent à développer, occupe ce qui reste.
+    Poser la question du vivrier en Guadeloupe, ce n’est donc pas demander s’il serait
+possible d’y produire davantage d’ignames ou de légumes : c’est demander ce qu’il faudrait
+déplacer pour le faire, sur quelles terres, au détriment de quoi, et à quel prix pour le revenu
+des exploitations. C’est un problème d’allocation sous contraintes, et c’est à ce titre qu’il
+relève d’un modèle d’optimisation.
+
+
+Une commande héritée d’une lignée
+    Le stage s’inscrit dans le projet TI-FIG, porté par l’unité de recherche ASTRO de
+l’INRAE en Guadeloupe, successeur direct du projet CALALOU (2021–2025) et de sa
+démarche « de la fourchette à la fourche ». CALALOU avait mobilisé, dans son volet
+d’évaluation ex ante, un modèle bioéconomique d’allocation de cultures publié dix ans
+plus tôt : MOSAICA (Chopin et al. 2015). La lettre de mission de ce stage demandait de
+concevoir des scénarios agro-économiques de développement des aliments traditionnels, et
+prévoyait pour cela des enquêtes de terrain ainsi que l’acquisition de données technico-
+économiques sur une microferme expérimentale. MOSAICA y figurait comme l’outil
+disponible : la commande portait sur ce qu’on allait lui faire dire, pas sur lui. [Q5] [Q6]
+    Cette continuité mérite d’être prise au sérieux, parce qu’elle fixe les attentes. Un modèle
+publié, une équipe qui l’a écrit, un projet qui l’a déjà employé : la question qu’un mémoire
+d’ingénieur pose normalement dans cette situation est celle de l’usage — quels scénarios,
+quels indicateurs, quelles conclusions. Elle suppose acquis que l’instrument fonctionne, et
+qu’il dit ce qu’on croit qu’il dit. [Q2] [Q10]
+
+
+Le constat, et la réorientation
+   L’instrument n’était pas exploitable en l’état, et la raison n’est pas celle qu’on attend. Le
+programme GAMS d’origine existe, il est complet, il est lisible. Mais GAMS renvoie zéro,
+sans le moindre avertissement, lorsqu’une table est interrogée sur une colonne absente. Une
+Introduction                                                                                  2
+
+
+
+équation d’éligibilité des vergers pluviaux teste alors une valeur nulle contre la valeur 1 : la
+comparaison est toujours vraie, et la culture concernée se trouve interdite sur la totalité du
+territoire. Personne ne l’a voulu, rien ne le signale, et le résultat produit reste parfaitement
+plausible — c’est là tout le problème. Un paramètre absent ne laisse pas un trou dans les
+sorties : il laisse un nombre crédible.
+    Un tel comportement ne se découvre pas en lisant le code, qui est correct d’apparence,
+ni en regardant les résultats, qui sont vraisemblables. Il se découvre en réécrivant le modèle
+contre ses données, ligne à ligne. Le stage a donc été réorienté : reconstruire avant de
+simuler. Le travail présenté ici est le portage de MOSAICA en Python/Pyomo (Bynum
+et al. 2021), résolu par HiGHS (Huangfu et Hall 2018) — un programme linéaire en
+nombres entiers de 308 847 variables binaires, 18 377 lignes de Python — sa calibration
+contre l’assolement observé de 2017, et l’usage prospectif qu’il rend enfin possible.
+
+
+D’où ce travail est écrit
+    Six mois, aucune enquête de terrain, des données produites ailleurs et pour autre
+chose, et un élève ingénieur en mécanique des fluides portant un modèle bioéconomique
+agronomique. Cette position n’est pas une circonstance atténuante : elle détermine ce que le
+travail peut affirmer. Les 4 638 exploitations dont il est question dans ce mémoire sont des
+lignes de table, et la façon dont elles arbitrent m’est connue par un coefficient d’aversion
+au risque déduit d’une typologie.
+    L’extériorité a d’ailleurs une trace mesurable dans le programme lui-même, et pas
+seulement dans le ton de ce paragraphe : les vingt-cinq variantes maraîchères qui portent le
+nom de la microferme expérimentale sont vides — identiques les unes aux autres sur tous
+les paramètres que le modèle lit — parce que l’acquisition de données prévue par la lettre
+de mission n’a pas eu lieu, absorbée par la reconstruction. Le chapitre 5 y revient ; ici, le
+constat suffit.
+
+
+Question et plan
+   Le déplacement de la commande n’est pas un accident à excuser, c’est le sujet. Il
+conduit à une question que ce mémoire prend pour objet :
+       que faut-il avoir établi sur un modèle d’allocation hérité pour que ses résultats
+       prospectifs soient opposables — c’est-à-dire défendables devant quelqu’un
+       qui les conteste ?
+    Cette question appelle trois réponses, et ce sont les trois chapitres qui suivent le cadrage
+du terrain. Il faut d’abord le porter fidèlement, y compris dans ses défauts, sans quoi tout
+désaccord ultérieur entre les deux modèles est indémêlable — on ne saurait plus distinguer
+une correction voulue d’une erreur de transcription (chapitre 2). Il faut ensuite établir
+ce qu’il reproduit du réel, et à quel prix, sans quoi un scénario n’est qu’un calcul sans
+référent (chapitre 3). Il faut enfin mesurer ce qu’il ne permet pas de conclure, sans
+quoi on publie des chiffres qu’un simple changement de contexte renverse (chapitre 4). Le
+Chapitre 1. Terrain et objet                                                                              3
+
+
+
+chapitre 5 discute ce que la construction ainsi menée engage, sur le territoire représenté
+comme sur la position depuis laquelle il l’a été.
+    Une dernière précision de lecture. Les six annexes ne sont pas un dépôt de matériaux :
+elles sont la couche de preuve du corps. Le corps affirme et mesure ; l’annexe établit,
+équation par équation, seuil par seuil, culture par culture. Chacune est appelée depuis le
+texte à l’endroit où l’affirmation qu’elle soutient est faite.
+
+
+Chapitre 1
+
+Terrain et objet
+
+  DANS CE CHAPITRE     1.1 climat, sol, chlordécone, foncier : un problème d’allocation · 1.2 ce que le
+  modèle promet · 1.3 trois raisons de le réécrire
+
+
+
+
+1.1      Pertinence d’un modèle d’allocation en Guadeloupe
+    Les possibilités d’allocation de cultures par parcelles sont restreintes par le climat, le
+sol, la pollution au chlordécone, le foncier et le travail. Les aides orientent le reste.
+    Environ 14 200 ha sont classés à risque de contamination par la chlordécone, dont près
+de 7 300 ha encore en usage agricole. C’est un phénomène irréversible à l’échelle humaine
+car la molécule persiste dans les sols pour des siècles (DAAF Guadeloupe 2025). Cela
+interdit les cultures dont l’organe récolté est en contact avec le sol.
+    C’est une règle d’éligibilité par parcelle.
+    On compte 24 734 parcelles pour 4 638 exploitations. Le parcellaire est fragmenté donc
+on ne peut a priori pas raisonner en exploitation moyenne. Le régime des Groupement
+Foncier Agricole (GFA) impose contractuellement une part minimale de canne à sucre à
+une partie de ce foncier.
+    C’est une contrainte de politique publique.
+    D’après le jeu de données, sur les 23 578 ha cultivés, la canne occupe 12 813 ha, la
+prairie 6 109 ha et la banane 1 921 ha. Ces trois postes correspondent à 90 % de la surface
+totale. Un développement du vivrier passe nécessairement par leur diminution, au profit de
+la surface vivrière, pour l’instant résiduelle.
+    C’est une réallocation.
+    On peut arbitrer sous contrainte. Le programme d’optimisation est donc pertinent en
+tant que modèle d’allocation en Guadeloupe.
+
+
+1.2      MOSAICA : ce que le modèle promet
+   MOSAICA manipule une mosaïque, c’est-à-dire une affectation simultanée de chaque
+parcelle à une culture, sur tout un territoire, sous les contraintes propres à chaque exploitation.
+On peut créer des scénarios (ex : ajout d’une contrainte, baisse de prix, etc.) et les évaluer
+Chapitre 1. Terrain et objet                                                                 4
+
+
+
+selon des indicateurs calculables depuis la mosaïque finale (ex : la marge, l’emploi, l’azote
+épandu, l’eau prélevée, etc.). On peut donc réaliser des évaluations ex ante (chapitre 4).
+    La formulation du modèle parle de parcelles, de cultures et d’exploitations mais jamais
+de la Guadeloupe. En langage de développeur, on appelle ça le « soft coding ». C’est
+volontaire et c’est un des principes importants du portage (§ 2.3).
+    Chopin et al. (2015, § 2.6) publie une procédure de comparaison entre l’assolement
+simulé et l’assolement observé, avec ses seuils. Cela permet de scorer la qualité de la
+calibration du modèle (chapitre 3).
+
+
+1.3      Le GAMS existant, et pourquoi il a fallu reconstruire
+    Le modèle GAMS pèse 646 ko répartis en 12 fichiers. On distingue 3 raisons qui
+justifient sa réécriture.
+ 1. GAMS est un environnement propriétaire qui fonctionne par licences. Cela crée des
+    problèmes de compatibilité de versions et crée une dépendance au logiciel.
+    On préfère adopter une approche open-source. On choisit Python comme langage de
+    programmation pour plusieurs raisons.
+   — Beaucoup de personnes sont formés à Python. Cela peut évacuer la question de la
+     formation à un nouveau langage à la fois pour des collaborations entre équipes ou
+     bien lors de recrutements.
+   — La forte concurrence entre les bibliothèques Python et leur modèle open-source
+     assurent un large choix de modules optimisés et maintenus grâce à des mises à jour
+     gratuites régulières. On choisit la bibliothèque d’optimisation Pyomo (Bynum et al.
+     2021) qui propose le solveur non-commercial HiGHS (Huangfu et Hall 2018).
+   — Python permet très efficacement de faire de l’analyse de données approfondie et fait
+     facilement le lien avec des SIG (système d’information géographique).
+   — Python est parfaitement compatible avec l’utilisation de GitHub. Cela permet de
+     simplifier la collaboration en proposant des outils de gestion de projet et en rendant
+     le code accessible à des équipes extérieures.
+ 2. Dans le modèle GAMS, faire varier un levier suppose d’éditer le code lui-même.
+    Réaliser une campagne de scénarios suppose un nombre considérable de modifications
+    manuelles. La traçabilité est faible, bricolée au cas par cas.
+ 3. Le GAMS ne signale pas ses défauts (§ 2.2, annexe B). Par exemple, si l’on interroge
+    GAMS sur une colonne absente d’une table, il préférera renvoyer 0 plutôt qu’une
+    erreur ou un avertissement. La conséquence concrète, identifiée et résolue durant le
+    portage, est que l’équation Eq_VE_PLUIE testait l’éligibilité du verger pluvial sur une
+    parcelle en comparant ce 0 avec la valeur 1. La variante était donc interdite sur toutes
+    les parcelles du territoire.
+    Le code reste correct et le résultat est plausible, ce qui rend la résolution des problèmes
+    difficile.
+Chapitre 2. Porter et rendre traçable                                                                             5
+
+
+
+   Retour rÃ©flexif
+   REFLEXIVITE
+
+
+
+Chapitre 2
+
+Porter et rendre traçable
+
+  DANS CE CHAPITRE     2.1 le programme et sa fonction objectif · 2.2 porter les défauts avec le reste · 2.3 ce
+  qui est générique, ce qui est guadeloupéen · 2.4 rendre le problème résoluble · 2.5 tests, sommes de
+  contrôle, runs de référence
+
+
+
+
+2.1       Formulation du programme
+    Le programme est un Mixed Integer Linear Program – programme linéaire en nombres
+entiers (MILP) purement binaire : il n’y a aucune variable continue
+    Soit 𝑃 l’ensemble des parcelles, 𝐶 l’ensemble des cultures, et 𝐸 ⊆ 𝑃 ×𝐶 l’ensemble des
+couples éligibles (§ 2.3). L’ensemble 𝐸 rend le problème traitable computationnellement.
+Le produit 𝑃 × 𝐶 compte environ deux millions de couples. Restreindre cet ensemble aux
+couples agronomiquement éligibles réduit le compte à 308 847 (tableau 2.1). C’est une
+décision de modélisation qui intervient avant l’optimisation : les couples écartés par le
+masque d’éligibilité ne pourront pas réapparaître grâce à une contrainte. Le chapitre 3
+montrera que le masque impose à lui seul un plancher d’écart à l’observé.
+
+    La variable de décision est
+
+                                     𝑌𝑝,𝑐 ∈ {0, 1},          ( 𝑝, 𝑐) ∈ 𝐸,
+
+qui vaut 1 si la parcelle 𝑝 porte la culture 𝑐.
+
+   On utilise une fonction objective, c’est-à-dire une quantité que l’on cherche à optimiser.
+L’objectif à maximiser est la marge brute agrégée, corrigée du risque, appelée fonction de
+Markowitz :                      ∑︁                                 
+                          max          𝑌𝑝,𝑐 𝑠 𝑝 𝑚 𝑐 1 − 𝑎 𝑓 ( 𝑝) 𝑣 𝑐 ,                 (2.1)
+                                        ( 𝑝,𝑐)∈𝐸
+
+où 𝑠 𝑝 est la surface de la parcelle (ha), 𝑚 𝑐 la marge brute unitaire (e/ha), 𝑓 ( 𝑝) l’exploitation
+de la parcelle, 𝑎 𝑓 son coefficient d’aversion au risque et 𝑣 𝑐 un coefficient de perte propre
+à la culture. Une exploitation neutre au risque (𝑎 𝑓 = 0) maximise la marge brute. Une
+exploitation prudente sur une culture volatile voit cette même marge fortement décotée.
+Chapitre 2. Porter et rendre traçable                                                       6
+
+
+
+    À chaque parcelle, au plus une culture :
+                                        ∑︁
+                                                 𝑌𝑝,𝑐 ≤ 1,         ∀𝑝 ∈ 𝑃.               (2.2)
+                                  𝑐 : ( 𝑝,𝑐)∈𝐸
+
+
+
+
+    Par exploitation, un plafond de main d’œuvre,
+                                        ∑︁ ∑︁
+                                                    𝑌𝑝,𝑐 𝑠 𝑝 ℎ𝑐 ≤ 𝜎 𝐻 𝑓 ,                (2.3)
+                                        𝑝∈𝑃 𝑓   𝑐
+
+
+où ℎ𝑐 est le besoin en travail (h/ha), 𝐻 𝑓 la main d’œuvre observée et 𝜎 un facteur de
+desserrement.
+
+    Enfin, des bornes portant sur un indicateur quelconque,
+                                           ∑︁
+                                                    𝑌𝑝,𝑐 𝑠 𝑝 𝑤 𝑝 𝑟 𝑐 ⋚ 𝑇,                (2.4)
+                                         ( 𝑝,𝑐)∈𝐸
+
+où 𝑟 𝑐 est un taux par hectare (kg d’azote, Indice de Fréquence de Traitements phytosanitaires
+(IFT), heures, euros de subvention) et 𝑤 𝑝 un poids de parcelle.
+
+    Deux précisions concernant la fonction objective :
+  — La pénalité est linéaire en surface, et aucune covariance entre cultures n’intervient. Le
+    programme appartient donc à la classe Mixed Integer Linear Program – programme
+    linéaire en nombres entiers (MILP) plutôt que quadratique. Il est donc résoluble par
+    HiGHS.
+  — Le revenu net que produit le rapport de run n’est pas la quantité maximisée. Il intègre
+    également le coût de la main d’œuvre, alors qu’elle n’est pas monétisée dans les
+    coûts variables hérités du GAMS : elle n’apparaît que comme la ressource plafonnée
+    de (2.3).
+   L’annexe A donne l’inventaire complet des ensembles, paramètres et contraintes, avec
+pour chacun le nom qu’il porte dans le GAMS d’origine.
+
+
+2.2      Protocole
+    Le protocole du portage prévoit une reproduction fidèle du comportement du modèle
+GAMS. Les éventuels défauts identifiés sont également portés et documentés. L’intérêt
+d’une telle parité est de pouvoir attribuer correctement un écart à sa cause. En supprimant
+les divergences de transcription, on sait attribuer chaque divergence à une correction voulue.
+    La parité n’est pas l’aboutissement du modèle. C’est une première étape documentée
+avant amélioration du modèle et exploration des scénarios.
+    Ce souci de traçabilité a conduit à donner à chaque équation du GAMS un statut : portée,
+implicite, différée ou écartée. Quatorze équations Eq_*_SUPP sont déclarées implicites
+Chapitre 2. Porter et rendre traçable                                                       7
+
+
+
+car elles annulent des codes agrégats dont l’économie est nulle. Eq_CS_GFA, qui impose
+la part minimale de canne des GFA, est portée mais désactivée : elle rend le problème
+infaisable sur les données 2017 réelles, comme le ferait le GAMS.
+    L’annexe B donne la table complète avec le motif de chaque statut.
+
+
+2.3      Une architecture qui sépare le générique du territoire
+    Les formules (2.1)–(2.4) ne mentionnent pas la Guadeloupe. C’est un des principes
+d’organisation du code, réparti en trois couches :
+  — un noyau générique, qui ne connaît que des parcelles, des cultures et des exploitations ;
+  — une étude de cas, qui fournit les données guadeloupéennes, les règles héritées du
+    GAMS et la restitution ;
+  — une couche en lecture seule, qui ouvre les dossiers de résultats déjà écrits.
+Le respect de ce principe est garanti via un test de soft coding appliqué au noyau.
+    Le noyau définit des constructeurs d’objets. Chaque typologie d’objet a un constructeur
+propre. Par exemple, les contraintes qui partagent le formalisme de l’équation (2.4) partagent
+le même constructeur. Construire une contrainte, c’est d’abord récupérer ses caractéristiques
+dans un fichier YAML Ain’t Markup Language – format de configuration (YAML) de
+configuration puis mobiliser le constructeur adéquat. Les caractéristiques deviennent les
+arguments de la fonction constructeur. Par exemple, un plafond nitrates, une enveloppe
+de dépense publique et un plancher d’emploi sont le même constructeur appelé avec trois
+arguments différents.
+    Au cours du chapitre 4, on verra que ce principe permet d’explorer 10 politiques, 12
+forçages et 2 fronts de Pareto, c’est-à-dire un nombre considérable de combinaisons de
+contraintes, sans jamais modifier le noyau. Ce principe permet d’envisager l’utilisation du
+modèle à d’autres cas d’études et de simplifier l’exploration prospective.
+
+
+2.4      Rendre le problème traitable
+    Une résolution complète sur le territoire demande entre 30 min et 55 min. C’est un ordre
+de grandeur, toutes configurations confondues, pour de la calibration ou de la prospective, à
+froid ou à chaud. C’est l’ordre de grandeur d’organisation qu’il faut prévoir avant de lancer
+un run.
+    De plus, à taille constante (308 847 variables) et problème identique, 20 résolutions
+enregistrées se sont étalées de 155 s à 1 007 s. Cette variabilité vient de la recherche par
+séparation et évaluation (le coût de l’enveloppe logicielle étant de 15 s).
+    — Pourquoi on ne retrouve pas les 30min-55min classiques ? —
+    La recherche par séparation et évaluation (branch and bound) permet de ne pas explorer
+les 2308 847 combinaisons possibles. Elle permet plutôt l’exploration organisée en arbre.
+Chaque niveau correspond au resserrement du problème d’une variable. On abandonne une
+branche dès qu’on peut prouver, grâce à sa relaxation linéaire, c’est-à-dire sa résolution
+comme problème à variables continues entre 0 et 1, qu’elle ne battra jamais la meilleure
+Chapitre 2. Porter et rendre traçable                                                           8
+
+
+
+solution déjà trouvée. Si le solveur trouve rapidement une première solution, celle-ci devient
+automatiquement la meilleure déjà trouvée, et il peut rapidement écarter des branches et
+gagner du temps d’exploration.
+    Le solveur s’arrête dès que l’écart relatif entre l’incumbent, c’est-à-dire la meilleure
+solution déjà trouvée, et la meilleure valeur de relaxation parmi les nœuds encore ouverts
+est suffisamment proche de 0 %.
+    Le facteur (1 − 𝑎 𝑓 𝑣 𝑐 ) de l’équation (2.1) peut devenir négatif pour une exploitation
+prudente sur une culture très variable. Cela peut rendre la relaxation linéaire très fractionnaire
+et donc rallonger le temps nécessaire à la recherche d’optimum. On fixe donc cette tolérance
+à 1 % au lieu de la valeur par défaut de HiGHS, qui est de 0,01 %. On passe d’un solve de
+37 h qui n’avait pas terminé à des solves d’1 h qui trouvent un optimum.
+    Une limite de temps de calcul existe pour éviter un débordement trop important. Le
+problème est qu’un solve arrêté à cause de la limite de temps n’est pas fiable car il sous-
+estime probablement l’objectif final et propose une mosaïque qui diverge probablement de
+la mosaïque recherchée. Ce genre de solve peut être courant du fait de la variabilité des
+temps de calcul.
+    Pour remédier à ce problème, on propose le principe d’amorçage à chaud (warm
+start). Le solveur reçoit l’allocation d’un run passé comme point de départ. Cela accélère
+grandement la recherche d’optimum mais ne change pas la nature du résultat. Par exemple,
+sur un même problème et pour un optimum identique, on passe de 720 s à 209 s de temps
+de calcul.
+    La Table 2.1 récapitule ces informations :
+
+    Table 2.1 – Taille du programme et coût de sa résolution. Les durées sont mesurées sur le
+    territoire complet ; l’étendue min–max porte sur vingt résolutions du même problème, à
+    taille constante.
+
+Couples parcelle × culture potentiels                                                 ∼2 000 000
+Variables binaires déclarées (calibration retenue)                                       308 847
+Variables binaires déclarées (configuration prospective)                                 331 044
+. . . si les 25 variantes symétriques sont rouvertes (§ 2.4)                             879 162
+Résolution la plus rapide des vingt enregistrées                                             155 s
+Résolution la plus lente des vingt enregistrées                                            1 007 s
+Coefficient de variation des durées                                                          64 %
+Même problème, amorçage à froid puis à chaud                                        720 s → 209 s
+Écart d’optimalité relatif imposé au solveur                                                  1%
+
+
+
+
+2.5      Les garde-fous
+    Il existe trois dispositifs différents qui contrôlent la robustesse du code :
+  — 613 tests unitaires, répartis en 58 fichiers dont le but est de vérifier que chaque
+    contrainte fait ce qu’elle prétend. Ces tests sont rapides et exécutables sans données.
+    Ils ne permettent pas de vérifier que le résultat global est juste.
+Chapitre 3. Calibrer                                                                                                9
+
+
+
+   — le golden snapshot fixe sur chaque parcelle l’allocation de la culture représentative
+     qu’elle porte réellement en 2 017. Le but ici est de comparer des indicateurs entre la
+     référence et l’allocation que le golden snapshot fixe. Les deux côtés sont censés être
+     rigoureusement identiques. On sérialise ainsi 681 sommes de contrôle : sommes de
+     colonnes, tailles de tables, etc. Ce script permet d’identifier les dérives numériques
+     silencieuses du pipeline ou des indicateurs après une retouche. Il ne renseigne pas
+     sur la justesse du modèle. Le golden snapshot se résout en 7 s contre 30 min à 55 min
+     pour un run classique.
+   — un script compare 3 runs de références déclarés à leurs métriques attendues. Le
+     bruit de la recherche arborescente vaut 0,15 point de Pourcentage d’Écart Absolu
+     (percentage absolute deviation) (PAD) (§ 3.6). Cela correspond à environ 5 % de
+     bruit sur l’objectif final. Le script a donc une tolérance de 5 %.
+
+   Retour rÃ©flexif
+   REFLEXIVITE
+
+
+
+Chapitre 3
+
+Calibrer
+
+  DANS CE CHAPITRE       3.1 l’assolement observé et ses trois défauts · 3.2 la métrique, et ce qu’elle ne
+  peut pas dire · 3.3 à quelle échelle le modèle tombe juste · 3.4 la cause commune de l’écart résiduel ·
+  3.5 corriger ou ajuster : le test qui sépare les deux · 3.6 ce qui reste inexpliqué · 3.7 deux postes retrouvés
+  sans être nommés
+
+
+    Un modèle d’optimisation ne se valide pas comme un modèle prédictif. Il ne prétend
+pas reproduire ce que les agriculteurs ont fait, mais représenter la façon dont ils arbitrent ;
+lui demander de retrouver l’assolement observé serait lui demander d’être ce qu’il n’est pas.
+La question posée dans ce chapitre est donc à la fois plus étroite et plus honnête : le modèle,
+laissé libre, retrouve-t-il quelque chose qui ressemble au territoire observé ? On verra à
+quoi l’on compare, avec quelle métrique, ce que cela donne, et — c’est ce qui a occupé le
+plus de temps — comment distinguer une correction légitime d’un ajustement circulaire.
+
+
+3.1       L’état de référence, et ce qu’il ne dit pas
+    L’assolement observé de 2017 constitue l’état de référence contre laquelle le modèle
+est noté. Cette référence présente trois défauts :
+— La finesse, car la donnée parcellaire n’encode que 12 groupes agrégés, quand le modèle
+  manipule 84 variantes techniques. Ces variantes doivent être réparties en ces 12 groupes
+  avant toute comparaison. La lecture des indicateurs doit se faire avec prudence du fait
+  de cette approximation.
+Chapitre 3. Calibrer                                                                     10
+
+
+
+— La main d’œuvre est une contrainte car elle est plafonnée. Elle s’estime comme
+  tel : pour chaque variante technique, connaitre son itinéraire technique et le nombre
+  d’heure de travail par hectare de chaque opération et rapporter cela à la surface totale.
+  L’itinéraire technique change d’une variante technique à l’autre. On doit choisir une
+  variante technique pour représenter une culture agrégée dans l’état de référence. Mais
+  en faisant ça, on fait un arbitrage dans l’estimation du plafond de main d’œuvre et donc
+  de l’optimum final.
+  De plus, le modèle interdit souvent cette culture sur la parcelle même qu’elle représente.
+  Par exemple, La représentante de la canne n’est éligible que sur 31 % de la surface
+  cannière observée.
+
+— Les corrections manuelles sont présentées dans la documentation technique du modèle
+  GAMS. 419 parcelles sont reclassées de café et cacao vers la canne. 3 parcelles de
+  plus de 45° de pente ramenées à 45° « pour ne pas avoir à modifier les seuils dans
+  MOSAICA ». On observe que la référence contre laquelle le modèle est noté a été
+  ajustée au modèle.
+    Sur certaines parcelles, aucune variante fine du groupe qui y était observé en 2 017
+n’est éligible. En particulier, 167 ha de vergers sur 311 ha, 52 ha d’agrumes sur 101 ha, et
+ensuite le reste en plantain (26 ha), canne (84 ha), ananas (10 ha) et igname (8 ha). Cela
+correspond à 348 ha sur 23 578 ha. Cela implique un plancher de PAD de 1,5 %, qu’importe
+l’optimisation.
+    Les données parcellaires couvrent 87 % de la Surface Agricole Utile (SAU) déclarée
+par la statistique agricole (Agreste 2019), avec la canne à 98 % et les fruits à 90 %.
+
+
+3.2      La métrique : le PAD, et ce qu’il ne peut pas dire
+   Le pourcentage d’écart absolu — PAD — compare, pour un usage du sol 𝑢, la surface
+observée à la surface simulée (Chopin et al. 2015, §2.6) :
+
+                                                 𝑆𝑢obs − 𝑆𝑢sim
+                               PAD𝑢 = 100 ×                      .                     (3.1)
+                                                     𝑆𝑢obs
+
+0 % signifie que le modèle retrouve exactement la surface observée de cet usage, 50 % qu’il
+se trompe de la moitié.
+    L’article fixe deux seuils d’acceptabilité :
+— 15 % pour les cultures principales à l’échelle du territoire ;
+— 20 % à l’échelle des sous-régions et des exploitations.
+   Le modèle est évalué aux échelles du territoire, des îles, des sous-régions et des
+exploitations. On produit aussi la matrice de confusion des huit types d’exploitation ainsi
+qu’un taux de correspondance parcellaire, compté en parcelles et en hectares.
+Chapitre 3. Calibrer                                                                              11
+
+
+
+Cinq raisons de ne pas en faire un score
+    Le PAD est la métrique de l’article Chopin et al., mais il présente des angles morts que
+le tableau 3.1 présente.
+
+               Table 3.1 – Liste des cinq angles morts du PAD et leurs conséquences
+
+Angle mort                    Conséquence
+C’est un rapport              Manquer 80 ha sur 100 ha compte autant que manquer 10 000 ha sur
+                              12 500 ha : les petits postes dominent le score
+Il ignore la localisation     Deux allocations aux mêmes totaux par culture, toutes parcelles
+                              interverties, ont le même PAD. D’où les taux de correspondance
+                              parcellaire et surfacique, qui regardent la carte
+Une contrainte l’annule       Toute contrainte calée sur l’observé met son poste à zéro. Le plancher
+                              de prairie épingle un quart de la surface cultivée (§ 3.5)
+Il est indéfini, pas infini   Une culture inventée là où rien n’était observé a un dénominateur nul :
+                              sa ligne sort du calcul
+L’observé n’est pas la        La référence couvre 87 % de la surface agricole déclarée, contient des
+vérité                        reclassements manuels, et sa ventilation agrumes / vergers est douteuse
+                              (§ 3.7)
+
+
+   De plus, un modèle d’optimisation prescrit mais ne prédit pas. La question utile n’est
+pas « de combien s’écarte-t-il ? » mais « où s’écarte-t-il, et est-ce que cela s’explique ? ».
+Tous ces éléments invitent à ne pas voir le PAD comme un score robuste, mais plutôt
+comme un détecteur.
+   On ne cherche pas forcément à faire baisser le PAD dans l’absolu. En revanche, on
+cherche à faire baisser la part de l’écart que l’on ne sait pas expliquer.
+
+
+Ce qui est comparable à l’article, et ce qui ne l’est pas
+    L’article publie un PAD par culture et propose un seuil de 15 % en dessous duquel on
+considère la calibration satisfaisante. Dans l’article, 8 cultures sur 10 passent le test, contre
+seulement 4 cultures sur 11 pour le modèle Python. En parallèle, les trois autres métriques
+de l’article sont atteintes ou dépassées (§ 3.3). De plus, on propose un PAD territorial
+qui n’est pas présent dans l’article. Cette métrique correspond à un PAD toutes cultures
+confondues à l’échelle de la Guadeloupe.
+    On distingue 2 calibrations différentes. La première correspond à un portage à parité
+stricte, c’est-à-dire une fidélité totale au modèle GAMS. La seconde, de meilleure qualité,
+correspond à ce même portage auquel on ajoute deux modifications (§ 3.5).
+    Pour un portage à parité stricte, le PAD territorial est de 48,44 % et 0 culture sur 11
+n’est sous le seuil. 4 choses expliquent l’écart avec les résultats de l’article (cf. annexe E) :
+ 1. L’article ne valide pas le modèle à parité. Le modèle de l’article contient le plafond de
+    plantain. Sans lui, le plantain monte à 2 875 ha contre 147 ha observés. On le désactive
+    pour mesurer ce qu’il apporte.
+Chapitre 3. Calibrer                                                                       12
+
+
+
+ 2. Le jeu de données de l’article est différent du nôtre. Il présente 25 057 parcelles et
+    5 336 exploitations alors que notre jeu comporte 24 734 parcelles et 4 638 exploitations.
+    Cela correspond à 14 % d’exploitations en moins à hectares comparables, donc à de la
+    concentration foncière.
+ 3. L’agrégat territorial est plus sévère que le PAD par culture. L’article ne le propose pas.
+ 4. La tolérance d’optimalité du solveur est de 1 %. Ce bruit rend indifférent l’allocation
+    de prairie ou de canne sur environ 3 000 ha sur lesquelles leurs marges diffèrent de
+    moins de 1 %. Cela correspond à environ 3 % du PAD.
+
+
+Ce qu’il faut en retenir pour lire la suite
+    L’écart résiduel du modèle est concentré sur l’arboriculture, les vergers et les cultures
+maraîchères de niche. Le PAD y est mécaniquement plus sévère.
+    Au final, le modèle reproduit 77,1 % de la surface et 86,9 % des types d’exploitation et
+manque les petits postes. C’est un modèle dont on connaît le domaine de validité : il ne
+faut pas l’utiliser pour arbitrer entre deux cultures marginales.
+    Le PAD par exploitation a une médiane de 0,0 %, une moyenne de 26,3 %, et 72,3 % des
+exploitations passent sous le seuil de 20 %. Lire la moyenne seule conduit à sous-estimer la
+qualité réelle du modèle. Les tables complètes, aux quatre échelles, sont en annexe E.
+
+
+3.3      L’échelle d’attribution
+    La calibration a consisté à ajouter une contrainte à la fois et à mesurer ce que chacune
+apporte. Ce n’est pas un bidouillage de paramètre jusqu’à ce que le résultat convienne.
+    Le premier état du portage, avant que la parité ne soit complète, donnait un PAD
+territorial de 193 %, 7,3 % de types d’exploitation reproduits, 7,0 % de parcelles et 4,5 % de
+surface. Le tableau 3.2 présente les métriques des trois états suivant par ordre chronologique
+ainsi que les métriques de l’article.
+    Le dernier état (parité GAMS + plafond plantain + plancher prairie) présente une erreur
+est localisée, pas diffuse. Sur les 7 sous-régions, 5 passent sous le seuil sous-régional de
+20 % — de 6,7 % à 14,4 % — et deux le dépassent nettement, le Sud-Est et le Sud-Ouest de
+Basse-Terre, à 28,4 % et 33,7 %. La sous-région la moins bien reproduite dans l’article est
+également le Sud-Est de Basse-Terre (56 % de surface correctement simulée contre 70 %
+à 76 % ailleurs). L’article explique que la rotation banane/canne forme un seul système
+technique réparti sur plusieurs parcelles, alors que le modèle traite cela comme des choix
+indépendants. Cette similitude entre le modèle GAMS et le modèle Python appuie la fidélité
+du portage.
+    Marie-Galante est passée du pire au meilleur rang (6,7 %) : sa prairie y tombait de
+1 357 ha à 228 ha avant l’ajout du plancher, soit 83 % de perte sur une île entière.
+    Le plancher de prairie force la prairie à sa valeur. L’écart est donc nul par construction
+et la prairie pèse un quart de la surface cultivée. Les chiffres défendables sont les trois
+Chapitre 3. Calibrer                                                                                          13
+
+
+
+premières lignes du tableau 3.2 — types, parcelles, surface — et le retour de la canne,
+qu’aucune contrainte ne produit. Le PAD territorial n’est pas un score pertinent.
+
+    Table 3.2 – Ce que chaque contrainte ajoute et coûte. Les seuils de la dernière colonne sont
+    ceux de Chopin et al. (2015).
+
+                              Parité GAMS      + plafond plantain                + plancher prairie       Article
+Types d’exploitation                   64,0                         67,0                       86,9           81
+reproduits (%)
+Parcelles bien simulées                56,0                         59,8                       67,6           66
+(%)
+Surface bien simulée (%)               64,3                         69,0                       77,1            77
+Cultures sous le seuil (sur               0                            2                          4        8 / 10
+11)
+PAD territorial (%)                   48,44                       31,69                        6,60           15
+Objectif (Me)                          85,0                         81,8                       81,2           —
+
+
+
+         Canne à sucre
+
+                Prairie
+
+         Banane export
+
+           Maraîchage
+
+               Jachère
+
+               Vergers
+
+                Melon
+
+       Banane plantain
+
+               Igname
+
+               Ananas
+                                                                                           Observé 2017
+             Agrumes                                                                       Simulé
+
+                              101                102                       103                  104
+                                           Surface (ha, échelle logarithmique)
+
+
+    Figure 3.1 – Assolement observé (référence 2017) et simulé (calibration retenue) par groupe
+    de cultures. L’échelle est logarithmique et les surfaces vont de 4 ha à 12 813 ha.
+
+
+
+3.4      La cause commune de l’écart résiduel : les rendements
+    La statistique agricole publie, pour chaque culture, une surface et une production, donc
+un rendement territorial observé (Agreste 2019). Le tableau 3.3 le confronte au rendement
+que porte l’assolement simulé. L’ordre de grandeur est un facteur 2 à 4 sur les cultures
+diversifiées.
+    Une part de cet écart est prévisible. La statistique fait la moyenne de tous les producteurs
+et rapporte la production à la surface déclarée. Les jeunes vergers non encore entrés en
+production y sont donc comptés. Le modèle, lui, postule le respect des itinéraires techniques
+Chapitre 3. Calibrer                                                                             14
+
+
+    Table 3.3 – Rendement du modèle et rendement du territoire, en tonnes par hectare. La
+    colonne Agreste est tirée de la statistique agricole (Agreste 2019). La colonne « modèle »
+    est la production simulée divisée par la surface simulée, mélange de variantes techniques
+    compris. Les rendements du modèle sont exprimés par cycle et sont donc annualisées avant
+    comparaison.
+
+    Groupe              Agreste 2017    Modèle, par cycle     Modèle, annualisé     Rapport
+    Maraîchage                   10,8                  43,9                  43,9       ×4,1
+    Agrumes                       5,2                  20,0                  20,0       ×3,8
+    Banane plantain               9,0                  26,0                  26,0       ×2,9
+    Vergers                       6,4                  14,5                  14,5       ×2,3
+    Ananas (18 mois)             12,3                  34,0                  22,7       ×1,8
+    Igname                       10,0                  17,8                  17,8       ×1,8
+    Melon                        19,9                  20,0                  20,0       ×1,0
+
+
+et des rendements tabulés. L’écart vient, en partie, du fait que la statistique agricole publie
+des rendements moyens alors que le modèle manipule des rendements potentiels.
+    Le modèle décrit, pour le maraîchage, une rotation annuelle dans laquelle plusieurs
+légumes se succèdent sur le même hectare dans l’année et les récoltes s’additionnent. Au
+contraire, Agreste compte une surface par légume et un rendement par légume. Le rapport
+de 4,1 vient largement de cette méthode comptable.
+    Le modèle simule la production d’agrumes sur 10 ha. Son rendement moyen est donc
+calculé sur un échantillon de surface restreint, et on essaye de confronter ce chiffre à un
+rendement moyenné sur 101 ha observés. Le rapport des deux est donc à ne pas citer sans
+ce contexte.
+    On ne prend pas les données Agreste pour 3 raisons :
+— le respect du mandat de parité, afin de pouvoir attribuer les écarts à des modifications
+  déclarées ;
+— Agreste donne des rendements par culture alors que le modèle donne des rendements
+  par itinéraire technique, c’est-à-dire par cultures fines. Avec les données Agreste, le
+  modèle ne pourrait pas distinguer deux variantes d’une même culture et on retomberait
+  sur une optimisation à 12 cultures ;
+— Agreste sert de juge au modèle, un peu comme le PAD. On cherche à identifier les
+  raisons de l’écart entre le rendement potentiel (modèle) et le rendement réel (Agreste).
+  Caler les entrées sur la statistique agricole revient à caler le modèle sur les résultats que
+  l’on souhaiterait qu’il produise. Ce serait circulaire et donnerait un modèle surajusté.
+    Le melon est la seule culture du territoire produite presque entièrement par un seul
+opérateur à partir d’un unique itinéraire technique. L’écart ne vient pas d’un défaut de
+données mais plutôt de la différence entre un rendement potentiel et un rendement moyen.
+Quand les deux coïncident comme c’est le cas pour le melon, l’écart disparaît.
+    Une culture dont le rendement est 2 à 4 fois trop élevé a une marge 2 à 4 fois trop
+attractive, et le modèle en couvre l’île dès qu’aucun débouché ne la borne.
+Chapitre 3. Calibrer                                                                        15
+
+
+
+3.5      Deux déviations, et le test qui les sépare d’un ajuste-
+         ment
+    Toute déviation par rapport à la parité doit avoir une source extérieure au modèle et à
+l’observé. L’ajout d’une contrainte à un modèle pour l’approcher du réel doit être justifié.
+Une contrainte calée sur l’observé produit mécaniquement un écart nul sur le poste qu’elle
+vise. C’est de l’ajustement déguisé en résultat (Howitt 1995). On a retenu 2 déviations.
+
+
+Première déviation : le plafond de plantain
+    Sans contrainte, le modèle donne 2 875 ha de plantain contre 147 ha observés. Cela
+s’explique par la différence de rendement vu précédemment ainsi que par la contrainte de
+rotation qui pèse sur son concurrent, la banane. Cela crée, pour le plantain, un avantage
+relatif de 4,9 %. Ce poste correspond pour 20,9 Me à l’écart d’objectif entre l’optimum et
+l’observé.
+    Au lieu de choisir arbitrairement, on a balayé des valeurs de plafond (annexe E). Le
+balayage donne un palier plat de 4 650 t (plafond donné par l’équation 6 de l’article) jusqu’à
+9 240 t. En dessous de 4 650 t, le plafond devient la production et on contraint explicitement
+le modèle. Au dessus de 9 240 t, le plafond cesse de mordre et on retombe sur le run de
+parité avec le plantain à 2 875 ha. Entre ces deux bornes, le seuil double pendant que le PAD
+évolue d’un demi-point, ce qui est à peine plus que le bruit du solveur. Le plafond n’oblige
+pas le simulé à coller à l’observé car l’optimum du palier est atteinte pour (9 240 t) ce qui
+est 2,5 fois le débouché observé. Plus contraignant encore, le modèle freine le simulé mais
+ne le tire pas vers l’observé. Même pour le plafond le plus contraignant, le plantain simulé
+(247ha) reste supérieur au plantain observé (147ha). On choisit finalement un plafond de
+6440t. C’est la valeur retenue dans le modèle GAMS.
+
+
+Seconde déviation : le plancher de prairie
+    Le seuil retenu est de 6 096 ha, soit la surface de prairie observée en 2017 à 13 ha près,
+et c’est aussi le paramètre GAMS QUOTA_PN_PIQ_MIN. La règle posée plus haut devrait
+donc l’interdire. Ce qui autorise malgré tout la déviation est que la nécessité du plancher
+s’établit hors du modèle, par un calcul de charge animale.
+    Sans plancher, le modèle ne laisse que 2 980 ha à la prairie. Le territoire portait 40 449
+bovins en 2017, soit environ 29 771 Unité Gros Bétail (UGB) (Agreste 2019). Rapporté
+aux 9 595 ha de la statistique agricole cela donne 3,10 UGB par hectare, ce que confirment
+les deux recensements agricoles qui encadrent l’année ; rapporté aux 2 980 ha du modèle,
+9,99, soit trois à quatre fois le chargement attesté. Ce n’est pas un résultat surprenant qu’il
+faudrait respecter, c’est un état du territoire qui n’existe pas, et il est établi sans que le
+PAD intervienne. Les hectares manquants ne sont pas non plus étiquetés sous d’autres
+cultures : si les 3 489 ha d’écart étaient chez nous rangés en canne, notre canne dépasserait
+la statistique agricole, alors qu’elle en restitue 98 %. Ce sont des parcelles absentes du
+Chapitre 3. Calibrer                                                                        16
+
+
+
+jeu parcellaire, de l’herbe non déclarée aux aides, donc non récupérables en contraignant
+l’allocation. La contrainte n’encode ainsi pas l’assolement de 2017 mais le fait qu’un
+cheptel existe et doit se nourrir ; que le seuil tombe sur l’observé en est le résultat, pas la
+construction.
+    Reste à choisir le niveau, sans se servir de l’ajustement pour le faire. On balaye de
+6 096 ha à 9 595 ha, avec un repère intermédiaire à 8 341 ha, la statistique agricole ramenée
+à notre couverture de 87 %. Sur toute la plage, les trois métriques que le plancher ne touche
+pas restent au-dessus des seuils de l’article : au plancher le plus haut, encore 82,0 % de
+types, 65,2 % de parcelles et 72,2 % de surface. En revanche le PAD hors prairie empire
+quand on monte, de 14,9 % à 24,0 % : le plancher prend alors sa terre à la canne, la culture
+que le modèle restitue le mieux. Un seuil calé pour flatter le résultat ferait l’inverse. On
+retient le bas de la plage, 27 % sous la valeur exogène.
+    Deux chiffres ne sont pas à revendiquer. Le PAD territorial d’abord : le plancher épingle
+un quart de la surface cultivée, l’écart de la prairie est nul par construction et le PAD en
+hérite (§ 3.2). Le retour de la canne ensuite, à 12 782 ha contre 12 813 ha observés sans
+qu’aucune contrainte ne la nomme : prairie et canne se disputent les mêmes parcelles, donc
+ce retour est en partie un report mécanique. C’est un contrôle de cohérence passé, pas une
+validation indépendante.
+    Reste à dire pourquoi le modèle perd la prairie ; la décomposition des 3 489 ha est en
+annexe E. 30 % de la surface perdue tient à un écart de 0,94 % entre les marges de deux
+cultures, où l’arbitrage est plus numérique qu’économique. Le reste tient au travail. L’article
+donne 70 h ha=1 pour la prairie, notre jeu de données 126 h ha=1 : le chiffre se recompose
+depuis l’itinéraire technique, dont aucune des sept opérations n’est un travail du sol. Ce
+sont des soins aux animaux, comptés à l’hectare faute d’une variable de cheptel où les
+loger, et ces heures entrent dans le plafond de main d’œuvre comme un coût de culture.
+    Le produit animal est traité de la même façon. Les tables donnent pour la prairie au
+piquet 0,66 t ha=1 vendues 5 000 e t=1 , plus 550 e ha=1 de POSEI : à ce prix la tonne n’est
+pas de l’herbe, c’est de la viande. La marge vaut environ 1 602 e ha=1 avec une variance de
+rendement nulle, ce qui aide la prairie plutôt que de la pénaliser et explique que recalibrer
+l’aversion au risque ne répare rien. L’élevage est donc dans le modèle comme produit et
+absent comme activité : retirer 3 489 ha de prairie y coûte 1 602 e ha=1 , quand la réalité
+serait de vendre un cheptel. Face aux 2 400 e ha=1 à 3 500 e ha=1 de la canne mécanisée,
+la prairie perd donc légitimement l’arbitrage. Le modèle a raison dans ses termes, ce sont
+ses termes qui sont incomplets.
+    Le plancher est la forme réduite d’une équation absente, surface fourragère supérieure
+au cheptel divisé par le chargement, évaluée au troupeau de 2017. Cela borne ce qu’on peut
+explorer : aucune question d’intensification de l’élevage, faute d’arbitrage entre moins de
+surface plus chargée et plus de surface extensive. En prospective, le seuil est à lire comme
+une hypothèse de cheptel, à déclarer dans chaque scénario plutôt qu’à hériter (chapitre 4).
+Chapitre 3. Calibrer                                                                       17
+
+
+
+Le coût des deux déviations
+    Les deux contraintes adoptées coûtent 0,7 % de l’objectif pour le plancher de prairie
+et 3,7 % pour le plafond de plantain. Un troisième levier a été envisagé et non retenu, le
+plancher arboricole, dont le coût mesuré va de 0,39 % à 200 ha à 1,19 % à 335 ha ; il a
+été écarté parce que les runs qui le portaient atteignaient la limite d’une heure avec un
+incumbent incohérent, donc inexploitable. Les deux corrections retenues sont du même
+ordre de grandeur que ce candidat : aucune n’est une correction massive imposée au modèle.
+Elles corrigent, elles ne réécrivent pas.
+
+
+Une contrainte que l’on n’a pas posée
+    430 ha d’ananas intensif apparaissent chez les canniers et les bananiers, et aucune
+contrainte actuelle ne l’interdit. Ce que le modèle vérifie sur une exploitation tient en deux
+lignes : des hectares éligibles et un total annuel d’heures de travail. Ces 430 ha passent
+les deux tests. Ce qu’un agronome regarderait, le modèle ne le porte pas. Le calendrier
+d’abord : le cycle de l’ananas dure 18 mois quand le modèle est mono-période annuel, et
+une exploitation cannière a déjà ses pointes de plantation et de récolte dont un total annuel
+ne dit rien. Le matériel végétal ensuite : l’ananas se plante par rejets issus des plantations
+existantes, et 430 ha supposent un stock qui n’existe pas sur le territoire et met plusieurs
+cycles à se constituer. L’équipement et le savoir-faire enfin : une exploitation cannière
+possède des machines de canne et une main d’œuvre formée à la canne, quand le modèle
+n’a ni capital, ni compétence, ni coût d’apprentissage — changer de culture y est gratuit
+et instantané. Le débouché, pour finir, est une filière organisée qui n’absorbe pas 430 ha
+supplémentaires par construction.
+    Ce n’est donc pas une erreur de calcul mais une contrainte manquante, de la même
+famille que l’élevage : le modèle ignore qu’un métier ne se change pas en une saison, et
+rien dans ses sorties ne le signale. Le résultat reste plausible tant qu’on ne regarde pas qui
+cultive quoi.
+
+
+3.6      Explications de l’écart résiduel
+    La résolution n’est pas responsable de l’écart résiduel. L’hypothèse qu’il existerait un
+meilleur optimum que le solveur n’a pas trouvé est fausse (§ 2.4).
+    La situation observée de 2017 donne un objectif de 72,2 Me alors que l’optimum est
+de 85,0 Me. Cette écart de 15 % correspond à 15 fois la tolérance d’optimalité imposée
+au solveur. On peut donc dire que le modèle converge bien mais qu’il ne maximise pas la
+même chose que les agriculteurs.
+    De plus, 3 optimisations de même configurations donnent 48,44 %, 48,29 % et 48,31 %
+de PAD. L’arbitraire du solveur vaut 0,15 % de PAD et c’est ce chiffre qui fixe la tolérance
+des garde-fous du dépôt (§ 2.5).
+    Concernant la main d’œuvre, la situation observée demande 5,68 Mh pour un plafond
+de 6,25 Mh. Le plafond n’interdit pas l’assolement réel.
+Chapitre 4. Explorer                                                                                     18
+
+
+
+    La recalibration sur 2017 des coefficients d’aversion au risque donne un PAD de 39,9 %
+mais au prix d’un surajustement qui rend les coefficients économiquement absurdes. La
+piste est abandonnée.
+    Caler des plafonds de marché sur l’observé descend à 33,6 %, et c’est circulaire par
+construction, puisque la contrainte est l’observé. La piste est abandonnée.
+    Implémenter l’élevage semble être la bonne piste mais c’est un chantier important. Il a
+donc été écarté ici plutôt que bâclé. Il correspond à la seconde partie du stage qui n’est pas
+encore réalisée et Chopin et al. (2015) reconnaît son absence comme sa propre limite.
+
+
+3.7      Deux signatures émergentes
+    La canne à sucre est à 12 782 ha contre 12 813 ha observés (0,2 % de PAD) sans
+qu’aucune contrainte ne la nomme. Le modèle, laissé entièrement libre sur la culture qui
+occupe plus de la moitié du territoire, retombe sur l’observé.
+    De même, la banane revient sous le plafond de plantain, et la canne sous le plancher
+de prairie. Pour ces deux cultures, le modèle se rapproche de l’observé grâce à des
+contraintes agissant sur d’autres postes. Cela semble indiquer que la structure économique
+du programme est juste, indépendamment des seuils qu’on lui impose.
+    Sur l’arboriculture, le modèle est plus proche de la statistique agricole que de notre
+propre référence parcellaire. L’écart mesuré est en partie un écart entre la référence et la
+réalité ce qui relativise la responsabilité du modèle dans ce cas précis. À noter que le déficit
+d’arboriculture ne vient pas de l’inéligibilité mais du rendement horaire. Avec un plafond
+de main d’œuvre, ce qui compte n’est pas la marge à l’hectare mais la marge à l’heure.
+
+   Retour rÃ©flexif
+   réflexivité
+
+
+
+Chapitre 4
+
+Explorer
+
+  DANS CE CHAPITRE      4.1 politiques, forçages, balayages, et les trois décisions de méthode · 4.2 le
+  classement des politiques dépend du forçage · 4.3 ce que coûtent un euro public et un kilogramme d’azote
+
+
+   Le modèle est porté et calibré. On s’intéresse désormais à l’exploration de scénarios.
+Ce chapitre présente le dispositif et les résultats.
+
+
+4.1      Le dispositif expérimental
+    Chaque scénario est séparé en trois rubriques :
+— La politique, qui correspond à une décision de la puissance publique. Cela peut être un
+  plafond d’azote, une enveloppe de subventions, un plancher d’emploi, etc.
+Chapitre 4. Explorer                                                                                                              19
+
+
+
+— Le forçage, qui correspond à ce que le climat et les marchés imposent. Cela peut être
+  des prix, des rendements, des coûts d’intrants multipliés par un facteur, etc.
+— Le balayage, qui correspond à une variation d’un seul seuil afin de tracer le front des
+  compromis atteignables.
+    Le catalogue actuel est composé de 10 politiques, 12 forçages et 2 fronts.
+    La figure 4.1 donne les deux catalogues. Le catalogue des politiques est ordonné d’une
+dérégulation complète à une rupture agroécologique. On peut voir quels scénarios ont
+été explorés. Le produit cartésien complet donne 120 combinaisons, ce qui correspond à
+environ cinq jours de calcul continu, sans compter les fronts. Un plan explicite désigne,
+pour chaque politique, ses forçages et ses fronts.
+
+  Forçages — ce qu’imposent le climat et les marchés                           Politiques — ce que décide la puissance publique
+
+   ◦ F10     conjoncture favorable                                              ◦ P10      bifurcation agroécologique
+   • F0      nominal (forçage nul)                                              • P8       transition agroécologique
+                                                                                • P7       Écophyto réglementaire
+   ◦ F3      dérive climatique
+                                                                                • P6       verdissement incitatif
+   ◦ F4      choc sanitaire
+                                                                                • P4       statu quo
+   • F1      cyclone majeur
+   ◦ F2      sécheresse sévère                                                  ◦ P3       intensification modérée
+                                                                                • P5       austérité budgétaire
+   • F7      inflation alimentaire
+                                                                                ◦ P2       accélérationnisme industriel
+   ◦ F8      retrait du posei
+                                                                                • P1       dérégulation totale
+   ◦ F5      effondrement des prix d’export
+   • F6      choc sur les intrants                                              • P9       souveraineté alimentaire
+   ◦ F11     artificialisation des terres
+   • F9      crise systémique
+
+                                     teinte : du plus favorable, ou du plus agroécologique, au plus défavorable
+
+       témoin (F0, P4)                climat et sanitaire                  marchés et politique              hors gradient
+ • au moins une cellule de la grille a été résolue          ◦ aucune : la ligne n’a jamais été calculée
+
+     Figure 4.1 – Les deux catalogues. La teinte va de la conjoncture la plus favorable (F10) à la
+     plus défavorable (F9), et de la rupture agroécologique (P10) à la dérégulation (P1). Les
+     témoins encadrés en noir sont les points de comparaison. F0 est le forçage nul, P4 le statu
+     quo.
+
+     On distingue trois décisions au niveau de la méthode :
+ 1. Les seuils du catalogue sont des fractions choisies de totaux mesurés sur un run de
+    référence, et non des chiffres inventés. L’annexe C donne, pour chaque seuil, la fraction
+    et le total dont elle est tirée.
+
+ 2. On décrit une politique par ses résultats sous chaque forçage. On mobilise les critères
+    classiques de décision dans l’incertain : pire cas (Wald 1945), regret maximal (Savage
+    1951), domaine de viabilité (Starr 1963). L’infaisabilité correspond au pire résultat.
+
+ 3. Les fronts sont tracés par 𝜀-contrainte (Haimes et al. 1971 ; Mavrotas 2009) et non
+    par somme pondérée. La raison est qu’une somme pondérée ne peut atteindre que les
+    points situés sur l’enveloppe convexe du front.
+Chapitre 4. Explorer                                                                          20
+
+
+
+4.2      Ce que la grille montre
+    Le classement des politiques dépend du forçage. Le tableau 4.1 donne les cellules
+résolues.
+    Sous crise systémique (F9), les trois politiques testées donnent une marge brute du
+territoire négative. C’est le pire cas au sens de Wald.
+    La politique de souveraineté alimentaire (P9) est la meilleure sous le forçage nominal
+(F0). Elle donne 128,19 Me de marge brute contre 98,35 Me pour le statu quo (P4). Elle
+est également la pire sous crise systémique (F9), avec =32,20 Me contre =16,99 Me. Le
+classement s’inverse d’un forçage à l’autre. Le regret de Savage montre cette inversion
+(figure 4.2). Passer de F0 à F9 fait passer le regret de P9 de 0,00 % à 15,21 %. À l’inverse,
+le regret de P4 passe de 29,84 % à 0,00 %.
+    Un point important est que la marge brute contient la subvention. On cherche à classer
+des politiques et donc à classer notamment des déplacements d’aides. Regarder la marge
+brute, c’est, en partie, avantager les politiques qui subventionnent davantage. On propose
+donc une colonne « hors aide » qui isole la marge issue de la production agricole seule.
+On constate que le classement change. Sous F9, P8 (=39,41 Me) est plus exposée que P9
+(=35,78 Me). Les métriques « brute » et « hors aide » se complètent et ne donnent pas les
+mêmes informations.
+    Ce qui limite les politiques, c’est la contradiction entre hausse des Équivalent Temps
+Plein (ETP) et régulation des pratiques. Les itinéraires les plus intensifs en travail sont aussi
+les plus intensifs en azote et en IFT. En somme, créer du travail peut devenir impossible à
+cause des autres plafonds.
+    À noter qu’un forçage peut rendre une politique inutile, c’est-à-dire qu’elle ne coûte et
+n’apporte rien. Les contraintes imposées par la politique peuvent être déjà contenues dans
+les contraintes imposées par les forçages. Sous crise systémique, le plafond d’azote de P8
+ne mord jamais car la crise réduit les surfaces intensives.
+
+   Table 4.1 – Marge brute par cellule (Me). hors aide exclut les subventions de la marge
+   brute. La dague marque un solve sous-optimal car arrêté à la limite de temps.
+
+                                      F0 nominal          F6 intrants            F9 crise
+                                    brute   hors aide   brute   hors aide      brute   hors aide
+P4 statu quo                       98,35       27,08    59,77      20,32     =16,99      =30,35
+P6 verdissement                   78,39†       25,01    69,59      28,97         —           —
+P7 Écophyto                        83,05       26,46    41,34       2,11         —           —
+P8 agroécologie                   81,39†       42,12       —          —     =19,79†      =39,41
+P9 souveraineté                   128,19       93,26       —          —      =32,20      =35,78
+Chapitre 4. Explorer                                                                             21
+
+
+
+                          P4 statu quo
+
+
+                       P6 verdissement
+
+
+                          P7 Écophyto
+
+
+                       P8 agroécologie
+
+
+                       P9 souveraineté
+
+
+                                         0        10      20        30     40       50
+                                             F0 nominal   F6 intrants    F9 crise
+
+    Figure 4.2 – Regret par politique et par forçage, en pourcentage de la meilleure politique
+    du même forçage. Une barre nulle correspond au meilleur choix de politique, sachant le
+    forçage. Aucune politique n’est courte partout.
+
+
+4.3      Le coût marginal : euro public et azote
+L’enveloppe publique
+    La marge brute varie en sens inverse du plafond de subventions sur les sept points
+(tableau 4.2). Par exemple, si on réduit l’enveloppe publique de 90 000 000 e à 35 900 000 e,
+la marge brute du territoire augmente de plus de 14 Me pendant que l’objectif diminue
+de 81,04 Me à 74,36 Me. On rappelle que l’objectif est une marge ajustée du risque. Cet
+ajustement correspond à 18 % de la marge brute pour le plafond haut de subventions et 34 %
+pour le plafond bas de subventions. On constate que le modèle va chercher des cultures
+plus rémunératrices et exposées. L’aide publique achète la stabilité et non la marge.
+    On considère maintenant les points de contrôle du balayage de l’enveloppe publique
+afin de valider le front. 2 des 7 points ont un plafond supérieur à ce que le statu quo dépense
+spontanément, donc ils ne contraignent rien. L’objectif retombe exactement sur le run non
+balayé (81,04 Me).
+    Le prix dual n’est a priori valable qu’au voisinage du point. L’intérêt d’un front est de
+pouvoir visualiser l’évolution de ce prix sur un intervalle.
+    La différence entre le statu quo avec un plafond de subvention libre et le plafond le
+plus serré est claire. La banane d’exportation passe de 2 004 ha à 95 ha (=95 %), la canne
+diminue de 2 231 ha, le maraîchage et l’igname doublent, les agrumes passent de 9 ha
+à 657 ha, la prairie gagne 1 539 ha (tableau D.4). Retirer l’aide ne transforme donc pas
+l’export en vivrier hectare pour hectare : l’export libère 4 140 ha (1 909 ha de banane,
+2 231 ha de canne), et le vivrier n’en reprend qu’environ la moitié.
+    Le modèle dit que l’enveloppe publique maintient la banane d’exportation sur le sol
+guadeloupéen et joue un rôle important dans l’existence de la culture de canne. En revanche,
+le modèle ne vérifie pas que les 2 237 ha de maraîchage qui apparaissent trouvent un
+acheteur (chapitre 5).
+Chapitre 5. Discussion                                                                                              22
+
+
+    Table 4.2 – Front marge × enveloppe publique sous P4, en euros. L’astérisque marque les
+    points de contrôle : l’objectif y retombe exactement sur le run non balayé (81,04 Me), donc
+    le plafond n’y contraint rien.
+
+                              Plafond          Niveau atteint        Objectif (Me)
+                              35 900 000            35 898 271                  74,36
+                              43 000 000            42 986 537                  76,84
+                              50 300 000            50 070 701                  77,96
+                              57 400 000            57 111 266                  79,18
+                              64 600 000            64 590 701                  80,62
+                              72 000 000            71 277 791                 81,04*
+                              90 000 000            71 277 791                 81,04*
+
+
+L’azote
+    Le second front que l’on considère est celui de l’azote. Il est tracé sous la configuration
+de référence, c’est-à-dire la calibration retenue, et sous la politique agroécologique (P8). La
+comparaison des deux fronts donne comme résultat une pente moyenne de 15,73 e kg=1
+sous la référence contre 8,01 e kg=1 sous P8. Cela veut dire qu’un kilogramme d’azote est
+moins cher à retirer sous une politique déjà contraignante. Ici, P8 impose un plafond d’IFT,
+un plafond d’eau, un plancher d’emploi et une inertie de 40 % par rapport à l’assolement
+existant. Cela veut dire que les usages les plus intensifs sont déjà écartés et que les hectares
+faciles à désazoter ont déjà été pris.
+    Sans tracer les fronts, on serait passé à côté de ce résultat car les duaux au point le plus
+serré des deux configurations sont de 19,69 e kg=1 et 19,76 e kg=1 . On aurait conclu à
+l’égalité des coûts marginaux, ce qui est réfuté par les fronts.
+
+  Retour rÃ©flexif
+   reflexivité
+
+
+
+Chapitre 5
+
+Discussion
+
+  DANS CE CHAPITRE      5.1 ce que le stage n’a pas fait, et ce qui reste à faire · 5.2 d’où ce travail est écrit, et
+  ce que cela lui interdit · 5.3 ce que l’assistant de programmation a permis et déplacé
+
+
+    Ce chapitre porte sur les angles morts du travail et non sur ses résultats : ce que le stage
+n’a pas fait, ce que ma position engage, et ce que l’outil d’assistance a déplacé.
+
+
+5.1       Discussions sur le stage
+   Il existe 25 variantes maraîchères qui sont vides parce que l’acquisition de données
+prévue par la lettre de mission n’a pas eu lieu. Le volet consacré à la restauration collective,
+Chapitre 5. Discussion                                                                                     23
+
+
+
+lui, est resté différé faute d’accès à des données externes. Les données liées à la demande
+nutritive du territoire sont disponibles mais non implémentées, via des scores ou des seuils,
+dans le modèle.
+
+   QUESTION · Quelles sont ces variantes ?
+  Ce sont les 25 itinéraires maraîchers qui portent le nom de la microferme expérimentale : trois
+  paillages (bagasse, bois raméal fragmenté, paille), quatre régimes de fertilisation (biologique,
+  végétale, fertilisée, aucune) et deux régimes d’irrigation. Sur le papier, une combinatoire
+  d’agriculture de conservation.
+  Dans les tables, elles sont identiques au bit près à l’itinéraire maraîcher de référence sur tous
+  les paramètres que le modèle lit : même marge (20 825 e ha=1 ), même rendement (36 t ha=1 ),
+  même travail (1 128 h ha=1 ), même azote (75,6 kg ha=1 ), même IFT (10), même empreinte
+  d’éligibilité. Les distinctions paillage / fertilisation / irrigation ne portent aucune donnée : ce
+  sont des noms.
+  Les deux conséquences ont mordu. D’abord, les rouvrir ajoute 548 000 variables binaires de
+  pure symétrie (879 162 contre 331 044) : le solveur passe son temps à permuter des solutions
+  équivalentes. Ensuite, toute part de bio bâtie sur elles est satisfaite à coût exactement nul,
+  par relabellisation — une politique agroécologique qui ne contraint rien. Les seules vraies
+  cultures biologiques du jeu sont MA_PLBIO et MA_MOBIO (azote nul, IFT nul, 3 882 e ha=1
+  contre 27 929 e ha=1 pour le maraîchage intensif), et c’est sur elles seules que les scénarios
+  bâtissent une part biologique.
+
+    Trois chantiers en découlent. Le premier est une interface : un format de données
+attendu très clair et facile à compléter ou à produire — un document tableur où l’on saisit
+les valeurs des tableaux, façon « bilan carbone ». Le deuxième est d’inclure l’élevage, la
+pêche et les cycles associés (méthanisation, compostage, etc.). Le troisième est d’incorporer
+le modèle MAELIA de l’INRAE pour simuler les rendements et les itinéraires techniques
+physiquement, plutôt que de tabuler ces valeurs.
+
+   QUESTION · Pourquoi est-ce un problème de voir le travail de troupeau comme des heures et une
+   marge à l’hectare ? Ce n’est pas exactement la même chose pour les cultures ? Pourquoi cela ferait-il
+   de la prairie une mauvaise affaire ?
+  Pour une culture, décrire l’activité par des heures et une marge à l’hectare est fidèle, parce
+  que l’objet qui produit est l’hectare : on travaille la parcelle, on récolte la parcelle. Pour un
+  troupeau, non : l’objet qui produit est l’animal, et l’hectare ne fait que le porter.
+  Or le modèle n’a aucune variable pour un animal. Il achète 126 h ha=1 de travail sur la prairie
+  et vend 0,66 t ha=1 de « rendement » à 5 000 e t=1 — à ce prix, la tonne est de la viande.
+  Le produit animal est donc bien dans le modèle, mais sous forme de coefficient surfacique.
+  L’élevage y est présent comme produit et absent comme activité.
+  Trois conséquences, dont la dernière est la vraie. Un, les 126 h ha=1 sont le double des
+  70 h ha=1 de la table publiée, et les sept opérations de l’itinéraire sont des soins aux animaux
+  — abreuvement, déplacement du piquet, saillies, traitements : aucun travail du sol. Le modèle
+  paie le troupeau sans jamais le posséder. Deux, en face, la prairie rapporte de l’ordre de
+Chapitre 5. Discussion                                                                             24
+
+
+
+  1 602 e ha=1 (produit animal et POSEI surfacique), contre deux fois plus pour une canne
+  mécanisée : dans les termes du modèle, elle perd donc légitimement. Trois, et c’est là que la
+  représentation casse, la décision que cela suppose n’existe pas. Libérer des hectares de prairie,
+  pour le modèle, c’est renoncer à 1 602 e ha=1 , hectare par hectare, en continu ; dans la réalité,
+  c’est vendre un troupeau — une décision discrète, irréversible, et que rien ici ne pénalise.
+  Dernier point, qui ferme une fausse piste : la variabilité de rendement de la prairie vaut zéro
+  dans les tables, ce qui l’avantage à l’objectif. Le problème n’est donc pas un mauvais réglage
+  de l’aversion au risque, c’est une unité manquante — et c’est pour cela que l’élevage est le
+  premier chantier et non un souci de complétude.
+
+    Deux tâches, enfin, ne portent pas sur le modèle mais sur sa reprise : former mes
+encadrants au projet et à Python, et faire une note technique sur le projet pour l’équipe en
+interne, avec des similitudes avec ce mémoire.
+
+
+5.2      Discussions sur le positionnement
+    J’ai passé cinq mois en Guadeloupe, dont quatre en stage. Je n’ai pas de liens spécifiques
+avec la Guadeloupe et je n’ai pas réalisé d’enquête. Je ne connais le territoire que par des
+tables produites par d’autres personnes, les gens par mes rencontres pendant ces quelques
+mois, l’histoire et la culture par mes recherches personnelles. Mes connaissances sont
+lacunaires et ma vie, éloignée de la vie guadeloupéenne.
+    De plus, il y a quelque chose d’insensible dans la démarche de description numérique
+du territoire. Derrière les lignes de code, il y a pour l’instant un rapport froid et déconnecté
+à la situation.
+    Au niveau du code, l’interdiction des cultures sur certaines parcelles à cause du
+chlordécone est une contrainte comme une autre. Pour le territoire et ses habitants, c’est la
+conséquence d’un insecticide interdit aux États-Unis en 1976, retiré du marché en France
+hexagonale en 1990, et utilisé en Guadeloupe et en Martinique jusqu’en 1993 par dérogation
+obtenue à la demande de la filière banane (Office parlementaire d’évaluation des
+choix scientifiques et technologiques 2009). Cette contamination touche aujourd’hui
+environ 14 200 ha pour plusieurs siècles (DAAF Guadeloupe 2025).
+    Le catalogue, tel qu’il est construit, suppose que le débat agricole guadeloupéen
+s’organise entre dérégulation et bifurcation. Ça n’est pas vérifié et c’est simplement un
+arbitrage de ma part pour pouvoir commencer à explorer des scénarios politiques.
+    Je n’ai aucun moyen, depuis les tables, de distinguer une contrainte agronomique d’une
+contrainte héritée comme celle des GFA.
+
+   QUESTION · Quelles conséquences ?
+  Sur le modèle. La part minimale de canne imposée aux terres GFA existe bien dans le dépôt
+  — c’est la transcription de l’équation Eq_CS_GFA du GAMS — mais elle est désactivée :
+  l’activer rend le problème infaisable sur les données 2017, parce que trois exploitations GFA
+  ont toutes leurs parcelles verrouillées en friche et que sept autres demanderaient plus de main
+Chapitre 5. Discussion                                                                                  25
+
+
+
+   d’œuvre que le plafond ne leur en accorde. En pratique, le modèle ne porte donc pas la règle
+   foncière : il retrouve la canne sans elle. C’est une bonne nouvelle pour la calibration — la
+   canne n’est pas imposée, elle est retrouvée — et une mauvaise pour l’analyse, puisque le levier
+   n’est pas manipulable.
+   Sur ce qu’on peut demander au modèle. La question « que se passerait-il si le régime GFA
+   était levé ? » est une vraie question de politique publique — elle porte sur 5 286 ha, à comparer
+   aux 12 813 ha de canne observés, soit 41 % de couverture. Elle est hors d’atteinte tant que la
+   règle héritée et la règle agronomique arrivent dans le même fichier, sous la même forme : on
+   ne peut pas retirer l’une sans retirer l’autre.
+   Sur la lecture. Une contrainte héritée est alors présentée avec l’autorité d’une contrainte
+   agronomique. Le lecteur qui voit « la canne est possible ici et pas là » ne peut pas savoir si
+   c’est le sol qui parle ou un titre de propriété.
+
+    Le choix de telle culture plutôt qu’une autre est guidé par 8 coefficients d’aversion
+au risque, issus d’une typologie construite par des chercheurs et calibrée sur un panel
+d’experts (Chopin et al. 2015) : aucun agriculteur n’a validé un seuil de ce travail.
+
+   QUESTION · Ce n’est pas uniquement lié à un calcul d’optimisation de la marge ? Comment intervient
+   cette aversion au risque ?
+   Non, et c’est même le seul endroit du programme où un comportement est représenté. L’objectif
+   n’est pas la marge, c’est la marge décotée : chaque euro est multiplié par (1 − 𝑎 𝑓 𝑣 𝑐 ) dans
+   l’équation (2.1), où 𝑣 𝑐 est la variabilité de rendement de la culture et 𝑎 𝑓 l’aversion de
+   l’exploitation qui détient la parcelle. Une exploitation neutre (𝑎 𝑓 = 0) maximise la marge nue ;
+   une exploitation prudente sur une culture volatile voit la même marge fortement décotée, et
+   préfère une culture moins rentable mais plus sûre.
+   L’effet est massif, pas cosmétique. Sur le run retenu, la décote vaut 18 % de la marge brute,
+   et monte à 34 % quand on serre l’enveloppe publique (§ 4.3). Ce n’est donc pas une correction
+   de second ordre : c’est ce qui sépare ce modèle d’un simple classement des cultures par marge
+   à l’hectare.
+   Et c’est bien là que porte ta phrase. Ces huit nombres ne sont mesurés sur aucun agriculteur :
+   ils sont le résultat d’un ajustement numérique — une centaine d’itérations de descente par
+   coordonnées — qui a fait coller le modèle à l’assolement de 2010. Ils absorbent donc tout
+   ce que le modèle ne représentait pas cette année-là, l’élevage en premier. Ce que l’objectif
+   appelle « aversion au risque » est pour partie un résidu de calage.
+
+     L’écart de 15 % entre le plan observé et l’optimum est la mesure agrégée de tout ce que
+je ne représente pas dans le modèle : une préférence pour ce qu’on sait faire, un contrat
+déjà signé, une main d’œuvre qu’on ne licencie pas, ou un risque que personne ne prend
+deux fois.
+     Une manière de dépasser les angles morts de mon stage et du projet, en matière de
+réalisme et d’impact, est d’organiser de la co-construction avec les acteurs du territoire.
+Il faut qu’ils donnent leur avis, reprennent, contestent et reparamètrent le modèle. C’est
+rendu possible par la forme du dépôt : la construction des scénarios et la modification des
+paramètres sont techniquement simples, mais rien dans ce stage ne l’a encore organisé.
+Conclusion                                                                                              26
+
+
+
+5.3      Discussion sur l’IA générative
+    J’ai utilisé Claude Code tout au long de ce stage. C’est un grand modèle de langage
+(LLM) spécialisé pour le développement de code. L’outil a permis un portage de 18 377
+lignes, 613 tests, 681 sommes de contrôle et un dispositif de prospection opérationnel en
+six mois avec une seule personne.
+    Les résultats faux sont plutôt faciles à repérer. Le vrai risque de cet outil est de produire
+des résultats plausibles, difficiles à vérifier. C’est l’intérêt de produire des tests et des
+sommes de contrôle.
+
+   QUESTION · Explique « écrire pour une machine a produit une meilleure documentation d’architecture
+   qu’écrire pour un humain », et explique ce qu’est une somme de contrôle.
+  La phrase. Le dépôt contient un fichier que l’assistant relit au début de chaque session, parce
+  qu’il n’a aucune mémoire d’une fois sur l’autre : il y trouve l’architecture, les commandes, et
+  surtout les pièges. Ce dispositif a une propriété que la documentation pour humains n’a pas —
+  si elle est fausse ou périmée, la sanction est immédiate. L’assistant applique la consigne à la
+  lettre et produit du code faux dans la minute. Une documentation pour humains, elle, pourrit
+  en silence : le lecteur compense avec sa mémoire, son habitude et le collègue d’à côté, et
+  personne ne s’aperçoit qu’elle ne décrit plus le programme. Écrire pour une machine, c’est
+  donc écrire sous contrôle : ce n’est pas que la prose soit meilleure, c’est que l’erreur y est
+  détectée.
+  Une somme de contrôle. C’est un nombre calculé à partir d’un résultat, dont la seule fonction
+  est de changer si le résultat change. Ici : un script reconstruit tout le jeu de données et tous
+  les indicateurs sur une allocation fixée, sans résoudre le MILP — donc en sept secondes et
+  de façon exactement reproductible — et enregistre 681 nombres. Après une modification du
+  code, on rejoue : si un seul de ces nombres a bougé, le script sort en erreur et dit lequel. Ce
+  n’est pas un test de justesse (il ne dit pas que le nombre est bon), c’est un détecteur de dérive
+  (il dit qu’il n’a pas bougé). C’est exactement ce qui manque quand un outil produit beaucoup
+  et vite : le moyen de savoir qu’un changement d’apparence anodine a déplacé un chiffre trois
+  modules plus loin.
+  Le contre-exemple vaut d’être gardé : le nombre de sommes de contrôle annoncé dans le
+  générateur de chiffres de ce mémoire était lui-même périmé. Un garde-fou silencieux ne garde
+  rien.
+
+
+
+Conclusion
+
+Ce qui est établi
+   Trois résultats de ce travail tiennent sans réserve de lecture. Le modèle porté atteint ou
+dépasse les trois métriques publiées par Chopin et al. (2015) : 86,9 % de types d’exploitation
+reproduits contre 81 %, 67,6 % de parcelles contre 66 %, 77,1 % de surface contre 77 %.
+La canne à sucre revient à 12 782 ha contre 12 813 ha observés — 0,2 % d’écart — sans
+qu’aucune contrainte ne la nomme, sur la culture qui occupe plus de la moitié du territoire.
+Conclusion                                                                                   27
+
+
+
+Et ce fait s’est produit deux fois en deux jours, la banane revenant sous le plafond de plantain
+comme la canne sous le plancher de prairie : deux signatures émergentes, c’est-à-dire deux
+postes retrouvés en réponse à une contrainte portant sur un autre poste.
+    La réserve doit figurer ici aussi : 4 cultures sur 11 passent sous le seuil de l’article,
+contre 8 sur 10 publiées. Le domaine de validité du modèle est connu, et il est étroit sur les
+petits postes.
+
+
+Ce qu’on a appris du territoire
+    Trois énoncés, vrais dans les termes du modèle — c’est-à-dire d’un modèle qui ne
+connaît aucun débouché au-delà des deux filières d’exportation. La marge brute du territoire
+varie en sens inverse du plafond de subventions, de façon monotone sur sept points prouvés
+optimaux : dans ce modèle, l’aide publique n’achète pas de la marge, elle achète de la
+stabilité. Ce qu’elle maintient se lit à l’hectare — la banane d’exportation perd 95 % de sa
+surface, la canne 2 231 ha, le maraîchage double.
+    Le classement des politiques publiques dépend du forçage : la politique de souveraineté
+alimentaire est la meilleure sous le contexte nominal et la pire sous crise systémique —
+et sous ce dernier forçage, la marge brute du territoire devient négative pour les trois
+politiques testées. Une politique n’est donc pas bonne dans l’absolu, et un scénario unique
+ne peut pas le montrer. Enfin, un résultat qui n’était pas cherché : dans ce modèle, une
+politique environnementale ambitieuse plafonne l’emploi agricole qu’elle peut soutenir,
+le facteur limitant n’étant pas la terre mais les cultures capables d’absorber les heures de
+travail sous les autres contraintes.
+
+
+Ce qui reste ouvert
+    Cinq chantiers, par ordre de poids : modéliser les débouchés, sans quoi tout basculement
+vers le vivrier suppose un marché parfaitement élastique ; inclure l’élevage, dont le chapitre 3
+a fait un diagnostic et non plus une intuition ; simuler les rendements plutôt que les tabuler,
+par couplage avec un modèle de culture, ce qui lèverait aussi l’écart du § 3.4 ; passer
+au multi-périodes, cadré mais non commencé ; et choisir la culture représentante par
+parcelle, qui est le meilleur rapport entre le coût et ce qu’il lève.
+    Deux corrections immédiates s’y ajoutent, qui sont des courriels et non des chantiers :
+la clé de répartition mensuelle des précipitations existe, alors que le dépôt la déclare
+inexistante et qu’un indicateur d’irrigation nette a été jugé non calculable pour cette
+raison ; et les deux couches de chlordécone sont agrégées en sens opposés, les contraintes
+d’éligibilité lisant la plus permissive — sur un enjeu de santé publique, cela doit être
+confirmé avec la source (annexe B).
+    La question posée en introduction était : que faut-il avoir établi sur un modèle
+d’allocation hérité pour que ses résultats prospectifs soient opposables ? La réponse tient
+dans ce que ce stage laisse derrière lui, et elle n’est pas celle que la commande attendait.
+Le livrable opposable de ce travail n’est pas un jeu de scénarios : c’est un instrument
+Conclusion                                                                                                                                 28
+
+
+
+dont on sait exactement ce qu’il peut et ne peut pas dire — porté sous un mandat qui
+rend chaque divergence attribuable, calibré par une méthode qui distingue une correction
+d’un ajustement, et exploité par un dispositif qui énonce ses limites au même titre que ses
+résultats. Cet instrument est 18 377 lignes de Python, 613 tests, 681 sommes de contrôle et
+trois runs de référence déclarés ; ce qui décide de sa valeur n’est aucun de ces nombres,
+mais le fait que quelqu’un d’autre que son auteur le fasse tourner. [Q11]
+ En attente — question 8 aux encadrants. Cette dernière page nomme le successeur, l’échéance et la forme de la passation — y
+ compris la séance de prise en main du modèle avec les encadrants, qui est le seul test de transmissibilité qui compte. En l’absence
+ de réponse, elle s’en tient à ce qui est vrai : le dépôt, sa documentation et cette passation sont écrits pour être repris, et personne n’a
+ encore lancé le modèle en dehors de moi.
+Références bibliographiques                                                                 29
+
+
+
+Références bibliographiques
+Agreste (2019). Mémento de la statistique agricole — Guadeloupe, édition 2019. Rapp.
+   tech. Direction de l’Alimentation, de l’Agriculture et de la Forêt de la Guadeloupe.
+   url : https://daaf.guadeloupe.agriculture.gouv.fr/Memento-2019-de-
+   la-statistique (visité le 16/08/2026).
+Bynum, M. L., G. A. Hackebeil, W. E. Hart, C. D. Laird, B. L. Nicholson, J. D. Siirola,
+   J.-P. Watson et D. L. Woodruff (2021). Pyomo — Optimization Modeling in Python.
+   3e éd. Springer. doi : 10.1007/978-3-030-68928-5.
+Chopin, P., T. Doré, L. Guindé et J.-M. Blazy (2015). « MOSAICA : A multi-scale
+   bioeconomic model for the design and ex ante assessment of cropping system mosaics ».
+   In : Agricultural Systems 140, p. 26-39. doi : 10.1016/j.agsy.2015.08.006.
+DAAF Guadeloupe (2025). Cartographie des teneurs en chlordécone des sols. url :
+   https : / / daaf . guadeloupe . agriculture . gouv . fr / cartographie - des -
+   teneurs-en-chlordecone-des-sols-a1304.html (visité le 09/08/2026).
+Dufour, K. et M. Monziols (2023). « En 2022, les prix restent plus élevés dans les
+   DOM qu’en France métropolitaine, en particulier pour les produits alimentaires ». In :
+   Insee Première 1958. url : https://www.insee.fr/fr/statistiques/7648939
+   (visité le 17/08/2026).
+Haimes, Y. Y., L. S. Lasdon et D. A. Wismer (1971). « On a bicriterion formulation of
+   the problems of integrated system identification and system optimization ». In : IEEE
+   Transactions on Systems, Man, and Cybernetics SMC-1.3, p. 296-297.
+Howitt, R. E. (1995). « Positive mathematical programming ». In : American Journal of
+   Agricultural Economics 77.2, p. 329-342. doi : 10.2307/1243543.
+Huangfu, Q. et J. A. J. Hall (2018). « Parallelizing the dual revised simplex method ». In :
+   Mathematical Programming Computation 10.1, p. 119-142. doi : 10.1007/s12532-
+   017-0130-5.
+Mavrotas, G. (2009). « Effective implementation of the 𝜀-constraint method in multi-
+   objective mathematical programming problems ». In : Applied Mathematics and
+   Computation 213.2, p. 455-465. doi : 10.1016/j.amc.2009.03.037.
+ODEADOM (2019). Quelles conditions pour améliorer la couverture des besoins alimen-
+   taires dans les DOM ? Rapp. tech. Office de développement de l’économie agricole
+   d’outre-mer. url : https://www.odeadom.fr/wp- content/uploads/2019/
+   01/Couverture- des- besoins- alimentaires- dans- les- DOM.pdf (visité le
+   09/08/2026).
+Office parlementaire d’évaluation des choix scientifiques et technologiques
+   (2009). Impacts de l’utilisation de la chlordécone et des pesticides aux Antilles : bilan et
+   perspectives d’évolution. Rapport 487 (2008–2009). Assemblée nationale et Sénat. url :
+   https://www.senat.fr/rap/r08-487/r08-487.html (visité le 16/08/2026).
+Savage, L. J. (1951). « The theory of statistical decision ». In : Journal of the American
+   Statistical Association 46.253, p. 55-67. doi : 10.1080/01621459.1951.10500768.
+Annexe A. Formulation complète du programme                                                   30
+
+
+
+Starr, M. K. (1963). Product Design and Decision Theory. Englewood Cliffs, NJ :
+   Prentice-Hall.
+Tixier, P., E. Malézieux, M. Dorel, C. Bockstaller et P. Girardin (2007). « Rpest —
+   an indicator linked to a crop model to assess the dynamics of the risk of pesticide water
+   pollution : Application to banana-based cropping systems ». In : European Journal of
+   Agronomy 26.1, p. 71-81.
+Toute l’Europe (2024). Le POSEI, une aide européenne pour l’agriculture d’outre-mer.
+   url : https://www.touteleurope.eu/l-europe-en-region/le-posei-une-
+   aide-europeenne-pour-l-agriculture-d-outre-mer/ (visité le 09/08/2026).
+Vie publique (2023). Outre-mer : une forte dépendance aux importations alimentaires.
+   url : https://www.vie- publique.fr/en- bref/290380- outre- mer- une-
+   autonomie-alimentaire-limitee (visité le 09/08/2026).
+Wald, A. (1945). « Statistical decision functions which minimize the maximum risk ». In :
+   Annals of Mathematics 46.2, p. 265-280.
+
+
+Annexe A
+
+Formulation complète du programme
+    Cette annexe donne la formulation complète du programme résolu, dans l’ordre où un
+lecteur qui voudrait le reconstruire en aurait besoin : les ensembles, les paramètres et leur
+provenance, puis l’objectif et les cinq familles de contraintes, puis les indicateurs calculés
+après la résolution. La correspondance équation par équation avec le GAMS d’origine —
+avec le statut de chacune — fait l’objet de l’annexe B.
+
+
+A.1       Ensembles, paramètres, variables
+
+                        Table A.1 – Ensembles et variable de décision.
+
+Symbole    Nom dans le code     Contenu
+𝑃          PLOTS                parcelles du RPG 2017, identifiants synthétiques P1..Pn
+𝐶          CROPS                activités « culture × itinéraire technique », 84 codes fins
+𝐹          FARMS                exploitations ; 𝑓 ( 𝑝) désigne celle de la parcelle 𝑝
+𝐸          PAIRS                couples éligibles ( 𝑝, 𝑐), seuls déclarés au solveur
+𝑌 𝑝,𝑐      model.Y              variable binaire d’affectation, ( 𝑝, 𝑐) ∈ 𝐸
+
+
+
+A.2       Objectif et cinq familles de contraintes
+    L’objectif est l’équation (2.1) du chapitre 2. Une variante marge brute pure, sans pénalité
+de risque, existe et n’est activée que par la politique de dérégulation totale — ce qui rend sa
+colonne d’objectif incomparable aux autres, et impose de la comparer sur les grandeurs
+physiques.
+Annexe A. Formulation complète du programme                                                         31
+
+
+     Table A.2 – Paramètres du programme. La colonne de droite indique d’où vient la valeur —
+     c’est elle qui permet de savoir ce qui est observé, ce qui est tabulé et ce qui est calculé.
+
+Symbole      Unité        Origine
+𝑠𝑝           ha           surface de la parcelle, table parcellaire
+𝑚𝑐           e/ha         marge brute unitaire, calculée par domain/economics.py à partir des
+                          produits, des charges et des aides POSEI ; dépend de l’année économique
+                          choisie en configuration
+𝑎𝑓           —            coefficient d’aversion au risque, déduit du type d’exploitation
+                          TYPE_EXPL lui-même déduit du groupe de cultures dominant
+                          (domain/farm_typology.py) ; huit valeurs, Table 2 de Chopin et al.
+                          (2015)
+𝑣𝑐           —            fraction de marge perdue en cas d’aléa (Var_Rdt_Cult). Ce n’est pas
+                          une variance : aucune covariance entre cultures n’intervient, et la pénalité
+                          est linéaire en surface
+ℎ𝑐           h/ha         besoin en travail de l’itinéraire technique, Table 1 de l’article
+𝐻𝑓           h            main d’œuvre de l’exploitation, calculée sur son assolement 2017 observé
+𝜎            —            facteur de desserrement du plafond de travail, levier de scénario
+𝑟𝑐           (unité)/ha   taux par hectare d’un indicateur : azote, IFT, GES, eau, heures, euros de
+                          subvention
+𝑤𝑝           —            poids de parcelle : vaut 1, ou l’indicatrice d’irrigabilité pour l’eau
+𝑇            (unité)      niveau de la borne, fixé par le scénario
+
+
+     Les contraintes se rangent en cinq familles, toutes paramétrées depuis la configuration :
+     1. Affectation : au plus une culture par parcelle, équation (2.2).
+     2. Règles par exploitation : parts de surface maximales ou minimales entre groupes
+        de cultures (farm_area_share_max, farm_area_ratio_min), jachère et rotation
+        obligatoires de la banane d’exportation, part minimale de canne des GFA, et le
+        plafond de travail de l’équation (2.3).
+     3. Bornes de production territoriales (territory_production_bound) : quotas et
+        planchers exprimés en tonnes de produit, obtenus en multipliant la surface allouée
+        par le rendement de la culture. Deux d’entre elles sont exprimées en surface et non
+        en production — le plancher de prairie et l’objectif de surface pâturée — au moyen
+        d’un paramètre qui désactive la multiplication par le rendement.
+     4. Bornes d’indicateur, équation (2.4). Une seule famille borne n’importe quel
+        taux par hectare exposé par l’étude de cas, à l’échelle du territoire (territory_
+        indicator_bound) ou d’une zone — île, région, bassin versant ou exploitation
+        (zone_indicator_bound). C’est cette dernière forme qui permet d’écrire une
+        directive nitrates : un plafond de kilogrammes d’azote par hectare, vérifié ferme par
+        ferme.
+     5. Inertie (baseline_inertia_min) : une part minimale de la surface allouée doit
+        rester dans le groupe de cultures qu’elle portait en 2017. C’est le levier qui distingue
+        une transition d’une rupture.
+Annexe A. Formulation complète du programme                                                      32
+
+
+
+L’éligibilité
+    La matrice d’éligibilité est l’intersection de deux mécanismes. D’une part des bornes
+numériques : l’altitude, la pente, la pluviométrie et la surface de la parcelle doivent tomber
+dans l’intervalle admissible de la culture. D’autre part des règles catégorielles, au nombre
+de cinq dans le noyau : interdiction pure d’une culture, exigence d’irrigation, interdiction
+sur une valeur d’attribut, seuil ou valeur exacte sur un indicateur de risque, et interdiction
+régionale. Une sixième règle, spécifique à l’étude de cas, verrouille les parcelles en friche
+selon leur historique.
+    Le point de méthode qui importe pour lire la configuration est le suivant : chaque
+règle interdit son propre sous-ensemble, et le masque conserve l’union des interdictions.
+Une entrée unique conjugue donc ses conditions par un ET, et une disjonction s’écrit
+nécessairement en plusieurs entrées — c’est ainsi qu’est écrite l’interdiction du melon, qui
+porte à la fois sur des types de sol et sur une île.
+
+  Le piège du booléen trivial. Lorsque la somme d’une contrainte ne rencontre aucun couple
+  ( 𝑝, 𝑐) éligible, elle vaut le 0 entier de Python et non une expression symbolique ; la comparer
+  à un seuil produit un booléen nu que le modeleur rejette. Toute contrainte dont l’ensemble de
+  termes peut être vide doit donc rendre explicitement « faisable » ou « infaisable » à la place.
+  Deux contraintes du dépôt s’en gardent ; toute nouvelle contrainte doit le faire.
+
+
+
+A.3      Indicateurs
+     Tous les indicateurs sont des taux par hectare appliqués à l’allocation après la résolution :
+ils n’entrent dans le programme que lorsqu’une borne les y fait entrer explicitement. Trois
+sont hérités du GAMS — azote, GES et IFT. Le phosphore et la potasse ont été ajoutés
+en lisant les noms des engrais NPK des itinéraires techniques, lecture validée contre la
+colonne d’azote existante, qui la confirme au millième.
+     Quatre méritent une réserve explicite.
+  — L’eau est un besoin brut des cultures, jamais un besoin net d’irrigation : la clé de
+    répartition mensuelle des précipitations n’était pas utilisée. Elle existe pourtant dans
+    la documentation technique des données, et c’est une correction immédiate signalée
+    en conclusion.
+  — Le carbone organique du sol est le seul indicateur à dépendre de la parcelle — par
+    son type de sol — et non seulement de la culture ; il ne passe donc pas par l’aide au
+    calcul commune aux autres taux.
+  — Le Rpest, arbre flou de Tixier et al. (2007), est le seul à dépendre du couple ( 𝑝, 𝑐) :
+    il croise les produits phytosanitaires de la culture avec le ruissellement et le drainage
+    de la parcelle.
+  — L’agroécologie et le biologique sont rapportés séparément, et pour cause : les Mesure
+    Agro-Environnementale (MAE) donnent une définition sourcée de l’agroécologie, les
+    opérations de fertilisation organique une définition du biologique. La canne récoltée
+Annexe B. Inventaire de portage GAMS                                                      33
+
+
+
+      en vert n’est pas biologique, et la prairie domine le biologique par itinéraire — deux
+      raisons de ne pas confondre les deux colonnes.
+    Enfin, le score composite qui agrège ces indicateurs pondère par famille. Sans cela, les
+onze ratios d’autonomie alimentaire, quasi colinéaires entre eux, pèseraient onze fois les
+émissions de GES, et le score mesurerait la finesse du découpage des indicateurs plutôt
+que la performance des politiques. Un indicateur qu’une contrainte du scénario fixe est
+par ailleurs exclu du score, sur détection automatique : le noter reviendrait à féliciter une
+politique d’avoir respecté sa propre consigne.
+
+
+A.4      Le registre, en une page
+   Ce qui mérite d’être retenu de l’architecture du chapitre 2 tient dans un exemple. Ajouter
+au modèle un plafond d’azote territorial de 1 351 632 kg par an s’écrit ainsi :
+      - name: territory_indicator_bound
+        args: {label: plafond_azote, indicator: azote,
+               sense: le, threshold: 1351632}
+
+    Aucune ligne de Python n’est écrite. Le nom territory_indicator_bound est celui
+sous lequel une fonction constructrice s’est enregistrée dans le registre du noyau au moment
+de l’import de son module ; la configuration en sélectionne les entrées actives et transmet
+les arguments. Le même motif sert aux objectifs — dont un et un seul doit être actif —,
+aux critères d’éligibilité et aux règles catégorielles.
+    Le revers, déjà signalé dans le corps, est le mode de défaillance : un nom mal
+orthographié n’échoue qu’à l’interrogation du registre, et une famille dont le module n’est
+jamais importé est silencieusement absente. C’est le prix de l’indirection, et il explique
+pourquoi le dépôt tient autant à ses garde-fous.
+
+
+Annexe B
+
+Inventaire de portage GAMS
+    Le mandat de parité (§ 2.2) n’a de valeur que s’il est vérifiable. Cette annexe donne le
+statut de chaque bloc d’équations du GAMS d’origine, le détail des quatre défauts portés
+sciemment, et le tableau des sept branches fermées au cours du stage avec la mesure qui les
+a fermées.
+
+
+B.1      Statut des équations, bloc par bloc
+    Le programme d’origine compte une centaine d’équations nommées, réparties sur douze
+fichiers. Chacune reçoit l’un de quatre statuts : portée (le comportement est reproduit),
+implicite (le comportement est obtenu sans écrire de contrainte, parce que la formulation
+Python le rend inutile), différée (non portée, pour une raison consignée) ou écartée (portée
+puis désactivée, pour une raison consignée).
+Annexe B. Inventaire de portage GAMS                                                                                            34
+
+
+
+
+    Table B.1 – Statut des blocs d’équations. Le motif est la colonne qui compte : sans lui, la
+    table est un inventaire ; avec lui, c’est une preuve.
+
+Bloc GAMS              Statut        Nom Python                  Motif
+Eq_REV,                portées       maximize_gross_             les deux objectifs coexistent ; un seul peut être actif
+Eq_REV_MARKOVITZ                     margin, maximize_risk_
+                                     adjusted_gross_margin
+Eq_ALTI/PENTE/         portées       altitude, slope,      bornes numériques d’éligibilité ; deviennent un masque, pas
+PLUVIO/SURF_*_Parc                   rainfall, plot_size   des contraintes
+Eq_*_SUPP (14)         implicites    forbid_crops          annulent des codes agrégats dont l’économie est nulle ; l’auteur
+                                                           du GAMS les supprimait déjà en bloc
+Eq_MO_MAX_Expl         portée        farm_labor_hours_max  contrainte dominante : sans elle l’optimum réclame
+                                                           21 593 ETP là où le territoire en comptait 3 598
+Eq_*_QUOTA_MAX,        portées       territory_production_ une seule famille générique ; le plancher de prairie et l’objectif
+Eq_*_PROD_MIN,                       bound                 de surface pâturée s’expriment en surface, pas en tonnes
+Eq_*_OBJ
+Eq_BA_JA,              portées       farm_area_ratio_min,        règles de rotation et de part par exploitation
+Eq_BA_ROTA,                          farm_area_share_max
+Eq_BA_QUOTA_Expl
+Eq_AN_AGRO_MAX_Expl,   portées       farm_area_share_max         plafonds agronomiques par ferme
+Eq_IG_AGRO_MAX_Expl
+Eq_*_SOL_*,            portées       attribute_forbidden,        règles catégorielles ; une disjonction s’écrit en plusieurs entrées
+Eq_*_BT/GT/MG,                       region_crop_forbidden
+Eq_ME_Reg
+Eq_*_IRR               portées       irrigation_required,        exigence ou interdiction d’irrigation selon la culture
+                                     cs_irrig_ban
+Eq_IG_CLD,             portées       max_risk_threshold,         ne sont pas actives dans le même bloc, contrairement à ce que
+Eq_PN_PIQ_CLD                        exact_risk_value            leur nature commune suggère
+Eq_FRICHE,             portées       friche_lock,                historique de friche et parcelles non cultivées
+Eq_NOCULT_NC                         nocult_nc_1/2
+Eq_VE_PLUIE            portée avec   attribute_forbidden         voir § B.2
+                       son défaut
+Eq_CS_GFA              écartée       cs_gfa_minimum_share        portée et testée, mais infaisable sur les données 2017 réelles —
+                                                                 comme le serait le GAMS
+Eq_CF_* (bloc canne    différé       —                           le point bloquant n’est pas le code, c’est le sens des données
+fibre, ∼20)                                                      d’entrée
+Annexe B. Inventaire de portage GAMS                                                              35
+
+
+
+    Un contre-exemple mérite d’être consigné, puisque cette annexe prétend à la traçabilité :
+cet inventaire a d’abord été tenu après coup plutôt qu’au fil du portage, et deux de ses
+lignes sont restées périmées pendant trois semaines. Une table de correspondance ne vaut
+que par la discipline qui la met à jour, et celle-ci a manqué une fois.
+
+
+B.2      Les quatre défauts portés, et leur variante « intention
+         présumée »
+Le zéro silencieux et Eq_VE_PLUIE. GAMS renvoie zéro sans avertissement lorsqu’une
+table est interrogée sur une colonne absente. L’équation teste ce zéro contre la valeur 1 pour
+autoriser un verger pluvial ; le test 0 ≠ 1 étant toujours vrai, la variante est interdite sur toutes
+les parcelles du territoire. Intention présumée : la condition portait vraisemblablement
+sur une caractéristique pluviométrique de la parcelle. La variante corrigée existe dans
+la configuration, désactivée ; l’activer rouvre la variante sur les parcelles concernées, et
+change donc le poste où l’écart de calibration est le plus grand. Conséquence à retenir
+pour lire le chapitre 3 : le déficit de vergers y est mesuré sous cette interdiction.
+
+Les deux ordres de types de sol. Les types de sol apparaissent dans deux fichiers sources
+dans deux ordres différents. Indexer par position ne produit aucune erreur : elle produit
+des coefficients de rendement faux et parfaitement plausibles. Ce n’est pas à proprement
+parler un défaut du GAMS mais un piège du portage, et c’est celui qui a mordu — la règle
+pédologique de l’ananas a été portée à l’envers et a vécu plusieurs semaines alors même
+que le piège était déjà documenté. Le correctif est structurel : les tables sont jointes par
+nom, l’indexation par position n’est plus possible.
+
+Les commentaires inversés de la chlordécone. Cas symétrique et instructif : les
+commentaires de configuration décrivaient les interdictions liées à la chlordécone dans le
+sens inverse de ce que faisait le code, lequel était juste. Le premier verdict avait été tiré du
+commentaire. Un commentaire qui paraphrase un comportement est destiné à dériver, et il
+est cru sur parole.
+
+Les deux couches de chlordécone, agrégées en sens opposés. Ce point n’est pas résolu.
+La couche de risque prend le minimum de la classe rencontrée sur la parcelle, la couche
+de contamination réelle en prend le maximum. Or ce sont les contraintes d’éligibilité
+de l’igname tutorée et de la prairie pâturée qui lisent la première, c’est-à-dire la lecture
+la plus favorable : une parcelle à cheval sur une zone saine et une zone contaminée est
+traitée comme saine. Sur un enjeu de santé publique, cette permissivité par défaut n’est
+documentée nulle part, et elle doit être confirmée avec la source avant tout usage. [Q14]
+
+Un piège de lecture sans défaut : le cycle de l’ananas. Il faut le consigner ici parce qu’il
+ressemble à un bug et n’en est pas un. Les rendements de la table source sont exprimés
+par cycle de culture, et le GAMS les annualise pour tout ce qui est monétaire — chiffre
+Annexe C. Catalogue des scénarios                                                                                           36
+
+
+
+d’affaires, subventions, marge — en divisant par la durée du cycle. Il ne les annualise pas
+pour les tonnages : quantités produites, quotas de production et bilans nutritionnels lisent
+le rendement brut. Sur les quatre-vingt-quatre cultures du modèle, une seule a un cycle
+différent de douze mois : l’ananas, à 18 mois. C’est donc la seule culture pour laquelle
+un tonnage du modèle n’est pas un tonnage annuel, et le seul endroit où confronter une
+sortie du modèle à une statistique agricole demande une conversion. Le portage reproduit
+ce comportement à l’identique, et l’écart de rendement du § 3.4 est corrigé en conséquence
+— sans quoi il serait surestimé de moitié sur cette culture.
+
+
+B.3          Les sept branches fermées
+   Le corpus qui a servi à écrire ce mémoire impose une règle : aucune branche n’est
+fermée sans mesure, ou bien l’exception est déclarée. Le tableau B.2 donne les sept
+fermetures et ce qui les a tranchées.
+     Table B.2 – Les sept branches fermées. Quatre le sont sans mesure comparative — et
+     chacune le déclare. Une règle sans exception se contourne en silence ; ici l’exception est un
+     champ, comptée et affichée par l’audit, donc opposable.
+
+Ce qui a été retenu              Ce que cela a fermé               Ce qui a tranché
+Mandat de parité stricte         un port « amélioré » corrigeant   mesure : le zéro silencieux et Eq_VE_PLUIE — sans référence
+                                 les défauts au passage            inchangée, aucune divergence n’est attribuable
+Réécrire en Python/Pyomo         rester en GAMS avec une           mesure : trois défauts invisibles autrement qu’en réécrivant
+                                 couche de scripts                 contre les données
+HiGHS plutôt qu’un solveur       Gurobi, CPLEX                     aucune mesure — contrainte de destination : relançable sans
+commercial                                                         licence dans une unité INRAE
+Cinq règles catégorielles        les factoriser en une seule       aucune mesure — critère de lisibilité de la configuration par
+distinctes                                                         un non-développeur, assumé tel quel
+𝜀-contrainte                     somme pondérée des objectifs      théorème : une somme pondérée n’atteint que l’enveloppe
+                                                                   convexe du front, et ses poids encodent une valeur politique
+Code en anglais, documentation   tout en français, ou tout en      mesure du coût d’un renommage transverse : 518 macros,
+en français                      anglais                           681 sommes de contrôle, 18 377 lignes
+Ne pas viser la publication      rédiger l’article en parallèle    aucune mesure — et l’absence de mesure est la raison de
+pendant le stage                                                   l’écart
+
+
+    Une huitième piste, plus étroite, mérite d’être mentionnée parce qu’elle a été instruite
+jusqu’à l’implémentation avant d’être annulée : l’interface persistante du solveur, testée
+puis révoquée, parce qu’elle entre en conflit avec la capture des flux de sortie sur laquelle
+repose l’affichage de progression.
+
+
+Annexe C
+
+Catalogue des scénarios
+    Sans cette annexe, les seuils du chapitre 4 ressemblent à des chiffres choisis arbitraire-
+ment. Ils ne le sont pas : chacun est une fraction déclarée d’un total mesuré sur un run de
+référence, et c’est la seule chose qui les distingue d’une opinion chiffrée. Les valeurs de
+référence sont celles de la calibration retenue : 98 632 983 e de marge brute, 71 805 112 e
+de subventions, 3 503 ETP, 1 930 903 kg d’azote, un IFT total de 66 946, et 34 663 590 m3
+d’eau sur les seules parcelles irrigables.
+Annexe C. Catalogue des scénarios                                                                                                     37
+
+
+
+C.1          Les dix politiques
+    Le catalogue est ordonné le long d’un axe qui va de l’intensification accélérationniste à
+la rupture agroécologique, plus une politique délibérément hors axe. Le tableau C.1 en
+donne les leviers principaux ; le fichier de catalogue lui-même porte, sous chaque seuil, le
+commentaire numéroté qui le justifie.
+
+     Table C.1 – Les dix politiques et leurs leviers principaux. Aides désigne un multiplicateur
+     appliqué aux subventions d’un groupe de cultures ; slack le desserrement du plafond de
+     main d’œuvre ; inertie la part de surface qui doit rester dans son groupe de 2017.
+
+Politique                     Leviers
+P1 dérégulation totale        aides supprimées ; objectif de marge brute pure ; tous les quotas, planchers, rotations et interdictions
+                              désactivés ; slack 3,0. Borne supérieure de ce que la marge pure peut extraire du territoire, et mesure de
+                              ce que l’ensemble des règles coûte
+P2 accélérationnisme in-      aides canne ×1,5 et banane ×1,4 ; quotas d’export levés ; jachère réduite de moitié ; part mécanisée
+dustriel                      minimale de 60 % ; slack 0,85 (contraction du travail)
+P3 intensification modérée    aides ×1,20 et ×1,15 ; quotas +30 % ; enveloppe publique plafonnée ; inertie 40 %
+P4 statu quo                  le statu quo comme politique : quotas, aides et règles inchangés, enveloppe gelée au niveau constaté,
+                              plafonds d’IFT et d’azote posés au niveau constaté (pas de dégradation), plancher d’emploi, inertie 70 %.
+                              Point de comparaison de tous les autres
+P5 austérité budgétaire       enveloppe −40 %, coupe supplémentaire sur la canne, rien pour compenser. Mesure ce que la géographie
+                              agricole doit aux aides plutôt qu’à l’agronomie
+P6 verdissement incitatif     la carotte seule : aucune interdiction nouvelle, surprime au maraîchage biologique, réouverture des
+                              systèmes qui le permettent, part biologique modeste, slack 1,20
+P7 Écophyto réglementaire     le bâton seul : IFT −30 %, azote −20 %, directive nitrates à 170 kg ha=1 par exploitation, prairie interdite
+                              sur sols chlordéconés, aucune aide supplémentaire. Le pendant exact de P6 : l’écart entre les deux répond
+                              à « faut-il payer ou interdire ? »
+P8 transition agroécolo-      le paquet complet : IFT −40 %, azote −30 %, eau −20 %, nitrates à 150 kg ha=1 , redéploiement des aides
+gique                         de l’export vers le biologique, plancher d’emploi à 4 200 ETP, slack 1,50, inertie 40 %
+P9 souveraineté alimentaire   hors axe : planchers de production vivrière réactivés, quota sucrier abaissé pour libérer du foncier, aides
+                              basculées vers le local, plancher arboricole en surface, slack 1,60, inertie 30 %
+P10 bifurcation agroécolo-    borne extrême, symétrique de P1 : IFT −50 %, azote −40 %, eau −30 %, GES −25 %, souveraineté
+gique                         alimentaire, export divisé par deux, aucune inertie. Aucune solution entière trouvée (figure 4.1)
+
+
+
+    Trois remarques rendent ce catalogue lisible. Un, la politique de dérégulation est la seule
+à changer d’objectif ; sa colonne d’objectif n’est donc pas comparable aux autres, et elle ne
+se compare que sur les grandeurs physiques et économiques, calculées à l’identique quel
+que soit l’objectif. Deux, aucune politique ne rouvre les vingt-cinq variantes symétriques :
+les rouvrir coûterait 548 000 binaires de pure symétrie et rendrait toute part biologique
+inopérante (§ 2.4). La branche consistant à écrire la politique agroécologique comme une
+part minimale de cultures biologiques — qui en était la formulation naturelle — a donc
+été fermée, et c’est le seul cas du mémoire où une formulation est écartée parce qu’elle
+serait satisfaite trop facilement. Trois, le plafond de main d’œuvre est la première cause
+d’infaisabilité : il accorde 3 891 ETP au desserrement nominal, si bien qu’un plancher
+d’emploi supérieur est infaisable à moins de relever le desserrement dans le même scénario.
+Les planchers d’emploi du catalogue sont posés aux alentours de 86 % à 88 % d’un
+maximum mesuré en maximisant le travail sous les autres contraintes de chaque politique,
+pour laisser la place au saut d’intégralité que la relaxation ignore.
+Annexe C. Catalogue des scénarios                                                            38
+
+
+
+C.2      Les douze forçages
+    Un forçage multiplie des prix, des rendements ou des coûts d’intrants ; il ne modifie
+aucune règle. Le catalogue en déclare douze : conjoncture nominale, cyclone majeur,
+sécheresse sévère, dérive climatique, choc sanitaire, effondrement des prix d’export, choc
+sur les intrants, inflation alimentaire, retrait du POSEI, crise systémique, conjoncture
+favorable et artificialisation des terres.
+    Deux propriétés méritent d’être rappelées. La première est une convention : les forçages
+ne sont pas moyennés, et l’infaisabilité y compte comme le pire résultat et non comme une
+donnée manquante. La seconde est un outil de contrôle : le forçage nominal est le forçage
+nul, si bien qu’une politique seule et cette même politique croisée avec lui sont le même
+problème et doivent rendre le même chiffre. C’est ce qui a permis de détecter une erreur
+d’ancrage en cours de campagne — les deux runs différaient de 567 647 e, soit 0,70 % —
+un contrôle qui ne coûte rien et qu’il faut refaire à chaque campagne.
+
+
+C.3      Les balayages et le plan
+    Deux fronts sont déclarés, l’un sur le plafond d’azote et l’autre sur l’enveloppe de
+subventions. Un front n’est pas une cellule de la grille : c’est une résolution par point. C’est
+pourquoi un front n’est jamais croisé avec les forçages de sa cellule, et pourquoi le plan
+doit nommer explicitement un front forcé lorsqu’on en veut un.
+    Deux points de méthode gouvernent leur exécution. D’abord, un front se paramètre
+sur la borne de sa politique hôte et non sur le réalisé de la configuration de référence :
+c’est un verdict renversé en cours de campagne, et l’oublier produit un front dont plusieurs
+points ne contraignent rien. Ensuite, les points sont réordonnés du plus serré au plus lâche
+avant exécution — l’inverse de la lecture du fichier — pour que chaque solution serve de
+graine admissible à la suivante ; le sens s’inverse pour un plancher, et le tri s’abstient dès
+qu’il ne peut pas conclure : matrice à deux dimensions, contrainte sans sens déclaré, ou
+argument qui n’est pas le niveau de la borne. S’abstenir ne coûte que du temps de calcul ; la
+correction, elle, repose sur l’audit de chaque graine.
+
+
+C.4      Le contrôle de faisabilité
+    Le contrôle résout la relaxation linéaire de chaque scénario : deux minutes contre une
+heure. Sa logique est à sens unique — infaisable en relaxation implique infaisable en
+entiers, la réciproque est fausse — et c’est donc un filtre, non une garantie. Il a néanmoins
+écarté une erreur de conception avant qu’aucun lot ne tourne : deux blocs de configuration
+corrects séparément ne composent pas nécessairement un scénario faisable, les planchers
+vivriers réclamant plus de travail que le plafond n’en accorde. C’est aussi lui qui signale
+les groupes de cultures symétriques, et c’est ainsi que les vingt-cinq variantes ont été
+trouvées.
+    Un dernier piège de configuration mérite d’être consigné, parce qu’il ne laisse aucune
+trace : un seuil relevé sur un run et reposé en configuration sans son poids de parcelle
+Annexe D. Grille complète des résultats                                                                       39
+
+
+
+est faux d’un facteur 1,6. C’est le cas du plafond d’eau, qui ne porte que sur les parcelles
+irrigables.
+
+
+Annexe D
+
+Grille complète des résultats
+    Le chapitre 4 ne retient de chaque cellule que la marge brute. Cette annexe donne les
+autres indicateurs, les durées et les drapeaux de convergence. Chaque cellule porte son
+drapeau : un solve arrêté à la limite de temps est prouvablement faux et non seulement
+imprécis (§ 3.6), et un tableau de résultats qui ne le dit pas invite à comparer des chiffres
+qui ne sont pas comparables.
+
+
+D.1       Les politiques non forcées, tous indicateurs
+
+    Table D.1 – Économie, emploi et convergence par politique, sans forçage. La colonne P1
+    porte un autre objectif (marge brute pure) : sa ligne « objectif » n’est pas comparable aux
+    autres, ses lignes physiques le sont.
+
+                                    P1           P4           P5         P6        P7       P8          P9
+        Objectif (Me)             204,52      81,04      50,62      65,01      72,30      69,09       81,01
+        Marge brute (e)      204 517 602 98 354 588 82 870 500 78 390 018 83 048 097 81 393 701 128 192 824
+        Subvention (e)                 0 71 277 791 17 430 130 53 375 934 56 585 130 39 270 659 34 935 003
+        Emploi (ETP)               6 992      3 476      2 853      2 821      2 954      4 200       4 389
+        Surface allouée (ha)      11 222     26 023     24 586     22 293     25 847     26 052      26 083
+        Concentration (HHI)        0,369      0,109      0,151      0,117      0,103      0,129       0,176
+        Durée (s)                   61         2 644        3 625   10 839    1 334      8 981        1 136
+        Optimum prouvé             oui           oui          non      non      oui        oui          oui
+
+
+
+
+    Table D.2 – Indicateurs physiques par politique, sans forçage. L’eau ne porte que sur les
+    parcelles irrigables ; les GES sont dans l’unité interne du modèle.
+
+                              P1          P4           P5           P6        P7          P8          P9
+         Azote (kg N) 1 446 493    1 917 320 1 391 757    1 476 371   1 446 771   1 351 311   1 837 134
+         IFT             106 576      66 575     63 323      51 463      46 862      40 082      82 619
+         GES          39 080 009 141 924 732 95 739 296 124 172 923 132 315 861 171 863 050 153 235 747
+         Eau (m3 )    93 014 332 34 393 102 34 582 376 22 168 667 38 144 065 27 699 904 55 725 019
+
+
+    Deux lectures s’imposent ici et nulle part ailleurs. La première : P1, qui supprime toute
+aide et toute règle, double presque la marge brute du territoire par rapport au statu quo, tout
+en réduisant l’azote et la surface allouée — elle concentre la production sur les meilleures
+terres et abandonne le reste, ce que la colonne de surface allouée rend visible et qu’aucun
+indicateur agrégé ne dirait. La seconde : les durées de résolution ne se comparent pas d’une
+politique à l’autre, puisque plusieurs runs sont amorcés à chaud et d’autres non, et que le
+même problème avec la même graine a demandé 8 981 s puis 10 856 s.
+Annexe D. Grille complète des résultats                                                             40
+
+
+
+D.2       Robustesse
+    Le regret de Savage se calcule contre la meilleure politique du même forçage, jamais
+contre un optimum global : la question est « qu’aurais-je perdu à choisir celle-ci, sachant
+que ce contexte-là est survenu ». L’infaisabilité y compte comme le pire résultat, et les
+forçages ne sont pas moyennés.
+
+    Table D.3 – Regret par politique et par forçage, en pourcentage de la meilleure politique du
+    même forçage. Brut inclut la subvention, hors aide la déduit. Un tiret marque une cellule
+    non résolue — et non un résultat nul.
+
+                                            F0 nominal          F6 intrants            F9 crise
+                                           brut   hors aide    brut   hors aide       brut   hors aide
+P4 statu quo                              29,84      66,18     9,82       8,65       0,00         0,00
+P6 verdissement                           49,80      68,24     0,00       0,00         —            —
+P7 Écophyto                               45,14      66,79    28,25      26,86         —            —
+P8 agroécologie                           46,80      51,13       —          —        2,80         9,06
+P9 souveraineté                            0,00       0,00       —          —       15,21         5,43
+meilleure politique                       Pneuf      Pneuf     Psix        Psix   Pquatre      Pquatre
+
+
+    La lecture de ce tableau est colonne par colonne, et l’inversion saute aux yeux : la
+politique la plus regrettée sous le forçage nominal est celle qui ne l’est pas du tout sous
+crise systémique. C’est le même fait que la figure 4.2, sous forme numérique.
+
+  Un indicateur qu’une contrainte du scénario fixe n’est pas un résultat de ce scénario.
+  Le plafond d’azote de P8 vaut exactement l’azote de P8 : le noter reviendrait à féliciter la
+  politique d’avoir respecté sa propre consigne. Ces indicateurs sont détectés automatiquement
+  depuis la liste des contraintes du run, donc rétroactivement sur les runs déjà écrits, et exclus de
+  tout score composite.
+
+
+
+D.3       Les fronts, point par point
+    Le front sur l’enveloppe publique figure au chapitre 4 (tableau 4.2) : ses 7 points sont
+tous prouvés optimaux, dont 2 points de contrôle où le plafond ne contraint rien. C’est ce
+qui le rend citable point par point.
+    Les deux fronts sur l’azote, eux, ne le sont pas au même titre, et les tableaux ci-dessous
+doivent se lire avec cette réserve : sous la politique agroécologique, seuls 2 des 5 points sont
+prouvés optimaux, et 1 palier est un artefact de la chaîne d’amorçage. Sous la configuration
+de référence, les 5 points le sont.
+
+
+D.4       Coûts marginaux et prix duals
+   Les prix duals des contraintes nommées situent un point d’IFT à 286 e, un kilogramme
+d’azote à 9,81 e et une heure de travail à 12,50 e.
+Annexe D. Grille complète des résultats                                                            41
+
+
+
+
+    Table D.4 – Réallocation entre le statu quo libre et le plafond de subventions le plus serré
+    (35 900 000 e), en hectares par groupe RPG. C’est le détail à l’hectare du résultat central
+    du § 4.3.
+
+                     Groupe               Avant (ha)   Après (ha)    Écart (ha)
+                     Prairie                   6 096        7 635        1 539
+                     Maraîchage                1 145        2 237        1 092
+                     Agrumes                       9          657          649
+                     Igname                      279          576          298
+                     Jachère                     443          570          127
+                     Vergers                       6           64           58
+                     Ananas                      459          404         =55
+                     Banane export             2 004           95       =1 909
+                     Canne à sucre            12 773       10 541       =2 231
+                     autres groupes               —            —          =12
+
+
+
+
+   Table D.5 – Front marge × azote sous la configuration de référence. Pente moyenne
+   15,73 e/kg N, dual local au point le plus serré 19,69 e/kg N.
+
+                           Plafond        Niveau atteint   Objectif (Me)
+                           1 061 997           1 061 851             69,12
+                           1 158 542           1 158 420             70,73
+                           1 351 632           1 350 263             74,12
+                           1 544 722           1 542 762             77,16
+                           1 737 813           1 735 470             79,75
+
+
+
+
+    Table D.6 – Front marge × azote sous la politique agroécologique P8. Pente moyenne
+    8,01 e/kg N — moins cher que sous la référence, alors que les duals locaux des deux
+    configurations sont quasi identiques.
+
+                           Plafond        Niveau atteint   Objectif (Me)
+                           810 979               807 152             63,30
+                           946 142               943 807            65,78†
+                           1 081 306           1 066 127            66,55†
+                           1 216 469           1 066 127            66,55†
+                           1 351 632           1 351 311            69,09*
+Annexe E. Tableaux de calibration                                                                              42
+
+
+
+    Deux réserves les accompagnent, et la première est technique. Figer les variables
+entières ne fonctionne pas ici : le modèle étant purement binaire, la relaxation obtenue en
+fixant les entiers n’a plus aucune variable libre et tous les duals y valent zéro. Ce sont donc
+les duals de la relaxation linéaire qui sont lus, avec l’écart au problème entier que cela
+suppose.
+    La seconde est une méthode de contrôle, et c’est la plus utile : comparer le dual local
+à la pente moyenne du front correspondant. Un écart important signifie que le dual est
+lu hors de son voisinage de validité. C’est exactement ce qui se produit sur l’enveloppe
+publique, où le dual au point le plus serré vaut près du double de la pente moyenne du
+front : extrapoler le premier sur tout l’intervalle surestimerait l’effet d’environ trois quarts.
+
+
+Annexe E
+
+Tableaux de calibration
+    Le chapitre 3 affirme trois choses que seule cette annexe établit : que l’écart résiduel se
+concentre sur les petits postes, que le plafond de plantain et le plancher de prairie sont des
+corrections et non des ajustements, et que le solveur est hors de cause. Chacune correspond
+à une section ci-dessous.
+
+
+E.1      PAD par culture, aux trois barreaux
+
+    Table E.1 – Surfaces observées et simulées par groupe RPG (ha), et PAD correspondant (%),
+    aux trois barreaux de calibration. Le symbole • marque les cultures sous le seuil de 15 %
+    de Chopin et al. (2015). Rappel : 348 ha du territoire ne sont reproductibles par aucune
+    variante fine, ce qui impose un plancher d’écart de 1,5 point avant toute optimisation.
+
+                                               Parité GAMS       + plafond plantain   + plancher prairie
+           Groupe                   observé     sim.     PAD       sim.       PAD       sim.         PAD
+           Canne à sucre (CS)        12 813   15 392      20,1   15 425       20,4    12 782         0,2 •
+           Prairie (PN)               6 109    2 576      57,8    2 980       51,2     6 096         0,2 •
+           Banane export (BA)         1 921      978      49,1    2 213       15,2     2 047         6,6 •
+           Maraîchage (MA)            1 087      915      15,8    1 240       14,1     1 149         5,7 •
+           Jachère (JA)                 621      174      72,0      427       31,2       418         32,7
+           Plantain (BC)                147    2 875   1 853,2      247       68,0       247         67,5
+           Igname (IG)                  145       44      69,9      289       99,0       259         77,9
+           Ananas (AN)                  133      476     258,9      507      282,3       461        247,6
+           Melon (ME)                   189        0     100,0        4       97,7         4         97,8
+           Agrumes (AG)                 101       10      89,8       91        9,4        10         90,2
+           Vergers (VE)                 311       18      94,1       33       89,3         8         97,4
+           cultures sous le seuil                            0                   2                         4
+
+
+    Cette table établit trois choses que le corps affirme. D’abord la concentration de l’écart :
+les quatre cultures qui passent sous le seuil sont les quatre plus grandes en surface, et
+les sept qui échouent totalisent moins d’un dixième du territoire. Ensuite le double sens
+du plancher d’éligibilité : il innocente le modèle sur les vergers, dont une partie n’est
+accessible à aucune variante fine, et il l’accuse partout ailleurs, où rien n’interdisait de
+Annexe E. Tableaux de calibration                                                           43
+
+
+
+faire mieux. Enfin la nature du succès sur la prairie, qui est nul par construction puisque
+son plancher l’épingle — à l’inverse exact de la canne, qu’aucune contrainte ne nomme.
+
+
+E.2      Les autres échelles, et comment se comparer à l’article
+Sous-région. Le seuil de l’article n’est pas le même qu’au niveau territorial : c’est 20 %
+et non 15 %. 5 sous-régions sur 7 y passent, entre 6,7 % et 14,4 %. Les deux qui échouent
+sont le Sud-Est et le Sud-Ouest de Basse-Terre, à 28,4 % et 33,7 %. L’article échoue sur la
+même sous-région que nous — le Sud-Est de Basse-Terre, sa seule à descendre à 56 % de
+surface correctement simulée — et il en donne la cause : la rotation banane/canne forme un
+système technique unique réparti sur plusieurs parcelles, que le modèle traite comme des
+choix indépendants. Marie-Galante, elle, est passée du pire au meilleur rang (6,7 %) : sa
+prairie tombait de 1 357 ha à 228 ha avant le plancher, soit 83 % de perte sur une île entière.
+L’écart n’est pas diffus, il a une adresse.
+
+Exploitation. 3 316 exploitations sur 4 588, soit 72,3 %, passent sous le seuil de 20 %. La
+distribution est très asymétrique : la médiane du PAD par exploitation vaut 0,0 % pour une
+moyenne de 26,3 % — autrement dit, plus d’une ferme sur deux est reproduite exactement,
+et la moyenne est portée par une minorité de fermes très mal simulées. Lire la moyenne
+comme un écart uniforme conduirait à sous-estimer largement ce que le modèle reproduit.
+L’écart avec le run de parité est d’ailleurs le meilleur résumé de ce que les deux déviations
+apportent : la médiane y valait 18,5 % et la moyenne 51,5 %.
+
+Types d’exploitation. La matrice de confusion des huit types donne 86,9 % de types
+correctement reproduits, contre 64,0 % à la parité seule.
+
+Parcellaire. 67,6 % des parcelles portent la bonne culture, pour 77,1 % de la surface :
+l’écart entre les deux chiffres signifie que le modèle se trompe davantage sur les petites
+parcelles que sur les grandes.
+   Six corrections sont nécessaires pour comparer honnêtement ces chiffres à Chopin et al.
+(2015), et elles doivent être énoncées avant toute conclusion.
+   1. Le run de parité n’est pas le modèle que l’article valide. L’article valide un modèle
+      qui contient déjà le plafond de plantain (son équation 6). Notre parité le désactive
+      pour mesurer ce qu’il apporte, et c’est la cause dominante de l’écart : le plantain y
+      monte à 2 875 ha contre 147 ha observés. Comparer le PAD de parité au PAD publié
+      revient donc à comparer deux modèles différents.
+   2. L’article publie son PAD par culture et jamais agrégé. La seule métrique directement
+      comparable est donc le nombre de cultures sous le seuil, et c’est celle sur laquelle
+      notre modèle est le plus faible. Ses dix usages fusionnent en outre vergers et agrumes,
+      c’est-à-dire précisément les deux postes que nous ratons le plus.
+Annexe E. Tableaux de calibration                                                                     44
+
+
+
+   3. Ses seuils sont deux et non un : 15 % pour les cultures principales à l’échelle du
+      territoire, 20 % en sous-région et à la ferme. Comparer nos chiffres de ferme au seuil
+      de 15 % serait gratuitement défavorable.
+   4. La table parcellaire de l’article compte les parcelles non cultivées au dénominateur,
+      la nôtre non — quatre points d’écart qui relèvent de la définition et non du modèle.
+   5. Son année de base est 2010, pas 2017 : 25 057 parcelles et 5 336 exploitations,
+      contre 24 734 et 4 638 ici. À hectares comparables, cela fait 14 % d’exploitations
+      en moins, c’est-à-dire de la concentration foncière réelle et non un échantillonnage
+      différent. Les coefficients d’aversion au risque de sa Table 2 étant, de son propre
+      aveu, le résultat d’une calibration menée sur ces 5 336 fermes, les appliquer à 2017
+      est un transfert hors échantillon.
+   6. L’article ne publie aucune table par exploitation ; notre quatrième échelle n’a donc
+      pas de référence, et les chiffres ci-dessus ne peuvent être lus qu’en absolu.
+
+
+E.3      Les balayages de seuil
+     Sans les deux balayages de cette section, « correction et non ajustement » reste une
+affirmation.
+
+Plantain. Le seuil a été balayé sur toute la plage des valeurs candidates. Le PAD y forme
+un palier plat de 4 650 t à 9 240 t : un facteur deux sur le seuil pour un demi-point de
+PAD, à peine plus que le bruit du solveur. Deux observations tirées du balayage suffisent à
+écarter le soupçon de circularité — l’optimum du palier se trouve à l’extrémité haute, à
+deux fois et demie le débouché observé et non au seuil le plus serré ; et même au plafond
+le plus contraignant, le plantain simulé (247 ha) reste au-dessus de l’observé (147 ha). La
+contrainte ne pousse donc pas la culture vers l’observé.
+
+Prairie. Le seuil a été balayé de sa valeur retenue jusqu’à la statistique exogène. Les
+trois métriques que le plancher ne touche pas restent au-dessus des seuils publiés sur toute
+la plage — au plancher le plus haut, 82,0 % de types, 65,2 % de parcelles et 72,2 % de
+surface. Et le PAD calculé hors prairie empire quand on remonte le seuil, de 14,9 % à
+24,0 %, parce que le plancher prend alors sa terre à la canne, c’est-à-dire à la culture la
+mieux restituée. Un seuil calé pour flatter le résultat ferait exactement l’inverse.
+
+Le calcul de charge animale, en entier. C’est le meilleur argument du chapitre 3, et il
+est extérieur au modèle :
+      40 449 bovins recensés en 2017 ⇒ 29 771 UGB.
+      Rapportés aux 9 595 ha de la statistique agricole : 3,10 UGB/ha — conforme aux
+      recensements.
+      Rapportés aux 2 980 ha que le modèle sans plancher laisse à la prairie : 9,99 UGB/ha
+      — agronomiquement impossible.
+      Prairie observée dans notre jeu parcellaire : 6 109 ha, soit 8 341 ha une fois la statistique
+      ramenée à notre couverture de 87 %.
+Annexe F. Chronologie et méthode de travail                                                 45
+
+
+
+Décomposition du déficit. Les 3 489 ha de prairie perdus sans plancher se répartissent
+en 62 % d’économie légitime, 36 % de couplage avec le plafond de main d’œuvre et 2 %
+de résidu. 30 % du déficit tient sur un écart de 0,94 % entre les marges de deux cultures ; et
+la prairie pesait 42 % de la déviation totale avant son plancher.
+
+
+E.4      Ce que le solveur n’explique pas
+Les trois graines. Le même problème résolu avec trois graines de branchement différentes
+rend 48,44 %, 48,29 % et 48,31 % de PAD territorial. L’arbitraire du solveur vaut donc
+0,15 point, et c’est ce chiffre qui fixe la tolérance à 5 % du garde-fou des runs de référence.
+
+Les trois voies écartées. Recalibrer les coefficients d’aversion au risque descend le PAD
+à 39,9 %, mais avec des coefficients économiquement absurdes : surajustement. Caler des
+plafonds de marché sur l’observé descend à 33,6 %, et c’est circulaire par construction.
+Incorporer l’élevage est la bonne réponse, et c’est pourquoi elle est écartée du stage plutôt
+que bâclée : elle demande une variable d’état que le modèle mono-période ne porte pas.
+
+Deux verdicts périmés, et leur date. « Le plancher de prairie rend le MILP intraitable »
+datait d’une version du modèle à 900 000 variables et n’a pas survécu au masque d’éligibilité.
+« Le plancher de prairie est circulaire » était mon propre verdict, tenu jusqu’au jour où la
+donnée exogène de charge animale a été trouvée. Les deux figurent dans la chronologie de
+l’annexe F.
+
+La main d’œuvre n’est pas en cause non plus. Le plan réellement observé demande
+5,68 Mh pour un plafond de 6,25 Mh : le modèle n’a pas d’excuse de ce côté-là.
+
+La fourchette d’incertitude des indicateurs. L’assolement 2017 n’étant connu qu’au
+niveau des douze groupes agrégés, chaque indicateur observé est une fourchette et non
+une valeur. Plusieurs indicateurs simulés — subvention, revenu, azote, travail — tombent
+à l’intérieur de cette fourchette, et le point central en sort parfois par le haut. L’écart
+au central n’y démontre donc rien, et c’est une réserve à opposer à toute comparaison
+indicateur par indicateur.
+
+
+Annexe F
+
+Chronologie et méthode de travail
+
+F.1      Le déroulé
+   Quatre verdicts ont été renversés au cours de ces phases, tous par une mesure : le
+plancher de prairie jugé intraitable puis circulaire, l’idée qu’une contrainte ne peut pas
+améliorer le résultat, un écart attribué au solveur qui venait du modèle, et le paramétrage
+Annexe F. Chronologie et méthode de travail                                                         46
+
+
+    Table F.1 – Les jalons du stage. La troisième colonne est ce qui distingue une chronologie
+    d’un journal : ce n’est pas ce qui a été fait, c’est ce que cela a établi.
+
+Période             Travail                       Ce que cela a établi
+Prise en main       lecture du GAMS, des don-     la découverte du zéro silencieux, et la réorientation
+                    nées et de l’article          du stage : reconstruire avant de simuler
+Portage             réécriture       en     Py-   un modèle interrogeable sans rouvrir les équations,
+                    thon/Pyomo sous mandat        et quatre défauts documentés plutôt que corrigés
+                    de parité                     en silence
+Tractabilité        masque d’éligibilité, amor-   qu’un solve arrêté est prouvablement faux ; et que
+                    çage à chaud, audit des       la variabilité à taille constante vaut un facteur 6,5
+                    graines
+Calibration         trois barreaux, deux ba-      que l’écart est localisé, que les deux déviations
+                    layages de seuil, trois       sont des corrections, et que le solveur est hors de
+                    graines                       cause
+Prospective         catalogues, plan, grille et   que le classement des politiques dépend du forçage,
+                    fronts                        et que l’axe du catalogue est unilatéral
+Gel du calcul       plus aucune résolution        décision de date, prise pour que la rédaction se
+                    nouvelle                      fasse sur un jeu de résultats stable plutôt que
+                                                  mouvant
+
+
+d’un front sur la mauvaise référence. Leur date et la mesure qui les a démentis figurent aux
+annexes E et D.
+
+
+F.2       Comment le travail a été organisé
+     Un commit égale un fait mesuré, et le message en porte le chiffre — parfois la
+prédiction, ce qui permet de vérifier après coup si elle tenait ; c’est ainsi que la correction
+de l’erreur d’ancrage du forçage nul a pu être vérifiée au centime.
+     Quatre lieux d’écriture coexistent, avec une règle de tri explicite entre eux : les pièges et
+limites de données dans le fichier de vigilance, ce qui reste à implémenter dans la liste des
+chantiers, une investigation entière — avec ses impasses — dans une spécification datée, et
+l’avancement du mémoire dans son propre fichier d’état. Le journal d’investigation a été
+synthétisé plutôt que maintenu, ce qui est une décision et non un abandon : un journal de
+mille lignes n’est plus lu.
+     Trois règles d’écriture méritent d’être citées parce qu’elles ont produit des effets
+mesurables. Générer plutôt que rédiger tout ce qui peut l’être : les 518 macros de ce
+mémoire sont lues dans les fichiers de résultats des runs, et aucun chiffre du corps n’est saisi
+à la main. Échouer bruyamment : le générateur refuse d’émettre une valeur périmée plutôt
+que de la produire silencieusement, et il lit aussi la version écartée en quarantaine pour
+qu’une démonstration survive à sa propre correction. Commenter le pourquoi, jamais le
+comment : un commentaire qui paraphrase un comportement est destiné à dériver, et il
+est cru sur parole — c’est exactement ce qui s’est produit sur les interdictions liées à la
+chlordécone.
+Annexe F. Chronologie et méthode de travail                                                  47
+
+
+
+    Deux limites de méthode doivent être consignées ici plutôt qu’ailleurs. La première est
+organisationnelle : ne lancer une résolution complète qu’en fin de journée, et itérer sur des
+sous-territoires et des tests ciblés, structure le travail bien au-delà du confort — le temps
+de calcul décide de ce qu’on peut essayer dans une journée, donc de ce qu’on essaie. La
+seconde est que les tests ne lisent jamais les données réelles, ce qui les rend rapides et
+portables mais laisse un dispositif validé de bout en bout nulle part ; le dépôt le reconnaît à
+cinq reprises. Enfin, un choix du corpus n’a jamais reçu de justification consignée — le
+code en anglais et la documentation en français —, et l’audit le signale comme tel plutôt
+que de lui inventer un parent après coup.
+
+
+F.3      Le corpus qui a produit ce mémoire
+    Ce mémoire n’a pas été écrit depuis les souvenirs du stage mais depuis un inventaire typé
+de ce qu’il a décidé, mesuré, écarté ou raté : 482 items reliés par 1 267 arcs de justification,
+vérifiés par un script qui impose trois règles — aucun choix retenu sans justification, aucune
+branche fermée sans mesure ou sans exception déclarée, aucun arc pendant. C’est ce qui
+permet d’affirmer que les sept fermetures de l’annexe B sont exhaustives, et non celles dont
+je me souviens.
+    Il faut ajouter la lucidité qui va avec, parce qu’elle est le meilleur exemple de ce que
+ce mémoire discute au chapitre 5 : devant la question « comment donner du sens à ce
+stage », la réponse produite a été un inventaire typé et un script d’audit — c’est-à-dire une
+méthode d’ingénieur appliquée à une question qui n’en est pas une. Et elle a marché, ce qui
+complique le procès qu’on pourrait lui faire.
+

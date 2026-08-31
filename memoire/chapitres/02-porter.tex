@@ -18,40 +18,40 @@
 \section{Formulation du programme}
 \label{sec:formulation}
 
-Le programme est un Mixed Integer Linear Program – programme linéaire
-en nombres entiers (MILP) purement binaire : il n’y a aucune variable continue
+Le programme est un \gls{milp} purement binaire : il n'y a aucune variable continue.
 
 Soit $P$ l'ensemble des parcelles, $C$ l'ensemble des cultures, et $E \subseteq P \times C$
-l'ensemble des couples \emph{éligibles} (§~\ref{sec:architecture}). 
-L’ensemble $E$ rend le problème traitable computationnellement. Le produit $P \times C$ compte environ deux millions
-de couples. Restreindre cet ensemble aux couples agronomiquement éligibles réduit le
-compte à 308 847 (tableau 2.1). C’est une décision de modélisation qui intervient avant
-l’optimisation : les couples écartés par le masque d’éligibilité ne pourront pas réapparaître
-grâce à une contrainte. Le chapitre 3 montrera que le masque impose à lui seul un plancher
-d’écart à l’observé. \\
+l'ensemble des couples éligibles (§~\ref{sec:architecture}). C'est $E$ qui rend le problème
+traitable. Le produit $P \times C$ compte environ deux millions de couples ; le restreindre aux
+couples agronomiquement éligibles ramène ce compte à \num{\mesBinaires}
+(tableau~\ref{tab:programme}). C'est une décision de modélisation qui intervient avant
+l'optimisation : les couples écartés par le masque d'éligibilité ne peuvent pas réapparaître
+sous l'effet d'une contrainte. Le chapitre~\ref{ch:calibrer} montre que le masque impose à lui
+seul un plancher d'écart à l'observé.
 
 La variable de décision est
 \[
   Y_{p,c} \in \{0,1\}, \qquad (p,c) \in E,
 \]
-qui vaut 1 si la parcelle $p$ porte la culture $c$. \\
+qui vaut 1 si la parcelle $p$ porte la culture $c$.
 
-On utilise une fonction objective, c’est-à-dire une quantité que l’on cherche à optimiser. L'objectif à maximiser est la marge brute agrégée, corrigée du risque, appelée fonction de Markowitz :
+La fonction objectif est la quantité que l'on cherche à maximiser. Ici, c'est la marge brute
+agrégée corrigée du risque, dite fonction de Markowitz \parencite{markowitz1952} :
 \begin{equation}
   \max \; \sum_{(p,c) \in E} Y_{p,c} \; s_p \; m_c \; \bigl(1 - a_{f(p)} \, v_c \bigr),
   \label{eq:objectif}
 \end{equation}
 où $s_p$ est la surface de la parcelle (ha), $m_c$ la marge brute unitaire (\eur/ha), $f(p)$
 l'exploitation de la parcelle, $a_f$ son coefficient d'aversion au risque et $v_c$ un
-coefficient de perte propre à la culture. Une exploitation neutre au risque ($a_f = 0$) maximise la marge brute. 
-Une exploitation prudente sur une culture volatile voit cette même marge fortement décotée. \\
+coefficient de perte propre à la culture. Une exploitation neutre au risque ($a_f = 0$) maximise
+la marge brute ; une exploitation prudente sur une culture volatile voit cette même marge
+fortement décotée.
 
 À chaque parcelle, au plus une culture :
 \begin{equation}
   \sum_{c \,:\, (p,c) \in E} Y_{p,c} \;\le\; 1, \qquad \forall p \in P.
   \label{eq:unicite}
 \end{equation}
-\\
 
 Par exploitation, un plafond de main d'\oe uvre,
 \begin{equation}
@@ -59,24 +59,23 @@ Par exploitation, un plafond de main d'\oe uvre,
   \label{eq:mo}
 \end{equation}
 où $h_c$ est le besoin en travail (h/ha), $H_f$ la main d'\oe uvre observée et $\sigma$ un
-facteur de desserrement. \\
+facteur de desserrement.
 
-Enfin, des bornes portant sur un \emph{indicateur} quelconque,
+Enfin, des bornes portant sur un indicateur quelconque,
 \begin{equation}
   \sum_{(p,c) \in E} Y_{p,c} \, s_p \, w_p \, r_c \;\lesseqgtr\; T,
   \label{eq:indicateur}
 \end{equation}
 où $r_c$ est un taux par hectare (kg d'azote, \gls{ift}, heures, euros de subvention) et $w_p$
-un poids de parcelle.\\
+un poids de parcelle.
 
-
-Deux précisions concernant la fonction objective :
+Deux précisions sur la fonction objectif :
 \begin{itemize}
   \item La pénalité est linéaire en surface, et aucune covariance entre cultures n'intervient. Le
     programme appartient donc à la classe \gls{milp} plutôt que quadratique. Il est donc
     résoluble par \gls{highs}.
   \item Le revenu net que produit le rapport de run n'est pas la quantité maximisée. Il intègre
-    également le coût de la main d'\oe uvre, alors qu'elle n'est \textbf{pas} monétisée dans les
+    également le coût de la main d'\oe uvre, alors qu'elle n'est pas monétisée dans les
     coûts variables hérités du \gls{gams} : elle n'apparaît que comme la ressource plafonnée
     de~\eqref{eq:mo}.
 \end{itemize}
@@ -134,17 +133,20 @@ simplifier l'exploration prospective.
 \section{Rendre le problème traitable}
 \label{sec:tractabilite}
 
-Une résolution complète sur le territoire demande entre \SI{30}{\minute} et \SI{55}{\minute}.
-C'est un ordre de grandeur, toutes configurations confondues, pour de la calibration ou de la
-prospective, à froid ou à chaud. C'est l'ordre de grandeur d'organisation qu'il faut prévoir
-avant de lancer un run.
+Une résolution complète sur le territoire demande une demi-heure à une heure en configuration de
+calibration, et deux à trois heures en configuration prospective, qui compte
+\num{\mesBinairesRef} variables au lieu de \num{\mesBinaires}. C'est l'ordre de grandeur
+d'organisation qu'il faut prévoir avant de lancer un run.
 
-De plus, à taille constante (\num{\mesBinaires} variables) et problème identique, \num{20}
-résolutions enregistrées se sont étalées de \SI{\mesSolveMin}{\second} à
-\SI{\mesSolveMax}{\second}. Cette variabilité vient de la recherche par séparation et évaluation
-(le coût de l'enveloppe logicielle étant de \SI{15}{\second}).
-
---- Pourquoi on ne retrouve pas les 30min-55min classiques ? ---
+Cette moyenne cache une dispersion qu'il faut mesurer à taille constante. Sur la configuration de
+calibration, les \num{\mesSolveN} résolutions enregistrées vont de \SI{\mesSolveMin}{\second} à
+\SI{\mesSolveMax}{\second}, soit un facteur \num{\mesSolveFacteur} autour d'une moyenne de
+\SI{\mesSolveMoy}{\second}, pour un coefficient de variation de \SI{\mesSolveCV}{\percent}. Le
+problème est pourtant identique d'une résolution à l'autre. Cette variabilité vient donc de la
+recherche par séparation et évaluation elle-même, et non de l'enveloppe logicielle, dont le coût
+est de \SI{15}{\second}. La conséquence pratique est qu'aucune estimation ponctuelle de durée
+n'est fiable : le dépôt affiche une fourchette et refuse de répondre hors de la bande de tailles
+où il a des mesures.
 
 % CORRIGE : « variables entières entre 0 et 1 » -> « continues ». Un entier entre 0 et 1 vaut 0
 % ou 1 : il n'y aurait alors aucune relaxation.
@@ -179,13 +181,13 @@ recherche d'optimum mais ne change pas la nature du résultat. Par exemple, sur 
 et pour un optimum identique, on passe de \SI{\mesWarmAvant}{\second} à
 \SI{\mesWarmApres}{\second} de temps de calcul.
 
-La Table 2.1 récapitule ces informations :
+Le tableau~\ref{tab:programme} récapitule ces informations.
 
 \begin{table}[h]
   \centering
   \caption{Taille du programme et coût de sa résolution. Les durées sont mesurées sur le
-  territoire complet ; l'étendue \emph{min--max} porte sur vingt résolutions du \emph{même}
-  problème, à taille constante.}
+  territoire complet ; l'étendue min--max porte sur les \num{\mesSolveN} résolutions
+  enregistrées du même problème, à taille constante.}
   \label{tab:programme}
   \small
   \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
@@ -196,9 +198,10 @@ La Table 2.1 récapitule ces informations :
     \dots{} si les \num{25} variantes symétriques sont rouvertes (§~\ref{sec:tractabilite})
       & \num{\mesBinairesKarus} \\
     \midrule
-    Résolution la plus rapide des vingt enregistrées & \SI{\mesSolveMin}{\second} \\
-    Résolution la plus lente des vingt enregistrées & \SI{\mesSolveMax}{\second} \\
-    Coefficient de variation des durées & \SI{\mesSolveCV}{\percent} \\
+    Résolution la plus rapide, à la taille de calibration & \SI{\mesSolveMin}{\second} \\
+    Résolution la plus lente, à la même taille & \SI{\mesSolveMax}{\second} \\
+    Coefficient de variation de ces durées & \SI{\mesSolveCV}{\percent} \\
+    Durée moyenne à la taille prospective & \SI{\mesSolveProsMoy}{\second} \\
     Même problème, amorçage à froid puis à chaud
       & \SI{\mesWarmAvant}{\second} $\rightarrow$ \SI{\mesWarmApres}{\second} \\
     Écart d'optimalité relatif imposé au solveur & \SI{\mesGapMip}{\percent} \\
@@ -215,17 +218,17 @@ Il existe trois dispositifs différents qui contrôlent la robustesse du code :
     est de vérifier que chaque contrainte fait ce qu'elle prétend. Ces tests sont rapides et
     exécutables sans données. Ils ne permettent pas de vérifier que le résultat global est juste.
   \item le \emph{golden snapshot} fixe sur chaque parcelle l'allocation de la culture
-    représentative qu'elle porte réellement en \num{2017}. Le but ici est de comparer des
-    indicateurs entre la référence et l'allocation que le \emph{golden snapshot} fixe. Les deux
-    côtés sont censés être rigoureusement identiques. On sérialise ainsi \num{\mesChecksums}
-    sommes de contrôle : sommes de colonnes, tailles de tables, etc. Ce script permet
-    d'identifier les dérives numériques silencieuses du pipeline ou des indicateurs après une
-    retouche. Il ne renseigne pas sur la justesse du modèle. Le \emph{golden snapshot} se résout
-    en \SI{7}{\second} contre \SI{30}{\minute} à \SI{55}{\minute} pour un run classique.
-  \item un script compare \num{3} runs de références déclarés à leurs métriques attendues. Le
+    représentative qu'elle porte réellement en \num{2017}, puis compare les indicateurs
+    recalculés à ceux de la référence. Les deux côtés sont censés être rigoureusement
+    identiques. On sérialise ainsi \num{\mesChecksums} sommes de contrôle : sommes de colonnes,
+    tailles de tables, etc. Le script identifie les dérives numériques silencieuses du pipeline
+    ou des indicateurs après une retouche, mais ne renseigne pas sur la justesse du modèle. Il
+    s'exécute en \SI{7}{\second}, sans aucune résolution.
+  \item un script compare \num{3} runs de référence déclarés à leurs métriques attendues. Le
     bruit de la recherche arborescente vaut \num{\mesBruitPad} point de \gls{pad}
-    (§~\ref{sec:plateau}). Cela correspond à environ \SI{5}{\percent} de bruit sur l'objectif
-    final. Le script a donc une tolérance de \SI{5}{\percent}.
+    (§~\ref{sec:plateau}) : une garde à l'égalité exacte échouerait donc sur un simple
+    nouveau lancement. La tolérance est fixée à \SI{5}{\percent}, marge choisie pour absorber ce
+    bruit sans laisser passer une régression réelle.
 \end{itemize}
 
 \begin{reflexion}

@@ -221,6 +221,8 @@
 \newcommand{\prosPunSurfaceHa}{11222}
 \newcommand{\prosPunHhi}{0.369}
 \newcommand{\prosPunObjectifM}{204.52}
+\newcommand{\prosPunMargeM}{204.5}
+\newcommand{\prosPunSubventionM}{0.0}
 \newcommand{\prosPunFlag}{}
 \newcommand{\prosPunProuve}{oui}
 \newcommand{\prosPquatreObjectif}{81036580}
@@ -235,6 +237,8 @@
 \newcommand{\prosPquatreSurfaceHa}{26023}
 \newcommand{\prosPquatreHhi}{0.109}
 \newcommand{\prosPquatreObjectifM}{81.04}
+\newcommand{\prosPquatreMargeM}{98.4}
+\newcommand{\prosPquatreSubventionM}{71.3}
 \newcommand{\prosPquatreFlag}{}
 \newcommand{\prosPquatreProuve}{oui}
 \newcommand{\prosPcinqObjectif}{50622686}
@@ -249,6 +253,8 @@
 \newcommand{\prosPcinqSurfaceHa}{24586}
 \newcommand{\prosPcinqHhi}{0.151}
 \newcommand{\prosPcinqObjectifM}{50.62}
+\newcommand{\prosPcinqMargeM}{82.9}
+\newcommand{\prosPcinqSubventionM}{17.4}
 \newcommand{\prosPcinqFlag}{\dag}
 \newcommand{\prosPcinqProuve}{non}
 \newcommand{\prosPsixObjectif}{65005778}
@@ -263,6 +269,8 @@
 \newcommand{\prosPsixSurfaceHa}{22293}
 \newcommand{\prosPsixHhi}{0.117}
 \newcommand{\prosPsixObjectifM}{65.01}
+\newcommand{\prosPsixMargeM}{78.4}
+\newcommand{\prosPsixSubventionM}{53.4}
 \newcommand{\prosPsixFlag}{\dag}
 \newcommand{\prosPsixProuve}{non}
 \newcommand{\prosPseptObjectif}{72296286}
@@ -277,6 +285,8 @@
 \newcommand{\prosPseptSurfaceHa}{25847}
 \newcommand{\prosPseptHhi}{0.103}
 \newcommand{\prosPseptObjectifM}{72.30}
+\newcommand{\prosPseptMargeM}{83.0}
+\newcommand{\prosPseptSubventionM}{56.6}
 \newcommand{\prosPseptFlag}{}
 \newcommand{\prosPseptProuve}{oui}
 \newcommand{\prosPhuitObjectif}{69088438}
@@ -291,6 +301,8 @@
 \newcommand{\prosPhuitSurfaceHa}{26052}
 \newcommand{\prosPhuitHhi}{0.129}
 \newcommand{\prosPhuitObjectifM}{69.09}
+\newcommand{\prosPhuitMargeM}{81.4}
+\newcommand{\prosPhuitSubventionM}{39.3}
 \newcommand{\prosPhuitFlag}{}
 \newcommand{\prosPhuitProuve}{oui}
 \newcommand{\prosPneufObjectif}{81007454}
@@ -305,6 +317,8 @@
 \newcommand{\prosPneufSurfaceHa}{26083}
 \newcommand{\prosPneufHhi}{0.176}
 \newcommand{\prosPneufObjectifM}{81.01}
+\newcommand{\prosPneufMargeM}{128.2}
+\newcommand{\prosPneufSubventionM}{34.9}
 \newcommand{\prosPneufFlag}{}
 \newcommand{\prosPneufProuve}{oui}
 
@@ -534,9 +548,14 @@
 \newcommand{\mesBinaires}{308847}  % variables binaires, configuration de calibration (04-vigilance B.1)
 \newcommand{\mesBinairesKarus}{879162}  % binaires si les 25 variantes Karusmart sont rouvertes (B.3)
 \newcommand{\mesBinairesRef}{331044}  % binaires sans elles (B.3)
-\newcommand{\mesSolveMin}{155}  % solve le plus rapide des 20 enregistres, en s (B.1)
-\newcommand{\mesSolveMax}{1007}  % solve le plus lent des 20 enregistres, en s (B.1)
-\newcommand{\mesSolveCV}{64}  % coefficient de variation des durees, en % (B.1)
+\newcommand{\mesSolveN}{7}  % solves enregistres a la taille de calibration
+\newcommand{\mesSolveMin}{327}  % le plus rapide des 7, en s (historique du depot)
+\newcommand{\mesSolveMax}{3625}  % le plus lent des 7, en s
+\newcommand{\mesSolveMoy}{1448}  % duree moyenne des 7, en s
+\newcommand{\mesSolveCV}{91}  % coefficient de variation de ces durees, en %
+\newcommand{\mesSolveFacteur}{11}  % rapport du plus lent au plus rapide
+\newcommand{\mesSolveProsMoy}{7043}  % duree moyenne des 13 solves a la taille prospective, en s
+\newcommand{\mesSolveProsMax}{10856}  % le plus lent d'entre eux, en s
 \newcommand{\mesWarmAvant}{720}  % solve a froid, en s (CLAUDE.md, journal 2026-07-29)
 \newcommand{\mesWarmApres}{209}  % meme solve avec warm start, en s
 \newcommand{\mesIncumbentEcart}{5,5}  % ecart de l'incumbent a une solution construite a la main, en % (B.2)
@@ -600,4 +619,6 @@
 \newcommand{\mesHuitEcartApparent}{3,41}  % ecart du run de 3 h a la BORNE LP, en %
 \newcommand{\mesHuitEcartReel}{0,64}  % son ecart a l'optimum reel, en % -- cinq fois moins
 \newcommand{\mesCycleAnanas}{18}  % duree de cycle de l'ananas, en mois (Duree_Cycle_Cult.txt)
+
+\newcommand{\mesMacros}{593}  % macros de ce fichier, soi comprise
 

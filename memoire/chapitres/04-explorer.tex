@@ -21,11 +21,11 @@ chapitre présente le dispositif et les résultats.
 Chaque scénario est séparé en trois rubriques :
 
 \begin{itemize}[leftmargin=1.2em,itemsep=6pt]
-  \item \textbf{La politique}, qui correspond à une décision de la puissance publique. Cela peut
+  \item La politique, qui correspond à une décision de la puissance publique. Cela peut
     être un plafond d'azote, une enveloppe de subventions, un plancher d'emploi, etc.
-  \item \textbf{Le forçage}, qui correspond à ce que le climat et les marchés imposent. Cela peut
+  \item Le forçage, qui correspond à ce que le climat et les marchés imposent. Cela peut
     être des prix, des rendements, des coûts d'intrants multipliés par un facteur, etc.
-  \item \textbf{Le balayage}, qui correspond à une variation d'un seul seuil afin de tracer le
+  \item Le balayage, qui correspond à une variation d'un seul seuil afin de tracer le
     front des compromis atteignables.
 \end{itemize}
 
@@ -34,9 +34,10 @@ et \num{\mesBalayages} fronts.
 
 La figure~\ref{fig:spectre} donne les deux catalogues. Le catalogue des politiques est ordonné
 d'une dérégulation complète à une rupture agroécologique. On peut voir quels scénarios ont été
-explorés. Le produit cartésien complet donne \num{\mesCellulesTotal} combinaisons, ce qui
-correspond à environ cinq jours de calcul continu, sans compter les fronts. Un plan explicite
-désigne, pour chaque politique, ses forçages et ses fronts.
+explorés. Le produit cartésien complet donne \num{\mesCellulesTotal} combinaisons ; à la durée
+moyenne observée en configuration prospective (\SI{\mesSolveProsMoy}{\second}, §~\ref{sec:tractabilite}),
+cela représente une dizaine de jours de calcul continu, sans compter les fronts. Un plan
+explicite désigne donc, pour chaque politique, ses forçages et ses fronts.
 
 \begin{figure}[h]
   \centering
@@ -66,7 +67,7 @@ désigne, pour chaque politique, ses forçages et ses fronts.
     % qu'on encadre, donc leurs lignes doivent etre contigues), la borne basse en pied.
     % A l'interieur d'un bloc, les lignes vont du moins au plus severe.
     \node[anchor=south west, font=\scriptsize] at (1,-0.3)
-      {\textbf{Forçages} --- ce qu'imposent le climat et les marchés};
+      {Forçages --- ce qu'imposent le climat et les marchés};
     \draw[black!45, line width=0.3pt] (1,-0.9) -- (70,-0.9);
 
     \scenrow{1}{-1.5} {scenVert!75!scenSable}{\jamais}{F10}{conjoncture favorable}
@@ -78,7 +79,7 @@ désigne, pour chaque politique, ses forçages et ses fronts.
     \scenrow{1}{-26.3}{scenRouge!60!scenSable}{\jamais}{F2}{sécheresse sévère}
 
     \scenrow{1}{-32.7}{scenVert!35!scenSable} {\calc}  {F7}{inflation alimentaire}
-    \scenrow{1}{-37.3}{scenRouge!40!scenSable}{\jamais}{F8}{retrait du \textsc{posei}}
+    \scenrow{1}{-37.3}{scenRouge!40!scenSable}{\jamais}{F8}{retrait du \glsentryshort{posei}}
     \scenrow{1}{-41.9}{scenRouge!45!scenSable}{\jamais}{F5}{effondrement des prix d'export}
     \scenrow{1}{-46.5}{scenRouge!50!scenSable}{\calc}  {F6}{choc sur les intrants}
 
@@ -91,7 +92,7 @@ désigne, pour chaque politique, ses forçages et ses fronts.
 
     % ================= PANNEAU DROIT : LES DIX POLITIQUES =================
     \node[anchor=south west, font=\scriptsize] at (80,-0.3)
-      {\textbf{Politiques} --- ce que décide la puissance publique};
+      {Politiques --- ce que décide la puissance publique};
     \draw[black!45, line width=0.3pt] (80,-0.9) -- (149,-0.9);
 
     \scenrow{80}{-1.5} {scenVert!75!scenSable} {\jamais}{P10}{bifurcation agroécologique}
@@ -118,7 +119,7 @@ désigne, pour chaque politique, ses forçages et ses fronts.
     \fill[scenRouge!50!scenSable] (26,-65.5) rectangle ++(5,-2.9);
     \fill[scenRouge!75!scenSable] (31,-65.5) rectangle ++(5,-2.9);
     \node[anchor=west, inner sep=0] at (38,-67)
-      {\textbf{teinte} : du plus favorable, ou du plus agroécologique, au plus défavorable};
+      {teinte : du plus favorable, ou du plus agroécologique, au plus défavorable};
 
     \draw[temoin]   (1,-71.5)   rectangle ++(6,-2.9);
     \node[anchor=west, inner sep=0] at (8.5,-73) {témoin (F0, P4)};
@@ -136,7 +137,7 @@ désigne, pour chaque politique, ses forçages et ses fronts.
   \caption{Les deux catalogues. La teinte va de la
   conjoncture la plus favorable (F10) à la plus défavorable (F9), et de la rupture
   agroécologique (P10) à la dérégulation (P1). Les témoins encadrés en noir
-  sont les points de comparaison. F0 est le forçage \emph{nul}, P4 le statu quo.}
+  sont les points de comparaison. F0 est le forçage nul, P4 le statu quo.}
   \label{fig:spectre}
 \end{figure}
 
@@ -144,7 +145,7 @@ désigne, pour chaque politique, ses forçages et ses fronts.
 % s'imprime pas. Les deux chiffres qui vont avec sont disponibles : \mesCellulesGrille
 % cellules de grille resolues et \mesSolvesProspectifs dossiers de run prospectifs.
 
-On distingue trois décisions au niveau de la méthode :
+Trois décisions de méthode gouvernent ce dispositif.
 
 \begin{enumerate}[leftmargin=1.6em,itemsep=8pt]
 
@@ -168,7 +169,8 @@ situés sur l'enveloppe convexe du front.
 \label{sec:grille}
 
 Le classement des politiques dépend du forçage. Le tableau~\ref{tab:grille} donne les cellules
-résolues.
+résolues ; l'annexe~\ref{ann:resultats} en donne les autres indicateurs, les durées et les
+drapeaux de convergence.
 
 Sous crise systémique (F9), les trois politiques testées donnent une marge brute du territoire
 négative. C'est le pire cas au sens de Wald.
@@ -206,7 +208,7 @@ jamais car la crise réduit les surfaces intensives.
 \begin{table}[h]
   \centering
   \caption{Marge brute par cellule (M\eur).
-  \emph{hors aide} exclut les subventions de la marge brute. La dague marque un solve sous-optimal car arrêté à la limite de temps.}
+  hors aide exclut les subventions de la marge brute. La dague marque un solve sous-optimal car arrêté à la limite de temps.}
   \label{tab:grille}
   \small
   \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrrrr@{}}
@@ -272,7 +274,8 @@ jamais car la crise réduit les surfaces intensives.
     \fill[black!15] (33,-52) rectangle (35.5,-53.6); \node[right] at (35.5,-52.8) {F9 crise};
   \end{tikzpicture}
   \caption{Regret par politique et par forçage, en pourcentage de la meilleure politique du même
-  forçage. Une barre nulle correspond au meilleur choix de politique, sachant le forçage. Aucune politique n'est courte partout.}
+  forçage. Une barre nulle correspond au meilleur choix de politique, sachant le forçage. Aucune
+  politique n'a une barre nulle sous tous les forçages.}
   \label{fig:regret}
 \end{figure}
 
@@ -308,8 +311,8 @@ hectare pour hectare : l'export libère \SI{4140}{\ha} (\SI{1909}{\ha} de banane
 de canne), et le vivrier n'en reprend qu'environ la moitié.
 
 Le modèle dit que l'enveloppe publique maintient la banane d'exportation sur le sol
-guadeloupéen et joue un rôle important dans l'existence de la culture de canne. En revanche, le
-modèle ne vérifie pas que les \SI{2237}{\ha} de maraîchage qui apparaissent trouvent un acheteur
+guadeloupéen et joue un rôle important dans l'existence de la culture de canne. En revanche, il
+ne vérifie pas que les \SI{1092}{\ha} de maraîchage supplémentaires trouvent un acheteur
 (chapitre~\ref{ch:discussion}).
 
 \begin{table}[h]

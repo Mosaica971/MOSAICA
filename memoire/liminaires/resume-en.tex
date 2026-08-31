@@ -10,8 +10,9 @@
 
 \begin{otherlanguage}{english}
 
-Guadeloupe imports close to \SI{80}{\percent} of its food, at prices about one third higher
-than in mainland France, while sugarcane and export banana occupy most of its farmland. The
+Guadeloupe imports close to \SI{80}{\percent} of its food, at food prices more than
+\SI{40}{\percent} higher than in mainland France, while sugarcane and export banana occupy most
+of its farmland. The
 TI-FIG project, run by INRAE's ASTRO research unit, aims to assess \emph{ex ante} scenarios for
 developing local food crops. The tool intended for that purpose was MOSAICA, a bioeconomic
 crop-allocation model published in 2015, which assigns each field of a territory to at most one
@@ -19,14 +20,14 @@ crop so as to maximise risk-adjusted gross margin under agronomic, land-tenure a
 constraints.
 
 That tool turned out not to be usable as it stood, and not for the reason one would expect.
-Written in GAMS — a language that silently returns \emph{zero} when a table is queried on a
+Written in GAMS — a language that silently returns zero when a table is queried on a
 missing column — it contained behaviours invisible both in its code, which looks correct, and
 in its outputs, which look plausible. One of them forbids a rainfed orchard system across the
 entire territory. The internship was therefore redirected: rebuild the instrument before using
 it.
 
 This work ports MOSAICA to Python/Pyomo — a purely binary mixed-integer linear program of about
-\num{\mesBinaires} variables, solved with HiGHS — under a \emph{parity mandate} that reproduces
+\num{\mesBinaires} variables, solved with HiGHS — under a parity mandate that reproduces
 the original model's actual behaviour, defects included, each one documented and paired with a
 disabled \enquote{intended reading} variant. The model is then calibrated against the observed
 2017 land use using the percentage absolute deviation of the reference article, and finally used
@@ -37,19 +38,19 @@ Three results hold without qualification. Calibration matches or exceeds the thr
 metrics (\SI{\calibRetenuTypes}{\percent} of farm types reproduced,
 \SI{\calibRetenuParcelles}{\percent} of fields, \SI{\calibRetenuSurface}{\percent} of area);
 above all, sugarcane — more than half the territory — returns to \SI{\simRetenuCS}{\ha} against
-\SI{\obsHaCS}{\ha} observed \emph{without any constraint naming it}. Second, the ranking of
-public policies \textbf{depends on the forcing}: the food-sovereignty policy is the best under
+\SI{\obsHaCS}{\ha} observed without any constraint naming it. Second, the ranking of
+public policies depends on the forcing: the food-sovereignty policy is the best under
 nominal conditions and the worst under systemic crisis once subsidies are netted out, which a
-single scenario cannot reveal. Third, territorial gross margin varies \emph{inversely} with the
+single scenario cannot reveal. Third, territorial gross margin varies inversely with the
 subsidy ceiling, monotonically over seven points all proven optimal: in this model public
 support does not buy margin, it buys stability — and relaxing that constraint shifts about
 \SI{2100}{\ha} from export crops to food crops.
 
-What the framework does \emph{not} allow one to conclude was measured with equal care. No market
+What the framework does not allow one to conclude was measured with equal care. No market
 outlet is modelled beyond the two export sectors, so any shift towards food crops assumes a
 perfectly elastic market. Only four crops out of eleven fall below the article's deviation
 threshold, the residual error concentrating on the smallest crops. And an environmental policy
-built on the dataset's agroecological systems would be satisfied \emph{at exactly zero cost},
+built on the dataset's agroecological systems would be satisfied at exactly zero cost,
 those systems being indistinguishable from one another. The defensible deliverable of this work
 is therefore not a set of scenarios: it is an instrument whose limits are known precisely.
 

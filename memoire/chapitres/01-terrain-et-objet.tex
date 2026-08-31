@@ -16,29 +16,26 @@
 Les possibilités d'allocation de cultures par parcelles sont restreintes par le climat, le sol,
 la pollution au chlordécone, le foncier et le travail. Les aides orientent le reste.
 
-Environ \SI{14200}{\ha} sont classés à risque de contamination par la chlordécone, dont près de
-\SI{7300}{\ha} encore en usage agricole. C'est un phénomène irréversible à l'échelle humaine car
-la molécule persiste dans les sols pour des siècles \parencite{daafchlordecone}. Cela interdit
-les cultures dont l'organe récolté est en contact avec le sol.
-
-C'est une règle d'éligibilité par parcelle.
+Environ \SI{14200}{\ha} sont classés à risque de contamination par le chlordécone, dont près de
+\SI{7300}{\ha} encore en usage agricole. C'est un phénomène irréversible à l'échelle humaine, car
+la molécule persiste dans les sols pendant des siècles \parencite{daafchlordecone}. Cela interdit
+les cultures dont l'organe récolté est en contact avec le sol. C'est une règle d'éligibilité par
+parcelle.
 
 On compte \num{\obsParcelles} parcelles pour \num{\obsExploitations} exploitations. Le
-parcellaire est fragmenté donc on ne peut a priori pas raisonner en exploitation moyenne. Le
+parcellaire est fragmenté, donc on ne peut a priori pas raisonner en exploitation moyenne. Le
 régime des \gls{gfa} impose contractuellement une part minimale de canne à sucre à une partie de
-ce foncier.
-
-C'est une contrainte de politique publique.
+ce foncier. C'est une contrainte de politique publique.
 
 D'après le jeu de données, sur les \SI{\obsSurfaceCultivee}{\ha} cultivés, la canne occupe
 \SI{\obsHaCS}{\ha}, la prairie \SI{\obsHaPN}{\ha} et la banane \SI{\obsHaBA}{\ha}. Ces trois
-postes correspondent à \SI{90}{\percent} de la surface totale. Un développement du vivrier passe
-nécessairement par leur diminution, au profit de la surface vivrière, pour l'instant résiduelle.
+postes correspondent à près de \SI{90}{\percent} de la surface cultivée. Un développement du
+vivrier passe nécessairement par leur diminution, au profit de la surface vivrière, pour
+l'instant résiduelle. C'est une réallocation.
 
-C'est une réallocation.
-
-On peut arbitrer sous contrainte. Le programme d'optimisation est donc pertinent en tant que
-modèle d'allocation en Guadeloupe.
+Ces trois contraintes sont de natures différentes, mais elles s'expriment toutes comme des
+restrictions portant sur le même choix : quelle culture sur quelle parcelle. Le programme
+d'optimisation est donc pertinent en tant que modèle d'allocation en Guadeloupe.
 
 \section{\glsentryshort{mosaica} : ce que le modèle promet}
 \label{sec:mosaica}
@@ -73,18 +70,17 @@ On préfère adopter une approche open-source. On choisit Python comme langage d
 pour plusieurs raisons.
 
 \begin{itemize}[leftmargin=1.2em,itemsep=3pt]
-  \item Beaucoup de personnes sont formés à Python. Cela peut évacuer la question de la
-    formation à un nouveau langage à la fois pour des collaborations entre équipes ou bien lors
-    de recrutements.
-  \item La forte concurrence entre les bibliothèques Python et leur modèle open-source assurent
-    un large choix de modules optimisés et maintenus grâce à des mises à jour gratuites
-    régulières. On choisit la bibliothèque d'optimisation Pyomo \parencite{pyomo2021} qui propose
-    le solveur non-commercial \gls{highs} \parencite{highs2018}.
-  \item Python permet très efficacement de faire de l'analyse de données approfondie et fait
-    facilement le lien avec des SIG (système d'information géographique).
-  \item Python est parfaitement compatible avec l'utilisation de GitHub. Cela permet de
-    simplifier la collaboration en proposant des outils de gestion de projet et en rendant le
-    code accessible à des équipes extérieures.
+  \item Beaucoup de personnes sont formées à Python. Cela évacue la question de la formation à un
+    nouveau langage, aussi bien pour des collaborations entre équipes que lors de recrutements.
+  \item La forte concurrence entre les bibliothèques Python et leur modèle open source assurent
+    un large choix de modules optimisés et maintenus par des mises à jour gratuites régulières.
+    On choisit la bibliothèque d'optimisation Pyomo \parencite{pyomo2021}, qui donne accès au
+    solveur non commercial \gls{highs} \parencite{highs2018}.
+  \item Python permet une analyse de données approfondie et fait facilement le lien avec les
+    \gls{sig}.
+  \item Python est parfaitement compatible avec GitHub, ce qui simplifie la collaboration en
+    proposant des outils de gestion de projet et en rendant le code accessible à des équipes
+    extérieures.
 \end{itemize}
 
 \item Dans le modèle \gls{gams}, faire varier un levier suppose d'éditer le code lui-même.

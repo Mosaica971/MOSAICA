@@ -75,9 +75,23 @@ MEASUREMENTS: dict[str, tuple[str, str]] = {
     "mesBinaires":        ("308847",  "variables binaires, configuration de calibration (04-vigilance B.1)"),
     "mesBinairesKarus":   ("879162",  "binaires si les 25 variantes Karusmart sont rouvertes (B.3)"),
     "mesBinairesRef":     ("331044",  "binaires sans elles (B.3)"),
-    "mesSolveMin":        ("155",     "solve le plus rapide des 20 enregistres, en s (B.1)"),
-    "mesSolveMax":        ("1007",    "solve le plus lent des 20 enregistres, en s (B.1)"),
-    "mesSolveCV":         ("64",      "coefficient de variation des durees, en % (B.1)"),
+    # RECALCULE le 2026-08-30 depuis .mosaica_solve_history.json, qui est la source.
+    # Les valeurs precedentes -- 155 s / 1007 s / CV 64 %, reprises de docs/04-vigilance.md
+    # B.1 -- ne figurent PLUS dans l'historique : elles datent d'une campagne anterieure,
+    # ecrasee depuis par des runs plus recents. B.1 est donc perimee au meme titre.
+    # L'historique tient 20 entrees, mais reparties sur DEUX tailles, pas une :
+    #   308 847 (calibration) : n=7,  327 s -> 3 625 s, moyenne 1 448 s, CV 91 %
+    #   331 044 (prospective) : n=13, 2 505 s -> 10 856 s, moyenne 7 043 s, CV 49 %
+    # C'est ce qui explique l'incoherence relevee en marge du chapitre 2 : les 30-55 min
+    # annoncees et les 155-1007 s ne portaient pas sur la meme population.
+    "mesSolveN":          ("7",       "solves enregistres a la taille de calibration"),
+    "mesSolveMin":        ("327",     "le plus rapide des 7, en s (historique du depot)"),
+    "mesSolveMax":        ("3625",    "le plus lent des 7, en s"),
+    "mesSolveMoy":        ("1448",    "duree moyenne des 7, en s"),
+    "mesSolveCV":         ("91",      "coefficient de variation de ces durees, en %"),
+    "mesSolveFacteur":    ("11",      "rapport du plus lent au plus rapide"),
+    "mesSolveProsMoy":    ("7043",    "duree moyenne des 13 solves a la taille prospective, en s"),
+    "mesSolveProsMax":    ("10856",   "le plus lent d'entre eux, en s"),
     "mesWarmAvant":       ("720",     "solve a froid, en s (CLAUDE.md, journal 2026-07-29)"),
     "mesWarmApres":       ("209",     "meme solve avec warm start, en s"),
     "mesIncumbentEcart":  ("5,5",     "ecart de l'incumbent a une solution construite a la main, en % (B.2)"),
@@ -762,6 +776,15 @@ def main() -> int:
         objectif = _dig(data, ("objective", "value"))
         if objectif is not None:
             lines.append(f"\\newcommand{{\\pros{prefixe}ObjectifM}}{{{_fmt(objectif / 1e6, 2)}}}")
+        # Marge et subvention en millions : en euros pleins, la table de l'annexe D deborde
+        # de 110 pt, et huit colonnes de sept chiffres ne se lisent de toute facon pas.
+        for source, suffix in (
+            (("economics", "output", "total_gross_margin"), "MargeM"),
+            (("economics", "output", "total_subsidy"), "SubventionM"),
+        ):
+            valeur = _dig(data, source)
+            if valeur is not None:
+                lines.append(f"\\newcommand{{\\pros{prefixe}{suffix}}}{{{_fmt(valeur / 1e6, 1)}}}")
         # La dague de non-convergence, posee par le generateur pour la meme raison que sur les
         # fronts : elle doit disparaitre toute seule quand le run est repris.
         prouve = data.get("termination_condition") == "optimal"
@@ -908,9 +931,15 @@ def main() -> int:
         lines.append(f"\\newcommand{{\\{name}}}{{{value}}}  % {source}")
     lines.append("")
 
+    # Le memoire cite son propre nombre de macros (annexes B et F). Le saisir a la main
+    # l'a deja rendu perime une fois -- il valait 518 pour 573 macros reelles. On l'emet
+    # donc ici, en se comptant soi-meme.
+    macros = sum(1 for line in lines if line.startswith("\\newcommand")) + 1
+    lines.append(f"\\newcommand{{\\mesMacros}}{{{macros}}}  % macros de ce fichier, soi comprise")
+    lines.append("")
+
     TARGET.write_text("\n".join(lines) + "\n", encoding="utf8")
 
-    macros = sum(1 for line in lines if line.startswith("\\newcommand"))
     print(f"{TARGET.relative_to(ROOT)} : {macros} macros ecrites")
     if missing:
         print(f"\n{len(missing)} valeur(s) manquante(s) -- le memoire ne peut pas les citer :")

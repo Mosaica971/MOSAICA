@@ -12,10 +12,10 @@ mesure qui les a fermées.
 \section{Statut des équations, bloc par bloc}
 
 Le programme d'origine compte une centaine d'équations nommées, réparties sur douze fichiers.
-Chacune reçoit l'un de quatre statuts : \textbf{portée} (le comportement est reproduit),
-\textbf{implicite} (le comportement est obtenu sans écrire de contrainte, parce que la
-formulation Python le rend inutile), \textbf{différée} (non portée, pour une raison consignée)
-ou \textbf{écartée} (portée puis désactivée, pour une raison consignée).
+Chacune reçoit l'un de quatre statuts : portée (le comportement est reproduit),
+implicite (le comportement est obtenu sans écrire de contrainte, parce que la
+formulation Python le rend inutile), différée (non portée, pour une raison consignée)
+ou écartée (portée puis désactivée, pour une raison consignée).
 
 \begin{table}[htbp]
   \centering
@@ -42,7 +42,7 @@ ou \textbf{écartée} (portée puis désactivée, pour une raison consignée).
       \texttt{forbid\_crops} & annulent des codes agrégats dont l'économie est nulle ;
       l'auteur du \gls{gams} les supprimait déjà en bloc \\
     \texttt{Eq\_MO\_MAX\_Expl} & portée &
-      \texttt{farm\_labor\_hours\_max} & \textbf{contrainte dominante} : sans elle l'optimum
+      \texttt{farm\_labor\_hours\_max} & contrainte dominante : sans elle l'optimum
       réclame \SI{21593}{\etp} là où le territoire en comptait \num{3598} \\
     \texttt{Eq\_*\_QUOTA\_MAX}, \texttt{Eq\_*\_PROD\_MIN}, \texttt{Eq\_*\_OBJ} & portées &
       \texttt{territory\_\allowbreak production\_\allowbreak bound} & une seule famille générique ; le plancher de
@@ -59,16 +59,16 @@ ou \textbf{écartée} (portée puis désactivée, pour une raison consignée).
       \texttt{irrigation\_required}, \texttt{cs\_irrig\_ban} & exigence ou interdiction
       d'irrigation selon la culture \\
     \texttt{Eq\_IG\_CLD}, \texttt{Eq\_PN\_PIQ\_CLD} & portées &
-      \texttt{max\_risk\_threshold}, \texttt{exact\_risk\_value} & \textbf{ne sont pas actives
-      dans le même bloc}, contrairement à ce que leur nature commune suggère \\
+      \texttt{max\_risk\_threshold}, \texttt{exact\_risk\_value} & ne sont pas actives
+      dans le même bloc, contrairement à ce que leur nature commune suggère \\
     \texttt{Eq\_FRICHE}, \texttt{Eq\_NOCULT\_NC} & portées &
       \texttt{friche\_lock}, \texttt{nocult\_nc\_1/2} & historique de friche et parcelles non
       cultivées \\
-    \texttt{Eq\_VE\_PLUIE} & portée \emph{avec son défaut} &
+    \texttt{Eq\_VE\_PLUIE} & portée avec son défaut &
       \texttt{attribute\_forbidden} & voir §~\ref{sec:ann-bugs} \\
     \texttt{Eq\_CS\_GFA} & écartée &
       \texttt{cs\_gfa\_minimum\_share} & portée et testée, mais infaisable sur les données 2017
-      réelles --- \emph{comme le serait le \gls{gams}} \\
+      réelles --- comme le serait le \gls{gams} \\
     \texttt{Eq\_CF\_*} (bloc canne fibre, $\sim$20) & différé &
       --- & le point bloquant n'est pas le code, c'est le sens des données d'entrée \\
     \bottomrule
@@ -76,7 +76,7 @@ ou \textbf{écartée} (portée puis désactivée, pour une raison consignée).
 \end{table}
 
 Un contre-exemple mérite d'être consigné, puisque cette annexe prétend à la traçabilité : cet
-inventaire a d'abord été tenu \emph{après coup} plutôt qu'au fil du portage, et deux de ses
+inventaire a d'abord été tenu après coup plutôt qu'au fil du portage, et deux de ses
 lignes sont restées périmées pendant trois semaines. Une table de correspondance ne vaut que
 par la discipline qui la met à jour, et celle-ci a manqué une fois.
 
@@ -86,41 +86,41 @@ par la discipline qui la met à jour, et celle-ci a manqué une fois.
 \paragraph{Le zéro silencieux et \texttt{Eq\_VE\_PLUIE}.} \gls{gams} renvoie zéro sans
 avertissement lorsqu'une table est interrogée sur une colonne absente. L'équation teste ce zéro
 contre la valeur~1 pour autoriser un verger pluvial ; le test $0 \neq 1$ étant toujours vrai,
-la variante est interdite sur toutes les parcelles du territoire. \emph{Intention présumée} :
+la variante est interdite sur toutes les parcelles du territoire. Intention présumée :
 la condition portait vraisemblablement sur une caractéristique pluviométrique de la parcelle.
 La variante corrigée existe dans la configuration, désactivée ; l'activer rouvre la variante
 sur les parcelles concernées, et change donc le poste où l'écart de calibration est le plus
-grand. \textbf{Conséquence à retenir pour lire le chapitre~\ref{ch:calibrer}} : le déficit de
+grand. Conséquence à retenir pour lire le chapitre~\ref{ch:calibrer} : le déficit de
 vergers y est mesuré sous cette interdiction.
 
 \paragraph{Les deux ordres de types de sol.} Les types de sol apparaissent dans deux fichiers
 sources dans deux ordres différents. Indexer par position ne produit aucune erreur : elle
 produit des coefficients de rendement faux et parfaitement plausibles. Ce n'est pas à
-proprement parler un défaut du \gls{gams} mais un piège du \emph{portage}, et c'est celui qui a
+proprement parler un défaut du \gls{gams} mais un piège du portage, et c'est celui qui a
 mordu — la règle pédologique de l'ananas a été portée à l'envers et a vécu plusieurs semaines
 alors même que le piège était déjà documenté. Le correctif est structurel : les tables sont
 jointes par nom, l'indexation par position n'est plus possible.
 
-\paragraph{Les commentaires inversés de la chlordécone.} Cas symétrique et instructif : les
-commentaires de configuration décrivaient les interdictions liées à la chlordécone dans le sens
+\paragraph{Les commentaires inversés du chlordécone.} Cas symétrique et instructif : les
+commentaires de configuration décrivaient les interdictions liées au chlordécone dans le sens
 inverse de ce que faisait le code, lequel était juste. Le premier verdict avait été tiré du
 commentaire. Un commentaire qui paraphrase un comportement est destiné à dériver, et il est cru
 sur parole.
 
-\paragraph{Les deux couches de chlordécone, agrégées en sens opposés.} \emph{Ce point n'est pas
-résolu.} La couche de risque prend le \textbf{minimum} de la classe rencontrée sur la parcelle,
-la couche de contamination réelle en prend le \textbf{maximum}. Or ce sont les contraintes
+\paragraph{Les deux couches de chlordécone, agrégées en sens opposés.} Ce point n'est pas
+résolu. La couche de risque prend le minimum de la classe rencontrée sur la parcelle,
+la couche de contamination réelle en prend le maximum. Or ce sont les contraintes
 d'éligibilité de l'igname tutorée et de la prairie pâturée qui lisent la première, c'est-à-dire
-la lecture la plus \emph{favorable} : une parcelle à cheval sur une zone saine et une zone
+la lecture la plus favorable : une parcelle à cheval sur une zone saine et une zone
 contaminée est traitée comme saine. Sur un enjeu de santé publique, cette permissivité par
 défaut n'est documentée nulle part, et elle doit être confirmée avec la source avant tout
 usage.\attente{14}
 
 \paragraph{Un piège de lecture sans défaut : le cycle de l'ananas.} Il faut le consigner ici
 parce qu'il ressemble à un bug et n'en est pas un. Les rendements de la table source sont
-exprimés \textbf{par cycle de culture}, et le \gls{gams} les annualise pour tout ce qui est
+exprimés par cycle de culture, et le \gls{gams} les annualise pour tout ce qui est
 monétaire — chiffre d'affaires, subventions, marge — en divisant par la durée du cycle. Il ne
-les annualise \emph{pas} pour les tonnages : quantités produites, quotas de production et
+les annualise pas pour les tonnages : quantités produites, quotas de production et
 bilans nutritionnels lisent le rendement brut. Sur les quatre-vingt-quatre cultures du modèle,
 une seule a un cycle différent de douze mois : l'ananas, à \num{\mesCycleAnanas} mois. C'est
 donc la seule culture pour laquelle un tonnage du modèle n'est pas un tonnage annuel, et le
@@ -137,7 +137,7 @@ fermetures et ce qui les a tranchées.
 
 \begin{table}[htbp]
   \centering
-  \caption{Les sept branches fermées. Quatre le sont \emph{sans mesure} comparative --- et
+  \caption{Les sept branches fermées. Quatre le sont sans mesure comparative --- et
   chacune le déclare. Une règle sans exception se contourne en silence ; ici l'exception est un
   champ, comptée et affichée par l'audit, donc opposable.}
   \label{tab:ann-branches}
@@ -148,25 +148,25 @@ fermetures et ce qui les a tranchées.
     \textbf{Ce qui a été retenu} & \textbf{Ce que cela a fermé} & \textbf{Ce qui a tranché} \\
     \midrule
     Mandat de parité stricte & un port \enquote{amélioré} corrigeant les défauts au passage &
-      \textbf{mesure} : le zéro silencieux et \texttt{Eq\_VE\_PLUIE} --- sans référence
+      mesure : le zéro silencieux et \texttt{Eq\_VE\_PLUIE} --- sans référence
       inchangée, aucune divergence n'est attribuable \\
     Réécrire en Python/Pyomo & rester en \gls{gams} avec une couche de scripts &
-      \textbf{mesure} : trois défauts invisibles autrement qu'en réécrivant contre les
+      mesure : trois défauts invisibles autrement qu'en réécrivant contre les
       données \\
     \gls{highs} plutôt qu'un solveur commercial & Gurobi, CPLEX &
-      \emph{aucune mesure} --- contrainte de destination : relançable sans licence dans une
+      aucune mesure --- contrainte de destination : relançable sans licence dans une
       unité \gls{inrae} \\
     Cinq règles catégorielles distinctes & les factoriser en une seule &
-      \emph{aucune mesure} --- critère de lisibilité de la configuration par un
+      aucune mesure --- critère de lisibilité de la configuration par un
       non-développeur, assumé tel quel \\
     $\varepsilon$-contrainte & somme pondérée des objectifs &
-      \textbf{théorème} : une somme pondérée n'atteint que l'enveloppe convexe du front, et ses
+      théorème : une somme pondérée n'atteint que l'enveloppe convexe du front, et ses
       poids encodent une valeur politique \\
     Code en anglais, documentation en français & tout en français, ou tout en anglais &
-      \textbf{mesure} du coût d'un renommage transverse : \num{518} macros, \num{\mesChecksums}
+      mesure du coût d'un renommage transverse : \num{\mesMacros} macros, \num{\mesChecksums}
       sommes de contrôle, \num{\mesLignesCode} lignes \\
     Ne pas viser la publication pendant le stage & rédiger l'article en parallèle &
-      \emph{aucune mesure} --- et l'absence de mesure \emph{est} la raison de l'écart \\
+      aucune mesure --- et l'absence de mesure est la raison de l'écart \\
     \bottomrule
   \end{tabularx}
 \end{table}
