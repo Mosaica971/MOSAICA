@@ -1,26 +1,25 @@
 \chapter{Inventaire de portage \glsentryshort{gams}}
 \label{ann:portage}
-% BUDGET : 4 pages. 37 items du corpus destines ici.
-% ROLE : couche de PREUVE de la section 2.2. C'est l'annexe qui rend le mandat de parite
-% verifiable par quelqu'un d'autre que son auteur.
+% BUDGET : 2 pages. Version resserree du 2026-08-31 : les quatre defauts portes sont passes
+% de quatre paragraphes a un tableau. C'est l'annexe qui rend le mandat de parite verifiable
+% par quelqu'un d'autre que son auteur.
 
 Le mandat de parité (§~\ref{sec:parite}) n'a de valeur que s'il est vérifiable. Cette annexe
-donne le statut de chaque bloc d'équations du \gls{gams} d'origine, le détail des quatre
-défauts portés sciemment, et le tableau des sept branches fermées au cours du stage avec la
-mesure qui les a fermées.
+donne le statut de chaque bloc d'équations du \gls{gams} d'origine, les quatre défauts portés
+sciemment et les sept branches fermées au cours du stage.
 
 \section{Statut des équations, bloc par bloc}
 
-Le programme d'origine compte une centaine d'équations nommées, réparties sur douze fichiers.
-Chacune reçoit l'un de quatre statuts : portée (le comportement est reproduit),
-implicite (le comportement est obtenu sans écrire de contrainte, parce que la
-formulation Python le rend inutile), différée (non portée, pour une raison consignée)
-ou écartée (portée puis désactivée, pour une raison consignée).
+Le programme d'origine compte une centaine d'équations nommées réparties sur douze fichiers.
+Chacune reçoit l'un de quatre statuts. Portée, le comportement est reproduit. Implicite, le
+comportement est obtenu sans écrire de contrainte parce que la formulation Python le rend
+inutile. Différée, non portée pour une raison consignée. Écartée, portée puis désactivée pour
+une raison consignée. Le tableau~\ref{tab:ann-portage} donne le statut de chaque bloc.
 
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
-  \caption{Statut des blocs d'équations. Le motif est la colonne qui compte : sans lui, la
-  table est un inventaire ; avec lui, c'est une preuve.}
+  \caption{Statut des blocs d'équations. Le motif est la colonne qui compte. Sans lui, la
+  table est un inventaire. Avec lui, c'est une preuve.}
   \label{tab:ann-portage}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -34,144 +33,149 @@ ou écartée (portée puis désactivée, pour une raison consignée).
     \texttt{Eq\_REV}, \texttt{Eq\_REV\_MARKOVITZ} & portées &
       \texttt{maximize\_\allowbreak gross\_\allowbreak margin},
       \texttt{maximize\_\allowbreak risk\_\allowbreak adjusted\_\allowbreak gross\_\allowbreak margin} &
-      les deux objectifs coexistent ; un seul peut être actif \\
+      les deux objectifs coexistent, un seul peut être actif \\
     \texttt{Eq\_ALTI/\allowbreak PENTE/\allowbreak PLUVIO/\allowbreak SURF\_*\_Parc} & portées &
       \texttt{altitude}, \texttt{slope}, \texttt{rainfall}, \texttt{plot\_size} &
-      bornes numériques d'éligibilité ; deviennent un masque, pas des contraintes \\
+      bornes numériques d'éligibilité, devenues un masque et non des contraintes \\
     \texttt{Eq\_*\_SUPP} (14) & implicites &
-      \texttt{forbid\_crops} & annulent des codes agrégats dont l'économie est nulle ;
-      l'auteur du \gls{gams} les supprimait déjà en bloc \\
+      \texttt{forbid\_crops} & annulent des codes agrégats dont l'économie est nulle.
+      L'auteur du \gls{gams} les supprimait déjà en bloc \\
     \texttt{Eq\_MO\_MAX\_Expl} & portée &
-      \texttt{farm\_labor\_hours\_max} & contrainte dominante : sans elle l'optimum
-      réclame \SI{21593}{\etp} là où le territoire en comptait \num{3598} \\
+      \texttt{farm\_labor\_hours\_max} & contrainte dominante. Sans elle l'optimum réclame
+      \SI{21593}{\etp} là où le territoire en comptait \num{3598} \\
     \texttt{Eq\_*\_QUOTA\_MAX}, \texttt{Eq\_*\_PROD\_MIN}, \texttt{Eq\_*\_OBJ} & portées &
-      \texttt{territory\_\allowbreak production\_\allowbreak bound} & une seule famille générique ; le plancher de
-      prairie et l'objectif de surface pâturée s'expriment en surface, pas en tonnes \\
+      \texttt{territory\_\allowbreak production\_\allowbreak bound} & une seule famille
+      générique. Le plancher de prairie et l'objectif de surface pâturée s'expriment en
+      surface et non en tonnes \\
     \texttt{Eq\_BA\_JA}, \texttt{Eq\_BA\_ROTA}, \texttt{Eq\_BA\_QUOTA\_Expl} & portées &
       \texttt{farm\_area\_ratio\_min}, \texttt{farm\_area\_share\_max} & règles de rotation et
       de part par exploitation \\
     \texttt{Eq\_AN\_AGRO\_MAX\_Expl}, \texttt{Eq\_IG\_AGRO\_MAX\_Expl} & portées &
       \texttt{farm\_area\_share\_max} & plafonds agronomiques par ferme \\
     \texttt{Eq\_*\_SOL\_*}, \texttt{Eq\_*\_BT/GT/MG}, \texttt{Eq\_ME\_Reg} & portées &
-      \texttt{attribute\_forbidden}, \texttt{region\_crop\_forbidden} & règles catégorielles ;
-      une disjonction s'écrit en plusieurs entrées \\
+      \texttt{attribute\_forbidden}, \texttt{region\_crop\_forbidden} & règles catégorielles.
+      Une disjonction s'écrit en plusieurs entrées \\
     \texttt{Eq\_*\_IRR} & portées &
       \texttt{irrigation\_required}, \texttt{cs\_irrig\_ban} & exigence ou interdiction
       d'irrigation selon la culture \\
     \texttt{Eq\_IG\_CLD}, \texttt{Eq\_PN\_PIQ\_CLD} & portées &
-      \texttt{max\_risk\_threshold}, \texttt{exact\_risk\_value} & ne sont pas actives
-      dans le même bloc, contrairement à ce que leur nature commune suggère \\
+      \texttt{max\_risk\_threshold}, \texttt{exact\_risk\_value} & ne sont pas actives dans le
+      même bloc, contrairement à ce que leur nature commune suggère \\
     \texttt{Eq\_FRICHE}, \texttt{Eq\_NOCULT\_NC} & portées &
       \texttt{friche\_lock}, \texttt{nocult\_nc\_1/2} & historique de friche et parcelles non
       cultivées \\
     \texttt{Eq\_VE\_PLUIE} & portée avec son défaut &
       \texttt{attribute\_forbidden} & voir §~\ref{sec:ann-bugs} \\
     \texttt{Eq\_CS\_GFA} & écartée &
-      \texttt{cs\_gfa\_minimum\_share} & portée et testée, mais infaisable sur les données 2017
-      réelles --- comme le serait le \gls{gams} \\
-    \texttt{Eq\_CF\_*} (bloc canne fibre, $\sim$20) & différé &
-      --- & le point bloquant n'est pas le code, c'est le sens des données d'entrée \\
+      \texttt{cs\_gfa\_minimum\_share} & portée et testée, mais infaisable sur les données
+      2017 réelles, comme le serait le \gls{gams} \\
+    \texttt{Eq\_CF\_*} (canne fibre, $\sim$20) & différé &
+      aucun & le point bloquant n'est pas le code, c'est le sens des données d'entrée \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Un contre-exemple mérite d'être consigné, puisque cette annexe prétend à la traçabilité : cet
-inventaire a d'abord été tenu après coup plutôt qu'au fil du portage, et deux de ses
-lignes sont restées périmées pendant trois semaines. Une table de correspondance ne vaut que
-par la discipline qui la met à jour, et celle-ci a manqué une fois.
+Un contre-exemple mérite d'être consigné, puisque cette annexe prétend à la traçabilité. Cet
+inventaire a d'abord été tenu après coup plutôt qu'au fil du portage, et deux de ses lignes
+sont restées périmées trois semaines. Une table de correspondance ne vaut que par la
+discipline qui la met à jour, et celle-ci a manqué une fois.
 
-\section{Les quatre défauts portés, et leur variante \enquote{intention présumée}}
+\section{Les quatre défauts portés}
 \label{sec:ann-bugs}
 
-\paragraph{Le zéro silencieux et \texttt{Eq\_VE\_PLUIE}.} \gls{gams} renvoie zéro sans
-avertissement lorsqu'une table est interrogée sur une colonne absente. L'équation teste ce zéro
-contre la valeur~1 pour autoriser un verger pluvial ; le test $0 \neq 1$ étant toujours vrai,
-la variante est interdite sur toutes les parcelles du territoire. Intention présumée :
-la condition portait vraisemblablement sur une caractéristique pluviométrique de la parcelle.
-La variante corrigée existe dans la configuration, désactivée ; l'activer rouvre la variante
-sur les parcelles concernées, et change donc le poste où l'écart de calibration est le plus
-grand. Conséquence à retenir pour lire le chapitre~\ref{ch:calibrer} : le déficit de
-vergers y est mesuré sous cette interdiction.
+Le tableau~\ref{tab:ann-bugs} donne chaque défaut, ce que le code fait réellement, l'intention
+présumée et l'état du dossier.
 
-\paragraph{Les deux ordres de types de sol.} Les types de sol apparaissent dans deux fichiers
-sources dans deux ordres différents. Indexer par position ne produit aucune erreur : elle
-produit des coefficients de rendement faux et parfaitement plausibles. Ce n'est pas à
-proprement parler un défaut du \gls{gams} mais un piège du portage, et c'est celui qui a
-mordu — la règle pédologique de l'ananas a été portée à l'envers et a vécu plusieurs semaines
-alors même que le piège était déjà documenté. Le correctif est structurel : les tables sont
-jointes par nom, l'indexation par position n'est plus possible.
-
-\paragraph{Les commentaires inversés du chlordécone.} Cas symétrique et instructif : les
-commentaires de configuration décrivaient les interdictions liées au chlordécone dans le sens
-inverse de ce que faisait le code, lequel était juste. Le premier verdict avait été tiré du
-commentaire. Un commentaire qui paraphrase un comportement est destiné à dériver, et il est cru
-sur parole.
-
-\paragraph{Les deux couches de chlordécone, agrégées en sens opposés.} Ce point n'est pas
-résolu. La couche de risque prend le minimum de la classe rencontrée sur la parcelle,
-la couche de contamination réelle en prend le maximum. Or ce sont les contraintes
-d'éligibilité de l'igname tutorée et de la prairie pâturée qui lisent la première, c'est-à-dire
-la lecture la plus favorable : une parcelle à cheval sur une zone saine et une zone
-contaminée est traitée comme saine. Sur un enjeu de santé publique, cette permissivité par
-défaut n'est documentée nulle part, et elle doit être confirmée avec la source avant tout
-usage.\attente{14}
-
-\paragraph{Un piège de lecture sans défaut : le cycle de l'ananas.} Il faut le consigner ici
-parce qu'il ressemble à un bug et n'en est pas un. Les rendements de la table source sont
-exprimés par cycle de culture, et le \gls{gams} les annualise pour tout ce qui est
-monétaire — chiffre d'affaires, subventions, marge — en divisant par la durée du cycle. Il ne
-les annualise pas pour les tonnages : quantités produites, quotas de production et
-bilans nutritionnels lisent le rendement brut. Sur les quatre-vingt-quatre cultures du modèle,
-une seule a un cycle différent de douze mois : l'ananas, à \num{\mesCycleAnanas} mois. C'est
-donc la seule culture pour laquelle un tonnage du modèle n'est pas un tonnage annuel, et le
-seul endroit où confronter une sortie du modèle à une statistique agricole demande une
-conversion. Le portage reproduit ce comportement à l'identique, et l'écart de rendement du
-§~\ref{sec:rendements} est corrigé en conséquence — sans quoi il serait surestimé de moitié
-sur cette culture.
+\begin{table}[tbp]
+  \centering
+  \caption{Les quatre défauts portés sciemment, et un piège de lecture qui n'en est pas un.
+  Aucun n'a été corrigé en silence.}
+  \label{tab:ann-bugs}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{27mm}X
+                               >{\raggedright\arraybackslash}p{27mm}@{}}
+    \toprule
+    \textbf{Défaut} & \textbf{Ce que fait le code, et pourquoi} & \textbf{État} \\
+    \midrule
+    Le zéro silencieux de \texttt{Eq\_VE\_PLUIE} &
+      \gls{gams} rend zéro sans avertissement sur une colonne absente. L'équation teste ce
+      zéro contre~1 pour autoriser un verger pluvial. Le test étant toujours vrai, la variante
+      est interdite sur tout le territoire. L'intention portait vraisemblablement sur une
+      caractéristique pluviométrique de la parcelle &
+      variante corrigée présente en configuration, désactivée. Le déficit de vergers du
+      chapitre~\ref{ch:calibrer} est mesuré sous cette interdiction \\
+    Les deux ordres de types de sol &
+      les types de sol apparaissent dans deux fichiers dans deux ordres. Indexer par position
+      ne produit aucune erreur, mais des rendements faux et plausibles. C'est le piège qui a
+      mordu, la règle pédologique de l'ananas ayant vécu plusieurs semaines à l'envers &
+      corrigé de façon structurelle. Les tables sont jointes par nom, l'indexation par
+      position n'est plus possible \\
+    Les commentaires inversés du chlordécone &
+      les commentaires décrivaient les interdictions dans le sens inverse du code, lequel
+      était juste. Le premier verdict avait été tiré du commentaire &
+      commentaires refaits. La règle d'écriture qui en découle est en
+      annexe~\ref{ann:chronologie} \\
+    Les deux couches de chlordécone &
+      la couche de risque prend le minimum de la classe rencontrée sur la parcelle, celle de
+      contamination réelle le maximum. Or l'igname tutorée et la prairie pâturée lisent la
+      première, donc la lecture la plus favorable. Une parcelle à cheval sur une zone saine et
+      une zone contaminée est traitée comme saine &
+      non résolu. Sur un enjeu de santé publique, cette permissivité par défaut n'est
+      documentée nulle part et doit être confirmée avec la source\attente{14} \\
+    \midrule
+    Le cycle de l'ananas, qui ressemble à un défaut &
+      le \gls{gams} annualise les rendements pour tout ce qui est monétaire et ne les
+      annualise pas pour les tonnages. Une seule des quatre-vingt-quatre cultures a un cycle
+      différent de douze mois, l'ananas à \num{\mesCycleAnanas} mois. C'est donc la seule dont
+      un tonnage n'est pas annuel &
+      reproduit à l'identique. L'écart de rendement du §~\ref{sec:rendements} est corrigé en
+      conséquence, sans quoi il serait surestimé de moitié \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \section{Les sept branches fermées}
 
-Le corpus qui a servi à écrire ce mémoire impose une règle : aucune branche n'est fermée sans
+Le corpus qui a servi à écrire ce mémoire impose une règle. Aucune branche n'est fermée sans
 mesure, ou bien l'exception est déclarée. Le tableau~\ref{tab:ann-branches} donne les sept
 fermetures et ce qui les a tranchées.
 
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
-  \caption{Les sept branches fermées. Quatre le sont sans mesure comparative --- et
-  chacune le déclare. Une règle sans exception se contourne en silence ; ici l'exception est un
-  champ, comptée et affichée par l'audit, donc opposable.}
+  \caption{Les sept branches fermées. Quatre le sont sans mesure comparative, et chacune le
+  déclare. Une règle sans exception se contourne en silence. Ici l'exception est un champ,
+  comptée et affichée par l'audit, donc opposable.}
   \label{tab:ann-branches}
   \scriptsize
-  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{38mm}
-                               >{\raggedright\arraybackslash}p{36mm}X@{}}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{36mm}
+                               >{\raggedright\arraybackslash}p{34mm}X@{}}
     \toprule
     \textbf{Ce qui a été retenu} & \textbf{Ce que cela a fermé} & \textbf{Ce qui a tranché} \\
     \midrule
     Mandat de parité stricte & un port \enquote{amélioré} corrigeant les défauts au passage &
-      mesure : le zéro silencieux et \texttt{Eq\_VE\_PLUIE} --- sans référence
-      inchangée, aucune divergence n'est attribuable \\
-    Réécrire en Python/Pyomo & rester en \gls{gams} avec une couche de scripts &
-      mesure : trois défauts invisibles autrement qu'en réécrivant contre les
-      données \\
+      mesure. Le zéro silencieux et \texttt{Eq\_VE\_PLUIE}. Sans référence inchangée, aucune
+      divergence n'est attribuable \\
+    Réécrire en Python et Pyomo & rester en \gls{gams} avec une couche de scripts &
+      mesure. Trois défauts invisibles autrement qu'en réécrivant contre les données \\
     \gls{highs} plutôt qu'un solveur commercial & Gurobi, CPLEX &
-      aucune mesure --- contrainte de destination : relançable sans licence dans une
-      unité \gls{inrae} \\
+      aucune mesure. Contrainte de destination, relançable sans licence dans une unité
+      \gls{inrae} \\
     Cinq règles catégorielles distinctes & les factoriser en une seule &
-      aucune mesure --- critère de lisibilité de la configuration par un
-      non-développeur, assumé tel quel \\
+      aucune mesure. Critère de lisibilité de la configuration par un non-développeur, assumé
+      tel quel \\
     $\varepsilon$-contrainte & somme pondérée des objectifs &
-      théorème : une somme pondérée n'atteint que l'enveloppe convexe du front, et ses
-      poids encodent une valeur politique \\
+      théorème. Une somme pondérée n'atteint que l'enveloppe convexe du front, et ses poids
+      encodent une valeur politique \\
     Code en anglais, documentation en français & tout en français, ou tout en anglais &
-      mesure du coût d'un renommage transverse : \num{\mesMacros} macros, \num{\mesChecksums}
-      sommes de contrôle, \num{\mesLignesCode} lignes \\
+      mesure du coût d'un renommage transverse. \num{\mesMacros} macros,
+      \num{\mesChecksums} sommes de contrôle, \num{\mesLignesCode} lignes \\
     Ne pas viser la publication pendant le stage & rédiger l'article en parallèle &
-      aucune mesure --- et l'absence de mesure est la raison de l'écart \\
+      aucune mesure, et l'absence de mesure est la raison de l'écart \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Une huitième piste, plus étroite, mérite d'être mentionnée parce qu'elle a été instruite jusqu'à
-l'implémentation avant d'être annulée : l'interface persistante du solveur, testée puis
-révoquée, parce qu'elle entre en conflit avec la capture des flux de sortie sur laquelle repose
-l'affichage de progression.
+Une huitième piste a été instruite jusqu'à l'implémentation avant d'être annulée. L'interface
+persistante du solveur a été testée puis révoquée, parce qu'elle entre en conflit avec la
+capture des flux de sortie sur laquelle repose l'affichage de progression.

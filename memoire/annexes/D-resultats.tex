@@ -1,23 +1,28 @@
 \chapter{Grille complète des résultats}
 \label{ann:resultats}
-% BUDGET : 3 pages. 21 items du corpus destines ici.
+% BUDGET : 2,5 pages. Version resserree du 2026-08-31 : les deux tableaux par politique sont
+% fusionnes en un seul, la prose est reduite a ce qui ne se lit pas dans les colonnes.
 %
 % Regenerer d'abord :  .venv/Scripts/python memoire/build_chiffres.py
 % Tous les nombres de cette annexe sont des macros lues dans les recap.json des runs.
 
 Le chapitre~\ref{ch:explorer} ne retient de chaque cellule que la marge brute. Cette annexe
-donne les autres indicateurs, les durées et les drapeaux de convergence. Chaque cellule
-porte son drapeau : un solve arrêté à la limite de temps est prouvablement faux et non
-seulement imprécis (§~\ref{sec:plateau}), et un tableau de résultats qui ne le dit pas invite à
+donne les autres indicateurs, les durées et les drapeaux de convergence. Chaque cellule porte
+son drapeau, parce qu'un solve arrêté à la limite de temps est prouvablement faux et non
+seulement imprécis (§~\ref{sec:plateau}). Un tableau de résultats qui ne le dit pas invite à
 comparer des chiffres qui ne sont pas comparables.
 
 \section{Les politiques non forcées, tous indicateurs}
 
-\begin{table}[htbp]
+Le tableau~\ref{tab:ann-pros-eco} rassemble l'économie, les indicateurs physiques et la
+convergence des sept politiques qui ont abouti sans forçage.
+
+\begin{table}[tbp]
   \centering
-  \caption{Économie, emploi et convergence par politique, sans forçage. La colonne P1 porte un
-  autre objectif (marge brute pure) : sa ligne \enquote{objectif} n'est pas comparable
-  aux autres, ses lignes physiques le sont.}
+  \caption{Économie, indicateurs physiques et convergence par politique, sans forçage. La
+  colonne P1 porte un autre objectif, la marge brute pure, si bien que sa ligne d'objectif
+  n'est pas comparable aux autres et que ses lignes physiques le sont. L'eau ne porte que sur
+  les parcelles irrigables et les \gls{ges} sont dans l'unité interne du modèle.}
   \label{tab:ann-pros-eco}
   \scriptsize
   % Huit colonnes de nombres a sept chiffres : le tabcolsep par defaut (6 pt, soit 84 pt
@@ -45,27 +50,6 @@ comparer des chiffres qui ne sont pas comparables.
     Concentration (\gls{hhi}) & \num{\prosPunHhi} & \num{\prosPquatreHhi} & \num{\prosPcinqHhi}
       & \num{\prosPsixHhi} & \num{\prosPseptHhi} & \num{\prosPhuitHhi} & \num{\prosPneufHhi} \\
     \midrule
-    Durée (s) & \num{\prosPunDuree} & \num{\prosPquatreDuree} & \num{\prosPcinqDuree}
-      & \num{\prosPsixDuree} & \num{\prosPseptDuree} & \num{\prosPhuitDuree}
-      & \num{\prosPneufDuree} \\
-    Optimum prouvé & \prosPunProuve & \prosPquatreProuve & \prosPcinqProuve & \prosPsixProuve
-      & \prosPseptProuve & \prosPhuitProuve & \prosPneufProuve \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\begin{table}[htbp]
-  \centering
-  \caption{Indicateurs physiques par politique, sans forçage. L'eau ne porte que sur les
-  parcelles irrigables ; les \gls{ges} sont dans l'unité interne du modèle.}
-  \label{tab:ann-pros-phys}
-  \scriptsize
-  \setlength{\tabcolsep}{3pt}
-  \begin{tabular}{@{}lrrrrrrr@{}}
-    \toprule
-    & \textbf{P1} & \textbf{P4} & \textbf{P5} & \textbf{P6} & \textbf{P7} & \textbf{P8}
-      & \textbf{P9} \\
-    \midrule
     Azote (kg N) & \num{\prosPunAzote} & \num{\prosPquatreAzote} & \num{\prosPcinqAzote}
       & \num{\prosPsixAzote} & \num{\prosPseptAzote} & \num{\prosPhuitAzote}
       & \num{\prosPneufAzote} \\
@@ -75,31 +59,36 @@ comparer des chiffres qui ne sont pas comparables.
       & \num{\prosPsixGes} & \num{\prosPseptGes} & \num{\prosPhuitGes} & \num{\prosPneufGes} \\
     Eau (m\textsuperscript{3}) & \num{\prosPunEau} & \num{\prosPquatreEau} & \num{\prosPcinqEau}
       & \num{\prosPsixEau} & \num{\prosPseptEau} & \num{\prosPhuitEau} & \num{\prosPneufEau} \\
+    \midrule
+    Durée (s) & \num{\prosPunDuree} & \num{\prosPquatreDuree} & \num{\prosPcinqDuree}
+      & \num{\prosPsixDuree} & \num{\prosPseptDuree} & \num{\prosPhuitDuree}
+      & \num{\prosPneufDuree} \\
+    Optimum prouvé & \prosPunProuve & \prosPquatreProuve & \prosPcinqProuve & \prosPsixProuve
+      & \prosPseptProuve & \prosPhuitProuve & \prosPneufProuve \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Deux lectures s'imposent ici et nulle part ailleurs. La première : P1, qui supprime toute aide
-et toute règle, double presque la marge brute du territoire par rapport au statu quo, tout en
-réduisant l'azote et la surface allouée — elle concentre la production sur les meilleures
-terres et abandonne le reste, ce que la colonne de surface allouée rend visible et qu'aucun
-indicateur agrégé ne dirait. La seconde : les durées de résolution ne se comparent pas d'une
-politique à l'autre, puisque plusieurs runs sont amorcés à chaud et d'autres non, et que le même
-problème avec la même graine a demandé \SI{\mesHuitPreuveDuree}{\second} puis
-\SI{10856}{\second}.
+Deux lectures s'imposent ici et nulle part ailleurs. P1, qui supprime toute aide et toute
+règle, fait plus que doubler la marge brute du territoire tout en réduisant l'azote et la
+surface allouée. Elle concentre la production sur les meilleures terres et abandonne le reste,
+ce que la ligne de surface allouée rend visible et qu'aucun indicateur agrégé ne dirait. Les
+durées, ensuite, ne se comparent pas d'une politique à l'autre, puisque certains runs sont
+amorcés à chaud et que le même problème avec la même graine a demandé
+\SI{\mesHuitPreuveDuree}{\second} puis \SI{10856}{\second}.
 
 \section{Robustesse}
 
-Le regret de Savage se calcule contre la meilleure politique du même forçage, jamais
-contre un optimum global : la question est \enquote{qu'aurais-je perdu à choisir celle-ci,
-sachant que ce contexte-là est survenu}. L'infaisabilité y compte comme le pire résultat, et
-les forçages ne sont pas moyennés.
+Le regret de Savage se calcule contre la meilleure politique du même forçage et jamais contre
+un optimum global. La question posée est celle du coût d'avoir choisi cette politique sachant
+que ce contexte est survenu. Le tableau~\ref{tab:ann-regret} en donne la valeur sur les trois
+forçages résolus.
 
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
   \caption{Regret par politique et par forçage, en pourcentage de la meilleure politique du
-  même forçage. Brut inclut la subvention, hors aide la déduit. Un tiret marque
-  une cellule non résolue --- et non un résultat nul.}
+  même forçage. Brut inclut la subvention, hors aide la déduit. Un tiret marque une cellule
+  non résolue et non un résultat nul.}
   \label{tab:ann-regret}
   \small
   \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrrrrr@{}}
@@ -128,32 +117,32 @@ les forçages ne sont pas moyennés.
   \end{tabularx}
 \end{table}
 
-La lecture de ce tableau est colonne par colonne, et l'inversion saute aux yeux : la
-politique la plus regrettée sous le forçage nominal est celle qui ne l'est pas du tout sous
-crise systémique. C'est le même fait que la figure~\ref{fig:regret}, sous forme numérique.
+La lecture de ce tableau est colonne par colonne, et l'inversion saute aux yeux. La politique
+la plus regrettée sous le forçage nominal est celle qui ne l'est pas du tout sous crise
+systémique. C'est le même fait que la figure~\ref{fig:regret}, sous forme numérique.
 
 \begin{vigilance}
-Un indicateur qu'une contrainte du scénario fixe n'est pas un résultat de ce scénario.
-Le plafond d'azote de P8 vaut exactement l'azote de P8 : le noter reviendrait à féliciter la
+Un indicateur qu'une contrainte du scénario fixe n'est pas un résultat de ce scénario. Le
+plafond d'azote de P8 vaut exactement l'azote de P8, et le noter reviendrait à féliciter la
 politique d'avoir respecté sa propre consigne. Ces indicateurs sont détectés automatiquement
-depuis la liste des contraintes du run, donc rétroactivement sur les runs déjà écrits, et exclus
-de tout score composite.
+depuis la liste des contraintes du run, donc rétroactivement sur les runs déjà écrits, et
+exclus de tout score composite.
 \end{vigilance}
 
 \section{Les fronts, point par point}
 
 Le front sur l'enveloppe publique figure au chapitre~\ref{ch:explorer}
-(tableau~\ref{tab:front-budget}) : ses \num{\frontsubvQuatrePoints} points sont tous
-prouvés optimaux, dont \num{\frontsubvQuatrePlateau} points de contrôle où le plafond ne
-contraint rien. C'est ce qui le rend citable point par point.
+(tableau~\ref{tab:front-budget}). Ses \num{\frontsubvQuatrePoints} points sont tous prouvés
+optimaux, dont \num{\frontsubvQuatrePlateau} points de contrôle où le plafond ne contraint
+rien, et c'est ce qui le rend citable point par point. Les deux fronts sur l'azote ne le sont
+pas au même titre. Sous la politique agroécologique, seuls \num{\frontazoteHuitProuves} des
+\num{\frontazoteHuitPoints} points sont prouvés optimaux et \num{\frontazoteHuitPlateau}
+palier est un artefact de la chaîne d'amorçage. Sous la configuration de référence, les
+\num{\frontazoteRefProuves} points le sont. Les tableaux~\ref{tab:ann-front-azote-ref}
+et~\ref{tab:ann-front-azote-huit} les donnent point par point, et doivent se lire avec cette
+réserve.
 
-Les deux fronts sur l'azote, eux, ne le sont pas au même titre, et les tableaux ci-dessous
-doivent se lire avec cette réserve : sous la politique agroécologique, seuls
-\num{\frontazoteHuitProuves} des \num{\frontazoteHuitPoints} points sont prouvés optimaux, et
-\num{\frontazoteHuitPlateau} palier est un artefact de la chaîne d'amorçage. Sous la
-configuration de référence, les \num{\frontazoteRefProuves} points le sont.
-
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
   \caption{Réallocation entre le statu quo libre et le plafond de subventions le plus serré
   (\SI{\frontsubvQuatreunSeuil}{\euros}), en hectares par groupe \gls{rpg}. C'est le détail à
@@ -163,7 +152,7 @@ configuration de référence, les \num{\frontazoteRefProuves} points le sont.
   \input{tables/realloc-budget}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
   \caption{Front marge $\times$ azote sous la configuration de référence. Pente moyenne
   \num{\frontazoteRefPente}~\eur/kg~N, dual local au point le plus serré
@@ -173,11 +162,11 @@ configuration de référence, les \num{\frontazoteRefProuves} points le sont.
   \input{tables/front-azoteRef}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
   \caption{Front marge $\times$ azote sous la politique agroécologique P8. Pente moyenne
-  \num{\frontazoteHuitPente}~\eur/kg~N --- moins cher que sous la référence, alors que
-  les duals locaux des deux configurations sont quasi identiques.}
+  \num{\frontazoteHuitPente}~\eur/kg~N, moins cher que sous la référence alors que les duals
+  locaux des deux configurations sont quasi identiques.}
   \label{tab:ann-front-azote-huit}
   \small
   \input{tables/front-azoteHuit}
@@ -188,14 +177,11 @@ configuration de référence, les \num{\frontazoteRefProuves} points le sont.
 Les prix duals des contraintes nommées situent un point d'\gls{ift} à \SI{286}{\euros}, un
 kilogramme d'azote à \SI{9.81}{\euros} et une heure de travail à \SI{12.50}{\euros}.
 
-Deux réserves les accompagnent, et la première est technique. Figer les variables
-entières ne fonctionne pas ici : le modèle étant purement binaire, la relaxation obtenue en
-fixant les entiers n'a plus aucune variable libre et tous les duals y valent zéro. Ce sont donc
-les duals de la relaxation linéaire qui sont lus, avec l'écart au problème entier que
-cela suppose.
-
-La seconde est une méthode de contrôle, et c'est la plus utile : comparer le dual local à la
-pente moyenne du front correspondant. Un écart important signifie que le dual est lu hors
-de son voisinage de validité. C'est exactement ce qui se produit sur l'enveloppe publique, où
-le dual au point le plus serré vaut près du double de la pente moyenne du front : extrapoler le
-premier sur tout l'intervalle surestimerait l'effet d'environ trois quarts.
+Deux réserves les accompagnent. La première est technique. Figer les variables entières ne
+fonctionne pas ici, le modèle étant purement binaire, si bien que la relaxation obtenue n'a
+plus aucune variable libre et que tous les duals y valent zéro. Ce sont donc les duals de la
+relaxation linéaire qui sont lus. La seconde est une méthode de contrôle, et c'est la plus
+utile. Un écart important entre le dual local et la pente moyenne du front correspondant
+signale que le dual est lu hors de son voisinage de validité. C'est ce qui se produit sur
+l'enveloppe publique, où le dual au point le plus serré vaut près du double de la pente
+moyenne. L'extrapoler sur tout l'intervalle surestimerait l'effet d'environ trois quarts.

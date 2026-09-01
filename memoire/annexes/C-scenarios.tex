@@ -1,135 +1,157 @@
 \chapter{Catalogue des scénarios}
 \label{ann:scenarios}
-% BUDGET : 3 pages. 25 items du corpus destines ici.
-% ROLE : couche de PREUVE de la section 4.1. Sans cette annexe, les seuils du chapitre 4
-% ressemblent a des chiffres choisis au doigt mouille -- ce qu'ils ne sont pas.
+% BUDGET : 2 pages. Version resserree du 2026-08-31 : les douze forcages, jusqu'ici en prose,
+% sont devenus un tableau. Les quatre sections de methode tiennent en une.
 
 Sans cette annexe, les seuils du chapitre~\ref{ch:explorer} ressemblent à des chiffres choisis
-arbitrairement. Ils ne le sont pas : chacun est une fraction déclarée d'un total mesuré sur un
-run de référence, et c'est la seule chose qui les distingue d'une opinion chiffrée. Les valeurs
-de référence sont celles de la calibration retenue : \SI{\calibRetenuMarge}{\euros} de marge
-brute, \SI{\calibRetenuSubvention}{\euros} de subventions, \SI{\calibRetenuEtp}{\etp},
-\SI{\calibRetenuAzote}{\kilogram} d'azote, un \gls{ift} total de \num{\calibRetenuIft}, et
+arbitrairement. Ils ne le sont pas. Chacun est une fraction déclarée d'un total mesuré sur la
+calibration retenue, qui vaut \SI{\calibRetenuMarge}{\euros} de marge brute,
+\SI{\calibRetenuSubvention}{\euros} de subventions, \SI{\calibRetenuEtp}{\etp},
+\SI{\calibRetenuAzote}{\kilogram} d'azote, un \gls{ift} total de \num{\calibRetenuIft} et
 \SI{\calibRetenuEau}{\metre\cubed} d'eau sur les seules parcelles irrigables.
 
 \section{Les dix politiques}
 
 Le catalogue est ordonné le long d'un axe qui va de l'intensification accélérationniste à la
-rupture agroécologique, plus une politique délibérément hors axe. Le tableau~\ref{tab:ann-politiques}
-en donne les leviers principaux ; le fichier de catalogue lui-même porte, sous chaque seuil, le
-commentaire numéroté qui le justifie.
+rupture agroécologique, plus une politique délibérément hors axe. Le
+tableau~\ref{tab:ann-politiques} en donne les leviers. Le fichier de catalogue porte, sous
+chaque seuil, le commentaire numéroté qui le justifie.
 
-\begin{table}[htbp]
+\begin{table}[tbp]
   \centering
-  \caption{Les dix politiques et leurs leviers principaux. Aides désigne un multiplicateur
-  appliqué aux subventions d'un groupe de cultures ; \emph{slack} le desserrement du plafond de
-  main d'\oe uvre ; inertie la part de surface qui doit rester dans son groupe de 2017.}
+  \caption{Les dix politiques et leurs leviers. Aides désigne un multiplicateur appliqué aux
+  subventions d'un groupe de cultures, \emph{slack} le desserrement du plafond de main
+  d'\oe uvre, inertie la part de surface qui doit rester dans son groupe de 2017.}
   \label{tab:ann-politiques}
   \scriptsize
-  \begin{tabularx}{\textwidth}{@{}p{30mm}X@{}}
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{27mm}X@{}}
     \toprule
     \textbf{Politique} & \textbf{Leviers} \\
     \midrule
-    P1 dérégulation totale & aides supprimées ; objectif de marge brute pure ; tous les
-      quotas, planchers, rotations et interdictions désactivés ; slack \num{3.0}.
-      Borne supérieure de ce que la marge pure peut extraire du territoire, et mesure
-      de ce que l'ensemble des règles coûte \\
-    P2 accélérationnisme industriel & aides canne $\times$\num{1.5} et banane
-      $\times$\num{1.4} ; quotas d'export levés ; jachère réduite de moitié ; part mécanisée
-      minimale de \SI{60}{\percent} ; slack \num{0.85} (contraction du travail) \\
-    P3 intensification modérée & aides $\times$\num{1.20} et $\times$\num{1.15} ; quotas
-      $+\SI{30}{\percent}$ ; enveloppe publique plafonnée ; inertie \SI{40}{\percent} \\
-    P4 statu quo & le statu quo comme politique : quotas, aides et règles inchangés,
-      enveloppe gelée au niveau constaté, plafonds d'\gls{ift} et d'azote posés au niveau
-      constaté (pas de dégradation), plancher d'emploi, inertie \SI{70}{\percent}.
-      Point de comparaison de tous les autres \\
+    P1 dérégulation totale & aides supprimées, marge brute pure, quotas, planchers, rotations
+      et interdictions désactivés, slack \num{3.0}. Borne supérieure, et mesure de ce que
+      l'ensemble des règles coûte \\
+    P2 accélérationnisme industriel & aides canne $\times$\num{1.5}, banane $\times$\num{1.4},
+      quotas d'export levés, jachère de moitié, part mécanisée \SI{60}{\percent}, slack
+      \num{0.85} \\
+    P3 intensification modérée & aides $\times$\num{1.20} et $\times$\num{1.15}, quotas
+      $+\SI{30}{\percent}$, enveloppe plafonnée, inertie \SI{40}{\percent} \\
+    P4 statu quo & règles inchangées, enveloppe, \gls{ift} et azote gelés au niveau constaté,
+      plancher d'emploi, inertie \SI{70}{\percent}. Point de comparaison des autres \\
     P5 austérité budgétaire & enveloppe $-\SI{40}{\percent}$, coupe supplémentaire sur la
-      canne, rien pour compenser. Mesure ce que la géographie agricole doit aux aides plutôt
-      qu'à l'agronomie \\
-    P6 verdissement incitatif & la carotte seule : aucune interdiction nouvelle,
-      surprime au maraîchage biologique, réouverture des systèmes qui le permettent, part
-      biologique modeste, slack \num{1.20} \\
-    P7 Écophyto réglementaire & le bâton seul : \gls{ift} $-\SI{30}{\percent}$, azote
-      $-\SI{20}{\percent}$, directive nitrates à \SI{170}{\kilogram\per\ha} par
-      exploitation, prairie interdite sur sols chlordéconés, aucune aide supplémentaire.
-      Le pendant exact de P6 : l'écart entre les deux répond à \enquote{faut-il payer ou
-      interdire ?} \\
-    P8 transition agroécologique & le paquet complet : \gls{ift} $-\SI{40}{\percent}$, azote
-      $-\SI{30}{\percent}$, eau $-\SI{20}{\percent}$, nitrates à \SI{150}{\kilogram\per\ha},
-      redéploiement des aides de l'export vers le biologique, plancher d'emploi à
-      \SI{4200}{\etp}, slack \num{1.50}, inertie \SI{40}{\percent} \\
-    P9 souveraineté alimentaire & hors axe : planchers de production vivrière
-      réactivés, quota sucrier abaissé pour libérer du foncier, aides basculées vers le local,
-      plancher arboricole en surface, slack \num{1.60}, inertie \SI{30}{\percent} \\
-    P10 bifurcation agroécologique & borne extrême, symétrique de P1 : \gls{ift}
-      $-\SI{50}{\percent}$, azote $-\SI{40}{\percent}$, eau $-\SI{30}{\percent}$, \gls{ges}
-      $-\SI{25}{\percent}$, souveraineté alimentaire, export divisé par deux, aucune inertie.
-      Aucune solution entière trouvée (figure~\ref{fig:spectre}) \\
+      canne, aucune compensation. Mesure ce que la géographie doit aux aides plutôt qu'à
+      l'agronomie \\
+    P6 verdissement incitatif & la carotte seule. Surprime au maraîchage biologique,
+      réouverture des systèmes qui le permettent, aucune interdiction nouvelle, slack
+      \num{1.20} \\
+    P7 Écophyto réglementaire & le bâton seul. \gls{ift} $-\SI{30}{\percent}$, azote
+      $-\SI{20}{\percent}$, nitrates \SI{170}{\kilogram\per\ha} par ferme, prairie interdite
+      sur sols chlordéconés. Le pendant exact de P6 \\
+    P8 transition agroécologique & \gls{ift} $-\SI{40}{\percent}$, azote
+      $-\SI{30}{\percent}$, eau $-\SI{20}{\percent}$, nitrates \SI{150}{\kilogram\per\ha},
+      aides de l'export vers le biologique, emploi $\geq\SI{4200}{\etp}$, slack \num{1.50},
+      inertie \SI{40}{\percent} \\
+    P9 souveraineté alimentaire & hors axe. Planchers vivriers réactivés, quota sucrier
+      abaissé, aides vers le local, plancher arboricole, slack \num{1.60}, inertie
+      \SI{30}{\percent} \\
+    P10 bifurcation agroécologique & symétrique de P1. \gls{ift} $-\SI{50}{\percent}$, azote
+      $-\SI{40}{\percent}$, eau $-\SI{30}{\percent}$, \gls{ges} $-\SI{25}{\percent}$, export
+      divisé par deux, aucune inertie. Aucune solution entière trouvée
+      (figure~\ref{fig:spectre}) \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Trois remarques rendent ce catalogue lisible. Un, la politique de dérégulation est la
-seule à changer d'objectif ; sa colonne d'objectif n'est donc pas comparable aux autres, et
-elle ne se compare que sur les grandeurs physiques et économiques, calculées à l'identique quel
-que soit l'objectif. Deux, aucune politique ne rouvre les vingt-cinq variantes
-symétriques : les rouvrir coûterait \num{548000} binaires de pure symétrie et rendrait toute
-part biologique inopérante (§~\ref{sec:tractabilite}). La branche consistant à écrire la
-politique agroécologique comme une part minimale de cultures biologiques — qui en était la
-formulation naturelle — a donc été fermée, et c'est le seul cas du mémoire où une formulation
-est écartée parce qu'elle serait satisfaite trop facilement. Trois, le plafond
-de main d'\oe uvre est la première cause d'infaisabilité : il accorde \SI{3891}{\etp} au
-desserrement nominal, si bien qu'un plancher d'emploi supérieur est infaisable à moins de
-relever le desserrement dans le même scénario. Les planchers d'emploi du catalogue sont posés
-aux alentours de \SI{86}{\percent} à \SI{88}{\percent} d'un maximum mesuré en maximisant
-le travail sous les autres contraintes de chaque politique, pour laisser la place au saut
-d'intégralité que la relaxation ignore.
+Trois remarques rendent ce catalogue lisible. P1 est la seule à changer d'objectif, si bien
+qu'elle ne se compare aux autres que sur les grandeurs physiques et économiques. Aucune
+politique ne rouvre les vingt-cinq variantes symétriques, dont la réouverture coûterait
+\num{548000} binaires de pure symétrie et rendrait toute part biologique inopérante
+(§~\ref{sec:tractabilite}). Écrire la politique agroécologique comme une part minimale de
+cultures biologiques en était la formulation naturelle, et c'est le seul cas du mémoire où une
+formulation est écartée parce qu'elle serait satisfaite trop facilement. Le plafond de main
+d'\oe uvre, enfin, est la première cause d'infaisabilité. Il accorde \SI{3891}{\etp} au
+desserrement nominal, donc tout plancher d'emploi supérieur exige de relever le desserrement
+dans le même scénario. Les planchers du catalogue sont posés vers \SI{86}{\percent} à
+\SI{88}{\percent} d'un maximum mesuré en maximisant le travail sous les autres contraintes de
+la politique, pour laisser la place au saut d'intégralité que la relaxation ignore.
 
 \section{Les douze forçages}
 
-Un forçage multiplie des prix, des rendements ou des coûts d'intrants ; il ne modifie aucune
-règle. Le catalogue en déclare douze : conjoncture nominale, cyclone majeur, sécheresse sévère,
-dérive climatique, choc sanitaire, effondrement des prix d'export, choc sur les intrants,
-inflation alimentaire, retrait du \gls{posei}, crise systémique, conjoncture favorable et
-artificialisation des terres.
+Un forçage multiplie des prix, des rendements, des variances ou des coûts d'intrants. Il ne
+modifie aucune règle, à l'exception du dernier, qui retire de la terre. Le
+tableau~\ref{tab:ann-forcages} donne les douze.
 
-Deux propriétés méritent d'être rappelées. La première est une convention : les forçages ne
-sont pas moyennés, et l'infaisabilité y compte comme le pire résultat et non
-comme une donnée manquante. La seconde est un outil de contrôle : le forçage nominal est le
-forçage nul, si bien qu'une politique seule et cette même politique croisée avec lui
-sont le même problème et doivent rendre le même chiffre. C'est ce qui a permis de
-détecter une erreur d'ancrage en cours de campagne — les deux runs différaient de
-\SI{\prosEcartFzero}{\euros}, soit \SI{\prosEcartFzeroPct}{\percent} — un contrôle qui ne coûte
-rien et qu'il faut refaire à chaque campagne.
+\begin{table}[tbp]
+  \centering
+  \caption{Les douze forçages du catalogue. F0 est le forçage nul et sert de témoin de
+  contrôle, F10 la borne haute symétrique de F9.}
+  \label{tab:ann-forcages}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{31mm}X@{}}
+    \toprule
+    \textbf{Forçage} & \textbf{Ce qu'il impose} \\
+    \midrule
+    F0 nominal & aucun forçage. Conditions 2017 \\
+    F1 cyclone majeur & rendements $\times$\num{0.50} à $\times$\num{0.75} selon le port,
+      variance $\times$\num{1.30}. Les pérennes hautes paient le plus \\
+    F2 sécheresse sévère & rendements $-\num{25}$ à $-\SI{35}{\percent}$, variance
+      $\times$\num{1.40}, prélèvement d'eau $-\SI{30}{\percent}$. Éprouve la dépendance à
+      l'eau \\
+    F3 dérive climatique & rendements $-\SI{12}{\percent}$, variance $+\SI{60}{\percent}$.
+      Isole le canal du risque \\
+    F4 choc sanitaire & cercosporiose noire. Banane d'export $-\SI{50}{\percent}$ de rendement
+      et $+\SI{25}{\percent}$ de coût de protection. Choc de filière \\
+    F5 effondrement des prix d'export & banane $-\SI{35}{\percent}$, canne
+      $-\SI{25}{\percent}$. Les deux piliers cèdent ensemble \\
+    F6 choc sur les intrants & coûts variables $+\SI{45}{\percent}$ partout. Sépare le pôle
+      accélérationniste du pôle agroécologique \\
+    F7 inflation alimentaire & vivrier local $+\SI{40}{\percent}$, export inchangé. Favorable
+      à la relocalisation \\
+    F8 retrait du \gls{posei} & aides à \SI{40}{\percent} de leur niveau. Choc purement
+      budgétaire \\
+    F9 crise systémique & rendements $-\num{20}$, prix d'export $-\num{25}$, coûts $+\num{30}$,
+      subventions $-\SI{40}{\percent}$, variance $+\SI{50}{\percent}$. Le pire cas plausible \\
+    F10 conjoncture favorable & rendements $+\num{10}$, prix $+\num{15}$, coûts $-\num{10}$,
+      variance $-\SI{20}{\percent}$. Le témoin par le haut \\
+    F11 artificialisation & \SI{8}{\percent} de la \gls{sau} sortent de la production, en
+      priorité à basse altitude. Le seul forçage qui retire de la terre \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
-\section{Les balayages et le plan}
+Deux propriétés méritent d'être rappelées. La première est une convention. Les forçages ne
+sont pas moyennés, et l'infaisabilité y compte comme le pire résultat et non comme une donnée
+manquante. La seconde est un outil de contrôle. Le forçage nominal étant le forçage nul, une
+politique seule et cette même politique croisée avec lui sont le même problème et doivent
+rendre le même chiffre. C'est ce qui a détecté une erreur d'ancrage en cours de campagne, les
+deux runs différant de \SI{\prosEcartFzero}{\euros}, soit
+\SI{\prosEcartFzeroPct}{\percent}. Ce contrôle ne coûte rien et doit être refait à chaque
+campagne.
+
+\section{Balayages, plan et contrôle de faisabilité}
 
 Deux fronts sont déclarés, l'un sur le plafond d'azote et l'autre sur l'enveloppe de
-subventions. Un front n'est pas une cellule de la grille : c'est une résolution par
-point. C'est pourquoi un front n'est jamais croisé avec les forçages de sa cellule, et
-pourquoi le plan doit nommer explicitement un front forcé lorsqu'on en veut un.
+subventions. Un front n'est pas une cellule de la grille mais une résolution par point, si
+bien qu'il n'est jamais croisé avec les forçages de sa cellule et qu'un front forcé doit être
+nommé explicitement. Un front se paramètre sur la borne de sa politique hôte et non sur le
+réalisé de la configuration de référence, verdict renversé en cours de campagne dont l'oubli
+produit un front dont plusieurs points ne contraignent rien. Les points sont ensuite
+réordonnés du plus serré au plus lâche, à l'inverse de la lecture du fichier, pour que chaque
+solution serve de graine admissible à la suivante. Le sens s'inverse pour un plancher, et le
+tri s'abstient dès qu'il ne peut pas conclure. S'abstenir ne coûte que du temps de calcul, la
+correction reposant sur l'audit de chaque graine.
 
-Deux points de méthode gouvernent leur exécution. D'abord, un front se paramètre sur la borne
-de sa politique hôte et non sur le réalisé de la configuration de référence : c'est un
-verdict renversé en cours de campagne, et l'oublier produit un front dont plusieurs points ne
-contraignent rien. Ensuite, les points sont réordonnés du plus serré au plus lâche avant
-exécution — l'inverse de la lecture du fichier — pour que chaque solution serve de graine
-admissible à la suivante ; le sens s'inverse pour un plancher, et le tri s'abstient dès
-qu'il ne peut pas conclure : matrice à deux dimensions, contrainte sans sens déclaré, ou
-argument qui n'est pas le niveau de la borne. S'abstenir ne coûte que du temps de calcul ; la
-correction, elle, repose sur l'audit de chaque graine.
+Le contrôle de faisabilité résout la relaxation linéaire de chaque scénario, deux minutes
+contre une heure. Infaisable en relaxation implique infaisable en entiers sans que la
+réciproque tienne, donc c'est un filtre et non une garantie. Il a néanmoins écarté une erreur
+de conception avant qu'aucun lot ne tourne, deux blocs corrects séparément ne composant pas
+nécessairement un scénario faisable. C'est aussi lui qui signale les groupes de cultures
+symétriques, et c'est ainsi que les vingt-cinq variantes ont été trouvées.
 
-\section{Le contrôle de faisabilité}
-
-Le contrôle résout la relaxation linéaire de chaque scénario : deux minutes contre une heure.
-Sa logique est à sens unique — infaisable en relaxation implique infaisable en entiers, la
-réciproque est fausse — et c'est donc un filtre, non une garantie. Il a néanmoins écarté une
-erreur de conception avant qu'aucun lot ne tourne : deux blocs de configuration corrects
-séparément ne composent pas nécessairement un scénario faisable, les planchers vivriers
-réclamant plus de travail que le plafond n'en accorde. C'est aussi lui qui signale les groupes
-de cultures symétriques, et c'est ainsi que les vingt-cinq variantes ont été trouvées.
-
-Un dernier piège de configuration mérite d'être consigné, parce qu'il ne laisse aucune trace :
-un seuil relevé sur un run et reposé en configuration sans son poids de parcelle est
-faux d'un facteur \num{1.6}. C'est le cas du plafond d'eau, qui ne porte que sur les parcelles
-irrigables.
+\begin{vigilance}
+Un seuil relevé sur un run et reposé en configuration sans son poids de parcelle est faux d'un
+facteur \num{1.6}. C'est le cas du plafond d'eau, qui ne porte que sur les parcelles
+irrigables. Ce piège ne laisse aucune trace dans les sorties.
+\end{vigilance}

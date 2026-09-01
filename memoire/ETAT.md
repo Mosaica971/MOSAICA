@@ -4,7 +4,40 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-08-29**. Dépôt le **26/08**, soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-08-31**. Dépôt le **26/08**, soutenance **1-4 sept**.
+>
+> **Session du 2026-08-31 — les six annexes réécrites, format tableau, style sans `:` ni `;`.**
+> Demande de Clément : raccourcir fortement, passer en tableaux et figures, prose sobre, points
+> plutôt que deux-points, point-virgules et tirets cadratins. Les six fichiers sont réécrits.
+> **Sept tableaux neufs** remplacent de la prose (les 4 défauts portés en B, les 12 forçages en
+> C, le balayage plantain complet en E — il était réclamé par `CAL-76` —, les 3 autres échelles
+> et les 6 corrections de comparaison à l'article et les suspects écartés en E, les règles
+> d'écriture en F). Deux tableaux fusionnés en D. **Estimation 18 p → 15,3 p** ; le gain net est
+> limité parce que ~5 p de prose retirées sont compensées par ~2,5 p de tableaux **ajoutés**
+> (ils portent des preuves qui n'existaient nulle part). Les trois coupes suivantes, si un
+> resserrage supplémentaire est voulu, sont nommées dans la réponse de session.
+>
+> ⚠ **MiKTeX n'est plus installé sur cette machine** (`pdflatex` introuvable, `compile.ps1`
+> échoue). **Rien n'a pu être compilé.** `memoire/_check_annexes.py` a été écrit pour tenir
+> lieu de contrôle — macros de `chiffres.tex` définies, environnements et accolades équilibrés,
+> tout flottant cité, ponctuation proscrite absente. Il passe, sauf les 8 tirets du tableau de
+> regret de D, qui sont des cellules non résolues et non de la prose. **Recompiler dès que
+> MiKTeX est réinstallé.**
+>
+> ⚠ **Une erreur de chiffre corrigée en annexe E** (`% CORRIGE` en regard). Le mémoire écrivait
+> que le plantain simulé vaut 247 ha « même au plafond le plus contraignant ». 247 ha est la
+> valeur **au seuil retenu (6 440 t)** ; au seuil le plus serré (4 650 t) c'est **179 ha**
+> (`CAL-76`, journal-vigilance 407-421). L'argument tient — tous les seuils restent au-dessus
+> des 147 ha observés — mais le chiffre était mal attribué. Le balayage entier est maintenant
+> tabulé, ce qui rend l'erreur impossible à refaire.
+>
+> ⚠ **Incohérence non tranchée sur la variabilité des solves.** `chiffres.tex` donne
+> `mesSolveMin/Max/CV/Facteur` = 327 s / 3 625 s / 91 % / ×11 (7 solves à la taille de
+> calibration), et le corpus `SOLV-11` écrit « 155 s à 1 007 s, facteur 6,5, CV 64 % » sur
+> 20 solves — **en déclarant précisément ces macros comme ses `chiffre`**. `CLAUDE.md` reprend
+> 6,5. Les deux mesures ne portent pas sur la même population. Le `.tex` est cohérent avec
+> lui-même (ch. 2 et annexe F lisent les macros), donc **rien n'a été modifié**, mais l'un des
+> deux jeux est périmé et c'est à trancher avant le dépôt.
 >
 > **Session du 2026-08-29 — mise au propre des reformulations de Clément (ch. 1 à 4).**
 > Il a remplacé quatorze encadrés `questionreponse` par sa propre prose, en **texte brut** :
