@@ -261,6 +261,7 @@ au-dessus du bruit de branch-and-bound mesuré (0,15 point de PAD sur trois grai
 streamlit run apps/dashboard/app.py
 ```
 
+
 Il ne résout rien et n'écrit rien : il ouvre des dossiers `outputs/`.
 
 | Page | Ce qu'elle répond |
