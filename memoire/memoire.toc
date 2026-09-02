@@ -1,81 +1,60 @@
 \babel@toc {french}{}\relax 
-\contentsline {chapter}{Remerciements}{i}{Doc-Start}%
 \contentsline {chapter}{Résumé}{i}{Doc-Start}%
 \contentsline {chapter}{Abstract}{iii}{Doc-Start}%
 \babel@toc {english}{}\relax 
 \babel@toc {french}{}\relax 
 \contentsline {chapter}{Introduction}{1}{section*.1}%
-\contentsline {chapter}{\numberline {1}Terrain et objet}{3}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Pertinence d'un modèle d'allocation en Guadeloupe}{3}{section.1.1}%
-\contentsline {section}{\numberline {1.2}MOSAICA : ce que le modèle promet}{3}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Le GAMS existant, et pourquoi il a fallu reconstruire}{4}{section.1.3}%
-\contentsline {chapter}{\numberline {2}Porter et rendre traçable}{5}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Formulation du programme}{5}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Protocole}{6}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Une architecture qui sépare le générique du territoire}{6}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Rendre le problème traitable}{7}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Les garde-fous}{8}{section.2.5}%
-\contentsline {chapter}{\numberline {3}Calibrer}{9}{chapter.3}%
-\contentsline {section}{\numberline {3.1}L'état de référence, et ce qu'il ne dit pas}{9}{section.3.1}%
-\contentsline {section}{\numberline {3.2}La métrique : le PAD, et ce qu'il ne peut pas dire}{10}{section.3.2}%
-\contentsline {section}{\numberline {3.3}L'échelle d'attribution}{12}{section.3.3}%
-\contentsline {section}{\numberline {3.4}La cause commune de l'écart résiduel : les rendements}{12}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Deux déviations, et le test qui les sépare d'un ajustement}{14}{section.3.5}%
-\contentsline {section}{\numberline {3.6}Explications de l'écart résiduel}{16}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Deux signatures émergentes}{17}{section.3.7}%
-\contentsline {chapter}{\numberline {4}Explorer}{17}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Le dispositif expérimental}{17}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Ce que la grille montre}{19}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Le coût marginal : euro public et azote}{20}{section.4.3}%
-\contentsline {chapter}{\numberline {5}Discussion}{21}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Discussions sur le stage}{21}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Discussions sur le positionnement}{23}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Discussion sur l'IA générative}{24}{section.5.3}%
-\contentsline {chapter}{Conclusion}{25}{section.5.3}%
-\contentsline {chapter}{Références bibliographiques}{27}{section.5.3}%
-\contentsline {chapter}{\numberline {A}Formulation complète du programme}{28}{chapter.A}%
-\contentsline {section}{\numberline {A.1}Ensembles, paramètres, variables}{28}{section.A.1}%
-\contentsline {section}{\numberline {A.2}Objectif et cinq familles de contraintes}{28}{section.A.2}%
-\contentsline {section}{\numberline {A.3}Indicateurs}{30}{section.A.3}%
-\contentsline {section}{\numberline {A.4}Le registre, en une page}{31}{section.A.4}%
-\contentsline {chapter}{\numberline {B}Inventaire de portage GAMS}{31}{chapter.B}%
-\contentsline {section}{\numberline {B.1}Statut des équations, bloc par bloc}{31}{section.B.1}%
-\contentsline {section}{\numberline {B.2}Les quatre défauts portés, et leur variante \enquote {intention présumée}}{33}{section.B.2}%
-\contentsline {paragraph}{Le zéro silencieux et \texttt {Eq\_VE\_PLUIE}.}{33}{section.B.2}%
-\contentsline {paragraph}{Les deux ordres de types de sol.}{33}{section.B.2}%
-\contentsline {paragraph}{Les commentaires inversés du chlordécone.}{33}{section.B.2}%
-\contentsline {paragraph}{Les deux couches de chlordécone, agrégées en sens opposés.}{33}{section.B.2}%
-\contentsline {paragraph}{Un piège de lecture sans défaut : le cycle de l'ananas.}{33}{section.B.2}%
-\contentsline {section}{\numberline {B.3}Les sept branches fermées}{34}{section.B.3}%
-\contentsline {chapter}{\numberline {C}Catalogue des scénarios}{34}{chapter.C}%
-\contentsline {section}{\numberline {C.1}Les dix politiques}{35}{section.C.1}%
-\contentsline {section}{\numberline {C.2}Les douze forçages}{36}{section.C.2}%
-\contentsline {section}{\numberline {C.3}Les balayages et le plan}{36}{section.C.3}%
-\contentsline {section}{\numberline {C.4}Le contrôle de faisabilité}{36}{section.C.4}%
-\contentsline {chapter}{\numberline {D}Grille complète des résultats}{37}{chapter.D}%
-\contentsline {section}{\numberline {D.1}Les politiques non forcées, tous indicateurs}{37}{section.D.1}%
-\contentsline {section}{\numberline {D.2}Robustesse}{38}{section.D.2}%
-\contentsline {section}{\numberline {D.3}Les fronts, point par point}{38}{section.D.3}%
-\contentsline {section}{\numberline {D.4}Coûts marginaux et prix duals}{38}{section.D.4}%
-\contentsline {chapter}{\numberline {E}Tableaux de calibration}{40}{chapter.E}%
-\contentsline {section}{\numberline {E.1}PAD par culture, aux trois barreaux}{40}{section.E.1}%
-\contentsline {section}{\numberline {E.2}Les autres échelles, et comment se comparer à l'article}{41}{section.E.2}%
-\contentsline {paragraph}{Sous-région.}{41}{section.E.2}%
-\contentsline {paragraph}{Exploitation.}{41}{section.E.2}%
-\contentsline {paragraph}{Types d'exploitation.}{41}{section.E.2}%
-\contentsline {paragraph}{Parcellaire.}{41}{section.E.2}%
-\contentsline {section}{\numberline {E.3}Les balayages de seuil}{42}{section.E.3}%
-\contentsline {paragraph}{Plantain.}{42}{section.E.3}%
-\contentsline {paragraph}{Prairie.}{42}{section.E.3}%
-\contentsline {paragraph}{Le calcul de charge animale, en entier.}{42}{section.E.3}%
-\contentsline {paragraph}{Décomposition du déficit.}{43}{section.E.3}%
-\contentsline {section}{\numberline {E.4}Ce que le solveur n'explique pas}{43}{section.E.4}%
-\contentsline {paragraph}{Les trois graines.}{43}{section.E.4}%
-\contentsline {paragraph}{Les trois voies écartées.}{43}{section.E.4}%
-\contentsline {paragraph}{Deux verdicts périmés, et leur date.}{43}{section.E.4}%
-\contentsline {paragraph}{La main d'\oe uvre n'est pas en cause non plus.}{43}{section.E.4}%
-\contentsline {paragraph}{La fourchette d'incertitude des indicateurs.}{43}{section.E.4}%
-\contentsline {chapter}{\numberline {F}Chronologie et méthode de travail}{43}{chapter.F}%
-\contentsline {section}{\numberline {F.1}Le déroulé}{43}{section.F.1}%
-\contentsline {section}{\numberline {F.2}Comment le travail a été organisé}{44}{section.F.2}%
-\contentsline {section}{\numberline {F.3}Le corpus qui a produit ce mémoire}{45}{section.F.3}%
+\contentsline {chapter}{\numberline {1}Terrain et objet}{2}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Pertinence d'un modèle d'allocation en Guadeloupe}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}MOSAICA : ce que le modèle promet}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Le GAMS existant, et pourquoi il a fallu reconstruire}{3}{section.1.3}%
+\contentsline {chapter}{\numberline {2}Porter et rendre traçable}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Formulation du programme}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Protocole}{5}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Une architecture qui sépare le générique du territoire}{5}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Rendre le problème traitable}{6}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Les garde-fous}{7}{section.2.5}%
+\contentsline {chapter}{\numberline {3}Calibrer}{8}{chapter.3}%
+\contentsline {section}{\numberline {3.1}L'état de référence, et ce qu'il ne dit pas}{8}{section.3.1}%
+\contentsline {section}{\numberline {3.2}La métrique : le PAD, et ce qu'il ne peut pas dire}{9}{section.3.2}%
+\contentsline {section}{\numberline {3.3}L'échelle d'attribution}{11}{section.3.3}%
+\contentsline {section}{\numberline {3.4}La cause commune de l'écart résiduel : les rendements}{11}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Deux déviations, et le test qui les sépare d'un ajustement}{13}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Explications de l'écart résiduel}{15}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Deux signatures émergentes}{16}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Explorer}{16}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Le dispositif expérimental}{16}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Ce que la grille montre}{18}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Le coût marginal : euro public et azote}{19}{section.4.3}%
+\contentsline {chapter}{\numberline {5}Discussion}{20}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Discussions sur le stage}{20}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Discussions sur le positionnement}{22}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Discussion sur l'IA générative}{23}{section.5.3}%
+\contentsline {chapter}{Conclusion}{24}{section.5.3}%
+\contentsline {chapter}{Références bibliographiques}{26}{section.5.3}%
+\contentsline {chapter}{\numberline {A}Formulation complète du programme}{27}{chapter.A}%
+\contentsline {section}{\numberline {A.1}Ensembles, paramètres, variables}{27}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Objectif et familles de contraintes}{27}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Indicateurs}{28}{section.A.3}%
+\contentsline {chapter}{\numberline {B}Inventaire de portage GAMS}{29}{chapter.B}%
+\contentsline {section}{\numberline {B.1}Statut des équations, bloc par bloc}{29}{section.B.1}%
+\contentsline {section}{\numberline {B.2}Les quatre défauts portés}{29}{section.B.2}%
+\contentsline {section}{\numberline {B.3}Les sept branches fermées}{31}{section.B.3}%
+\contentsline {chapter}{\numberline {C}Catalogue des scénarios}{31}{chapter.C}%
+\contentsline {section}{\numberline {C.1}Les dix politiques}{32}{section.C.1}%
+\contentsline {section}{\numberline {C.2}Les douze forçages}{33}{section.C.2}%
+\contentsline {section}{\numberline {C.3}Balayages, plan et contrôle de faisabilité}{33}{section.C.3}%
+\contentsline {chapter}{\numberline {D}Grille complète des résultats}{34}{chapter.D}%
+\contentsline {section}{\numberline {D.1}Les politiques non forcées, tous indicateurs}{34}{section.D.1}%
+\contentsline {section}{\numberline {D.2}Robustesse}{35}{section.D.2}%
+\contentsline {section}{\numberline {D.3}Les fronts, point par point}{35}{section.D.3}%
+\contentsline {section}{\numberline {D.4}Coûts marginaux et prix duals}{36}{section.D.4}%
+\contentsline {chapter}{\numberline {E}Tableaux de calibration}{37}{chapter.E}%
+\contentsline {section}{\numberline {E.1}PAD par culture, aux trois barreaux}{37}{section.E.1}%
+\contentsline {section}{\numberline {E.2}Les autres échelles, et la comparaison à l'article}{37}{section.E.2}%
+\contentsline {section}{\numberline {E.3}Les balayages de seuil}{38}{section.E.3}%
+\contentsline {section}{\numberline {E.4}Ce que le solveur n'explique pas}{39}{section.E.4}%
+\contentsline {chapter}{\numberline {F}Chronologie et méthode de travail}{40}{chapter.F}%
+\contentsline {section}{\numberline {F.1}Le déroulé}{40}{section.F.1}%
+\contentsline {section}{\numberline {F.2}Comment le travail a été organisé}{41}{section.F.2}%
+\contentsline {section}{\numberline {F.3}Le corpus qui a produit ce mémoire}{41}{section.F.3}%

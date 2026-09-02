@@ -4,7 +4,17 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-08-31**. Dépôt le **26/08**, soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-09-01**. Dépôt le **26/08**, soutenance **1-4 sept**.
+>
+> **Session du 2026-09-01 — remerciements supprimés, intro et conclusion condensées à 1 page.**
+> `liminaires/remerciements.tex` est supprimé et son `\input` retiré de `memoire.tex`.
+> L'introduction passe de 2 p à **1 p** (les quatre `\section*` sautent, la position de
+> l'auteur est repliée en une incise du paragraphe de plan) et la conclusion de 2 p à **~1 p**
+> de prose (plus le `\attentebloc{8}`, qui disparaît avec `\attentesvisiblesfalse`). Aucun
+> chiffre changé, tous repris des macros existantes. **MiKTeX est réinstallé** : le document
+> recompile, **cœur à 25 / 30 pages**, 0 référence non résolue. Il reste **1 `Overfull hbox`
+> > 5 pt, dans les annexes** (`Eq_AN_AGRO_MAX_Expl` en `\texttt` et un tableau trop large) —
+> les annexes n'avaient jamais pu être compilées après leur réécriture du 31/08.
 >
 > **Session du 2026-08-31 — les six annexes réécrites, format tableau, style sans `:` ni `;`.**
 > Demande de Clément : raccourcir fortement, passer en tableaux et figures, prose sobre, points

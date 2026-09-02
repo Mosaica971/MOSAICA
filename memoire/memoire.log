@@ -1,6 +1,7 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  30 AUG 2026 21:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  1 SEP 2026 20:08
 entering extended mode
  restricted \write18 enabled.
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **./memoire.tex
 (memoire.tex
@@ -2325,20 +2326,19 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 {C:/Users/Clément/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/C
 lément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf.enc}{C:/
 Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf-p
-c.enc}]) (liminaires/remerciements.tex
+c.enc}]) (liminaires/resume-fr.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 17.28pt on input line 1.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 17.28pt on input line 1.
-) (liminaires/resume-fr.tex
 Package babel Info: 'french' activates 'french' shorthands.
-(babel)             Reported on input line 48.
+(babel)             Reported on input line 57.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.48 
+l.57 
       [1]
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 12.0pt on input line 59.
@@ -2371,34 +2371,34 @@ Package microtype Info: Character `029' is missing
 
 ATTENTE : Q5
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 38.
-LaTeX Font Info:    Trying to load font information for T1+qhv on input line 38
+(Font)              scaled to size 8.0pt on input line 27.
+LaTeX Font Info:    Trying to load font information for T1+qhv on input line 27
 .
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/tex-gyre\t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 7.52002pt on input line 38.
+(Font)              scaled to size 7.52002pt on input line 27.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `qhv' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/qhv/b/n' will be
-(Font)              scaled to size 7.52002pt on input line 38.
+(Font)              scaled to size 7.52002pt on input line 27.
 
 ATTENTE : Q6
 ATTENTE : Q2
 ATTENTE : Q10
-[1
+) (chapitres/01-terrain-et-objet.tex [1
 
 {C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-ec.
-enc}] [2]) (chapitres/01-terrain-et-objet.tex
+enc}]
 Chapitre 1.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 10.0pt on input line 11.
 LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
 (Font)              scaled to size 10.0pt on input line 11.
-[3]
+[2]
 LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
 (Font)              scaled to size 12.0pt on input line 94.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
@@ -2409,15 +2409,15 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/it' will be
 (Font)              scaled to size 10.95pt on input line 104.
 LaTeX Font Info:    Font shape `TS1/ntxtlf/b/it' will be
 (Font)              scaled to size 10.95pt on input line 104.
- [4]) (chapitres/02-porter.tex
+) (chapitres/02-porter.tex
 Chapitre 2.
-[5{C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ot
-1-tlf.enc}] [6] [7]
+[3] [4{C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/nt
+x-ot1-tlf.enc}] [5] [6]
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 10.95pt on input line 190.
- [8]) (chapitres/03-calibrer.tex
+ [7]) (chapitres/03-calibrer.tex
 Chapitre 3.
-[9]
+[8]
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 8.8pt on input line 80.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
@@ -2426,7 +2426,7 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[10] [11]
+[9] [10]
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
 (Font)              scaled to size 10.95pt on input line 233.
 Package microtype Info: Character `029' is missing
@@ -2436,7 +2436,7 @@ Package microtype Info: Character `029' is missing
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<figures/calibration-observe-simule.pdf, id=630, 434.99513pt x 266.3073pt>
+<figures/calibration-observe-simule.pdf, id=614, 434.99513pt x 266.3073pt>
 File: figures/calibration-observe-simule.pdf Graphic file (type pdf)
 <use figures/calibration-observe-simule.pdf>
 Package pdftex.def Info: figures/calibration-observe-simule.pdf  used on input 
@@ -2449,10 +2449,10 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[12] [13 <./figures/calibration-observe-simule.pdf>] [14] [15] [16])
+[11] [12 <./figures/calibration-observe-simule.pdf>] [13] [14] [15])
 (chapitres/04-explorer.tex
 Chapitre 4.
-[17]
+[16]
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
 (Font)              scaled to size 6.0pt on input line 73.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
@@ -2487,7 +2487,7 @@ LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
 (Font)              scaled to size 5.5pt on input line 73.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 8.0pt on input line 73.
- [18]
+ [17]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 181.
@@ -2527,7 +2527,7 @@ LaTeX Info: Symbol \textminus not provided by
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[19]
+[18]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 307.
@@ -2544,7 +2544,7 @@ LaTeX Info: Symbol \textminus not provided by
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 338.
-[20]
+[19]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 345.
@@ -2565,80 +2565,53 @@ LaTeX Info: Symbol \textminus not provided by
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 30.
-[21]
+[20]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 39.
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 39.
- [22] [23] [24]) (chapitres/06-conclusion.tex [25]
+ [21] [22] [23]) (chapitres/06-conclusion.tex
 ATTENTE : Q11
+[24]
 ATTENTE : Q8 (bloc)
 )
 
-===== PAGES DU COEUR : 26 / 30 =====
+===== PAGES DU COEUR : 25 / 30 =====
 
-[26] [27
+[25] [26
 
 ] (annexes/A-formulation.tex
 Annexe A.
-
-Underfull \hbox (badness 2809) in paragraph at lines 63--63
-[]|\T1/ntxtlf/m/n/10.95 (+20) coefficient d'aver-sion au risque, d�-duit du typ
-e d'ex-ploi-ta-tion
- []
-
-
-Underfull \hbox (badness 3128) in paragraph at lines 63--63
-\T1/ntxtt/m/n/10.95 TYPE_EXPL \T1/ntxtlf/m/n/10.95 (+20) lui-m�me d�-duit du gr
-oupe de cultures do-mi-nant
- []
-
-[28] [29] [30]) (annexes/B-portage-gams.tex
+[27]
+LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
+(Font)              scaled to size 10.95pt on input line 84.
+) (annexes/B-portage-gams.tex [28]
 Annexe B.
 
 Overfull \hbox (1.09224pt too wide) in paragraph at lines 75--75
 []|\T1/ntxtt/m/n/8 Eq_AN_AGRO_MAX_Expl\T1/ntxtlf/m/n/8 (-20) , 
  []
 
-[31] [32]
-LaTeX Font Info:    Trying to load font information for T1+txtt on input line 8
-6.
-
-(C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/txfonts\t1txtt.fd
-File: t1txtt.fd 2000/12/15 v3.1
-)
-LaTeX Font Info:    Font shape `T1/ntxtt/b/n' in size <12> not available
-(Font)              Font shape `T1/txtt/bx/n' tried instead on input line 86.
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `txtt' (encoding: T1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
-
 ATTENTE : Q14
-[33]) (annexes/C-scenarios.tex
+[29] [30]) (annexes/C-scenarios.tex
 Annexe C.
-[34]
+[31]
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 69.
-
-Underfull \hbox (badness 1728) in paragraph at lines 69--69
-[]|\T1/ntxtlf/m/n/8 (+20) P8 tran-si-tion agro�-co-lo-
- []
-
+            Default family used instead on input line 63.
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 69.
-[35]) (annexes/D-resultats.tex
+            Default family used instead on input line 63.
+ [32] [33]) (annexes/D-resultats.tex
 Annexe D.
-[36]
-Overfull \hbox (10.01851pt too wide) in paragraph at lines 26--55
+
+Overfull \hbox (122.68745pt too wide) in paragraph at lines 31--70
  [][] 
  []
 
-[37] (tables/realloc-budget.tex
+[34] (tables/realloc-budget.tex
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 12.
@@ -2651,60 +2624,50 @@ LaTeX Info: Symbol \textminus not provided by
 LaTeX Info: Symbol \textminus not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 15.
-) (tables/front-azoteRef.tex)
-(tables/front-azoteHuit.tex) [38] [39]) (annexes/E-calibration.tex
+) [35] (tables/front-azoteRef.tex)
+(tables/front-azoteHuit.tex)) (annexes/E-calibration.tex [36]
 Annexe E.
-[40] [41] [42]) (annexes/F-chronologie.tex
+[37] [38]) (annexes/F-chronologie.tex
 Annexe F.
 
-Underfull \hbox (badness 10000) in paragraph at lines 38--38
-[]|\T1/ntxtlf/m/n/10.95 (+20) r��criture en Py-
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
+[]|\T1/ntxtlf/m/n/10.95 (+20) masque d'�li-gi-bi-lit�,
  []
 
-
-Underfull \hbox (badness 2310) in paragraph at lines 38--38
-\T1/ntxtlf/m/n/10.95 (+20) layages de seuil, trois
- []
-
-
-Underfull \hbox (badness 2865) in paragraph at lines 38--38
-[]|\T1/ntxtlf/m/n/10.95 (+20) plus au-cune r�-so-lu-tion
- []
-
-[43] [44]) [45] (memoire.aux)
+[39] [40]) [41] (memoire.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
  ***********
 Package rerunfilecheck Info: File `memoire.out' has not changed.
-(rerunfilecheck)             Checksum: 1AD8E86BA74C2A25AD635C2A07DDB095;12284.
+(rerunfilecheck)             Checksum: 86E991E3F548E095AEC20CDA541DBD6A;11615.
 Package logreq Info: Writing requests to 'memoire.run.xml'.
 \openout1 = `memoire.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 60181 strings out of 467871
- 1266420 string characters out of 5416925
- 2144356 words of memory out of 5000000
- 87592 multiletter control sequences out of 15000+600000
- 770736 words of font info for 376 fonts, out of 8000000 for 9000
+ 60150 strings out of 467871
+ 1265970 string characters out of 5416925
+ 2145568 words of memory out of 5000000
+ 87556 multiletter control sequences out of 15000+600000
+ 775293 words of font info for 389 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 91i,15n,120p,2515b,3043s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 91i,15n,120p,2515b,3015s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\t
 crm0600.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec
 /dpi600\tcrm0900.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jk
 nappen/ec/dpi600\tcrm1095.pk> <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/
 ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/Clément/AppData/Local/Programs
 /MiKTeX/fonts/type1/public/newtx/NewTXMI.pfb><C:/Users/Clément/AppData/Local/P
-rograms/MiKTeX/fonts/type1/public/newtx/NewTXMI7.pfb><C:/Users/Clément/AppData
-/Local/Programs/MiKTeX/fonts/type1/public/eurosym/feybr10.pfb><C:/Users/Clémen
-t/AppData/Local/Programs/MiKTeX/fonts/type1/public/eurosym/feymr10.pfb><C:/User
-s/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/ms
-am10.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/te
-x-gyre/qhvb.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/pu
-blic/tex-gyre/qtmbi.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/
-type1/public/tex-gyre/qtmr.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/txfonts/t1xbtt.pfb><C:/Users/Clément/AppData/Local/Program
+rograms/MiKTeX/fonts/type1/public/newtx/NewTXMI5.pfb><C:/Users/Clément/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/newtx/NewTXMI7.pfb><C:/Users/Clément
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/eurosym/feybr10.pfb><C:/Users
+/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/eurosym/feymr10.pfb>
+<C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/sy
+mbols/msam10.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/tex-gyre/qhvb.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/tex-gyre/qtmbi.pfb><C:/Users/Clément/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/tex-gyre/qtmr.pfb><C:/Users/Clément/AppData/Local/Program
 s/MiKTeX/fonts/type1/public/txfonts/t1xtt.pfb><C:/Users/Clément/AppData/Local/
 Programs/MiKTeX/fonts/type1/public/newtx/txexs.pfb><C:/Users/Clément/AppData/L
 ocal/Programs/MiKTeX/fonts/type1/public/newtx/txmiaX.pfb><C:/Users/Clément/App
@@ -2714,9 +2677,9 @@ t/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmb.pfb><C:/Users/Cl�
 s/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmr.pfb><C:/
 Users/Clément/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmri.pfb
 >
-Output written on memoire.pdf (52 pages, 662806 bytes).
+Output written on memoire.pdf (48 pages, 655629 bytes).
 PDF statistics:
- 1187 PDF objects out of 1200 (max. 8388607)
- 195 named destinations out of 1000 (max. 500000)
- 70786 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 1198 PDF objects out of 1200 (max. 8388607)
+ 184 named destinations out of 1000 (max. 500000)
+ 72298 words of extra memory for PDF output out of 74296 (max. 10000000)
 

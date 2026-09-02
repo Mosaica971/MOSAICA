@@ -1,108 +1,54 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 \markboth{Introduction}{}
-% BUDGET : 2,5 pages (cf. memoire/PLAN.md, section 4).
+% BUDGET : 1 page (condense le 2026-09-01, cf. memoire/ETAT.md).
 % THESE DU CHAPITRE : le stage n'a pas repondu a la commande, il a reconstruit
 % l'instrument qu'elle supposait acquis -- et ce deplacement est l'objet du memoire.
 
-La Guadeloupe cultive \SI{\obsSurfaceCultivee}{\ha} et importe l'essentiel de ce qu'elle
-mange. Près de \SI{80}{\percent} des produits alimentaires consommés dans les départements
-d'outre-mer viennent de l'extérieur \parencite{viepublique2023,odeadom2019}, et l'écart de prix
-qui en résulte est d'abord alimentaire : en 2022, l'alimentation coûtait en Guadeloupe
+La Guadeloupe cultive \SI{\obsSurfaceCultivee}{\ha} et importe l'essentiel de ce qu'elle mange.
+Près de \SI{80}{\percent} des produits alimentaires consommés dans les départements d'outre-mer
+viennent de l'extérieur \parencite{viepublique2023,odeadom2019}, et l'écart de prix qui en
+résulte est d'abord alimentaire : en 2022, l'alimentation coûtait
 \SI{41.8}{\percent} de plus qu'en France métropolitaine, contre \SI{15.8}{\percent} tous postes
-confondus \parencite{insee2023prix}. Ce n'est pas un déficit de potentiel
-agronomique : c'est un effet d'organisation. Sur les \num{\obsParcelles} parcelles que compte
-le jeu de données parcellaire, la canne à sucre en occupe \SI{\obsHaCS}{\ha} et la banane
-d'exportation \SI{\obsHaBA}{\ha} — deux filières tournées vers l'extérieur, structurées par
-des organisations de producteurs et par un soutien public dont l'ordre de grandeur décide de
-tout le reste : le \gls{posei} représente environ les trois quarts de la marge brute agricole
-du territoire \parencite{touteleurope2024}. Le vivrier, celui-là même que les politiques de
-souveraineté alimentaire cherchent à développer, occupe ce qui reste.
+confondus \parencite{insee2023prix}. Ce n'est pas un déficit de potentiel agronomique, c'est un
+effet d'organisation. La canne à sucre occupe \SI{\obsHaCS}{\ha} et la banane d'exportation
+\SI{\obsHaBA}{\ha}, deux filières tournées vers l'extérieur et soutenues par un dispositif dont
+l'ordre de grandeur décide de tout le reste, le \gls{posei} représentant environ les trois quarts
+de la marge brute agricole du territoire \parencite{touteleurope2024}. Le vivrier occupe ce qui
+reste. Demander s'il peut croître revient à demander ce qu'il faudrait déplacer, sur quelles
+terres et à quel prix pour le revenu des exploitations, ce qui est un problème d'allocation sous
+contraintes.
 
-Poser la question du vivrier en Guadeloupe, ce n'est donc pas demander s'il serait
-possible d'y produire davantage d'ignames ou de légumes : c'est demander ce qu'il faudrait
-déplacer pour le faire, sur quelles terres, au détriment de quoi, et à quel prix pour le
-revenu des exploitations. C'est un problème d'allocation sous contraintes, et c'est à ce titre
-qu'il relève d'un modèle d'optimisation.
+Le stage s'inscrit dans le projet \gls{tifig} de l'unité \gls{astro} de l'\gls{inrae}, successeur
+de CALALOU, qui avait mobilisé pour son évaluation \emph{ex ante} un modèle bioéconomique
+d'allocation publié dix ans plus tôt, \gls{mosaica} \parencite{chopin2015}. La lettre de mission
+demandait des scénarios agro-économiques sur les aliments traditionnels et prévoyait des enquêtes
+de terrain. \gls{mosaica} y figurait comme l'outil disponible : la commande portait sur ce qu'on
+allait lui faire dire, pas sur lui.\attente{5}\attente{6}
 
-\section*{Une commande héritée d'une lignée}
+L'instrument n'était pas exploitable en l'état, et pas pour la raison qu'on attend. Le programme
+\gls{gams} d'origine est complet et lisible, mais \gls{gams} renvoie zéro, sans avertissement,
+lorsqu'une table est interrogée sur une colonne absente. Une équation d'éligibilité des vergers
+pluviaux compare alors une valeur nulle à~1, la comparaison est toujours vraie, et la culture se
+trouve interdite sur tout le territoire. Un paramètre absent ne laisse pas un trou dans les
+sorties, il laisse un nombre crédible. Cela ne se découvre ni en lisant le code, correct
+d'apparence, ni en regardant les résultats, vraisemblables, mais en réécrivant le modèle contre
+ses données. Le stage a donc été réorienté vers le portage de \gls{mosaica} en Python/Pyomo
+\parencite{pyomo2021} résolu par \gls{highs} \parencite{highs2018}, soit \num{\mesBinaires}
+variables binaires et \num{\mesLignesCode} lignes de Python, sa calibration contre l'assolement
+observé de 2017, et l'usage prospectif qu'il rend enfin possible.\attente{2}\attente{10}
 
-Le stage s'inscrit dans le projet \gls{tifig}, porté par l'unité de recherche \gls{astro} de
-l'\gls{inrae} en Guadeloupe, successeur direct du projet CALALOU (2021--2025) et de sa
-démarche \enquote{de la fourchette à la fourche}. CALALOU avait mobilisé, dans son volet
-d'évaluation \emph{ex ante}, un modèle bioéconomique d'allocation de cultures publié dix ans
-plus tôt : \gls{mosaica} \parencite{chopin2015}. La lettre de mission de ce stage demandait de
-concevoir des scénarios agro-économiques de développement des aliments traditionnels, et
-prévoyait pour cela des enquêtes de terrain ainsi que l'acquisition de données
-technico-économiques sur une microferme expérimentale. \gls{mosaica} y figurait comme l'outil
-disponible : la commande portait sur ce qu'on allait lui faire dire, pas sur lui.\attente{5}%
-\attente{6}
-
-Cette continuité mérite d'être prise au sérieux, parce qu'elle fixe les attentes. Un modèle
-publié, une équipe qui l'a écrit, un projet qui l'a déjà employé : la question qu'un mémoire
-d'ingénieur pose normalement dans cette situation est celle de l'usage — quels scénarios,
-quels indicateurs, quelles conclusions. Elle suppose acquis que l'instrument fonctionne, et
-qu'il dit ce qu'on croit qu'il dit.\attente{2}\attente{10}
-
-\section*{Le constat, et la réorientation}
-
-L'instrument n'était pas exploitable en l'état, et la raison n'est pas celle qu'on attend. Le
-programme \gls{gams} d'origine existe, il est complet, il est lisible. Mais \gls{gams} renvoie
-zéro, sans le moindre avertissement, lorsqu'une table est interrogée sur une colonne
-absente. Une équation d'éligibilité des vergers pluviaux teste alors une valeur nulle contre
-la valeur~1 : la comparaison est toujours vraie, et la culture concernée se trouve interdite
-sur la totalité du territoire. Personne ne l'a voulu, rien ne le signale, et le résultat
-produit reste parfaitement plausible — c'est là tout le problème. Un paramètre absent ne
-laisse pas un trou dans les sorties : il laisse un nombre crédible.
-
-Un tel comportement ne se découvre pas en lisant le code, qui est correct d'apparence, ni en
-regardant les résultats, qui sont vraisemblables. Il se découvre en réécrivant le modèle
-contre ses données, ligne à ligne. Le stage a donc été réorienté : reconstruire avant de
-simuler. Le travail présenté ici est le portage de \gls{mosaica} en Python/Pyomo
-\parencite{pyomo2021}, résolu par \gls{highs} \parencite{highs2018} — un programme linéaire en
-nombres entiers de \num{\mesBinaires} variables binaires, \num{\mesLignesCode} lignes de
-Python — sa calibration contre l'assolement observé de 2017, et l'usage prospectif qu'il rend
-enfin possible.
-
-\section*{D'où ce travail est écrit}
-
-Six mois, aucune enquête de terrain, des données produites ailleurs et pour autre chose, et un
-élève ingénieur en mécanique des fluides portant un modèle bioéconomique agronomique. Cette
-position n'est pas une circonstance atténuante : elle détermine ce que le travail peut
-affirmer. Les \num{\obsExploitations} exploitations dont il est question dans ce mémoire sont
-des lignes de table, et la façon dont elles arbitrent m'est connue par un coefficient
-d'aversion au risque déduit d'une typologie.
-
-L'extériorité a d'ailleurs une trace mesurable dans le programme lui-même, et pas seulement
-dans le ton de ce paragraphe : les vingt-cinq variantes maraîchères qui portent le nom de la
-microferme expérimentale sont vides — identiques les unes aux autres sur tous les paramètres
-que le modèle lit — parce que l'acquisition de données prévue par la lettre de mission n'a pas
-eu lieu, absorbée par la reconstruction. Le chapitre~\ref{ch:discussion} y revient ; ici, le
-constat suffit.
-
-\section*{Question et plan}
-
-Le déplacement de la commande n'est pas un accident à excuser, c'est le sujet. Il conduit à
-une question que ce mémoire prend pour objet :
-
-\begin{quote}
-que faut-il avoir établi sur un modèle d'allocation hérité pour que ses résultats
-prospectifs soient opposables, c'est-à-dire défendables devant quelqu'un qui les
-conteste ?
-\end{quote}
-
-Cette question appelle trois réponses, et ce sont les trois chapitres qui suivent le cadrage
-du terrain. Il faut d'abord le porter fidèlement, y compris dans ses défauts, sans
-quoi tout désaccord ultérieur entre les deux modèles est indémêlable — on ne saurait plus
-distinguer une correction voulue d'une erreur de transcription (chapitre~\ref{ch:porter}). Il
-faut ensuite établir ce qu'il reproduit du réel, et à quel prix, sans quoi un scénario
-n'est qu'un calcul sans référent (chapitre~\ref{ch:calibrer}). Il faut enfin mesurer ce
-qu'il ne permet pas de conclure, sans quoi on publie des chiffres qu'un simple changement de
-contexte renverse (chapitre~\ref{ch:explorer}). Le chapitre~\ref{ch:discussion} discute ce que
-la construction ainsi menée engage, sur le territoire représenté comme sur la position depuis
-laquelle il l'a été.
-
-Une dernière précision de lecture. Les six annexes ne sont pas un dépôt de matériaux : elles
-sont la couche de preuve du corps. Le corps affirme et mesure ; l'annexe établit,
-équation par équation, seuil par seuil, culture par culture. Chacune est appelée depuis le
-texte à l'endroit où l'affirmation qu'elle soutient est faite.
+Ce déplacement n'est pas un accident à excuser, c'est le sujet, et il conduit à la question que
+ce mémoire prend pour objet : que faut-il avoir établi sur un modèle d'allocation hérité pour que
+ses résultats prospectifs soient opposables, c'est-à-dire défendables devant quelqu'un qui les
+conteste ? Trois réponses, trois chapitres après le cadrage du terrain
+(chapitre~\ref{ch:terrain}). Il faut porter le modèle fidèlement, défauts compris, sans quoi
+aucun désaccord ultérieur entre les deux versions n'est attribuable
+(chapitre~\ref{ch:porter}). Il faut établir ce qu'il reproduit du réel et à quel prix, sans quoi
+un scénario est un calcul sans référent (chapitre~\ref{ch:calibrer}). Il faut mesurer ce qu'il ne
+permet pas de conclure, sans quoi on publie des chiffres qu'un changement de contexte renverse
+(chapitre~\ref{ch:explorer}). Le chapitre~\ref{ch:discussion} discute ce que cette construction
+engage, sur le territoire représenté comme sur la position depuis laquelle il l'a été, six mois
+sans enquête de terrain, avec des données produites ailleurs et pour autre chose. Les six annexes
+ne sont pas un dépôt de matériaux mais la couche de preuve du corps, appelées chacune à l'endroit
+où l'affirmation qu'elles soutiennent est faite.
