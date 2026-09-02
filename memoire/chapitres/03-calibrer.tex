@@ -359,6 +359,8 @@ le tire pas vers l'observé : même au plafond le plus contraignant, le plantain
 (\SI{247}{\ha}) reste au-dessus du plantain observé (\SI{\obsHaBC}{\ha}). On retient finalement
 un plafond de \SI{6440}{\tonne}, la valeur du modèle \gls{gams}.
 
+La contrainte coûte \SI{3.7}{\percent} de l'objectif.
+
 \subsection*{Seconde déviation : le plancher de prairie}
 
 Sans plancher, le modèle ne donne que \SI{\simBcSeulPN}{\ha} à la prairie. Or le territoire
@@ -385,35 +387,7 @@ On le fixe donc précisément à \SI{\mesCalalouBovins}{\ha}. Les hectares que l
 la prairie vont principalement à la canne, qu'il porte alors à \SI{\simBcSeulCS}{\ha} ; le
 plancher la ramène à \SI{\simRetenuCS}{\ha}, contre \SI{\obsHaCS}{\ha} observés.
 
-\subsection*{Le coût des deux déviations}
-
-Les deux contraintes adoptées coûtent \SI{0.7}{\percent} de l'objectif pour le plancher de
-prairie et \SI{3.7}{\percent} pour le plafond de plantain. Un troisième levier a été envisagé et
-non retenu, le plancher arboricole, dont le coût mesuré va de \SI{0.39}{\percent} à
-\SI{200}{\ha} à \SI{1.19}{\percent} à \SI{335}{\ha} ; il a été écarté parce que les runs qui le
-portaient atteignaient la limite d'une heure avec un incumbent incohérent, donc inexploitable.
-Les deux corrections retenues sont du même ordre de grandeur que ce candidat : aucune n'est une
-correction massive imposée au modèle. Elles corrigent, elles ne réécrivent pas.
-
-\subsection*{Une contrainte que l'on n'a pas posée}
-
-\SI{430}{\ha} d'ananas intensif apparaissent chez les canniers et les bananiers, et aucune
-contrainte actuelle ne l'interdit. Ce que le modèle vérifie sur une exploitation tient en deux
-lignes : des hectares éligibles et un total annuel d'heures de travail. Ces
-\SI{430}{\ha} passent les deux tests. Ce qu'un agronome regarderait, le modèle ne le porte pas.
-Le calendrier d'abord : le cycle de l'ananas dure \num{\mesCycleAnanas} mois quand le modèle est
-mono-période annuel, et une exploitation cannière a déjà ses pointes de plantation et de récolte
-dont un total annuel ne dit rien. Le matériel végétal ensuite : l'ananas se plante par rejets
-issus des plantations existantes, et \SI{430}{\ha} supposent un stock qui n'existe pas sur le
-territoire et met plusieurs cycles à se constituer. L'équipement et le savoir-faire enfin : une
-exploitation cannière possède des machines de canne et une main d'\oe uvre formée à la canne,
-quand le modèle n'a ni capital, ni compétence, ni coût d'apprentissage — changer de culture y est
-gratuit et instantané. Le débouché, pour finir, est une filière organisée qui n'absorbe pas
-\SI{430}{\ha} supplémentaires par construction.
-
-Ce n'est donc pas une erreur de calcul mais une contrainte manquante, de la même famille que
-l'élevage : le modèle ignore qu'un métier ne se change pas en une saison, et rien dans ses
-sorties ne le signale. Le résultat reste plausible tant qu'on ne regarde pas qui cultive quoi.
+La contrainte coûte \SI{0.7}{\percent} de l'objectif.
 
 \section{Explications de l'écart résiduel}
 \label{sec:plateau}
