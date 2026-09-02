@@ -8,52 +8,45 @@
 % chiffres, ce que le dispositif ne permet PAS de conclure. Le cinquieme n'est pas
 % optionnel : c'est lui qui distingue ce resume d'un resume de rapport de stage.
 
-La Guadeloupe importe près de \SI{80}{\percent} de son alimentation, à des prix alimentaires
-supérieurs de plus de \SI{40}{\percent} à ceux de l'Hexagone, tandis que la canne à sucre et la
-banane d'exportation occupent
-l'essentiel de ses terres agricoles. Le projet \gls{tifig}, mené par l'unité \gls{astro} de
+La Guadeloupe importe près de \SI{80}{\percent} de son alimentation, et le prix de l'alimentation est
+\SI{40}{\percent} supérieur à celui de l'Hexagone.  La canne à sucre et la banane d'exportation 
+occupent l'essentiel de ses terres agricoles. Le projet \gls{tifig}, mené par l'unité \gls{astro} de
 l'\gls{inrae}, cherche à évaluer \emph{ex ante} des scénarios de développement des productions
 vivrières ; l'outil prévu pour cela était \gls{mosaica}, modèle bioéconomique d'allocation de
 cultures publié en 2015, qui affecte chaque parcelle d'un territoire à une culture de manière à
-maximiser la marge brute ajustée du risque, sous contraintes agronomiques, foncières et de main
-d'\oe uvre.
+maximiser la marge brute ajustée du risque, sous contraintes diverses (agronomiques, foncières, de main
+d'\oe uvre, etc.). La conception et l'exploration du modèle de 2015 est détaillée dans l'article de \parencite{chopin2015}.
 
-Cet outil n'était pas exploitable en l'état, et la raison n'est pas celle qu'on attend. Écrit en
-\gls{gams}, un langage qui renvoie zéro sans avertissement lorsqu'une table est
-interrogée sur une colonne absente, il contenait des comportements invisibles à la fois dans son
-code, correct d'apparence, et dans ses résultats, parfaitement plausibles — l'un d'eux interdit
-une variante de verger pluvial sur la totalité du territoire. Le stage a donc été réorienté :
-reconstruire l'instrument avant de s'en servir.
+Le travail présenté porte \gls{mosaica} en Python/Pyomo depuis GAMS. C'est un programme linéaire en nombres
+entiers et le solveur \gls{highs} résout un problème d'environ \num{\mesBinaires} variables binaires.
+Le portage est contraint par mandat de parité, c'est-à-dire de reproduction fidèle du modèle GAMS 
+afin de pouvoir attribuer correctement les divergences futures de résultats entre les deux modèle.
+Le modèle est ensuite calibré avec comme référence l'assolement observé de 2017. Une fois calibré, 
+on explore des scénarios choisis parmi une grille de politiques publiques croisées avec des 
+forçages climatiques et économiques. On complète cette exploration par la recherche de 
+deux fronts de Pareto tracés par $\varepsilon$-contrainte.
 
-Le travail présenté porte \gls{mosaica} en Python/Pyomo — un programme linéaire en nombres
-entiers d'environ \num{\mesBinaires} variables binaires, résolu par \gls{highs} — sous un
-mandat de parité qui reproduit le comportement réel du modèle d'origine, défauts compris,
-chacun étant documenté et doublé d'une variante corrigée désactivée. Le modèle est ensuite
-calibré contre l'assolement observé de 2017 selon la métrique de l'article de référence, puis
-employé sur une grille de politiques publiques croisées avec des forçages climatiques et de
-marché, complétée par deux fronts de Pareto tracés par $\varepsilon$-contrainte.
+Plusieurs résultats sont encourageant et la phase d'exploration de scenarios donne déjà des résultats :
+- La calibration dépasse les trois métriques publiées par l'article de \parencite{chopin2015} 
+(\SI{\calibRetenuTypes}{\percent} de types d'exploitation reproduits, 
+\SI{\calibRetenuParcelles}{\percent} de parcelles, \SI{\calibRetenuSurface}{\percent} de surface)
+- Le modèle simule \SI{\simRetenuCS}{\ha} de canne à sucre contre \SI{\obsHaCS}{\ha} observés sans 
+qu'aucune contrainte ne la nomme. 
+- Le classement des politiques publiques dépend du forçage. On évalue les politiques avec des indicateurs 
+de robustesse et de performance.
+- La marge brute du territoire varie en sens inverse du plafond de subventions. l'aide publique 
+n'achète pas de la marge mais plutôt de la stabilité. Desserrer cette contrainte fait disparaître la 
+banane export, diminue fortement la canne à sucre et réoriente environ \SI{2100}{\ha} vers le vivrier.
 
-Trois résultats tiennent sans réserve. La calibration atteint ou dépasse les trois métriques
-publiées (\SI{\calibRetenuTypes}{\percent} de types d'exploitation reproduits,
-\SI{\calibRetenuParcelles}{\percent} de parcelles, \SI{\calibRetenuSurface}{\percent} de
-surface), et surtout la canne à sucre — plus de la moitié du territoire — revient à
-\SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés sans qu'aucune contrainte ne la
-nomme. Le classement des politiques publiques dépend du forçage : la politique de
-souveraineté alimentaire est la meilleure en conjoncture nominale et la pire sous crise
-systémique hors aide, ce qu'un scénario unique ne peut pas montrer. Enfin, la marge brute du
-territoire varie en sens inverse du plafond de subventions, de façon monotone sur sept
-points prouvés optimaux : dans ce modèle, l'aide publique n'achète pas de la marge, elle achète
-de la stabilité — et desserrer cette contrainte réoriente environ \SI{2100}{\ha} de l'export
-vers le vivrier.
-
-Ce que le dispositif ne permet pas de conclure a été mesuré avec le même soin. Aucun débouché
-n'est modélisé au-delà des deux filières d'exportation, si bien que tout basculement vers le
-vivrier suppose un marché parfaitement élastique. Quatre cultures sur onze seulement passent
-sous le seuil d'écart de l'article, l'erreur résiduelle se concentrant sur les petits postes.
-Une politique environnementale bâtie sur les systèmes agroécologiques du jeu de données serait
-satisfaite à coût exactement nul, ceux-ci étant indiscernables les uns des autres. Le
-livrable opposable de ce travail n'est donc pas un jeu de scénarios : c'est un instrument dont
-on sait exactement ce qu'il peut et ne peut pas dire.
+Le modèle présente des défauts et il est important de définir son domaine de validité :
+- Aucun débouché n'est modélisé à part pour la canne à sucre et pour la banane export. Le 
+basculement de l'agricuture vers le vivrier fait l'hypothèse d'un marché parfaitement élastique. 
+- Seulement 4 cultures sur 11 passent sous le seuil d'écart de l'article. l'erreur résiduelle 
+se concentre sur les petits postes, c'est-à-dire les cultures qui occupent une petite surface.
+- La prairie est mal modélisée du fait de l'absence de l'élevage dans le modèle.
+- Ces données de rendement en entrée sont tabulées (extrapolation statistique et déclarations). 
+Caractériser le rendement par parcelle via une simulation permettrait de mieux décrire le 
+comportaement de la parcelle et de ne pas être dépendant d'estimations.
 
 \vfill
 \noindent\textbf{Mots-clés} — allocation de cultures \textperiodcentered\ optimisation en

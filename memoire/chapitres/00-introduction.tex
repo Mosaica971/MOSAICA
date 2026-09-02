@@ -7,48 +7,26 @@
 
 La Guadeloupe cultive \SI{\obsSurfaceCultivee}{\ha} et importe l'essentiel de ce qu'elle mange.
 Près de \SI{80}{\percent} des produits alimentaires consommés dans les départements d'outre-mer
-viennent de l'extérieur \parencite{viepublique2023,odeadom2019}, et l'écart de prix qui en
-résulte est d'abord alimentaire : en 2022, l'alimentation coûtait
-\SI{41.8}{\percent} de plus qu'en France métropolitaine, contre \SI{15.8}{\percent} tous postes
-confondus \parencite{insee2023prix}. Ce n'est pas un déficit de potentiel agronomique, c'est un
-effet d'organisation. La canne à sucre occupe \SI{\obsHaCS}{\ha} et la banane d'exportation
-\SI{\obsHaBA}{\ha}, deux filières tournées vers l'extérieur et soutenues par un dispositif dont
-l'ordre de grandeur décide de tout le reste, le \gls{posei} représentant environ les trois quarts
-de la marge brute agricole du territoire \parencite{touteleurope2024}. Le vivrier occupe ce qui
-reste. Demander s'il peut croître revient à demander ce qu'il faudrait déplacer, sur quelles
-terres et à quel prix pour le revenu des exploitations, ce qui est un problème d'allocation sous
+viennent de l'extérieur \parencite{viepublique2023,odeadom2019} sachant qu'en 2022, l'alimentation coûtait
+\SI{41.8}{\percent} de plus qu'en France métropolitaine. La canne à sucre représente \SI{\obsHaCS}{\ha} et la banane d'exportation
+\SI{\obsHaBA}{\ha}. Ces deux filières sont soutenues par le \gls{posei} représentant environ les trois quarts
+de la marge brute agricole du territoire \parencite{touteleurope2024}. Le vivrier occupe la surface
+restante. Pour l'augmenter, il faut réflechir aux cultures qu'il faudrait déplacer, sur quelles
+terres et à quel prix pour le revenu des exploitations. C'est un problème d'allocation sous
 contraintes.
 
-Le stage s'inscrit dans le projet \gls{tifig} de l'unité \gls{astro} de l'\gls{inrae}, successeur
-de CALALOU, qui avait mobilisé pour son évaluation \emph{ex ante} un modèle bioéconomique
-d'allocation publié dix ans plus tôt, \gls{mosaica} \parencite{chopin2015}. La lettre de mission
-demandait des scénarios agro-économiques sur les aliments traditionnels et prévoyait des enquêtes
-de terrain. \gls{mosaica} y figurait comme l'outil disponible : la commande portait sur ce qu'on
-allait lui faire dire, pas sur lui.\attente{5}\attente{6}
-
-L'instrument n'était pas exploitable en l'état, et pas pour la raison qu'on attend. Le programme
-\gls{gams} d'origine est complet et lisible, mais \gls{gams} renvoie zéro, sans avertissement,
-lorsqu'une table est interrogée sur une colonne absente. Une équation d'éligibilité des vergers
-pluviaux compare alors une valeur nulle à~1, la comparaison est toujours vraie, et la culture se
-trouve interdite sur tout le territoire. Un paramètre absent ne laisse pas un trou dans les
-sorties, il laisse un nombre crédible. Cela ne se découvre ni en lisant le code, correct
-d'apparence, ni en regardant les résultats, vraisemblables, mais en réécrivant le modèle contre
-ses données. Le stage a donc été réorienté vers le portage de \gls{mosaica} en Python/Pyomo
-\parencite{pyomo2021} résolu par \gls{highs} \parencite{highs2018}, soit \num{\mesBinaires}
-variables binaires et \num{\mesLignesCode} lignes de Python, sa calibration contre l'assolement
+Le stage s'inscrit dans le projet \gls{tifig} de l'unité \gls{astro} de l'\gls{inrae}. Ce projet est le successeur
+de CALALOU, qui utilisait déjà \emph{ex ante} un modèle bioéconomique
+d'allocation appelé \gls{mosaica} \parencite{chopin2015}. L'objectif du stage est le portage de \gls{mosaica} en Python/Pyomo
+\parencite{pyomo2021} résolu par \gls{highs} \parencite{highs2018}. Ce travail correspond 
+à \num{\mesLignesCode} lignes de Python, sa calibration contre l'assolement
 observé de 2017, et l'usage prospectif qu'il rend enfin possible.\attente{2}\attente{10}
 
-Ce déplacement n'est pas un accident à excuser, c'est le sujet, et il conduit à la question que
-ce mémoire prend pour objet : que faut-il avoir établi sur un modèle d'allocation hérité pour que
-ses résultats prospectifs soient opposables, c'est-à-dire défendables devant quelqu'un qui les
-conteste ? Trois réponses, trois chapitres après le cadrage du terrain
-(chapitre~\ref{ch:terrain}). Il faut porter le modèle fidèlement, défauts compris, sans quoi
-aucun désaccord ultérieur entre les deux versions n'est attribuable
-(chapitre~\ref{ch:porter}). Il faut établir ce qu'il reproduit du réel et à quel prix, sans quoi
-un scénario est un calcul sans référent (chapitre~\ref{ch:calibrer}). Il faut mesurer ce qu'il ne
-permet pas de conclure, sans quoi on publie des chiffres qu'un changement de contexte renverse
-(chapitre~\ref{ch:explorer}). Le chapitre~\ref{ch:discussion} discute ce que cette construction
-engage, sur le territoire représenté comme sur la position depuis laquelle il l'a été, six mois
-sans enquête de terrain, avec des données produites ailleurs et pour autre chose. Les six annexes
-ne sont pas un dépôt de matériaux mais la couche de preuve du corps, appelées chacune à l'endroit
-où l'affirmation qu'elles soutiennent est faite.
+Le travail commence par explorer les raisons du portage (chapitre~\ref{ch:terrain})
+On souhaite pouvoir défendre les résultas prospectifs du modèle. Pour cela il fallait s'assurer de 2 points :
+- Il faut porter le modèle fidèlement depuis la version de 2015, défauts compris, afin de 
+pouvoir attribuer les divergences futures de résultats entre les deux versions (chapitre~\ref{ch:porter}). 
+- Il faut établir sa capacité à reproduire la réalité afin de pouvoir donner son domaine de 
+validité (chapitre~\ref{ch:calibrer}). 
+Le chapitre~\ref{ch:discussion} discute de mon positionnement, du stage, du projet, 
+de son impact et propose des pistes d'actions face à ses angles morts.
