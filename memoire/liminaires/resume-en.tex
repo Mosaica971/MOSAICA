@@ -10,49 +10,48 @@
 
 \begin{otherlanguage}{english}
 
-Guadeloupe imports close to \SI{80}{\percent} of its food, at food prices more than
-\SI{40}{\percent} higher than in mainland France, while sugarcane and export banana occupy most
-of its farmland. The
-TI-FIG project, run by INRAE's ASTRO research unit, aims to assess \emph{ex ante} scenarios for
-developing local food crops. The tool intended for that purpose was MOSAICA, a bioeconomic
-crop-allocation model published in 2015, which assigns each field of a territory to at most one
-crop so as to maximise risk-adjusted gross margin under agronomic, land-tenure and labour
-constraints.
+Guadeloupe imports close to \SI{80}{\percent} of its food, and food prices there are
+\SI{40}{\percent} higher than in mainland France. Sugarcane and export banana occupy most of its
+farmland. The TI-FIG project, run by INRAE's ASTRO research unit, seeks to assess \emph{ex ante}
+scenarios for developing local food crops; the tool intended for that purpose was MOSAICA, a
+bioeconomic crop-allocation model published in 2015, which assigns each field of a territory to a
+crop so as to maximise risk-adjusted gross margin under various constraints (agronomic,
+land-tenure, labour, etc.). The design and the exploration of the 2015 model are detailed in the
+article by \parencite{chopin2015}.
 
-That tool turned out not to be usable as it stood, and not for the reason one would expect.
-Written in GAMS — a language that silently returns zero when a table is queried on a
-missing column — it contained behaviours invisible both in its code, which looks correct, and
-in its outputs, which look plausible. One of them forbids a rainfed orchard system across the
-entire territory. The internship was therefore redirected: rebuild the instrument before using
-it.
+The work presented here ports MOSAICA to Python/Pyomo from GAMS. It is a mixed-integer linear
+program, and the HiGHS solver handles a problem of about \num{\mesBinaires} binary variables. The
+port is constrained by a parity mandate, that is, by a faithful reproduction of the GAMS model so
+that future divergences in results between the two models can be attributed correctly. The model
+is then calibrated against the observed 2017 land use as a reference. Once calibrated, scenarios
+are explored, chosen from a grid of public policies crossed with climate and market forcings. This
+exploration is completed by tracing two Pareto fronts by $\varepsilon$-constraint.
 
-This work ports MOSAICA to Python/Pyomo — a purely binary mixed-integer linear program of about
-\num{\mesBinaires} variables, solved with HiGHS — under a parity mandate that reproduces
-the original model's actual behaviour, defects included, each one documented and paired with a
-disabled \enquote{intended reading} variant. The model is then calibrated against the observed
-2017 land use using the percentage absolute deviation of the reference article, and finally used
-over a grid of public policies crossed with climate and market forcings, complemented by two
-Pareto fronts traced by $\varepsilon$-constraint.
+Several results are encouraging, and the scenario exploration phase already yields results:
+\begin{itemize}
+\item Calibration exceeds the three metrics published in the article by \parencite{chopin2015}
+(\SI{\calibRetenuTypes}{\percent} of farm types reproduced,
+\SI{\calibRetenuParcelles}{\percent} of fields, \SI{\calibRetenuSurface}{\percent} of area)
+\item The model simulates \SI{\simRetenuCS}{\ha} of sugarcane against \SI{\obsHaCS}{\ha} observed,
+without any constraint naming it.
+\item The ranking of public policies depends on the forcing. Policies are assessed with robustness
+and performance indicators.
+\item Territorial gross margin varies inversely with the subsidy ceiling. Public support does not buy
+margin but rather stability. Relaxing that constraint makes export banana disappear, sharply
+reduces sugarcane and shifts about \SI{2100}{\ha} towards food crops.
+\end{itemize}
 
-Three results hold without qualification. Calibration matches or exceeds the three published
-metrics (\SI{\calibRetenuTypes}{\percent} of farm types reproduced,
-\SI{\calibRetenuParcelles}{\percent} of fields, \SI{\calibRetenuSurface}{\percent} of area);
-above all, sugarcane — more than half the territory — returns to \SI{\simRetenuCS}{\ha} against
-\SI{\obsHaCS}{\ha} observed without any constraint naming it. Second, the ranking of
-public policies depends on the forcing: the food-sovereignty policy is the best under
-nominal conditions and the worst under systemic crisis once subsidies are netted out, which a
-single scenario cannot reveal. Third, territorial gross margin varies inversely with the
-subsidy ceiling, monotonically over seven points all proven optimal: in this model public
-support does not buy margin, it buys stability — and relaxing that constraint shifts about
-\SI{2100}{\ha} from export crops to food crops.
-
-What the framework does not allow one to conclude was measured with equal care. No market
-outlet is modelled beyond the two export sectors, so any shift towards food crops assumes a
-perfectly elastic market. Only four crops out of eleven fall below the article's deviation
-threshold, the residual error concentrating on the smallest crops. And an environmental policy
-built on the dataset's agroecological systems would be satisfied at exactly zero cost,
-those systems being indistinguishable from one another. The defensible deliverable of this work
-is therefore not a set of scenarios: it is an instrument whose limits are known precisely.
+The model has shortcomings, and it is important to define its domain of validity:
+\begin{itemize}
+\item No market outlet is modelled apart from sugarcane and export banana. The shift of agriculture
+towards food crops assumes a perfectly elastic market.
+\item Only 4 crops out of 11 fall below the article's deviation threshold. The residual error
+concentrates on the smallest items, that is, on the crops that occupy a small area.
+\item Grassland is poorly modelled because livestock is absent from the model.
+\item The yield data used as input are tabulated (statistical extrapolation and declarations).
+Characterising yield field by field through simulation would describe the behaviour of the field
+better and would remove the dependence on estimates.
+\end{itemize}
 
 \vfill
 \noindent\textbf{Keywords} — crop allocation \textperiodcentered\ mixed-integer programming
