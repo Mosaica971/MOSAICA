@@ -311,8 +311,10 @@
     justifie: [SOLV-11, SOLV-12]
   critique: >
     Enregistrer systématiquement une mesure dont on ne sait pas encore quoi
-    faire : c'est ce qui a permis, six semaines plus tard, d'établir le CV de
-    64 % et de tuer l'estimateur ponctuel. Argument pour instrumenter tôt.
+    faire : c'est ce qui a permis, six semaines plus tard, d'établir la
+    dispersion des durées et de tuer l'estimateur ponctuel. Argument pour
+    instrumenter tôt — assorti de sa limite, SOLV-11b : le fichier ne garde que
+    les 20 dernières entrées, donc il mesure sans archiver.
 
 - id: VER-11
   titre: >
@@ -459,7 +461,8 @@
     mesure-par: [SOLV-11]
   critique: >
     ⚠ LA BRANCHE LA MIEUX COUPÉE DU DÉPÔT, avec DEUX raisons dont la seconde est
-    la vraie. (1) Trop lent : 30 à 55 min avec une variance ×2,1. (2) Et surtout
+    la vraie. (1) Trop lent : une demi-heure à une heure, avec un rapport de
+    ×11 entre le plus rapide et le plus lent. (2) Et surtout
     **pas déterministe au sens qui nous intéresse** — sur un MILP DÉGÉNÉRÉ, deux
     optima de VALEUR IDENTIQUE peuvent être retournés indifféremment. « Un écart
     d'allocation entre deux runs ne prouverait rien, et MASQUERAIT les vrais

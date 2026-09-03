@@ -144,7 +144,9 @@
 # --- La dispersion du temps de solve ----------------------------------------
 
 - id: SOLV-10
-  titre: Le solve prend 30 à 55 min sur le territoire complet
+  titre: >
+    Le solve prend une demi-heure à une heure sur le territoire complet en
+    configuration de calibration, deux à trois heures en prospective
   type: resultat
   statut: retenu
   severite: majeur
@@ -157,14 +159,14 @@
 
 - id: SOLV-11
   titre: >
-    À taille constante, les 20 solves enregistrés s'étalent de 155 s à 1 007 s
-    — facteur 6,5, CV 64 %
+    À taille constante, les 7 solves de calibration enregistrés s'étalent de
+    327 s à 3 625 s — facteur 11, CV 91 %
   type: resultat
   statut: retenu
   severite: majeur
-  quand: 2026-08-01
-  source: [docs/04-vigilance.md#B.1, core/solve/timing.py]
-  chiffre: [mesSolveMin, mesSolveMax, mesSolveCV]
+  quand: 2026-08-30
+  source: [docs/04-vigilance.md#B.1, .mosaica_solve_history.json, memoire/build_chiffres.py]
+  chiffre: [mesSolveN, mesSolveMin, mesSolveMax, mesSolveMoy, mesSolveCV, mesSolveFacteur]
   destination: [ch2, oral, article]
   arcs:
     parce-que: [SOLV-10]
@@ -173,6 +175,43 @@
     Résultat sous-exploité. La dispersion à taille constante d'un MILP
     d'allocation est exactement le genre de mesure qui manque dans la
     littérature appliquée, où l'on publie un temps de calcul unique.
+    ⚠ CHIFFRES REMPLACÉS LE 2026-08-30, et la raison compte autant que les
+    valeurs. Cet item disait « les 20 solves vont de 155 s à 1 007 s, facteur
+    6,5, CV 64 % », relevé le 2026-08-01. `.mosaica_solve_history.json` est une
+    FENÊTRE GLISSANTE sur les 20 derniers solves, pas un journal cumulatif :
+    la campagne de l'époque a été écrasée par les runs prospectifs, plus aucune
+    entrée n'approche 155 s ou 1 007 s, et les 20 entrées actuelles se
+    répartissent sur DEUX tailles, ce qui rend « à taille constante, les 20
+    solves » mal formé. Ni le relevé de 2026-08-01 ni celui-ci n'était faux :
+    c'est la SOURCE qui oublie. Le chiffre publié doit donc être recompté, pas
+    recopié — voir SOLV-11b.
+
+- id: SOLV-11b
+  titre: >
+    Une source de chiffres peut OUBLIER — l'historique de solve est une fenêtre
+    glissante de 20 entrées, pas un journal
+  type: methode
+  statut: retenu
+  severite: majeur
+  quand: 2026-09-02
+  source: [core/solve/progress.py, .mosaica_solve_history.json]
+  chiffre: []
+  destination: [note, oral]
+  arcs:
+    parce-que: [SOLV-11]
+    justifie: [MET-14]
+  critique: >
+    `del entries[:-_MAX_ENTRIES_PER_CASE_STUDY]` tient la trace d'un seul
+    fichier borné, ce qui est le bon choix pour un estimateur — il doit décrire
+    la machine d'AUJOURD'HUI — et le mauvais pour une citation, qui prétend
+    décrire un fait daté. Le mémoire a cité pendant un mois « 155 s à 1 007 s,
+    CV 64 % » alors que le fichier ne contenait plus rien de tel, et sans
+    qu'aucun garde-fou puisse le voir : `golden_snapshot` verrouille le
+    pipeline, pas les mesures de durée, qui sont non déterministes par nature.
+    Même famille que MET-14 (le chiffre de documentation qui dérive) mais un
+    cran plus retors : ici la dérive vient de la source elle-même, pas de la
+    copie. La règle qui en sort : un chiffre lu dans un artefact borné se
+    RECOMPTE à la publication et se date, il ne se recopie pas.
 
 - id: SOLV-12
   titre: >
@@ -809,9 +848,9 @@
     ⚠ LE MEILLEUR EXEMPLE DU DÉPÔT D'UNE OPTIMISATION QUI NE PASSE PAS À
     L'ÉCHELLE. Gain mesuré : ~25 % sur l'île 1 (un sous-ensemble). À pleine
     échelle : 3 310 s, c'est-à-dire DANS LA FOURCHETTE HABITUELLE — donc
-    indiscernable du bruit (SOLV-11, CV 64 %). Retour à `SolverFactory`.
+    indiscernable du bruit (SOLV-11, CV 91 %). Retour à `SolverFactory`.
     Leçon générale, et elle vaut pour tout le travail : sur un problème dont la
-    durée a un CV de 64 %, une mesure d'accélération faite sur UN run à pleine
+    durée a un CV de 91 %, une mesure d'accélération faite sur UN run à pleine
     échelle ne prouve rien, et une mesure faite sur un sous-ensemble ne se
     transporte pas. C'est la raison profonde pour laquelle le gain propre du
     chaînage d'amorçage n'a jamais été chiffré (PERSP-50) : il faudrait des

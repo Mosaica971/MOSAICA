@@ -189,8 +189,8 @@
 
 \begin{table}[H]
   \centering
-  \caption{Prix duals des contraintes nommées, lus sur la relaxation linéaire, et les deux
-  réserves qui conditionnent leur emploi.}
+  \caption{Prix duals des contraintes nommées, lus sur la relaxation linéaire du run indiqué,
+  et les trois réserves qui conditionnent leur emploi.}
   \label{tab:ann-duals}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -198,10 +198,13 @@
     \toprule
     \textbf{Grandeur} & \textbf{Valeur ou réserve} \\
     \midrule
-    Un point d'\gls{ift} & \SI{286}{\euros} \\
-    Un kilogramme d'azote & \SI{9.81}{\euros} \\
-    Une heure de travail & \SI{12.50}{\euros} \\
+    Un point d'\glsentryshort{ift}, sous P7 & \SI{\dualIftSept}{\euros} \\
+    Un point d'\glsentryshort{ift}, sous P8 & \SI{\dualIftHuit}{\euros} \\
+    Un kilogramme d'azote, sous P8 & \SI{\dualAzoteHuit}{\euros} \\
     \midrule
+    Un dual n'existe que sous une politique & les deux premières lignes sont la même grandeur
+      physique sous deux politiques, et le prix va du simple à moins du double. Un prix dual
+      cité sans le run dont il est issu ne veut rien dire \\
     Ce sont les duals de la relaxation linéaire & figer les variables entières ne fonctionne
       pas ici, le modèle étant purement binaire. La relaxation obtenue n'a plus aucune variable
       libre et tous les duals y valent zéro \\

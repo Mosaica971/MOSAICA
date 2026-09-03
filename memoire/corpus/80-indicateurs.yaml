@@ -482,15 +482,18 @@
 
 - id: IND-60
   titre: >
-    Le coût marginal de chaque contrainte nommée — un point d'IFT vaut 286 €,
-    un kg d'azote 9,81 €, une heure de travail 12,50 €
+    Le coût marginal de chaque contrainte nommée — un point d'IFT vaut 566,68 €
+    sous P7 et 412,18 € sous P8, un kg d'azote 5,27 € sous P8
   type: resultat
   statut: retenu
   severite: null
-  quand: 2026-08-01
-  source: [core/solve/shadow_prices.py]
-  chiffre: []
-  destination: [ch4, annexeD]
+  quand: 2026-09-02
+  source: [core/solve/shadow_prices.py, memoire/build_chiffres.py]
+  chiffre: [dualIftSept, dualIftHuit, dualAzoteHuit]
+  # Le chapitre 4 parle des duals des fronts (`front*DualBas`), qui sont un autre objet : une
+  # pente locale au point le plus serre d'un balayage. Les duals des contraintes nommees
+  # vivent en annexe D, et nulle part ailleurs.
+  destination: [annexeD, oral]
   arcs:
     parce-que: [IND-01]
     justifie: [PROS-11]
@@ -499,6 +502,15 @@
     travail. Mais ils portent la réserve de VER-13 (duaux de la relaxation, pas
     du MILP) ET celle de PROS-11 (validité locale seulement) — deux réserves
     empilées sur le chiffre le plus citable du lot. À ne jamais sortir seul.
+    ⚠ TROISIÈME RÉSERVE, DÉCOUVERTE LE 2026-09-02 en cherchant à générer ces
+    chiffres au lieu de les saisir. L'item disait « 286 € / 9,81 € / 12,50 € »,
+    repris de docs/TODO.md : AUCUN recap présent sur le disque ne les reproduit,
+    et la troisième valeur n'était même pas du bon genre — le dual de
+    `mo_max_expl` porte sur le plafond de main-d'œuvre d'une exploitation
+    (~42 000 €), ce n'est pas un prix horaire. Le chiffre le plus citable du lot
+    était donc aussi le seul invérifiable. Il est désormais généré, daté et
+    attaché à son run, et la ligne « heure de travail » a été supprimée plutôt
+    que corrigée. Même famille que SOLV-11b : ce qui se recopie dérive.
 
 # =============================================================================
 # DENSIFICATION — spec « eau et carbone organique » (2026-07-20).

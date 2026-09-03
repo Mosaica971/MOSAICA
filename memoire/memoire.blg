@@ -1,15 +1,15 @@
 [0] Config.pm:328> INFO - This is Biber 2.21
 [0] Config.pm:331> INFO - Logfile is 'memoire.blg'
-[105] biber-MSWIN64:342> INFO - === 
-[151] Biber.pm:421> INFO - Reading 'memoire.bcf'
-[266] Biber.pm:1002> INFO - Found 16 citekeys in bib section 0
-[277] Biber.pm:4487> INFO - Processing section 0
-[288] Biber.pm:4678> INFO - Looking for bibtex file 'biblio.bib' for section 0
-[381] bibtex.pm:1713> INFO - LaTeX decoding ...
-[402] bibtex.pm:1519> INFO - Found BibTeX data source 'biblio.bib'
-[514] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'variable = shifted' with 'variable = non-ignorable'
-[514] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[514] Biber.pm:4307> INFO - Sorting list 'nyt/global//global/global/global' of type 'entry' with template 'nyt' and locale 'fr-FR'
-[514] Biber.pm:4313> INFO - No sort tailoring available for locale 'fr-FR'
-[530] bbl.pm:676> INFO - Writing 'memoire.bbl' with encoding 'UTF-8'
-[541] bbl.pm:779> INFO - Output to memoire.bbl
+[185] biber-MSWIN64:342> INFO - === 
+[246] Biber.pm:421> INFO - Reading 'memoire.bcf'
+[433] Biber.pm:1002> INFO - Found 16 citekeys in bib section 0
+[458] Biber.pm:4487> INFO - Processing section 0
+[480] Biber.pm:4678> INFO - Looking for bibtex file 'biblio.bib' for section 0
+[654] bibtex.pm:1713> INFO - LaTeX decoding ...
+[791] bibtex.pm:1519> INFO - Found BibTeX data source 'biblio.bib'
+[1576] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'variable = shifted' with 'variable = non-ignorable'
+[1577] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[1578] Biber.pm:4307> INFO - Sorting list 'nyt/global//global/global/global' of type 'entry' with template 'nyt' and locale 'fr-FR'
+[1579] Biber.pm:4313> INFO - No sort tailoring available for locale 'fr-FR'
+[1695] bbl.pm:676> INFO - Writing 'memoire.bbl' with encoding 'UTF-8'
+[1767] bbl.pm:779> INFO - Output to memoire.bbl

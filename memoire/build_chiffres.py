@@ -401,6 +401,25 @@ GRILLE: dict[str, dict[str, str]] = {
     },
 }
 
+# --- Les prix duals cites en annexe D ---------------------------------------
+# UN DUAL EST LU DANS UN RUN NOMME, jamais recopie, et il n'a de sens que sous LA POLITIQUE
+# qui l'a produit -- un point d'IFT ne vaut pas le meme prix sous P7 et sous P8.
+#
+# CE BLOC EXISTE PARCE QUE LES TROIS VALEURS PRECEDENTES ETAIENT INTROUVABLES. L'annexe D
+# citait, saisis a la main depuis docs/TODO.md, « un point d'IFT vaut 286 EUR, un kg d'azote
+# 9,81 EUR, une heure de travail 12,50 EUR ». Aucun recap present sur le disque ne les
+# reproduit : ils datent d'une campagne anterieure, faite sous une autre configuration. Pire,
+# le troisieme n'etait meme pas du bon genre -- le dual de `mo_max_expl` porte sur le plafond
+# de main-d'oeuvre D'UNE EXPLOITATION (~42 000 EUR), ce n'est pas un prix horaire. La ligne a
+# donc ete supprimee plutot que corrigee.
+DUALS: list[tuple[str, str, str]] = [
+    # (suffixe de macro, dossier de run, nom de la contrainte dans recap["shadow_prices"])
+    ("IftSept",   "p7_ecophyto_reglementaire_f0_nominal",    "plafond_ift"),
+    ("IftHuit",   "p8_transition_agroecologique_f0_nominal", "plafond_ift"),
+    ("AzoteHuit", "p8_transition_agroecologique_f0_nominal", "plafond_azote"),
+]
+
+
 # --- Les fronts de Pareto ---------------------------------------------------
 # (prefixe de macro, balayage, politique hote ou None, label de la contrainte balayee,
 #  chemin de l'indicateur reellement atteint, dossier du run NON BALAYE de reference)
@@ -425,6 +444,37 @@ FRONTS: list[tuple[str, str, str | None, str, tuple[str, ...], str]] = [
     ("subvQuatre", "pareto_subventions", "P4_statu_quo", "budget_subventions",
      ("economics", "output", "total_subsidy"), "p4_statu_quo"),
 ]
+
+
+def _corpus() -> list[tuple[str, int]]:
+    """Items et arcs du corpus, comptes dans les YAML.
+
+    Le meme comptage que `audit_corpus.py`, refait ici plutot qu'importe : ce fichier ne doit
+    dependre que de la bibliotheque standard et de PyYAML, pour rester lancable seul.
+
+    LE COMPTE INCLUT LES ARCS COMPLETES PAR SYMETRIE, comme celui de l'audit -- sans quoi il
+    rendrait 826 la ou l'audit annonce 1 271, et les deux chiffres se contrediraient dans le
+    memoire. `parce-que` et `justifie` sont deux lectures du meme lien : un item declare
+    souvent l'un sans que l'autre bout declare le retour, et ces liens existent quand meme.
+    """
+    import yaml
+
+    declares: dict[str, dict[str, set[str]]] = {}
+    for fichier in sorted((Path(__file__).resolve().parent / "corpus").glob("*.yaml")):
+        for item in yaml.safe_load(fichier.read_text(encoding="utf8")) or []:
+            arcs = {k: set(v or []) for k, v in (item.get("arcs") or {}).items()}
+            declares[item["id"]] = arcs
+
+    for source, arcs in list(declares.items()):
+        for parent in arcs.get("parce-que", ()):
+            if parent in declares:
+                declares[parent].setdefault("justifie", set()).add(source)
+        for enfant in arcs.get("justifie", ()):
+            if enfant in declares:
+                declares[enfant].setdefault("parce-que", set()).add(source)
+
+    total = sum(len(cibles) for arcs in declares.values() for cibles in arcs.values())
+    return [("corpusItems", len(declares)), ("corpusArcs", total)]
 
 
 def _dig(data: dict, path: tuple[str, ...]) -> float | int | None:
@@ -923,6 +973,20 @@ def main() -> int:
         lines += _emettre_front(prefixe, points, temoin)
     lines.append("")
 
+    lines.append("% --- prix duals des contraintes nommees " + "-" * 35)
+    for suffixe, dossier, contrainte in DUALS:
+        dual = _dig(par_dossier.get(dossier) or {}, ("shadow_prices", contrainte, "dual"))
+        if dual is None:
+            missing.append(f"dual {suffixe} : `{contrainte}` absent de `{dossier}`")
+            continue
+        # Un dual NUL veut dire que la contrainte ne mord pas dans ce run. L'imprimer serait
+        # citer un prix qui n'existe pas : on le signale au lieu de l'ecrire.
+        if abs(dual) < 1e-9:
+            missing.append(f"dual {suffixe} : `{contrainte}` ne mord pas dans `{dossier}`")
+            continue
+        lines.append(f"\\newcommand{{\\dual{suffixe}}}{{{_fmt(abs(dual), 2)}}}  % {dossier}")
+    lines.append("")
+
     # Ce que le serrage de l'enveloppe publique deplace sur le terrain.
     lines.append("% --- reallocation sous plafond de subventions " + "-" * 30)
     lines += _table_realloc(
@@ -936,6 +1000,14 @@ def main() -> int:
     # des bequilles.
     lines.append("% --- rendements : modele contre statistique agricole " + "-" * 21)
     lines += _table_rendements("calib_retenu")
+    lines.append("")
+
+    # La taille du corpus etait saisie a la main dans l'annexe F. Elle avait deja derive :
+    # « 482 items, 1 267 arcs » alors que les fichiers en portaient davantage. Un inventaire
+    # qui grandit a chaque session ne peut pas etre cite de memoire -- on le compte.
+    lines.append("% --- taille du corpus (comptee dans memoire/corpus/*.yaml) " + "-" * 17)
+    for name, value in _corpus():
+        lines.append(f"\\newcommand{{\\{name}}}{{{value}}}")
     lines.append("")
 
     lines.append("% --- mesures hors recap (voir build_chiffres.py pour les sources) -----")

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  2 SEP 2026 21:08
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  2 SEP 2026 22:59
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -2625,10 +2625,10 @@ Package logreq Info: Writing requests to 'memoire.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 60133 strings out of 467871
- 1265539 string characters out of 5416925
- 2145863 words of memory out of 5000000
- 87509 multiletter control sequences out of 15000+600000
+ 60138 strings out of 467871
+ 1265595 string characters out of 5416925
+ 2145882 words of memory out of 5000000
+ 87514 multiletter control sequences out of 15000+600000
  771633 words of font info for 393 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  91i,15n,120p,2515b,3062s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -2653,9 +2653,9 @@ al/Programs/MiKTeX/fonts/type1/public/newtx/txsys.pfb><C:/Users/Clément/AppDat
 a/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmb.pfb><C:/Users/Clément/Ap
 pData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmr.pfb><C:/Users/Clémen
 t/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmri.pfb>
-Output written on memoire.pdf (51 pages, 589833 bytes).
+Output written on memoire.pdf (51 pages, 590275 bytes).
 PDF statistics:
- 1237 PDF objects out of 1440 (max. 8388607)
+ 1234 PDF objects out of 1440 (max. 8388607)
  200 named destinations out of 1000 (max. 500000)
  67690 words of extra memory for PDF output out of 74296 (max. 10000000)
 

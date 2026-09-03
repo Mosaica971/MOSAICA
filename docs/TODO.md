@@ -127,8 +127,14 @@ listés « bloqués » plus bas et ne l'étaient pas.
   en récolte verte comme bio.
 - **Rpest (Tixier)** : `domain/rpest.py`, arbre flou complet (4 sous-scores, surface/profondeur).
   Banane intensive 8,81, maraîchage 6,05, canne 5,66 ; 2 655 ha à risque élevé sur `output_3`.
-- **Prix duaux** : `core/solve/shadow_prices.py`. Un point d'IFT vaut 286 €, un kg d'azote 9,81 €,
-  une heure de travail 12,50 € sur l'exploitation la plus contrainte.
+- **Prix duaux** : `core/solve/shadow_prices.py`. Un point d'IFT vaut **566,68 €** sous P7 et
+  **412,18 €** sous P8, un kg d'azote **5,27 €** sous P8 (lus le 2026-09-02 dans les recaps
+  `p7_ecophyto_reglementaire_f0_nominal` et `p8_transition_agroecologique_f0_nominal` ; le
+  mémoire les génère via `memoire/build_chiffres.py`, bloc `DUALS`). ⚠ Cette ligne annonçait
+  « 286 € / 9,81 € / 12,50 € l'heure de travail », valeurs d'une campagne antérieure qu'**aucun
+  recap présent sur le disque ne reproduit** ; la troisième n'était en outre pas un prix horaire
+  mais le dual du plafond de main-d'œuvre d'une exploitation (~42 000 €). Un dual n'a de sens que
+  sous la politique qui l'a produit : le citer sans son run est une erreur.
 - **`zone_filter` qui met les bornes territoriales à l'échelle** : un run Marie-Galante passe
   d'**infaisable à optimal en 5 s**. Le développement de scénarios devient testable en secondes.
 - **Balayages de seuils** : `matrix:` accepte `args:<label>.<argument>`, ce qui rend les fronts

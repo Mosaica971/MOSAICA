@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > **les chapitres actuels ont été rédigés par Claude et Clément compte s'en éloigner**), le
 > plan par phases, et les points ouverts. Le tenir à jour à la fin de chaque session de
 > rédaction — c'est ce qui évite de tout réexpliquer à chaque conversation.
-> L'inventaire raisonné du stage vit dans `memoire/corpus/` (482 items typés, 1 267 arcs de
+> L'inventaire raisonné du stage vit dans `memoire/corpus/` (491 items typés, 1 271 arcs de
 > justification) ; `memoire/audit_corpus.py` en vérifie la complétude et écrit
 > `corpus/_audit.md`.
 
@@ -61,9 +61,9 @@ Full end-to-end solve (builds data → model → solves with HiGHS → writes `o
 (`build_reference_state`, `evaluate_calibration`, `compare_to_reference`, `pad_all_scales`) are
 case-study-specific by nature. See `docs/05-nouveau-cas-etude.md`.
 
-**Do NOT run `main.py` casually.** The full solve is slow (~30–55 min on the real dataset,
-with large run-to-run variance; the bottleneck is the branch-and-bound search itself — see
-`docs/04-vigilance.md`). Per standing user preference, only run the full solve at end-of-day and
+**Do NOT run `main.py` casually.** The full solve is slow (~30–60 min on the real dataset in the
+calibration configuration, 2–3 h in the prospective one, with large run-to-run variance; the
+bottleneck is the branch-and-bound search itself — see `docs/04-vigilance.md`). Per standing user preference, only run the full solve at end-of-day and
 only when asked; iterate with targeted pytest instead. For scaled-down experiments use
 `zone_filter` in `config.yaml` (restrict to one island/region/farm) or
 `scripts/profile_solver.py` (phase-timed run on a zone subset).
@@ -268,8 +268,11 @@ the YAML, not the builder.
    `solve_model` (`core/solve/solver.py`, `SolverFactory('appsi_highs')` → HiGHS)
    **synchronously on the main thread**, printing an expected-duration **range** before and
    the real duration after. It is a range, not a point, because measurement says a point is
-   meaningless: at a fixed 308 847 variables the 20 recorded solves span 155 s to 1 007 s
-   (CV 64 %, factor 6.5), and the previous point estimator was wrong by a median 75 %.
+   meaningless: at a fixed 308 847 variables the 7 recorded calibration solves span 327 s to
+   3 625 s (CV 91 %, factor 11), and the previous point estimator was wrong by a median 75 %.
+   **That figure is a rolling window, not a cumulative log** — `.mosaica_solve_history.json`
+   keeps only the last 20 solves per case study, so recount it (last done 2026-08-30) instead
+   of quoting this line; an earlier "155 s to 1 007 s, CV 64 %" was overwritten unnoticed.
    `SolveHistory.estimate_range` therefore reads the **most recent** comparable runs (same
    size ±20 %, same warm/cold mode — 720 s against 209 s, so those are never pooled) and
    **returns None rather than answer outside the size band** (the old one gave the same 456 s

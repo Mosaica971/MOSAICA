@@ -50,10 +50,41 @@ refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémo
 > État : **cœur 25 / 30, annexes 18 / 20, 0 `Overfull hbox` > 5 pt, 0 référence non résolue,
 > 0 marqueur d'attente.**
 >
-> ⚠ **Toujours non tranché : la variabilité des solves.** `chiffres.tex` donne 327 s / 3 625 s
-> / CV 91 % / ×11 sur **7** solves ; le corpus `SOLV-11` et `CLAUDE.md` disent 155 s / 1 007 s
-> / CV 64 % / ×6,5 sur **20**. Le `.tex` est cohérent avec lui-même (il lit les macros), mais
-> l'un des deux jeux est périmé.
+> ✅ **TRANCHÉ le 2026-09-02 (2ᵉ passe) : la variabilité des solves.** Le mémoire a raison, les
+> autres sources étaient périmées. `.mosaica_solve_history.json` est une **fenêtre glissante sur
+> les 20 derniers solves** (`core/solve/progress.py`, `del entries[:-_MAX_ENTRIES_PER_CASE_STUDY]`),
+> pas un journal : la campagne de 2026-08-01 qui donnait 155 s / 1 007 s / CV 64 % a été
+> **écrasée** par les runs prospectifs. Recompté sur le fichier actuel — 7 solves à 308 847
+> variables : 327 s → 3 625 s, moyenne 1 448 s, **CV 91 %**, facteur 11 ; 13 solves à 331 044 :
+> 2 505 s → 10 856 s, moyenne 7 043 s, CV 49 %. Ce ne sont donc plus « 20 solves à taille
+> constante » mais 20 réparties sur **deux tailles**, ce qui rendait l'ancienne phrase mal formée.
+> La dispersion n'est pas un artefact du mélange warm/cold : sur les 6 solves de calibration
+> amorcés à chaud seuls, le CV vaut encore **96 %**. Mis à jour en conséquence :
+> `docs/04-vigilance.md` B.1, `CLAUDE.md` (×2), le docstring de `SolveHistory`, `SOLV-11`,
+> `SOLV-72`, `VER-10` et `VER-31`. Nouvel item de méthode **`SOLV-11b`** : *une source de
+> chiffres peut oublier*, un chiffre lu dans un artefact borné se **recompte** à la publication.
+>
+> **Deux autres corrections, même passe.**
+> * **Les trois prix duals de l'annexe D étaient introuvables.** « Un point d'IFT vaut 286 €, un
+>   kg d'azote 9,81 €, une heure de travail 12,50 € », repris de `docs/TODO.md` : **aucun recap
+>   présent sur le disque ne les reproduit**, et le troisième n'était même pas du bon genre (le
+>   dual de `mo_max_expl` porte sur le plafond de main-d'œuvre d'une exploitation, ~42 000 €, ce
+>   n'est pas un prix horaire). `build_chiffres.py` porte désormais un bloc `DUALS` qui les lit
+>   dans des runs nommés — **566,68 €** le point d'IFT sous P7, **412,18 €** sous P8, **5,27 €**
+>   le kg d'azote sous P8 — et la ligne « heure de travail » est supprimée plutôt que corrigée.
+>   La table gagne au passage sa vraie leçon : le même IFT n'a pas le même prix sous deux
+>   politiques. `IND-60` et `docs/TODO.md` mis à jour.
+> * **La taille du corpus est générée** (`\corpusItems`, `\corpusArcs`, comptés dans les YAML
+>   avec la même complétion par symétrie que l'audit). L'annexe F affichait 482 items / 1 267
+>   arcs à la main alors que les fichiers en portent **491 / 1 271**. La ligne « aucun chiffre du
+>   corps n'est saisi à la main » de la même table était fausse : elle dit maintenant ce qui est
+>   vrai, et une ligne voisine énonce ce que ce régime **n'empêche pas** (les deux dérives
+>   ci-dessus).
+>
+> `compile.ps1` **était cassé** : `$ErrorActionPreference = "Stop"` plus une ligne de MiKTeX sur
+> stderr (« you have not checked for MiKTeX updates ») = `NativeCommandError` terminant, alors
+> que pdflatex rendait 0. Les appels natifs passent par `Invoke-Natif`, qui juge sur le code de
+> sortie. `memoire/out*.txt` supprimés.
 >
 > **Session du 2026-09-01 — remerciements supprimés, intro et conclusion condensées à 1 page.**
 > `liminaires/remerciements.tex` est supprimé et son `\input` retiré de `memoire.tex`.
@@ -274,7 +305,8 @@ change ; y consigner les réponses au fur et à mesure. `\attentesvisiblesfalse`
 ### Le corpus — `memoire/corpus/` (fait)
 
 L'inventaire typé de tout ce que le stage a décidé, mesuré, écarté ou raté, avec les arcs qui
-relient chaque item à ce qui le justifie. **482 items, 1 267 arcs, 13 fichiers.** Le schéma
+relient chaque item à ce qui le justifie. **491 items, 1 271 arcs, 13 fichiers** (compté par
+`audit_corpus.py` ; le mémoire l'affiche via `\corpusItems` / `\corpusArcs`, plus à la main). Le schéma
 est dans `corpus/00-schema.md` ; il est à lire avant d'y toucher. Les préfixes : CTX contexte,
 PORT portage, ARCH architecture, SOLV solveur, DON données, CAL calibration, PROS prospective,
 IND indicateurs, VER vérification, MET méthode, REF réflexivité, PERSP perspectives, ART
@@ -352,10 +384,11 @@ là qu'une dérive s'est logée (`mesChecksums` annonçait 570 pour 681 réels).
 5. **Une trentaine de chiffres du corps ne viennent toujours pas de `chiffres.tex`.** Ils sont
    exacts (ils viennent du corpus) mais saisis à la main, ce qui contredit la règle du § 4 de
    `PLAN.md` — et le § 6 bis montre que ce n'est pas une coquetterie de méthode. Les plus
-   visibles restants : le palier plantain (4 650 / 9 240 t), les 126 h/ha de troupeau, les trois
-   coûts marginaux (286 € / 9,81 € / 12,50 €), la réallocation à l'hectare du Ch. 4, les
-   +20,9 M€ du plantain et les 12,8 M€ d'écart d'objectif. **Le bon correctif est d'étendre
-   `build_chiffres.py`**, pas de retirer les chiffres. Repérables par
+   visibles restants : le palier plantain (4 650 / 9 240 t), les 126 h/ha de troupeau, la
+   réallocation à l'hectare du Ch. 4, les +20,9 M€ du plantain et les 12,8 M€ d'écart
+   d'objectif. Les **trois coûts marginaux** et la **taille du corpus** sont sortis de cette
+   liste le 2026-09-02 : ils sont générés — et les deux étaient faux, ce qui est l'argument.
+   **Le bon correctif est d'étendre `build_chiffres.py`**, pas de retirer les chiffres. Repérables par
    `Select-String -Path chapitres\*.tex -Pattern '\\(num|SI)\{[0-9]'`.
 6. **Bibliographie vérifiée le 2026-08-16** contre Crossref, Wiley, Taylor & Francis,
    ScienceDirect et JSTOR : volumes, numéros et pages des dix entrées de méthode sont confirmés,

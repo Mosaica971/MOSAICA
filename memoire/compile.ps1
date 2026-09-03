@@ -22,10 +22,22 @@ Set-Location $PSScriptRoot
 # -interaction=nonstopmode : ne jamais attendre au clavier (le harnais n'a pas de stdin).
 $flags = @("-interaction=nonstopmode", "-halt-on-error", "-file-line-error", "memoire.tex")
 
+# UNE LIGNE SUR STDERR NE DOIT PAS TUER LA COMPILATION. Avec $ErrorActionPreference = "Stop",
+# Windows PowerShell 5.1 transforme chaque ligne de stderr d'un executable natif en
+# NativeCommandError terminant, MEME quand l'executable rend 0. MiKTeX ecrit desormais un
+# rappel de mise a jour sur stderr ("you have not checked for MiKTeX updates"), ce qui suffisait
+# a interrompre le script des la premiere passe alors que le PDF etait correct. On neutralise
+# la preference le temps de l'appel et on juge sur le CODE DE SORTIE, seule information fiable.
+function Invoke-Natif($exe, $arguments) {
+    $ancien = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try   { & $exe @arguments 2>&1 | Out-Null; return $LASTEXITCODE }
+    finally { $ErrorActionPreference = $ancien }
+}
+
 function Invoke-Pass($n) {
     Write-Host "--- pdflatex passe $n ---"
-    & $pdflatex @flags | Out-Null
-    if ($LASTEXITCODE -ne 0) {
+    if ((Invoke-Natif $pdflatex $flags) -ne 0) {
         Write-Host "ECHEC pdflatex (passe $n). Erreurs :"
         Select-String -Path memoire.log -Pattern '^(.*:\d+:|!)' | Select-Object -First 25
         exit 1
@@ -34,7 +46,8 @@ function Invoke-Pass($n) {
 
 Invoke-Pass 1
 if (-not $Quick) {
-    & $biber memoire | Out-Null      # biber echoue tant qu'aucune citation n'existe : sans gravite
+    # biber echoue tant qu'aucune citation n'existe : sans gravite, on ne teste pas son code.
+    Invoke-Natif $biber @("memoire") | Out-Null
     Invoke-Pass 2
     Invoke-Pass 3
 }

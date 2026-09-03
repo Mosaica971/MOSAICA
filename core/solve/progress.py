@@ -24,11 +24,19 @@ T = TypeVar("T")
 class SolveHistory:
     """Durations of past solves, per case study, used to say what to expect before one.
 
-    WHAT THIS CAN AND CANNOT DO. Measured on the 20 recorded Guadeloupe solves: at a FIXED
-    problem size (308 847 variables) the durations run 155 s to 1 007 s -- a factor 6.5, CV
-    64 %. That dispersion is the branch-and-bound search itself, not noise in the
-    measurement, so no estimator built on size can be a reliable point estimate. The earlier
-    one returned a single number and was wrong by a median 75 % (max 195 %).
+    WHAT THIS CAN AND CANNOT DO. At a FIXED problem size the durations are wildly dispersed:
+    on the 7 calibration solves recorded at 308 847 variables, 327 s to 3 625 s -- a factor 11,
+    CV 91 % (96 % on the warm ones alone, so this is not a warm/cold pooling artefact). That
+    dispersion is the branch-and-bound search itself, not noise in the measurement, so no
+    estimator built on size can be a reliable point estimate. The earlier one returned a single
+    number and was wrong by a median 75 % (max 195 %).
+
+    THESE NUMBERS AGE. The history below is a ROLLING WINDOW of the last
+    _MAX_ENTRIES_PER_CASE_STUDY solves, not a cumulative log, so a docstring that quotes it
+    goes stale silently -- this paragraph used to say "the 20 recorded solves run 155 s to
+    1 007 s, factor 6.5, CV 64 %", measured 2026-08-01 and overwritten since. Recount the file
+    (2026-08-30 here) rather than trusting the figure; `docs/04-vigilance.md` B.1 and
+    `memoire/build_chiffres.py` carry the same values and must move together.
 
     A RANGE from the same data is honest and still answers the question actually being asked
     -- "is this three minutes or three hours?". Hence `estimate_range`, which returns
