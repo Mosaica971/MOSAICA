@@ -372,6 +372,14 @@ PROS_EXTRACTIONS: list[tuple[tuple[str, ...], str, int]] = [
 # libelle le dit : un exploitant suppose neutre au risque), donc sa valeur d'objectif n'est
 # pas du meme genre que les autres et un tableau qui les alignerait serait faux.
 # `scenarios_politiques.yaml` porte deja l'avertissement ; on l'applique ici.
+# Le prefixe de macro est en LETTRES parce que \newcommand refuse les chiffres. Il ne doit
+# jamais s'imprimer tel quel : \grilleMeilleure* ecrivait litteralement « Pneuf » dans le
+# tableau de regret de l'annexe D. Cette table redonne le libelle lisible.
+POLITIQUE_LABEL: dict[str, str] = {
+    "Pun": "P1", "Pdeux": "P2", "Ptrois": "P3", "Pquatre": "P4", "Pcinq": "P5",
+    "Psix": "P6", "Psept": "P7", "Phuit": "P8", "Pneuf": "P9", "Pdix": "P10",
+}
+
 GRILLE_INDICATEUR = ("economics", "output", "total_gross_margin")
 GRILLE: dict[str, dict[str, str]] = {
     "Fzero": {
@@ -888,8 +896,12 @@ def main() -> int:
                 continue
             meilleure = max(table, key=lambda k: table[k])
             lines.append(
-                f"\\newcommand{{\\grilleMeilleure{etiquette}{forcage}}}{{{meilleure}}}"
+                f"\\newcommand{{\\grilleMeilleure{etiquette}{forcage}}}"
+                f"{{{POLITIQUE_LABEL.get(meilleure, meilleure)}}}"
             )
+            # LE REGRET EST EN MILLIONS D'EUROS, jamais en pourcentage. Sous un forcage
+            # severe la meilleure politique a une marge NEGATIVE, et un regret rapporte a
+            # une valeur negative n'a aucun sens. Le memoire doit donc l'afficher en M EUR.
             for politique, valeur in table.items():
                 lines.append(
                     f"\\newcommand{{\\regret{etiquette}{politique}{forcage}}}"

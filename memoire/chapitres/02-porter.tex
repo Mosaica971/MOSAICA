@@ -84,7 +84,7 @@ L'annexe~\ref{ann:formulation} donne l'inventaire complet des ensembles, paramè
 contraintes, avec pour chacun le nom qu'il porte dans le \gls{gams} d'origine.
 
 
-\section{Protocole}
+\section{Le mandat de parité}
 \label{sec:parite}
 
 Le protocole du portage prévoit une reproduction fidèle du comportement du modèle \gls{gams}.
@@ -127,7 +127,7 @@ constructeur appelé avec trois arguments différents.
 Au cours du chapitre~\ref{ch:explorer}, on verra que ce principe permet d'explorer
 \num{\mesPolitiques} politiques, \num{\mesForcages} forçages et \num{\mesBalayages} fronts de
 Pareto, c'est-à-dire un nombre considérable de combinaisons de contraintes, sans jamais modifier
-le noyau. Ce principe permet d'envisager l'utilisation du modèle à d'autres cas d'études et de
+le noyau. Ce principe permet d'envisager l'utilisation du modèle à d'autres cas d'étude et de
 simplifier l'exploration prospective.
 
 \section{Rendre le problème traitable}
@@ -195,8 +195,8 @@ Le tableau~\ref{tab:programme} récapitule ces informations.
     Couples parcelle $\times$ culture potentiels & $\sim$\num{2000000} \\
     Variables binaires déclarées (calibration retenue) & \num{\mesBinaires} \\
     Variables binaires déclarées (configuration prospective) & \num{\mesBinairesRef} \\
-    \dots{} si les \num{25} variantes symétriques sont rouvertes (§~\ref{sec:tractabilite})
-      & \num{\mesBinairesKarus} \\
+    \dots{} si les \num{25} variantes symétriques sont rouvertes
+      (annexe~\ref{ann:scenarios}) & \num{\mesBinairesKarus} \\
     \midrule
     Résolution la plus rapide, à la taille de calibration & \SI{\mesSolveMin}{\second} \\
     Résolution la plus lente, à la même taille & \SI{\mesSolveMax}{\second} \\
@@ -230,7 +230,3 @@ Il existe trois dispositifs différents qui contrôlent la robustesse du code :
     nouveau lancement. La tolérance est fixée à \SI{5}{\percent}, marge choisie pour absorber ce
     bruit sans laisser passer une régression réelle.
 \end{itemize}
-
-\begin{reflexion}
-REFLEXIVITE
-\end{reflexion}

@@ -11,7 +11,7 @@ viennent de l'extérieur \parencite{viepublique2023,odeadom2019} sachant qu'en 2
 \SI{41.8}{\percent} de plus qu'en France métropolitaine. La canne à sucre représente \SI{\obsHaCS}{\ha} et la banane d'exportation
 \SI{\obsHaBA}{\ha}. Ces deux filières sont soutenues par le \gls{posei} représentant environ les trois quarts
 de la marge brute agricole du territoire \parencite{touteleurope2024}. Le vivrier occupe la surface
-restante. Pour l'augmenter, il faut réflechir aux cultures qu'il faudrait déplacer, sur quelles
+restante. Pour l'augmenter, il faut réfléchir aux cultures qu'il faudrait déplacer, sur quelles
 terres et à quel prix pour le revenu des exploitations. C'est un problème d'allocation sous
 contraintes.
 
@@ -20,13 +20,20 @@ de CALALOU, qui utilisait déjà \emph{ex ante} un modèle bioéconomique
 d'allocation appelé \gls{mosaica} \parencite{chopin2015}. L'objectif du stage est le portage de \gls{mosaica} en Python/Pyomo
 \parencite{pyomo2021} résolu par \gls{highs} \parencite{highs2018}. Ce travail correspond 
 à \num{\mesLignesCode} lignes de Python, sa calibration contre l'assolement
-observé de 2017, et l'usage prospectif qu'il rend enfin possible.\attente{2}\attente{10}
+observé de 2017, et l'usage prospectif qu'il rend enfin possible.
 
-Le travail commence par explorer les raisons du portage (chapitre~\ref{ch:terrain})
-On souhaite pouvoir défendre les résultas prospectifs du modèle. Pour cela il fallait s'assurer de 2 points :
-- Il faut porter le modèle fidèlement depuis la version de 2015, défauts compris, afin de 
-pouvoir attribuer les divergences futures de résultats entre les deux versions (chapitre~\ref{ch:porter}). 
-- Il faut établir sa capacité à reproduire la réalité afin de pouvoir donner son domaine de 
-validité (chapitre~\ref{ch:calibrer}). 
-Le chapitre~\ref{ch:discussion} discute de mon positionnement, du stage, du projet, 
+Le travail commence par explorer les raisons du portage (chapitre~\ref{ch:terrain}).
+On souhaite pouvoir défendre les résultats prospectifs du modèle. Pour cela il fallait
+s'assurer de \num{2} points.
+
+\begin{itemize}[leftmargin=1.2em,itemsep=3pt]
+  \item Il faut porter le modèle fidèlement depuis la version de 2015, défauts compris, afin
+    de pouvoir attribuer les divergences futures de résultats entre les deux versions
+    (chapitre~\ref{ch:porter}).
+  \item Il faut établir sa capacité à reproduire la réalité afin de pouvoir donner son domaine
+    de validité (chapitre~\ref{ch:calibrer}).
+\end{itemize}
+
+Le chapitre~\ref{ch:explorer} met ce modèle calibré à l'épreuve d'un catalogue de scénarios.
+Le chapitre~\ref{ch:discussion} discute de mon positionnement, du stage, du projet,
 de son impact et propose des pistes d'actions face à ses angles morts.

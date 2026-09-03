@@ -1,27 +1,37 @@
-\chapter{Catalogue des scénarios}
+﻿\chapter{Catalogue des scénarios}
 \label{ann:scenarios}
-% BUDGET : 2 pages. Version resserree du 2026-08-31 : les douze forcages, jusqu'ici en prose,
-% sont devenus un tableau. Les quatre sections de methode tiennent en une.
+% BUDGET : 2 pages. Version 2026-09-02 : l'annexe ne contient plus que des tableaux. Les totaux
+% de reference, les remarques de lecture et les regles de balayage, jusqu'ici en prose, sont
+% devenus trois tables.
 
-Sans cette annexe, les seuils du chapitre~\ref{ch:explorer} ressemblent à des chiffres choisis
-arbitrairement. Ils ne le sont pas. Chacun est une fraction déclarée d'un total mesuré sur la
-calibration retenue, qui vaut \SI{\calibRetenuMarge}{\euros} de marge brute,
-\SI{\calibRetenuSubvention}{\euros} de subventions, \SI{\calibRetenuEtp}{\etp},
-\SI{\calibRetenuAzote}{\kilogram} d'azote, un \gls{ift} total de \num{\calibRetenuIft} et
-\SI{\calibRetenuEau}{\metre\cubed} d'eau sur les seules parcelles irrigables.
+\section{Les totaux dont les seuils sont tirés}
+
+\begin{table}[H]
+  \centering
+  \caption{Totaux mesurés sur la calibration retenue. Chaque seuil des catalogues qui suivent
+  est une fraction déclarée de l'une de ces valeurs, et non un chiffre choisi arbitrairement.}
+  \label{tab:ann-totaux}
+  \small
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
+    \toprule
+    Marge brute du territoire & \SI{\calibRetenuMarge}{\euros} \\
+    Subventions versées & \SI{\calibRetenuSubvention}{\euros} \\
+    Emploi & \SI{\calibRetenuEtp}{\etp} \\
+    Azote épandu & \SI{\calibRetenuAzote}{\kilogram} \\
+    \gls{ift} total & \num{\calibRetenuIft} \\
+    Eau prélevée, parcelles irrigables seules & \SI{\calibRetenuEau}{\metre\cubed} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \section{Les dix politiques}
 
-Le catalogue est ordonné le long d'un axe qui va de l'intensification accélérationniste à la
-rupture agroécologique, plus une politique délibérément hors axe. Le
-tableau~\ref{tab:ann-politiques} en donne les leviers. Le fichier de catalogue porte, sous
-chaque seuil, le commentaire numéroté qui le justifie.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les dix politiques et leurs leviers. Aides désigne un multiplicateur appliqué aux
-  subventions d'un groupe de cultures, \emph{slack} le desserrement du plafond de main
-  d'\oe uvre, inertie la part de surface qui doit rester dans son groupe de 2017.}
+  \caption{Les dix politiques du catalogue et leurs leviers, du pôle accélérationniste à la
+  rupture agroécologique. Aides désigne un multiplicateur appliqué aux subventions d'un groupe
+  de cultures, \emph{slack} le desserrement du plafond de main d'\oe uvre, inertie la part de
+  surface qui doit rester dans son groupe de 2017.}
   \label{tab:ann-politiques}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -63,29 +73,13 @@ chaque seuil, le commentaire numéroté qui le justifie.
   \end{tabularx}
 \end{table}
 
-Trois remarques rendent ce catalogue lisible. P1 est la seule à changer d'objectif, si bien
-qu'elle ne se compare aux autres que sur les grandeurs physiques et économiques. Aucune
-politique ne rouvre les vingt-cinq variantes symétriques, dont la réouverture coûterait
-\num{548000} binaires de pure symétrie et rendrait toute part biologique inopérante
-(§~\ref{sec:tractabilite}). Écrire la politique agroécologique comme une part minimale de
-cultures biologiques en était la formulation naturelle, et c'est le seul cas du mémoire où une
-formulation est écartée parce qu'elle serait satisfaite trop facilement. Le plafond de main
-d'\oe uvre, enfin, est la première cause d'infaisabilité. Il accorde \SI{3891}{\etp} au
-desserrement nominal, donc tout plancher d'emploi supérieur exige de relever le desserrement
-dans le même scénario. Les planchers du catalogue sont posés vers \SI{86}{\percent} à
-\SI{88}{\percent} d'un maximum mesuré en maximisant le travail sous les autres contraintes de
-la politique, pour laisser la place au saut d'intégralité que la relaxation ignore.
-
 \section{Les douze forçages}
 
-Un forçage multiplie des prix, des rendements, des variances ou des coûts d'intrants. Il ne
-modifie aucune règle, à l'exception du dernier, qui retire de la terre. Le
-tableau~\ref{tab:ann-forcages} donne les douze.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les douze forçages du catalogue. F0 est le forçage nul et sert de témoin de
-  contrôle, F10 la borne haute symétrique de F9.}
+  \caption{Les douze forçages du catalogue. Un forçage multiplie des prix, des rendements, des
+  variances ou des coûts d'intrants et ne modifie aucune règle, à l'exception de F11 qui retire
+  de la terre. F0 est le forçage nul, F10 la borne haute symétrique de F9.}
   \label{tab:ann-forcages}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -121,37 +115,77 @@ tableau~\ref{tab:ann-forcages} donne les douze.
   \end{tabularx}
 \end{table}
 
-Deux propriétés méritent d'être rappelées. La première est une convention. Les forçages ne
-sont pas moyennés, et l'infaisabilité y compte comme le pire résultat et non comme une donnée
-manquante. La seconde est un outil de contrôle. Le forçage nominal étant le forçage nul, une
-politique seule et cette même politique croisée avec lui sont le même problème et doivent
-rendre le même chiffre. C'est ce qui a détecté une erreur d'ancrage en cours de campagne, les
-deux runs différant de \SI{\prosEcartFzero}{\euros}, soit
-\SI{\prosEcartFzeroPct}{\percent}. Ce contrôle ne coûte rien et doit être refait à chaque
-campagne.
+\section{Conventions de lecture et règles de campagne}
 
-\section{Balayages, plan et contrôle de faisabilité}
+\begin{table}[H]
+  \centering
+  \caption{Les cinq conventions qui rendent les deux catalogues lisibles, et ce que chacune
+  implique pour la comparaison des résultats.}
+  \label{tab:ann-conventions}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{34mm}X@{}}
+    \toprule
+    \textbf{Convention} & \textbf{Conséquence} \\
+    \midrule
+    P1 change d'objectif & elle ne se compare aux autres que sur les grandeurs physiques et
+      économiques, jamais sur la colonne d'objectif \\
+    Aucune politique ne rouvre les variantes symétriques & leur réouverture coûterait
+      \num{548000} binaires de pure symétrie et rendrait toute part biologique inopérante
+      (§~\ref{sec:tractabilite}). Écrire la politique agroécologique comme une part minimale de
+      cultures biologiques en était la formulation naturelle, et c'est le seul cas du mémoire
+      où une formulation est écartée parce qu'elle serait satisfaite trop facilement \\
+    Le plafond de main d'\oe uvre est la première cause d'infaisabilité & il accorde
+      \SI{3891}{\etp} au desserrement nominal, donc tout plancher d'emploi supérieur exige de
+      relever le desserrement dans le même scénario. Les planchers du catalogue sont posés vers
+      \SI{86}{\percent} à \SI{88}{\percent} d'un maximum mesuré en maximisant le travail sous
+      les autres contraintes de la politique, pour laisser la place au saut d'intégralité que
+      la relaxation ignore \\
+    Les forçages ne sont pas moyennés & le résultat d'une politique est un vecteur et non un
+      scalaire. L'infaisabilité y compte comme le pire résultat et non comme une donnée
+      manquante \\
+    F0 est le forçage nul & une politique seule et la même politique croisée avec F0 sont le
+      même problème et doivent rendre le même chiffre. Ce contrôle a détecté une erreur
+      d'ancrage en cours de campagne, les deux runs différant de \SI{\prosEcartFzero}{\euros},
+      soit \SI{\prosEcartFzeroPct}{\percent}. Il ne coûte rien et doit être refait à chaque
+      campagne \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
-Deux fronts sont déclarés, l'un sur le plafond d'azote et l'autre sur l'enveloppe de
-subventions. Un front n'est pas une cellule de la grille mais une résolution par point, si
-bien qu'il n'est jamais croisé avec les forçages de sa cellule et qu'un front forcé doit être
-nommé explicitement. Un front se paramètre sur la borne de sa politique hôte et non sur le
-réalisé de la configuration de référence, verdict renversé en cours de campagne dont l'oubli
-produit un front dont plusieurs points ne contraignent rien. Les points sont ensuite
-réordonnés du plus serré au plus lâche, à l'inverse de la lecture du fichier, pour que chaque
-solution serve de graine admissible à la suivante. Le sens s'inverse pour un plancher, et le
-tri s'abstient dès qu'il ne peut pas conclure. S'abstenir ne coûte que du temps de calcul, la
-correction reposant sur l'audit de chaque graine.
-
-Le contrôle de faisabilité résout la relaxation linéaire de chaque scénario, deux minutes
-contre une heure. Infaisable en relaxation implique infaisable en entiers sans que la
-réciproque tienne, donc c'est un filtre et non une garantie. Il a néanmoins écarté une erreur
-de conception avant qu'aucun lot ne tourne, deux blocs corrects séparément ne composant pas
-nécessairement un scénario faisable. C'est aussi lui qui signale les groupes de cultures
-symétriques, et c'est ainsi que les vingt-cinq variantes ont été trouvées.
-
-\begin{vigilance}
-Un seuil relevé sur un run et reposé en configuration sans son poids de parcelle est faux d'un
-facteur \num{1.6}. C'est le cas du plafond d'eau, qui ne porte que sur les parcelles
-irrigables. Ce piège ne laisse aucune trace dans les sorties.
-\end{vigilance}
+\begin{table}[H]
+  \centering
+  \caption{Règles de construction des balayages et contrôles appliqués avant qu'une campagne ne
+  tourne. Deux fronts sont déclarés, l'un sur le plafond d'azote et l'autre sur l'enveloppe de
+  subventions.}
+  \label{tab:ann-balayages}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{34mm}X@{}}
+    \toprule
+    \textbf{Règle ou contrôle} & \textbf{Contenu} \\
+    \midrule
+    Un front n'est pas une cellule & c'est une résolution par point. Il n'est donc jamais
+      croisé avec les forçages de sa cellule, et un front forcé doit être nommé explicitement \\
+    Un front se paramètre sur sa politique hôte & et non sur le réalisé de la configuration de
+      référence. Verdict renversé en cours de campagne, dont l'oubli produit un front dont
+      plusieurs points ne contraignent rien \\
+    Les points sont réordonnés du plus serré au plus lâche & à l'inverse de la lecture du
+      fichier, pour que chaque solution serve de graine admissible à la suivante. Le sens
+      s'inverse pour un plancher \\
+    Le tri s'abstient dès qu'il ne peut pas conclure & s'abstenir ne coûte que du temps de
+      calcul, la correction reposant sur l'audit de chaque graine \\
+    Contrôle de faisabilité en relaxation linéaire & deux minutes contre une heure. Infaisable
+      en relaxation implique infaisable en entiers, sans que la réciproque tienne. C'est donc
+      un filtre et non une garantie. Il a écarté une erreur de conception avant qu'aucun lot ne
+      tourne, deux blocs corrects séparément ne composant pas nécessairement un scénario
+      faisable \\
+    Détection des groupes de cultures symétriques & le même contrôle les signale, et c'est
+      ainsi que les vingt-cinq variantes ont été trouvées \\
+    Piège du poids de parcelle & un seuil relevé sur un run et reposé en configuration sans son
+      poids de parcelle est faux d'un facteur \num{1.6}. C'est le cas du plafond d'eau, qui ne
+      porte que sur les parcelles irrigables. Ce piège ne laisse aucune trace dans les
+      sorties \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

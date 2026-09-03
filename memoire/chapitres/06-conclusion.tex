@@ -5,32 +5,46 @@
 % REGLE : la conclusion repond a la question de l'introduction DANS SES TERMES. Si les mots
 % changent, c'est qu'on repond a une autre question.
 
-Le modèle porté dépasse les trois métriques publiées par \textcite{chopin2015} :
-- \SI{\calibRetenuTypes}{\percent} de types d'exploitation reproduits contre \SI{\mesArtTypes}{\percent}.
-- \SI{\calibRetenuParcelles}{\percent} de parcelles contre \SI{\mesArtParcelles}{\percent}.
-- \SI{\calibRetenuSurface}{\percent} de surface contre \SI{\mesArtSurface}{\percent}.
-La canne à sucre est simulée à \SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés, 
-soit \SI{\padRetenuCS}{\percent} d'écart. Aucune contrainte ne la nomme et elle occupe plus de la moitié du territoire. 
-Ce phénomène s'est également porduit pour la banane revenant sous le plafond de plantain.
-C'est un marqueur de qualité du modèle.
-En revanche, \num{\calibRetenuCulturesOk} cultures sur \num{\calibRetenuCulturesTotal} 
-passent sous le seuil de l'article, contre \num{8} sur \num{10} publiées. 
-Le domaine de validité est connu. Le modèle gère beaucoup mieux les cultures massives que les cultures marginales.
+Le modèle porté dépasse les trois métriques publiées par \textcite{chopin2015}.
 
-Sauf pour la canne et la banane, le modèle n'intègre pas la notion de débouché. C'est une réserve importante.
-La marge brute varie en sens inverse du plafond de subventions. On établit que l'aide publique 
-achète de la stabilité et pas la marge. Quand les subventions se resserent, la banane 
-d'exportation a tendance à disparaître et la surface de canne à fortement diminuer au profit de 
+\begin{itemize}[leftmargin=1.2em,itemsep=3pt]
+  \item \SI{\calibRetenuTypes}{\percent} de types d'exploitation reproduits contre
+    \SI{\mesArtTypes}{\percent}.
+  \item \SI{\calibRetenuParcelles}{\percent} de parcelles contre \SI{\mesArtParcelles}{\percent}.
+  \item \SI{\calibRetenuSurface}{\percent} de surface contre \SI{\mesArtSurface}{\percent}.
+\end{itemize}
+
+La canne à sucre est simulée à \SI{\simRetenuCS}{\ha} contre \SI{\obsHaCS}{\ha} observés,
+soit \SI{\padRetenuCS}{\percent} d'écart. Aucune contrainte ne la nomme et elle occupe plus de
+la moitié du territoire. Ce phénomène s'est également produit pour la banane revenant sous le
+plafond de plantain. C'est un marqueur de qualité du modèle.
+En revanche, \num{\calibRetenuCulturesOk} cultures sur \num{\calibRetenuCulturesTotal}
+passent sous le seuil de l'article, contre \num{8} sur \num{10} publiées.
+Le domaine de validité est connu. Le modèle gère beaucoup mieux les cultures massives que les
+cultures marginales.
+
+Sauf pour la canne et la banane, le modèle n'intègre pas la notion de débouché. C'est une
+réserve importante.
+La marge brute varie en sens inverse du plafond de subventions. On établit que l'aide publique
+achète de la stabilité et pas la marge. Quand les subventions se resserrent, la banane
+d'exportation a tendance à disparaître et la surface de canne à fortement diminuer au profit de
 l'élevage et de cultures vivrières comme le maraîchage.
-Le classement des politiques dépend ensuite du forçage. Une politique n'est pas bonne 
-dans l'absolu. Ce qui est intéressant est de la confronter à différents contexte pour évaluer sa 
-robustesse et sa performance.
+Le classement des politiques dépend ensuite du forçage. Une politique n'est pas bonne
+dans l'absolu. Ce qui est intéressant est de la confronter à différents contextes pour évaluer
+sa robustesse et sa performance.
 
-Il existe plusieurs pistes d'améliorations du projet : 
-- modéliser les débouchés pour arrêter de supposer un marché parfaitement élastique à la hausse du vivrier.
-- inclure l'élevage pour mieux modéliser les prairies et affiner les indicateurs nutritionnels.
-- simuler les rendements plutôt que les tabuler pour lever l'écart du §~\ref{sec:rendements}. Cela est prévu 
-dans la suite du stage à la suite d'une formation sur l'outil MAELIA de l'INRAE.
-- rendre le modèle dynamique afin de simuler les roulement de cultures d'une année à l'autre.
-- Organiser des ateliers qui rassemblent les acteurs afin de concevoir les scenarios à explorer 
-et critiquer leurs résultats.
+Il existe plusieurs pistes d'améliorations du projet.
+
+\begin{itemize}[leftmargin=1.2em,itemsep=3pt]
+  \item Modéliser les débouchés pour arrêter de supposer un marché parfaitement élastique à la
+    hausse du vivrier.
+  \item Inclure l'élevage pour mieux modéliser les prairies et affiner les indicateurs
+    nutritionnels.
+  \item Simuler les rendements plutôt que les tabuler pour lever l'écart du
+    §~\ref{sec:rendements}. Cela est prévu dans la suite du stage à la suite d'une formation sur
+    l'outil MAELIA de l'\gls{inrae}.
+  \item Rendre le modèle dynamique afin de simuler les roulements de cultures d'une année à
+    l'autre.
+  \item Organiser des ateliers qui rassemblent les acteurs afin de concevoir les scénarios à
+    explorer et critiquer leurs résultats.
+\end{itemize}

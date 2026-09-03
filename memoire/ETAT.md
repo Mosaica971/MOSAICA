@@ -4,7 +4,56 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-09-01**. Dépôt le **26/08**, soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-09-02**. Dépôt le **26/08**, soutenance **1-4 sept**.
+>
+> **Session du 2026-09-02 — échafaudage supprimé, annexes réduites aux tableaux, deux
+> erreurs de fond corrigées.** Demande de Clément, sans aucune reformulation de sa prose.
+> 1. **Encadrés réflexifs supprimés** (4, tous vides, ils portaient le mot « REFLEXIVITE »),
+>    **marqueurs `\attente` supprimés** (3), et les définitions devenues mortes retirées de
+>    `preambule.tex` — `reflexion`, `questionreponse`, `attente`, `attentebloc`, `matiere`,
+>    `arediger`, `\idc`, `\mac`, `\fic`, `\lbl`, `vigilance`. Deux `% TODO CLEMENT` retirés.
+> 2. **Chaque chapitre repart sur une page neuve** : `\titleclass{\chapter}{top}`. **Pas
+>    `page`** — cette valeur réserve une page entière au seul titre, comme `\part`, et
+>    dédouble les entrées de sommaire des chapitres non numérotés (essayé, constaté, annulé).
+> 3. **Les six annexes ne contiennent plus que des tableaux.** Toute la prose est soit
+>    supprimée, soit convertie en table. **Quinze tables neuves** : familles de contraintes,
+>    éligibilité et pièges d'implémentation (A) ; les quatre statuts (B) ; totaux de
+>    référence, conventions de lecture, règles de balayage (C) ; réserves de lecture, statut
+>    des fronts, prix duals (D) ; balayage du plancher de prairie, argument du cheptel,
+>    réserves (E) ; verdicts renversés, corpus (F). Les légendes sont redevenues des
+>    descriptions, plus des punchlines. Annexes **18 / 20 pages**.
+> 4. **Deux erreurs de fond corrigées.** (a) Le ch. 3 écrivait encore **247 ha** de plantain
+>    « au plafond le plus contraignant » — c'est **179 ha** (247 est la valeur au seuil
+>    retenu), correction déjà faite en annexe E le 31/08 mais jamais reportée dans le corps.
+>    (b) **Les macros `\regret*` sont en MILLIONS D'EUROS, pas en pourcentage** :
+>    `build_chiffres.py` les calcule comme `(meilleure − valeur) / 1e6`. Le ch. 4, la légende
+>    de `fig:regret` et l'annexe D les affichaient en `%`. Sous F9 la meilleure marge est
+>    **négative** (−16,99 M€), donc un regret en pourcentage n'y a aucun sens. Unités
+>    corrigées partout et commentaire posé dans le générateur.
+> 5. **`\grilleMeilleure*` imprimait « Pneuf », « Psix », « Pquatre »** — le préfixe de macro
+>    au lieu du libellé. `build_chiffres.py` porte désormais `POLITIQUE_LABEL` et écrit P9,
+>    P6, P4. Régénération vérifiée : **seules ces six lignes changent**.
+> 6. **`11 fichiers` GAMS et non 12** (compté sur `context/gams/`), corrigé au ch. 1 et en
+>    annexe B. **`sec:disc-position` n'existait plus** et laissait une référence non résolue
+>    dans le mini-sommaire du ch. 5. **41,8 %** d'écart de prix dans les deux résumés, au lieu
+>    de 40 %, pour coller à l'introduction. Orthographe reprise dans le ch. 5, la conclusion
+>    et les deux résumés ; les pseudo-listes à tirets de l'introduction et de la conclusion
+>    sont devenues des `itemize` ; le § positionnement du ch. 5, un bloc de 20 lignes, est
+>    découpé en quatre paragraphes.
+> 7. **Une phrase ajoutée à l'introduction** — elle annonçait les chapitres 1, 2, 3 et 5 mais
+>    **pas le chapitre 4**. C'est le seul endroit où de la prose a été écrite ; à supprimer si
+>    Clément préfère la formuler lui-même.
+> 8. `_check_annexes.py` : la règle « tout flottant est cité » n'a plus de sens dans une
+>    annexe qui n'est faite que de flottants. Elle est remplacée par « toute référence pointe
+>    sur un label existant ».
+>
+> État : **cœur 25 / 30, annexes 18 / 20, 0 `Overfull hbox` > 5 pt, 0 référence non résolue,
+> 0 marqueur d'attente.**
+>
+> ⚠ **Toujours non tranché : la variabilité des solves.** `chiffres.tex` donne 327 s / 3 625 s
+> / CV 91 % / ×11 sur **7** solves ; le corpus `SOLV-11` et `CLAUDE.md` disent 155 s / 1 007 s
+> / CV 64 % / ×6,5 sur **20**. Le `.tex` est cohérent avec lui-même (il lit les macros), mais
+> l'un des deux jeux est périmé.
 >
 > **Session du 2026-09-01 — remerciements supprimés, intro et conclusion condensées à 1 page.**
 > `liminaires/remerciements.tex` est supprimé et son `\input` retiré de `memoire.tex`.

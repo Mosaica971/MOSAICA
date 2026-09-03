@@ -141,10 +141,6 @@ explicite désigne donc, pour chaque politique, ses forçages et ses fronts.
   \label{fig:spectre}
 \end{figure}
 
-% TODO CLEMENT : le mot « matériau » etait seul sur sa ligne ici -- commente pour qu'il ne
-% s'imprime pas. Les deux chiffres qui vont avec sont disponibles : \mesCellulesGrille
-% cellules de grille resolues et \mesSolvesProspectifs dossiers de run prospectifs.
-
 Trois décisions de méthode gouvernent ce dispositif.
 
 \begin{enumerate}[leftmargin=1.6em,itemsep=8pt]
@@ -181,11 +177,14 @@ Elle donne \SI{\grillePneufFzero}{\mega\euros} de marge brute contre
 crise systémique (F9), avec \SI{\grillePneufFneuf}{\mega\euros} contre
 \SI{\grillePquatreFneuf}{\mega\euros}. Le classement s'inverse d'un forçage à l'autre. Le regret
 de Savage montre cette inversion (figure~\ref{fig:regret}). Passer de F0 à F9 fait passer le
-regret de P9 de \SI{\regretPneufFzero}{\percent} à \SI{\regretPneufFneuf}{\percent}. À
-l'inverse, le regret de P4 passe de \SI{\regretPquatreFzero}{\percent} à
+regret de P9 de \SI{\regretPneufFzero}{\mega\euros} à \SI{\regretPneufFneuf}{\mega\euros}. À
+l'inverse, le regret de P4 passe de \SI{\regretPquatreFzero}{\mega\euros} à
 % CORRIGE : la phrase disait « de 30 % a 10 % ». Sous F9, P4 est la MEILLEURE politique, son
-% regret y vaut donc 0 %. Les 9,82 % sont son regret sous F6, pas sous F9.
-\SI{\regretPquatreFneuf}{\percent}.
+% regret y vaut donc 0. Les 9,82 M EUR sont son regret sous F6, pas sous F9.
+% CORRIGE 2026-09-02 : l'unite etait le POURCENT. build_chiffres.py calcule ces macros comme
+% (meilleure - valeur) / 1e6, donc en MILLIONS D'EUROS. Sous F9 la meilleure marge est
+% negative (-16,99 M EUR), et un regret rapporte a une valeur negative n'a aucun sens.
+\SI{\regretPquatreFneuf}{\mega\euros}.
 
 Un point important est que la marge brute contient la subvention. On cherche à classer des
 politiques et donc à classer notamment des déplacements d'aides. Regarder la marge brute, c'est,
@@ -272,10 +271,11 @@ jamais car la crise réduit les surfaces intensives.
     \fill[black!70] (0,-52)  rectangle (2.5,-53.6); \node[right] at (2.5,-52.8) {F0 nominal};
     \fill[black!40] (16,-52) rectangle (18.5,-53.6); \node[right] at (18.5,-52.8) {F6 intrants};
     \fill[black!15] (33,-52) rectangle (35.5,-53.6); \node[right] at (35.5,-52.8) {F9 crise};
+    \node[right] at (48,-52.8) {M\eur};
   \end{tikzpicture}
-  \caption{Regret par politique et par forçage, en pourcentage de la meilleure politique du même
-  forçage. Une barre nulle correspond au meilleur choix de politique, sachant le forçage. Aucune
-  politique n'a une barre nulle sous tous les forçages.}
+  \caption{Regret par politique et par forçage, en millions d'euros de marge brute perdus par
+  rapport à la meilleure politique du même forçage. Une barre nulle correspond au meilleur choix
+  de politique, sachant le forçage. Aucune politique n'a une barre nulle sous tous les forçages.}
   \label{fig:regret}
 \end{figure}
 
@@ -345,8 +345,3 @@ Sans tracer les fronts, on serait passé à côté de ce résultat car les duaux
 serré des deux configurations sont de \SI{\frontazoteRefDualBas}{\euros\per\kilogram} et
 \SI{\frontazoteHuitDualBas}{\euros\per\kilogram}. On aurait conclu à l'égalité des coûts
 marginaux, ce qui est réfuté par les fronts.
-
-
-\begin{reflexion}
-reflexivité
-\end{reflexion}

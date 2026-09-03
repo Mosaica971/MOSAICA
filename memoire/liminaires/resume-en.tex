@@ -11,13 +11,13 @@
 \begin{otherlanguage}{english}
 
 Guadeloupe imports close to \SI{80}{\percent} of its food, and food prices there are
-\SI{40}{\percent} higher than in mainland France. Sugarcane and export banana occupy most of its
+\SI{41.8}{\percent} higher than in mainland France. Sugarcane and export banana occupy most of its
 farmland. The TI-FIG project, run by INRAE's ASTRO research unit, seeks to assess \emph{ex ante}
 scenarios for developing local food crops; the tool intended for that purpose was MOSAICA, a
 bioeconomic crop-allocation model published in 2015, which assigns each field of a territory to a
 crop so as to maximise risk-adjusted gross margin under various constraints (agronomic,
 land-tenure, labour, etc.). The design and the exploration of the 2015 model are detailed in the
-article by \parencite{chopin2015}.
+article by \textcite{chopin2015}.
 
 The work presented here ports MOSAICA to Python/Pyomo from GAMS. It is a mixed-integer linear
 program, and the HiGHS solver handles a problem of about \num{\mesBinaires} binary variables. The
@@ -27,11 +27,11 @@ is then calibrated against the observed 2017 land use as a reference. Once calib
 are explored, chosen from a grid of public policies crossed with climate and market forcings. This
 exploration is completed by tracing two Pareto fronts by $\varepsilon$-constraint.
 
-Several results are encouraging, and the scenario exploration phase already yields results:
+Several results are encouraging, and the scenario exploration phase already yields results.
 \begin{itemize}
-\item Calibration exceeds the three metrics published in the article by \parencite{chopin2015}
+\item Calibration exceeds the three metrics published in the article by \textcite{chopin2015}
 (\SI{\calibRetenuTypes}{\percent} of farm types reproduced,
-\SI{\calibRetenuParcelles}{\percent} of fields, \SI{\calibRetenuSurface}{\percent} of area)
+\SI{\calibRetenuParcelles}{\percent} of fields, \SI{\calibRetenuSurface}{\percent} of area).
 \item The model simulates \SI{\simRetenuCS}{\ha} of sugarcane against \SI{\obsHaCS}{\ha} observed,
 without any constraint naming it.
 \item The ranking of public policies depends on the forcing. Policies are assessed with robustness
@@ -41,11 +41,12 @@ margin but rather stability. Relaxing that constraint makes export banana disapp
 reduces sugarcane and shifts about \SI{2100}{\ha} towards food crops.
 \end{itemize}
 
-The model has shortcomings, and it is important to define its domain of validity:
+The model has shortcomings, and it is important to define its domain of validity.
 \begin{itemize}
 \item No market outlet is modelled apart from sugarcane and export banana. The shift of agriculture
 towards food crops assumes a perfectly elastic market.
-\item Only 4 crops out of 11 fall below the article's deviation threshold. The residual error
+\item Only \num{\calibRetenuCulturesOk} crops out of \num{\calibRetenuCulturesTotal} fall below
+the article's deviation threshold. The residual error
 concentrates on the smallest items, that is, on the crops that occupy a small area.
 \item Grassland is poorly modelled because livestock is absent from the model.
 \item The yield data used as input are tabulated (statistical extrapolation and declarations).

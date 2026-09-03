@@ -2404,16 +2404,13 @@
     <bcf:citekey order="27" intorder="1">starr1963</bcf:citekey>
     <bcf:citekey order="28" intorder="1">haimes1971</bcf:citekey>
     <bcf:citekey order="28" intorder="2">mavrotas2009</bcf:citekey>
-    <bcf:citekey order="29" intorder="1">opecst2009</bcf:citekey>
-    <bcf:citekey order="30" intorder="1">daafchlordecone</bcf:citekey>
-    <bcf:citekey order="31" intorder="1">chopin2015</bcf:citekey>
+    <bcf:citekey order="29" intorder="1">chopin2015</bcf:citekey>
     <bcf:citekey order="32" intorder="1">chopin2015</bcf:citekey>
-    <bcf:citekey order="35" intorder="1">chopin2015</bcf:citekey>
-    <bcf:citekey order="38" intorder="1">tixier2007</bcf:citekey>
+    <bcf:citekey order="35" intorder="1">tixier2007</bcf:citekey>
+    <bcf:citekey order="36" intorder="1">chopin2015</bcf:citekey>
+    <bcf:citekey order="37" intorder="1">chopin2015</bcf:citekey>
+    <bcf:citekey order="38" intorder="1">chopin2015</bcf:citekey>
     <bcf:citekey order="39" intorder="1">chopin2015</bcf:citekey>
-    <bcf:citekey order="40" intorder="1">chopin2015</bcf:citekey>
-    <bcf:citekey order="41" intorder="1">chopin2015</bcf:citekey>
-    <bcf:citekey order="42" intorder="1">chopin2015</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

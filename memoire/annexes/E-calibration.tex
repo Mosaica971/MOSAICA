@@ -1,20 +1,14 @@
-\chapter{Tableaux de calibration}
+﻿\chapter{Tableaux de calibration}
 \label{ann:calibration}
-% BUDGET : 2,5 pages. Version resserree du 2026-08-31 : les six corrections de comparaison a
-% l'article, le balayage plantain et ce que le solveur n'explique pas sont passes en tableaux.
-% CORRIGE le 2026-08-31 : le plantain au seuil LE PLUS SERRE vaut 179 ha, pas 247 (qui est la
-% valeur au seuil retenu de 6 440 t). Source : journal-vigilance 407-421, item CAL-76.
+% BUDGET : 2,5 pages. Version 2026-09-02 : l'annexe ne contient plus que des tableaux. Le
+% balayage du plancher de prairie et l'argument exogene du cheptel, jusqu'ici en prose, sont
+% devenus deux tables.
 % Tous les nombres sont des macros lues dans les recap.json (build_chiffres.py), sauf le
 % tableau du balayage plantain, saisi depuis CAL-76.
 
-Le chapitre~\ref{ch:calibrer} affirme trois choses que seule cette annexe établit. L'écart
-résiduel se concentre sur les petits postes. Le plafond de plantain et le plancher de prairie
-sont des corrections et non des ajustements. Le solveur est hors de cause. Une section leur
-répond dans cet ordre.
-
 \section{\glsentryshort{pad} par culture, aux trois barreaux}
 
-\begin{table}[h]
+\begin{table}[H]
   \centering
   \caption{Surfaces observées et simulées par groupe \gls{rpg} (ha) et \gls{pad}
   correspondant (\%), aux trois barreaux de calibration. Le symbole $\bullet$ marque les
@@ -66,23 +60,13 @@ répond dans cet ordre.
   \end{tabular}
 \end{table}
 
-Cette table établit trois choses. Les quatre cultures qui passent sous le seuil sont les
-quatre plus grandes en surface, et les sept qui échouent totalisent moins d'un dixième du
-territoire. Le plancher d'éligibilité joue ensuite dans les deux sens, puisqu'il innocente le
-modèle sur les vergers, dont une partie n'est accessible à aucune variante fine, et l'accuse
-partout ailleurs, où rien n'interdisait de faire mieux. Le succès sur la prairie, enfin, est
-nul par construction puisque son plancher l'épingle, à l'inverse exact de la canne, qu'aucune
-contrainte ne nomme.
-
 \section{Les autres échelles, et la comparaison à l'article}
 
-Le tableau~\ref{tab:ann-echelles} donne les trois autres échelles, à la parité et sous la
-calibration retenue.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les trois autres échelles d'évaluation. Le seuil sous-régional et le seuil par
-  ferme valent \SI{\mesArtPadZone}{\percent} et non \SI{\mesArtPad}{\percent}.}
+  \caption{Les trois autres échelles d'évaluation, à la parité et sous la calibration retenue.
+  Le seuil sous-régional et le seuil par ferme valent \SI{\mesArtPadZone}{\percent} et non
+  \SI{\mesArtPad}{\percent}.}
   \label{tab:ann-echelles}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -94,7 +78,9 @@ calibration retenue.
       les reçues tiennent entre \SI{\calibRetenuRegionsPadMin}{\percent} et
       \SI{\calibRetenuRegionsPadOkMax}{\percent}. Les deux échecs sont le Sud-Est et le
       Sud-Ouest de Basse-Terre, à \SI{\calibRetenuRegionsPadHorsMin}{\percent} et
-      \SI{\calibRetenuRegionsPadMax}{\percent} \\
+      \SI{\calibRetenuRegionsPadMax}{\percent}. L'article échoue sur la même sous-région, le
+      Sud-Est de Basse-Terre, sa seule à descendre à \SI{56}{\percent} de surface correctement
+      simulée \\
     Fermes sous le seuil (\%) & &
       \num{\calibRetenuFermesOkPct} &
       \num{\calibRetenuFermesOk} fermes sur \num{\calibRetenuFermesTotal} \\
@@ -110,25 +96,18 @@ calibration retenue.
     Parcelles justes (\%) & & \num{\calibRetenuParcelles} &
       pour \SI{\calibRetenuSurface}{\percent} de la surface. Le modèle se trompe donc
       davantage sur les petites parcelles \\
+    \midrule
+    Marie-Galante & & \num{\calibRetenuRegionsPadMin} &
+      passée du pire au meilleur rang. Sa prairie tombait de \SI{1357}{\ha} à \SI{228}{\ha}
+      avant le plancher, soit \SI{83}{\percent} de perte sur une île entière \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Deux lectures s'ajoutent à cette table. L'article échoue sur la même sous-région que nous, le
-Sud-Est de Basse-Terre, sa seule à descendre à \SI{56}{\percent} de surface correctement
-simulée, et il en donne la cause. La rotation banane et canne forme un système technique
-unique réparti sur plusieurs parcelles, que le modèle traite comme des choix indépendants.
-Marie-Galante, elle, est passée du pire au meilleur rang, sa prairie tombant de
-\SI{1357}{\ha} à \SI{228}{\ha} avant le plancher, soit \SI{83}{\percent} de perte sur une île
-entière. L'écart n'est pas diffus, il a une adresse.
-
-Six corrections sont enfin nécessaires avant de rapprocher ces chiffres de ceux de l'article,
-et le tableau~\ref{tab:ann-corrections} les énonce.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les six corrections nécessaires pour comparer honnêtement ces chiffres à
-  \textcite{chopin2015}. Elles doivent être énoncées avant toute conclusion.}
+  \caption{Les six corrections à appliquer avant de rapprocher ces chiffres de ceux de
+  \textcite{chopin2015}.}
   \label{tab:ann-corrections}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -164,16 +143,12 @@ et le tableau~\ref{tab:ann-corrections} les énonce.
 
 \section{Les balayages de seuil}
 
-Sans ces deux balayages, \enquote{correction et non ajustement} reste une affirmation. Le
-tableau~\ref{tab:ann-balayage-plantain} donne le premier en entier.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Balayage du plafond de plantain, sept seuils. Le \gls{pad} y forme un palier plat
-  de \SI{4650}{\tonne} à \SI{9240}{\tonne}, soit un facteur deux sur le seuil pour un
-  demi-point, à peine plus que le bruit du solveur. Ces valeurs datent du balayage du 27
-  juillet, avant l'activation du plancher de prairie. Leur niveau n'est donc pas comparable au
-  tableau~\ref{tab:ann-pad-cultures}, seule leur variation le long du balayage est en cause.}
+  \caption{Balayage du plafond de plantain, sept seuils. Le \gls{pad} forme un palier plat de
+  \SI{4650}{\tonne} à \SI{9240}{\tonne}, soit un facteur deux sur le seuil pour un demi-point
+  d'écart. Le plantain simulé reste au-dessus des \SI{\obsHaBC}{\ha} observés à tous les
+  seuils.}
   \label{tab:ann-balayage-plantain}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -194,50 +169,72 @@ tableau~\ref{tab:ann-balayage-plantain} donne le premier en entier.
   \end{tabular}
 \end{table}
 
-Deux observations écartent le soupçon de circularité. L'optimum du palier se trouve à
-l'extrémité haute, à deux fois et demie le débouché observé, et non au seuil le plus serré,
-alors qu'un paramètre servant de variable d'ajustement s'améliorerait de façon monotone en se
-rapprochant de l'observé. Et le plantain simulé reste au-dessus de l'observé
-% CORRIGE 2026-08-31 : la version precedente ecrivait 247 ha ici. 247 ha est la valeur au
-% seuil RETENU (6 440 t) ; au seuil le plus serre (4 650 t) c'est 179 ha. Source CAL-76.
-(\SI{\obsHaBC}{\ha}) à tous les seuils, le minimum étant \SI{179}{\ha} au plus serré. La
-contrainte ne pousse donc pas la culture vers l'observé. Le seuil retenu est
-\SI{6440}{\tonne}, qui n'est pas celui qui note le mieux mais le seul des trois candidats qui
-soit sourçable.
+\begin{table}[H]
+  \centering
+  \caption{Balayage du plancher de prairie, de la valeur retenue jusqu'à la statistique
+  agricole. Les trois métriques que le plancher ne touche pas restent au-dessus des seuils
+  publiés sur toute la plage, tandis que le \gls{pad} hors prairie empire quand le seuil
+  monte.}
+  \label{tab:ann-balayage-prairie}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{54mm}rX@{}}
+    \toprule
+    \textbf{Mesure} & \textbf{Valeur} & \textbf{Lecture} \\
+    \midrule
+    Plancher retenu & \SI{\mesCalalouBovins}{\ha} & valeur du paramètre \gls{gams}
+      \texttt{QUOTA\_PN\_PIQ\_MIN} \\
+    Plancher le plus haut balayé & \SI{\mesPrairieAgreste}{\ha} & prairie de la statistique
+      agricole \\
+    Types reproduits au plancher le plus haut & \SI{\mesPrairieHautTypes}{\percent} & \\
+    Parcelles au plancher le plus haut & \SI{\mesPrairieHautParcelles}{\percent} & \\
+    Surface au plancher le plus haut & \SI{\mesPrairieHautSurface}{\percent} & \\
+    \gls{pad} hors prairie à \SI{7218}{\ha} & \SI{\mesPadHorsPrairieBas}{\percent} & \\
+    \gls{pad} hors prairie à \SI{\mesPrairieAgreste}{\ha} & \SI{\mesPadHorsPrairieHaut}{\percent}
+      & le plancher prend alors sa terre à la canne, la culture la mieux restituée. Un seuil
+      calé pour flatter le résultat ferait exactement l'inverse \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
-Sur la prairie, le seuil a été balayé de sa valeur retenue jusqu'à la statistique exogène. Les
-trois métriques que le plancher ne touche pas restent au-dessus des seuils publiés sur toute
-la plage, avec au plancher le plus haut \SI{\mesPrairieHautTypes}{\percent} de types,
-\SI{\mesPrairieHautParcelles}{\percent} de parcelles et \SI{\mesPrairieHautSurface}{\percent}
-de surface. Le \gls{pad} hors prairie empire quand on remonte le seuil, de
-\SI{\mesPadHorsPrairieBas}{\percent} à \SI{\mesPadHorsPrairieHaut}{\percent}, parce que le
-plancher prend alors sa terre à la canne, la culture la mieux restituée. Un seuil calé pour
-flatter le résultat ferait exactement l'inverse.
-
-Le meilleur argument du chapitre~\ref{ch:calibrer} est cependant extérieur au modèle. Le
-cheptel de \num{\mesBovins} bovins recensés en 2017 vaut \num{\mesUgb} \gls{ugb}. Rapportés
-aux \SI{\mesPrairieAgreste}{\ha} de la statistique agricole, cela fait
-\num{\mesUgbHaAgreste} \gls{ugb} par hectare, conforme aux recensements. Rapportés aux
-\SI{2980}{\ha} que le modèle sans plancher laisse à la prairie, \num{\mesUgbHaSansPlancher},
-agronomiquement impossible. La prairie de notre jeu parcellaire couvre
-\SI{\mesPrairieRpg}{\ha}, soit \SI{\mesPrairieExogene}{\ha} une fois la statistique ramenée à
-notre couverture de \SI{\mesCouvertureSau}{\percent}. Sans plancher, \SI{3489}{\ha} de
-parcelles observées en prairie ne sont pas reconduites, dont \SI{62}{\percent} d'économie
-légitime, \SI{36}{\percent} de couplage avec le plafond de main d'\oe uvre et
-\SI{2}{\percent} de résidu. \SI{30}{\percent} du déficit tient sur un écart de
-\SI{0.94}{\percent} entre les marges de deux cultures, et la prairie pesait
-\SI{42}{\percent} de la déviation totale avant son plancher.
+\begin{table}[H]
+  \centering
+  \caption{L'argument exogène qui fonde le plancher de prairie, et la décomposition du déficit
+  de prairie observé sans plancher. La charge animale se déduit du recensement de 2017 et non
+  du modèle.}
+  \label{tab:ann-cheptel}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{54mm}rX@{}}
+    \toprule
+    \textbf{Grandeur} & \textbf{Valeur} & \textbf{Lecture} \\
+    \midrule
+    Bovins recensés en 2017 & \num{\mesBovins} & \\
+    \gls{ugb} correspondantes & \num{\mesUgb} & \\
+    Prairie de la statistique agricole & \SI{\mesPrairieAgreste}{\ha} &
+      \num{\mesUgbHaAgreste} \gls{ugb} par hectare, conforme aux recensements \\
+    Prairie du modèle sans plancher & \SI{\simBcSeulPN}{\ha} &
+      \num{\mesUgbHaSansPlancher} \gls{ugb} par hectare, agronomiquement impossible \\
+    Prairie de notre jeu parcellaire & \SI{\mesPrairieRpg}{\ha} & \\
+    Statistique ramenée à notre couverture de \SI{\mesCouvertureSau}{\percent} &
+      \SI{\mesPrairieExogene}{\ha} & \\
+    \midrule
+    Parcelles observées en prairie non reconduites sans plancher & \SI{3489}{\ha} &
+      \SI{62}{\percent} d'économie légitime, \SI{36}{\percent} de couplage avec le plafond de
+      main d'\oe uvre, \SI{2}{\percent} de résidu \\
+    Part du déficit tenant à un écart de marge de \SI{0.94}{\percent} &
+      \SI{30}{\percent} & \\
+    Poids de la prairie dans la déviation totale avant son plancher & \SI{42}{\percent} & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \section{Ce que le solveur n'explique pas}
 
-Cinq suspects ont été instruits et écartés, et deux verdicts que j'avais tenus ont été
-démentis. Le tableau~\ref{tab:ann-solveur} donne pour chacun la mesure qui a tranché.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Ce qui a été mis hors de cause, et par quelle mesure. Les deux dernières lignes
-  sont des verdicts que j'ai tenus puis démentis, et leur date figure en
-  annexe~\ref{ann:chronologie}.}
+  \caption{Les cinq suspects instruits puis écartés, avec la mesure qui a tranché. Les deux
+  dernières lignes sont des verdicts tenus puis démentis.}
   \label{tab:ann-solveur}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -249,8 +246,8 @@ démentis. Le tableau~\ref{tab:ann-solveur} donne pour chacun la mesure qui a tr
       \SI{\mesGraineA}{\percent}, \SI{\mesGraineB}{\percent} et \SI{\mesGraineC}{\percent} de
       \gls{pad} territorial. L'arbitraire vaut donc \num{\mesBruitPad} point, et c'est ce
       chiffre qui fixe à \SI{5}{\percent} la tolérance du garde-fou des runs de référence \\
-    La main d'\oe uvre & le plan réellement observé demande \SI{5.68}{\mega\hour} pour un
-      plafond de \SI{6.25}{\mega\hour}. Le modèle n'a pas d'excuse de ce côté \\
+    La main d'\oe uvre & le plan réellement observé demande \SI{\mesMoObserve}{\mega\hour} pour
+      un plafond de \SI{\mesMoPlafond}{\mega\hour}. Le modèle n'a pas d'excuse de ce côté \\
     Recalibrer l'aversion au risque & descend le \gls{pad} à \SI{39.9}{\percent} avec des
       coefficients économiquement absurdes. Surajustement \\
     Caler des plafonds de marché sur l'observé & descend à \SI{33.6}{\percent} et c'est
@@ -258,6 +255,7 @@ démentis. Le tableau~\ref{tab:ann-solveur} donne pour chacun la mesure qui a tr
     Incorporer l'élevage & c'est la bonne réponse, et c'est pourquoi elle est écartée du stage
       plutôt que bâclée. Elle demande une variable d'état que le modèle mono-période ne porte
       pas \\
+    \midrule
     \enquote{Le plancher de prairie rend le \gls{milp} intraitable} & verdict daté d'une
       version du modèle à \num{900000} variables. Il n'a pas survécu au masque
       d'éligibilité \\
@@ -267,9 +265,24 @@ démentis. Le tableau~\ref{tab:ann-solveur} donne pour chacun la mesure qui a tr
   \end{tabularx}
 \end{table}
 
-Une dernière réserve porte sur les indicateurs plutôt que sur les surfaces. L'assolement 2017
-n'étant connu qu'au niveau des douze groupes agrégés, chaque indicateur observé est une
-fourchette et non une valeur. Plusieurs indicateurs simulés, la subvention, le revenu, l'azote
-et le travail, tombent à l'intérieur de cette fourchette, et le point central en sort parfois
-par le haut. L'écart au central ne démontre donc rien, et c'est une réserve à opposer à toute
-comparaison indicateur par indicateur.
+\begin{table}[H]
+  \centering
+  \caption{Les deux réserves à appliquer à la lecture des tableaux de cette annexe.}
+  \label{tab:ann-reserves-calib}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{34mm}X@{}}
+    \toprule
+    \textbf{Réserve} & \textbf{Contenu} \\
+    \midrule
+    Le balayage du plantain est daté & ses valeurs viennent du balayage du 27 juillet, avant
+      l'activation du plancher de prairie. Leur niveau n'est donc pas comparable au
+      tableau~\ref{tab:ann-pad-cultures}, seule leur variation le long du balayage est en
+      cause \\
+    Chaque indicateur observé est une fourchette & l'assolement 2017 n'étant connu qu'au niveau
+      des douze groupes agrégés, l'indicateur observé n'est pas une valeur. La subvention, le
+      revenu, l'azote et le travail simulés tombent à l'intérieur de cette fourchette, et le
+      point central en sort parfois par le haut. L'écart au central ne démontre donc rien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

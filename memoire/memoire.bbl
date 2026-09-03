@@ -215,50 +215,6 @@
       \verb https://daaf.guadeloupe.agriculture.gouv.fr/cartographie-des-teneurs-en-chlordecone-des-sols-a1304.html
       \endverb
     \endentry
-    \entry{insee2023prix}{article}{}{}
-      \name{author}{2}{}{%
-        {{un=0,uniquepart=base,hash=e1e23dab1f7804f96e0d546d8597bb60}{%
-           family={Dufour},
-           familyi={D\bibinitperiod},
-           given={Karine},
-           giveni={K\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=5fe30bef9a45bf231c1f0a94ce5b7b29}{%
-           family={Monziols},
-           familyi={M\bibinitperiod},
-           given={Martin},
-           giveni={M\bibinitperiod},
-           givenun=0}}%
-      }
-      \strng{namehash}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{fullhash}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{fullhashraw}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{bibnamehash}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{authorbibnamehash}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{authornamehash}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{authorfullhash}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \strng{authorfullhashraw}{5ed3b83d3a78d6904f56bf2d98623a00}
-      \field{sortinit}{D}
-      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Insee Première}
-      \field{number}{1958}
-      \field{title}{En 2022, les prix restent plus élevés dans les {DOM} qu'en {France} métropolitaine, en particulier pour les produits alimentaires}
-      \field{urlday}{17}
-      \field{urlmonth}{8}
-      \field{urlyear}{2026}
-      \field{year}{2023}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://www.insee.fr/fr/statistiques/7648939
-      \endverb
-      \verb{url}
-      \verb https://www.insee.fr/fr/statistiques/7648939
-      \endverb
-    \endentry
     \entry{haimes1971}{article}{}{}
       \name{author}{3}{}{%
         {{un=0,uniquepart=base,hash=cf0a6ea825844fc35a72852afcaa22f0}{%
@@ -476,44 +432,6 @@
       \endverb
       \verb{url}
       \verb https://www.odeadom.fr/wp-content/uploads/2019/01/Couverture-des-besoins-alimentaires-dans-les-DOM.pdf
-      \endverb
-    \endentry
-    \entry{opecst2009}{report}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=a1ce762042a96fe505b2cfd24c9842b7}{%
-           family={{Office parlementaire d'évaluation des choix scientifiques et technologiques}},
-           familyi={O\bibinitperiod}}}%
-      }
-      \list{institution}{1}{%
-        {Assemblée nationale et Sénat}%
-      }
-      \strng{namehash}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{fullhash}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{fullhashraw}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{bibnamehash}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{authorbibnamehash}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{authornamehash}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{authorfullhash}{a1ce762042a96fe505b2cfd24c9842b7}
-      \strng{authorfullhashraw}{a1ce762042a96fe505b2cfd24c9842b7}
-      \field{sortinit}{O}
-      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{number}{487 (2008--2009)}
-      \field{title}{Impacts de l'utilisation de la chlordécone et des pesticides aux {Antilles} : bilan et perspectives d'évolution}
-      \field{type}{Rapport}
-      \field{urlday}{16}
-      \field{urlmonth}{8}
-      \field{urlyear}{2026}
-      \field{year}{2009}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://www.senat.fr/rap/r08-487/r08-487.html
-      \endverb
-      \verb{url}
-      \verb https://www.senat.fr/rap/r08-487/r08-487.html
       \endverb
     \endentry
     \entry{savage1951}{article}{}{}

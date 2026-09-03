@@ -44,14 +44,16 @@ for f, txt in allsrc.items():
         problems.append("accolades desequilibrees : %+d (%s)"
                         % (stripped.count("{") - stripped.count("}"), f))
 
-# 3. flottants cites
-refs = set()
+# 3. toute reference vers une annexe pointe sur un label existant.
+#    Depuis le 2026-09-02 les annexes ne contiennent QUE des tableaux : un flottant d'annexe
+#    n'a donc plus a etre cite par une phrase, et la reciproque n'est plus une regle.
+labels = set()
 for txt in list(allsrc.values()) + list(corps.values()):
-    refs |= set(re.findall(r"\\(?:ref|eqref)\{([^}]+)\}", txt))
-for f, txt in allsrc.items():
-    for lab in re.findall(r"\\label\{((?:tab|fig):[^}]+)\}", txt):
-        if lab not in refs:
-            problems.append("flottant jamais cite : %s (%s)" % (lab, f))
+    labels |= set(re.findall(r"\\label\{([^}]+)\}", txt))
+for f, txt in dict(allsrc, **corps).items():
+    for ref in re.findall(r"\\(?:ref|eqref)\{((?:ann|tab|fig):[^}]+)\}", txt):
+        if ref not in labels:
+            problems.append("reference vers un label inexistant : %s (%s)" % (ref, f))
 
 # 4. ponctuation proscrite hors tableaux techniques
 for f, txt in allsrc.items():

@@ -1,25 +1,35 @@
-\chapter{Inventaire de portage \glsentryshort{gams}}
+﻿\chapter{Inventaire de portage \glsentryshort{gams}}
 \label{ann:portage}
-% BUDGET : 2 pages. Version resserree du 2026-08-31 : les quatre defauts portes sont passes
-% de quatre paragraphes a un tableau. C'est l'annexe qui rend le mandat de parite verifiable
-% par quelqu'un d'autre que son auteur.
-
-Le mandat de parité (§~\ref{sec:parite}) n'a de valeur que s'il est vérifiable. Cette annexe
-donne le statut de chaque bloc d'équations du \gls{gams} d'origine, les quatre défauts portés
-sciemment et les sept branches fermées au cours du stage.
+% BUDGET : 2 pages. Version 2026-09-02 : l'annexe ne contient plus que des tableaux. Les quatre
+% statuts, jusqu'ici en prose, sont devenus une table ; le contre-exemple sur la tenue de
+% l'inventaire est passe en annexe F, avec les autres limites de methode.
 
 \section{Statut des équations, bloc par bloc}
 
-Le programme d'origine compte une centaine d'équations nommées réparties sur douze fichiers.
-Chacune reçoit l'un de quatre statuts. Portée, le comportement est reproduit. Implicite, le
-comportement est obtenu sans écrire de contrainte parce que la formulation Python le rend
-inutile. Différée, non portée pour une raison consignée. Écartée, portée puis désactivée pour
-une raison consignée. Le tableau~\ref{tab:ann-portage} donne le statut de chaque bloc.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Statut des blocs d'équations. Le motif est la colonne qui compte. Sans lui, la
-  table est un inventaire. Avec lui, c'est une preuve.}
+  \caption{Les quatre statuts attribués aux blocs d'équations du \gls{gams} d'origine, qui
+  compte une centaine d'équations nommées réparties sur onze fichiers.}
+  \label{tab:ann-statuts}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{22mm}X@{}}
+    \toprule
+    \textbf{Statut} & \textbf{Définition} \\
+    \midrule
+    Portée & le comportement du \gls{gams} est reproduit \\
+    Implicite & le comportement est obtenu sans écrire de contrainte, parce que la formulation
+      Python le rend inutile \\
+    Différée & non portée, pour une raison consignée \\
+    Écartée & portée puis désactivée, pour une raison consignée \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Statut de chaque bloc d'équations du \gls{gams}, avec le nom de la contrainte
+  Python correspondante et le motif du statut.}
   \label{tab:ann-portage}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -75,21 +85,14 @@ une raison consignée. Le tableau~\ref{tab:ann-portage} donne le statut de chaqu
   \end{tabularx}
 \end{table}
 
-Un contre-exemple mérite d'être consigné, puisque cette annexe prétend à la traçabilité. Cet
-inventaire a d'abord été tenu après coup plutôt qu'au fil du portage, et deux de ses lignes
-sont restées périmées trois semaines. Une table de correspondance ne vaut que par la
-discipline qui la met à jour, et celle-ci a manqué une fois.
-
 \section{Les quatre défauts portés}
 \label{sec:ann-bugs}
 
-Le tableau~\ref{tab:ann-bugs} donne chaque défaut, ce que le code fait réellement, l'intention
-présumée et l'état du dossier.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les quatre défauts portés sciemment, et un piège de lecture qui n'en est pas un.
-  Aucun n'a été corrigé en silence.}
+  \caption{Les quatre défauts du \gls{gams} portés volontairement, avec ce que le code fait
+  réellement et l'état du dossier. La dernière ligne est un comportement qui ressemble à un
+  défaut sans en être un.}
   \label{tab:ann-bugs}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -122,7 +125,7 @@ présumée et l'état du dossier.
       première, donc la lecture la plus favorable. Une parcelle à cheval sur une zone saine et
       une zone contaminée est traitée comme saine &
       non résolu. Sur un enjeu de santé publique, cette permissivité par défaut n'est
-      documentée nulle part et doit être confirmée avec la source\attente{14} \\
+      documentée nulle part et doit être confirmée avec la source \\
     \midrule
     Le cycle de l'ananas, qui ressemble à un défaut &
       le \gls{gams} annualise les rendements pour tout ce qui est monétaire et ne les
@@ -135,17 +138,14 @@ présumée et l'état du dossier.
   \end{tabularx}
 \end{table}
 
-\section{Les sept branches fermées}
+\section{Les branches fermées}
 
-Le corpus qui a servi à écrire ce mémoire impose une règle. Aucune branche n'est fermée sans
-mesure, ou bien l'exception est déclarée. Le tableau~\ref{tab:ann-branches} donne les sept
-fermetures et ce qui les a tranchées.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les sept branches fermées. Quatre le sont sans mesure comparative, et chacune le
-  déclare. Une règle sans exception se contourne en silence. Ici l'exception est un champ,
-  comptée et affichée par l'audit, donc opposable.}
+  \caption{Les sept branches fermées au cours du stage, ce que chacune écarte et la mesure ou
+  l'argument qui l'a tranchée. Quatre sont fermées sans mesure comparative et le déclarent.
+  La dernière ligne est une huitième piste, instruite jusqu'à l'implémentation avant d'être
+  annulée.}
   \label{tab:ann-branches}
   \scriptsize
   \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{36mm}
@@ -172,10 +172,10 @@ fermetures et ce qui les a tranchées.
       \num{\mesChecksums} sommes de contrôle, \num{\mesLignesCode} lignes \\
     Ne pas viser la publication pendant le stage & rédiger l'article en parallèle &
       aucune mesure, et l'absence de mesure est la raison de l'écart \\
+    \midrule
+    Interface classique du solveur & interface persistante, testée puis révoquée &
+      mesure. Elle entre en conflit avec la capture des flux de sortie sur laquelle repose
+      l'affichage de progression \\
     \bottomrule
   \end{tabularx}
 \end{table}
-
-Une huitième piste a été instruite jusqu'à l'implémentation avant d'être annulée. L'interface
-persistante du solveur a été testée puis révoquée, parce qu'elle entre en conflit avec la
-capture des flux de sortie sur laquelle repose l'affichage de progression.

@@ -1,16 +1,15 @@
-\chapter{Chronologie et méthode de travail}
+﻿\chapter{Chronologie et méthode de travail}
 \label{ann:chronologie}
-% BUDGET : 1 page. Version resserree du 2026-08-31 : les regles d'ecriture et les limites de
-% methode sont passees en tableau. C'est l'annexe qui rend le stage lisible comme un travail.
+% BUDGET : 1,5 page. Version 2026-09-02 : l'annexe ne contient plus que des tableaux. Les quatre
+% verdicts renverses et le corpus, jusqu'ici en prose, sont devenus deux tables. Le
+% contre-exemple sur la tenue de l'inventaire de portage vient de l'annexe B.
 
 \section{Le déroulé}
 
-Le stage s'est déroulé en six phases, que donne le tableau~\ref{tab:ann-chrono}.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Les jalons du stage. La troisième colonne est ce qui distingue une chronologie d'un
-  journal. Ce n'est pas ce qui a été fait, c'est ce que cela a établi.}
+  \caption{Les six phases du stage, le travail mené dans chacune et ce que cette phase a
+  établi.}
   \label{tab:ann-chrono}
   \small
   \begin{tabularx}{\textwidth}{@{}p{24mm}p{38mm}X@{}}
@@ -39,27 +38,40 @@ Le stage s'est déroulé en six phases, que donne le tableau~\ref{tab:ann-chrono
   \end{tabularx}
 \end{table}
 
-Quatre verdicts ont été renversés au cours de ces phases, tous par une mesure. Le plancher de
-prairie jugé intraitable puis circulaire, l'idée qu'une contrainte ne peut pas améliorer le
-résultat, un écart attribué au solveur qui venait du modèle, et le paramétrage d'un front sur
-la mauvaise référence. Leur date et la mesure qui les a démentis figurent aux
-annexes~\ref{ann:calibration} et~\ref{ann:resultats}.
+\begin{table}[H]
+  \centering
+  \caption{Les quatre verdicts tenus puis renversés au cours du stage, la mesure qui les a
+  démentis et l'annexe qui la porte.}
+  \label{tab:ann-verdicts}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{40mm}X
+                               >{\raggedright\arraybackslash}p{16mm}@{}}
+    \toprule
+    \textbf{Verdict tenu} & \textbf{Ce qui l'a démenti} & \textbf{Où} \\
+    \midrule
+    Le plancher de prairie rend le \gls{milp} intraitable, puis il est circulaire &
+      le masque d'éligibilité pour le premier, la donnée exogène de charge animale pour le
+      second & annexe~\ref{ann:calibration} \\
+    Une contrainte ne peut pas améliorer le résultat &
+      le plafond de plantain améliore les quatre métriques de calibration à la fois &
+      annexe~\ref{ann:calibration} \\
+    L'écart résiduel vient du solveur &
+      trois graines de branchement le bornent à \num{\mesBruitPad} point de \gls{pad} &
+      annexe~\ref{ann:calibration} \\
+    Un front se paramètre sur le réalisé de la configuration de référence &
+      il se paramètre sur la borne de sa politique hôte, faute de quoi plusieurs de ses points
+      ne contraignent rien & annexe~\ref{ann:scenarios} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \section{Comment le travail a été organisé}
 
-Un commit égale un fait mesuré, et le message en porte le chiffre, parfois la prédiction. Cela
-permet de vérifier après coup si elle tenait, et c'est ainsi que la correction de l'erreur
-d'ancrage du forçage nul a pu être vérifiée au centime. Quatre lieux d'écriture coexistent
-avec une règle de tri entre eux, la vigilance, les chantiers restants, les spécifications
-datées et ce fichier d'état. Le journal d'investigation a été synthétisé plutôt que maintenu,
-décision et non abandon, puisqu'un journal de mille lignes n'est plus lu. Le
-tableau~\ref{tab:ann-methode} donne les trois règles d'écriture qui ont produit des effets
-mesurables et les deux limites de méthode qui vont avec.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{Trois règles d'écriture et deux limites de méthode. Les premières ont produit des
-  effets mesurables, les secondes sont consignées ici parce qu'elles n'ont pas d'autre place.}
+  \caption{Les règles d'écriture appliquées pendant le stage et leur effet constaté, suivies
+  des trois limites de méthode qui les accompagnent.}
   \label{tab:ann-methode}
   \scriptsize
   \setlength{\tabcolsep}{4pt}
@@ -67,6 +79,10 @@ mesurables et les deux limites de méthode qui vont avec.
     \toprule
     \textbf{Règle ou limite} & \textbf{Effet constaté} \\
     \midrule
+    Un commit égale un fait mesuré &
+      le message en porte le chiffre, parfois la prédiction, ce qui permet de vérifier après
+      coup si elle tenait. C'est ainsi que la correction de l'erreur d'ancrage du forçage nul
+      a pu être vérifiée au centime \\
     Générer plutôt que rédiger &
       les \num{\mesMacros} macros de ce mémoire sont lues dans les fichiers de résultats des
       runs, et aucun chiffre du corps n'est saisi à la main \\
@@ -77,6 +93,10 @@ mesurables et les deux limites de méthode qui vont avec.
     Commenter le pourquoi, jamais le comment &
       un commentaire qui paraphrase un comportement est destiné à dériver, et il est cru sur
       parole. C'est ce qui s'est produit sur les interdictions liées au chlordécone \\
+    Quatre lieux d'écriture avec une règle de tri &
+      la vigilance, les chantiers restants, les spécifications datées et le fichier d'état. Le
+      journal d'investigation a été synthétisé plutôt que maintenu, décision et non abandon,
+      puisqu'un journal de mille lignes n'est plus lu \\
     \midrule
     Ne résoudre qu'en fin de journée &
       limite organisationnelle. Le temps de calcul décide de ce qu'on peut essayer dans une
@@ -84,23 +104,42 @@ mesurables et les deux limites de méthode qui vont avec.
     Des tests sans données réelles &
       rapides et portables, mais le dispositif n'est validé de bout en bout nulle part. Le
       dépôt le reconnaît à cinq reprises \\
+    L'inventaire de portage a été tenu après coup &
+      l'annexe~\ref{ann:portage} a d'abord été écrite après le portage plutôt qu'au fil de
+      celui-ci, et deux de ses lignes sont restées périmées trois semaines. Une table de
+      correspondance ne vaut que par la discipline qui la met à jour \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Un choix du corpus n'a par ailleurs jamais reçu de justification consignée, le code en anglais
-et la documentation en français, et l'audit le signale comme tel plutôt que de lui inventer un
-parent après coup.
-
 \section{Le corpus qui a produit ce mémoire}
 
-Ce mémoire n'a pas été écrit depuis les souvenirs du stage mais depuis un inventaire typé de
-ce qu'il a décidé, mesuré, écarté ou raté. Il compte \num{482} items reliés par \num{1267}
-arcs de justification, vérifiés par un script qui impose trois règles. Aucun choix retenu sans
-justification, aucune branche fermée sans mesure ou sans exception déclarée, aucun arc
-pendant. C'est ce qui permet d'affirmer que les sept fermetures de l'annexe~\ref{ann:portage}
-sont exhaustives, et non celles dont je me souviens. Il faut ajouter la lucidité qui va avec.
-Devant la question de savoir comment donner du sens à ce stage, la réponse produite a été un
-inventaire typé et un script d'audit, c'est-à-dire une méthode d'ingénieur appliquée à une
-question qui n'en est pas une. Et elle a marché, ce qui complique le procès qu'on pourrait lui
-faire.
+\begin{table}[H]
+  \centering
+  \caption{L'inventaire typé depuis lequel ce mémoire a été écrit, les règles que son script
+  d'audit impose et la limite de la démarche.}
+  \label{tab:ann-corpus}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}p{34mm}X@{}}
+    \toprule
+    \textbf{Élément} & \textbf{Contenu} \\
+    \midrule
+    Taille & \num{482} items reliés par \num{1267} arcs de justification, couvrant ce que le
+      stage a décidé, mesuré, écarté ou raté \\
+    Première règle & aucun choix retenu sans justification \\
+    Deuxième règle & aucune branche fermée sans mesure, ou bien l'exception est déclarée. Elle
+      est alors un champ, comptée et affichée par l'audit, donc opposable \\
+    Troisième règle & aucun arc pendant \\
+    Ce que cela permet & affirmer que les fermetures de l'annexe~\ref{ann:portage} sont
+      exhaustives, et non seulement celles dont je me souviens \\
+    Violation déclarée & le choix du code en anglais et de la documentation en français n'a
+      jamais reçu de justification consignée. L'audit le signale comme tel plutôt que de lui
+      inventer un parent après coup \\
+    Limite de la démarche & devant la question de savoir comment donner du sens à ce stage, la
+      réponse produite a été un inventaire typé et un script d'audit, c'est-à-dire une méthode
+      d'ingénieur appliquée à une question qui n'en est pas une. Et elle a marché, ce qui
+      complique le procès qu'on pourrait lui faire \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
