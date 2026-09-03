@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  2 SEP 2026 22:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.9)  3 SEP 2026 00:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -2199,97 +2199,88 @@ Package hyperref Info: Link coloring OFF on input line 14.
 \openout5 = `memoire.out'.
 
  (liminaires/garde.tex
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.0pt on input line 14.
-LaTeX Font Info:    Trying to load font information for T1+ntxtt on input line 
-14.
-
-(C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/newtx\t1ntxtt.fd
-File: t1ntxtt.fd 2012/04/20 v3.1
-)
-LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
-(Font)              scaled to size 10.0pt on input line 14.
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `ntxtt' (encoding: T1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
+<figures/logo-n7.pdf, id=267, 501.875pt x 181.67876pt>
+File: figures/logo-n7.pdf Graphic file (type pdf)
+<use figures/logo-n7.pdf>
+Package pdftex.def Info: figures/logo-n7.pdf  used on input line 14.
+(pdftex.def)             Requested size: 117.89468pt x 42.67912pt.
 LaTeX Font Info:    Trying to load font information for OT1+minntx on input lin
-e 14.
+e 15.
 
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/newtx\ot1minntx.fd
 File: ot1minntx.fd 2023/09/09 v1.1 font definition file for OT1/minntx
 )
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `minntx' (encoding: OT1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Trying to load font information for U+ntxmia on input line 
-14.
+15.
 
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/newtx\untxmia.fd
 File: untxmia.fd 2024/04/09 Fontinst v1.933 font definitions for U/ntxmia.
 )
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Trying to load font information for U+ntxsym on input line 
-14.
+15.
 
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/newtx\untxsym.fd
 File: untxsym.fd 2023/08/16 Fontinst v1.933 font definitions for U/ntxsym.
 )
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Trying to load font information for U+ntxsyc on input line 
-14.
+15.
 
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/newtx\untxsyc.fd
 File: untxsyc.fd 2012/04/12 Fontinst v1.933 font definitions for U/ntxsyc.
 )
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 6.6pt on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 12.0pt on input line 14.
+(Font)              scaled to size 12.0pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 8.8pt on input line 14.
+(Font)              scaled to size 8.8pt on input line 15.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 6.6pt on input line 14.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 14.
+(Font)              scaled to size 6.6pt on input line 15.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 15.
 
 
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
@@ -2298,7 +2289,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 14.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 15.
 
  (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -2306,6 +2297,14 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 (C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
+
+pdfTeX warning: pdflatex.exe (file ./figures/logo-inrae.pdf): PDF inclusion: fo
+und PDF version <1.7>, but at most version <1.5> allowed
+<figures/logo-inrae.pdf, id=268, 845.1575pt x 597.23125pt>
+File: figures/logo-inrae.pdf Graphic file (type pdf)
+<use figures/logo-inrae.pdf>
+Package pdftex.def Info: figures/logo-inrae.pdf  used on input line 21.
+(pdftex.def)             Requested size: 100.65366pt x 71.13188pt.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 14.4pt on input line 26.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
@@ -2314,17 +2313,20 @@ Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/ntxtlf/m/sc/14.4'.
 (microtype)             Ignoring protrusion settings for this character.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 10.0pt on input line 28.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 20.74pt on input line 34.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 20.74pt on input line 34.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 14.4pt on input line 47.
- [1
+[1
 
 {C:/Users/Clément/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/C
-lément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf.enc}{C:/
-Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf-p
-c.enc}]) (liminaires/resume-fr.tex
+lément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf-pc.enc}{
+C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tl
+f.enc} <./figures/logo-n7.pdf> <./figures/logo-inrae.pdf>])
+(liminaires/resume-fr.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 17.28pt on input line 1.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
@@ -2405,9 +2407,20 @@ LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
 
 {C:/Users/Clément/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-ec.
 enc}]
+LaTeX Font Info:    Trying to load font information for T1+ntxtt on input line 
+94.
+
+(C:\Users\Clément\AppData\Local\Programs\MiKTeX\tex/latex/newtx\t1ntxtt.fd
+File: t1ntxtt.fd 2012/04/20 v3.1
+)
 LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
 (Font)              scaled to size 12.0pt on input line 94.
-) (chapitres/02-porter.tex
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `ntxtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+)
+(chapitres/02-porter.tex
 Chapitre 2.
 [3] [4
 
@@ -2432,7 +2445,7 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/m/sc' will be
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/ntxtlf/m/sc/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
-<figures/calibration-observe-simule.pdf, id=622, 434.99513pt x 266.3073pt>
+<figures/calibration-observe-simule.pdf, id=632, 434.99513pt x 266.3073pt>
 File: figures/calibration-observe-simule.pdf Graphic file (type pdf)
 <use figures/calibration-observe-simule.pdf>
 Package pdftex.def Info: figures/calibration-observe-simule.pdf  used on input 
@@ -2625,11 +2638,11 @@ Package logreq Info: Writing requests to 'memoire.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 60138 strings out of 467871
- 1265595 string characters out of 5416925
- 2145882 words of memory out of 5000000
- 87514 multiletter control sequences out of 15000+600000
- 771633 words of font info for 393 fonts, out of 8000000 for 9000
+ 60146 strings out of 467871
+ 1265881 string characters out of 5416925
+ 2145876 words of memory out of 5000000
+ 87522 multiletter control sequences out of 15000+600000
+ 771311 words of font info for 392 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  91i,15n,120p,2515b,3062s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Clément\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\t
@@ -2653,9 +2666,9 @@ al/Programs/MiKTeX/fonts/type1/public/newtx/txsys.pfb><C:/Users/Clément/AppDat
 a/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmb.pfb><C:/Users/Clément/Ap
 pData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmr.pfb><C:/Users/Clémen
 t/AppData/Local/Programs/MiKTeX/fonts/type1/public/newtx/ztmri.pfb>
-Output written on memoire.pdf (51 pages, 590275 bytes).
+Output written on memoire.pdf (51 pages, 802287 bytes).
 PDF statistics:
- 1234 PDF objects out of 1440 (max. 8388607)
+ 1244 PDF objects out of 1440 (max. 8388607)
  200 named destinations out of 1000 (max. 500000)
- 67690 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 67188 words of extra memory for PDF output out of 74296 (max. 10000000)
 
