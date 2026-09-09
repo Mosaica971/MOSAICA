@@ -46,7 +46,11 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
     # above its config entry before flipping it.
     assert "cs_gfa_minimum_share" not in enabled_constraints
     assert "farm_labor_hours_max" in enabled_constraints
-    assert len(enabled_constraints) == 10
+    # farm_production_bound (2026-09-08): Eq_BA_QUOTA_Expl, the per-farm export-banana
+    # delivery right. Distinct from the territorial ba_quota_max, which cannot stop the
+    # model concentrating the island's whole quota on the farms where banana pays best.
+    assert "farm_production_bound" in enabled_constraints
+    assert len(enabled_constraints) == 11
     assert {
         e["args"]["attribute"] for e in config["eligibility_criteria"] if e["enable"]
     } == {"ALTITUDE", "PENTE", "PLUVIO_PARC", "SURF_HA"}

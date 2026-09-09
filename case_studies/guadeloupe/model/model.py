@@ -138,6 +138,9 @@ def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
         # GAMS MO_Expl_init (ENTREES.txt:466-469): the labour the farm's OBSERVED 2017
         # cropping plan required, which Eq_MO_MAX_Expl then treats as its budget.
         farm_labor_capacity_hours=dataset.parameters.get("farm_labor_capacity_hours", {}),
+        # GAMS REF_BAN_EXPL_init (ENTREES.txt:477-483): what each farm's OBSERVED 2017 plan
+        # produced, per RPG group, which Eq_BA_QUOTA_Expl caps the farm's own output at.
+        farm_production_capacity=dataset.parameters.get("farm_baseline_production_t", {}),
         crop_indicator_rates=_crop_indicator_rates(dataset),
         plot_zones=_plot_zones(dataset),
         plot_weights=_plot_weights(dataset),

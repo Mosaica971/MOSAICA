@@ -55,7 +55,7 @@ def test_build_dataset_selects_2017_column_for_price_and_yield():
     dataset = build_dataset(CONFIG)
 
     assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
-    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(20)
+    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(18.5)
 
 
 def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
@@ -83,10 +83,10 @@ def test_build_dataset_computes_gross_margin_per_ha_cult():
 
     margin_per_ha_cult = dataset.parameters["margin_per_ha_cult"]
 
-    # AG: PB=rdt*prix=20*700=14000 (no subsidies/bagasse for citrus), CV~8001.31
-    # from OTK variable costs -- hand-verified via a one-off script using
-    # case_studies.guadeloupe.domain.economics against the real data tables.
-    assert margin_per_ha_cult["AG"] == pytest.approx(5998.69, abs=0.01)
+    # AG: PB=rdt*prix=18.5*700=12950 (no subsidies/bagasse for citrus), CV~8001.31
+    # from OTK variable costs. Cross-checked against the GAMS run's own output
+    # (context/SORTIES/RECAP_CULT_init.TXT, line MB, column AG = 4948.69).
+    assert margin_per_ha_cult["AG"] == pytest.approx(4948.69, abs=0.01)
 
 
 def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
@@ -192,9 +192,10 @@ def test_build_dataset_defaults_to_2017_restit_without_data_section():
 
     dataset = build_dataset(config)
 
-    # 2017 economics reproduced (AG price/yield unchanged from the hard-coded default).
+    # 2017 economics reproduced, read from Prix_Cult_CF_<scenario>/Rdt_Cult_CF_<scenario>
+    # -- the tables GAMS itself includes (DONNEES.txt:283-289).
     assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
-    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(20)
+    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(18.5)
 
 
 def test_build_dataset_rejects_unknown_year():
@@ -212,7 +213,7 @@ def test_build_dataset_rejects_unknown_scenario():
 
 
 def test_build_dataset_year_selects_requested_economic_column():
-    raw_2018 = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")["2018"]
+    raw_2018 = read_wide_table(INDICE_H_DIR / "Prix_Cult_CF_RESTIT.txt")["2018"]
     config = {**CONFIG, "data": {"year": "2018", "scenario": "RESTIT"}}
 
     dataset = build_dataset(config)
@@ -221,7 +222,7 @@ def test_build_dataset_year_selects_requested_economic_column():
 
 
 def test_build_dataset_accepts_init_baseline_column_as_year():
-    raw_init = read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")["init"]
+    raw_init = read_wide_table(INDICE_H_DIR / "Prix_Cult_CF_RESTIT.txt")["init"]
     config = {**CONFIG, "data": {"year": "init", "scenario": "RESTIT"}}
 
     dataset = build_dataset(config)
@@ -329,11 +330,11 @@ def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
     subsidy_annualized = dataset.parameters["subsidy_per_ha_cult_annualized"]
     margin = dataset.parameters["margin_per_ha_cult"]
 
-    # AG: PB=rdt*prix=20*700=14000, no subsidies/bagasse (see the existing
+    # AG: PB=rdt*prix=18.5*700=12950, no subsidies/bagasse (see the existing
     # gross-margin test's comment) -- sales alone should equal the full gross
     # product, and reconciling with the already-verified margin gives the
     # same CV~8001.31 hand-verified variable cost.
-    assert sales["AG"] == pytest.approx(14000.0, abs=0.01)
+    assert sales["AG"] == pytest.approx(12950.0, abs=0.01)
     assert subsidy_annualized["AG"] == pytest.approx(0.0, abs=0.01)
     assert (sales["AG"] + subsidy_annualized["AG"] - margin["AG"]) == pytest.approx(8001.31, abs=1.0)
 

@@ -98,7 +98,8 @@ source des données.
 | `Eq_BA_JA` | Jachère ≥ `PROP_BA_JA` × banane export | porté | `farm_area_ratio_min` (`ba_ja`) |
 | `Eq_BA_ROTA` | Jachère + canne (+ CF) ≥ `PROP_BA_JA` × banane | porté | `farm_area_ratio_min` (`ba_rota`) — terme CF absent tant que le bloc CF n'est pas câblé |
 | `Eq_CS_GFA` | Part min de canne sur les exploitations GFA | porté, **désactivé par choix** | `cs_gfa_minimum_share` — infaisable sur les données 2017 réelles, comme en GAMS |
-| `Eq_AN_PA` | `AN_PA` interdit si `Surf_Expl_Parc_init < AN_SURF_EXPL_MIN` | **différé** | Porte sur une **taille d'exploitation**, pas un attribut de parcelle : `attribute_forbidden` ne peut pas l'exprimer. Demande une règle catégorielle indexée par exploitation. |
+| `Eq_AN_PA` | `AN_PA` interdit si `Surf_Expl_Parc_init < AN_SURF_EXPL_MIN` | porté | `attribute_forbidden` sur `SURF_EXPL_PARC < 10` — la colonne porte la surface de l'exploitation propriétaire de la parcelle, donc la règle s'exprime sans indexation par exploitation. Cette ligne annonçait « différé » jusqu'au 2026-09-08 : c'était périmé, le portage date du 2026-07-27. |
+| `Eq_BA_QUOTA_Expl` | Tonnage de banane export de CHAQUE exploitation ≤ sa production 2017 | porté 2026-09-08 | `farm_production_bound` (`ba_quota_expl`) — nouveau builder ; la référence par exploitation vient de `compute_farm_baseline_production_t`, qui valorise chaque groupe observé par sa variante représentante faute de mix fin, ce qui **desserre** le plafond d'environ 18 %. |
 
 ## Territoire
 

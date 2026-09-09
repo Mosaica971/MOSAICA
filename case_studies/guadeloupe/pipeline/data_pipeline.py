@@ -1,3 +1,5 @@
+import csv
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -50,9 +52,9 @@ DEFAULT_COEFF_C_CO2 = 0.272
 
 def _available_years() -> list[str]:
     """Column labels available in the indice_H economic tables (canonical table:
-    Prix_Cult.txt). Includes the special baseline columns ``init``/``calib`` alongside the
+    Prix_Cult_CF_<scenario>.txt). Includes the special ``init``/``calib`` columns alongside the
     calendar years 2017..2022."""
-    return list(read_wide_table(INDICE_H_DIR / "Prix_Cult.txt").columns)
+    return list(read_wide_table(INDICE_H_DIR / f"Prix_Cult_CF_{DEFAULT_SCENARIO}.txt").columns)
 
 
 def _available_scenarios() -> list[str]:
@@ -119,6 +121,103 @@ def compute_farm_labor_capacity_hours(
     return hours_by_plot.groupby(farm_of_plot.reindex(hours_by_plot.index)).sum()
 
 
+def read_fine_baseline_allocation(path: str | Path) -> dict[str, dict[str, float]]:
+    """Read a GAMS-style wide plot x crop allocation table into {plot: {crop: ha}}.
+
+    The 2017 baseline we normally carry has only the 12 aggregate RPG groups; the GAMS run
+    wrote its own FINE baseline, one ITK per plot, in SORTIES/ASSOL_PARC_INIT.TXT. Reading it
+    is what lets a farm-level budget be computed on the real cropping plan instead of on the
+    representative-crop stand-in.
+
+    Two quirks of GAMS's `put` writer are handled here: the file is comma-delimited with
+    quoted labels (not the tab-separated layout of data/tables), and its header line is one
+    field SHORT because the last two crop names are written glued together without a
+    separator -- so the trailing pair is restored by name rather than trusted from the header.
+    """
+    path = Path(path)
+    with path.open(encoding="latin-1") as handle:
+        reader = csv.reader(handle)
+        header = next(reader)
+        crops = [name.strip('"') for name in header[1:-1]] + ["MA_PAI_NON_I", "MA_PAI_NON_NI"]
+        allocation: dict[str, dict[str, float]] = {}
+        for row in reader:
+            plot = row[0].strip('"')
+            planted = {crop: float(value) for crop, value in zip(crops, row[1:]) if float(value)}
+            if planted:
+                allocation[plot] = planted
+    return allocation
+
+
+def compute_farm_labor_capacity_hours_from_fine_baseline(
+    *,
+    fine_baseline: dict[str, dict[str, float]],
+    expl_parc: pd.DataFrame,
+    labor_hours_per_ha_cult: pd.Series,
+) -> pd.Series:
+    """MO_Expl_init computed the way GAMS computes it (ENTREES.txt:466-469).
+
+    `MO_Parc_init(SP) = sum(SC, SURF_Parc_init(SP) * Matrice_Parc_Cult(SP,SC) * MO_Ha_Cult_init(SC))`
+    -- and Matrice_Parc_Cult holds the FINE ITK per plot, not the aggregate RPG code. That is
+    the difference with compute_farm_labor_capacity_hours, which prices each observed group
+    through one representative variant because the fine plan was thought unavailable.
+
+    Validated end to end: these same rates applied to the GAMS CALIB allocation reproduce its
+    reported TRAVAIL_TOT to 156 h out of 5 292 000 (0.003 %, GAMS's own 4-digit rounding).
+    """
+    farm_of_plot = expl_parc.set_index("plot")["farm"]
+    hours: dict[str, float] = defaultdict(float)
+    for plot, planted in fine_baseline.items():
+        farm = farm_of_plot.get(plot)
+        if farm is None:
+            continue
+        hours[farm] += sum(
+            surface * float(labor_hours_per_ha_cult.get(crop, 0.0))
+            for crop, surface in planted.items()
+        )
+    return pd.Series(hours, dtype=float)
+
+
+def compute_farm_baseline_production_t(
+    *,
+    base_crop_group: pd.Series,
+    plot_surface: pd.Series,
+    expl_parc: pd.DataFrame,
+    rdt_cult: pd.Series,
+    representative_crops: dict[str, str],
+) -> dict[str, dict[str, float]]:
+    """Tonnes each farm's OBSERVED 2017 plan produced, per observed RPG group.
+
+    This is GAMS REF_BAN_EXPL_init (ENTREES.txt:477-483) generalised: that parameter sums
+    SURF_Parc_init x Matrice_Parc_Cult x Rdt_Cult over the four export-banana ITKs of a
+    farm, and Eq_BA_QUOTA_Expl then caps the farm's banana tonnage at it. Computing one
+    group at a time here rather than banana only means a second per-farm quota costs a
+    config entry, not another pipeline function.
+
+    THE CAVEAT THAT MATTERS. GAMS reads the observed FINE ITK per plot; we only have the
+    12 aggregate RPG groups, so each group is priced through its representative fine
+    variant -- the same documented assumption compute_farm_labor_capacity_hours makes, and
+    the same one docs/04-vigilance.md flags. For banana it is not neutral: the observed mix
+    was 1 258 ha BA_INT (45 t/ha), 288 ha BA_PER (18), 204 ha BA_SINT (27) and 169 ha
+    BA_IRR (34), so pricing all 1 921 ha at BA_INT's 45 t/ha overstates the reference by
+    about 18 %. The resulting cap is therefore LOOSER than the GAMS one, never tighter --
+    it can only under-constrain, which is the safe direction for a parity fix.
+    context/SORTIES/ASSOL_PARC_INIT.TXT holds the real fine baseline and would remove the
+    approximation; wiring it in is a separate decision.
+    """
+    fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
+    rate = rdt_cult.reindex(fine.to_numpy()).fillna(0.0).to_numpy()
+    tonnes = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
+    farm_of_plot = expl_parc.set_index("plot")["farm"].reindex(fine.index)
+
+    frame = pd.DataFrame({"group": base_crop_group, "farm": farm_of_plot, "tonnes": tonnes})
+    frame = frame.dropna(subset=["farm"])
+    grouped = frame.groupby(["group", "farm"])["tonnes"].sum()
+    return {
+        str(group): {str(farm): float(value) for (_, farm), value in part.items()}
+        for group, part in grouped.groupby(level=0)
+    }
+
+
 def build_dataset(config: dict[str, Any]) -> Dataset:
     # `year` selects the economic time-series column (2017..2022, or init/calib); the plot/
     # farm structure stays pinned to 2017 (no other year's structural data exists). `scenario`
@@ -167,13 +266,19 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     # per-individual annual needs + population + fishing contribution).
     nutri_cult = read_wide_table(TABLES_DIR / "Nutri_Cult.txt")
     nutri_alim = read_wide_table(TABLES_DIR / "Nutri_Alim.txt")
+    # GAMS parity: DONNEES.txt:283-289 fills TABLE Prix_Cult(C,H) / Rdt_Cult(C,H) from the
+    # *_CF_<scenario> files, NOT from Prix_Cult.txt / Rdt_Cult.txt (which sit unused in the
+    # same directory). Reading the plain files diverged on 23 of 84 crops -- plantain at
+    # 26 t/ha & 800 EUR/t instead of 20 & 700, pasture at 5 000 EUR/t instead of 5 400,
+    # melon at 1 200 instead of 1 455, fodder cane priced instead of self-consumed at 0 --
+    # and that alone drove the territorial PAD to 48% where GAMS reaches 3.8%.
     prix_cult = apply_crop_multipliers(
-        read_wide_table(INDICE_H_DIR / "Prix_Cult.txt")[year], price_multipliers
+        read_wide_table(INDICE_H_DIR / f"Prix_Cult_CF_{scenario}.txt")[year], price_multipliers
     )
     # yield_multipliers (climate shock) scale rdt at source so the shock propagates to
     # variable cost, subsidy (POSEI_Q), sales, GES, and the yield-based territory quotas.
     rdt_cult = apply_crop_multipliers(
-        read_wide_table(INDICE_H_DIR / "Rdt_Cult.txt")[year], yield_multipliers
+        read_wide_table(INDICE_H_DIR / f"Rdt_Cult_CF_{scenario}.txt")[year], yield_multipliers
     )
     # variance_multipliers scale the yield variance Var_Rdt_Cult, which is what the Markowitz
     # objective weighs against margin. It is the lever for climate INSTABILITY as distinct
@@ -188,7 +293,11 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[year]
     duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[year]
     cout_recolte_cult = read_wide_table(INDICE_H_DIR / "Cout_Recolte_Cult.txt")[year]
-    cout_transp_cult = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult.txt")[year]
+    # GAMS parity: DONNEES.txt:228 includes Cout_Transp_Cult_LAM.txt, not Cout_Transp_Cult.txt.
+    # The two tables differ on the ten CF_* (fodder cane) rows only -- 0.98 to 4.50 EUR/t --
+    # and since CV carries a (Cout_Recolte + Cout_Transp) * Rdt term, that fed a 71 to 290
+    # EUR/ha margin gap on exactly those ten crops.
+    cout_transp_cult = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult_LAM.txt")[year]
     posei_surf_cult = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[year]
     posei_q_cult = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[year]
     aide_indus_cult = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[year]
@@ -323,6 +432,18 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         duree_plant_cult=duree_plant_cult,
         duree_cycle_cult=duree_cycle_cult,
     )
+    farm_baseline_production_t = compute_farm_baseline_production_t(
+        base_crop_group=base_crop_group,
+        plot_surface=plot_surface,
+        expl_parc=expl_parc,
+        rdt_cult=rdt_cult,
+        representative_crops=config.get("baseline_representative_crops") or {},
+    )
+    # Opt-in: compute the farm labour budget on the OBSERVED FINE cropping plan rather than
+    # on the representative-crop stand-in. `data.fine_baseline_allocation` names a GAMS-style
+    # plot x crop table (context/SORTIES/ASSOL_PARC_INIT.TXT is the one the GAMS run wrote).
+    # Left unset the behaviour is unchanged, so this cannot move a past result silently.
+    fine_baseline_path = data_cfg.get("fine_baseline_allocation")
     farm_labor_capacity_hours = compute_farm_labor_capacity_hours(
         base_crop_group=base_crop_group,
         plot_surface=plot_surface,
@@ -330,6 +451,16 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         labor_hours_per_ha_cult=labor_hours_per_ha_cult,
         representative_crops=config.get("baseline_representative_crops") or {},
     )
+    if fine_baseline_path:
+        farm_labor_capacity_hours = (
+            compute_farm_labor_capacity_hours_from_fine_baseline(
+                fine_baseline=read_fine_baseline_allocation(fine_baseline_path),
+                expl_parc=expl_parc,
+                labor_hours_per_ha_cult=labor_hours_per_ha_cult,
+            )
+            .reindex(farm_labor_capacity_hours.index)
+            .fillna(0.0)
+        )
     azote_per_ha_cult = compute_azote_per_ha_cult(
         data_otk=data_otk,
         matrice_otk_cult=matrice_otk_cult,
@@ -403,6 +534,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "farm_plots": farm_plots,
         "farm_gfa_surface_ha": farm_gfa_surface_ha,
         "farm_labor_capacity_hours": farm_labor_capacity_hours,
+        "farm_baseline_production_t": farm_baseline_production_t,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
         "margin_per_ha_cult": margin_per_ha_cult,

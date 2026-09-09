@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,marge_brute,subventions,etp,production_t,surface_ha,azote_kg,ift,ges_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+calib_gams_parite_prix,,,optimal,83235917.88452095,105787684.91,73884561.21,3618.8,921366.32,23475.71,1940256.42,70506.17,175115444.46,38652998.4,0.03,0.12,12.18,22049,138.3,C:\Users\clleborgne\Desktop\mosaica\claude_mosaica_workspace\outputs\calib_gams_parite_prix_2,

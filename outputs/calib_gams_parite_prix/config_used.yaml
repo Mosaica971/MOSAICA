@@ -1,0 +1,1010 @@
+data:
+  year: '2017'
+  scenario: RESTIT
+solver:
+  name: appsi_highs
+  args:
+    mip_rel_gap: 0.01
+    time_limit: 10800
+labor:
+  hours_per_etp: 1607
+  cost_per_hour: 15.5
+resilience:
+  price_shock_delta: 0.2
+reporting:
+  environment:
+    coeff_c_co2: 0.272
+  calibration:
+    regional_pad_max: 15
+    subregional_pad_max: 20
+    farm_pad_max: 20
+    farm_type_match_min: 80
+baseline_representative_crops:
+  AN: AN_NU
+  BA: BA_INT
+  BC: BC_BT
+  CS: CS_NGT_NISM
+  IG: IG_PLA
+  MA: MA_ROTA
+  PN: PN_PIQ
+  VE: VE_BTGT
+crop_families:
+  an: &id001
+  - AN
+  - AN_NU
+  - AN_PA
+  ig: &id002
+  - IG
+  - IG_PLA
+  - IG_TUT
+  cs: &id004
+  - CS
+  - CS_BT_NISM
+  - CS_BT_NIM
+  - CS_BT_IM
+  - CS_SBT_NISM
+  - CS_SBT_NIM
+  - CS_SBT_IM
+  - CS_NGT_NISM
+  - CS_NGT_NIM
+  - CS_NGT_IM
+  - CS_CGT_NISM
+  - CS_CGT_NIM
+  - CS_CGT_IM
+  - CS_EGT_NISM
+  - CS_EGT_NIM
+  - CS_EGT_IM
+  - CS_MG_NISM
+  - CS_MG_NIM
+  - CS_MG_IM
+  cs_irrig: &id009
+  - CS_BT_IM
+  - CS_SBT_IM
+  - CS_NGT_IM
+  - CS_CGT_IM
+  - CS_EGT_IM
+  - CS_MG_IM
+  cs_meca: &id010
+  - CS_BT_NIM
+  - CS_BT_IM
+  - CS_SBT_NIM
+  - CS_SBT_IM
+  - CS_NGT_NIM
+  - CS_NGT_IM
+  - CS_CGT_NIM
+  - CS_CGT_IM
+  - CS_EGT_NIM
+  - CS_EGT_IM
+  - CS_MG_NIM
+  - CS_MG_IM
+  cs_bt: &id011
+  - CS_BT_NISM
+  - CS_BT_NIM
+  - CS_BT_IM
+  cs_sbt: &id012
+  - CS_SBT_NISM
+  - CS_SBT_NIM
+  - CS_SBT_IM
+  cs_ngt: &id013
+  - CS_NGT_NISM
+  - CS_NGT_NIM
+  - CS_NGT_IM
+  cs_cgt: &id014
+  - CS_CGT_NISM
+  - CS_CGT_NIM
+  - CS_CGT_IM
+  cs_egt: &id015
+  - CS_EGT_NISM
+  - CS_EGT_NIM
+  - CS_EGT_IM
+  cs_mg: &id016
+  - CS_MG_NISM
+  - CS_MG_NIM
+  - CS_MG_IM
+  ban_ex: &id005
+  - BA
+  - BA_INT
+  - BA_IRR
+  - BA_PER
+  - BA_SINT
+  bc: &id006
+  - BC
+  - BC_BT
+  - BC_GTMG
+  ma: &id007
+  - MA
+  - MA_PLBIO
+  - MA_MOBIO
+  - MA_ROTA
+  - MA_TO_CHOU_JA
+  - MA_TO_CO_JA
+  - MA_BAG_BIO_I
+  - MA_BAG_BIO_NI
+  - MA_BAG_VEG_I
+  - MA_BAG_VEG_NI
+  - MA_BAG_FER_I
+  - MA_BAG_FER_NI
+  - MA_BAG_NON_I
+  - MA_BAG_NON_NI
+  - MA_BRF_BIO_I
+  - MA_BRF_BIO_NI
+  - MA_BRF_VEG_I
+  - MA_BRF_VEG_NI
+  - MA_BRF_FER_I
+  - MA_BRF_FER_NI
+  - MA_BRF_NON_I
+  - MA_BRF_NON_NI
+  - MA_PAI_BIO_I
+  - MA_PAI_BIO_NI
+  - MA_PAI_VEG_I
+  - MA_PAI_VEG_NI
+  - MA_PAI_FER_I
+  - MA_PAI_FER_NI
+  - MA_PAI_NON_I
+  - MA_PAI_NON_NI
+  plu: &id008
+  - AG
+  - VE
+  - VE_BTGT
+  - VE_PLUIE
+  ba_ja: &id003
+  - BA_INT
+  - BA_IRR
+  - BA_SINT
+objectives:
+- name: maximize_gross_margin
+  enable: false
+  args: {}
+- name: maximize_risk_adjusted_gross_margin
+  enable: true
+  args: {}
+constraints:
+- name: at_most_one_crop_per_plot
+  enable: true
+  args: {}
+- name: farm_area_share_max
+  enable: true
+  args:
+    label: an_agro_max_expl
+    crops: *id001
+    max_share: 0.75
+- name: farm_area_share_max
+  enable: true
+  args:
+    label: ig_agro_max_expl
+    crops: *id002
+    max_share: 0.66
+- name: farm_area_ratio_min
+  enable: true
+  args:
+    label: ba_ja
+    numerator_crops:
+    - JA
+    denominator_crops: *id003
+    ratio: 0.2
+- name: farm_area_ratio_min
+  enable: true
+  args:
+    label: ba_rota
+    numerator_crops:
+    - JA
+    - CS
+    - CS_BT_NISM
+    - CS_BT_NIM
+    - CS_BT_IM
+    - CS_SBT_NISM
+    - CS_SBT_NIM
+    - CS_SBT_IM
+    - CS_NGT_NISM
+    - CS_NGT_NIM
+    - CS_NGT_IM
+    - CS_CGT_NISM
+    - CS_CGT_NIM
+    - CS_CGT_IM
+    - CS_EGT_NISM
+    - CS_EGT_NIM
+    - CS_EGT_IM
+    - CS_MG_NISM
+    - CS_MG_NIM
+    - CS_MG_IM
+    - CF_NBT_NISM
+    - CF_NBT_NIM
+    - CF_SBT_NISM
+    - CF_SBT_NIM
+    - CF_NGT_NISM
+    - CF_NGT_NIM
+    - CF_CGT_NISM
+    - CF_CGT_NIM
+    - CF_EGT_NISM
+    - CF_EGT_NIM
+    denominator_crops: *id003
+    ratio: 0.2
+- name: cs_gfa_minimum_share
+  enable: false
+  args:
+    label: cs_gfa
+    crops: *id004
+    min_share: 0.6
+    skip_when_no_eligible_area: true
+- name: farm_labor_hours_max
+  enable: true
+  args:
+    label: mo_max_expl
+    slack: 1.0
+- name: farm_production_bound
+  enable: true
+  args:
+    label: ba_quota_expl
+    crops: *id005
+    reference: BA
+    sense: le
+    scale: 1.0
+- name: territory_production_bound
+  enable: true
+  args:
+    label: ba_quota_max
+    groups:
+    - crops: *id005
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: le
+    threshold: 77877
+- name: territory_production_bound
+  enable: false
+  args:
+    label: me_quota_max
+    groups:
+    - crops:
+      - ME
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: le
+    threshold: 80000
+- name: territory_production_bound
+  enable: false
+  args:
+    label: an_quota_max
+    groups:
+    - crops: *id001
+      use_yield: true
+      rate_multiplier: 0.6666666666666666
+    sense: le
+    threshold: 70000
+- name: territory_production_bound
+  enable: false
+  args:
+    label: ig_quota_max
+    groups:
+    - crops: *id002
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: le
+    threshold: 50000
+- name: territory_production_bound
+  enable: false
+  args:
+    label: bc_quota_max
+    groups:
+    - crops: *id006
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: le
+    threshold: 6440
+- name: territory_production_bound
+  enable: true
+  args:
+    label: cs_quota_max
+    groups:
+    - crops: *id004
+      use_yield: true
+      rate_multiplier: 0.072
+    sense: le
+    threshold: 107000
+- name: territory_production_bound
+  enable: false
+  args:
+    label: bc_prod_min
+    groups:
+    - crops: *id006
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 4056
+- name: territory_production_bound
+  enable: false
+  args:
+    label: ig_prod_min
+    groups:
+    - crops: *id002
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 5125
+- name: territory_production_bound
+  enable: false
+  args:
+    label: ma_prod_min
+    groups:
+    - crops: *id007
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 26404
+- name: territory_production_bound
+  enable: false
+  args:
+    label: an_prod_min
+    groups:
+    - crops: *id001
+      use_yield: true
+      rate_multiplier: 0.6666666666666666
+    sense: ge
+    threshold: 2322
+- name: territory_production_bound
+  enable: false
+  args:
+    label: plu_prod_min
+    groups:
+    - crops: *id008
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 5879
+- name: territory_production_bound
+  enable: false
+  args:
+    label: me_prod_min
+    groups:
+    - crops:
+      - ME
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 4135
+- name: territory_production_bound
+  enable: false
+  args:
+    label: pn_prod_min
+    groups:
+    - crops:
+      - PN_PIQ
+      use_yield: false
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 6096
+- name: territory_production_bound
+  enable: false
+  args:
+    label: leg_prod_obj
+    groups:
+    - crops: *id007
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 63059
+- name: territory_production_bound
+  enable: false
+  args:
+    label: tub_prod_obj
+    groups:
+    - crops: *id002
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 0
+- name: territory_production_bound
+  enable: false
+  args:
+    label: fru_prod_obj
+    groups:
+    - crops: *id006
+      use_yield: true
+      rate_multiplier: 1.0
+    - crops: *id001
+      use_yield: true
+      rate_multiplier: 0.6666666666666666
+    - crops: *id008
+      use_yield: true
+      rate_multiplier: 1.0
+    - crops:
+      - ME
+      use_yield: true
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 30789
+- name: territory_production_bound
+  enable: false
+  args:
+    label: pat_surf_obj
+    groups:
+    - crops:
+      - PN_PIQ
+      use_yield: false
+      rate_multiplier: 1.0
+    sense: ge
+    threshold: 12193
+- name: territory_indicator_bound
+  enable: false
+  args:
+    label: azote_max
+    indicator: azote
+    sense: le
+    threshold: 1930903
+- name: territory_indicator_bound
+  enable: false
+  args:
+    label: emploi_min
+    indicator: travail
+    sense: ge
+    threshold: 5629321
+eligibility_criteria:
+- name: altitude
+  enable: true
+  args:
+    attribute: ALTITUDE
+    min_col: ALTI_MIN
+    max_col: ALTI_MAX
+- name: slope
+  enable: true
+  args:
+    attribute: PENTE
+    min_col: PENTE_MIN
+    max_col: PENTE_MAX
+- name: rainfall
+  enable: true
+  args:
+    attribute: PLUVIO_PARC
+    min_col: PLUVIO_MIN
+    max_col: PLUVIO_MAX
+- name: plot_size
+  enable: true
+  args:
+    attribute: SURF_HA
+    min_col: SURF_PARC_MIN
+    max_col: SURF_PARC_MAX
+categorical_rules:
+- name: forbid_crops
+  enable: true
+  args:
+    crops:
+    - AN
+    - BA
+    - BC
+    - CS
+    - IG
+    - MA
+    - PN
+    - VE
+- name: forbid_crops
+  enable: true
+  args:
+    crops:
+    - TH
+- name: forbid_crops
+  enable: true
+  args:
+    label: pn_tour_supp
+    crops:
+    - PN_TOUR
+- name: forbid_crops
+  enable: true
+  args:
+    label: cf_supp
+    crops:
+    - CF_NBT_NISM
+    - CF_NBT_NIM
+    - CF_SBT_NISM
+    - CF_SBT_NIM
+    - CF_NGT_NISM
+    - CF_NGT_NIM
+    - CF_CGT_NISM
+    - CF_CGT_NIM
+    - CF_EGT_NISM
+    - CF_EGT_NIM
+- name: forbid_crops
+  enable: true
+  args:
+    crops:
+    - CS_SBT_NISM
+    - CS_MG_NIM
+- name: forbid_crops
+  enable: true
+  args:
+    label: ma_exp_supp
+    crops:
+    - MA_TO_CHOU_JA
+    - MA_BAG_BIO_I
+    - MA_BAG_BIO_NI
+    - MA_BAG_VEG_I
+    - MA_BAG_VEG_NI
+    - MA_BAG_FER_I
+    - MA_BAG_FER_NI
+    - MA_BAG_NON_I
+    - MA_BAG_NON_NI
+    - MA_BRF_BIO_I
+    - MA_BRF_BIO_NI
+    - MA_BRF_VEG_I
+    - MA_BRF_VEG_NI
+    - MA_BRF_FER_I
+    - MA_BRF_FER_NI
+    - MA_BRF_NON_I
+    - MA_BRF_NON_NI
+    - MA_PAI_BIO_I
+    - MA_PAI_BIO_NI
+    - MA_PAI_VEG_I
+    - MA_PAI_VEG_NI
+    - MA_PAI_FER_I
+    - MA_PAI_FER_NI
+    - MA_PAI_NON_I
+    - MA_PAI_NON_NI
+- name: irrigation_required
+  enable: true
+  args:
+    crops:
+    - ME
+    - MA_ROTA
+    irrigation_column: IRRIG_PARC
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - AN
+    - AN_NU
+    - AN_PA
+    conditions:
+    - column: TYPE_SOL
+      op: ne
+      value: 2
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - AN_PA
+    conditions:
+    - column: SURF_EXPL_PARC
+      op: lt
+      value: 10
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - ME
+    conditions:
+    - column: TYPE_SOL
+      op: in
+      value:
+      - 2
+      - 3
+      - 4
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - ME
+    conditions:
+    - column: ILE
+      op: eq
+      value: 1
+- name: max_risk_threshold
+  enable: true
+  args:
+    crops:
+    - IG_TUT
+    risk_column: RISQUE_CLD
+    max_allowed: 3
+- name: exact_risk_value
+  enable: false
+  args:
+    label: pn_piq_cld
+    crops:
+    - PN_PIQ
+    risk_column: RISQUE_CLD
+    allowed_value: 1
+- name: region_crop_forbidden
+  enable: true
+  args:
+    crops:
+    - ME
+    region_column: REGION_CODE
+    forbidden_regions:
+    - R0
+    - R1
+    - R3
+    - R4
+    - R5
+    - R6
+    - R7
+    - R9
+    - R10
+    - R12
+    - R13
+    - R14
+    - R17
+    - R19
+    - R21
+    - R25
+    - R26
+    - R27
+- name: forbid_crops
+  enable: true
+  args:
+    label: cs_irrig_ban
+    crops: *id009
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id010
+    conditions:
+    - column: SOL_COURT
+      op: eq
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id010
+    conditions:
+    - column: CONFORM
+      op: gt
+      value: 1500
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id011
+    conditions:
+    - column: ILE
+      op: ne
+      value: 1
+    - column: REGION
+      op: ne
+      value: 5
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id012
+    conditions:
+    - column: REGION
+      op: ne
+      value: 5
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id013
+    conditions:
+    - column: COMMUNE
+      op: not_in
+      value:
+      - 97102
+      - 97119
+      - 97122
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id014
+    conditions:
+    - column: COMMUNE
+      op: not_in
+      value:
+      - 97116
+      - 97113
+      - 97101
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id015
+    conditions:
+    - column: COMMUNE
+      op: not_in
+      value:
+      - 97117
+      - 97128
+      - 97125
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops: *id016
+    conditions:
+    - column: ILE
+      op: ne
+      value: 3
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - MA_TO_CHOU_JA
+    conditions:
+    - column: ILE
+      op: ne
+      value: 1
+    - column: IRRIG_PARC
+      op: eq
+      value: 0
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - ME
+    conditions:
+    - column: REGION
+      op: eq
+      value: 7
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - IG_PLA
+    conditions:
+    - column: ILE
+      op: eq
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - IG_TUT
+    conditions:
+    - column: ILE
+      op: ne
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - BA_IRR
+    conditions:
+    - column: IRRIG_PARC
+      op: eq
+      value: 0
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - BA_IRR
+    conditions:
+    - column: ILE
+      op: eq
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - BC_BT
+    conditions:
+    - column: ILE
+      op: ne
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - BC_GTMG
+    conditions:
+    - column: ILE
+      op: eq
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - BC_BT
+    conditions:
+    - column: PLUVIO_PARC
+      op: lt
+      value: 2300
+    - column: IRRIG_PARC
+      op: eq
+      value: 0
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - BC_GTMG
+    conditions:
+    - column: ILE
+      op: ne
+      value: 1
+    - column: IRRIG_PARC
+      op: eq
+      value: 0
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - AG
+    conditions:
+    - column: IRRIG_PARC
+      op: eq
+      value: 0
+    - column: ALTITUDE
+      op: lt
+      value: 400
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - AG
+    conditions:
+    - column: ILE
+      op: gt
+      value: 1
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - VE_BTGT
+    conditions:
+    - column: PLUVIO_PARC
+      op: lt
+      value: 2700
+    - column: IRRIG_PARC
+      op: eq
+      value: 0
+- name: attribute_forbidden
+  enable: true
+  args:
+    crops:
+    - VE_BTGT
+    conditions:
+    - column: REGION
+      op: eq
+      value: 4
+- name: attribute_forbidden
+  enable: false
+  args:
+    crops:
+    - VE_BTGT
+    conditions:
+    - column: REGION
+      op: in
+      value:
+      - 4
+      - 5
+- name: forbid_crops
+  enable: true
+  args:
+    crops:
+    - VE_PLUIE
+- name: attribute_forbidden
+  enable: false
+  args:
+    crops:
+    - VE_PLUIE
+    conditions:
+    - column: REGION
+      op: eq
+      value: 6
+- name: attribute_forbidden
+  enable: false
+  args:
+    crops:
+    - VE_PLUIE
+    conditions:
+    - column: ILE
+      op: ne
+      value: 1
+- name: friche_lock
+  enable: true
+  args:
+    label: friche
+    history_columns:
+    - cult_2015
+    - cult_2016
+    - cult_2017
+    fallow_codes:
+    - 0
+    - 10
+    - 14
+    crops: &id017
+    - AG
+    - AN
+    - AN_NU
+    - AN_PA
+    - BA
+    - BA_INT
+    - BA_IRR
+    - BA_PER
+    - BA_SINT
+    - BC
+    - BC_BT
+    - BC_GTMG
+    - CF_NBT_NISM
+    - CF_NBT_NIM
+    - CF_SBT_NISM
+    - CF_SBT_NIM
+    - CF_NGT_NISM
+    - CF_NGT_NIM
+    - CF_CGT_NISM
+    - CF_CGT_NIM
+    - CF_EGT_NISM
+    - CF_EGT_NIM
+    - CS
+    - CS_BT_NISM
+    - CS_BT_NIM
+    - CS_BT_IM
+    - CS_SBT_NISM
+    - CS_SBT_NIM
+    - CS_SBT_IM
+    - CS_NGT_NISM
+    - CS_NGT_NIM
+    - CS_NGT_IM
+    - CS_CGT_NISM
+    - CS_CGT_NIM
+    - CS_CGT_IM
+    - CS_EGT_NISM
+    - CS_EGT_NIM
+    - CS_EGT_IM
+    - CS_MG_NISM
+    - CS_MG_NIM
+    - CS_MG_IM
+    - IG
+    - IG_PLA
+    - IG_TUT
+    - JA
+    - MA
+    - MA_TO_CHOU_JA
+    - MA_PLBIO
+    - MA_MOBIO
+    - MA_ROTA
+    - ME
+    - PN
+    - PN_PIQ
+    - PN_TOUR
+    - TH
+    - VE
+    - VE_BTGT
+    - VE_PLUIE
+    - MA_TO_CO_JA
+    - MA_BAG_BIO_I
+    - MA_BAG_BIO_NI
+    - MA_BAG_VEG_I
+    - MA_BAG_VEG_NI
+    - MA_BAG_FER_I
+    - MA_BAG_FER_NI
+    - MA_BAG_NON_I
+    - MA_BAG_NON_NI
+    - MA_BRF_BIO_I
+    - MA_BRF_BIO_NI
+    - MA_BRF_VEG_I
+    - MA_BRF_VEG_NI
+    - MA_BRF_FER_I
+    - MA_BRF_FER_NI
+    - MA_BRF_NON_I
+    - MA_BRF_NON_NI
+    - MA_PAI_BIO_I
+    - MA_PAI_BIO_NI
+    - MA_PAI_VEG_I
+    - MA_PAI_VEG_NI
+    - MA_PAI_FER_I
+    - MA_PAI_FER_NI
+    - MA_PAI_NON_I
+    - MA_PAI_NON_NI
+- name: attribute_forbidden
+  enable: true
+  args:
+    label: nocult_nc_1
+    crops: *id017
+    conditions:
+    - column: cult_2017
+      op: eq
+      value: 14
+- name: attribute_forbidden
+  enable: true
+  args:
+    label: nocult_nc_2
+    crops: *id017
+    conditions:
+    - column: cult_2016
+      op: in
+      value:
+      - 0
+      - 10
+      - 14
+    - column: cult_2017
+      op: in
+      value:
+      - 0
+      - 10
+      - 14
+run_name: calib_gams_parite_prix
+run_policy: null
+run_forcing: null
+run_sweep: null
