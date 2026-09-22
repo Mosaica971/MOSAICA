@@ -1,0 +1,310 @@
+# Implementation roadmap: what is done, in progress, to do, to update, or only proposed.
+#
+# This file replaces docs/TODO.md (retired 2026-09-22). It is the LIST; the reasoning behind
+# each item lives in the spec it points to, and the traps in docs/04-vigilance.md.
+# scripts/build_status_board.py renders it into docs/status/STATUS.md and the dashboard's
+# Status page; tests/test_status_board.py checks every item has a known status and that the
+# spec it cites exists.
+#
+# status:   done | in_progress | todo | to_update | proposal | blocked | abandoned
+# area:     model | data | calibration | scenarios | reporting | dashboard | tooling |
+#           docs | coupling | information_system
+# `left` says what remains for an item that is done but not finished; `blocked_by` why an
+# item cannot move.
+
+items:
+  # --- post-thesis workstream (2026-09-22) ---------------------------------------------
+  - id: english-renaming
+    title: Code, config, scenarios, dashboard and docs in English
+    status: in_progress
+    area: tooling
+    since: 2026-09-22
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    left: >-
+      Code, config, scenario files, recap keys, CSV names, dashboard and tests are done;
+      the numbered docs are translated. The dated specs and the archived journal are kept
+      in French as historical records.
+  - id: status-board
+    title: Status board (indicators x levels, constraints x crops, parameter choices, roadmap)
+    status: done
+    area: tooling
+    since: 2026-09-22
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    left: Constraint x crop view counts eligibility removals only when the data is present.
+  - id: data-catalogue
+    title: Data catalogue with sensitivity levels, fill-in workbook and validator
+    status: in_progress
+    area: information_system
+    since: 2026-09-22
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    left: Access levels to validate with INRAE's data protection officer.
+  - id: level-export
+    title: Export a run at a given access level (aggregate, suppress what exceeds it)
+    status: todo
+    area: information_system
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+  - id: maelia-yields
+    title: MAELIA -> MOSAICA, simulated yields and ITKs as per-(plot, crop) coefficients
+    status: todo
+    area: coupling
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    blocked_by: MAELIA training; tropical crop parameterisation in MAELIA to confirm.
+  - id: maelia-daily-test
+    title: MOSAICA -> MAELIA, daily simulation of the optimised cropping plan
+    status: todo
+    area: coupling
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    blocked_by: maelia-yields; decision on multi-year rotations.
+  - id: per-plot-facts
+    title: One per-plot indicator table, aggregated to any zone (commune, farm, watershed, arbitrary)
+    status: proposal
+    area: reporting
+    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    left: The status board shows every additive indicator as computable at those levels.
+
+  # --- calibration --------------------------------------------------------------------------
+  - id: regenerate-reference-runs
+    title: Regenerate calib_gams_parity and calib_selected under the corrected price tables
+    status: to_update
+    area: calibration
+    since: 2026-09-08
+    spec: docs/superpowers/specs/2026-07-21-calibration-validation-design.md
+    left: >-
+      The reference folders on disk (calib_gams_parite, calib_retenu) were solved with the
+      plain Prix_Cult/Rdt_Cult tables; the 2026-09-08 fix changed 23 crops. references.yaml
+      still guards the old figures. Regenerate, then update `expect:` and docs/04-vigilance.md E.
+  - id: fine-labour-budget
+    title: Per-farm labour budget from the observed fine plan (ASSOL_PARC_INIT.TXT)
+    status: in_progress
+    area: calibration
+    since: 2026-09-08
+    left: Experiment runs exist (calib_fine_labor_2017, fine_labor_observed); adoption pending.
+  - id: farm-banana-quota
+    title: Per-farm export-banana delivery right (Eq_BA_QUOTA_Expl)
+    status: done
+    area: model
+    since: 2026-09-08
+    left: The per-farm reference is ~18 % above the true observed mix (representative crop).
+  - id: calibration-validation
+    title: PAD at every scale, farm-type confusion, plot agreement (Chopin et al. 2015 §2.6)
+    status: done
+    area: calibration
+    since: 2026-07-21
+    spec: docs/superpowers/specs/2026-07-21-calibration-validation-design.md
+  - id: calibration-levers
+    title: Markowitz objective, Eq_*_SUPP, PN_PIQ, labour cap (PAD 193 % -> 51 %)
+    status: done
+    area: calibration
+    since: 2026-07-23
+    spec: docs/superpowers/specs/2026-07-21-calibration-levers-design.md
+  - id: plantain-ceiling
+    title: Plantain market ceiling bc_quota_max at 6 440 t
+    status: done
+    area: calibration
+    since: 2026-07-27
+    spec: docs/superpowers/specs/2026-07-27-modalites-solveur-plantain-design.md
+    left: The 6 440 t figure dates from 2010; substitute a recent consumption figure if found.
+  - id: grassland-floor
+    title: Grassland floor pn_prod_min at 6 096 ha
+    status: done
+    area: calibration
+    since: 2026-07-28
+    spec: docs/superpowers/specs/2026-07-28-plancher-prairie-design.md
+  - id: reference-state
+    title: 2017 reference state (outputs/reference_2017) and run comparison
+    status: done
+    area: calibration
+    since: 2026-07-27
+    spec: docs/superpowers/specs/2026-07-27-reference-state-design.md
+  - id: orchard-floor
+    title: Orchard area floor (200-335 ha) and pineapple ceiling
+    status: blocked
+    area: calibration
+    since: 2026-07-29
+    blocked_by: Both hit the solver time limit with an incoherent incumbent; needs a repaired warm start.
+  - id: region-aware-representatives
+    title: Representative crop chosen per plot among the eligible variants
+    status: todo
+    area: calibration
+    left: The island-wide CS_NGT_NISM is eligible on 31 % of observed cane; it feeds the labour cap.
+  - id: gams-results
+    title: Compare with the actual GAMS run results and coefficients
+    status: proposal
+    area: calibration
+    left: Would settle the risk-aversion question; partly done with context/SORTIES (2026-09-08).
+
+  # --- model ----------------------------------------------------------------------------------
+  - id: config-registry
+    title: Config-driven registry of constraints, objectives and eligibility rules
+    status: done
+    area: model
+    since: 2026-07-07
+    spec: docs/superpowers/specs/2026-07-07-config-driven-optimization-objects-design.md
+  - id: gams-territory-farm-constraints
+    title: GAMS parity, territorial and per-farm constraints
+    status: done
+    area: model
+    since: 2026-07-07
+    spec: docs/superpowers/specs/2026-07-07-gams-parity-territory-farm-constraints-design.md
+  - id: indicator-bounds
+    title: Bounds on any indicator (territory, zone, farm) and baseline inertia
+    status: done
+    area: model
+    since: 2026-07-31
+    spec: docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md
+  - id: an-pa-farm-size
+    title: Eq_AN_PA, AN_PA forbidden on farms under 10 ha
+    status: done
+    area: model
+    left: Expressed through the per-plot SURF_EXPL_PARC column (the TODO listed it as deferred).
+  - id: labour-cap
+    title: Per-farm labour cap (Eq_MO_MAX_Expl)
+    status: done
+    area: model
+    since: 2026-07-21
+  - id: fibre-cane-block
+    title: Fibre-cane equations Eq_CF_*
+    status: blocked
+    area: model
+    blocked_by: Meaning of the CF source tables to settle with the data owner.
+  - id: cs-gfa
+    title: Sugarcane share on GFA farms (Eq_CS_GFA)
+    status: blocked
+    area: model
+    blocked_by: Infeasible with the labour cap on 7 GFA farms; see its config comment.
+  - id: multi-period
+    title: Multi-period model (time index, conversion costs, perennial lock-in)
+    status: proposal
+    area: model
+    left: A change of nature of the model, to frame as its own sub-project; linked to maelia-daily-test.
+  - id: livestock
+    title: Livestock (fodder areas, herds, manure, own economics)
+    status: proposal
+    area: model
+  - id: solver-performance
+    title: Faster MILP search (gap, warm start from the observed plan, eligibility pre-filtering)
+    status: proposal
+    area: model
+
+  # --- scenarios ------------------------------------------------------------------------------
+  - id: prospective-grid
+    title: Policy x forcing catalogues, plan, campaign of August 2026
+    status: done
+    area: scenarios
+    since: 2026-08-12
+    spec: docs/superpowers/specs/2026-07-31-scenarios-prospectifs-design.md
+    left: >-
+      P10 is intractable (no repairable seed); several cells ended at maxTimeLimit -- check
+      which are proven optimal before quoting them (docs/04-vigilance.md B.2, B.7-B.9).
+  - id: pareto-fronts
+    title: Epsilon-constraint fronts (nitrogen, subsidies)
+    status: done
+    area: scenarios
+    since: 2026-08-10
+  - id: warm-start-chain-gain
+    title: Measure the gain of chaining warm starts along a front
+    status: to_update
+    area: scenarios
+    left: The 720 s -> 209 s figure is for a warm start in general; read the batch logs.
+  - id: employment-front
+    title: Margin x employment front
+    status: blocked
+    area: scenarios
+    blocked_by: LP ceiling ~4 875-4 975 FTE; a sweep above it yields infeasible runs.
+  - id: egalim
+    title: Collective catering / food aid / EGalim demand
+    status: blocked
+    area: scenarios
+    spec: docs/superpowers/specs/2026-07-17-egalim-collective-catering-design-DEFERRED.md
+    blocked_by: External demand data.
+
+  # --- reporting ------------------------------------------------------------------------------
+  - id: environmental-indicators
+    title: Nitrogen, GHG, TFI, water, soil carbon, P and K, Rpest
+    status: done
+    area: reporting
+    spec: docs/superpowers/specs/2026-07-20-water-soil-carbon-indicators-design.md
+  - id: agroecology-organic
+    title: AECM and organic areas (reported separately)
+    status: done
+    area: reporting
+    spec: docs/superpowers/specs/2026-07-17-bio-share-indicator-design-DEFERRED.md
+  - id: resilience-exposure
+    title: Exposure indicators of a frozen allocation, and grid robustness
+    status: done
+    area: reporting
+    spec: docs/superpowers/specs/2026-07-20-resilience-stability-score-design.md
+  - id: food-self-sufficiency
+    title: Food self-sufficiency by nutrient
+    status: done
+    area: reporting
+    spec: docs/superpowers/specs/2026-07-17-food-self-sufficiency-indicators-design.md
+  - id: shadow-prices
+    title: Dual prices of the LP relaxation per named constraint
+    status: done
+    area: reporting
+  - id: ghg-unit
+    title: Clarify the scale of GES_SURF / GES_Q with the source
+    status: todo
+    area: reporting
+    left: Harmless for rankings (min-max score), wrong for any absolute GHG figure.
+  - id: energy
+    title: Energy / fuel consumption indicator
+    status: blocked
+    area: reporting
+    blocked_by: No fuel or energy column in Data_OTK.
+  - id: nbt-aggregates
+    title: North Basse-Terre reporting aggregates (EXPL_NBT / PARC_NBT)
+    status: todo
+    area: reporting
+  - id: region-code-check
+    title: Check REGION against REGION_CODE; document or merge
+    status: todo
+    area: data
+  - id: net-irrigation
+    title: Net irrigation need from the monthly rainfall key of the technical report
+    status: todo
+    area: reporting
+    left: Declared impossible by mistake; the monthly key exists (thesis item PERSP-60).
+
+  # --- dashboard and tooling ------------------------------------------------------------------
+  - id: dashboard
+    title: Read-only dashboard (summary, run detail, comparison, calibration, prospective, map, Pareto)
+    status: done
+    area: dashboard
+    spec: docs/superpowers/specs/2026-07-10-dashboard-design.md
+  - id: transition-heatmap
+    title: 12 x 12 transition matrix as a heatmap on the Comparison page
+    status: proposal
+    area: dashboard
+  - id: large-grid-check
+    title: Open the Summary and Prospective pages on a 110-run grid
+    status: to_update
+    area: dashboard
+  - id: map-page
+    title: Plot map, observed vs simulated, from the RPG layer
+    status: done
+    area: dashboard
+  - id: warm-start
+    title: Warm start with a feasibility audit, allocation repair
+    status: done
+    area: tooling
+    since: 2026-07-29
+  - id: golden-snapshot
+    title: Golden snapshot of the pipeline and indicators (no solve)
+    status: done
+    area: tooling
+  - id: check-references-hook
+    title: Run check_references.py as a pre-commit hook
+    status: proposal
+    area: tooling
+  - id: second-case-study
+    title: Make the dashboard and the calibration vocabulary case-study-agnostic
+    status: proposal
+    area: tooling
+    left: Only when a second case study exists (docs/05-new-case-study.md).
+  - id: excel-carbon-workbook
+    title: Fill-in workbook in the style of a carbon assessment
+    status: in_progress
+    area: information_system
+    left: Folded into data-catalogue.

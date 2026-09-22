@@ -2,9 +2,10 @@
 # economic tables (prices, yields, subsidies): one of 2017..2022, or the baseline columns
 # init/calib. It drives ECONOMICS ONLY -- the plot/farm structure stays pinned to 2017,
 # the only year whose structural data exists. `scenario` (RESTIT | SMART) selects the OTK
-# cost matrix (Matrice_OTK_Cult_<scenario>) and the MAE-compost subsidy table
-# (MAE_Compost_Cult_<scenario>). Note: it does NOT yet drive the CF crop files
-# (Prix_Cult_CF_*, Rdt_Cult_CF_*), which the pipeline does not load -- see docs/04-vigilance.md.
+# cost matrix (Matrice_OTK_Cult_<scenario>), the AECM compost subsidy table
+# (MAE_Compost_Cult_<scenario>) and, since 2026-09-08, the price and yield tables
+# (Prix_Cult_CF_<scenario>, Rdt_Cult_CF_<scenario>) -- the files GAMS actually includes
+# (DONNEES.txt:283-289), not the plain Prix_Cult/Rdt_Cult next to them.
 data:
   year: "2017"        # economic-table column: 2017..2022, or init/calib
   scenario: "RESTIT"  # RESTIT | SMART
@@ -29,7 +30,7 @@ data:
 
 # MILP solver. `name` is the Pyomo solver interface (appsi_highs = HiGHS via Pyomo's
 # persistent APPSI wrapper); `args` passes extra HiGHS options (e.g. mip_rel_gap, threads).
-# See core/model/solver.py.
+# See core/solve/solver.py.
 solver:
   name: appsi_highs
   # warm_start_from: seed the solve with a past run's allocation (its allocation_output.csv).
@@ -61,11 +62,12 @@ solver:
     # pasture-heavy solution. So 1% stays: it is the tractable optimum, and the residual pasture
     # leak is a genuine B&B-intractability limit, not a tuning knob. Kept at 0.01.
     mip_rel_gap: 0.01
-    # Safety net: fail loudly after 1 h rather than grind for a day and a half. With the gap
-    # above the real solve is far under this, so it should never trigger.
+    # Safety net: stop after 3 h rather than grind for a day and a half. A calibration solve
+    # at the gap above normally ends well under this; prospective scenarios can reach it
+    # (docs/04-vigilance.md B.1-B.2), in which case the run reports an incumbent, not an optimum.
     time_limit: 10800
 
-# Labor: annual working hours per full-time-equivalent (ETP/UTA), used to convert the
+# Labor: annual working hours per full-time equivalent (FTE; ETP/UTA in the French sources), used to convert the
 # estimated labor hours (surface x crop x technical itinerary x time per operation) into
 # a number of full-time jobs. 1607 h/year is the French legal full-time base (35h/week).
 # Adjust per scenario if you use a different labor convention.
@@ -106,7 +108,7 @@ reporting:
 # Representative fine crop per aggregate baseline family (see docs/04-vigilance.md C.2).
 # The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",
 # not which technical system), and the aggregate codes carry no economics of their own.
-# To compute input-side production/subsidy/revenue/ETP (and input-vs-output deltas) we
+# To compute input-side production/subsidy/revenue/FTE (and input-vs-output deltas) we
 # substitute a representative fine variant per family. THESE ARE ASSUMPTIONS -- review and
 # adjust to your knowledge of the 2017 land use. Families AG/ME/JA are real single crops
 # and need no substitution; NC (non cultivated) is excluded from the baseline.
@@ -245,8 +247,9 @@ constraints:
   # match GAMS; this is a genuine interaction in the real dataset, not a porting bug.
   # Re-enable once someone with the original GAMS/production results confirms whether
   # the real SCENARIO run tolerated this (e.g. per-farm exception, relaxed threshold,
-  # or the real 2017 GFA/fallow data differed) -- see docs/superpowers/plans/
-  # 2026-07-07-gams-parity-phase1-territory-farm-constraints.md Task 9 notes.
+  # or the real 2017 GFA/fallow data differed) -- see the Task 9 notes of the phase-1 plan,
+  # since removed; its reasoning survives in
+  # docs/superpowers/specs/2026-07-07-gams-parity-territory-farm-constraints-design.md.
   # Re-enabled 2026-07-21 with skip_when_no_eligible_area, a DELIBERATE DEVIATION from
   # GAMS: the three farms above are skipped rather than sinking the whole solve. GAMS would
   # be infeasible there too; we choose to lose 3 farms out of 4588 (0.07%) instead of the
@@ -273,7 +276,7 @@ constraints:
 
   # Eq_MO_MAX_Expl (MODELE.txt:368, Eq. 5 of the article): a farm may not demand more labour
   # than its observed 2017 cropping plan did. THE dominant anchor to reality -- the
-  # pre-2026-07-21 solution required 21 593 ETP where Guadeloupe had 3 598, a factor of 6.
+  # pre-2026-07-21 solution required 21 593 FTE where Guadeloupe had 3 598, a factor of 6.
   # A cane farm has 12.7 h/ha to spend; market gardening asks 1653.
   # The cap is computed in data_pipeline.compute_farm_labor_capacity_hours through the
   # representative fine crops -- read its docstring before touching this, the literal GAMS
@@ -336,7 +339,8 @@ constraints:
       groups: [{crops: *SC_IG, use_yield: true, rate_multiplier: 1.0}]
       sense: le
       threshold: 50000
-  # bc_quota_max -- ENABLED 2026-07-27, AND THE ONE DELIBERATE DEVIATION FROM THE CALIB BLOCK.
+  # bc_quota_max -- ENABLED 2026-07-27, THE FIRST OF THE TWO DELIBERATE DEVIATIONS FROM THE
+  # CALIB BLOCK (the second is pn_prod_min, below).
   # Read this before touching it.
   #
   # Eq_BC_QUOTA_MAX (MODELE.txt:385) is commented out of BOTH GAMS model blocks (lines 551 and
@@ -549,17 +553,17 @@ constraints:
   - name: territory_indicator_bound
     enable: false
     args:
-      label: nitrogen_max      # nitrogen ceiling, kg N/an (calib retenu measured 1 930 903)
+      label: nitrogen_max      # nitrogen ceiling, kg N/yr (calib_selected measured 1 930 903)
       indicator: nitrogen
       sense: le
       threshold: 1930903
   - name: territory_indicator_bound
     enable: false
     args:
-      label: employment_min     # employment floor, in HOURS (scale converts to ETP-equivalent)
+      label: employment_min     # employment floor, in HOURS (scale converts to FTE)
       indicator: labor
       sense: ge
-      # 3 503 ETP x 1 607 h. Careful: `farm_labor_hours_max` grants 6 252 740 h (3 891 ETP)
+      # 3 503 FTE x 1 607 h. Careful: `farm_labor_hours_max` grants 6 252 740 h (3 891 FTE)
       # at slack 1.0, so a floor above that is infeasible unless the same scenario raises
       # the slack -- and raising it is not sufficient either (docs/04-vigilance.md, prospective entry).
       threshold: 5629321
@@ -595,7 +599,7 @@ eligibility_criteria:
 
 # Categorical eligibility rules: each forbids a set of crops on plots matching a categorical
 # condition (irrigation, soil, region, risk, fallow history). Intersected with the numeric
-# bounds above. See core/data/eligibility.py + case_studies/guadeloupe/constraints.py.
+# bounds above. See core/data/eligibility.py + case_studies/guadeloupe/model/constraints.py.
 #
 # `label:` on a rule is inert for the model and exists so a scenario batch can target ONE
 # entry: `disable: [<label>]` lifts that ban and nothing else. Matching on the rule `name`

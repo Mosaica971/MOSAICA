@@ -1,0 +1,195 @@
+# Indicator catalogue: every scalar a run reports, and at which aggregation levels.
+#
+# Read by case_studies/guadeloupe/reporting/status.py to build the status board
+# (docs/status/STATUS.md, dashboard page "Status"). tests/test_status_board.py fails if an
+# indicator the dashboard offers is missing here, so the table cannot silently fall behind.
+#
+# `class` says how an indicator aggregates, and therefore where it COULD be reported:
+#   additive       a sum over plots (area, tonnes, euros, kg N). Computable at any level
+#                  that has a plot -> zone mapping, arbitrary zones included.
+#   ratio          a ratio of two additive quantities (per ha, per tonne, shares).
+#                  Computable wherever its numerator and denominator are.
+#   non_additive   a statistic that does not sum (Shannon, Gini, HHI, a maximum). Each level
+#                  needs its own definition before it can be reported there.
+#   territorial    needs a denominator the data only has for the whole territory
+#                  (population for food self-sufficiency). Territory only.
+#   observed       compares with the observed 2017 land use, which only exists at the 12 RPG
+#                  groups: crop-group resolution only, never a fine crop.
+#
+# `reported` lists the levels a run writes TODAY (recap.json or a CSV of the run folder).
+# Levels: territory, island, region (the 7 sub-regions), commune, watershed, farm,
+# farm_type, plot, crop_group (12 RPG groups), crop (84 fine codes), zone (arbitrary).
+
+levels: [territory, island, region, commune, watershed, farm, farm_type, plot, crop_group, crop, zone]
+
+indicators:
+  # --- area and production -------------------------------------------------------------
+  - {key: total_surface_ha, label: Cultivated area, unit: ha, family: economy, class: additive,
+     block: output, reported: [territory, island, region, plot, crop_group, crop],
+     source: reporting/indicators.compute_aggregate_summary}
+  - {key: total_production_tonnes, label: Production, unit: t, family: economy, class: additive,
+     block: economics, reported: [territory, island, region, crop_group, crop],
+     source: reporting/indicators.compute_economic_totals}
+  # --- economics ---------------------------------------------------------------------------
+  - {key: total_revenue, label: Revenue (sales + subsidy), unit: EUR, family: economy, class: additive,
+     block: economics, reported: [territory, island, region, farm, crop_group, crop],
+     source: reporting/indicators.compute_economic_totals}
+  - {key: total_gross_margin, label: Gross margin, unit: EUR, family: economy, class: additive,
+     block: economics, reported: [territory, island, region, crop_group, crop],
+     source: reporting/indicators.compute_economic_totals}
+  - {key: total_net_revenue, label: Net revenue (margin - labour cost), unit: EUR, family: economy,
+     class: additive, block: economics, reported: [territory],
+     source: reporting/indicators.compute_economic_totals}
+  - {key: total_subsidy, label: Subsidy, unit: EUR, family: economy, class: additive,
+     block: economics, reported: [territory, island, region, crop_group, crop],
+     source: reporting/indicators.compute_economic_totals}
+  - {key: total_variable_cost, label: Variable cost, unit: EUR, family: economy, class: additive,
+     block: economics, reported: [territory],
+     source: reporting/indicators.compute_economic_totals}
+  - {key: total_labor_cost, label: Labour cost, unit: EUR, family: economy, class: additive,
+     block: economics, reported: [territory, island, region, crop_group, crop],
+     source: reporting/indicators.compute_economic_totals}
+  - {key: total_fte, label: Employment, unit: FTE, family: economy, class: additive,
+     block: economics, reported: [territory, island, region, farm, crop_group, crop],
+     source: reporting/indicators.compute_total_fte}
+  - {key: gini_revenue_by_farm, label: Gini of revenue per farm, unit: "-", family: equity,
+     class: non_additive, block: root, reported: [territory],
+     source: reporting/indicators.compute_gini}
+  # --- environment -----------------------------------------------------------------------
+  - {key: total_nitrogen, label: Mineral nitrogen, unit: kg N, family: environment, class: additive,
+     block: environment, reported: [territory, island, region, crop_group, crop],
+     source: domain/environment.compute_crop_nitrogen_per_ha}
+  - {key: total_phosphorus, label: Mineral phosphorus, unit: kg P2O5, family: environment,
+     class: additive, block: environment, reported: [territory],
+     source: domain/environment.compute_crop_phosphorus_per_ha}
+  - {key: total_potassium, label: Mineral potassium, unit: kg K2O, family: environment,
+     class: additive, block: environment, reported: [territory],
+     source: domain/environment.compute_crop_potassium_per_ha}
+  - {key: total_ghg, label: Greenhouse gases, unit: model unit, family: environment, class: additive,
+     block: environment, reported: [territory, island, region, crop_group, crop],
+     source: domain/environment.compute_crop_ghg_per_ha, note: scale unresolved (roadmap ghg-unit)}
+  - {key: total_tfi, label: Treatment frequency index, unit: TFI.ha, family: environment,
+     class: additive, block: environment, reported: [territory, island, region, crop_group, crop],
+     source: domain/environment.compute_crop_tfi_per_ha}
+  - {key: chlordecone_risk_area, label: Area at chlordecone risk, unit: ha, family: environment,
+     class: additive, block: environment, reported: [territory, island, region, crop_group, crop],
+     source: reporting/indicators.compute_chlordecone_risk_area}
+  - {key: total_water_need_m3, label: Irrigation water need, unit: m3, family: environment,
+     class: additive, block: environment, reported: [territory, island, region, crop_group, crop],
+     source: domain/water.compute_crop_water_need_per_ha, note: irrigable plots only}
+  - {key: water_need_peak_month_m3, label: Water need in the peak month, unit: m3, family: environment,
+     class: non_additive, block: environment, reported: [territory],
+     source: reporting/indicators.compute_monthly_water_need_m3}
+  - {key: soil_carbon_balance, label: Soil carbon balance, unit: t C, family: environment,
+     class: additive, block: environment, reported: [territory, island, region, crop_group, crop],
+     source: domain/soil_carbon, note: depends on the plot's soil type}
+  - {key: soil_carbon_mineralization, label: Soil carbon mineralisation, unit: t C, family: environment,
+     class: additive, block: environment, reported: [territory],
+     source: domain/soil_carbon}
+  - {key: rpest_surface_at_risk_ha, label: Rpest area at risk, unit: ha, family: environment,
+     class: additive, block: environment, reported: [territory],
+     source: domain/rpest.compute_rpest_by_pair}
+  - {key: rpest_surface_at_risk_share, label: Rpest share at risk, unit: share, family: environment,
+     class: ratio, block: environment, reported: [territory], source: domain/rpest}
+  - {key: rpest_mean, label: Mean Rpest (area-weighted), unit: 0-10, family: environment,
+     class: ratio, block: environment, reported: [territory], source: domain/rpest}
+  - {key: rpest_max, label: Maximum Rpest, unit: 0-10, family: environment,
+     class: non_additive, block: environment, reported: [territory], source: domain/rpest}
+  - {key: shannon, label: Cropping diversity (Shannon), unit: "-", family: environment,
+     class: non_additive, block: diversity, reported: [territory, island, region],
+     source: reporting/indicators.compute_shannon_diversity}
+  # --- agroecology -------------------------------------------------------------------------
+  - {key: aecm_area_ha, label: Area under an AECM, unit: ha, family: agroecology, class: additive,
+     block: agroecology, reported: [territory], source: domain/agroecology}
+  - {key: aecm_area_share, label: Share under an AECM, unit: share, family: agroecology,
+     class: ratio, block: agroecology, reported: [territory], source: domain/agroecology}
+  - {key: aecm_spending, label: AECM spending, unit: EUR, family: agroecology, class: additive,
+     block: agroecology, reported: [territory], source: domain/agroecology}
+  - {key: organic_area_ha, label: Organic area (grassland included), unit: ha, family: agroecology,
+     class: additive, block: agroecology, reported: [territory], source: domain/agroecology}
+  - {key: organic_area_share, label: Organic share (grassland included), unit: share,
+     family: agroecology, class: ratio, block: agroecology, reported: [territory],
+     source: domain/agroecology}
+  - {key: organic_area_excl_grassland_ha, label: Organic area excluding grassland, unit: ha,
+     family: agroecology, class: additive, block: agroecology, reported: [territory],
+     source: domain/agroecology}
+  - {key: organic_area_excl_grassland_share, label: Organic share excluding grassland, unit: share,
+     family: agroecology, class: ratio, block: agroecology, reported: [territory],
+     source: domain/agroecology}
+  # --- intensity ---------------------------------------------------------------------------
+  - {key: gross_margin_per_ha, label: Gross margin per ha, unit: EUR/ha, family: intensity,
+     class: ratio, block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: fte_per_ha, label: Employment per ha, unit: FTE/ha, family: intensity, class: ratio,
+     block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: production_per_ha, label: Production per ha, unit: t/ha, family: intensity, class: ratio,
+     block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: gross_margin_per_fte, label: Gross margin per FTE, unit: EUR/FTE, family: intensity,
+     class: ratio, block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: nitrogen_per_tonne, label: Nitrogen per tonne produced, unit: kg N/t, family: intensity,
+     class: ratio, block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: tfi_per_tonne, label: TFI per tonne produced, unit: TFI/t, family: intensity, class: ratio,
+     block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: subsidy_per_tonne, label: Subsidy per tonne, unit: EUR/t, family: intensity, class: ratio,
+     block: intensity, reported: [territory, crop], source: reporting/indicators.compute_intensity_totals}
+  - {key: subsidy_per_fte, label: Subsidy per FTE, unit: EUR/FTE, family: intensity, class: ratio,
+     block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: subsidy_per_euro_margin, label: Subsidy per euro of margin, unit: EUR/EUR, family: intensity,
+     class: ratio, block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  - {key: subsidy_per_ha, label: Subsidy per ha, unit: EUR/ha, family: intensity, class: ratio,
+     block: intensity, reported: [territory], source: reporting/indicators.compute_intensity_totals}
+  # --- exposure (frozen allocation) --------------------------------------------------------
+  - {key: climate_margin_at_risk, label: Climate margin at risk, unit: EUR, family: exposure,
+     class: additive, block: resilience, reported: [territory], source: domain/resilience}
+  - {key: climate_margin_at_risk_ratio, label: Climate margin at risk (share), unit: share,
+     family: exposure, class: ratio, block: resilience, reported: [territory], source: domain/resilience}
+  - {key: revenue_concentration_hhi, label: Revenue concentration (HHI), unit: "-", family: exposure,
+     class: non_additive, block: resilience, reported: [territory], source: domain/resilience}
+  - {key: price_shock_margin_loss, label: Loss under a price shock, unit: EUR, family: exposure,
+     class: additive, block: resilience, reported: [territory], source: domain/resilience}
+  - {key: price_shock_margin_loss_ratio, label: Loss under a price shock (share), unit: share,
+     family: exposure, class: ratio, block: resilience, reported: [territory], source: domain/resilience}
+  # --- food self-sufficiency -----------------------------------------------------------------
+  - {key: autonomy_limiting, label: Self-sufficiency (limiting nutrient), unit: ratio,
+     family: self_sufficiency, class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals, note: needs population per zone}
+  # One entry per nutrient; they aggregate alike (production / need of the population).
+  - {key: autonomy_kcal, label: Energy self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_prot, label: Protein self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_lip, label: Lipid self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_glu, label: Carbohydrate self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_fibres, label: Fibre self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_ca, label: Calcium self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_p, label: Phosphorus self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_mg, label: Magnesium self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_k, label: Potassium self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  - {key: autonomy_fe, label: Iron self-sufficiency, unit: ratio, family: self_sufficiency,
+     class: territorial, block: food_autonomy, reported: [territory],
+     source: reporting/indicators.compute_food_autonomy_totals}
+  # --- calibration against the 2017 observation ---------------------------------------------
+  - {key: regional_pad_pct, label: PAD against the 2017 observation, unit: "%", family: calibration,
+     class: observed, block: calibration, reported: [territory, region, farm, crop_group],
+     source: reporting/calibration}
+  - {key: farm_type_match_pct, label: Farm types reproduced, unit: "%", family: calibration,
+     class: observed, block: calibration, reported: [territory, farm_type], source: reporting/calibration}
+  - {key: plot_match_pct, label: Plots with the observed crop, unit: "%", family: calibration,
+     class: observed, block: calibration, reported: [territory, region, plot], source: reporting/calibration}
+  - {key: area_match_pct, label: Area with the observed crop, unit: "%", family: calibration,
+     class: observed, block: calibration, reported: [territory, region], source: reporting/calibration}
