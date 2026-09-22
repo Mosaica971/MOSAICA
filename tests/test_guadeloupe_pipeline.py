@@ -393,7 +393,7 @@ def test_cost_multiplier_scales_variable_cost_in_dataset():
 
 
 def test_build_dataset_registers_water_and_carbon_rates():
-    """Les nouveaux taux sont enregistrés, indexés par culture, et non dégénérés."""
+    """The new rates are registered, indexed by crop, and not degenerate."""
     dataset = build_dataset(CONFIG)
     crops = dataset.sets["crops"]
 
@@ -404,9 +404,9 @@ def test_build_dataset_registers_water_and_carbon_rates():
     assert set(water_need.index) == set(crops)
     assert set(carbon_input.index) == set(crops)
     assert list(monthly.index) == [f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]
-    # Le total annuel est bien la somme des 12 mois.
+    # The annual total is the sum of the 12 months.
     assert water_need.sum() == pytest.approx(monthly.to_numpy().sum())
-    # Non dégénéré: au moins une culture a un besoin en eau et un apport carbone non nuls.
+    # Not degenerate: at least one crop has a non-zero water need and carbon input.
     assert (water_need > 0).any()
     assert (carbon_input > 0).any()
 
@@ -419,8 +419,8 @@ def test_build_dataset_loads_soil_table_with_all_five_soils():
     assert set(soil_data.columns) == {
         "NITISOL", "ANDOSOL", "FERRALSOL", "AUTRES", "VERTISOL"
     }
-    # Les coefficients de minéralisation diffèrent entre sols -- sinon le choix du sol
-    # n'aurait aucun effet sur le bilan carbone.
+    # Mineralisation coefficients differ between soils -- otherwise the choice of soil
+    # would have no effect on the carbon balance.
     assert soil_data.loc["KAER"].nunique() > 1
 
 
@@ -429,5 +429,5 @@ def test_build_dataset_registers_duree_cycle_cult():
     duree = dataset.parameters["crop_cycle_duration"]
 
     assert set(duree.index) == set(dataset.sets["crops"])
-    # Une duree de cycle nulle ferait exploser l'annualisation du choc de prix.
+    # A zero cycle duration would blow up the annualisation of the price shock.
     assert (duree > 0).all()

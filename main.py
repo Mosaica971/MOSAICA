@@ -44,21 +44,21 @@ def _apply_warm_start(model, config: dict, outputs_root: Path) -> bool:
     if not run_dir.is_absolute():
         run_dir = outputs_root.parent / run_dir
     report = apply_allocation(model, read_allocation(run_dir))
-    print(f"Warm start depuis {run_dir.name} : {report.summary()}")
+    print(f"Warm start from {run_dir.name}: {report.summary()}")
 
     violations = constraint_violations(model)
     if violations:
         shown = ", ".join(f"{name} ({amount:.4g})" for name, amount in violations[:_MAX_VIOLATIONS_SHOWN])
-        more = f" (+{len(violations) - _MAX_VIOLATIONS_SHOWN} autres)" if len(violations) > _MAX_VIOLATIONS_SHOWN else ""
+        more = f" (+{len(violations) - _MAX_VIOLATIONS_SHOWN} more)" if len(violations) > _MAX_VIOLATIONS_SHOWN else ""
         print(
-            f"  ATTENTION : depart INFAISABLE, {len(violations)} contrainte(s) violee(s) : "
+            f"  WARNING: INFEASIBLE start, {len(violations)} constraint(s) violated: "
             f"{shown}{more}\n"
-            f"  HiGHS l'ignorera -- le solve sera aussi lent qu'a froid. Reparez l'allocation "
-            f"ou changez de source."
+            f"  HiGHS will discard it -- the solve will be as slow as a cold one. Repair the "
+            f"allocation or pick another source."
         )
         return False
 
-    print(f"  depart faisable, objectif {objective_value(model):,.2f}")
+    print(f"  feasible start, objective {objective_value(model):,.2f}")
     return True
 
 

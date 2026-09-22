@@ -421,7 +421,7 @@ def test_load_batch_spec_assembles_catalogues_and_resolves_groups(tmp_path):
     (tmp_path / "crop_groups.yaml").write_text(
         yaml.safe_dump({"sugarcane": ["@cs"], "food_crops": ["@sugarcane", "ME"]}), encoding="utf-8"
     )
-    (tmp_path / "politiques.yaml").write_text(
+    (tmp_path / "policies.yaml").write_text(
         yaml.safe_dump({"policies": [
             {"name": "P1", "overrides": {"economic_overrides.price_multipliers": [
                 {"crops": {"group": "food_crops"}, "factor": 1.4}
@@ -434,7 +434,7 @@ def test_load_batch_spec_assembles_catalogues_and_resolves_groups(tmp_path):
     )
     (tmp_path / "plan.yaml").write_text(
         yaml.safe_dump({
-            "include": {"crop_groups": "crop_groups.yaml", "policies": "politiques.yaml",
+            "include": {"crop_groups": "crop_groups.yaml", "policies": "policies.yaml",
                         "forcings": "forcages.yaml"},
             "scenarios": {"P1": ["F0"]},
         }),
@@ -458,7 +458,7 @@ def test_load_batch_spec_honours_a_catalogues_own_crop_groups_include(tmp_path):
     from core.config import load_batch_spec
 
     (tmp_path / "groups.yaml").write_text(yaml.safe_dump({"bio": ["MA_PLBIO"]}), encoding="utf-8")
-    (tmp_path / "politiques.yaml").write_text(
+    (tmp_path / "policies.yaml").write_text(
         yaml.safe_dump({
             "include": {"crop_groups": "groups.yaml"},
             "policies": [{"name": "P1", "enable_add": [
@@ -468,7 +468,7 @@ def test_load_batch_spec_honours_a_catalogues_own_crop_groups_include(tmp_path):
         encoding="utf-8",
     )
     (tmp_path / "plan.yaml").write_text(
-        yaml.safe_dump({"include": {"policies": "politiques.yaml"}, "scenarios": {"P1": None}}),
+        yaml.safe_dump({"include": {"policies": "policies.yaml"}, "scenarios": {"P1": None}}),
         encoding="utf-8",
     )
 
@@ -902,8 +902,8 @@ def test_prospective_labour_slack_covers_every_employment_floor():
             # for scale = 1/1607, which is why this is worth writing out).
             required_fte = args["threshold"] / args.get("scale", 1.0) / hours_per_fte
             assert required_fte <= cap_fte, (
-                f"{run['name']}: plancher d'emploi {required_fte:,.0f} ETP au-dessus du "
-                f"plafond de main d'oeuvre {cap_fte:,.0f} ETP (slack {slack})"
+                f"{run['name']}: employment floor {required_fte:,.0f} FTE above the "
+                f"labour ceiling {cap_fte:,.0f} FTE (slack {slack})"
             )
 
 

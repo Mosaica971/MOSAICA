@@ -27,7 +27,7 @@ matplotlib.use("Agg")  # aucun affichage : on ecrit des fichiers
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 OUTPUTS = ROOT / "outputs"
 FIGURES = Path(__file__).resolve().parent / "figures"
 

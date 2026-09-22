@@ -247,7 +247,7 @@ def compute_tfi_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
 
 
 def _chlordecone_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    """Boolean per allocated plot: True where the assigned crop, the parcel's chlordécone
+    """Boolean per allocated plot: True where the assigned crop, the parcel's chlordecone
     soil-risk level (RISQUE_CLD, 1=worst..5=none) and its soil type (TYPE_SOL) trigger
     at-risk food production. Faithful to OPTIMISATION.txt indicator n°10 (NV_CLD_parc),
     with c = crop uptake class (Data_Cult["CLD"], 1=high..4=none)."""
@@ -264,7 +264,7 @@ def _chlordecone_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series
 
 
 def compute_chlordecone_risk_area(dataset: Dataset, allocation: pd.Series) -> float:
-    """Cultivated surface (ha) flagged at chlordécone risk by the crop x soil rule."""
+    """Cultivated surface (ha) flagged at chlordecone risk by the crop x soil rule."""
     mask = _chlordecone_risk_mask(dataset, allocation)
     return float(_plot_surface(dataset, allocation)[mask].sum())
 
@@ -332,7 +332,7 @@ def compute_soil_carbon_balance_by_plot(dataset: Dataset, allocation: pd.Series)
 
 def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dict[str, float]:
     """Headline environmental totals for one allocation: nitrogen (kg N), GES (t CO2), IFT,
-    chlordécone-exposed surface (ha), plus per-ha averages over the cultivated surface.
+    chlordecone-exposed surface (ha), plus per-ha averages over the cultivated surface.
     Also: gross annual water need (m3, not net of rainfall) both territory-wide and for the
     single peak month, and the net annual soil organic carbon balance and mineralization
     flux (t C, see soil_carbon.py)."""
@@ -619,7 +619,7 @@ def compute_facts_table(
     per_plot["revenue"] = per_plot["sales"] + per_plot["subsidy"]
     per_plot["labor_cost"] = per_plot["labor_hours"] * cost_per_hour
     per_plot["fte"] = per_plot["labor_hours"] / hours_per_fte
-    # Chlordécone-exposed surface: the plot's own surface when the crop x soil rule flags it.
+    # Chlordecone-exposed surface: the plot's own surface when the crop x soil rule flags it.
     per_plot["chlordecone_risk_area"] = surface * _chlordecone_risk_mask(dataset, allocation).to_numpy()
     # Water is a per-crop rate, but soil carbon depends on the plot's soil type: it cannot
     # go through rate() and comes from the per-plot functions instead.

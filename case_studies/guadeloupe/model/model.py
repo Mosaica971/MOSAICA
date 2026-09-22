@@ -13,11 +13,11 @@ from core.model.model_inputs import ModelInputs
 # Per-hectare rates a config-declared bound may target, mapped to the dataset parameter
 # holding them. The name on the left is what config.yaml / scenarios write as `indicator:`;
 # the unit on the right is what the threshold must then be expressed in.
-#   azote      kg N / ha / an          ift      indice de frequence de traitement / ha / an
-#   ges        u GES / ha / an         eau      mm / ha / an  (x10 -> m3, cf. domain/water.py)
-#   carbone    entrees de C / ha / an  travail  h / ha / an   (/1607 -> ETP)
-#   subvention EUR / ha / an           marge / vente / cout    EUR / ha / an
-#   rendement  t / ha / an
+#   nitrogen   kg N / ha / yr          tfi      treatment frequency index / ha / yr
+#   ghg        GHG units / ha / yr     water    mm / ha / yr  (x10 -> m3, see domain/water.py)
+#   carbon     C inputs / ha / yr      labor    h / ha / yr   (/1607 -> FTE)
+#   subsidy    EUR / ha / yr           margin / sales / cost   EUR / ha / yr
+#   yield      t / ha / yr
 # `subvention` is the annualized subsidy, i.e. what a public-spending envelope must count.
 # Two rates are narrower than the indicator of the same name in the run report, and a
 # threshold must be set in the constraint's own terms, not read off recap.json:
@@ -154,7 +154,7 @@ def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
     if (config.get("zone_filter") or {}).get("scale_territorial_bounds"):
         fraction = float(dataset.scalars.get("zone_surface_fraction", 1.0))
         print(
-            f"zone_filter : seuils territoriaux mis a l'echelle x{fraction:.4f} "
+            f"zone_filter: territorial thresholds scaled by x{fraction:.4f} "
             f"({100 * fraction:.1f} % de la surface)"
         )
         config = scale_territorial_bounds(config, fraction)

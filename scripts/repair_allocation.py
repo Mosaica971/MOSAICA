@@ -103,19 +103,19 @@ def repair(
             {
                 "plot": plot,
                 "farm": farm[plot],
-                "de": crop,
-                "vers": best,
+                "from": crop,
+                "to": best,
                 "ha": float(surface[plot]),
-                "cout_eur": value_of(plot, crop) - value_of(plot, best),
+                "cost_eur": value_of(plot, crop) - value_of(plot, best),
                 "delta_h": float(surface[plot]) * (float(labor[best]) - float(labor[crop])),
             }
         )
 
     frame = pd.DataFrame(candidates)
     if frame.empty:
-        raise SystemExit("Aucune parcelle basculable : verifiez --crops et --freeze.")
-    frame["cout_eur_ha"] = frame["cout_eur"] / frame["ha"]
-    frame = frame.sort_values("cout_eur_ha")
+        raise SystemExit("No plot can be switched: check --crops and --freeze.")
+    frame["cost_eur_ha"] = frame["cost_eur"] / frame["ha"]
+    frame = frame.sort_values("cost_eur_ha")
 
     switched = []
     for row in frame.itertuples():
@@ -124,15 +124,15 @@ def repair(
         if row.delta_h > slack.get(row.farm, 0.0):
             continue
         slack[row.farm] -= row.delta_h
-        allocation[row.plot] = row.vers
+        allocation[row.plot] = row.to
         held += row.ha
         switched.append(row.Index)
 
     if held < min_surface:
         raise SystemExit(
-            f"Plancher inatteignable par cette heuristique : {held:.1f} ha sur "
-            f"{min_surface:.1f} demandes. Les heures de main d'oeuvre disponibles sont "
-            f"probablement le facteur limitant."
+            f"Floor out of reach for this heuristic: {held:.1f} ha out of "
+            f"{min_surface:.1f} requested. The available labour hours are "
+            f"probably the limiting factor."
         )
     return allocation, frame.loc[switched]
 
@@ -158,15 +158,15 @@ def main(argv: list[str] | None = None) -> int:
         else _floored_crops(config)
     )
     crops = [c.strip() for c in args.crops.split(",") if c.strip()]
-    print(f"cultures cibles : {crops}")
-    print(f"cultures gelees : {sorted(freeze) or '(aucune)'}")
+    print(f"target crops: {crops}")
+    print(f"frozen crops: {sorted(freeze) or '(none)'}")
 
     allocation, switches = repair(config, args.run_dir, crops, args.min_surface, freeze)
     print(
-        f"\n{len(switches)} parcelles basculees, {switches['ha'].sum():.1f} ha, "
-        f"cout {switches['cout_eur'].sum():,.0f} EUR"
+        f"\n{len(switches)} plots switched, {switches['ha'].sum():.1f} ha, "
+        f"cost {switches['cost_eur'].sum():,.0f} EUR"
     )
-    print(switches.groupby("de")["ha"].sum().sort_values(ascending=False).head(10).round(1).to_string())
+    print(switches.groupby("from")["ha"].sum().sort_values(ascending=False).head(10).round(1).to_string())
 
     # The only thing that matters about a warm start: is it feasible? Rebuild and audit.
     dataset = build_dataset(config)
@@ -174,22 +174,22 @@ def main(argv: list[str] | None = None) -> int:
     report = apply_allocation(model, allocation)
     violations = constraint_violations(model)
     print(f"\naudit : {report.summary()}")
-    print(f"objectif du depart : {objective_value(model):,.2f}")
+    print(f"objective of the start: {objective_value(model):,.2f}")
     if violations:
-        print(f"ATTENTION : {len(violations)} contrainte(s) violee(s) -- ce depart sera ignore par HiGHS :")
+        print(f"WARNING: {len(violations)} constraint(s) violated -- HiGHS will discard this start:")
         for name, amount in violations[:5]:
             print(f"   {name} : {amount:.6g}")
     else:
-        print("depart FAISABLE pour la configuration courante.")
-        print("  (si le plancher vise n'est pas encore active dans config.yaml, activez-le :")
-        print("   c'est precisement le run que ce depart sert a debloquer.)")
+        print("start is FEASIBLE for the current configuration.")
+        print("  (if the target floor is not yet enabled in config.yaml, enable it:")
+        print("   that is precisely the run this start exists to unblock.)")
 
     csv_dir = args.out / "csv"
     csv_dir.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(
         {"plot": list(allocation.keys()), "crop": list(allocation.values())}
     ).to_csv(csv_dir / "allocation_output.csv", index=False)
-    print(f"\necrit dans {args.out} -- utilisable via solver.warm_start_from dans config.yaml")
+    print(f"\nwritten to {args.out} -- usable through solver.warm_start_from in config.yaml")
     return 0
 
 

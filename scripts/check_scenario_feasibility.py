@@ -105,10 +105,10 @@ def check(
             dataset = build_dataset(config)
             for group in symmetric_crop_groups(dataset):
                 print(
-                    f"      SYMETRIE: {len(group)} cultures indistinguables par le modele "
+                    f"      SYMMETRY: {len(group)} crops the model cannot tell apart "
                     f"({', '.join(group[:4])}{'...' if len(group) > 4 else ''}) -- "
-                    f"branch-and-bound bien plus lent, et toute contrainte qui les "
-                    f"distingue est satisfaite par simple renommage."
+                    f"a much slower branch-and-bound, and any constraint telling them "
+                    f"apart is met by mere relabelling."
                 )
             model = build_model(dataset, config)
             for var in model.Y.values():

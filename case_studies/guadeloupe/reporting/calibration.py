@@ -308,8 +308,8 @@ def farm_type_confusion(dataset: Dataset, output_allocation: pd.Series) -> pd.Da
     codes = sorted(FARM_TYPE_LABELS)
     confusion = pd.crosstab(_farm_type(dataset, observed), _farm_type(dataset, simulated))
     confusion = confusion.reindex(index=codes, columns=codes, fill_value=0).astype(int)
-    confusion.index.name = "type_observe"
-    confusion.columns.name = "type_simule"
+    confusion.index.name = "observed_type"
+    confusion.columns.name = "simulated_type"
     return confusion
 
 

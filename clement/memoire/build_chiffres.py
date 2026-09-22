@@ -24,7 +24,7 @@ import csv
 import json
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 OUTPUTS = ROOT / "outputs"
 TARGET = Path(__file__).resolve().parent / "chiffres.tex"
 TABLES = Path(__file__).resolve().parent / "tables"
@@ -785,7 +785,10 @@ def main() -> int:
     # liste d'extractions. Ses indicateurs portent une fourchette basse/centrale/haute :
     # l'assolement 2017 n'etant connu qu'au niveau des 12 groupes RPG, la valeur "centrale"
     # repose sur l'hypothese `baseline_representative_crops` et n'est pas une observation.
-    reference = OUTPUTS / "reference_2017" / "reference.json"
+    # Depuis le passage du depot a l'anglais (2026-09-22), `reference_2017/` porte des cles
+    # anglaises ; la copie ci-dessous est la derniere version a cles francaises, celle que
+    # ce generateur sait lire.
+    reference = OUTPUTS / "_legacy_reference_2017_fr" / "reference.json"
     if not reference.exists():
         missing.append("outputs/reference_2017/reference.json est absent")
     else:

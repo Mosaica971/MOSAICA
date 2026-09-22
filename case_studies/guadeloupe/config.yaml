@@ -117,7 +117,7 @@ baseline_representative_crops:
   CS: CS_NGT_NISM  # canne a sucre Nord Grande-Terre, non irriguee, semi-mecanisee
   IG: IG_PLA       # igname a plat
   MA: MA_ROTA      # maraichage en rotation
-  PN: PN_PIQ       # prairie avec elevage au piquet -- PN_TOUR est supprimee par Eq_PN_TOUR_SUPP
+  PN: PN_PIQ       # grassland with tethered livestock -- PN_TOUR is suppressed by Eq_PN_TOUR_SUPP
   VE: VE_BTGT      # vergers Basse-Terre & Grande-Terre
 
 # Optional: restrict the optimization to a subset of plots (island/region/farm/plot),
@@ -279,7 +279,7 @@ constraints:
   # representative fine crops -- read its docstring before touching this, the literal GAMS
   # formula yields a near-zero cap on this data.
   # `slack` scales every cap (1.0 = faithful). GAMS keeps its own scenario multipliers
-  # commented right under the formula: "x 1.7 pour S1, x 1.3 pour S2, x 10 pour S3".
+  # commented right under the formula: "x 1.7 pour S1, x 1.3 pour S2, x 10 pour S3" (x 1.7 for S1, ...).
   - name: farm_labor_hours_max
     enable: true
     args: {label: labor_max_farm, slack: 1.0}
@@ -459,7 +459,7 @@ constraints:
   #
   # WHY A FLOOR AT ALL -- established from data OUTSIDE the model. Agreste's Statistique
   # agricole annuelle for 2017 (Memento Guadeloupe 2019, p.5, champ "exploitations") reports
-  # 9 595 ha of "surfaces toujours en herbe des exploitations", and the 1 Dec 2017 cattle
+  # 9 595 ha of "surfaces toujours en herbe des exploitations" (permanent grassland), and the 1 Dec 2017 cattle
   # census (same source, p.10) 40 449 head ~= 29 771 UGB. That is 3.10 UGB/ha -- matching the
   # agricultural census benchmarks exactly (RA2010: 32 056 UGB / 10 250 ha = 3.13; RA2020:
   # 27 496 / 11 222 = 2.45). Without this floor the model allocates 2 980 ha of pasture, which
@@ -561,7 +561,7 @@ constraints:
       sense: ge
       # 3 503 ETP x 1 607 h. Careful: `farm_labor_hours_max` grants 6 252 740 h (3 891 ETP)
       # at slack 1.0, so a floor above that is infeasible unless the same scenario raises
-      # the slack -- and raising it is not sufficient either (VIGILANCE, entree prospective).
+      # the slack -- and raising it is not sufficient either (docs/04-vigilance.md, prospective entry).
       threshold: 5629321
 
 # Numeric eligibility bounds: a (plot, crop) pair is eligible only if the plot's `attribute`

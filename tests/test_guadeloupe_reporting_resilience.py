@@ -6,7 +6,7 @@ from case_studies.guadeloupe.reporting import indicators
 
 
 def _dataset() -> Dataset:
-    """Deux parcelles, deux cultures. SAFE ne risque rien, RISKY perd 50%."""
+    """Two plots, two crops. SAFE risks nothing, RISKY loses 50%."""
     plot_data = pd.DataFrame({"SURF_HA": [2.0, 3.0]}, index=["P1", "P2"])
     parameters = {
         "plot_data": plot_data,
@@ -58,4 +58,4 @@ def test_revenue_concentration_uses_revenue_not_margin():
 def test_empty_allocation_yields_zeros_not_errors():
     totals = indicators.compute_resilience_totals(_dataset(), pd.Series(dtype=object), 0.20)
     for key, value in totals.items():
-        assert value == 0.0, f"{key} devrait etre 0 sur une allocation vide"
+        assert value == 0.0, f"{key} should be 0 on an empty allocation"

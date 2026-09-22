@@ -22,7 +22,7 @@ from apps.dashboard import comparison, loaders, pareto
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"
 
 st.set_page_config(page_title="MOSAICA — Pareto", layout="wide")
-st.title("Front de Pareto : ce que coûte le cran suivant")
+st.title("Pareto front: what the next step costs")
 
 recaps: dict[str, dict] = {}
 for run_dir in loaders.list_output_runs(OUTPUTS_ROOT):
@@ -39,88 +39,87 @@ sweeps = [
 ]
 if not sweeps:
     st.info(
-        "Aucun balayage trouvé. Cette page lit les runs d'un balayage par ε-contrainte, "
-        "tracé soit contre la config de référence, soit sous une politique déclarée dans "
-        "`plan.yaml` :\n\n"
+        "No sweep found. This page reads the runs of an ε-constraint sweep, traced either "
+        "against the reference config or under a policy declared in `plan.yaml`:\n\n"
         "```\npython scripts/run_scenarios.py --scenarios "
         "case_studies/guadeloupe/scenarios_pareto.yaml\n```\n\n"
-        "Chaque point est un vrai solve MILP (~3 min), et le balayage azote livré en compte "
-        "sept — à ne pas lancer sans intention. Un run rejoint un balayage par le `run_sweep` "
-        "de son recap (à défaut, par le préfixe de son `run_name` avant `__`)."
+        "Each point is a real MILP solve, and the nitrogen sweep shipped has seven — do not "
+        "launch it without meaning to. A run joins a sweep through its recap's `run_sweep` "
+        "(failing that, through the prefix of its `run_name` before `__`)."
     )
     st.stop()
 
 controls = st.columns(4)
-sweep = controls[0].selectbox("Balayage", sweeps)
+sweep = controls[0].selectbox("Sweep", sweeps)
 x_indicator = controls[1].selectbox(
-    "Axe contraint (x)", list(comparison.INDICATOR_LABELS),
+    "Constrained axis (x)", list(comparison.INDICATOR_LABELS),
     index=list(comparison.INDICATOR_LABELS).index("total_nitrogen"),
     format_func=lambda i: comparison.INDICATOR_LABELS[i],
 )
 y_indicator = controls[2].selectbox(
-    "Objectif (y)", list(comparison.INDICATOR_LABELS),
+    "Objective (y)", list(comparison.INDICATOR_LABELS),
     index=list(comparison.INDICATOR_LABELS).index("total_gross_margin"),
     format_func=lambda i: comparison.INDICATOR_LABELS[i],
 )
-side = controls[3].radio("Côté", ("output", "input"), horizontal=True,
-                         format_func=lambda s: {"output": "sortie", "input": "entrée"}[s])
+side = controls[3].radio("Side", ("output", "input"), horizontal=True,
+                         format_func=lambda s: comparison.SIDE_LABELS[s])
 
 points = pareto.collect_points(recaps, sweep, x_indicator, y_indicator, side)
 if len(points) < 2:
     st.warning(
-        f"« {sweep} » n'a que {len(points)} point(s) portant ces deux indicateurs. Un front "
-        "demande au moins deux solves ; vérifiez que les runs du balayage sont bien tous "
-        "présents et qu'ils portent le bloc de recap concerné."
+        f"\"{sweep}\" has only {len(points)} point(s) carrying both indicators. A front needs "
+        "at least two solves; check that every run of the sweep is present and carries the "
+        "relevant recap block."
     )
     st.stop()
 
 points = pareto.mark_dominated(points, x_indicator, y_indicator)
 st.pyplot(pareto.build_front_figure(points, x_indicator, y_indicator))
 st.caption(
-    "Chaque point est un solve sous un plafond différent. Le premier point du balayage a "
-    "son plafond calé sur le total réalisé, donc la contrainte y est **inactive** : sa "
-    "valeur doit égaler celle de la calibration retenue. Si elle en diffère, ce n'est pas le "
-    "front qui est faux — c'est que ce solve n'a pas convergé au même endroit."
+    "Each point is a solve under a different ceiling. The first point of the sweep has its "
+    "ceiling set at the achieved total, so the constraint is **inactive** there: its value "
+    "must equal that of the selected calibration. If it differs, the front is not wrong — "
+    "that solve did not converge to the same place."
 )
 
 dominated = [p for p in points if p.dominated]
 if dominated:
     st.warning(
-        "**Points dominés** (croix grises) : "
+        "**Dominated points** (grey crosses): "
         + ", ".join(p.label.rsplit(pareto.SWEEP_SEPARATOR, 1)[-1] for p in dominated)
-        + ". Un arbitrage ne revient pas en arrière — serrer une contrainte ne peut pas "
-        "améliorer l'objectif. Un point dominé signale donc presque toujours un solve qui "
-        "n'a pas convergé (limite de temps, incumbent sous-optimal), pas une découverte. "
-        "Vérifier sa terminaison avant d'en tirer quoi que ce soit."
+        + ". A trade-off does not double back — tightening a constraint cannot improve the "
+        "objective. A dominated point therefore almost always signals a solve that did not "
+        "converge (time limit, sub-optimal incumbent), not a discovery. Check its termination "
+        "before drawing anything from it."
     )
 
-st.header("Coût marginal")
+st.header("Marginal cost")
 rates = pareto.marginal_rates(points)
 if not rates:
-    st.info("Pas assez de points non dominés pour calculer une pente.")
+    st.info("Not enough non-dominated points to compute a slope.")
 else:
     table = pd.DataFrame([
         {
-            "De": r["from"].rsplit(pareto.SWEEP_SEPARATOR, 1)[-1],
-            "Vers": r["to"].rsplit(pareto.SWEEP_SEPARATOR, 1)[-1],
+            "From": r["from"].rsplit(pareto.SWEEP_SEPARATOR, 1)[-1],
+            "To": r["to"].rsplit(pareto.SWEEP_SEPARATOR, 1)[-1],
             f"Δ {comparison.INDICATOR_LABELS[x_indicator]}": r["delta_x"],
             f"Δ {comparison.INDICATOR_LABELS[y_indicator]}": r["delta_y"],
-            "Coût marginal (Δy/Δx)": r["rate"],
+            "Marginal cost (Δy/Δx)": r["rate"],
         }
         for r in rates
     ])
     st.dataframe(table.style.format(precision=2), width="stretch", hide_index=True)
     st.caption(
-        "C'est le chiffre que le front existe pour produire : « les cent derniers milliers "
-        "de kg d'azote coûtent X € de marge ». À comparer au **prix dual** de la même "
-        "contrainte (`core/solve/shadow_prices.py`), qui en est la version locale : un écart "
-        "important entre les deux signifie que le dual est lu hors de son voisinage de "
-        "validité — il price une relaxation infinitésimale, pas le cran entier."
+        "This is the figure the front exists to produce: \"the last hundred thousand kg of "
+        "nitrogen cost X € of margin\". Compare it with the **dual price** of the same "
+        "constraint (`core/solve/shadow_prices.py`), its local version: a large gap between "
+        "the two means the dual is read outside its neighbourhood of validity — it prices an "
+        "infinitesimal relaxation, not the whole step."
     )
 
 st.info(
-    "**Un plafond se satisfait aussi en cultivant moins.** Une politique qui alloue moins "
-    "d'hectares affiche moins d'azote total sans produire plus proprement. Pour distinguer "
-    "les deux, refaire le front avec « Azote / tonne produite » en abscisse : c'est "
-    "l'intensité, et c'est elle qui décrit une pratique."
+    "**A ceiling can also be met by farming less.** A policy that allocates fewer hectares "
+    "shows less total nitrogen without producing more cleanly. To tell the two apart, redraw "
+    "the front with \"Nitrogen / tonne produced\" on the x axis: that is the intensity, and it "
+    "is what describes a practice."
 )

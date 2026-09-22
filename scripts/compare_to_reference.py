@@ -14,7 +14,10 @@ Two readings the run's own recap does not give:
 * every indicator gap is confronted with the reference's OWN BRACKET. The observed side has
   no fine crops, so its economics is an assumption with a range; a gap smaller than that
   range says nothing about the model. This is the difference between "the model loses 970
-  ETP" and "the model lands inside the uncertainty of the observed figure".
+  FTE" and "the model lands inside the uncertainty of the observed figure".
+
+The run's recap and config are read through apps.dashboard.loaders, so a run written before
+the English renaming of 2026-09-22 compares exactly like a new one.
 """
 
 from __future__ import annotations
@@ -28,8 +31,8 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
-import yaml
 
+from apps.dashboard import loaders
 from case_studies.guadeloupe.domain.farm_typology import FARM_TYPE_LABELS
 
 from scripts._common import OUTPUTS_ROOT, ROOT, format_number as _n
@@ -73,7 +76,7 @@ def _run_side(recap: dict[str, Any], name: str) -> float | None:
         economics = recap["economics"]["output"]
         return economics["total_revenue"] - economics["total_subsidy"]
     if name == "labor_hours":
-        return None  # compared through etp, which the recap carries directly
+        return None  # compared through fte, which the recap carries directly
     block, key = _RECAP_KEYS.get(name, (None, None))
     if block is None:
         return None
@@ -81,8 +84,8 @@ def _run_side(recap: dict[str, Any], name: str) -> float | None:
 
 
 def _reference_bracket(reference: dict[str, Any], name: str) -> tuple[float | None, float | None]:
-    entry = reference["indicateurs"].get(name) or {}
-    return entry.get("bas"), entry.get("haut")
+    entry = reference["indicators"].get(name) or {}
+    return entry.get("low"), entry.get("high")
 
 
 def _within_bracket(value: float, low: float | None, high: float | None) -> bool | None:
@@ -93,8 +96,12 @@ def _within_bracket(value: float, low: float | None, high: float | None) -> bool
     return min(low, high) <= value <= max(low, high)
 
 
+def _verdict(passed: bool) -> str:
+    return "OK" if passed else "OUTSIDE THRESHOLD"
+
+
 def compare(run_dir: Path, reference_dir: Path) -> str:
-    recap = json.loads((run_dir / "recap.json").read_text(encoding="utf-8"))
+    recap = loaders.load_recap(run_dir)
     reference = json.loads((reference_dir / "reference.json").read_text(encoding="utf-8"))
     pad_by_crop = pd.read_csv(run_dir / "csv" / "calibration_pad_by_crop.csv", index_col=0)
     field_match = pd.read_csv(run_dir / "csv" / "calibration_field_match.csv", index_col=0)
@@ -104,62 +111,62 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
     repro = pd.read_csv(
         reference_dir / "csv" / "reference_reproducibility.csv", index_col=0
     )
-    run_config = yaml.safe_load((run_dir / "config_used.yaml").read_text(encoding="utf-8"))
+    run_config = loaders.load_config_used(run_dir) or {}
     hours_per_fte = float((run_config.get("labor") or {}).get("hours_per_fte", 1607.0))
 
     calib = recap["calibration"]
-    universe = reference["univers"]
+    universe = reference["universe"]
     total = pad_by_crop.loc[TOTAL_KEY]
     field_total = field_match.loc[TOTAL_KEY]
 
     lines = [
-        f"# {run_dir.name} vs situation de reference 2017",
+        f"# {run_dir.name} vs the 2017 reference state",
         "",
-        f"- Reference : `{reference_dir.name}` "
-        f"({_n(universe['surface_cultivee_ha'])} ha cultives, "
-        f"{_n(universe['parcelles_cultivees'])} parcelles, "
-        f"{_n(universe['exploitations'])} exploitations)",
-        f"- Run : objectif `{recap['objective']['name']}` = "
-        f"{_n(recap['objective']['value'])}, resolu en "
+        f"- Reference: `{reference_dir.name}` "
+        f"({_n(universe['cultivated_area_ha'])} ha cultivated, "
+        f"{_n(universe['cultivated_plots'])} plots, "
+        f"{_n(universe['farms'])} farms)",
+        f"- Run: objective `{recap['objective']['name']}` = "
+        f"{_n(recap['objective']['value'])}, solved in "
         f"{recap['solve_duration_seconds']:.0f} s ({recap['termination_condition']})",
-        f"- Annee / scenario : {recap['data']['year']} / {recap['data']['scenario']}",
+        f"- Year / scenario: {recap['data']['year']} / {recap['data']['scenario']}",
         "",
-        "## 1. Verdict de calibration",
+        "## 1. Calibration verdict",
         "",
-        "| Metrique | Valeur | Seuil (Chopin et al. 2015) | Verdict |",
+        "| Metric | Value | Threshold (Chopin et al. 2015) | Verdict |",
         "|---|---:|---:|---|",
-        f"| PAD territorial | {calib['regional_pad_pct']:.1f} % | "
+        f"| Territorial PAD | {calib['regional_pad_pct']:.1f} % | "
         f"{calib['thresholds']['regional_pad_max']:.0f} % | "
-        f"{'OK' if calib['regional_within_threshold'] else 'HORS SEUIL'} |",
-        f"| Cultures sous seuil | {calib['crops_within_threshold']} / "
+        f"{_verdict(calib['regional_within_threshold'])} |",
+        f"| Crops under threshold | {calib['crops_within_threshold']} / "
         f"{calib['crops_evaluated']} | 8 / 10 | "
-        f"{'OK' if calib['crops_within_threshold'] >= 8 else 'HORS SEUIL'} |",
-        f"| Types d'exploitation reproduits | {calib['farm_type_match_pct']:.1f} % | "
+        f"{_verdict(calib['crops_within_threshold'] >= 8)} |",
+        f"| Farm types reproduced | {calib['farm_type_match_pct']:.1f} % | "
         f"{calib['thresholds']['farm_type_match_min']:.0f} % | "
-        f"{'OK' if calib['farm_type_within_threshold'] else 'HORS SEUIL'} |",
-        f"| Exploitations sous seuil | {calib['farms_within_threshold']} / "
+        f"{_verdict(calib['farm_type_within_threshold'])} |",
+        f"| Farms under threshold | {calib['farms_within_threshold']} / "
         f"{calib['farms_evaluated']} | - | - |",
-        f"| Parcelles bien simulees | {calib['plot_match_pct']:.1f} % | 66 % (article) | "
-        f"{'OK' if calib['plot_match_pct'] >= 66 else 'HORS SEUIL'} |",
-        f"| Surface bien simulee | {calib['area_match_pct']:.1f} % | 77 % (article) | "
-        f"{'OK' if calib['area_match_pct'] >= 77 else 'HORS SEUIL'} |",
+        f"| Plots correctly simulated | {calib['plot_match_pct']:.1f} % | 66 % (article) | "
+        f"{_verdict(calib['plot_match_pct'] >= 66)} |",
+        f"| Area correctly simulated | {calib['area_match_pct']:.1f} % | 77 % (article) | "
+        f"{_verdict(calib['area_match_pct'] >= 77)} |",
         "",
-        f"Plancher de PAD induit par l'eligibilite seule : "
+        "PAD floor induced by eligibility alone: "
         f"{reference['pad_floor_pct']:.1f} % "
-        f"({_n(reference['surface_irreproductible_ha'])} ha irreproductibles). L'ecart",
-        "constate est donc tres majoritairement un choix du modele, pas une impossibilite.",
+        f"({_n(reference['irreproducible_area_ha'])} ha irreproducible). The observed gap",
+        "is therefore overwhelmingly a choice of the model, not an impossibility.",
         "",
-        "## 2. Assolement : observe vs simule",
+        "## 2. Land use: observed vs simulated",
         "",
-        "`irreprod.` rappelle la part de l'observe qu'aucune variante fine ne pouvait porter.",
+        "`irreprod.` recalls the part of the observation no fine variant could carry.",
         "",
-        "| Groupe | Observe (ha) | Simule (ha) | Ecart (ha) | PAD | Irreprod. (ha) |",
+        "| Group | Observed (ha) | Simulated (ha) | Gap (ha) | PAD | Irreprod. (ha) |",
         "|---|---:|---:|---:|---:|---:|",
     ]
     for group, row in pad_by_crop.drop(index=TOTAL_KEY).iterrows():
         pad = "-" if pd.isna(row["pad_pct"]) else f"{row['pad_pct']:.0f} %"
         irreproducible = (
-            _n(repro.loc[group, "irreproductible_ha"]) if group in repro.index else "-"
+            _n(repro.loc[group, "irreproducible_ha"]) if group in repro.index else "-"
         )
         lines.append(
             f"| {group} | {_n(row['observed_ha'])} | {_n(row['simulated_ha'])} | "
@@ -171,35 +178,35 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
         f"| **TOTAL** | {_n(total['observed_ha'])} | {_n(total['simulated_ha'])} | "
         f"{total['simulated_ha'] - total['observed_ha']:+,.0f} | "
         f"{total['pad_pct']:.1f} % | "
-        f"{_n(repro['irreproductible_ha'].sum())} |".replace(",", " "),
+        f"{_n(repro['irreproducible_ha'].sum())} |".replace(",", " "),
         "",
-        "## 3. Indicateurs : reference vs run",
+        "## 3. Indicators: reference vs run",
         "",
-        "La colonne « dans la fourchette » compare l'ecart a l'incertitude de la reference",
-        "elle-meme (cf. REFERENCE.md section 4.1). « oui » = le run tombe dans le domaine des",
-        "assolements observes plausibles : l'ecart au central ne demontre rien.",
+        "The \"inside the bracket\" column compares the gap with the reference's own",
+        "uncertainty (see REFERENCE.md section 4.1). \"yes\" = the run falls within the range",
+        "of plausible observed cropping plans: the gap to the central value proves nothing.",
         "",
-        "| Indicateur | Reference (central) | Fourchette | Run | Ecart | Dans la fourchette |",
+        "| Indicator | Reference (central) | Bracket | Run | Gap | Inside the bracket |",
         "|---|---:|---:|---:|---:|:--:|",
     ]
 
     verdicts: list[tuple[str, bool | None]] = []
-    for name, entry in reference["indicateurs"].items():
+    for name, entry in reference["indicators"].items():
         central = entry.get("central")
         run_value = _run_side(recap, name)
         if run_value is None or central is None:
             continue
         low, high = _reference_bracket(reference, name)
-        # ETP has no bracket of its own; it is labor_hours / hours_per_fte, so it inherits it.
+        # FTE has no bracket of its own; it is labor_hours / hours_per_fte, so it inherits it.
         if name == "fte":
-            hours = reference["indicateurs"].get("labor_hours") or {}
-            low = (hours.get("bas") or 0) / hours_per_fte or None
-            high = (hours.get("haut") or 0) / hours_per_fte or None
+            hours = reference["indicators"].get("labor_hours") or {}
+            low = (hours.get("low") or 0) / hours_per_fte or None
+            high = (hours.get("high") or 0) / hours_per_fte or None
         inside = _within_bracket(run_value, low, high)
         verdicts.append((name, inside))
         bracket = "-" if low is None or high is None else f"{_n(low)} - {_n(high)}"
         gap = f"{100.0 * (run_value - central) / central:+.0f} %" if central else "-"
-        flag = {True: "oui", False: "non", None: "-"}[inside]
+        flag = {True: "yes", False: "no", None: "-"}[inside]
         lines.append(
             f"| {name} | {_n(central)} | {bracket} | {_n(run_value)} | {gap} | {flag} |"
         )
@@ -209,15 +216,15 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
 
     lines += [
         "",
-        f"{inside_count} indicateur(s) sur {bracketed} encadres tombent dans la fourchette de",
-        "la reference.",
+        f"{inside_count} bracketed indicator(s) out of {bracketed} fall inside the reference's",
+        "bracket.",
         "",
-        "## 4. Types d'exploitation",
+        "## 4. Farm types",
         "",
-        "Rappel de lecture : la diagonale est le taux de reproduction. La marge-ligne est la",
-        "reference (typologie observee), la marge-colonne ce que le run produit.",
+        "Reading reminder: the diagonal is the reproduction rate. The row-marginal is the",
+        "reference (observed typology), the column-marginal what the run produces.",
         "",
-        "| Type | Observees | Simulees | Reproduites (rappel) |",
+        "| Type | Observed | Simulated | Reproduced (recall) |",
         "|---|---:|---:|---:|",
     ]
     recall = calib.get("farm_type_recall_by_type", {})
@@ -235,24 +242,24 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
         worst = sorted(recall.items(), key=lambda item: item[1])[:3]
         lines += [
             "",
-            "Types les moins bien reproduits : "
+            "Least well reproduced types: "
             + ", ".join(f"{label} ({value:.0f} %)" for label, value in worst)
             + ".",
         ]
 
     lines += [
         "",
-        "## 5. Pour aller plus loin",
+        "## 5. Going further",
         "",
-        f"- `python scripts/pad_all_scales.py {_relative(run_dir)}` : le PAD aux cinq",
-        "  echelles, ile par ile comprise (reconstruit le dataset, ~7 s).",
-        "- `csv/calibration_pad_by_crop_and_region.csv` : le detail sous-regional.",
-        f"- `{_relative(reference_dir)}/REFERENCE.md` : comment la reference est construite",
-        "  et ce qu'elle ne peut pas dire.",
+        f"- `python scripts/pad_all_scales.py {_relative(run_dir)}`: the PAD at five scales,",
+        "  island by island included (rebuilds the dataset, ~7 s).",
+        "- `csv/calibration_pad_by_crop_and_region.csv`: the sub-regional detail.",
+        f"- `{_relative(reference_dir)}/REFERENCE.md`: how the reference is built and what it",
+        "  cannot say.",
         "",
-        f"Correspondance parcellaire : {int(field_total['matched_plots'])} parcelles sur "
-        f"{int(field_total['total_plots'])} portent la culture observee "
-        f"({field_total['area_match_pct']:.1f} % de la surface).",
+        f"Plot agreement: {int(field_total['matched_plots'])} plots out of "
+        f"{int(field_total['total_plots'])} carry the observed crop "
+        f"({field_total['area_match_pct']:.1f} % of the area).",
         "",
     ]
     return "\n".join(lines)
@@ -278,7 +285,7 @@ def main(argv: list[str] | None = None) -> int:
     destination = args.run_dir / "reference_comparison.md"
     destination.write_text(markdown, encoding="utf-8")
     print(markdown)
-    print(f"\nEcrit dans {destination}")
+    print(f"\nWritten to {destination}")
     return 0
 
 

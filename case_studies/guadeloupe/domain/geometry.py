@@ -58,9 +58,9 @@ class GeometryJoin:
     def summary(self, total_plots: int) -> str:
         share = 100.0 * len(self.polygons) / total_plots if total_plots else 0.0
         return (
-            f"{len(self.polygons):,}/{total_plots:,} parcelles localisées ({share:.1f} %), "
-            f"{self.matched_farms:,}/{self.total_farms:,} exploitations appariées, "
-            f"{self.ambiguous_plots:,} parcelles interchangeables avec une jumelle"
+            f"{len(self.polygons):,}/{total_plots:,} plots located ({share:.1f} %), "
+            f"{self.matched_farms:,}/{self.total_farms:,} farms matched, "
+            f"{self.ambiguous_plots:,} plots interchangeable with a twin"
         )
 
 

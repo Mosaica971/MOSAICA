@@ -27,7 +27,7 @@ _GROUP_BY_TOKEN: dict[str, str] = {
     "JA": "JA",   # jachere
     "MA": "MA",   # maraichage
     "ME": "ME",   # melon
-    "NC": "NC",   # non cultive
+    "NC": "NC",   # not cultivated
     "PN": "PN",   # prairies & savanes
     "TH": "MA",   # tomate -> maraichage
     "VE": "VE",   # vergers hors agrumes

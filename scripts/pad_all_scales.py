@@ -28,7 +28,7 @@ TOTAL = calibration.TOTAL_KEY
 
 
 def _verdict(pad: float, threshold: float) -> str:
-    return "OK" if pad <= threshold else "HORS SEUIL"
+    return "OK" if pad <= threshold else "OUTSIDE THRESHOLD"
 
 
 def report(run_dir: Path) -> None:
@@ -46,29 +46,29 @@ def report(run_dir: Path) -> None:
     # Persist the one table the run's own report does not write.
     by_island.to_csv(run_dir / "csv" / "calibration_pad_by_island.csv")
 
-    print(f"\n=== PAD aux 5 echelles -- {run_dir.name} ===")
-    print("(PAD = 100*|observe-simule|/observe sur les 12 groupes RPG observes)\n")
+    print(f"\n=== PAD at 5 scales -- {run_dir.name} ===")
+    print("(PAD = 100*|observed-simulated|/observed over the 12 observed RPG groups)\n")
 
     # 1. Global / territorial.
     territorial = float(by_crop.loc[TOTAL, "pad_pct"])
-    print("1. GLOBALE (territoire)")
+    print("1. GLOBAL (territory)")
     print(
-        f"   PAD territorial : {territorial:6.1f}%   "
-        f"(seuil {thresholds.regional_pad_max:.0f}%, {_verdict(territorial, thresholds.regional_pad_max)})"
+        f"   Territorial PAD : {territorial:6.1f}%   "
+        f"(threshold {thresholds.regional_pad_max:.0f}%, {_verdict(territorial, thresholds.regional_pad_max)})"
     )
 
     # 2. Island by island.
-    print("\n2. ILE PAR ILE")
+    print("\n2. ISLAND BY ISLAND")
     for island, row in by_island.iterrows():
         pad = float(row["pad_pct"])
         print(
-            f"   Ile {str(island):<12} PAD {pad:6.1f}%   "
+            f"   Island {str(island):<9} PAD {pad:6.1f}%   "
             f"(obs {row['observed_ha']:9.1f} ha / sim {row['simulated_ha']:9.1f} ha, "
             f"{_verdict(pad, thresholds.subregional_pad_max)})"
         )
 
     # 3. Region by region: the per-region TOTAL rows of the sub-regional table.
-    print("\n3. REGION PAR REGION (7 sous-regions)")
+    print("\n3. REGION BY REGION (7 sub-regions)")
     totals = by_region[by_region.index.get_level_values("crop") == TOTAL]
     for (region, _crop), row in totals.iterrows():
         pad = float(row["pad_pct"])
@@ -84,29 +84,29 @@ def report(run_dir: Path) -> None:
     pad_farm = by_farm["pad_pct"].dropna()
     within = int(by_farm["within_threshold"].fillna(False).astype(bool).sum())
     evaluated = int(by_farm["pad_pct"].notna().sum())
-    print("\n4. EXPLOITATION PAR EXPLOITATION")
-    print(f"   Exploitations evaluees      : {evaluated}")
+    print("\n4. FARM BY FARM")
+    print(f"   Farms evaluated             : {evaluated}")
     print(
-        f"   PAD median / moyen          : {pad_farm.median():6.1f}% / {pad_farm.mean():6.1f}%"
+        f"   PAD median / mean           : {pad_farm.median():6.1f}% / {pad_farm.mean():6.1f}%"
     )
     print(
-        f"   Sous le seuil {thresholds.farm_pad_max:.0f}%          : "
+        f"   Under the {thresholds.farm_pad_max:.0f}% threshold    : "
         f"{within} / {evaluated}  ({100.0 * within / evaluated:4.1f}%)"
     )
     print(
-        f"   Quartiles PAD (25/50/75)    : "
+        f"   PAD quartiles (25/50/75)    : "
         f"{pad_farm.quantile(0.25):5.1f}% / {pad_farm.quantile(0.5):5.1f}% / "
         f"{pad_farm.quantile(0.75):5.1f}%"
     )
 
     # 5. Field by field: a match rate.
     total = field.loc[TOTAL]
-    print("\n5. PARCELLE PAR PARCELLE (taux de correspondance, pas un PAD)")
+    print("\n5. PLOT BY PLOT (agreement rate, not a PAD)")
     print(
-        f"   Parcelles bien simulees     : {total['plot_match_pct']:6.1f}%  "
+        f"   Plots correctly simulated   : {total['plot_match_pct']:6.1f}%  "
         f"({int(total['matched_plots'])} / {int(total['total_plots'])})"
     )
-    print(f"   Surface bien simulee        : {total['area_match_pct']:6.1f}%")
+    print(f"   Area correctly simulated    : {total['area_match_pct']:6.1f}%")
     print()
 
 

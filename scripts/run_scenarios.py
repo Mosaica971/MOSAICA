@@ -118,16 +118,16 @@ def _try_warm_start(model: Any, allocation: dict[str, str], origin: str) -> bool
             f"{name} ({amount:.4g})" for name, amount in violations[:_MAX_VIOLATIONS_SHOWN]
         )
         more = (
-            f" (+{len(violations) - _MAX_VIOLATIONS_SHOWN} autres)"
+            f" (+{len(violations) - _MAX_VIOLATIONS_SHOWN} more)"
             if len(violations) > _MAX_VIOLATIONS_SHOWN
             else ""
         )
         print(
-            f"    warm start depuis {origin} REJETE : {len(violations)} contrainte(s) "
-            f"violee(s) : {shown}{more} -> depart a froid"
+            f"    warm start from {origin} REJECTED: {len(violations)} constraint(s) "
+            f"violated: {shown}{more} -> cold start"
         )
         return False
-    print(f"    warm start depuis {origin} : {report.summary()}")
+    print(f"    warm start from {origin}: {report.summary()}")
     return True
 
 # Headline numbers pulled back out of each run's recap.json, so one batch summary answers
@@ -255,7 +255,7 @@ def run_scenarios(
     seed_allocation: dict[str, str] = {}
     if warm_start_from is not None:
         seed_allocation = read_allocation(warm_start_from)
-        print(f"Graine globale : {warm_start_from} ({len(seed_allocation)} parcelles)\n")
+        print(f"Global seed: {warm_start_from} ({len(seed_allocation)} plots)\n")
     policy_seeds: dict[str, dict[str, str]] = {}
     sweep_seeds: dict[tuple[Any, Any, Any], tuple[dict[str, str], str]] = {}
     for index, run_spec in enumerate(runs, start=1):

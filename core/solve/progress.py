@@ -111,7 +111,7 @@ def format_estimate(estimate: tuple[float, float, int] | None) -> str:
     if estimate is None:
         return ""
     low, high, count = estimate
-    basis = f"d'apres {count} run comparable" + ("s" if count > 1 else "")
+    basis = f"from {count} comparable run" + ("s" if count > 1 else "")
     # Collapsed to one number only when the spread is negligible, and then to the SLOW end:
     # an estimate that is read as a promise should err on the side of "longer".
     if high - low < 0.05 * max(high, 1.0):

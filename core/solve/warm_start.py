@@ -48,9 +48,9 @@ class WarmStartReport:
     plots_left_empty: int = 0
 
     def summary(self) -> str:
-        text = f"{self.assigned} paires placees, {self.plots_left_empty} parcelles laissees vides"
+        text = f"{self.assigned} pairs placed, {self.plots_left_empty} plots left empty"
         if self.dropped:
-            text += f", {len(self.dropped)} paires ignorees (non eligibles dans ce modele)"
+            text += f", {len(self.dropped)} pairs skipped (not eligible in this model)"
         return text
 
 

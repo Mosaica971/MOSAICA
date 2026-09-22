@@ -60,7 +60,7 @@ def test_a_threshold_move_on_a_constraint_off_both_sides_is_flagged_inert():
     summary = config_diff.summarise(left, right)
 
     assert summary["headline"]["retuned"] == []
-    assert "inactif" in summary["components"]["constraints"][0]["verdict"]
+    assert "inactive" in summary["components"]["constraints"][0]["verdict"]
 
 
 def test_a_constraint_present_on_one_side_only_is_not_silently_dropped():
@@ -88,7 +88,7 @@ def test_unchanged_components_are_kept_when_asked():
 
     rows = config_diff.diff_components(same, same, "constraints", changes_only=False)
 
-    assert [row["verdict"] for row in rows] == ["identique"]
+    assert [row["verdict"] for row in rows] == ["identical"]
 
 
 def test_scalars_are_compared_by_dotted_key_and_skip_component_lists():

@@ -15,7 +15,7 @@ def test_climate_margin_at_risk_is_margin_times_loss_fraction():
 
 
 def test_zero_variance_crop_carries_no_climate_risk():
-    """Prairies et jachere portent Var_Rdt = 0 dans les vraies donnees."""
+    """Grassland and fallow carry Var_Rdt = 0 in the real data."""
     margin = pd.Series({"PRAIRIE": 800.0})
     var_rdt = pd.Series({"PRAIRIE": 0.0})
 
@@ -56,7 +56,7 @@ def test_hhi_of_n_equal_crops_is_one_over_n():
 
 
 def test_hhi_ignores_zero_revenue_crops():
-    """Une culture a revenu nul ne doit pas diluer l'indice."""
+    """A zero-revenue crop must not dilute the index."""
     concentrated = pd.Series({"A": 1000.0})
     padded = pd.Series({"A": 1000.0, "B": 0.0, "C": 0.0})
 

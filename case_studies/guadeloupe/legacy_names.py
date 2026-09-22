@@ -136,6 +136,9 @@ LEGACY_NAMES: dict[str, str] = {
     "calib_retenu": "calib_selected",
     "calib_mo_fin_2017": "calib_fine_labor_2017",
     "mo_fin_observe": "fine_labor_observed",
+    # --- calibration CSV columns ----------------------------------------------------------
+    "type_observe": "observed_type",
+    "type_simule": "simulated_type",
     # --- farm-type labels (keys of calibration.farm_type_recall_by_type) -------------------
     "Non classe": "Unclassified",
     "Sans surface cultivee": "No cultivated area",

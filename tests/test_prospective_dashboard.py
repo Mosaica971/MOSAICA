@@ -97,17 +97,17 @@ def test_robustness_frame_exposes_one_row_per_policy():
         robustness.summarise_grid(grid, nominal_forcing="F0")
     )
     assert list(table.index) == ["P1", "P2"]
-    assert table.loc["P1", "Pire cas"] == 20.0
+    assert table.loc["P1", "Worst case"] == 20.0
 
 
 def test_robustness_frame_of_an_empty_grid_is_an_empty_table_not_a_crash():
     """Every policy filtered out is a legitimate state; `set_index` on a row-less frame has
-    no "Politique" column to find and used to raise a KeyError."""
+    no "Policy" column to find and used to raise a KeyError."""
     table = prospective.robustness_frame([])
 
     assert table.empty
-    assert table.index.name == "Politique"
-    assert "Pire cas" in table.columns
+    assert table.index.name == "Policy"
+    assert "Worst case" in table.columns
 
 
 # --- composite score corrections -----------------------------------------------

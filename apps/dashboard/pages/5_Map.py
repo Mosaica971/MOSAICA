@@ -24,20 +24,21 @@ from case_studies.guadeloupe.domain.zones import ISLAND_LABELS, REGION_LABELS
 
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"
 LAYER = _REPO_ROOT / RPG_LAYER
+ALL = "All"
 
-st.set_page_config(page_title="MOSAICA -- Carte", layout="wide")
-st.title("Carte des cultures")
+st.set_page_config(page_title="MOSAICA -- Map", layout="wide")
+st.title("Crop map")
 
 if not LAYER.exists():
     st.error(
-        f"Couche parcellaire absente : `{RPG_LAYER}`.\n\n"
-        "Cette page a besoin du dossier `data/gis/`, non versionné comme tout `data/`. "
-        "Copiez-le à la racine du dépôt."
+        f"Plot layer missing: `{RPG_LAYER}`.\n\n"
+        "This page needs the `data/gis/` folder, which, like all of `data/`, is not "
+        "versioned. Copy it to the repository root."
     )
     st.stop()
 
 
-@st.cache_resource(show_spinner="Lecture du parcellaire…")
+@st.cache_resource(show_spinner="Reading the plot layer…")
 def _geometry():
     """Polygons keyed by plot id, plus the plot attribute table.
 
@@ -47,21 +48,21 @@ def _geometry():
     from case_studies.guadeloupe.pipeline.data_pipeline import SETS_DIR, TABLES_DIR
     from core.data.readers import read_mapping_set, read_wide_table
 
-    parc = read_wide_table(TABLES_DIR / "Data_Parc_Gwad_2017.txt")
-    expl = read_mapping_set(SETS_DIR / "EXPL_PARC_2017.set", "farm", "plot")
-    join = build_geometry_join(parc, expl.set_index("plot")["farm"], LAYER)
-    return join, parc
+    plots = read_wide_table(TABLES_DIR / "Data_Parc_Gwad_2017.txt")
+    farms = read_mapping_set(SETS_DIR / "EXPL_PARC_2017.set", "farm", "plot")
+    join = build_geometry_join(plots, farms.set_index("plot")["farm"], LAYER)
+    return join, plots
 
 
-join, parc = _geometry()
+join, plots = _geometry()
 
 runs = loaders.list_output_runs(OUTPUTS_ROOT)
 if not runs:
-    st.info("Aucun run dans `outputs/` — lancez `python main.py` d'abord.")
+    st.info("No run in `outputs/` — run `python main.py` first.")
     st.stop()
 
 with st.sidebar:
-    st.header("Carte")
+    st.header("Map")
     labels: dict[str, Path] = {}
     for run_dir_candidate in runs:
         try:
@@ -76,34 +77,34 @@ with st.sidebar:
     chosen_name = st.selectbox("Run", list(labels), index=0)
     run_dir = labels[chosen_name]
 
-    island_codes = sorted(parc["ILE"].dropna().unique().tolist())
+    island_codes = sorted(plots["ILE"].dropna().unique().tolist())
     island = st.selectbox(
-        "Île", ["Toutes", *island_codes],
-        format_func=lambda v: v if v == "Toutes" else ISLAND_LABELS.get(str(int(v)), str(v)),
+        "Island", [ALL, *island_codes],
+        format_func=lambda v: v if v == ALL else ISLAND_LABELS.get(str(int(v)), str(v)),
     )
-    region_codes = sorted(parc["REGION"].dropna().unique().tolist())
+    region_codes = sorted(plots["REGION"].dropna().unique().tolist())
     region = st.selectbox(
-        "Région", ["Toutes", *region_codes],
-        format_func=lambda v: v if v == "Toutes" else REGION_LABELS.get(str(int(v)), str(v)),
+        "Region", [ALL, *region_codes],
+        format_func=lambda v: v if v == ALL else REGION_LABELS.get(str(int(v)), str(v)),
     )
     view = st.radio(
-        "Vue", ("Observé vs simulé", "Ce qui a changé"), index=0,
-        help="La seconde vue répond à une question que deux mosaïques côte à côte ne "
-        "permettent pas de lire : quelles parcelles ont changé d'usage.",
+        "View", ("Observed vs simulated", "What changed"), index=0,
+        help="The second view answers a question two mosaics side by side cannot: which "
+        "plots changed use.",
     )
-    outlines = st.checkbox("Contours des parcelles", value=False)
+    outlines = st.checkbox("Plot outlines", value=False)
 
-st.caption(f"Jointure parcellaire : {join.summary(len(parc))}")
+st.caption(f"Plot join: {join.summary(len(plots))}")
 
-selected = set(parc.index)
-if island != "Toutes":
-    selected &= set(parc.index[parc["ILE"] == island])
-if region != "Toutes":
-    selected &= set(parc.index[parc["REGION"] == region])
+selected = set(plots.index)
+if island != ALL:
+    selected &= set(plots.index[plots["ILE"] == island])
+if region != ALL:
+    selected &= set(plots.index[plots["REGION"] == region])
 
 polygons = maps.filter_polygons(join.polygons, selected)
 if not polygons:
-    st.warning("Aucune parcelle localisée pour cette sélection.")
+    st.warning("No located plot for this selection.")
     st.stop()
 bounds = maps.shared_bounds(polygons)
 
@@ -117,50 +118,49 @@ def _allocation(side: str) -> dict[str, str]:
 
 observed, simulated = _allocation("input"), _allocation("output")
 if not observed and not simulated:
-    st.warning(f"{run_dir.name} ne contient pas d'allocation exploitable.")
+    st.warning(f"{run_dir.name} holds no usable allocation.")
     st.stop()
 
-if view == "Observé vs simulé":
+if view == "Observed vs simulated":
     left, right = st.columns(2)
     with left:
         st.pyplot(maps.build_map_figure(
-            polygons, observed, title="Observé 2017",
+            polygons, observed, title="Observed 2017",
             bounds=bounds, edge_width=0.15 if outlines else 0.0,
         ))
     with right:
         st.pyplot(maps.build_map_figure(
-            polygons, simulated, title=f"Simulé — {chosen_name}",
+            polygons, simulated, title=f"Simulated — {chosen_name}",
             bounds=bounds, edge_width=0.15 if outlines else 0.0,
         ))
     st.caption(
-        "Même cadre et même palette des deux côtés : une couleur désigne le même groupe de "
-        "cultures sur les deux cartes. Le gris clair est la terre non allouée."
+        "Same frame and same palette on both sides: a colour means the same crop group on "
+        "both maps. Light grey is unallocated land."
     )
 else:
     st.pyplot(maps.build_change_figure(
         polygons, observed, simulated,
-        title=f"Changement d'usage — {chosen_name}", bounds=bounds,
+        title=f"Land-use change — {chosen_name}", bounds=bounds,
     ))
     st.caption(
-        "Comparaison au niveau des 12 groupes RPG observés : une parcelle qui passe d'une "
-        "variante technique à une autre du même groupe compte comme inchangée, faute de "
-        "résolution plus fine côté observé."
+        "Compared at the level of the 12 observed RPG groups: a plot moving from one technical "
+        "variant to another within the same group counts as unchanged, for lack of a finer "
+        "resolution on the observed side."
     )
 
 st.warning(
-    "**Ce que cette carte ne dit pas.** Le jeu parcellaire du modèle et la couche SIG n'ont "
-    "pas d'identifiant commun : la jointure est reconstruite par signature d'exploitation "
-    "(commune + surface). Elle place 99,4 % des parcelles, mais environ 1 557 d'entre elles "
-    "partagent commune ET surface avec une voisine de la même exploitation et peuvent avoir "
-    "été interverties. Les lectures territoriales et régionales sont fiables ; **une parcelle "
-    "isolée ne fait pas preuve**."
+    "**What this map does not say.** The model's plot set and the GIS layer share no "
+    "identifier: the join is rebuilt from a farm signature (commune + area). It places 99.4 % "
+    "of plots, but about 1 557 of them share commune AND area with a neighbour of the same "
+    "farm and may have been swapped. Territorial and regional readings are reliable; **a "
+    "single plot proves nothing**."
 )
 
-with st.expander("Répartition des surfaces localisées"):
-    surface = parc.loc[list(polygons), "SURF_HA"]
+with st.expander("Breakdown of located areas"):
+    surface = plots.loc[list(polygons), "SURF_HA"]
     table = pd.DataFrame({
-        "parcelles": [len(polygons)],
-        "surface (ha)": [round(float(surface.sum()), 1)],
-        "surface médiane (ha)": [round(float(surface.median()), 2)],
+        "plots": [len(polygons)],
+        "area (ha)": [round(float(surface.sum()), 1)],
+        "median area (ha)": [round(float(surface.median()), 2)],
     })
     st.dataframe(table, width="stretch", hide_index=True)

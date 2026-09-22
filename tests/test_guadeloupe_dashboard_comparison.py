@@ -260,8 +260,8 @@ _RESILIENCE_KEYS = (
 
 
 def test_resilience_indicators_are_selectable_in_the_dashboard_picker():
-    """Garde-fou: etre dans INDICATOR_DIRECTION ne suffit PAS a atteindre le score
-    composite -- c'est l'appartenance a _INDICATOR_LABELS qui rend un indicateur
+    """Guard: being in INDICATOR_DIRECTION is NOT enough to reach the composite
+    score -- it is membership of _INDICATOR_LABELS that makes an indicator
     selectionnable. La spec 1 a livre 4 indicateurs en code mort faute de ce test."""
     import importlib
 
@@ -269,7 +269,7 @@ def test_resilience_indicators_are_selectable_in_the_dashboard_picker():
         "apps.dashboard.pages.2_Comparison"
     )
     for key in _RESILIENCE_KEYS:
-        assert key in page._INDICATOR_LABELS, f"{key} absent du selecteur"
+        assert key in page._INDICATOR_LABELS, f"{key} missing from the selector"
 
 
 def test_resilience_indicators_have_a_composite_direction():

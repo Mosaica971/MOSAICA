@@ -1,4 +1,4 @@
-plot,farm,region,island,commune,surface_ha,cult_2016_code,cult_2017_code,raw_group,resolved_group,representative_crop,cultivated
+plot,farm,region,island,commune,surface_ha,code_cult_2016,code_cult_2017,groupe_brut,groupe_resolu,culture_representante,cultive
 P1,E1,3,2,97102,3.68,6,6,CS,CS,CS_NGT_NISM,True
 P2,E1,3,2,97102,3.3,6,6,CS,CS,CS_NGT_NISM,True
 P3,E1,3,2,97102,1.36,10,6,CS,CS,CS_NGT_NISM,True

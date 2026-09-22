@@ -11,7 +11,7 @@ _RPG_CODE_TO_BASE_GROUP: dict[int, str] = {
 }
 
 # context/gams/ENTREES.txt:49-57 -- if a plot's cult_2016 and cult_2017
-# are both in this set, cult_2017 is forced to 14 (Non cultivé) before mapping. The
+# are both in this set, cult_2017 is forced to 14 (not cultivated) before mapping. The
 # source's own comment describes a 3-year (cult_2015/2016/2017) rule, but the
 # cult_2015 clause of the actual IF condition is commented out (`*` in column 1) --
 # only cult_2016/cult_2017 are checked by the code that actually runs.

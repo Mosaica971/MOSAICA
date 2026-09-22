@@ -146,4 +146,4 @@ def test_the_shipped_manifest_declares_expectations_for_both_calibrations():
     for key in ("gams_parity", "retained"):
         assert declared[key].expect, f"{key} doit porter un bloc expect:"
         assert "calibration.regional_pad_pct" in declared[key].expect
-        assert declared[key].tolerance_pct >= 2.5, "sous le bruit de solveur mesuré"
+        assert declared[key].tolerance_pct >= 2.5, "below the measured solver noise"

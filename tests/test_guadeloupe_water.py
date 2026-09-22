@@ -6,7 +6,7 @@ from case_studies.guadeloupe.domain import water
 def _crop_data() -> pd.DataFrame:
     """Data_Cult miniature: lignes = attributs, colonnes = cultures (comme la vraie table)."""
     rows = {f"BESOIN_EAU_{m:02d}": [10.0 * m, 0.0] for m in range(1, 13)}
-    rows["KCROP"] = [0.9, 0.5]  # ligne non liée à l'eau, doit être ignorée
+    rows["KCROP"] = [0.9, 0.5]  # row unrelated to water, must be ignored
     return pd.DataFrame(rows, index=["CROP_A", "CROP_B"]).T
 
 
@@ -35,5 +35,5 @@ def test_annual_water_need_sums_the_twelve_months():
 
 
 def test_m3_conversion_constant_is_ten():
-    """1 mm sur 1 ha = 10 m3. Le GAMS omet ce facteur (OPTIMISATION.txt:2559)."""
+    """1 mm over 1 ha = 10 m3. GAMS omits this factor (OPTIMISATION.txt:2559)."""
     assert water.M3_PER_MM_PER_HA == 10.0

@@ -50,7 +50,7 @@ def build_zone_filter_from_args(args: argparse.Namespace) -> dict[str, Any] | No
 def disable_territory_bounds(config: dict[str, Any]) -> dict[str, Any]:
     """Drop territory_production_bound constraints (whole-Guadeloupe quotas that a
     zone_filter subset can't satisfy -- see docs/04-vigilance.md's "zone_filter ne
-    redimensionne pas les quotas territoriaux"). Only meant for profiling runs."""
+    redimensionne pas les quotas territoriaux", i.e. the territorial quotas are not rescaled). Only meant for profiling runs."""
     return {
         **config,
         "constraints": [

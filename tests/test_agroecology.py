@@ -63,7 +63,7 @@ def test_organic_operations_are_all_genuine_data_otk_rows():
 
     rows = set(read_wide_table(TABLES_DIR / "Data_OTK.txt").index)
     missing = [op for op in ORGANIC_OPERATIONS if op not in rows]
-    assert not missing, f"opérations absentes de Data_OTK : {missing}"
+    assert not missing, f"operations missing from Data_OTK: {missing}"
 
 
 def test_the_two_agroecology_families_are_separate_in_the_dashboard():

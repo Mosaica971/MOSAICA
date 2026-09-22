@@ -5,7 +5,7 @@ from case_studies.guadeloupe.domain import soil_carbon
 
 
 def _crop_data() -> pd.DataFrame:
-    """CROP_HIGH: gros producteur de résidus. CROP_LOW: quasi rien."""
+    """CROP_HIGH: a large residue producer. CROP_LOW: almost none."""
     return pd.DataFrame(
         {
             "BIOM_AER": [10.0, 1.0],
@@ -19,10 +19,10 @@ def _crop_data() -> pd.DataFrame:
 
 
 def _data_sol() -> pd.DataFrame:
-    """Colonnes dans l'ordre de la vraie table, DIFFERENT de l'ordre TYPE_SOL 1..5.
-    DENS reprend les vraies valeurs de data/tables/Data_Sol.txt (elles different toutes
-    d'un sol a l'autre) precisement pour qu'une indexation par position -- au lieu de
-    par nom -- fasse echouer les tests qui en dependent."""
+    """Columns in the order of the real table, DIFFERENT from the TYPE_SOL 1..5 order.
+    DENS takes the real values of data/tables/Data_Sol.txt (they all differ from one soil to
+    the next) precisely so that indexing by position -- instead of by name -- makes the tests
+    that depend on it fail."""
     return pd.DataFrame(
         {
             "NITISOL": [0.10, 0.9, 0.25, 3.0],
@@ -50,19 +50,19 @@ def _data_otk() -> pd.DataFrame:
 
 
 def _matrice() -> pd.DataFrame:
-    """Lignes = opérations ITK, colonnes = cultures."""
+    """Rows = ITK operations, columns = crops."""
     return pd.DataFrame(
         {"CROP_HIGH": [1.0, 1.0], "CROP_LOW": [0.0, 1.0]}, index=["COMPOST", "UREE"]
     )
 
 
 def test_type_sol_mapping_matches_gams_order_not_table_order():
-    """OPTIMISATION.txt:2880-2896. L'ordre des colonnes de Data_Sol est DIFFERENT --
-    indexer par position donnerait des coefficients faux mais plausibles."""
+    """OPTIMISATION.txt:2880-2896. The column order of Data_Sol is DIFFERENT -- indexing by
+    position would give wrong but plausible coefficients."""
     assert soil_carbon.TYPE_SOL_TO_SOIL_NAME == {
         1: "VERTISOL", 2: "FERRALSOL", 3: "ANDOSOL", 4: "NITISOL", 5: "AUTRES",
     }
-    # Garde-fou explicite: la position 1 de Data_Sol est NITISOL, pas VERTISOL.
+    # Explicit guard: position 1 of Data_Sol is NITISOL, not VERTISOL.
     assert list(_data_sol().columns)[0] == "NITISOL"
     assert soil_carbon.TYPE_SOL_TO_SOIL_NAME[1] == "VERTISOL"
 
@@ -94,7 +94,7 @@ def test_initial_soil_carbon_maps_soil_type_by_name():
 
 
 def test_mineralization_uses_the_plot_soil_kaer_not_a_fixed_one():
-    """Le test qui attrape un mapping par position: P1 (VERTISOL, KAER .50) et
+    """The test that catches a by-position mapping: P1 (VERTISOL, KAER .50) et
     P2 (NITISOL, KAER .10) doivent differer d'un facteur 5."""
     allocation = pd.Series(["CROP_HIGH", "CROP_HIGH"], index=["P1", "P2"])
     initial = pd.Series([100.0, 100.0], index=["P1", "P2"])
@@ -107,7 +107,7 @@ def test_mineralization_uses_the_plot_soil_kaer_not_a_fixed_one():
 
 
 def test_carbon_balance_drops_when_switching_to_a_low_residue_crop():
-    """Entrees - sorties. Meme parcelle, meme sol: seule la culture change."""
+    """Inputs - outputs. Same plot, same soil: only the crop changes."""
     plot_data, soil_data, crop_data = _plot_data(), _data_sol(), _crop_data()
     operation_data, matrice = _data_otk(), _matrice()
 

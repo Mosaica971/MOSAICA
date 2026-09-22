@@ -174,10 +174,10 @@ def build_front_figure(
 
     if front:
         ax.plot([p.x for p in front], [p.y for p in front],
-                marker="o", color="#1f77b4", linewidth=2, zorder=3, label="Front (non dominé)")
+                marker="o", color="#1f77b4", linewidth=2, zorder=3, label="Front (non-dominated)")
     if dominated:
         ax.scatter([p.x for p in dominated], [p.y for p in dominated],
-                   color="0.7", marker="x", zorder=2, label="Dominé (solve suspect)")
+                   color="0.7", marker="x", zorder=2, label="Dominated (suspect solve)")
     for point in points:
         ax.annotate(
             # The LAST segment is the swept value -- `rsplit`, not `split`: a front traced

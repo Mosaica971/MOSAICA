@@ -1,0 +1,142 @@
+{
+  "univers": {
+    "parcelles": 24734,
+    "exploitations": 4638,
+    "surface_totale_ha": 26136.660000000003,
+    "surface_cultivee_ha": 23577.99,
+    "surface_non_cultivee_ha": 2558.67,
+    "parcelles_cultivees": 22197,
+    "exploitations_cultivees": 4588,
+    "annee_economique": "2017",
+    "scenario_economique": "RESTIT",
+    "zone_filter": null,
+    "cultures_representantes": {
+      "AN": "AN_NU",
+      "BA": "BA_INT",
+      "BC": "BC_BT",
+      "CS": "CS_NGT_NISM",
+      "IG": "IG_PLA",
+      "MA": "MA_ROTA",
+      "PN": "PN_PIQ",
+      "VE": "VE_BTGT"
+    }
+  },
+  "assolement_observe_ha": {
+    "AG": 100.84,
+    "AN": 132.67000000000002,
+    "BA": 1920.8,
+    "BC": 147.21,
+    "CS": 12812.93,
+    "IG": 145.42,
+    "JA": 621.47,
+    "MA": 1086.97,
+    "ME": 189.36,
+    "PN": 6109.43,
+    "VE": 310.89
+  },
+  "reclassement_jachere_vers_nc_ha": 1208.1299999999999,
+  "types_exploitation": {
+    "Sans surface cultivee": 50,
+    "Arboriculteurs": 67,
+    "Bananiers": 146,
+    "Canniers specialises": 1371,
+    "Canniers diversifies": 862,
+    "Diversifies": 282,
+    "Eleveurs": 1047,
+    "Maraichers": 216,
+    "Canniers-eleveurs": 597
+  },
+  "plancher_pad_pct": 1.475401423106889,
+  "surface_irreproductible_ha": 347.87,
+  "parcelles_sans_variante_eligible": 482,
+  "representante_eligible_pct": {
+    "AG": 48.04641015470052,
+    "AN": 92.26652596668424,
+    "BA": 68.6625364431487,
+    "BC": 63.1818490591672,
+    "CS": 31.372683687493804,
+    "IG": 71.00811442717645,
+    "JA": 100.0,
+    "MA": 61.006283522084324,
+    "ME": 99.99999999999999,
+    "PN": 100.0,
+    "VE": 46.22535301875261
+  },
+  "indicateurs": {
+    "production_tonnes": {
+      "central": 722093.5048000001,
+      "bas": 704784.1048,
+      "haut": 912863.5828
+    },
+    "sales": {
+      "central": 160789070.24170667,
+      "bas": 103332142.10674667,
+      "haut": 152958846.21602666
+    },
+    "subsidy": {
+      "central": 68977158.52548571,
+      "bas": 48207434.10214858,
+      "haut": 72059977.74952
+    },
+    "revenue": {
+      "central": 229766228.7671924,
+      "bas": 151671857.47089523,
+      "haut": 224765879.34804666
+    },
+    "gross_margin": {
+      "central": 87558952.47521858,
+      "bas": 50840298.529674865,
+      "haut": 93187837.82502303
+    },
+    "labor_hours": {
+      "central": 6252739.71127381,
+      "bas": 3785525.2167499997,
+      "haut": 6195233.294278408
+    },
+    "azote": {
+      "central": 2065681.7056666669,
+      "bas": 1315420.933666667,
+      "haut": 1914715.928666667
+    },
+    "ges": {
+      "central": 178071029.99552476,
+      "bas": 137166566.5756473,
+      "haut": 172946068.01173228
+    },
+    "ift": {
+      "central": 68133.19647619048,
+      "bas": 42224.64647619047,
+      "haut": 65834.83433333333
+    },
+    "etp": {
+      "central": 3890.9394594112073,
+      "bas": null,
+      "haut": null
+    },
+    "labor_cost": {
+      "central": 96917465.52474405,
+      "bas": null,
+      "haut": null
+    },
+    "net_revenue": {
+      "central": -9358513.04952547,
+      "bas": null,
+      "haut": null
+    },
+    "surface_cld": {
+      "central": 691.49,
+      "bas": null,
+      "haut": null
+    },
+    "water_need_m3": {
+      "central": 35629950.0,
+      "bas": null,
+      "haut": null
+    },
+    "soil_carbon_balance": {
+      "central": -11836.919108310416,
+      "bas": null,
+      "haut": null
+    }
+  }
+}

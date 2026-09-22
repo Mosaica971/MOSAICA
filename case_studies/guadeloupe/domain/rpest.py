@@ -25,8 +25,9 @@ The method is a fuzzy decision tree, in three stages:
 
 TWO FAITHFUL-PORT NOTES, both visible in the GAMS and neither corrected here:
 
-* the per-crop averages are described in the source as "pondérée par les quantités de
-  produits phytosanitaires utilisés", but the algebra cancels the weights: numerator and
+* the per-crop averages are described in the source as "weighted by the quantities of
+  plant-protection products used" ("pondérée par les quantités de produits
+  phytosanitaires utilisés"), but the algebra cancels the weights: numerator and
   denominator carry the same annualised dose, so each term reduces to the property itself and
   the sum over operations is a **plain sum of the property over the operations the crop
   uses**, not a dose-weighted mean. A crop performing many small treatments therefore scores

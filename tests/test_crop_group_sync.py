@@ -2,7 +2,7 @@
 
 The prospective specs no longer hold a copy at all -- `crop_groups.yaml` is a catalogue
 resolved against `config.yaml`'s `crop_families` at load time (`core.config.load_batch_spec`),
-so `{group: canne}` cannot diverge from the family it aliases. What remains to guard:
+so `{group: sugarcane}` cannot diverge from the family it aliases. What remains to guard:
 
   * `scenarios.yaml` still carries a hand-copied `_crop_groups` block, because its YAML
     anchors live inside one file and never needed a catalogue. That copy CAN drift;
@@ -25,7 +25,7 @@ CATALOGUE = Path("case_studies/guadeloupe/crop_groups.yaml")
 
 # Scenario group name -> the config.yaml crop_families key it must mirror. Only the groups
 # that genuinely duplicate a config family are listed; a scenario is free to define groups
-# of its own (organic_market_gardening, vivrier, intensive_sugarcane) that have no config counterpart.
+# of its own (organic_market_gardening, food_crops, intensive_sugarcane) that have no config counterpart.
 _MIRRORED = {
     "export_banana": "ban_ex",
     "sugarcane": "cs",
@@ -57,8 +57,8 @@ def test_scenario_crop_groups_match_the_config_families():
         if scenario_name not in scenario_groups:
             continue
         assert scenario_groups[scenario_name] == families[config_name], (
-            f"scenarios.yaml : le groupe '{scenario_name}' a divergé de "
-            f"crop_families.{config_name} dans config.yaml"
+            f"scenarios.yaml: group '{scenario_name}' has drifted from "
+            f"crop_families.{config_name} in config.yaml"
         )
 
 
@@ -70,7 +70,7 @@ def test_catalogue_aliases_resolve_to_the_config_family_they_name():
     for alias, family in _MIRRORED.items():
         if alias in catalogue:
             assert catalogue[alias] == families[family], (
-                f"crop_groups.yaml : l'alias '{alias}' ne pointe pas sur "
+                f"crop_groups.yaml: alias '{alias}' does not point at "
                 f"crop_families.{family}"
             )
 
@@ -83,7 +83,7 @@ def test_every_declared_crop_code_belongs_to_a_known_family(spec_path):
             try:
                 base_group_for(crop)
             except KeyError:  # pragma: no cover - the assertion carries the message
-                pytest.fail(f"{spec_path.name}: '{crop}' ({group_name}) n'a pas de famille connue")
+                pytest.fail(f"{spec_path.name}: '{crop}' ({group_name}) has no known family")
 
 
 def test_every_catalogue_crop_code_belongs_to_a_known_family():
@@ -92,7 +92,7 @@ def test_every_catalogue_crop_code_belongs_to_a_known_family():
             try:
                 base_group_for(crop)
             except KeyError:  # pragma: no cover - the assertion carries the message
-                pytest.fail(f"crop_groups.yaml: '{crop}' ({group_name}) n'a pas de famille connue")
+                pytest.fail(f"crop_groups.yaml: '{crop}' ({group_name}) has no known family")
 
 
 def test_scenario_crop_codes_exist_in_the_crop_universe():
@@ -109,4 +109,4 @@ def test_scenario_crop_codes_exist_in_the_crop_universe():
     for origin, groups in checked.items():
         for group_name, crops in groups.items():
             unknown = [c for c in crops if c not in universe]
-            assert not unknown, f"{origin} / {group_name}: codes inconnus {unknown}"
+            assert not unknown, f"{origin} / {group_name}: unknown codes {unknown}"

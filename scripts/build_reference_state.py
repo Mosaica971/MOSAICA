@@ -28,6 +28,9 @@ Four things make this more than a group-by, and each has its own CSV:
 4. THE FARM TYPOLOGY. The observed TYPE_EXPL distribution is the row-marginal of every
    confusion matrix, and it also fixes each farm's risk aversion, so it is part of the
    reference state and not a result.
+
+The column and key names were translated to English on 2026-09-22. A copy of the last
+French-keyed folder is kept in outputs/_legacy_reference_2017_fr/ for the thesis tooling.
 """
 
 from __future__ import annotations
@@ -60,25 +63,23 @@ from scripts._common import CONFIG_PATH, OUTPUTS_ROOT, format_number as _n
 
 DEFAULT_DIR_NAME = "reference_2017"
 
-# Readable names for the 12 observed RPG groups (ENTREES.txt:62-103). ASCII only, like
-# crop_labels.py: these reach a markdown file that carries no accents.
+# Readable names for the 12 observed RPG groups (ENTREES.txt:62-103).
 GROUP_LABELS: dict[str, str] = {
-    "AG": "Agrumes",
-    "AN": "Ananas",
-    "BA": "Banane export",
-    "BC": "Banane plantain",
-    "CS": "Canne a sucre",
-    "IG": "Igname et tubercules",
-    "JA": "Jachere",
-    "MA": "Maraichage",
+    "AG": "Citrus",
+    "AN": "Pineapple",
+    "BA": "Export banana",
+    "BC": "Plantain",
+    "CS": "Sugarcane",
+    "IG": "Yam and tubers",
+    "JA": "Fallow",
+    "MA": "Market gardening",
     "ME": "Melon",
-    "NC": "Non cultive",
-    "PN": "Prairies et savanes",
-    "VE": "Vergers hors agrumes",
+    "NC": "Not cultivated",
+    "PN": "Grassland and savannah",
+    "VE": "Orchards excluding citrus",
 }
 
-# Per-ha rates bracketed below. Each entry is (metric name, dataset parameter or None for a
-# metric derived in _metric_rates).
+# Per-ha rates bracketed below (see _metric_rates for where each comes from).
 _BRACKETED_METRICS = (
     "production_tonnes",
     "sales",
@@ -109,20 +110,19 @@ def _resolved_groups(plot_data: pd.DataFrame) -> pd.Series:
 
 
 def _surface_and_count(surface: pd.Series, groups: pd.Series) -> pd.DataFrame:
-    frame = pd.DataFrame(
+    return pd.DataFrame(
         {
             "surface_ha": surface.reindex(groups.index).groupby(groups).sum(),
-            "parcelles": groups.groupby(groups).size(),
+            "plots": groups.groupby(groups).size(),
         }
     )
-    return frame
 
 
 def land_use_table(dataset: Dataset) -> pd.DataFrame:
     """Observed acreage per RPG group, in the two readings plus the cultivated reference.
 
-    `retenu_ha` is what the PAD is computed against: the resolved reading minus NC, since a
-    non-cultivated plot is not part of any crop's acreage on either side.
+    `reference_ha` is what the PAD is computed against: the resolved reading minus NC, since
+    a non-cultivated plot is not part of any crop's acreage on either side.
     """
     plot_data = dataset.parameters["plot_data"]
     surface = plot_data["SURF_HA"]
@@ -131,18 +131,20 @@ def land_use_table(dataset: Dataset) -> pd.DataFrame:
 
     frame = pd.DataFrame(
         {
-            "libelle": pd.Series(GROUP_LABELS),
-            "brut_ha": raw["surface_ha"],
-            "raw_plots": raw["parcelles"],
-            "resolu_ha": resolved["surface_ha"],
-            "resolved_plots": resolved["parcelles"],
+            "label": pd.Series(GROUP_LABELS),
+            "raw_ha": raw["surface_ha"],
+            "raw_plots": raw["plots"],
+            "resolved_ha": resolved["surface_ha"],
+            "resolved_plots": resolved["plots"],
         }
-    ).fillna({"brut_ha": 0.0, "raw_plots": 0, "resolu_ha": 0.0, "resolved_plots": 0})
-    frame["ecart_resolution_ha"] = frame["resolu_ha"] - frame["brut_ha"]
-    frame["retenu_ha"] = frame["resolu_ha"].where(frame.index != crop_families.NON_CULTIVATED, 0.0)
-    cultivated = float(frame["retenu_ha"].sum())
-    frame["part_cultive_pct"] = 100.0 * frame["retenu_ha"] / cultivated
-    frame.index.name = "groupe"
+    ).fillna({"raw_ha": 0.0, "raw_plots": 0, "resolved_ha": 0.0, "resolved_plots": 0})
+    frame["resolution_gap_ha"] = frame["resolved_ha"] - frame["raw_ha"]
+    frame["reference_ha"] = frame["resolved_ha"].where(
+        frame.index != crop_families.NON_CULTIVATED, 0.0
+    )
+    cultivated = float(frame["reference_ha"].sum())
+    frame["cultivated_share_pct"] = 100.0 * frame["reference_ha"] / cultivated
+    frame.index.name = "group"
     return frame.sort_index()
 
 
@@ -152,10 +154,10 @@ def surface_by_group_and_key(
     """Cultivated reference acreage pivoted as key x group, with row and column totals."""
     surface = dataset.parameters["plot_data"]["SURF_HA"].reindex(groups.index)
     frame = pd.DataFrame(
-        {key_name: key.reindex(groups.index), "groupe": groups, "surface_ha": surface}
+        {key_name: key.reindex(groups.index), "group": groups, "surface_ha": surface}
     )
     pivot = frame.pivot_table(
-        index=key_name, columns="groupe", values="surface_ha", aggfunc="sum", fill_value=0.0
+        index=key_name, columns="group", values="surface_ha", aggfunc="sum", fill_value=0.0
     )
     pivot["TOTAL"] = pivot.sum(axis=1)
     pivot.loc["TOTAL"] = pivot.sum(axis=0)
@@ -174,14 +176,14 @@ def farm_typology_table(dataset: Dataset) -> pd.DataFrame:
 
     frame = pd.DataFrame(
         {
-            "exploitations": farm_type.groupby(farm_type).size(),
+            "farms": farm_type.groupby(farm_type).size(),
             "surface_ha": farm_surface.reindex(farm_type.index).groupby(farm_type).sum(),
-            "avers_min": aversion.groupby(farm_type).min(),
-            "avers_max": aversion.groupby(farm_type).max(),
+            "aversion_min": aversion.groupby(farm_type).min(),
+            "aversion_max": aversion.groupby(farm_type).max(),
         }
     )
-    frame.insert(0, "libelle", pd.Series({code: FARM_TYPE_LABELS[code] for code in frame.index}))
-    frame["farm_share_pct"] = 100.0 * frame["exploitations"] / frame["exploitations"].sum()
+    frame.insert(0, "label", pd.Series({code: FARM_TYPE_LABELS[code] for code in frame.index}))
+    frame["farm_share_pct"] = 100.0 * frame["farms"] / frame["farms"].sum()
     frame.index.name = "farm_type"
     return frame
 
@@ -202,14 +204,14 @@ def reference_allocation(dataset: Dataset, config: dict[str, Any]) -> pd.DataFra
             "island": plot_data["ILE"].to_numpy(),
             "commune": plot_data["COMMUNE"].to_numpy(),
             "surface_ha": plot_data["SURF_HA"].to_numpy(),
-            "code_cult_2016": plot_data["cult_2016"].to_numpy(),
-            "code_cult_2017": plot_data["cult_2017"].to_numpy(),
-            "groupe_brut": _raw_groups(plot_data).to_numpy(),
-            "groupe_resolu": resolved.to_numpy(),
-            "culture_representante": representative.reindex(plot_data.index).to_numpy(),
+            "cult_2016_code": plot_data["cult_2016"].to_numpy(),
+            "cult_2017_code": plot_data["cult_2017"].to_numpy(),
+            "raw_group": _raw_groups(plot_data).to_numpy(),
+            "resolved_group": resolved.to_numpy(),
+            "representative_crop": representative.reindex(plot_data.index).to_numpy(),
         }
     )
-    frame["cultive"] = frame["groupe_resolu"] != crop_families.NON_CULTIVATED
+    frame["cultivated"] = frame["resolved_group"] != crop_families.NON_CULTIVATED
     return frame
 
 
@@ -259,19 +261,19 @@ def reproducibility_table(dataset: Dataset, config: dict[str, Any]) -> pd.DataFr
             reproducible = pd.Series(False, index=plots)
         rows.append(
             {
-                "groupe": group,
-                "libelle": GROUP_LABELS.get(group, group),
-                "variantes_fines": len(candidates),
-                "observe_ha": float(surface[plots].sum()),
+                "group": group,
+                "label": GROUP_LABELS.get(group, group),
+                "fine_variants": len(candidates),
+                "observed_ha": float(surface[plots].sum()),
                 "observed_plots": int(len(plots)),
-                "reproductible_ha": float(surface[plots][reproducible].sum()),
+                "reproducible_ha": float(surface[plots][reproducible].sum()),
                 "reproducible_plots": int(reproducible.sum()),
             }
         )
 
-    frame = pd.DataFrame(rows).set_index("groupe")
-    frame["irreproductible_ha"] = frame["observe_ha"] - frame["reproductible_ha"]
-    frame["part_reproductible_pct"] = 100.0 * frame["reproductible_ha"] / frame["observe_ha"]
+    frame = pd.DataFrame(rows).set_index("group")
+    frame["irreproducible_ha"] = frame["observed_ha"] - frame["reproducible_ha"]
+    frame["reproducible_share_pct"] = 100.0 * frame["reproducible_ha"] / frame["observed_ha"]
     return frame
 
 
@@ -304,19 +306,19 @@ def representative_eligibility_table(
         eligible = mask.loc[plots, representative] if representative in mask.columns else False
         rows.append(
             {
-                "groupe": group,
-                "representante": representative,
-                "observe_ha": float(surface[plots].sum()),
-                "representante_eligible_ha": float(surface[plots][eligible].sum()),
+                "group": group,
+                "representative": representative,
+                "observed_ha": float(surface[plots].sum()),
+                "representative_eligible_ha": float(surface[plots][eligible].sum()),
                 "representative_margin_eur_ha": float(
                     dataset.parameters["crop_margin_per_ha"].get(representative, float("nan"))
                 ),
             }
         )
 
-    frame = pd.DataFrame(rows).set_index("groupe")
-    frame["part_eligible_pct"] = (
-        100.0 * frame["representante_eligible_ha"] / frame["observe_ha"]
+    frame = pd.DataFrame(rows).set_index("group")
+    frame["eligible_share_pct"] = (
+        100.0 * frame["representative_eligible_ha"] / frame["observed_ha"]
     )
     return frame
 
@@ -385,7 +387,7 @@ def _bracket_totals(
             low[metric] += float(np.nansum(np.nanmin(values, axis=1) * plot_surface))
             high[metric] += float(np.nansum(np.nanmax(values, axis=1) * plot_surface))
 
-    return {"bas": low, "haut": high}, fallback_plots
+    return {"low": low, "high": high}, fallback_plots
 
 
 def indicator_table(dataset: Dataset, config: dict[str, Any]) -> tuple[pd.DataFrame, int]:
@@ -420,26 +422,26 @@ def indicator_table(dataset: Dataset, config: dict[str, Any]) -> tuple[pd.DataFr
         "gross_margin": "EUR",
         "labor_hours": "h",
         "nitrogen": "kg N",
-        "ghg": "t CO2 (magnitude, cf. VIGILANCE)",
-        "tfi": "IFT.ha",
+        "ghg": "t CO2 (magnitude, see docs/04-vigilance.md)",
+        "tfi": "TFI.ha",
     }
 
     frame = pd.DataFrame(
         {
-            "unite": pd.Series(units),
+            "unit": pd.Series(units),
             "central": pd.Series(central),
-            "bas": pd.Series(bracket["bas"]),
-            "haut": pd.Series(bracket["haut"]),
+            "low": pd.Series(bracket["low"]),
+            "high": pd.Series(bracket["high"]),
         }
     )
-    frame["amplitude_pct_du_central"] = 100.0 * (frame["haut"] - frame["bas"]) / frame["central"]
-    frame.index.name = "indicateur"
+    frame["range_pct_of_central"] = 100.0 * (frame["high"] - frame["low"]) / frame["central"]
+    frame.index.name = "indicator"
 
     # Metrics with no bracket (they do not reduce to a per-crop per-ha rate, or the observed
     # side has no variant choice at all) still belong in the reference.
     extra = pd.DataFrame(
         {
-            "unite": ["ETP", "EUR", "EUR", "ha", "m3", "t C"],
+            "unit": ["FTE", "EUR", "EUR", "ha", "m3", "t C"],
             "central": [
                 economics["total_fte"],
                 economics["total_labor_cost"],
@@ -458,7 +460,7 @@ def indicator_table(dataset: Dataset, config: dict[str, Any]) -> tuple[pd.DataFr
             "soil_carbon_balance",
         ],
     )
-    extra.index.name = "indicateur"
+    extra.index.name = "indicator"
     return pd.concat([frame, extra]), fallback_plots
 
 
@@ -487,21 +489,21 @@ def build_reference(config: dict[str, Any]) -> Reference:
     indicator_frame, fallback_plots = indicator_table(dataset, config)
 
     universe = {
-        "parcelles": int(len(plot_data)),
-        "exploitations": int(dataset.parameters["farm_plot_map"]["farm"].nunique()),
-        "surface_totale_ha": float(plot_data["SURF_HA"].sum()),
-        "surface_cultivee_ha": float(land_use["retenu_ha"].sum()),
-        "surface_non_cultivee_ha": float(
-            land_use.loc[crop_families.NON_CULTIVATED, "resolu_ha"]
+        "plots": int(len(plot_data)),
+        "farms": int(dataset.parameters["farm_plot_map"]["farm"].nunique()),
+        "total_area_ha": float(plot_data["SURF_HA"].sum()),
+        "cultivated_area_ha": float(land_use["reference_ha"].sum()),
+        "uncultivated_area_ha": float(
+            land_use.loc[crop_families.NON_CULTIVATED, "resolved_ha"]
         ),
-        "parcelles_cultivees": int(len(cultivated)),
-        "exploitations_cultivees": int(
+        "cultivated_plots": int(len(cultivated)),
+        "cultivated_farms": int(
             indicators.plot_to_farm(dataset).reindex(cultivated.index).nunique()
         ),
-        "annee_economique": (config.get("data") or {}).get("year"),
-        "scenario_economique": (config.get("data") or {}).get("scenario"),
+        "economic_year": (config.get("data") or {}).get("year"),
+        "economic_scenario": (config.get("data") or {}).get("scenario"),
         "zone_filter": config.get("zone_filter"),
-        "cultures_representantes": config.get("baseline_representative_crops"),
+        "representative_crops": config.get("baseline_representative_crops"),
     }
 
     return Reference(
@@ -528,35 +530,35 @@ def build_reference(config: dict[str, Any]) -> Reference:
 
 def _summary(reference: Reference) -> dict[str, Any]:
     repro = reference.reproducibility
-    observed = float(repro["observe_ha"].sum())
-    irreproducible = float(repro["irreproductible_ha"].sum())
+    observed = float(repro["observed_ha"].sum())
+    irreproducible = float(repro["irreproducible_ha"].sum())
     return {
-        "univers": reference.universe,
-        "assolement_observe_ha": {
+        "universe": reference.universe,
+        "observed_land_use_ha": {
             group: float(value)
-            for group, value in reference.land_use["retenu_ha"].items()
+            for group, value in reference.land_use["reference_ha"].items()
             if value > 0
         },
-        "reclassement_jachere_vers_nc_ha": float(
-            -reference.land_use.loc["JA", "ecart_resolution_ha"]
+        "fallow_reclassified_to_nc_ha": float(
+            -reference.land_use.loc["JA", "resolution_gap_ha"]
         ),
         "farm_types": {
             FARM_TYPE_LABELS[code]: int(count)
-            for code, count in reference.farm_types["exploitations"].items()
+            for code, count in reference.farm_types["farms"].items()
         },
         "pad_floor_pct": 100.0 * irreproducible / observed if observed else float("nan"),
-        "surface_irreproductible_ha": irreproducible,
-        "parcelles_sans_variante_eligible": reference.bracket_fallback_plots,
-        "representante_eligible_pct": {
+        "irreproducible_area_ha": irreproducible,
+        "plots_without_eligible_variant": reference.bracket_fallback_plots,
+        "representative_eligible_pct": {
             group: float(value)
             for group, value in reference.representative_eligibility[
-                "part_eligible_pct"
+                "eligible_share_pct"
             ].items()
         },
-        "indicateurs": {
+        "indicators": {
             name: {
                 key: (None if pd.isna(row[key]) else float(row[key]))
-                for key in ("central", "bas", "haut")
+                for key in ("central", "low", "high")
             }
             for name, row in reference.indicators.iterrows()
         },
@@ -568,11 +570,11 @@ def _above_bracket(indicator_frame: pd.DataFrame) -> str:
     symptom of a representative crop that is not itself eligible on the plots it stands for.
     Written from the numbers rather than by hand, so the sentence cannot go stale."""
     above = [
-        f"{name} (+{100.0 * (row['central'] - row['haut']) / row['haut']:.0f} %)"
+        f"{name} (+{100.0 * (row['central'] - row['high']) / row['high']:.0f} %)"
         for name, row in indicator_frame.iterrows()
-        if not pd.isna(row.get("haut")) and row["central"] > row["haut"]
+        if not pd.isna(row.get("high")) and row["central"] > row["high"]
     ]
-    return ", ".join(above) if above else "aucun indicateur dans ce run"
+    return ", ".join(above) if above else "no indicator in this run"
 
 
 def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
@@ -582,193 +584,189 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
     representative = reference.representative_eligibility
 
     lines = [
-        "# Situation de reference -- Guadeloupe 2017",
+        "# Reference state -- Guadeloupe 2017",
         "",
-        "Etat initial observe, reconstruit depuis l'historique RPG de `Data_Parc_Gwad_2017.txt`.",
-        "C'est la situation contre laquelle chaque run est note (PAD, matrice de confusion,",
-        "taux de correspondance parcellaire). Aucun solve : ce dossier ne depend d'aucun run.",
+        "Observed initial state, rebuilt from the RPG history in `Data_Parc_Gwad_2017.txt`.",
+        "It is the situation every run is scored against (PAD, confusion matrix, plot",
+        "agreement rate). No solve: this folder depends on no run.",
         "",
-        "## 1. Univers couvert",
+        "## 1. Universe covered",
         "",
-        f"- Parcelles : {_n(universe['parcelles'])}",
-        f"- Exploitations : {_n(universe['exploitations'])}",
-        f"- Surface totale : {_n(universe['surface_totale_ha'])} ha",
-        f"- dont cultivee (reference PAD) : {_n(universe['surface_cultivee_ha'])} ha "
-        f"sur {_n(universe['parcelles_cultivees'])} parcelles",
-        f"- dont non cultivee (NC) : {_n(universe['surface_non_cultivee_ha'])} ha",
-        f"- Annee / scenario economique : {universe['annee_economique']} / "
-        f"{universe['scenario_economique']}",
-        f"- Filtre de zone : {universe['zone_filter'] or 'aucun (territoire entier)'}",
+        f"- Plots: {_n(universe['plots'])}",
+        f"- Farms: {_n(universe['farms'])}",
+        f"- Total area: {_n(universe['total_area_ha'])} ha",
+        f"- of which cultivated (PAD reference): {_n(universe['cultivated_area_ha'])} ha "
+        f"on {_n(universe['cultivated_plots'])} plots",
+        f"- of which not cultivated (NC): {_n(universe['uncultivated_area_ha'])} ha",
+        f"- Economic year / scenario: {universe['economic_year']} / "
+        f"{universe['economic_scenario']}",
+        f"- Zone filter: {universe['zone_filter'] or 'none (whole territory)'}",
         "",
-        "**Ce n'est pas la SAU de la Guadeloupe.** L'univers est celui du jeu de donnees",
-        "parcellaire disponible localement. Chopin et al. (2015) travaillent sur 5 336",
-        f"exploitations, ce jeu en porte {_n(universe['exploitations'])} : les deux ne",
-        "decrivent pas le meme perimetre",
-        "(cf. docs/04-vigilance.md, entree de reouverture du 2026-07-27). Toute",
-        "comparaison observe/simule doit donc rester **interne** a cet univers -- ce que fait",
-        "le PAD, qui compare les deux cotes sur les memes parcelles.",
+        "**This is not Guadeloupe's UAA.** The universe is that of the plot dataset available",
+        "locally. Chopin et al. (2015) work on 5 336 farms, this dataset carries",
+        f"{_n(universe['farms'])}: the two do not describe the same perimeter",
+        "(see docs/04-vigilance.md). Any observed/simulated comparison must therefore stay",
+        "**internal** to this universe -- which is what the PAD does, comparing both sides on",
+        "the same plots.",
         "",
-        "## 2. Assolement observe",
+        "## 2. Observed land use",
         "",
-        "Deux lectures coexistent et il faut savoir laquelle on cite :",
+        "Two readings coexist, and one must know which one is quoted:",
         "",
-        "- **brut** : `cult_2017` traduit directement en groupe RPG ;",
-        "- **resolu** : la regle GAMS de continuite de friche (ENTREES.txt:49-57) force NC",
-        "  quand `cult_2016` ET `cult_2017` sont en jachere. C'est la lecture qu'utilisent le",
-        "  modele, la typologie et le PAD.",
+        "- **raw**: `cult_2017` translated directly into an RPG group;",
+        "- **resolved**: the GAMS fallow-continuity rule (ENTREES.txt:49-57) forces NC when",
+        "  `cult_2016` AND `cult_2017` are both fallow. This is the reading the model, the",
+        "  typology and the PAD use.",
         "",
-        f"Le passage de l'une a l'autre deplace "
-        f"**{_n(summary['reclassement_jachere_vers_nc_ha'])} ha** de la jachere vers le non "
-        "cultive : c'est le seul ecart entre les deux lectures.",
+        "Going from one to the other moves "
+        f"**{_n(summary['fallow_reclassified_to_nc_ha'])} ha** from fallow to not cultivated:",
+        "it is the only gap between the two readings.",
         "",
-        "| Groupe | Libelle | Brut (ha) | Resolu (ha) | Reference PAD (ha) | Part du cultive |",
+        "| Group | Label | Raw (ha) | Resolved (ha) | PAD reference (ha) | Share of cultivated |",
         "|---|---|---:|---:|---:|---:|",
     ]
     for group, row in land_use.iterrows():
-        share = "-" if pd.isna(row["part_cultive_pct"]) else f"{row['part_cultive_pct']:.1f} %"
+        share = "-" if pd.isna(row["cultivated_share_pct"]) else f"{row['cultivated_share_pct']:.1f} %"
         lines.append(
-            f"| {group} | {row['libelle']} | {_n(row['brut_ha'])} | {_n(row['resolu_ha'])} | "
-            f"{_n(row['retenu_ha'])} | {share} |"
+            f"| {group} | {row['label']} | {_n(row['raw_ha'])} | {_n(row['resolved_ha'])} | "
+            f"{_n(row['reference_ha'])} | {share} |"
         )
     lines += [
-        f"| **TOTAL** | | {_n(land_use['brut_ha'].sum())} | {_n(land_use['resolu_ha'].sum())} | "
-        f"{_n(land_use['retenu_ha'].sum())} | 100 % |",
+        f"| **TOTAL** | | {_n(land_use['raw_ha'].sum())} | {_n(land_use['resolved_ha'].sum())} | "
+        f"{_n(land_use['reference_ha'].sum())} | 100 % |",
         "",
-        "Declinaisons : `csv/reference_surface_by_region.csv`, `_by_island.csv`,",
-        "`_by_commune.csv`. Reference parcelle par parcelle : `csv/reference_allocation.csv`.",
+        "Breakdowns: `csv/reference_surface_by_region.csv`, `_by_island.csv`,",
+        "`_by_commune.csv`. Plot-by-plot reference: `csv/reference_allocation.csv`.",
         "",
-        "## 3. Typologie des exploitations observee",
+        "## 3. Observed farm typology",
         "",
-        "Marge-ligne de toute matrice de confusion, et source du coefficient d'aversion au",
-        "risque (AVERS) de chaque ferme dans l'objectif de Markowitz : c'est un element de la",
-        "reference, pas un resultat.",
+        "Row-marginal of every confusion matrix, and source of each farm's risk-aversion",
+        "coefficient (AVERS) in the Markowitz objective: part of the reference, not a result.",
         "",
-        "| Type | Libelle | Exploitations | Part | Surface (ha) | AVERS |",
+        "| Type | Label | Farms | Share | Area (ha) | AVERS |",
         "|---|---|---:|---:|---:|---:|",
     ]
     for code, row in reference.farm_types.iterrows():
         aversion = (
-            f"{row['avers_min']:.2f}"
-            if row["avers_min"] == row["avers_max"]
-            else f"{row['avers_min']:.2f}-{row['avers_max']:.2f}"
+            f"{row['aversion_min']:.2f}"
+            if row["aversion_min"] == row["aversion_max"]
+            else f"{row['aversion_min']:.2f}-{row['aversion_max']:.2f}"
         )
         lines.append(
-            f"| {code} | {row['libelle']} | {_n(row['exploitations'])} | "
+            f"| {code} | {row['label']} | {_n(row['farms'])} | "
             f"{row['farm_share_pct']:.1f} % | {_n(row['surface_ha'])} | {aversion} |"
         )
 
     lines += [
         "",
-        "## 4. Ce que la reference ne peut pas dire",
+        "## 4. What the reference cannot say",
         "",
-        "### 4.1 Aucune culture fine observee",
+        "### 4.1 No fine crop is observed",
         "",
-        "Les 12 groupes RPG disent « canne », jamais quel systeme technique. Le GAMS avait la",
-        "meme limite (`Matrice_Parc_Cult`). Tout indicateur economique ou environnemental de",
-        "la reference passe donc par une **culture representante** par famille",
-        "(`config.yaml: baseline_representative_crops`) -- une hypothese, pas une observation.",
+        "The 12 RPG groups say \"cane\", never which technical system. GAMS had the same limit",
+        "(`Matrice_Parc_Cult`). Every economic or environmental indicator of the reference",
+        "therefore goes through a **representative crop** per family",
+        "(`config.yaml: baseline_representative_crops`) -- an assumption, not an observation.",
         "",
-        "**Premier constat, quantifie ici pour la premiere fois : la representante est souvent",
-        "une culture que le modele lui-meme interdirait sur la parcelle qu'elle represente.**",
-        "`CS_NGT_NISM` est le systeme cannier du Nord Grande-Terre, cantonne a trois communes,",
-        "et il vaut pourtant tous les hectares de canne du territoire ; `MA_ROTA` exige",
-        "l'irrigation et vaut tout le maraichage.",
+        "**The representative is often a crop the model itself would forbid on the plot it",
+        "stands for.** `CS_NGT_NISM` is the North Grande-Terre cane system, confined to three",
+        "communes, yet it values every cane hectare of the territory; `MA_ROTA` requires",
+        "irrigation and values all of market gardening.",
         "",
-        "| Groupe | Representante | Observe (ha) | Representante eligible (ha) | Part | Marge (EUR/ha) |",
+        "| Group | Representative | Observed (ha) | Representative eligible (ha) | Share | Margin (EUR/ha) |",
         "|---|---|---:|---:|---:|---:|",
     ]
     for group, row in representative.iterrows():
         lines.append(
-            f"| {group} | `{row['representante']}` | {_n(row['observe_ha'])} | "
-            f"{_n(row['representante_eligible_ha'])} | {row['part_eligible_pct']:.0f} % | "
+            f"| {group} | `{row['representative']}` | {_n(row['observed_ha'])} | "
+            f"{_n(row['representative_eligible_ha'])} | {row['eligible_share_pct']:.0f} % | "
             f"{_n(row['representative_margin_eur_ha'])} |"
         )
 
     lines += [
         "",
-        "**Consequence a ne pas perdre de vue** : cette hypothese ne reste pas dans le",
-        "reporting. `farm_labor_hours_max` (Eq_MO_MAX_Expl) plafonne chaque exploitation a la",
-        "main d'oeuvre de son assolement observe, calculee via ces memes representantes :",
-        "changer une representante change le plafond, donc l'optimum. Cf. docs/04-vigilance.md et",
-        "l'entree « cultures representantes conscientes de la region » de TODO.md, que ce",
-        "tableau chiffre.",
+        "**Consequence not to lose sight of**: this assumption does not stay in the",
+        "reporting. `farm_labor_hours_max` (Eq_MO_MAX_Expl) caps each farm at the labour of its",
+        "observed plan, computed through these same representatives: changing a representative",
+        "changes the cap, hence the optimum. See docs/04-vigilance.md and the",
+        "\"region-aware representative crops\" item of docs/status/roadmap.yaml, which this",
+        "table quantifies.",
         "",
-        "Les indicateurs de la reference sont donc donnes avec une fourchette. L'estimation",
-        "**centrale** est celle des representantes du `config.yaml` -- exactement les chiffres",
-        "que reporte le cote « entree » d'un run, pour que les deux racontent la meme histoire.",
-        "Les bornes **bas** et **haut** rejouent chaque parcelle avec la variante la moins,",
-        "puis la plus intense **parmi celles qui y sont reellement eligibles**.",
+        "The reference indicators are therefore given with a bracket. The **central** estimate",
+        "is that of the `config.yaml` representatives -- exactly the figures a run reports on",
+        "its \"input\" side, so the two tell the same story. The **low** and **high** bounds",
+        "replay each plot with the least, then the most intensive variant **among those",
+        "actually eligible there**.",
         "",
-        "Rien ne garantit alors que le central tombe dans la fourchette -- la representante",
-        "n'appartient pas toujours a l'ensemble des variantes eligibles. La ou il en sort par",
-        "le haut, la reference est valorisee par un systeme technique que la parcelle ne",
-        f"pourrait pas porter : {_above_bracket(reference.indicators)}.",
+        "Nothing then guarantees that the central estimate falls inside the bracket -- the",
+        "representative does not always belong to the set of eligible variants. Where it leaves",
+        "it from above, the reference is valued with a technical system the plot could not",
+        f"carry: {_above_bracket(reference.indicators)}.",
         "",
-        "| Indicateur | Unite | Bas | Central | Haut | Amplitude |",
+        "| Indicator | Unit | Low | Central | High | Range |",
         "|---|---|---:|---:|---:|---:|",
     ]
     for name, row in reference.indicators.iterrows():
         amplitude = (
             "-"
-            if pd.isna(row.get("amplitude_pct_du_central"))
-            else f"{row['amplitude_pct_du_central']:.0f} %"
+            if pd.isna(row.get("range_pct_of_central"))
+            else f"{row['range_pct_of_central']:.0f} %"
         )
         lines.append(
-            f"| {name} | {row['unite']} | {_n(row.get('bas'))} | {_n(row['central'])} | "
-            f"{_n(row.get('haut'))} | {amplitude} |"
+            f"| {name} | {row['unit']} | {_n(row.get('low'))} | {_n(row['central'])} | "
+            f"{_n(row.get('high'))} | {amplitude} |"
         )
 
     lines += [
         "",
-        f"La fourchette retombe sur la famille entiere pour "
-        f"{reference.bracket_fallback_plots} parcelle(s) sans aucune variante eligible.",
+        "The bracket falls back on the whole family for "
+        f"{reference.bracket_fallback_plots} plot(s) with no eligible variant at all.",
         "",
-        "### 4.2 Une partie de l'observe est irreproductible par construction",
+        "### 4.2 Part of the observation cannot be reproduced by construction",
         "",
-        "Une parcelle n'est reproductible que si au moins une variante fine de sa famille",
-        "observee y est eligible. Ce qui ne l'est pas est un ecart qu'aucun objectif ne peut",
-        "eviter : c'est un **plancher sous le PAD**, propriete des donnees et du masque",
-        "d'eligibilite, pas du run.",
+        "A plot is reproducible only if at least one fine variant of its observed family is",
+        "eligible there. What is not is a gap no objective can avoid: a **floor under the",
+        "PAD**, a property of the data and of the eligibility mask, not of the run.",
         "",
-        "| Groupe | Observe (ha) | Reproductible (ha) | Irreproductible (ha) | Part reproductible |",
+        "| Group | Observed (ha) | Reproducible (ha) | Irreproducible (ha) | Reproducible share |",
         "|---|---:|---:|---:|---:|",
     ]
     for group, row in repro.iterrows():
         lines.append(
-            f"| {group} | {_n(row['observe_ha'])} | {_n(row['reproductible_ha'])} | "
-            f"{_n(row['irreproductible_ha'])} | {row['part_reproductible_pct']:.0f} % |"
+            f"| {group} | {_n(row['observed_ha'])} | {_n(row['reproducible_ha'])} | "
+            f"{_n(row['irreproducible_ha'])} | {row['reproducible_share_pct']:.0f} % |"
         )
     lines += [
-        f"| **TOTAL** | {_n(repro['observe_ha'].sum())} | "
-        f"{_n(repro['reproductible_ha'].sum())} | {_n(repro['irreproductible_ha'].sum())} | "
-        f"{100.0 * repro['reproductible_ha'].sum() / repro['observe_ha'].sum():.0f} % |",
+        f"| **TOTAL** | {_n(repro['observed_ha'].sum())} | "
+        f"{_n(repro['reproducible_ha'].sum())} | {_n(repro['irreproducible_ha'].sum())} | "
+        f"{100.0 * repro['reproducible_ha'].sum() / repro['observed_ha'].sum():.0f} % |",
         "",
-        f"Plancher de PAD induit : **{summary['pad_floor_pct']:.1f} %** "
-        f"({_n(summary['surface_irreproductible_ha'])} ha sur "
-        f"{_n(repro['observe_ha'].sum())} ha), et jusqu'au double si l'on compte aussi",
-        "l'exces cree ailleurs par ces hectares deplaces. C'est faible :",
-        "**l'ecart observe/simule ne s'explique pas par l'eligibilite.**",
+        f"Induced PAD floor: **{summary['pad_floor_pct']:.1f} %** "
+        f"({_n(summary['irreproducible_area_ha'])} ha out of "
+        f"{_n(repro['observed_ha'].sum())} ha), and up to twice that if the excess these",
+        "displaced hectares create elsewhere is counted too. It is small:",
+        "**the observed/simulated gap is not explained by eligibility.**",
         "",
-        "L'eligibilite embarque aussi les suppressions GAMS (`Eq_*_SUPP`, et `Eq_VE_PLUIE`",
-        "interdite partout par le bug GAMS porte fidelement) : les vergers et les agrumes sont",
-        "donc irreproductibles pour une raison de portage, pas d'agronomie.",
+        "Eligibility also embeds the GAMS suppressions (`Eq_*_SUPP`, and `Eq_VE_PLUIE`",
+        "forbidden everywhere by the GAMS bug ported faithfully): orchards and citrus are",
+        "therefore irreproducible for a porting reason, not an agronomic one.",
         "",
-        "## 5. Fichiers",
+        "## 5. Files",
         "",
-        "| Fichier | Contenu |",
+        "| File | Content |",
         "|---|---|",
-        "| `csv/reference_land_use.csv` | Assolement observe, lectures brute et resolue |",
-        "| `csv/reference_allocation.csv` | Reference parcelle par parcelle (la table pivot) |",
-        "| `csv/reference_surface_by_region.csv` | Surface cultivee par region x groupe |",
-        "| `csv/reference_surface_by_island.csv` | Idem par ile |",
-        "| `csv/reference_surface_by_commune.csv` | Idem par commune |",
-        "| `csv/reference_farm_types.csv` | Typologie observee et AVERS |",
-        "| `csv/reference_indicators.csv` | Indicateurs, central et fourchette |",
-        "| `csv/reference_reproducibility.csv` | Plancher de PAD par groupe |",
-        "| `csv/reference_representative_eligibility.csv` | Eligibilite des representantes |",
-        "| `reference.json` | Le tout, lisible par un script |",
+        "| `csv/reference_land_use.csv` | Observed land use, raw and resolved readings |",
+        "| `csv/reference_allocation.csv` | Plot-by-plot reference (the pivot table) |",
+        "| `csv/reference_surface_by_region.csv` | Cultivated area by region x group |",
+        "| `csv/reference_surface_by_island.csv` | Same by island |",
+        "| `csv/reference_surface_by_commune.csv` | Same by commune |",
+        "| `csv/reference_farm_types.csv` | Observed typology and AVERS |",
+        "| `csv/reference_indicators.csv` | Indicators, central and bracket |",
+        "| `csv/reference_reproducibility.csv` | PAD floor by group |",
+        "| `csv/reference_representative_eligibility.csv` | Eligibility of the representatives |",
+        "| `reference.json` | All of it, readable by a script |",
         "",
-        "Regenerer : `python scripts/build_reference_state.py`. Deterministe (aucun solve).",
+        "Regenerate: `python scripts/build_reference_state.py`. Deterministic (no solve).",
         "",
     ]
     return "\n".join(lines)
@@ -812,30 +810,30 @@ def main(argv: list[str] | None = None) -> int:
     reference = build_reference(config)
     summary = write_reference(reference, args.dir)
 
-    universe = summary["univers"]
-    print(f"\n=== Situation de reference 2017 -> {args.dir} ===")
+    universe = summary["universe"]
+    print(f"\n=== 2017 reference state -> {args.dir} ===")
     print(
-        f"  Univers                     : {universe['parcelles']} parcelles, "
-        f"{universe['exploitations']} exploitations, "
-        f"{universe['surface_totale_ha']:,.0f} ha"
+        f"  Universe                     : {universe['plots']} plots, "
+        f"{universe['farms']} farms, "
+        f"{universe['total_area_ha']:,.0f} ha"
     )
     print(
-        f"  Surface cultivee (ref. PAD) : {universe['surface_cultivee_ha']:,.0f} ha "
-        f"({universe['parcelles_cultivees']} parcelles)"
+        f"  Cultivated area (PAD ref.)   : {universe['cultivated_area_ha']:,.0f} ha "
+        f"({universe['cultivated_plots']} plots)"
     )
     print(
-        f"  Jachere reclassee en NC     : "
-        f"{summary['reclassement_jachere_vers_nc_ha']:,.0f} ha"
+        f"  Fallow reclassified to NC    : "
+        f"{summary['fallow_reclassified_to_nc_ha']:,.0f} ha"
     )
     print(
-        f"  Plancher de PAD (eligibilite): {summary['pad_floor_pct']:.1f} % "
-        f"({summary['surface_irreproductible_ha']:,.0f} ha irreproductibles)"
+        f"  PAD floor (eligibility)      : {summary['pad_floor_pct']:.1f} % "
+        f"({summary['irreproducible_area_ha']:,.0f} ha irreproducible)"
     )
-    print("\n  Assolement observe (ha) :")
+    print("\n  Observed land use (ha):")
     for group, value in sorted(
-        summary["assolement_observe_ha"].items(), key=lambda item: -item[1]
+        summary["observed_land_use_ha"].items(), key=lambda item: -item[1]
     ):
-        print(f"    {group:<3} {GROUP_LABELS.get(group, ''):<22} {value:>9,.0f}")
+        print(f"    {group:<3} {GROUP_LABELS.get(group, ''):<26} {value:>9,.0f}")
     print()
     return 0
 

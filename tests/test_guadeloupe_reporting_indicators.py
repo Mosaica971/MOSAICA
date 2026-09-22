@@ -21,7 +21,7 @@ def _small_dataset() -> Dataset:
             "ILE": [1, 1, 2, 2, 1, 2],
             "cult_2016": [6, 6, 13, 14, 6, 13],
             "cult_2017": [6, 6, 13, 14, 6, 13],
-            # Chlordécone: parcel soil risk (1=worst..5=none) and soil type. Tuned so that,
+            # Chlordecone: parcel soil risk (1=worst..5=none) and soil type. Tuned so that,
             # for the {P1:CS, P2:CS, P3:ME} allocation used across tests, only P3 (ME,
             # uptake class 3, r=2, soil 4) is flagged at-risk.
             "RISQUE_CLD": [5, 5, 2, 1, 5, 5],
@@ -300,7 +300,7 @@ def test_compute_ift_by_crop_multiplies_surface_by_rate():
 
 
 def _chlordecone_dataset() -> Dataset:
-    """Six plots covering every branch of the chlordécone crop×soil rule."""
+    """Six plots covering every branch of the chlordecone crop×soil rule."""
     plot_data = pd.DataFrame(
         {
             "SURF_HA": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],

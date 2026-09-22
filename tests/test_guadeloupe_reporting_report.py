@@ -25,7 +25,7 @@ def _tiny_dataset() -> Dataset:
             "ILE": [1, 1],
             "cult_2016": [6, 6],
             "cult_2017": [6, 6],
-            # Chlordécone: for the output allocation (both ME, uptake class 3), P1 (r=2,
+            # Chlordecone: for the output allocation (both ME, uptake class 3), P1 (r=2,
             # soil 4) is flagged at-risk, P2 (r=5) is not.
             "RISQUE_CLD": [2, 5],
             "TYPE_SOL": [4, 1],
@@ -263,7 +263,7 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     assert env["output"]["total_nitrogen"] == pytest.approx(250.0)
     assert env["output"]["chlordecone_risk_area"] == pytest.approx(2.0)
     assert env["output"]["ghg_per_ha"] == pytest.approx(5.0 / 5.0)
-    # input (both CS, 5 ha): GES 5*2=10 ; CS uptake class 4 -> no chlordécone risk
+    # input (both CS, 5 ha): GES 5*2=10 ; CS uptake class 4 -> no chlordecone risk
     assert env["input"]["total_ghg"] == pytest.approx(10.0)
     assert env["input"]["chlordecone_risk_area"] == pytest.approx(0.0)
     for key in ("total_ghg", "total_tfi", "total_nitrogen", "chlordecone_risk_area"):
@@ -295,7 +295,7 @@ def test_generate_report_writes_additional_indicators(tmp_path):
 
 
 def test_recap_carries_resilience_block_for_both_sides(tmp_path):
-    """Le recap expose les indicateurs d'exposition, cote entree comme sortie."""
+    """The recap exposes the exposure indicators, on both the input and the output side."""
     import json
 
     dataset = _tiny_dataset()

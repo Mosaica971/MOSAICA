@@ -12,7 +12,7 @@ def _dataset() -> Dataset:
             "TYPE_SOL": [1, 4],
             "SURF_HA": [2.0, 3.0],
             "IRRIG_PARC": [1, 0],  # P2 non irrigable -> 0 en eau
-            "RISQUE_CLD": [5, 5],  # requis par compute_environmental_totals (aucun risque)
+            "RISQUE_CLD": [5, 5],  # required by compute_environmental_totals (no risk)
         },
         index=["P1", "P2"],
     )
@@ -37,7 +37,7 @@ def _dataset() -> Dataset:
         },
         index=["CROP_A", "CROP_B"],
     ).T
-    # Un mois de pointe marqué: juillet à 50 mm pour CROP_A.
+    # A marked peak month: July at 50 mm for CROP_A.
     crop_data.loc["BESOIN_EAU_07", "CROP_A"] = 50.0
 
     monthly = crop_data.loc[[f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]]
@@ -54,8 +54,8 @@ def _dataset() -> Dataset:
         "crop_water_need_per_ha": monthly.sum(axis=0),
         "crop_monthly_water_need_per_ha": monthly,
         "crop_carbon_input_per_ha": pd.Series({"CROP_A": 3.0, "CROP_B": 3.0}),
-        # Requis par compute_environmental_totals, neutralisés à 0 : ce test porte sur
-        # l'eau et le carbone, pas sur les indicateurs préexistants.
+        # Required by compute_environmental_totals, zeroed: this test is about water and
+        # carbon, not about the pre-existing indicators.
         "crop_nitrogen_per_ha": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
         "crop_ghg_per_ha": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
         "crop_tfi_per_ha": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
@@ -93,10 +93,10 @@ def test_carbon_balance_and_mineralization_scale_with_surface():
 
 
 def test_pre_existing_environmental_keys_are_preserved():
-    """Le lot eau/carbone ne doit rien casser des indicateurs préexistants (azote, GES, IFT,
-    CLD). La fixture neutralise les taux azote/GES/IFT à 0.0 et met crop_chlordecone_uptake à 4.0
-    (classe « aucun risque ») pour les deux cultures, donc tous les totaux et moyennes/ha
-    attendus sont nuls, et aucune parcelle n'est signalée à risque chlordécone."""
+    """The water/carbon batch must break none of the pre-existing indicators (nitrogen, GHG,
+    TFI, CLD). The fixture zeroes the nitrogen/GHG/TFI rates and sets crop_chlordecone_uptake to
+    4.0 ("no risk" class) for both crops, so every expected total and per-ha mean is zero, and
+    no plot is flagged at chlordecone risk."""
     totals = indicators.compute_environmental_totals(_dataset(), _allocation())
     assert totals["total_nitrogen"] == pytest.approx(0.0)
     assert totals["total_ghg"] == pytest.approx(0.0)
@@ -120,7 +120,7 @@ def test_facts_table_carries_water_and_carbon_measures():
     )
     assert "water_need_m3" in facts.columns
     assert "soil_carbon_balance" in facts.columns
-    # Les deux parcelles sont dans la meme (culture, region) -> une ligne agregee.
+    # Both plots are in the same (crop, region) -> one aggregated row.
     assert facts["water_need_m3"].sum() == pytest.approx(2100.0)
     assert facts["soil_carbon_balance"].sum() == pytest.approx(-115.0)
 

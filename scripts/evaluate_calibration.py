@@ -89,12 +89,12 @@ def _print_verdicts(run_dir: Path, result: calibration.CalibrationResult) -> Non
 
     def line(label: str, value: float | None, threshold: float, ok: bool) -> str:
         shown = "n/a" if value is None else f"{value:6.1f}%"
-        return f"  {label:<34} {shown}  (seuil {threshold:.0f}%)  {'OK' if ok else 'HORS SEUIL'}"
+        return f"  {label:<34} {shown}  (threshold {threshold:.0f}%)  {'OK' if ok else 'OUTSIDE THRESHOLD'}"
 
     print(f"\n{run_dir.name}")
     print(
         line(
-            "PAD territorial",
+            "Territorial PAD",
             summary["regional_pad_pct"],
             summary["thresholds"]["regional_pad_max"],
             summary["regional_within_threshold"],
@@ -102,25 +102,25 @@ def _print_verdicts(run_dir: Path, result: calibration.CalibrationResult) -> Non
     )
     print(
         line(
-            "Types d'exploitation reproduits",
+            "Farm types reproduced",
             summary["farm_type_match_pct"],
             summary["thresholds"]["farm_type_match_min"],
             summary["farm_type_within_threshold"],
         )
     )
     print(
-        f"  {'Cultures sous seuil':<34} "
+        f"  {'Crops under threshold':<34} "
         f"{summary['crops_within_threshold']} / {summary['crops_evaluated']}"
     )
     print(
-        f"  {'Exploitations sous seuil':<34} "
+        f"  {'Farms under threshold':<34} "
         f"{summary['farms_within_threshold']} / {summary['farms_evaluated']}"
     )
     print(
-        f"  {'Parcelles bien simulees':<34} {summary['plot_match_pct']:6.1f}%  "
+        f"  {'Plots correctly simulated':<34} {summary['plot_match_pct']:6.1f}%  "
         f"({summary['matched_plots']} / {summary['total_plots']})"
     )
-    print(f"  {'Surface bien simulee':<34} {summary['area_match_pct']:6.1f}%")
+    print(f"  {'Area correctly simulated':<34} {summary['area_match_pct']:6.1f}%")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -140,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             _print_verdicts(run_dir, evaluate_run(run_dir))
         except (FileNotFoundError, KeyError) as error:
-            print(f"\n{run_dir.name}\n  ignore : {error}", file=sys.stderr)
+            print(f"\n{run_dir.name}\n  skipped: {error}", file=sys.stderr)
             failures += 1
     return 1 if failures and len(runs) == 1 else 0
 

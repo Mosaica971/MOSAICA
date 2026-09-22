@@ -197,8 +197,8 @@ def test_change_figure_separates_kept_from_changed():
         title="t",
     )
     labels = [t.get_text() for t in fig.axes[0].get_legend().get_texts()]
-    assert "inchangé (1)" in labels
-    assert "changé (1)" in labels
+    assert "unchanged (1)" in labels
+    assert "changed (1)" in labels
 
 
 def test_shared_bounds_spans_every_polygon():

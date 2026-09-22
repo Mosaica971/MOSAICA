@@ -508,7 +508,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     crop_carbon_input_per_ha = soil_carbon.compute_crop_carbon_input_per_ha(
         crop_data, operation_data, crop_operation_matrix
     )
-    # Chlordécone uptake class per crop (Data_Cult["CLD"], 1=high..4=none), for the crop x
+    # Chlordecone uptake class per crop (Data_Cult["CLD"], 1=high..4=none), for the crop x
     # soil at-risk-surface indicator in reporting.
     crop_chlordecone_uptake = crop_data.loc["CLD"]
 

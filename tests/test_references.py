@@ -8,8 +8,8 @@ from apps.dashboard import references
 
 _MANIFEST = {
     "references": [
-        {"id": "observed", "run": "output_3", "side": "input", "label": "Observé 2017"},
-        {"id": "gams_parity", "run": "output_1", "side": "output", "label": "Parité GAMS",
+        {"id": "observed", "run": "output_3", "side": "input", "label": "Observed 2017"},
+        {"id": "gams_parity", "run": "output_1", "side": "output", "label": "GAMS parity",
          "note": "CALIB strict"},
         {"id": "retained", "run": "output_3", "side": "output", "label": "Calib retenu"},
     ]
@@ -68,18 +68,18 @@ def test_series_labels_match_the_pages_catalog_by_folder_and_side(tmp_path):
     for name in ("output_1", "output_3"):
         (tmp_path / name).mkdir()
     catalog = {
-        "run A · entrée": {"run_dir": tmp_path / "output_3", "side": "input"},
-        "run A · sortie": {"run_dir": tmp_path / "output_3", "side": "output"},
-        "run B · sortie": {"run_dir": tmp_path / "output_1", "side": "output"},
+        "run A · input": {"run_dir": tmp_path / "output_3", "side": "input"},
+        "run A · output": {"run_dir": tmp_path / "output_3", "side": "output"},
+        "run B · output": {"run_dir": tmp_path / "output_1", "side": "output"},
     }
 
     resolved = references.resolve(references.parse_references(_MANIFEST), tmp_path)
     labels = references.series_labels_for(resolved, catalog)
 
     assert labels == {
-        "observed": "run A · entrée",
-        "gams_parity": "run B · sortie",
-        "retained": "run A · sortie",
+        "observed": "run A · input",
+        "gams_parity": "run B · output",
+        "retained": "run A · output",
     }
 
 
@@ -88,7 +88,7 @@ def test_a_reference_whose_side_has_no_facts_table_is_absent_from_the_labels(tmp
     on this page, which is different from the folder being missing."""
     (tmp_path / "output_1").mkdir()
     (tmp_path / "output_3").mkdir()
-    catalog = {"run B · sortie": {"run_dir": tmp_path / "output_1", "side": "output"}}
+    catalog = {"run B · output": {"run_dir": tmp_path / "output_1", "side": "output"}}
 
     resolved = references.resolve(references.parse_references(_MANIFEST), tmp_path)
     labels = references.series_labels_for(resolved, catalog)
@@ -103,4 +103,4 @@ def test_the_shipped_manifest_is_valid():
     declared = references.load_references(references.DEFAULT_MANIFEST)
 
     assert {r.id for r in declared} == {"observed", "gams_parity", "retained"}
-    assert all(r.note for r in declared), "chaque référence doit porter sa justification"
+    assert all(r.note for r in declared), "every reference must carry its justification"

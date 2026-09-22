@@ -50,7 +50,7 @@ def _save_bar_chart(series: pd.Series, *, title: str, ylabel: str, output_path: 
 def plot_production_by_crop(production_tonnes_by_crop: pd.Series, output_path: Path) -> Path:
     return _save_bar_chart(
         production_tonnes_by_crop,
-        title="Production par culture",
+        title="Production by crop",
         ylabel="Tonnes",
         output_path=output_path,
     )
@@ -59,7 +59,7 @@ def plot_production_by_crop(production_tonnes_by_crop: pd.Series, output_path: P
 def plot_subsidy_by_crop(subsidy_by_crop: pd.Series, output_path: Path) -> Path:
     return _save_bar_chart(
         subsidy_by_crop,
-        title="Subvention par culture",
+        title="Subsidy by crop",
         ylabel="Euros",
         output_path=output_path,
     )
@@ -68,7 +68,7 @@ def plot_subsidy_by_crop(subsidy_by_crop: pd.Series, output_path: Path) -> Path:
 def plot_revenue_by_crop(total_revenue_by_crop: pd.Series, output_path: Path) -> Path:
     return _save_bar_chart(
         total_revenue_by_crop,
-        title="Revenu total par culture (vente + subvention)",
+        title="Total revenue by crop (sales + subsidy)",
         ylabel="Euros",
         output_path=output_path,
     )
@@ -77,7 +77,7 @@ def plot_revenue_by_crop(total_revenue_by_crop: pd.Series, output_path: Path) ->
 def plot_gross_margin_by_crop(gross_margin_by_crop: pd.Series, output_path: Path) -> Path:
     return _save_bar_chart(
         gross_margin_by_crop,
-        title="Marge brute par culture",
+        title="Gross margin by crop",
         ylabel="Euros",
         output_path=output_path,
     )
@@ -86,7 +86,7 @@ def plot_gross_margin_by_crop(gross_margin_by_crop: pd.Series, output_path: Path
 def plot_labor_cost_by_crop(labor_cost_by_crop: pd.Series, output_path: Path) -> Path:
     return _save_bar_chart(
         labor_cost_by_crop,
-        title="Coût main d'œuvre par culture",
+        title="Labour cost by crop",
         ylabel="Euros",
         output_path=output_path,
     )
@@ -98,7 +98,7 @@ def plot_fte_by_region(fte_by_region: pd.Series, output_path: Path) -> Path:
     series = fte_by_region.sort_values(ascending=False)
     fig, ax = plt.subplots(figsize=_FIGSIZE)
     ax.bar([str(key) for key in series.index], series.to_numpy(), color=_BAR_COLOR)
-    _style_axes(ax, title="Emploi estimé par région (ETP)", ylabel="ETP")
+    _style_axes(ax, title="Estimated employment by region (FTE)", ylabel="FTE")
     fig.tight_layout()
     fig.savefig(output_path, dpi=_DPI)
     plt.close(fig)
@@ -110,7 +110,7 @@ def plot_surface_by_region(surface_by_region_and_key: pd.DataFrame, output_path:
     frame = surface_by_region_and_key.rename(columns=lambda code: label_for(str(code)))
     fig, ax = plt.subplots(figsize=_FIGSIZE)
     frame.plot.bar(stacked=True, ax=ax, colormap="tab20", width=0.8)
-    _style_axes(ax, title="Surface par région et par culture", ylabel="Hectares")
+    _style_axes(ax, title="Area by region and crop", ylabel="Hectares")
     ax.legend(title="Culture", bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8)
     fig.tight_layout()
     fig.savefig(output_path, dpi=_DPI)
@@ -136,15 +136,15 @@ def plot_calibration_regional(pad_by_crop: pd.DataFrame, output_path: Path) -> P
     fig, ax = plt.subplots(figsize=_FIGSIZE)
     ax.bar(
         positions - width / 2, frame["observed_ha"].to_numpy(),
-        width, label="Observé 2017", color=_OBSERVED_COLOR,
+        width, label="Observed 2017", color=_OBSERVED_COLOR,
     )
     ax.bar(
         positions + width / 2, frame["simulated_ha"].to_numpy(),
-        width, label="Simulé", color=_SIMULATED_COLOR,
+        width, label="Simulated", color=_SIMULATED_COLOR,
     )
     ax.set_xticks(positions)
     ax.set_xticklabels(_relabel_crops(frame.index))
-    _style_axes(ax, title="Calibration : surface observée vs simulée", ylabel="Hectares")
+    _style_axes(ax, title="Calibration: observed vs simulated area", ylabel="Hectares")
     ax.legend()
     fig.tight_layout()
     fig.savefig(output_path, dpi=_DPI)
@@ -174,7 +174,7 @@ def plot_calibration_pad_heatmap(
     ax.set_xticklabels(_relabel_crops(grid.columns))
     ax.set_yticks(np.arange(len(grid.index)))
     ax.set_yticklabels([region_label(key) for key in grid.index])
-    ax.set_title("Calibration : PAD (%) par sous-région et culture", fontweight="bold")
+    ax.set_title("Calibration: PAD (%) by sub-region and crop", fontweight="bold")
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
         tick.set_horizontalalignment("right")
