@@ -14,19 +14,39 @@ refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémo
 > ailleurs**. La suite du stage — couplage avec MAELIA dans les deux sens, portage des données
 > vers le SI de MAELIA avec niveaux d'accès, passage du code à l'anglais, tableau d'état de ce
 > qui est implémenté — est cadrée dans
-> `docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md`, avec l'ordre
-> proposé et les questions ouvertes. Rien n'y est encore implémenté.
+> `docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md` (en anglais),
+> avec l'ordre proposé et les questions ouvertes.
 >
-> ⚠ **Le déplacement a cassé deux générateurs.** `build_chiffres.py` et `build_figures.py`
-> calculent la racine du dépôt par `Path(__file__).parent.parent`, qui vaut désormais
-> `clement/` et non plus la racine : ils ne trouvent plus `outputs/`. Correctif :
-> `.parents[2]`. Même question pour `clement/soutenance/build_pptx.py` et
-> `build_carte_chlordecone.py` (`parents[1]`, qui visait `memoire/` et vise maintenant
-> `clement/`). **Non corrigé**, à faire avant de régénérer quoi que ce soit.
+> **Décisions de Clément, 2026-09-22.** (1) **Tout le dépôt passe en anglais** — code, config,
+> scénarios, dashboard, docs. **Le mémoire et le corpus restent en français** : ils sont clos.
+> (2) **La contrainte « aucun solve neuf » (§ 3) est levée** pour la suite du stage ; elle ne
+> valait que pour la rédaction. (3) **`docs/TODO.md` est remplacé par `docs/status/roadmap.yaml`.**
+> (4) Les couplages MAELIA attendent la formation.
 >
-> ⚠ **La contrainte « aucun solve neuf » (§ 3) valait pour la rédaction.** Elle n'est ni
-> levée ni reconduite pour la suite du stage : c'est à Clément de le dire. Le couplage MAELIA
-> implique une recalibration, donc des solves.
+> **Fait le même jour** (voir `git log`) : renommage anglais du code, de la config, des
+> scénarios, des clés du recap et du dashboard ; `case_studies/guadeloupe/legacy_names.py` lit
+> les anciens runs **sans réécrire `outputs/`** ; tableau d'état (`docs/status/STATUS.md`, page
+> Status) ; documentation numérotée traduite (`docs/01-usage.md` … `05-new-case-study.md`).
+>
+> **Ce que ça change pour l'outillage du mémoire.** Les deux générateurs lisaient la racine par
+> `Path(__file__).parent.parent`, cassé par le déplacement : **corrigé** (`parents[2]`, idem pour
+> les deux scripts de `soutenance/`). `build_chiffres.py` régénère `chiffres.tex` **à
+> l'identique** (598 macros, aucun diff). Il lit les `recap.json` directement, donc avec leurs
+> clés françaises d'origine — c'est voulu, les runs sur disque ne sont pas réécrits. Seule
+> exception : `outputs/reference_2017/` est régénéré avec des clés anglaises, et le générateur
+> lit désormais la copie à clés françaises gardée dans `outputs/_legacy_reference_2017_fr/`.
+> Les noms de runs cités dans ce fichier (`calib_retenu`, `P4_statu_quo`, `pareto_azote`) sont
+> ceux des dossiers sur disque ; dans le dépôt ils s'appellent désormais `calib_selected`,
+> `P4_status_quo`, `pareto_nitrogen` (table complète : `docs/glossary.md`).
+>
+> **Deux erreurs trouvées en relisant la doc, à connaître si le mémoire est rouvert.**
+> (a) `docs/04-vigilance.md` E.6 donnait pour la calibration retenue un PAD par exploitation
+> médian de 18,5 % et moyen de 51,5 % : ce sont les chiffres du run de **parité**. La
+> calibration retenue fait médiane 0,0 %, moyenne 26,3 %, 72,3 % des fermes sous le seuil —
+> ce que le mémoire écrit déjà (§ 6 bis ci-dessous). (b) La config décrivait `Eq_IG_CLD` à
+> l'envers (« IG_TUT seulement où le risque de cercosporiose ≤ 3 ») : la règle **interdit**
+> l'igname tuteuré là où le risque **chlordécone** est ≤ 3. Le code était juste, le commentaire
+> et l'inventaire de portage faux.
 >
 > **Session du 2026-09-02 — échafaudage supprimé, annexes réduites aux tableaux, deux
 > erreurs de fond corrigées.** Demande de Clément, sans aucune reformulation de sa prose.
@@ -285,8 +305,10 @@ aboutir à un résultat proche. Conséquence pratique : le `.tex` existant est *
 parmi d'autres**, jamais une référence à défendre. Ne jamais juger sa prose comme si elle
 était la sienne, ne jamais lui opposer « le mémoire dit déjà que… ».
 
-**Aucun solve nouveau.** `main.py` et `run_scenarios.py` sont hors limites (30-55 min par
-solve, variance ×6,5). Tout ce qui suit se fait sur les `outputs/` déjà écrits.
+**Aucun solve nouveau** — pendant la rédaction. `main.py` et `run_scenarios.py` étaient hors
+limites (30-55 min par solve, variance ×11). **Levée le 2026-09-22** pour la suite du stage ;
+si le mémoire est rouvert (note technique, article), les chiffres qu'il cite restent ceux des
+`outputs/` écrits avant le dépôt.
 
 ## 4. Ce qui existe
 

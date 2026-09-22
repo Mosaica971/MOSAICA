@@ -1,616 +1,640 @@
-# 04 — Vigilance : ce qu'il faut savoir avant de citer un chiffre
+# 04 — Vigilance: what to know before quoting a figure
 
-Le modèle produit des nombres crédibles là où ils ne veulent rien dire. Cette page liste les
-pièges, avec le verdict et la mesure qui le fonde. Le **journal complet des enquêtes** (avec les
-chemins abandonnés et pourquoi) est dans [`archives/journal-vigilance.md`](archives/journal-vigilance.md).
+The model produces credible numbers where they mean nothing. This page lists the traps, with
+the verdict and the measurement behind it. The **full investigation log** (with the paths
+abandoned and why) is in [`archives/journal-vigilance.md`](archives/journal-vigilance.md), in
+French.
 
-Sévérités : **Critique** (fausse un résultat) · **Majeur** (limite fonctionnelle réelle) ·
-**Mineur** (à connaître).
+Severities: **Critical** (falsifies a result) · **Major** (a real functional limit) ·
+**Minor** (to know).
+
+Figures below were measured on the runs named with them. The reference runs on disk
+(`calib_retenu`, `calib_gams_parite`) predate the correction of the price tables of
+2026-09-08 (E.1): their figures stand for those runs, and are due to be regenerated.
 
 ---
 
-## A. Lire un résultat
+## A. Reading a result
 
-### A.1 — Critique — Un indicateur fixé par une contrainte n'est pas un résultat
+### A.1 — Critical — An indicator fixed by a constraint is not a result {#a1}
 
-Noter une politique sur les subventions alors qu'elle plafonne elle-même son budget à 80 M€
-mesure **ce qu'on lui a imposé**. P1 gagne l'axe « dépense publique » en la mettant à zéro : c'est
-circulaire.
+Scoring a policy on subsidies when it caps its own budget at 80 M€ measures **what was imposed
+on it**. P1 wins the "public spending" axis by setting it to zero: that is circular.
 
-→ `comparison.bound_indicators(recap)` les détecte depuis `recap["constraints"]` — donc
-rétroactivement sur les runs déjà écrits — et le dashboard les marque ⚠. Le score les inclut
-quand même **si on le demande**, à dessein : les exclure d'office empêcherait de voir l'effet
-d'un plafond sur les *autres* indicateurs.
+-> `comparison.bound_indicators(recap)` detects them from `recap["constraints"]` — hence after the
+fact on runs already written — and the dashboard marks them ⚠. The score still includes them
+**if asked**, on purpose: excluding them outright would hide the effect of a ceiling on the
+*other* indicators.
 
-### A.2 — Critique — Comparer des totaux confond échelle et intensité
+### A.2 — Critical — Comparing totals confuses scale and intensity
 
-Une politique qui cultive moins d'hectares affiche moins d'azote total **sans produire plus
-proprement**. Un plafond d'azote se satisfait aussi en cultivant moins.
+A policy farming fewer hectares shows less total nitrogen **without producing more cleanly**. A
+nitrogen ceiling can also be met by farming less.
 
-→ Lire le bloc `intensity` : azote **par tonne**, par hectare. C'est l'intensité qui décrit une
-pratique.
+-> Read the `intensity` block: nitrogen **per tonne**, per hectare. Intensity is what describes a
+practice.
 
-### A.3 — Critique — « Résilience » désigne deux choses opposées dans ce dépôt
+### A.3 — Critical — "Resilience" means two opposite things in this repository
 
-| | Mesure | Le modèle a-t-il réagi ? |
+| | Measure | Did the model react? |
 |---|---|---|
-| `recap["resilience"]` (`domain/resilience.py`) | **exposition** — choc appliqué *après* le solve, allocation figée | non |
-| `core/reporting/robustness.py` | **capacité d'adaptation sous contrainte politique** — ré-optimisé sous chaque forçage | oui |
+| `recap["resilience"]` (`domain/resilience.py`) | **exposure** — shock applied *after* the solve, frozen allocation | no |
+| `core/reporting/robustness.py` | **adaptive capacity under policy constraint** — re-optimised under each forcing | yes |
 
-**Ne jamais les additionner** : le nombre obtenu n'a pas de sens.
+**Never add them up**: the number obtained has no meaning.
 
-Trois conventions du module de robustesse, à connaître avant d'interpréter :
-- une politique **infaisable** sous un forçage n'a **pas** de pire cas chiffré (case vide) —
-  sinon le pire de ses survivants la ferait passer pour robuste ;
-- les forçages ne sont **pas moyennés** par défaut : une moyenne affirmerait une distribution de
-  probabilité que personne n'a choisie ;
-- le regret se mesure contre la meilleure politique **du même forçage**.
+Three conventions of the robustness module, to know before interpreting:
+- a policy **infeasible** under a forcing has **no** numeric worst case (empty cell) —
+  otherwise the worst of its survivors would make it look robust;
+- forcings are **not averaged** by default: an average would assert a probability
+  distribution nobody chose;
+- regret is measured against the best policy **of the same forcing**.
 
-### A.4 — Majeur — Le score composite : pondérer par famille
+### A.4 — Major — The composite score: weight by family
 
-Sans `balance_families=True` (le défaut), les onze ratios d'autonomie alimentaire, quasi
-colinéaires, pèsent **onze fois** les GES. Le score mesurerait alors la finesse du découpage, pas
-la performance.
+Without `balance_families=True` (the default), the eleven food self-sufficiency ratios, nearly
+collinear, weigh **eleven times** GHG. The score would then measure how finely the list is cut,
+not performance.
 
-### A.5 — Majeur — Le PAD n'est pas un score en prospective
+### A.5 — Major — The PAD is not a score in prospective work
 
-Il mesure l'écart à 2017. Un scénario politique est *fait* pour s'en écarter. À lire comme
-« ampleur du bouleversement », jamais comme une note.
+It measures the gap to 2017. A policy scenario is *made* to move away from it. Read it as "size
+of the upheaval", never as a mark.
 
-### A.6 — Mineur — Le diff de config dit ce qui a été *demandé*, jamais ce que l'écart a *coûté*
+### A.6 — Minor — The config diff says what was *asked*, never what the gap *cost*
 
-Une contrainte qui ne mord pas ne change aucun résultat. Et deux configs identiques divergent
-déjà par le seul arbitraire de branchement du solveur (**0,15 point de PAD** mesuré sur trois
-graines HiGHS). Le diff d'**allocation** répond à la question suivante.
+A constraint that does not bind changes no result. And two identical configs already diverge by
+the solver's branching arbitrariness alone (**0.15 PAD point** measured over three HiGHS
+seeds). The **allocation** diff answers the next question.
 
-### A.7 — Critique — Un front ε-contrainte se paramètre sur la borne de sa POLITIQUE HÔTE
+### A.7 — Critical — An ε-constraint front is parameterised on the bound of its HOST POLICY
 
-Les seuils de `scenarios_pareto.yaml` sont des fractions du **réalisé de `calib_retenu`**
-(1 930 903 kg N). C'est le bon réglage pour un front tracé contre la config de référence. Sous
-une politique qui pose déjà sa propre borne, il ne l'est plus.
+The thresholds of `scenarios_pareto.yaml` are fractions of **what `calib_selected` achieved**
+(1 930 903 kg N). That is the right setting for a front traced against the reference config.
+Under a policy that already sets its own bound, it no longer is.
 
-Mesuré en LP le 2026-08-09 : sous **P8**, qui plafonne l'azote à 1 351 632, **cinq des sept
-points du catalogue sont inactifs ou égaux** à cette borne. P8 nue et le point à 1 930 903
-rendent la même valeur, **71 065 297, au centime**. Sept solves pour trois points distincts.
+Measured in LP on 2026-08-09: under **P8**, which caps nitrogen at 1 351 632, **five of the seven
+catalogue points are inactive or equal** to that bound. Bare P8 and the 1 930 903 point return
+the same value, **71 065 297, to the cent**. Seven solves for three distinct points.
 
-→ Reparamétrer sur le niveau **où la borne mord sous l'hôte** (`plan_etape_BC.yaml` : cinq
-points, fractions de 1 351 632 ; pente mesurée **5,27 €/kg N**, qui recoupe exactement le prix
-dual relevé sur `plafond_azote`). ⚠ `plan.yaml` accroche `pareto_azote` à P8 **sans**
-reparamétrer : le défaut est dans le plan, pas seulement dans un spec d'étape.
+-> Re-parameterise on the level **where the bound binds under the host** (the executed stage
+spec `plan_etape_BC.yaml`, in git history: five points, fractions of 1 351 632; measured slope
+**5.27 €/kg N**, which matches exactly the dual price read on the nitrogen cap). `plan.yaml`
+hangs `pareto_nitrogen` on P8 **without** re-parameterising: the defect is in the plan, not only
+in a stage spec.
 
-### A.8 — Majeur — Sous crise systémique, le plafond d'azote ne mord plus du tout
+### A.8 — Major — Under a systemic crisis, the nitrogen ceiling no longer binds at all
 
-Le front azote sous **F9** a été instruit puis **abandonné sur mesure**. Les cinq points, de
-1 351 632 à 810 979 kg, rendent la **même borne LP : 32 439 337**. Le plafond est inactif
-partout dans la plage.
+The nitrogen front under **F9** was investigated then **abandoned on measurement**. The five
+points, from 1 351 632 to 810 979 kg, return the **same LP bound: 32 439 337**. The ceiling is
+inactive everywhere in the range.
 
-La raison est économique : F9 dégrade les rendements (×0,80), les prix export (×0,75) et les
-subventions (×0,60) en renchérissant les coûts (×1,30), si bien que l'intensification cesse
-d'être rentable et que l'optimum consomme spontanément **moins de 42 % de l'azote de 2017**.
+The reason is economic: F9 degrades yields (x0.80), export prices (x0.75) and subsidies (x0.60)
+while raising costs (x1.30), so that intensification stops paying and the optimum spontaneously
+uses **less than 42 % of the 2017 nitrogen**.
 
-→ **La crise fait déjà le travail du plafond.** C'est un résultat, obtenu sans aucun solve
-MILP — et non un échec. Un vrai front sous F9 demanderait des seuils commençant sous ~810 000
-kg, donc de mesurer d'abord la consommation spontanée de P8×F9 (le run existant a fini en
-`maxTimeLimit` et rend une allocation identique à P8×F0, donc inexploitable).
+-> **The crisis already does the ceiling's job.** That is a result, obtained without any MILP
+solve — not a failure. A real front under F9 would need thresholds starting below ~810 000 kg,
+hence first measuring the spontaneous use of P8 x F9 (the existing run ended at `maxTimeLimit`
+and returns an allocation identical to P8 x F0, hence unusable).
 
 ---
 
-## B. Solveur et tractabilité {#tractabilite}
+## B. Solver and tractability {#tractabilite}
 
-### B.1 — Majeur — Le solve est lent et sa durée est très dispersée
+### B.1 — Major — The solve is slow and its duration very dispersed
 
-Une demi-heure à une heure en configuration de **calibration** (308 847 variables), deux à trois
-heures en configuration **prospective** (331 044). À **taille constante**, les 7 solves de
-calibration enregistrés vont de **327 s à 3 625 s** — facteur **11**, moyenne 1 448 s, **CV 91 %** ;
-les 13 solves prospectifs vont de 2 505 s à 10 856 s, moyenne **7 043 s**, CV 49 %. La dispersion
-n'est pas un artefact du mélange warm/cold : sur les 6 solves de calibration amorcés à chaud seuls,
-le CV vaut encore 96 %. Le goulot est la recherche branch-and-bound, pas l'enveloppe Pyomo→HiGHS
-(~15 s, négligeable).
+Half an hour to an hour in the **calibration** configuration (308 847 variables), two to three
+hours in the **prospective** one (331 044). At **constant size**, the 7 calibration solves
+recorded run from **327 s to 3 625 s** — a factor **11**, mean 1 448 s, **CV 91 %**; the 13
+prospective solves run from 2 505 s to 10 856 s, mean **7 043 s**, CV 49 %. The dispersion is
+not an artefact of mixing warm and cold: on the 6 warm-started calibration solves alone, the CV
+is still 96 %. The bottleneck is the branch-and-bound search, not the Pyomo->HiGHS wrapper
+(~15 s, negligible).
 
-> **`.mosaica_solve_history.json` est une fenêtre glissante sur les 20 derniers solves**
-> (`progress.py`, `del entries[:-_MAX_ENTRIES_PER_CASE_STUDY]`), pas un journal cumulatif.
-> Les chiffres ci-dessus ont été **recalculés le 2026-08-30** sur son contenu du moment. Les
-> valeurs précédentes — « les 20 solves vont de 155 s à 1 007 s, facteur 6,5, CV 64 % », relevées
-> le 2026-08-01 — décrivaient une campagne depuis **écrasée** : plus aucune entrée n'en approche,
-> et les 20 entrées actuelles se répartissent sur **deux tailles** et non une, ce qui rend la
-> phrase « à taille constante, les 20 solves » elle-même mal formée. Toute reprise de ce
-> paragraphe doit **recompter** le fichier plutôt que recopier un chiffre : `clement/memoire/build_chiffres.py`
-> (bloc `MEASUREMENTS`) porte les mêmes valeurs et la même date.
+> **`.mosaica_solve_history.json` is a rolling window over the last 20 solves**
+> (`progress.py`, `del entries[:-_MAX_ENTRIES_PER_CASE_STUDY]`), not a cumulative log. The
+> figures above were **recounted on 2026-08-30** from its content at the time. The previous
+> values — "the 20 solves run from 155 s to 1 007 s, factor 6.5, CV 64 %", read on 2026-08-01 —
+> described a campaign since **overwritten**. Anyone reusing this paragraph must **recount** the
+> file rather than copy a figure: `clement/memoire/build_chiffres.py` (block `MEASUREMENTS`)
+> carries the same values and date.
 
-→ **Aucune estimation ponctuelle de durée n'est fiable.** `core/solve/progress.py` affiche donc
-une **fourchette** issue des runs comparables (même taille à 20 %, même mode warm/cold), et
-refuse de répondre hors de cette bande.
+-> **No point estimate of duration is reliable.** `core/solve/progress.py` therefore prints a
+**range** from comparable runs (same size within 20 %, same warm/cold mode), and refuses to
+answer outside that band.
 
-### B.2 — Majeur — Un solve qui tape la limite de temps rend un incumbent *prouvablement*
-sous-optimal
+### B.2 — Major — A solve that hits the time limit returns a *provably* sub-optimal incumbent
 
-Ce n'est pas une présomption. En partant d'une allocation existante et en basculant vers le
-meilleur fruitier éligible les parcelles où cela coûte le moins, on construit **en quelques
-secondes** une solution faisable valant 80,91 M€, contre **76,46 M€** trouvés par HiGHS **en une
-heure** — 5,5 % d'écart.
+This is not a presumption. Starting from an existing allocation and switching to the best
+eligible fruit crop the plots where it costs least, a feasible solution worth 80.91 M€ is built
+**in a few seconds**, against the **76.46 M€** HiGHS found **in one hour** — a 5.5 % gap.
 
-**Signature à reconnaître** : une contrainte sur l'ananas fait reculer la canne et la banane.
-Une contrainte qui n'a aucune raison de toucher un poste et le touche = branch-and-bound perdu.
+**Signature to recognise**: a constraint on pineapple makes cane and banana recede. A constraint
+that has no reason to touch an item and touches it = a lost branch-and-bound.
 
-→ Le correctif est le **warm start** : le même plancher arboricole, mais plus serré (335 ha au
-lieu de 200), passe de 3 613 s non convergé à **642 s convergé**, objectif 4,7 M€ meilleur.
+-> The fix is the **warm start**: the same orchard floor, but tighter (335 ha instead of 200),
+goes from 3 613 s unconverged to **642 s converged**, an objective 4.7 M€ better.
 
-### B.3 — Majeur — Les cultures symétriques sont un désastre {#karusmart}
+### B.3 — Major — Symmetric crops are a disaster {#karusmart}
 
-**Les 25 variantes maraîchères « Karusmart »** `MA_{BAG,BRF,PAI}_{BIO,VEG,FER,NON}_{I,NI}` sont
-**identiques au bit près** à `MA_TO_CO_JA` sur tous les paramètres que le modèle lit — marge
-20 825 €/ha, rendement 36 t/ha, 1 128 h/ha, 75,6 kg N/ha, IFT 10, même empreinte d'éligibilité.
-Les distinctions paillage / fertilisation / irrigation **ne portent aucune donnée**.
+**The 25 "Karusmart" market-gardening variants** `MA_{BAG,BRF,PAI}_{BIO,VEG,FER,NON}_{I,NI}` are
+**bit-for-bit identical** to `MA_TO_CO_JA` on every parameter the model reads — margin
+20 825 €/ha, yield 36 t/ha, 1 128 h/ha, 75.6 kg N/ha, TFI 10, same eligibility footprint. The
+mulching / fertilisation / irrigation distinctions **carry no data**.
 
-Deux conséquences, les deux ont mordu :
-- les rouvrir ajoute **548 000 binaires de pure symétrie** (879 162 contre 331 044) ;
-- **toute part de bio bâtie sur elles est un no-op** : le solveur satisfait « 25 % de bio » en
-  choisissant la copie nommée `_BIO_` d'une activité identique, à coût **exactement nul**. Une
-  contrainte qui a l'air d'une politique agroécologique et ne contraint rien.
+Two consequences, both of which bit:
+- reopening them adds **548 000 binaries of pure symmetry** (879 162 against 331 044);
+- **any organic share built on them is a no-op**: the solver meets "25 % organic" by picking
+  the copy named `_BIO_` of an identical activity, at **exactly zero** cost. A constraint that
+  looks like an agroecological policy and constrains nothing.
 
-→ **Les seules vraies cultures bio du jeu sont `MA_PLBIO` et `MA_MOBIO`** (azote 0, IFT 0, pour
-3 882 / 3 498 €/ha contre 27 929 à `MA_ROTA`). C'est sur elles seules qu'est bâti
-`bio_maraichage`. **Ne pas rouvrir `ma_exp_supp`** sans que les 25 aient reçu des itinéraires
-distincts. `check_scenario_feasibility.py` détecte et signale tout groupe symétrique.
+-> **The only genuinely organic crops of the dataset are `MA_PLBIO` and `MA_MOBIO`** (nitrogen 0,
+TFI 0, for 3 882 / 3 498 €/ha against 27 929 for `MA_ROTA`). The group
+`organic_market_gardening` of `crop_groups.yaml` is built on them alone (the older
+`scenarios.yaml` still counts the copies, and says so). **Do not reopen `ma_exp_supp`** until
+the 25 have distinct itineraries. `check_scenario_feasibility.py` detects and reports any
+symmetric group.
 
-### B.4 — Majeur — Le plafond de main d'œuvre est le vrai facteur limitant
+### B.4 — Major — The labour ceiling is the real limiting factor
 
-`Eq_MO_MAX_Expl` accorde 6 252 740 h au territoire, soit **3 891 ETP** à `slack: 1.0`.
+`Eq_MO_MAX_Expl` grants the territory 6 252 740 h, i.e. **3 891 FTE** at `slack: 1.0`.
 
-- Un **plancher d'emploi** au-dessus de 3 891 ETP est infaisable si le scénario ne desserre pas
-  le slack (1.5 → 5 837 ETP, 2.0 → 7 782).
-- Les **planchers de production vivrière** réclament 6 222 537 h et sont infaisables à
-  `slack: 1.0`.
+- An **employment floor** above 3 891 FTE is infeasible unless the scenario loosens the slack
+  (1.5 -> 5 837 FTE, 2.0 -> 7 782).
+- The **food-production floors** claim 6 222 537 h and are infeasible at `slack: 1.0`.
 
-⚠ **Et desserrer le slack ne suffit pas.** P10 était infaisable avec un plancher à 6 000 ETP
-alors que son slack en autorisait 8 561 : ce ne sont pas les heures qui manquaient mais les
-**cultures capables de les absorber** sous les plafonds environnementaux. Maximum réel mesuré en
-LP : **P8 → 4 875 ETP, P10 → 4 975 ETP**. Une bissection a exclu tout plafond isolé comme cause
-(retirer l'IFT, l'azote ou les GES laisse l'infaisabilité) : c'est la combinaison.
+**And loosening the slack is not enough.** P10 was infeasible with a floor at 6 000 FTE while its
+slack allowed 8 561: what was missing was not hours but **crops able to absorb them** under the
+environmental ceilings. Real maximum measured in LP: **P8 -> 4 875 FTE, P10 -> 4 975 FTE**. A
+bisection ruled out any single ceiling as the cause (removing TFI, nitrogen or GHG leaves the
+infeasibility): it is the combination.
 
-→ **Ne jamais relever un plancher d'emploi sans re-mesurer.** Un test sans données
-(`test_prospective_labour_slack_covers_every_employment_floor`) garde la cohérence des deux blocs.
+-> **Never raise an employment floor without re-measuring.** A data-free test
+(`test_prospective_labour_slack_covers_every_employment_floor`) keeps the two blocks consistent.
 
-### B.5 — Mineur — Une zone sans terme est silencieusement exemptée
+The budget itself rests on the representative crops (C.2). The observed fine plan
+(`context/SORTIES/ASSOL_PARC_INIT.TXT`) gives 5 592 326 h instead of 6 252 740 and redistributes
+it between farms; it is tested in `scenarios_labor.yaml` and not yet the default.
 
-`zone_indicator_bound` ne pose aucune contrainte pour une zone dont aucune paire éligible ne
-porte de taux non nul. Sans conséquence pour un **plafond** ; mais pour un **plancher**, cette
-zone est **dispensée** au lieu de rendre le run infaisable.
+### B.5 — Minor — A zone with no term is silently exempted
 
-→ Contrôle : comparer le nombre de zones que la contrainte a produites au nombre que le
-groupement déclare.
+`zone_indicator_bound` sets no constraint for a zone where no eligible pair carries a non-zero
+rate. Harmless for a **ceiling**; but for a **floor**, that zone is **exempted** instead of
+making the run infeasible.
 
-### B.6 — Majeur — P10 est hors d'atteinte, et aucune graine n'est réparable {#p10}
+-> Check: compare the number of zones the constraint produced with the number the grouping
+declares.
 
-`P10_bifurcation_agroecologique` empile un plafond GES (−25 %), un IFT à 33 473 (−50 %), un
-azote à 1 158 542 (−40 %), 120 kgN/ha par ferme, un plafond d'eau, cinq planchers vivriers et
-un plancher d'emploi à 4 400 ETP. Le 2026-08-03 elle est sortie en `maxTimeLimit` **sans aucun
-incumbent** en 7 200 s.
+### B.6 — Major — P10 is out of reach, and no seed is repairable {#p10}
 
-**Ce n'est pas de l'infaisabilité** — la relaxation LP est faisable, borne **46 311 985 €** en
-81 s. Et ce n'est pas non plus une simple lenteur : `scripts/audit_warm_start_seed.py` rejette
-les trois graines les plus proches.
+`P10_agroecological_bifurcation` stacks a GHG ceiling (−25 %), TFI at 33 473 (−50 %), nitrogen
+at 1 158 542 (−40 %), 120 kg N/ha per farm, a water ceiling, five food-crop floors and an
+employment floor at 4 400 FTE. On 2026-08-03 it ended at `maxTimeLimit` **without any
+incumbent** in 7 200 s.
 
-| Graine | Contraintes violées | Le plus parlant |
+**It is not infeasibility** — the LP relaxation is feasible, bound **46 311 985 €** in 81 s. Nor
+is it mere slowness: `scripts/audit_warm_start_seed.py` rejects the three nearest seeds.
+
+| Seed | Constraints violated | Most telling |
 |---|---:|---|
-| `pareto_azote_threshold_1061997` | 124 | IFT dépassé de 26 316 sur un plafond à 33 473 |
-| `pareto_azote_threshold_1158542` | 156 | + GES dépassés de 6,4 M |
-| `p8_..._f0_nominal` | 407 | GES dépassés de 63,4 M, azote de 193 081 |
+| `pareto_azote_threshold_1061997` | 124 | TFI exceeded by 26 316 on a ceiling at 33 473 |
+| `pareto_azote_threshold_1158542` | 156 | + GHG exceeded by 6.4 M |
+| `p8_..._f0_nominal` | 407 | GHG exceeded by 63.4 M, nitrogen by 193 081 |
 
-→ **Aucune allocation jamais produite par ce modèle n'est à distance de réparation** de ces
-plafonds cumulés, et `repair_allocation.py` ne répare qu'un plancher de surface. Relancer à
-froid reproduirait l'échec. Ce qu'on sait dire tient dans la borne LP : **même en autorisant
-les fractions de parcelle, P10 coûte au moins 43 % de l'objectif** (46,3 M€ contre 80,8 M€
-pour P8). C'est une borne supérieure valide et elle est plus solide qu'un incumbent non prouvé.
-⚠ Conséquence pour la lecture : **l'axe P1 ↔ P10 est unilatéral**, seule la borne
-accélérationniste est résolue.
+-> **No allocation this model ever produced is within repair distance** of these stacked
+ceilings, and `repair_allocation.py` only repairs an area floor. Restarting cold would reproduce
+the failure. What can be said lies in the LP bound: **even allowing fractions of plots, P10 costs
+at least 43 % of the objective** (46.3 M€ against 80.8 M€ for P8). It is a valid upper bound
+and more solid than an unproven incumbent. Consequence for reading: **the P1 <-> P10 axis is
+one-sided**, only the accelerationist bound is solved.
 
----
+### B.7 — Major — The warm-start chain is **internal to the batch**: a run on disk is never a seed {#chaine-batch}
 
-### B.7 — Majeur — La chaîne de warm start est **interne au batch** : un run sur disque n'est jamais une graine {#chaine-batch}
+`seed_candidates` (`scripts/run_scenarios.py`) offers three seeds, nearest first: the previous
+point of the same front, the policy's nominal allocation, the global seed. The first two are
+read from `sweep_seeds` and `policy_seeds` — **two dictionaries filled during the batch**, never
+from `outputs/`. There is no discovery of seeds on disk.
 
-`seed_candidates` (`scripts/run_scenarios.py:74`) propose trois graines, la plus proche
-d'abord : le point précédent du même front, l'allocation nominale de la politique, la graine
-globale. Les deux premières se lisent dans `sweep_seeds` et `policy_seeds` — **deux
-dictionnaires remplis pendant le batch** (`run_scenarios.py:304-312`), jamais depuis
-`outputs/`. Il n'existe aucune découverte de graine sur disque.
+-> Consequence: **a cell whose policy has no unforced run in the same batch starts cold**,
+whatever sleeps in `outputs/`. That is exactly the case of a resumption batch, which by
+construction only replays forced cells. The only way to name an existing run is
+`--warm-start-from`, and it is **global to the batch**: a batch mixing several policies cannot
+give each its own seed. Splitting it by policy is not fussiness, it is the only way to seed
+correctly.
 
-→ Conséquence : **une cellule dont la politique n'a pas de run non forcé dans le même batch
-repart à froid**, quel que soit ce qui dort dans `outputs/`. C'est exactement le cas d'un lot
-de reprise, qui ne rejoue par construction que les cellules forcées. Le seul moyen de nommer
-un run existant est `--warm-start-from`, et il est **global au batch** : un lot mêlant
-plusieurs politiques ne peut donner à chacune sa propre graine. Le découper par politique
-n'est pas de la coquetterie, c'est la seule façon d'amorcer correctement.
+The symptom is discreet — the "warm start from …" line is missing, but the solve starts normally
+and the batch says nothing. Check: `run_scenarios.py` prints the seed chosen for each run; **its
+absence means cold**.
 
-Le symptôme est discret — la ligne « warm start depuis … » manque, mais le solve démarre
-normalement et le batch ne dit rien. Contrôle : `run_scenarios.py` imprime la graine retenue
-pour chaque run ; **son absence signifie froid**.
+### B.8 — Major — The root LP bound widely overstates what a solve left {#borne-lp}
 
-### B.8 — Majeur — La borne LP racine surestime largement ce qu'un solve a laissé {#borne-lp}
+Measured on `P8_agroecological_transition` on 2026-08-11: integer optimum **69 088 438**
+(proven), root LP bound **71 065 297**. The **integrality gap alone is 2.78 %**. An incumbent at
+68 644 754 is therefore 3.41 % from the LP bound but **0.64 % from the optimum** — a factor of
+five between the two readings.
 
-Mesuré sur `P8_transition_agroecologique` le 2026-08-11 : optimum entier **69 088 438**
-(prouvé), borne LP racine **71 065 297**. Le **saut d'intégralité vaut à lui seul 2,78 %**.
-Un incumbent à 68 644 754 est donc à 3,41 % de la borne LP mais à **0,64 % de l'optimum** —
-un facteur cinq entre les deux lectures.
+-> The LP bound serves to **prove an infeasibility** (B.6) and to compare policies with each
+other. It does not quantify how sub-optimal an incumbent is: the gap it shows belongs mostly to
+the relaxation, not to the branch-and-bound. Never write "the solver stalls at 3.4 %" on that
+basis.
 
-→ La borne LP sert à **prouver une infaisabilité** (cf. B.6) et à comparer des politiques
-entre elles. Elle ne chiffre pas la sous-optimalité d'un incumbent : l'écart qu'elle affiche
-appartient pour l'essentiel à la relaxation, pas au branch-and-bound. Ne jamais écrire « le
-solveur cale à 3,4 % » sur cette base.
+Corollary measured the same day: **proving costs more than finding**. Restarted on the optimum
+itself, the solve took **8 981 s** just to close the dual bound. And time only pays off in a
+chain, each step restarting from the previous incumbent — 68 445 374 (1 h), 68 644 754 (+3 h),
+69 088 438 proven (+2.2 h) — where three hours in one go from a fixed seed had brought only
+0.29 %.
 
-Corollaire mesuré le même jour : **prouver coûte plus cher que trouver**. Réamorcé sur
-l'optimum lui-même, le solve a mis **8 981 s** uniquement à fermer la borne duale. Et le temps
-ne rend qu'en chaîne, chaque étape repartant de l'incumbent de la précédente — 68 445 374
-(1 h), 68 644 754 (+3 h), 69 088 438 prouvé (+2,2 h) — là où trois heures d'un seul tenant à
-graine fixe n'avaient rapporté que 0,29 %.
+### B.9 — Major — A warm start can **degrade** a forced cell {#warm-regression}
 
-### B.9 — Majeur — Un warm start peut **dégrader** une cellule forcée {#warm-regression}
+A warm start guarantees a result **greater than or equal to its seed's value**. It guarantees
+nothing against an earlier run of the same cell, which may have started elsewhere and landed
+higher.
 
-Un warm start garantit un résultat **supérieur ou égal à la valeur de sa graine**. Il ne
-garantit rien vis-à-vis d'un run antérieur de la même cellule, qui a pu partir d'ailleurs et
-atterrir plus haut.
+Measured on 2026-08-12 on `P8 x F9_systemic_crisis`, resumed with three times more time:
 
-Mesuré le 2026-08-12 sur `P8 × F9_crise_systemique`, repris avec trois fois plus de temps :
-
-| | objectif | durée |
+| | objective | duration |
 |---|---:|---:|
-| run initial, à froid | **−1 506 116** | 3 629 s |
-| reprise, amorcée sur P8 × F0 | −1 678 357 | 10 825 s |
+| initial run, cold | **−1 506 116** | 3 629 s |
+| resumption, seeded from P8 x F0 | −1 678 357 | 10 825 s |
 
-La graine était l'allocation de `P8 × F0`, **optimale sous F0 et médiocre sous F9** : la crise
-systémique renverse la rentabilité relative des cultures, si bien que le meilleur assolement
-nominal est un mauvais point de départ. Le solveur est parti d'un incumbent bas et n'en est
-pas sorti en trois heures.
+The seed was the allocation of `P8 x F0`, **optimal under F0 and poor under F9**: the systemic
+crisis reverses the relative profitability of the crops, so that the best nominal cropping plan
+is a bad starting point. The solver started from a low incumbent and did not get out of it in
+three hours.
 
-→ **Ne jamais écraser l'ancien run.** Après toute reprise, comparer et garder le meilleur des
-deux incumbents ; la quarantaine `outputs/_non_converges/` sert exactement à ça. Et pour
-reprendre une cellule forcée, la graine la plus sûre est **son propre run antérieur**, pas
-l'allocation nominale de la politique — celle-ci n'est la meilleure graine que pour les
-forçages qui déplacent peu les coefficients. Ce que dit `scenarios_forcages.yaml`
-(« un forçage change des coefficients, pas l'ensemble faisable ») garantit la **faisabilité**
-de la graine, jamais sa **qualité**.
+-> **Never overwrite the old run.** After any resumption, compare and keep the better of the two
+incumbents; the quarantine `outputs/_non_converges/` exists exactly for that. And to resume a
+forced cell, the safest seed is **its own earlier run**, not the policy's nominal allocation —
+the latter is the best seed only for forcings that move the coefficients little. What
+`scenarios_forcings.yaml` says ("a forcing changes coefficients, not the feasible set")
+guarantees the seed's **feasibility**, never its **quality**.
 
 ---
 
-## C. Données : ce que le jeu ne contient pas
+## C. Data: what the dataset does not contain
 
-### C.1 — Majeur — Les rendements du modèle valent 1 à 4× ceux du territoire
+### C.1 — Major — The model's yields are 1 to 4x those of the territory
 
-Confronté à la Statistique agricole annuelle 2017 (Agreste, *Mémento de la statistique
-agricole — Guadeloupe*, éd. 2019, p. 16-17), qui publie superficie, **rendement** et production
-par culture — la colonne rendement est publiée telle quelle, ce n'est pas une division de notre
-fait. Colonne « modèle » = production simulée / surface simulée sur `calib_retenu`, donc mélange
-de variantes fines compris.
+Compared with the 2017 annual agricultural statistics (Agreste, *Mémento de la statistique
+agricole — Guadeloupe*, 2019 edition, pp. 16-17), which publish area, **yield** and production per
+crop — the yield column is published as is, not a division of ours. Column "model" = simulated
+production / simulated area on `calib_retenu`, fine-variant mix included.
 
-| | Agreste | modèle /cycle | modèle /an | rapport |
+| | Agreste | model /cycle | model /yr | ratio |
 |---|---:|---:|---:|---:|
-| Maraîchage | 10,8 t/ha | 43,9 | 43,9 | ×4,1 |
-| Agrumes | 5,2 | 20,0 | 20,0 | ×3,8 |
-| Plantain | 9,0 | 26,0 | 26,0 | ×2,9 |
-| Vergers | 6,4 | 14,5 | 14,5 | ×2,3 |
-| **Ananas (cycle 18 mois)** | 12,3 | 34,0 | **22,7** | ×1,8 |
-| Igname | 10,0 | 17,8 | 17,8 | ×1,8 |
-| Melon | 19,9 | 20,0 | 20,0 | ×1,0 ✓ |
+| Market gardening | 10.8 t/ha | 43.9 | 43.9 | x4.1 |
+| Citrus | 5.2 | 20.0 | 20.0 | x3.8 |
+| Plantain | 9.0 | 26.0 | 26.0 | x2.9 |
+| Orchards | 6.4 | 14.5 | 14.5 | x2.3 |
+| **Pineapple (18-month cycle)** | 12.3 | 34.0 | **22.7** | x1.8 |
+| Yam | 10.0 | 17.8 | 17.8 | x1.8 |
+| Melon | 19.9 | 20.0 | 20.0 | x1.0 ✓ |
 
-⚠ **CORRIGÉ le 2026-08-16 — cette entrée annonçait « 2 à 4× » et comparait des unités
-différentes sur l'ananas.** `Rdt_Cult` est un rendement **par cycle**. Le GAMS annualise
-(`/Duree_Cycle_Cult*12`) tout ce qui est monétaire — CA, subventions, marge — mais **pas** les
-tonnages (`PROD_*`, `TONNE_*`, `NUTRI_*` lisent `Rdt_Cult` brut ; le portage Python fait
-pareil, cf. `compute_production_tonnes_by_crop`). Sur les 84 cultures, `Duree_Cycle_Cult.txt`
-ne porte qu'une valeur ≠ 12 : l'ananas, à **18 mois**. C'est donc la seule culture dont un
-tonnage du modèle n'est pas un tonnage annuel, et l'ancien ×2,8 sur l'ananas était surestimé
-de moitié. Corollaire : **toute confrontation d'un tonnage du modèle à une statistique annuelle
-doit annualiser l'ananas** — quotas de production compris.
+**CORRECTED 2026-08-16 — this entry said "2 to 4x" and compared different units on pineapple.**
+`Rdt_Cult` is a yield **per cycle**. GAMS annualises (`/Duree_Cycle_Cult*12`) everything
+monetary — sales, subsidies, margin — but **not** the tonnages (`PROD_*`, `TONNE_*`, `NUTRI_*`
+read raw `Rdt_Cult`; the Python port does the same, see `compute_production_tonnes_by_crop`).
+Out of 84 crops, `Duree_Cycle_Cult.txt` carries only one value ≠ 12: pineapple, at **18 months**.
+It is therefore the only crop whose model tonnage is not an annual tonnage, and the former x2.8
+on pineapple was overstated by half. Corollary: **any comparison of a model tonnage with an
+annual statistic must annualise pineapple** — production quotas included.
 
-**Recoupement.** Le Mémento 2020 (données 2019) donne les mêmes ordres de grandeur : ananas
-12,91, plantain 9,3, igname 10,0, melon 19,3, agrumes 5,1 (64 ha citrons + 79 clémentines +
-104 oranges + 36 pamplemousses), autres fruits 5,9. Le constat est stable sur deux éditions.
+**Cross-check.** The 2020 Mémento (2019 data) gives the same orders of magnitude: pineapple
+12.91, plantain 9.3, yam 10.0, melon 19.3, citrus 5.1 (64 ha lemons + 79 clementines + 104
+oranges + 36 grapefruit), other fruit 5.9. The finding is stable over two editions.
 
-**Deux réserves à ne pas taire.** (a) *Maraîchage* : le modèle décrit une **rotation annuelle**
-de plusieurs légumes sur le même hectare (`MA_ROTA` 54 t/ha, `MA_TO_CO_JA` 36) alors qu'Agreste
-compte une surface par légume — le ×4,1 est donc en partie une différence d'unité, pas un écart
-de productivité. (b) *Agrumes* : le rendement simulé porte sur ~10 ha, et le dénominateur
-Agreste inclut les vergers non entrés en production.
+**Two caveats not to hide.** (a) *Market gardening*: the model describes an **annual rotation**
+of several vegetables on the same hectare (`MA_ROTA` 54 t/ha, `MA_TO_CO_JA` 36) whereas Agreste
+counts one area per vegetable — the x4.1 is therefore partly a difference of unit, not a
+productivity gap. (b) *Citrus*: the simulated yield bears on ~10 ha, and the Agreste denominator
+includes orchards not yet in production.
 
-**Ce qui rend le constat solide malgré ces réserves : le melon.** C'est la seule culture
-produite presque entièrement par un opérateur unique sous un itinéraire spécifié — donc la
-seule dont la moyenne territoriale *est* un itinéraire technique. Et c'est exactement la seule
-ligne où les deux chiffres coïncident. L'écart n'est pas un défaut de données : c'est la
-différence entre un **rendement potentiel** et un **rendement moyen**, et elle disparaît là où
-les deux notions se confondent.
+**What makes the finding solid despite these caveats: melon.** It is the only crop produced
+almost entirely by a single operator under a specified itinerary — hence the only one whose
+territorial mean *is* a technical itinerary. And it is exactly the only line where the two
+figures coincide. The gap is not a data defect: it is the difference between a **potential
+yield** and a **mean yield**, and it vanishes where the two notions merge.
 
-→ **Conséquence directe : la marge de ces cultures est mécaniquement surestimée, donc le modèle
-en couvre l'île dès qu'aucun débouché ne les borne.** C'est la cause commune du plantain, de
-l'ananas et de l'igname. Sous mandat de parité on n'y touche pas (ce sont les rendements de la
-Table 1 de l'article), mais cela explique *pourquoi* des plafonds de marché sont nécessaires :
-**ce ne sont pas des béquilles**, ils compensent une productivité surévaluée en amont.
+-> **Direct consequence: the margin of these crops is mechanically overstated, so the model
+covers the island with them as soon as no outlet bounds them.** That is the common cause behind
+plantain, pineapple and yam. Under the parity mandate it is not touched (these are the yields of
+the article's Table 1), but it explains *why* market ceilings are needed: **they are not
+crutches**, they compensate for a productivity overstated upstream. Simulated yields (the MAELIA
+coupling on the [roadmap](status/roadmap.yaml)) attack the cause rather than the symptom.
 
-### C.2 — Majeur — L'allocation fine 2017 en entrée n'a jamais existé
+### C.2 — Major — The fine 2017 allocation on the input side never existed
 
-La baseline n'encode la culture qu'au niveau **agrégat RPG** (12 codes). **Le GAMS faisait
-pareil** : la variante technique de 2017 n'a jamais été observée, ce n'est pas un portage
-manquant.
+The baseline only encodes the crop at **RPG aggregate** level (12 codes). **GAMS did the same**:
+the 2017 technical variant was never observed; it is not a missing port.
 
-→ Pour calculer production/subvention/revenu/ETP **en entrée**, on substitue une variante fine
-représentante par famille (`config.yaml baseline_representative_crops`). **Les indicateurs
-d'entrée reposent donc sur une hypothèse**, documentée et configurable.
+-> To compute production/subsidy/revenue/FTE **on the input side**, a representative fine
+variant per family is substituted (`config.yaml baseline_representative_crops`). **The input
+indicators therefore rest on an assumption**, documented and configurable.
 
-⚠ **Et cette hypothèse influence désormais l'allocation**, pas seulement le reporting : le
-plafond de main d'œuvre par exploitation est calculé via les représentantes. Changer une
-représentante change le plafond, donc l'optimum.
+**And that assumption now shapes the allocation**, not only the reporting: the per-farm labour
+ceiling is computed through the representatives. Changing a representative changes the ceiling,
+hence the optimum.
 
-⚠ **Pire : la représentante est souvent une culture que le modèle interdirait sur la parcelle
-qu'elle représente.** Part de la surface observée où elle est éligible : **canne 31 %**,
-maraîchage 61 %, plantain 63 %, banane 69 %, vergers 46 %, agrumes 48 %. Seules prairie, melon et
-jachère sont à 100 %.
+**Worse: the representative is often a crop the model would forbid on the plot it stands for.**
+Share of the observed area where it is eligible: **cane 31 %**, market gardening 61 %, plantain
+63 %, banana 69 %, orchards 46 %, citrus 48 %. Only grassland, melon and fallow are at 100 %.
 
-### C.3 — Majeur — Le RPG sous-déclare la prairie
+### C.3 — Major — The RPG under-declares grassland
 
-Notre jeu parcellaire couvre **87 %** de la SAU 2017 et restitue la canne à **98 %** — mais la
-prairie à **64 %** seulement (6 109 ha contre 9 595). Ce n'est pas un problème d'étiquetage : si
-les ~3 500 ha manquants étaient chez nous classés en canne, notre canne dépasserait Agreste.
-**Ce sont des parcelles absentes de l'univers parcellaire.**
+Our plot dataset covers **87 %** of the 2017 UAA and returns cane at **98 %** — but grassland at
+only **64 %** (6 109 ha against 9 595). It is not a labelling problem: if the ~3 500 missing ha
+were classified as cane here, our cane would exceed Agreste. **They are plots absent from the
+plot universe.**
 
-Preuve physique indépendante : 40 449 bovins ≈ 29 771 UGB. Sur les 9 595 ha d'Agreste cela fait
-**3,10 UGB/ha**, ce qui tombe pile sur les recensements ; sur les 2 980 ha que le modèle donnait
-sans plancher, **9,99 UGB/ha** — trois à quatre fois le réel, agronomiquement impossible.
+Independent physical proof: 40 449 cattle ≈ 29 771 LU. On Agreste's 9 595 ha that is **3.10
+LU/ha**, which falls exactly on the censuses; on the 2 980 ha the model gave without a floor,
+**9.99 LU/ha** — three to four times reality, agronomically impossible.
 
-→ Le défaut est donc prouvé **hors modèle**. C'est ce qui fonde le plancher de prairie à
-6 096 ha, **27 % sous** la valeur exogène (conservateur).
+-> The defect is therefore proven **outside the model**. It is what grounds the grassland floor
+at 6 096 ha, **27 % below** the exogenous value (conservative).
 
-### C.4 — Majeur — Pas de pluviométrie mensuelle
+### C.4 — Major — No monthly rainfall
 
-La formule GAMS du besoin en eau déduit `PLUVIO_01..12_PARC`, colonnes **absentes** des données.
-GAMS renvoie 0 sur colonne manquante, donc **la pluie n'a jamais été déduite**.
+The GAMS water-need formula subtracts `PLUVIO_01..12_PARC`, columns **absent** from the data.
+GAMS returns 0 on a missing column, so **rain was never subtracted**.
 
-→ L'indicateur est un besoin en eau **brut des cultures**, pas un besoin net d'irrigation.
-**Ne pas l'étiqueter « irrigation ».**
+-> The indicator is a **gross crop water need**, not a net irrigation need. **Do not label it
+"irrigation".**
 
-⚠ **CORRIGÉ le 2026-08-12 — la donnée mensuelle EXISTE, et elle est dans le dépôt.** Cette
-entrée affirmait (comme la spec eau/carbone) que le déblocage demandait « une série
-pluviométrique mensuelle par parcelle, qui n'existe pas aujourd'hui ». C'est faux.
-`context/Rapport technique variables MOSAICA_v2.docx` §5 porte une section « Calcul de la
-répartition mensuelle des précipitations annuelles » et publie la clé, moyennée sur trois
-stations INRA (Gardel, Duclos, Godet) et neuf années complètes communes :
+**CORRECTED 2026-08-12 — the monthly data EXISTS, and it is in the repository.** This entry said
+(as did the water/carbon spec) that unlocking it required "a monthly rainfall series per plot,
+which does not exist today". That is wrong. `context/Rapport technique variables
+MOSAICA_v2.docx` §5 has a section "Calcul de la répartition mensuelle des précipitations
+annuelles" (monthly split of annual rainfall) and publishes the key, averaged over three INRA
+stations (Gardel, Duclos, Godet) and nine complete common years:
 
 | J | F | M | A | M | J | J | A | S | O | N | D |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 7,4 % | 3,8 % | 4,6 % | 9,1 % | 10,3 % | 6,8 % | 8,2 % | 11,4 % | 9,6 % | 11,7 % | 9,9 % | 7,3 % |
+| 7.4 % | 3.8 % | 4.6 % | 9.1 % | 10.3 % | 6.8 % | 8.2 % | 11.4 % | 9.6 % | 11.7 % | 9.9 % | 7.3 % |
 
-`PLUVIO_01..12_PARC` valait donc `PLUVIO_PARC × clé`. Les colonnes sont absentes de la table
-livrée, mais la méthode et les coefficients sont versionnés. Le besoin net d'irrigation est
-calculable — attention toutefois : `PLUVIO_PARC` est une **normale 1981-2010**, pas la pluie
-de l'année simulée, et le bug `max(0, ·)` manquant (entrée D.3) se réveillera dès que la pluie
-sera effectivement déduite.
+`PLUVIO_01..12_PARC` was therefore `PLUVIO_PARC x key`. The columns are missing from the
+delivered table, but the method and the coefficients are versioned. The net irrigation need is
+computable (roadmap `net-irrigation`) — note however that `PLUVIO_PARC` is a **1981-2010
+normal**, not the rain of the simulated year, and the missing `max(0, ·)` bug (entry D.3) will
+wake up as soon as rain is actually subtracted.
 
-Corollaire : les 12 colonnes `BESOIN_EAU_01..12` sont **identiques pour les 84 cultures** — tout
-indicateur mensuel est dégénéré (le « mois de pointe » vaut toujours le total / 12). C'est
-pourquoi il est exclu du score composite.
+Corollary: the 12 columns `BESOIN_EAU_01..12` are **identical for the 84 crops** — any monthly
+indicator is degenerate (the "peak month" is always the total / 12). That is why it is excluded
+from the composite score.
 
-### C.5 — Mineur — Données présentes mais jamais lues
+### C.5 — Minor — Data present but never read
 
-`Data_OTK` porte `HOUDART_TOX_SCORE`, `HARMFUL_FACTOR`, `DLRAT`, `BIRD` (écotoxicité) ;
-`indice_H/RS_Cult.txt`, `Cout_Transp_Cult_LAM.txt` ; les sets `EXPL_NBT`, `PARC_NBT`,
-`CULTIV_2017`… `Avers.txt` est **délibérément** ignoré (stub uniforme).
+`Data_OTK` carries `HOUDART_TOX_SCORE`, `HARMFUL_FACTOR`, `DLRAT`, `BIRD` (ecotoxicity);
+`indice_H/RS_Cult.txt`; the sets `EXPL_NBT`, `PARC_NBT`, `CULTIV_2017`… `Avers.txt` is
+**deliberately** ignored (uniform stub). (`Cout_Transp_Cult_LAM.txt` was on this list; it is the
+transport-cost table read since 2026-09-08.)
 
-### C.6 — Mineur — `KNO3` porte `AZOTE = 0`
+### C.6 — Minor — `KNO3` carries `AZOTE = 0`
 
-Le nitrate de potassium titre ~13 % d'azote. Sur les 15 engrais nommés en triplet NPK, l'azote
-déduit du nom égale la colonne `AZOTE` **au millième près** — la convention du fichier est sûre —
-mais les sels nommés chimiquement échappent au contrôle. Non corrigé (mandat de parité).
-
----
-
-## D. Bugs GAMS portés fidèlement
-
-Le mandat est la parité : le comportement **réel** du GAMS est porté, bug compris, avec la
-variante « intention présumée » en `enable: false` juste à côté dans `config.yaml`.
-
-### D.1 — Majeur — `Eq_VE_PLUIE` interdit les vergers pluviaux **partout**
-
-`MODELE.txt` interroge `Data_RPG_Gwad` sur des colonnes `REGION`/`ILE` **absentes** de cette
-table. GAMS renvoie 0 sans broncher, donc le test `0 ≠ 1` est **toujours vrai**.
-
-→ **`VE_PLUIE` n'apparaîtra jamais en sortie.** Premier suspect si l'on compare un jour à des
-données observées de vergers.
-
-### D.2 — Majeur — Piège : deux ordres de types de sol incompatibles
-
-`SOL.set` est ordonné `NITISOL, ANDOSOL, FERRALSOL, AUTRES, VERTISOL`. Le GAMS mappe la colonne
-numérique `TYPE_SOL` dans un ordre **différent** : `1→VERTISOL, 2→FERRALSOL, 3→ANDOSOL,
-4→NITISOL, 5→AUTRES`.
-
-→ Indexer `Data_Sol` **par position** produit des coefficients faux mais plausibles — **erreur
-silencieuse**. Toujours mapper **par nom**.
-
-### D.3 — Mineur — Deux erreurs d'unité sans effet sur le classement
-
-- **GES** : la magnitude atteint ~1,6e5 « t CO₂/ha/an ». L'unité annoncée est probablement fausse
-  (kg ?), mais les valeurs viennent des données sources — le GAMS produirait les mêmes.
-- **Eau** : le GAMS omet le facteur 10 de la conversion mm→m³ (l'auteur avait lui-même laissé
-  « pourquoi x 10 ? » en commentaire). Le portage Python expose des m³ corrects.
-
-Sans effet sur les comparaisons : le score composite normalise en min-max.
-
-### D.4 — Mineur — `crop_variance_per_ha` porte un nom trompeur
-
-Le paramètre contient `Var_Rdt_Cult`, une **fraction de perte de marge** — ni une variance ni un
-coefficient de variation. **La perte est linéaire en surface, sans carré ni covariance.** Piège
-classique pour qui voudrait bâtir un calcul de variance dessus.
-
-### D.5 — Mineur — Bilan carbone : flux annuel seulement
-
-Le GAMS itère `C_ORG = C_ORG + (entrées − sorties)` sur plusieurs années. Le modèle Python est
-mono-année : seul le **flux annuel** est portable. Une trajectoire demanderait de réallouer année
-après année — autre projet.
+Potassium nitrate contains ~13 % nitrogen. On the 15 fertilisers named as an NPK triplet, the
+nitrogen deduced from the name equals the `AZOTE` column **to the thousandth** — the file's
+convention is safe — but chemically named salts escape the check. Not corrected (parity mandate).
 
 ---
 
-## E. Calibration : à quoi le modèle est comparé {#calibration}
+## D. GAMS bugs ported faithfully
 
-### E.1 — État actuel (`calib_retenu`)
+The mandate is parity: the **actual** GAMS behaviour is ported, bug included, with the "presumed
+intent" variant as `enable: false` right next to it in `config.yaml`.
 
-| Métrique | Parité GAMS | **Retenu** | Seuil / article |
+### D.1 — Major — `Eq_VE_PLUIE` forbids rain-fed orchards **everywhere**
+
+`MODELE.txt` queries `Data_RPG_Gwad` on columns `REGION`/`ILE` **absent** from that table. GAMS
+returns 0 without complaint, so the test `0 ≠ 1` is **always true**.
+
+-> **`VE_PLUIE` will never appear in the output.** First suspect if orchards are ever compared
+with observed data.
+
+### D.2 — Major — Trap: two incompatible soil-type orders
+
+`SOL.set` is ordered `NITISOL, ANDOSOL, FERRALSOL, AUTRES, VERTISOL`. GAMS maps the numeric
+column `TYPE_SOL` in a **different** order: `1->VERTISOL, 2->FERRALSOL, 3->ANDOSOL, 4->NITISOL,
+5->AUTRES`.
+
+-> Indexing `Data_Sol` **by position** produces wrong but plausible coefficients — a **silent
+error**. Always map **by name**.
+
+### D.3 — Minor — Two unit errors with no effect on the ranking
+
+- **GHG**: the magnitude reaches ~1.6e5 "t CO₂/ha/yr". The stated unit is probably wrong (kg?),
+  but the values come from the source data — GAMS would produce the same (roadmap `ghg-unit`).
+- **Water**: GAMS omits the factor 10 of the mm->m³ conversion (the author had himself left
+  "pourquoi x 10 ?" (why x 10?) in a comment). The Python port exposes correct m³.
+
+No effect on comparisons: the composite score normalises min-max.
+
+### D.4 — Minor — `crop_variance_per_ha` has a misleading name
+
+The parameter holds `Var_Rdt_Cult`, a **fraction of margin loss** — neither a variance nor a
+coefficient of variation. **The loss is linear in area, with no square and no covariance.** A
+classic trap for anyone building a variance computation on it.
+
+### D.5 — Minor — Carbon balance: annual flow only
+
+GAMS iterates `C_ORG = C_ORG + (inputs − outputs)` over several years. The Python model is
+single-year: only the **annual flow** is portable. A trajectory would need reallocating year
+after year — another project.
+
+---
+
+## E. Calibration: what the model is compared with {#calibration}
+
+### E.1 — Current state (`calib_retenu`, to be regenerated as `calib_selected`)
+
+| Metric | GAMS parity | **Selected** | Threshold / article |
 |---|---:|---:|---:|
-| Types d'exploitation reproduits | 64,0 % | **86,9 %** | 80 % (article : 81 %) |
-| Parcelles bien simulées | 56,0 % | **67,6 %** | article : 66 % |
-| Surface bien simulée | 64,3 % | **77,1 %** | article : 77 % |
-| PAD territorial | 48,4 % | 6,6 % | 15 % |
+| Farm types reproduced | 64.0 % | **86.9 %** | 80 % (article: 81 %) |
+| Plots correctly simulated | 56.0 % | **67.6 %** | article: 66 % |
+| Area correctly simulated | 64.3 % | **77.1 %** | article: 77 % |
+| Territorial PAD | 48.4 % | 6.6 % | 15 % |
 
-Le modèle **atteint la qualité de calibration publiée** sur les types, les parcelles et la
-surface.
+The model **reaches the published calibration quality** on types, plots and area.
 
-⚠ **NE PAS citer le PAD territorial de 6,6 %.** Le plancher de prairie épingle la prairie, dont
-le PAD est nul par construction ; le total en hérite. Les chiffres solides sont les trois
-premières lignes — et surtout la **canne revenue à 12 782 ha contre 12 813 observés** (PAD 0,2 %
-contre 20 %) **sans qu'aucune contrainte ne la nomme**.
+**Do NOT quote the 6.6 % territorial PAD.** The grassland floor pins grassland, whose PAD is zero
+by construction; the total inherits it. The solid figures are the first three rows — and above
+all **cane back at 12 782 ha against 12 813 observed** (PAD 0.2 % against 20 %) **without any
+constraint naming it**.
 
-### E.2 — Critique — Comparer à l'article demande quatre corrections
+**These two runs predate the 2026-09-08 correction** of the price, yield and transport tables
+(`Prix_Cult_CF_<scenario>` instead of `Prix_Cult`, 23 crops out of 84 affected). Replayed with
+the corrected tables, the GAMS-parity run (`calib_gams_parity_prices`) reaches a territorial PAD
+of 12.07 % against GAMS's own 3.76 % on `Assol_Calib`. The table above therefore describes the
+runs on disk, not the current config; regenerating them is roadmap item
+`regenerate-reference-runs`.
 
-1. **L'article publie son PAD par culture, jamais agrégé.** Le seuil <15 % qualifie « 8 usages
-   sur 10 ». Notre « PAD territorial » est une ligne TOTAL maison, **plus sévère**. La métrique
-   comparable est *Cultures sous seuil*.
-2. **Sa Table 5 compte les parcelles non cultivées** dans le dénominateur, nous les excluons. À
-   sa convention, `calib_gams_parite` afficherait 60,5 % / 67,8 % au lieu de 56,0 % / 64,3 % —
-   **quatre points qui relevaient de la définition.**
-3. **Son année de base est 2010, pas 2017** (25 057 parcelles, 5 336 exploitations, contre
-   24 734 / 4 638). Région par région les surfaces collent à quelques % près : c'est le même
-   territoire, avec sept ans de concentration foncière. Structurellement hors d'atteinte.
-4. **Il ne publie aucune table de PAD par exploitation.** Le seuil « 20 % … and farms » n'y est
-   jamais instancié.
+### E.2 — Critical — Comparing with the article needs four corrections
 
-### E.3 — Majeur — Le solveur est hors de cause
+1. **The article publishes its PAD per crop, never aggregated.** The <15 % threshold qualifies
+   "8 uses out of 10". Our "territorial PAD" is a home-made TOTAL row, **stricter**. The
+   comparable metric is *Crops under threshold*.
+2. **Its Table 5 counts non-cultivated plots** in the denominator, we exclude them. At its
+   convention, `calib_gams_parite` would show 60.5 % / 67.8 % instead of 56.0 % / 64.3 % — **four
+   points that were a matter of definition.**
+3. **Its base year is 2010, not 2017** (25 057 plots, 5 336 farms, against 24 734 / 4 638).
+   Region by region the areas match within a few %: it is the same territory, with seven years
+   of land concentration. Structurally out of reach.
+4. **It publishes no PAD table per farm.** The threshold "20 % … and farms" is never
+   instantiated there.
 
-- Le **plan observé de 2017 vaut 15 % de moins que l'optimum** sous notre propre objectif
-  (72,2 M€ contre 85,0). Le gap MIP est de 1 % : l'écart à combler est **quinze fois** la
-  tolérance.
-- **Trois graines HiGHS** : PAD 48,44 / 48,29 / 48,31. L'arbitraire de branchement vaut
-  **0,15 point**. Il n'y a pas de bouton solveur.
+### E.3 — Major — The solver is not to blame
 
-### E.4 — Deux déviations assumées au bloc `CALIB`, toutes deux sourcées
+- The **observed 2017 plan is worth 15 % less than the optimum** under our own objective
+  (72.2 M€ against 85.0). The MIP gap is 1 %: the gap to close is **fifteen times** the
+  tolerance.
+- **Three HiGHS seeds**: PAD 48.44 / 48.29 / 48.31. Branching arbitrariness is worth **0.15
+  point**. There is no solver knob.
 
-| Déviation | Valeur | Source |
+### E.4 — Two deviations accepted in the `CALIB` block, both sourced
+
+| Deviation | Value | Source |
 |---|---|---|
-| Plafond plantain `bc_quota_max` | 6 440 t | chiffre de l'auteur du GAMS ; corroboré par l'Éq. 6 de l'article (4 650 t) |
-| Plancher de prairie `pn_prod_min` | 6 096 ha | paramètre GAMS `QUOTA_PN_PIQ_MIN`, corroboré par Agreste 2017 |
+| Plantain ceiling `bc_quota_max` | 6 440 t | the GAMS author's figure; corroborated by the article's Eq. 6 (4 650 t) |
+| Grassland floor `pn_prod_min` | 6 096 ha | GAMS parameter `QUOTA_PN_PIQ_MIN`, corroborated by Agreste 2017 |
 
-**Le test qui distingue une correction d'un ajustement** : le balayage du seuil plantain montre
-un **palier plat de 4 650 à 9 240 t** — facteur 2 sur le seuil, 0,5 point de PAD, à peine plus
-que le bruit de solveur. Le résultat ne dépend pas de la valeur, seulement de **l'existence**
-d'un plafond à l'échelle du marché. Et l'optimum du palier est à 9 240 t (×2,4 l'observé), pas au
-seuil le plus serré : un paramètre servant de variable d'ajustement s'améliorerait de façon
-monotone en se rapprochant de l'observé.
+**The test that tells a correction from a fit**: the plantain threshold sweep shows a **flat
+plateau from 4 650 to 9 240 t** — a factor of 2 on the threshold, 0.5 PAD point, barely more than
+the solver noise. The result does not depend on the value, only on **the existence** of a
+ceiling at market scale. And the plateau's optimum is at 9 240 t (x2.4 the observation), not at
+the tightest threshold: a parameter used as a fitting variable would improve monotonically as it
+approached the observation.
 
-C'est la différence de fond avec les « plafonds de marché » écartés, qui étaient calés **sur**
-l'observé (PAD nul par construction).
+That is the essential difference with the "market ceilings" discarded, which were fitted **on**
+the observation (zero PAD by construction). The candidates and the retained values are listed
+in `case_studies/guadeloupe/status/parameter_choices.yaml`.
 
-### E.5 — Ce qui reste, et pourquoi on s'arrête là
+### E.5 — What remains, and why we stop there
 
-Trois voies pour descendre sous le plateau ont été instruites jusqu'au bout puis **écartées** :
-recalibrer l'aversion au risque (→ 39,9 % mais coefficients économiquement absurdes, un
-spécialiste devenant « très averse » — de l'overfitting), caler des plafonds sur l'observé
-(circulaire), incorporer l'élevage (l'économie y est déjà ; il manque une **variable d'état**
-interdisant de liquider un cheptel gratuitement, ce que l'article reconnaît lui-même).
+Three ways to go below the plateau were investigated to the end then **discarded**: recalibrate
+the risk aversion (-> 39.9 % but economically absurd coefficients, a specialist becoming "very
+averse" — overfitting), fit ceilings on the observation (circular), add livestock (the economics
+is already there; what is missing is a **state variable** forbidding the free liquidation of a
+herd, which the article itself acknowledges).
 
-L'écart résiduel — prairie, plantain, petites cultures — recoupe les limites que **l'article
-reconnaît lui-même**. Le détail de chaque impasse est dans le journal.
+The residual gap — grassland, plantain, small crops — matches the limits **the article itself
+acknowledges**. The detail of each dead end is in the journal.
 
-### E.6 — Trois précautions de lecture
+### E.6 — Three reading precautions
 
-- **Le plancher de PAD imposé par l'éligibilité est de 1,5 %** (348 ha sur 23 578). L'écart
-  n'est donc **pas** expliqué par le masque : c'est un choix d'optimisation, pas une impossibilité.
-- **Le PAD par exploitation a une médiane de 18,5 % pour une moyenne de 51,5 %** (quartiles
-  0 / 18,5 / 88,7) : la moitié des fermes est sous le seuil de l'article. **Ne pas lire la
-  moyenne comme un écart uniforme.**
-- Plusieurs indicateurs tombent **dans la fourchette d'incertitude de l'observé lui-même**
-  (subvention, revenu, azote, ETP) : l'assolement 2017 n'étant connu qu'au niveau agrégé, l'écart
-  au « central » n'y démontre rien.
-
----
-
-## F. Cartographie {#carte}
-
-### F.1 — Majeur — La carte repose sur une jointure reconstruite
-
-`data/gis/01_RPG 2017/` et `data_parc` décrivent le **même univers parcellaire** (24 734
-enregistrements de part et d'autre, 4 638 exploitations des deux côtés, **même distribution
-exacte des tailles**, zéro signature orpheline) — mais **aucun identifiant commun** : le modèle
-utilise `P1..P24734`, inventés en amont.
-
-La jointure est reconstruite par **signature d'exploitation** (multiensemble commune + surface),
-puis parcelle à parcelle dans l'exploitation appariée.
-
-→ **Couverture : 99,4 % des parcelles**, 96,7 % des exploitations. Contrôle indépendant :
-l'emprise de chaque polygone est toujours ≥ la surface déclarée (ratio médian 1,74, 0 anomalie
-sur 2 000).
-
-⚠ **Ce qu'elle ne permet pas** : **~1 557 parcelles** partagent commune ET surface avec une
-voisine de la même exploitation — elles peuvent avoir été interverties. Les lectures
-territoriales et régionales sont fiables ; **une parcelle isolée ne fait pas preuve.** La page
-l'affiche.
-
-### F.2 — Mineur — Aucune coordonnée dans les tables
-
-`Data_Parc` n'a ni lat/long ni identifiant de géométrie. Hors `data/gis/`, le reporting spatial
-s'agrège par `ILE`/`REGION`/`COMMUNE` uniquement.
+- **The PAD floor imposed by eligibility is 1.5 %** (348 ha out of 23 578). The gap is therefore
+  **not** explained by the mask: it is an optimisation choice, not an impossibility.
+- **The per-farm PAD of the selected calibration has a median of 0.0 % for a mean of 26.3 %**
+  (quartiles 0 / 0 / 30.6), and 72.3 % of farms are under the article's 20 % threshold. **Do not
+  read the mean as a uniform gap.** (This entry used to give 18.5 % / 51.5 % — the figures of the
+  GAMS-parity run, not of the selected one; corrected 2026-09-22 after recounting
+  `calibration_pad_by_farm.csv`.)
+- Several indicators fall **within the uncertainty range of the observation itself** (subsidy,
+  revenue, nitrogen, FTE): the 2017 land use being known only at aggregate level, the gap to the
+  "central" value proves nothing there.
 
 ---
 
-## G. Divers
+## F. Mapping {#carte}
 
-### G.1 — Majeur — `zone_filter` ne redimensionne pas les quotas territoriaux par défaut
+### F.1 — Major — The map rests on a rebuilt join
 
-Un sous-ensemble devient **infaisable** vis-à-vis de seuils pensés pour tout le territoire.
-`scale_territorial_bounds: true` corrige — **opt-in**, parce que réécrire un seuil change ce que
-le scénario dit.
+`data/gis/01_RPG 2017/` and `plot_data` describe the **same plot universe** (24 734 records on
+each side, 4 638 farms on both, **exactly the same size distribution**, zero orphan signature) —
+but **no common identifier**: the model uses `P1..P24734`, invented upstream.
 
-### G.2 — Majeur — Déviation assumée sur `Eq_CS_GFA`
+The join is rebuilt by **farm signature** (multiset of commune + area), then plot by plot within
+the matched farm.
 
-`cs_gfa_minimum_share` est réactivée avec `skip_when_no_eligible_area: true`. Trois fermes ont
-toutes leurs parcelles verrouillées en friche : la contrainte exige 60 % de canne sur une
-exploitation qui ne peut en porter aucune — **algébriquement infaisable, et le GAMS le serait
-aussi**. On perd 3 fermes sur 4 588 (0,07 %) plutôt que la contrainte entière. Le drapeau est à
-`false` par défaut dans le builder.
+-> **Coverage: 99.4 % of plots**, 96.7 % of farms. Independent check: each polygon's footprint is
+always ≥ the declared area (median ratio 1.74, 0 anomaly out of 2 000).
 
-### G.3 — Majeur — Bloc canne fibre (`CF`) non câblé
+**What it does not allow**: **~1 557 plots** share commune AND area with a neighbour of the same
+farm — they may have been swapped. Territorial and regional readings are reliable; **a single
+plot proves nothing.** The page says so. This join is also the first obstacle to handing the
+optimised plan to MAELIA, which needs real parcels.
 
-Les équations `Eq_CF_*` restent hors modèle. Les cultures `CF_*` sont bien éligibles et
-valorisées ; ce qui manque, ce sont les contraintes et l'exploitation de
-`indice_H/Prix_Cult_CF_*`. ⚠ **Ces fichiers ne sont pas des tables « prix des CF »** : ce sont des
-variantes *territoire entier* décrivant un monde où la filière existe, qui diffèrent au-delà des
-CF et mettent contre-intuitivement les `CF_*` à prix 0. **Trancher le sens avec la source avant
-tout câblage.**
+### F.2 — Minor — No coordinate in the tables
 
-### G.4 — Mineur — Rpest : plancher artificiel et « moyenne pondérée » qui n'en est pas une
-
-- Une culture sans pesticide somme `ADI = 0` et `AQUATOX = 0` ; or les seuils font du **bas** de
-  l'ADI le côté défavorable. « Aucun produit » s'encode donc exactement comme « le produit le plus
-  toxique » → prairie, jachère et `MA_PLBIO` à **2,36** contre 8,81 pour la banane intensive.
-  **Le classement est solide ; le niveau absolu du bas d'échelle ne l'est pas.**
-- La dose se simplifie entre numérateur et dénominateur : la « moyenne pondérée » annoncée est
-  une **somme simple**. Beaucoup de petits traitements scorent plus haut qu'un seul gros.
-
-### G.5 — Mineur — Le « bio » par itinéraire inclut la prairie
-
-`PN_PIQ` et `PN_TOUR` utilisent `PROC_BIO_BOVIN`. Sur `output_3`, **toute** la surface « bio »
-(6 096 ha) est du plancher de prairie, et la surface bio **hors prairie vaut 0 ha**.
-
-→ Lire la variante `surface_bio_hors_prairie_*` pour toute affirmation sur les terres cultivées.
-Même logique pour les MAE : l'agroécologie (MAE) et le bio sont rapportés **séparément**, parce
-que la canne en récolte verte n'est pas bio.
-
-### G.6 — Mineur — `NC` porte `Var_Rdt = 1,0`
-
-« Non cultivé » affecté d'une perte de 100 % est un artefact du tableau source. Sans effet sur le
-choc de prix, mais sa contribution à la marge à risque vaut `marge_NC × 1,0`.
+`Data_Parc` has neither lat/long nor a geometry identifier. Outside `data/gis/`, spatial
+reporting aggregates by `ILE`/`REGION`/`COMMUNE` only.
 
 ---
 
-## Aide-mémoire : les cinq à ne pas oublier
+## G. Miscellaneous
 
-1. **Un indicateur qu'une contrainte fixe est une hypothèse, pas un résultat.**
-2. **Comparer des totaux entre scénarios de surfaces différentes ne veut rien dire** — lire les
-   intensités.
-3. **Ne pas citer le PAD territorial de 6,6 %** — citer types / parcelles / surface, et la canne.
-4. **Un solve qui tape la limite de temps est prouvablement faux**, pas juste imprécis.
-5. **Une parcelle isolée sur la carte ne fait pas preuve.**
+### G.1 — Major — `zone_filter` does not rescale the territorial quotas by default
+
+A subset becomes **infeasible** against thresholds meant for the whole territory.
+`scale_territorial_bounds: true` fixes it — **opt-in**, because rewriting a threshold changes
+what the scenario says.
+
+### G.2 — Major — `Eq_CS_GFA` is disabled
+
+`cs_gfa_minimum_share` (60 % of cane on each GFA farm) is correct and tested, and **disabled**.
+It was re-enabled on 2026-07-21 with `skip_when_no_eligible_area: true` — skipping the three
+farms whose plots are all fallow-locked — then **disabled again the same day**: 7 GFA farms need
+more labour for their 60 % of cane than `farm_labor_hours_max` grants them. Both constraints are
+faithful to GAMS; together they are unsatisfiable on this data. The config comment has the
+detail; the roadmap item is `cs-gfa`.
+
+### G.3 — Major — Fibre-cane block (`CF`) not wired
+
+The equations `Eq_CF_*` stay out of the model; the `CF_*` crops are suppressed by `cf_supp`, as
+GAMS does. Separately, since 2026-09-08 the price and yield tables are read from
+`indice_H/Prix_Cult_CF_<scenario>.txt` and `Rdt_Cult_CF_<scenario>.txt`, because those are the
+files GAMS includes (DONNEES.txt:283-289) — despite their name, they cover every crop, not only
+fibre cane. **Settle the meaning of the CF equations with the source before wiring them**
+(roadmap `fibre-cane-block`).
+
+### G.4 — Minor — Rpest: an artificial floor and a "weighted mean" that is not one
+
+- A pesticide-free crop sums `ADI = 0` and `AQUATOX = 0`; yet the thresholds make the **low**
+  end of ADI the unfavourable side. "No product" is therefore encoded exactly like "the most
+  toxic product" -> grassland, fallow and `MA_PLBIO` at **2.36** against 8.81 for intensive
+  banana. **The ranking is solid; the absolute level of the bottom of the scale is not.**
+- The dose cancels between numerator and denominator: the announced "weighted mean" is a
+  **plain sum**. Many small treatments score higher than one large one.
+
+### G.5 — Minor — Organic by itinerary includes grassland
+
+`PN_PIQ` and `PN_TOUR` use `PROC_BIO_BOVIN`. On `output_3`, **the whole** "organic" area
+(6 096 ha) is the grassland floor, and the organic area **excluding grassland is 0 ha**.
+
+-> Read the `organic_area_excl_grassland_*` variant for any statement about cropland. Same logic
+for AECMs: agroecology (AECM) and organic are reported **separately**, because green-harvested
+cane is not organic.
+
+### G.6 — Minor — `NC` carries `Var_Rdt = 1.0`
+
+"Not cultivated" given a 100 % loss is an artefact of the source table. No effect on the price
+shock, but its contribution to the margin at risk is `margin_NC x 1.0`.
+
+### G.7 — Major — Runs written before 2026-09-22 use French names
+
+Recap keys (`total_azote`), labels (`mo_max_expl`), policies (`P4_statu_quo`) and some CSV names
+(`etp_by_region_output.csv`) were renamed. The files in `outputs/` are **not** rewritten:
+`case_studies/guadeloupe/legacy_names.py` renames on read, for the dashboard and the scripts.
+Two consequences. A script reading `recap.json` directly (rather than through
+`apps/dashboard/loaders.load_recap`) sees the old keys — the thesis tooling in `clement/memoire/`
+does so on purpose. And `run_name` is kept verbatim, so an old run is listed under its French
+name while its coordinates (`run_policy`, `run_forcing`) read in English.
+
+### G.8 — Minor — A rule used to read backwards
+
+Until 2026-09-22 the config described `Eq_IG_CLD` as "IG_TUT only where the black-leaf-streak
+risk RISQUE_CLD <= 3". The rule actually **forbids** staked yam where the **chlordecone** risk is
+medium to very high (RISQUE_CLD <= 3, 1 being the worst), as GAMS does; the backwards-named
+`max_risk_threshold` rule said the opposite of what it did. Both chlordecone rules are now
+written as `attribute_forbidden`. `docs/gams_port_inventory.md` carried the same inverted
+wording and was corrected.
+
+---
+
+## Cheat sheet: the five not to forget
+
+1. **An indicator a constraint fixes is a hypothesis, not a result.**
+2. **Comparing totals between scenarios with different areas means nothing** — read the
+   intensities.
+3. **Do not quote the 6.6 % territorial PAD** — quote types / plots / area, and cane.
+4. **A solve that hits the time limit is provably wrong**, not just imprecise.
+5. **A single plot on the map proves nothing.**

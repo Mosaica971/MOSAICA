@@ -19,7 +19,7 @@ items:
     status: in_progress
     area: tooling
     since: 2026-09-22
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
     left: >-
       Code, config, scenario files, recap keys, CSV names, dashboard and tests are done;
       the numbered docs are translated. The dated specs and the archived journal are kept
@@ -29,37 +29,37 @@ items:
     status: done
     area: tooling
     since: 2026-09-22
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
     left: Constraint x crop view counts eligibility removals only when the data is present.
   - id: data-catalogue
     title: Data catalogue with sensitivity levels, fill-in workbook and validator
     status: in_progress
     area: information_system
     since: 2026-09-22
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
     left: Access levels to validate with INRAE's data protection officer.
   - id: level-export
     title: Export a run at a given access level (aggregate, suppress what exceeds it)
     status: todo
     area: information_system
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
   - id: maelia-yields
     title: MAELIA -> MOSAICA, simulated yields and ITKs as per-(plot, crop) coefficients
     status: todo
     area: coupling
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
     blocked_by: MAELIA training; tropical crop parameterisation in MAELIA to confirm.
   - id: maelia-daily-test
     title: MOSAICA -> MAELIA, daily simulation of the optimised cropping plan
     status: todo
     area: coupling
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
     blocked_by: maelia-yields; decision on multi-year rotations.
   - id: per-plot-facts
     title: One per-plot indicator table, aggregated to any zone (commune, farm, watershed, arbitrary)
     status: proposal
     area: reporting
-    spec: docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md
+    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
     left: The status board shows every additive indicator as computable at those levels.
 
   # --- calibration --------------------------------------------------------------------------

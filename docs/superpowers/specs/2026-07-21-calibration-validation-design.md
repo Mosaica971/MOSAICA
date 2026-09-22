@@ -337,5 +337,5 @@ figures comme les autres. Un test de `zones.py` vérifie la ré-export depuis `c
   reconstruction typologique.
 - `TODO.md` — le chantier suivant : activer l'objectif Markowitz et porter `Eq_MO_MAX_Expl`,
   puis relancer l'évaluation pour mesurer le gain.
-- `docs/01-utilisation.md` — la commande `scripts/evaluate_calibration.py`.
+- `docs/01-usage.md` — la commande `scripts/evaluate_calibration.py`.
 - `CLAUDE.md` — une ligne sur le nouveau module dans la description de `reporting/`.
