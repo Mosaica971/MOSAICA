@@ -80,6 +80,12 @@ def compute_farm_type(
     base_crop_group: pd.Series,
     plot_surface_ha: Mapping[str, float],
 ) -> tuple[pd.Series, pd.Series]:
+    """(farm type, secondary type) per farm from the area shares of its observed groups.
+
+    GAMS TYPE_EXPL (ENTREES.txt): the 8 types of Chopin et al. (2015), 0 for a farm with no
+    cultivated area. The secondary type only exists for type 4 (diversified cane growers)
+    and refines its risk aversion; it is NaN elsewhere.
+    """
     farms = list(farm_plots.keys())
     plot_to_farm = {plot: farm for farm, plots in farm_plots.items() for plot in plots}
 

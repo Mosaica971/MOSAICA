@@ -9,6 +9,13 @@ def compute_eligibility_mask(
     crop_bounds: pd.DataFrame,
     attribute_bounds: dict[str, tuple[str, str]],
 ) -> pd.DataFrame:
+    """Plot x crop boolean mask of the numeric eligibility bounds.
+
+    `attribute_bounds` maps a plot attribute to the pair of crop columns holding its bounds,
+    e.g. {"ALTITUDE": ("ALTI_MIN", "ALTI_MAX")}. A pair is eligible when every attribute
+    falls within the crop's [min, max], bounds included. Categorical rules are applied on
+    top of this mask by `forbid_where`.
+    """
     mask = pd.DataFrame(True, index=plot_attributes.index, columns=crop_bounds.index)
     for attribute, (min_col, max_col) in attribute_bounds.items():
         values = plot_attributes[attribute].to_numpy()[:, None]
@@ -36,6 +43,7 @@ def forbid_where(mask: pd.DataFrame, condition: pd.Series, crops: "list[str] | s
 
 
 def eligible_pairs_from_mask(mask: pd.DataFrame) -> list[tuple[str, str]]:
+    """The (plot, crop) pairs left True: exactly the decision variables the model gets."""
     stacked = mask.stack()
     return list(stacked[stacked].index)
 
@@ -49,6 +57,8 @@ CATEGORICAL_RULE_REGISTRY: dict[str, Callable] = {}
 
 
 def register_categorical_rule(name: str) -> Callable:
+    """Register a rule under `name`. A rule takes the plot table and its config args and
+    returns (crops, condition): those crops are forbidden on the plots where condition holds."""
     def decorator(fn: Callable) -> Callable:
         if name in CATEGORICAL_RULE_REGISTRY:
             raise ValueError(f"'{name}' is already registered")
@@ -62,6 +72,7 @@ def register_categorical_rule(name: str) -> Callable:
 def rule_irrigation_required(
     plot_attributes: pd.DataFrame, *, crops: list[str], irrigation_column: str, **_args: Any
 ) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` on plots whose `irrigation_column` is 0 (not irrigable)."""
     condition = plot_attributes[irrigation_column] == 0
     return crops, condition
 
@@ -75,6 +86,7 @@ def rule_soil_type_forbidden(
     forbidden_soil_types: list[int],
     **_args: Any,
 ) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` on plots whose soil type is in `forbidden_soil_types`."""
     condition = plot_attributes[soil_column].isin(forbidden_soil_types)
     return crops, condition
 
@@ -88,6 +100,7 @@ def rule_region_crop_forbidden(
     forbidden_regions: list[str],
     **_args: Any,
 ) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` on plots whose region is in `forbidden_regions`."""
     condition = plot_attributes[region_column].isin(forbidden_regions)
     return crops, condition
 
@@ -101,6 +114,12 @@ def rule_max_risk_threshold(
     max_allowed: float,
     **_args: Any,
 ) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` where `risk_column` <= `max_allowed`.
+
+    Legacy: kept so that configs written before 2026-09-22 still resolve. The names read
+    backwards -- `max_allowed` is the value at or BELOW which the crop is FORBIDDEN, and on a
+    scale where 1 is the worst risk. New configs write `attribute_forbidden` with op `le`.
+    """
     condition = plot_attributes[risk_column] <= max_allowed
     return crops, condition
 
@@ -114,6 +133,11 @@ def rule_exact_risk_value(
     allowed_value: float,
     **_args: Any,
 ) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` where `risk_column` == `allowed_value`.
+
+    Legacy, like `max_risk_threshold`: `allowed_value` is the FORBIDDEN value. New configs
+    write `attribute_forbidden` with op `eq`.
+    """
     condition = plot_attributes[risk_column] == allowed_value
     return crops, condition
 
@@ -127,6 +151,8 @@ def rule_fallow_lock(
     fallow_codes: list[int],
     **_args: Any,
 ) -> tuple[list[str], pd.Series]:
+    """Forbid `crops` on plots that were fallow in EVERY one of `history_columns` (GAMS
+    Eq_FRICHE: land left fallow for years is not brought back into cultivation)."""
     condition = pd.Series(True, index=plot_attributes.index)
     for column in history_columns:
         condition &= plot_attributes[column].isin(fallow_codes)
@@ -226,6 +252,7 @@ def rule_attribute_forbidden(
 
 
 def attribute_bounds_from_config(entries: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
+    """{attribute: (min column, max column)} of the enabled eligibility criteria."""
     return {
         entry["args"]["attribute"]: (entry["args"]["min_col"], entry["args"]["max_col"])
         for entry in entries

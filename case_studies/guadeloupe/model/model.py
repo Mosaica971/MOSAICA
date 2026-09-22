@@ -25,7 +25,7 @@ from core.model.model_inputs import ModelInputs
 #     what the report counts) -- 5.6 Mmm.ha over all land, i.e. 56 Mm3, against 35 Mm3;
 #   * `carbone` is the crop's carbon INPUT only. The reported soil-carbon BALANCE also
 #     depends on the plot's soil type (Data_Sol), which a per-crop rate cannot carry.
-# `ges` is in the model's own unit -- its scale is an open question (see TODO.md) -- so GHG
+# `ges` is in the model's own unit -- its scale is an open question (docs/status/roadmap.yaml, `ghg-unit`) -- so GHG
 # thresholds here are calibrated as a share of the run's own baseline, not in t CO2.
 _INDICATOR_PARAMETERS: dict[str, str] = {
     "nitrogen": "crop_nitrogen_per_ha",
@@ -107,6 +107,12 @@ def _plot_zones(dataset: Dataset) -> dict[str, dict[str, Any]]:
 
 
 def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
+    """Map the Guadeloupe dataset onto core's generic ModelInputs and build the MILP.
+
+    Case-study contract. This is the only place where Guadeloupe vocabulary (GFA, RISQUE_CLD,
+    ILE) meets core's plots/crops/farms; everything past `build_crop_allocation_model` is
+    case-study-agnostic.
+    """
     # Observed 2017 group per plot, and the group each fine crop folds onto -- the pair the
     # inertia rule compares. base_crop_group already carries the 12 RPG groups, so only the
     # crop side needs folding.

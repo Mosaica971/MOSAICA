@@ -30,7 +30,7 @@ GROUP_REF = "@"
 def expand_group_refs(groups: dict[str, Any]) -> dict[str, list[str]]:
     """Resolve `@other_group` members so the catalogue can build groups out of groups.
 
-    ``vivrier: ["@plantain", "@igname", ME]`` becomes the flat union. Duplicates are dropped
+    ``food_crops: ["@plantain", "@yam", ME]`` becomes the flat union. Duplicates are dropped
     (first occurrence wins) and a reference cycle raises instead of recursing forever.
     """
     resolved: dict[str, list[str]] = {}
@@ -612,6 +612,12 @@ def _select_named(
 
 
 def apply_overrides(base_config: dict[str, Any], run_spec: dict[str, Any]) -> dict[str, Any]:
+    """The config one run solves: `base_config` with the run's edit channels applied.
+
+    Order: `overrides` (dotted paths), `enable_add` (new entries), `enable` / `disable`
+    (by label, else by name), `set_args` (patch an entry's args by label). The base config
+    is deep-copied, so runs of a batch never affect one another.
+    """
     config = copy.deepcopy(base_config)
 
     for path, value in (run_spec.get("overrides") or {}).items():
@@ -731,6 +737,12 @@ def scale_territorial_bounds(config: dict[str, Any], factor: float) -> dict[str,
 def resolve_enabled(
     entries: list[dict[str, Any]], registry: dict[str, Callable]
 ) -> list[tuple[Callable, dict[str, Any]]]:
+    """(builder, args) for every `enable: true` entry, in declaration order.
+
+    The single mechanism behind constraints, objectives, eligibility criteria and
+    categorical rules. An unknown `name` raises, listing what is registered -- usually a
+    builder module that was not imported, so it never registered itself.
+    """
     resolved = []
     for entry in entries:
         if not entry.get("enable", False):

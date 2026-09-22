@@ -219,6 +219,14 @@ def compute_farm_baseline_production_t(
 
 
 def build_dataset(config: dict[str, Any]) -> Dataset:
+    """Read the Guadeloupe tables and compute everything the model and the reports need.
+
+    Case-study contract, called first by main.py. In order: the raw GAMS sets and tables,
+    the zone filter, the per-crop economics and environmental rates, the farm typology and
+    risk aversion, and the plot x crop eligibility mask. No solve; ~7 s on the full data.
+    The parameter names are English; the source files and their columns keep their
+    GAMS names (see docs/glossary.md).
+    """
     # `year` selects the economic time-series column (2017..2022, or init/calib); the plot/
     # farm structure stays pinned to 2017 (no other year's structural data exists). `scenario`
     # (RESTIT|SMART) selects the OTK cost matrix and MAE-compost subsidy tables. Defaults

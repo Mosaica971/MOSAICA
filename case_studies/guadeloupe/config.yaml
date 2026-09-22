@@ -54,7 +54,7 @@ solver:
     # finish in 37 h. The 2026-07-27 parity investigation found the 1% gap (859k EUR on an 86M
     # objective) leaves the solver indifferent across the flat pasture(1602)/cane(1521-1617)
     # margin boundary, parking ~1400 ha of pasture arbitrarily on cane (starving the "breeder"
-    # type -- see VIGILANCE + spec 2026-07-27-calib-parity-rootcause-design). BUT tightening to
+    # type -- see docs/04-vigilance.md + spec 2026-07-27-calib-parity-rootcause-design). BUT tightening to
     # 0.1% was TESTED (output_4) and is a dead end: the solve hit the 1 h time_limit with an
     # incumbent identical to the 1% one (PAD 49.3, typo 63.7 -- no pasture recovered). The B&B
     # cannot close that boundary in tractable time and HiGHS's heuristics don't find the
@@ -103,7 +103,7 @@ reporting:
     farm_pad_max: 20           # PAD (%) tolerated per farm
     farm_type_match_min: 80    # minimum share (%) of farms simulated in their observed type
 
-# Representative fine crop per aggregate baseline family (see docs/04-vigilance.md "point 4").
+# Representative fine crop per aggregate baseline family (see docs/04-vigilance.md C.2).
 # The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",
 # not which technical system), and the aggregate codes carry no economics of their own.
 # To compute input-side production/subsidy/revenue/ETP (and input-vs-output deltas) we
@@ -631,7 +631,7 @@ categorical_rules:
     enable: true
     args: {label: pn_tour_supp, crops: [PN_TOUR]}
   # Eq_CF_SUPP: the whole fibre-cane block is suppressed in both models. The Eq_CF_* wiring
-  # left in TODO.md concerns the SCENARIO variants, not this baseline suppression.
+  # left in docs/status/roadmap.yaml concerns the SCENARIO variants, not this baseline suppression.
   - name: forbid_crops
     enable: true
     args: {label: cf_supp,
@@ -704,12 +704,17 @@ categorical_rules:
       crops: [ME]
       conditions:
         - {column: ILE, op: eq, value: 1}
-  - name: max_risk_threshold            # IG_TUT only where black-leaf-streak risk RISQUE_CLD <= 3
+  # Eq_IG_CLD (MODELE.txt:256): staked yam is FORBIDDEN where the chlordecone pollution risk
+  # is medium to very high. RISQUE_CLD runs from 1 (very high risk) to 5 (none), so "risk at
+  # least medium" is RISQUE_CLD <= 3. Written as an attribute ban, which says what it does;
+  # the former `max_risk_threshold` rule (still registered for old configs) read backwards.
+  - name: attribute_forbidden
     enable: true
     args:
+      label: ig_tut_chlordecone
       crops: [IG_TUT]
-      risk_column: RISQUE_CLD
-      max_allowed: 3
+      conditions:
+        - {column: RISQUE_CLD, op: le, value: 3}
   # Eq_PN_PIQ_CLD forbids pasture PN_PIQ where RISQUE_CLD == 1 (MODELE.txt:301). DISABLED
   # 2026-07-27 for CALIB parity: this equation is NOT in the GAMS CALIB model block
   # (MODELE.txt:450-561) -- it is commented (*Eq_PN_PIQ_CLD) in SCENARIO (MODELE.txt:626)
@@ -718,13 +723,13 @@ categorical_rules:
   # choking pasture eligibility and starving the "breeder" farm type. The rule direction was
   # correct (forbid where ==1, matching GAMS); the error was applying it under CALIB at all.
   # Re-enable only for a SCENARIO run that deliberately restores the chlordecone pasture ban.
-  - name: exact_risk_value              # Eq_PN_PIQ_CLD: forbid PN_PIQ where RISQUE_CLD == 1
+  - name: attribute_forbidden           # Eq_PN_PIQ_CLD: forbid PN_PIQ where RISQUE_CLD == 1
     enable: false
     args:
       label: pn_piq_cld
       crops: [PN_PIQ]
-      risk_column: RISQUE_CLD
-      allowed_value: 1
+      conditions:
+        - {column: RISQUE_CLD, op: eq, value: 1}
   - name: region_crop_forbidden         # ME forbidden in the listed REGION_CODE regions
     enable: true
     args:

@@ -30,7 +30,7 @@ def test_a_clean_run_raises_no_alert():
 
 
 def test_a_solve_that_did_not_prove_optimality_is_an_error():
-    """VIGILANCE records a hand-built solution beating a one-hour incumbent by 5.5 %, so a
+    """docs/04-vigilance.md records a hand-built solution beating a one-hour incumbent by 5.5 %, so a
     non-converged run is not a nuance."""
     alerts = synthesis.run_alerts(_recap(termination_condition="maxTimeLimit"))
 

@@ -35,6 +35,13 @@ def generate_report(
     *,
     outputs_root: Path = Path("outputs"),
 ) -> Path:
+    """Write one run folder and return its path. Case-study contract, called by main.py
+    and scripts/run_scenarios.py after the solve.
+
+    The folder holds recap.json (every indicator block, input and output side),
+    config_used.yaml (the exact configuration solved), the CSV tables under csv/ and the
+    charts under plots/. Nothing here changes the solution; it only reads it back.
+    """
     # A run that knows its name gets a folder named after it (see run_folder.slugify);
     # `main.py` sets no run_name, so an ad-hoc solve still lands in outputs/output_N.
     output_dir = create_output_folder(outputs_root, config.get("run_name"))
@@ -45,7 +52,7 @@ def generate_report(
     input_allocation = indicators.decode_baseline_allocation(dataset)
     # Input economics use a representative fine crop per aggregate baseline family, since
     # the observed 2017 baseline is only known at aggregate resolution (see docs/04-vigilance.md
-    # "point 4"). Surface/diversity below stay on the raw aggregate baseline.
+    # C.2). Surface/diversity below stay on the raw aggregate baseline.
     input_representative = indicators.decode_baseline_representative_allocation(dataset, config)
 
     _write_allocation_csv(dataset, output_allocation, _csv_path(output_dir, "allocation_output.csv"))

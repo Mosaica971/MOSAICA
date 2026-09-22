@@ -37,7 +37,7 @@ def decode_baseline_representative_allocation(dataset: Dataset, config: dict[str
     the input side. The observed baseline is only known at aggregate/RPG resolution and the
     aggregate codes carry no economics of their own; `config['baseline_representative_crops']`
     substitutes a representative fine variant per family (an assumption -- see docs/04-vigilance.md
-    "point 4"). Real single-crop families (AG/ME/JA) map to themselves; NC is already
+    C.2). Real single-crop families (AG/ME/JA) map to themselves; NC is already
     dropped by decode_baseline_allocation."""
     baseline = decode_baseline_allocation(dataset)
     mapping = config.get("baseline_representative_crops") or {}
