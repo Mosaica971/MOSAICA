@@ -118,8 +118,8 @@ def rule_exact_risk_value(
     return crops, condition
 
 
-@register_categorical_rule("friche_lock")
-def rule_friche_lock(
+@register_categorical_rule("fallow_lock")
+def rule_fallow_lock(
     plot_attributes: pd.DataFrame,
     *,
     crops: list[str],

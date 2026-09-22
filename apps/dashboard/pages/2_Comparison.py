@@ -44,12 +44,12 @@ _INDICATOR_LABELS = comparison.INDICATOR_LABELS
 _indicator_value = comparison.indicator_value
 
 
-st.set_page_config(page_title="MOSAICA -- Comparaison", layout="wide")
-st.title("Comparaison de scénarios")
+st.set_page_config(page_title="MOSAICA -- Comparison", layout="wide")
+st.title("Scenario comparison")
 
 runs = loaders.list_output_runs(OUTPUTS_ROOT)
 if not runs:
-    st.info("Aucun run trouvé dans `outputs/` -- lancez `python main.py` d'abord.")
+    st.info("No run found in `outputs/` -- run `python main.py` first.")
     st.stop()
 
 
@@ -76,13 +76,13 @@ def _discover_series() -> dict[str, dict]:
 
 series_catalog = _discover_series()
 
-# Corps de rendu garde par la presence de donnees. Sans run (dossier outputs/ vide --
-# il est desormais gitignore -- ou page importee hors runtime Streamlit par les tests),
-# on saute la suite data-dependante : st.stop() ne halte pas en import nu.
+# The rendering body is guarded by the presence of data. With no run (an empty outputs/
+# folder -- it is gitignored -- or the page imported outside the Streamlit runtime by the
+# tests) the data-dependent part is skipped: st.stop() does not halt on a bare import.
 if series_catalog:
     # ------------------------------------------------------------ Reference runs
     # Three series are not scenarios among others: the observed 2017 land use, the strict
-    # GAMS-parity calibration, and the retained one. They are declared in a versioned
+    # GAMS-parity calibration, and the selected one. They are declared in a versioned
     # manifest (case_studies/guadeloupe/references.yaml) with the reason for each choice.
     resolved_references = references.resolve(
         references.load_references(MANIFEST), OUTPUTS_ROOT
@@ -91,12 +91,12 @@ if series_catalog:
 
     if resolved_references:
         with st.container(border=True):
-            st.subheader("Références")
+            st.subheader("References")
             head, action = st.columns([4, 1])
             head.caption(
-                "Les trois points fixes contre lesquels tout le reste se lit, déclarés dans "
-                "`case_studies/guadeloupe/references.yaml`. Le bouton remplace la sélection "
-                "de séries ci-dessous par ces références, dans cet ordre."
+                "The three fixed points everything else is read against, declared in "
+                "`case_studies/guadeloupe/references.yaml`. The button replaces the series "
+                "selection below with these references, in this order."
             )
             ordered = [
                 reference_labels[item.reference.id]
@@ -104,7 +104,7 @@ if series_catalog:
                 if item.reference.id in reference_labels
             ]
             if action.button(
-                "Charger les références",
+                "Load the references",
                 disabled=not ordered,
                 width="stretch",
             ):
@@ -113,28 +113,29 @@ if series_catalog:
 
             for item in resolved_references:
                 reference = item.reference
+                folder = item.run_dir.name if item.run_dir else reference.run
                 if item.missing:
                     st.error(
-                        f"**{reference.label}** — dossier `{reference.run}` absent de "
-                        "`outputs/`. Relancez ce run, ou corrigez le manifeste."
+                        f"**{reference.label}** — folder `{reference.run}` missing from "
+                        "`outputs/`. Rerun it, or fix the manifest."
                     )
                 elif reference.id not in reference_labels:
                     st.warning(
-                        f"**{reference.label}** — `{reference.run}` existe mais n'a pas de "
-                        f"table `facts_{reference.side}.csv` : run antérieur à la table de "
-                        "faits, non comparable ici."
+                        f"**{reference.label}** — `{folder}` exists but has no "
+                        f"`facts_{reference.side}.csv` table: the run predates the facts "
+                        "table and cannot be compared here."
                     )
                 else:
-                    with st.expander(f"{reference.label} — `{reference.run}`"):
-                        st.write(reference.note or "_(pas de justification déclarée)_")
+                    with st.expander(f"{reference.label} — `{folder}`"):
+                        st.write(reference.note or "_(no justification declared)_")
 
     # The declared references make the best default: they are what this page exists to
-    # compare. Falls back to every "sortie" series when no manifest matches.
+    # compare. Falls back to every "output" series when no manifest matches.
     default = (
         [reference_labels[item.reference.id]
          for item in resolved_references
          if item.reference.id in reference_labels]
-        or [lbl for lbl in series_catalog if "sortie" in lbl]
+        or [lbl for lbl in series_catalog if comparison.SIDE_LABELS["output"] in lbl]
         or list(series_catalog)
     )
     # `default` AND `key`, on purpose: session state carries the reference button's rewrite
@@ -149,23 +150,23 @@ if series_catalog:
         ]
 
     selected = st.multiselect(
-        "Séries à comparer (run × côté)",
+        "Series to compare (run × side)",
         list(series_catalog),
         default=default,
         key=_SELECTION_KEY,
     )
     if not selected:
-        st.info("Sélectionnez au moins une série.")
+        st.info("Select at least one series.")
         st.stop()
 
     # ------------------------------------------------- Starting-configuration diff
     # What separates two runs at their hypotheses, not at their results. In this model the
     # explanation of a calibration gap is nearly always two lines of YAML.
-    st.header("Configuration de départ")
+    st.header("Starting configuration")
     st.caption(
-        "Ce qui sépare deux runs **avant** le solve. Un écart de résultat entre deux "
-        "calibrations s'explique d'abord par les contraintes que l'une active et pas "
-        "l'autre — pas par le solveur."
+        "What separates two runs **before** the solve. A result gap between two calibrations "
+        "is explained first by the constraints one enables and the other does not — not by "
+        "the solver."
     )
     run_by_folder = {
         entry["run_dir"].name: entry["run_dir"] for entry in series_catalog.values()
@@ -183,10 +184,10 @@ if series_catalog:
     )
     diff_cols = st.columns(2)
     left_folder = diff_cols[0].selectbox(
-        "Référence (gauche)", folders, index=folders.index(_default_left)
+        "Reference (left)", folders, index=folders.index(_default_left)
     )
     right_folder = diff_cols[1].selectbox(
-        "Comparé à (droite)", folders, index=folders.index(_default_right)
+        "Compared with (right)", folders, index=folders.index(_default_right)
     )
 
     left_config = loaders.load_config_used(run_by_folder[left_folder])
@@ -194,35 +195,35 @@ if series_catalog:
     if left_config is None or right_config is None:
         missing = left_folder if left_config is None else right_folder
         st.info(
-            f"`{missing}` ne porte pas de `config_used.yaml` (run antérieur à cette "
-            "sauvegarde) : le diff de configuration n'est pas calculable."
+            f"`{missing}` carries no `config_used.yaml` (the run predates that record): "
+            "the configuration diff cannot be computed."
         )
     elif left_folder == right_folder:
-        st.info("Choisissez deux runs différents pour voir un écart de configuration.")
+        st.info("Pick two different runs to see a configuration gap.")
     else:
         summary = config_diff.summarise(left_config, right_config)
         headline = summary["headline"]
         if not any(headline.values()) and not summary["scalars"]:
             st.success(
-                f"`{left_folder}` et `{right_folder}` ont été résolus avec **exactement la "
-                "même configuration**. Tout écart de résultat vient donc du solveur "
-                "(graine de branchement, incumbent sur limite de temps), pas du modèle."
+                f"`{left_folder}` and `{right_folder}` were solved with **exactly the same "
+                "configuration**. Any result gap therefore comes from the solver (branching "
+                "seed, incumbent at the time limit), not from the model."
             )
         else:
             bullets = []
             if headline["activated"]:
                 bullets.append(
-                    f"`{right_folder}` **active** : "
+                    f"`{right_folder}` **enables**: "
                     + ", ".join(f"`{c}`" for c in headline["activated"])
                 )
             if headline["deactivated"]:
                 bullets.append(
-                    f"`{right_folder}` **désactive** : "
+                    f"`{right_folder}` **disables**: "
                     + ", ".join(f"`{c}`" for c in headline["deactivated"])
                 )
             if headline["retuned"]:
                 bullets.append(
-                    "**seuils modifiés** sur : "
+                    "**thresholds changed** on: "
                     + ", ".join(f"`{c}`" for c in headline["retuned"])
                 )
             if bullets:
@@ -236,12 +237,12 @@ if series_catalog:
                     pd.DataFrame(
                         [
                             {
-                                "Composant": row["component"],
+                                "Component": row["component"],
                                 left_folder: row["left"],
                                 right_folder: row["right"],
-                                "Écart": row["verdict"],
-                                "Arguments modifiés": " · ".join(
-                                    f"{k} : {a} → {b}" for k, (a, b) in row["args"].items()
+                                "Gap": row["verdict"],
+                                "Changed arguments": " · ".join(
+                                    f"{k}: {a} → {b}" for k, (a, b) in row["args"].items()
                                 ),
                             }
                             for row in rows
@@ -252,12 +253,12 @@ if series_catalog:
                 )
 
             if summary["scalars"]:
-                st.markdown("**Paramètres**")
+                st.markdown("**Parameters**")
                 st.dataframe(
                     pd.DataFrame(
                         [
                             {
-                                "Paramètre": row["key"],
+                                "Parameter": row["key"],
                                 left_folder: str(row["left"]),
                                 right_folder: str(row["right"]),
                             }
@@ -269,88 +270,88 @@ if series_catalog:
                 )
 
         st.caption(
-            "Ce diff dit ce qui a été **demandé** aux deux modèles, jamais ce que l'écart a "
-            "**coûté** : une contrainte qui ne mord pas ne change aucun résultat, et deux "
-            "configs identiques résolues au même gap peuvent différer par l'arbitraire de "
-            "branchement du solveur (mesuré ici : 0,15 point de PAD)."
+            "This diff says what was **asked** of the two models, never what the gap **cost**: "
+            "a constraint that does not bind changes no result, and two identical configs "
+            "solved to the same gap can differ by the solver's branching arbitrariness "
+            "(measured here: 0.15 point of PAD)."
         )
 
     # ------------------------------------------------- What the config diff actually moved
-    st.subheader("Ce que ça a déplacé sur le terrain")
+    st.subheader("What it moved on the ground")
     left_alloc = loaders.load_csv(run_by_folder[left_folder], "allocation_output.csv")
     right_alloc = loaders.load_csv(run_by_folder[right_folder], "allocation_output.csv")
     if left_alloc is None or right_alloc is None:
-        st.info("Un des deux runs n'a pas d'`allocation_output.csv` exploitable.")
+        st.info("One of the two runs has no usable `allocation_output.csv`.")
     elif left_folder == right_folder:
-        st.info("Choisissez deux runs différents.")
+        st.info("Pick two different runs.")
     else:
         opts = st.columns(3)
         resolution = opts[0].radio(
-            "Résolution", allocation_diff.RESOLUTIONS, horizontal=True,
-            format_func=lambda r: {"fine": "Culture fine (84)",
-                                   "base": "Groupe RPG (12)"}[r],
-            help="Comparer deux runs SIMULÉS est le seul cas où la résolution fine a un "
-            "sens : les deux côtés viennent du même univers de 84 codes. Le groupe RPG est "
-            "la résolution à laquelle la calibration est notée.",
+            "Resolution", allocation_diff.RESOLUTIONS, horizontal=True,
+            format_func=lambda r: {"fine": "Fine crop (84)",
+                                   "base": "RPG group (12)"}[r],
+            help="Comparing two SIMULATED runs is the only case where the fine resolution "
+            "makes sense: both sides come from the same universe of 84 codes. The RPG group "
+            "is the resolution the calibration is scored at.",
         )
         region_choice = opts[1].selectbox(
-            "Région", ["Toutes", *comparison.REGION_CODES],
-            format_func=lambda v: v if v == "Toutes" else comparison.label_region(v),
+            "Region", ["All", *comparison.REGION_CODES],
+            format_func=lambda v: v if v == "All" else comparison.label_region(v),
         )
-        top_n = opts[2].slider("Mouvements affichés", 5, 30, 12)
+        top_n = opts[2].slider("Moves shown", 5, 30, 12)
 
         aligned = allocation_diff.align(
             left_alloc, right_alloc,
             resolution=resolution,
-            region=None if region_choice == "Toutes" else region_choice,
+            region=None if region_choice == "All" else region_choice,
         )
         stats = allocation_diff.stability(aligned)
         stat_cols = st.columns(3)
-        stat_cols[0].metric("Surface identique", f"{stats['share_ha']:.1%}",
+        stat_cols[0].metric("Unchanged area", f"{stats['share_ha']:.1%}",
                             f"{stats['same_ha']:,.0f} / {stats['total_ha']:,.0f} ha",
                             delta_color="off")
-        stat_cols[1].metric("Parcelles identiques", f"{stats['share_plots']:.1%}",
+        stat_cols[1].metric("Unchanged plots", f"{stats['share_plots']:.1%}",
                             f"{stats['same_plots']:,} / {stats['total_plots']:,}",
                             delta_color="off")
-        stat_cols[2].metric("Surface déplacée",
+        stat_cols[2].metric("Area moved",
                             f"{stats['total_ha'] - stats['same_ha']:,.0f} ha")
 
         moves = allocation_diff.top_moves(aligned, top=top_n)
         if moves.empty:
-            st.success("Les deux runs allouent exactement la même chose.")
+            st.success("The two runs allocate exactly the same thing.")
         else:
             shown = moves.copy()
-            shown["De"] = [comparison.format_dim_value("subculture", c) for c in shown["left"]]
-            shown["Vers"] = [comparison.format_dim_value("subculture", c) for c in shown["right"]]
+            shown["From"] = [comparison.format_dim_value("subculture", c) for c in shown["left"]]
+            shown["To"] = [comparison.format_dim_value("subculture", c) for c in shown["right"]]
             st.dataframe(
-                shown[["De", "Vers", "surface_ha", "plots"]].rename(
-                    columns={"surface_ha": "Surface (ha)", "plots": "Parcelles"}
-                ).style.format({"Surface (ha)": "{:,.0f}", "Parcelles": "{:,.0f}"}),
+                shown[["From", "To", "surface_ha", "plots"]].rename(
+                    columns={"surface_ha": "Area (ha)", "plots": "Plots"}
+                ).style.format({"Area (ha)": "{:,.0f}", "Plots": "{:,.0f}"}),
                 width="stretch", hide_index=True,
             )
             st.caption(
-                "Les plus gros flux d'une culture vers une autre, parcelles inchangées "
-                f"exclues. Une seule ligne porte souvent tout l'écart. `{allocation_diff.UNALLOCATED}` "
-                "= terre laissée hors production par ce run — ce n'est pas « inchangé »."
+                "The largest flows from one crop to another, unchanged plots excluded. A "
+                f"single line often carries the whole gap. `{allocation_diff.UNALLOCATED}` "
+                "= land this run leaves out of production — that is not \"unchanged\"."
             )
 
             change = allocation_diff.net_change(aligned).head(top_n)
-            change["Culture"] = [
+            change["Crop"] = [
                 comparison.format_dim_value("subculture", c) for c in change["crop"]
             ]
             st.dataframe(
-                change[["Culture", "left_ha", "right_ha", "delta_ha"]].rename(
+                change[["Crop", "left_ha", "right_ha", "delta_ha"]].rename(
                     columns={"left_ha": f"{left_folder} (ha)",
                              "right_ha": f"{right_folder} (ha)",
-                             "delta_ha": "Écart (ha)"}
+                             "delta_ha": "Gap (ha)"}
                 ).style.format(precision=0),
                 width="stretch", hide_index=True,
             )
-            st.caption("Bilan net par culture, classé par ampleur du déplacement.")
+            st.caption("Net balance per crop, ranked by size of the move.")
 
     # Per-scenario color, chosen freely and reused across every chart on the page (grouped bars +
     # indicator panels). Keyed by series label so a choice sticks as long as the series is shown.
-    with st.expander("Couleurs des scénarios"):
+    with st.expander("Scenario colours"):
         series_colors: dict[str, str] = {}
         picker_cols = st.columns(min(len(selected), 4))
         for idx, lbl in enumerate(selected):
@@ -373,27 +374,27 @@ if series_catalog:
 
 
     # ---------------------------------------------------------------- Bar comparison
-    st.header("Barres comparées")
+    st.header("Compared bars")
     ctrl = st.columns(4)
     x_dim = ctrl[0].selectbox(
-        "Axe des abscisses", comparison.X_DIMENSIONS,
+        "X axis", comparison.X_DIMENSIONS,
         format_func=lambda d: comparison.X_DIMENSION_LABELS[d],
     )
     measure = ctrl[1].selectbox(
-        "Mesure (ordonnées)", list(comparison.MEASURE_LABELS),
+        "Measure (y axis)", list(comparison.MEASURE_LABELS),
         format_func=lambda m: comparison.MEASURE_LABELS[m],
     )
     stack_options = ["none"] + [d for d in ("subculture", "region", "island", "culture") if d != x_dim]
     stack_by = ctrl[2].selectbox(
-        "Empiler par", stack_options,
-        format_func=lambda s: "— aucun —" if s == "none" else comparison.X_DIMENSION_LABELS.get(s, s),
+        "Stack by", stack_options,
+        format_func=lambda s: "— none —" if s == "none" else comparison.X_DIMENSION_LABELS.get(s, s),
     )
     stacked = stack_by != "none"
 
     opt = st.columns(3)
-    include_zeros = opt[0].checkbox("Inclure les valeurs nulles", value=False)
-    relative = opt[1].checkbox("Part relative (%)", value=False, disabled=not stacked)
-    log = opt[2].checkbox("Échelle log (mode groupé)", value=False, disabled=stacked)
+    include_zeros = opt[0].checkbox("Include zero values", value=False)
+    relative = opt[1].checkbox("Relative share (%)", value=False, disabled=not stacked)
+    log = opt[2].checkbox("Log scale (grouped mode)", value=False, disabled=stacked)
 
     pivots = [
         (lbl, comparison.pivot_measure(loaders.load_facts(
@@ -434,22 +435,22 @@ if series_catalog:
     st.pyplot(fig)
     if include_zeros and x_dim in ("culture", "subculture") and not universe_from_recap:
         st.caption(
-            "Valeurs nulles issues du catalogue de cultures (ce run est antérieur au champ "
-            "`crop_universe` du recap) : la liste peut différer du jeu exact du modèle. "
-            "Relancez `python main.py` pour l'axe exhaustif fidèle au run."
+            "Zero values taken from the crop catalogue (this run predates the recap's "
+            "`crop_universe` field): the list may differ from the model's exact set. Rerun "
+            "`python main.py` for an exhaustive axis faithful to the run."
         )
     if stacked:
-        st.caption("Ordre des barres dans chaque groupe : " + " · ".join(selected))
+        st.caption("Bar order within each group: " + " · ".join(selected))
 
     # ---------------------------------------------------- Development-indicator profile
-    st.header("Profil des indicateurs de développement")
+    st.header("Development-indicator profile")
     chosen = st.multiselect(
-        "Indicateurs", list(_INDICATOR_LABELS),
+        "Indicators", list(_INDICATOR_LABELS),
         default=["total_revenue", _GINI_KEY],
         format_func=lambda i: _INDICATOR_LABELS[i],
     )
     if not chosen:
-        st.info("Choisissez au moins un indicateur.")
+        st.info("Pick at least one indicator.")
     else:
         rows = {}
         for lbl in selected:
@@ -458,7 +459,7 @@ if series_catalog:
             rows[lbl] = {ind: _indicator_value(recap, side, ind) for ind in chosen}
         raw = pd.DataFrame.from_dict(rows, orient="index")[chosen].dropna(axis=1, how="any")
         if raw.shape[1] < 1:
-            st.warning("Indicateurs indisponibles pour ces séries (runs trop anciens ?).")
+            st.warning("Indicators unavailable for these series (runs too old?).")
         else:
             st.pyplot(
                 comparison.build_indicator_parallel_axes_figure(
@@ -466,23 +467,24 @@ if series_catalog:
                 )
             )
             st.caption(
-                "Coordonnées parallèles : un axe vertical par indicateur, chacun à son échelle "
-                "native (pas de normalisation). Une ligne = un scénario (couleur choisie ci-dessus)."
+                "Parallel coordinates: one vertical axis per indicator, each on its native "
+                "scale (no normalisation). One line = one scenario (colour chosen above)."
             )
 
             # -------------------------------------------------- Composite score
-            st.subheader("Score agrégé")
+            st.subheader("Composite score")
             st.caption(
-                "Chaque indicateur est normalisé (min-max) sur les séries affichées, 1 = meilleur "
-                "du lot ; les indicateurs « coût » (GES, IFT, azote, chlordécone, subvention, coût "
-                "MO, Gini) sont inversés. Score = moyenne pondérée. Réglez les poids ci-dessous."
+                "Each indicator is min-max normalised over the displayed series, 1 = best of "
+                "the lot; \"cost\" indicators (GHG, TFI, nitrogen, chlordecone, subsidy, labour "
+                "cost, Gini) are inverted. Score = weighted mean. Set the weights below."
             )
             balance = st.checkbox(
-                "Équilibrer par famille", value=True,
-                help="Chaque famille (économie, environnement, autonomie, exposition, intensité, "
-                "équité) pèse autant quel que soit le nombre d'indicateurs cochés dedans. Sans "
-                "cela, sélectionner les 11 ratios d'autonomie leur donne 11 fois le poids des "
-                "GES — le score mesure alors la finesse du découpage, pas la performance.",
+                "Balance by family", value=True,
+                help="Each family (economy, environment, self-sufficiency, exposure, "
+                "intensity, equity) weighs the same whatever the number of indicators ticked "
+                "in it. Without this, ticking the 11 self-sufficiency ratios gives them 11 "
+                "times the weight of GHG — the score then measures how finely the list is "
+                "cut, not performance.",
             )
 
             # An indicator a scenario PINS with a constraint is its hypothesis, not its
@@ -494,14 +496,14 @@ if series_catalog:
             flagged = sorted({ind for inds in pinned.values() for ind in inds})
             if flagged:
                 detail = "; ".join(
-                    f"**{lbl}** : " + ", ".join(_INDICATOR_LABELS[i] for i in sorted(inds))
+                    f"**{lbl}**: " + ", ".join(_INDICATOR_LABELS[i] for i in sorted(inds))
                     for lbl, inds in pinned.items()
                     if inds
                 )
                 st.warning(
-                    "Certains indicateurs sont **fixés par une contrainte** du scénario, donc "
-                    "ce sont ses hypothèses et non ses résultats — les noter revient à mesurer "
-                    "ce qu'on lui a imposé. " + detail
+                    "Some indicators are **fixed by a constraint** of the scenario, so they are "
+                    "its hypotheses and not its results — scoring them measures what was "
+                    "imposed on it. " + detail
                 )
 
             weights: dict[str, float] = {}
@@ -522,14 +524,14 @@ if series_catalog:
             ax.set_yticks(range(len(scores)))
             ax.set_yticklabels(list(scores.index))
             ax.set_xlim(0, 1)
-            ax.set_xlabel("Score agrégé (0–1)")
+            ax.set_xlabel("Composite score (0–1)")
             for y, value in enumerate(scores.to_numpy()):
                 ax.text(min(value + 0.01, 0.98), y, f"{value:.2f}", va="center", fontsize=8)
             fig.tight_layout()
             st.pyplot(fig)
 
     # ---------------------------------------------------- Food self-sufficiency panel
-    st.header("Autonomie alimentaire")
+    st.header("Food self-sufficiency")
     _autonomy = {
         lbl: (series_catalog[lbl]["recap"].get("food_autonomy") or {}).get(
             series_catalog[lbl]["side"], {}
@@ -539,19 +541,19 @@ if series_catalog:
     _autonomy = {lbl: auto for lbl, auto in _autonomy.items() if auto}
     if not _autonomy:
         st.info(
-            "Aucune série sélectionnée ne porte le bloc `food_autonomy` (runs antérieurs à cette "
-            "fonctionnalité). Relancez `python main.py` pour un run comparable."
+            "No selected series carries the `food_autonomy` block (runs predating that "
+            "feature). Rerun `python main.py` for a comparable run."
         )
     else:
         variant_label = st.radio(
-            "Variante", ["Cultures seules", "Avec pêche"], horizontal=True
+            "Variant", ["Crops only", "With fishing"], horizontal=True
         )
-        variant = "with_fishing" if variant_label == "Avec pêche" else "crop_only"
+        variant = "with_fishing" if variant_label == "With fishing" else "crop_only"
         frame = comparison.autonomy_ratios_frame(_autonomy, variant)
         st.caption(
-            "Ratio production locale / besoin de la population, par nutriment. Une valeur ≥ 1 "
-            "(ligne pointillée) = auto-suffisance pour ce nutriment. Le nutriment le plus bas "
-            "borne l'autonomie globale."
+            "Ratio of local production to the population's need, per nutrient. A value ≥ 1 "
+            "(dotted line) = self-sufficiency for that nutrient. The lowest nutrient bounds "
+            "overall self-sufficiency."
         )
         fig_auto, ax_auto = plt.subplots(figsize=(9, 4))
         nutrients = list(frame.index)
@@ -567,9 +569,9 @@ if series_catalog:
         ax_auto.axhline(1.0, color="grey", linestyle="--", linewidth=1)
         ax_auto.set_xticks(list(x))
         ax_auto.set_xticklabels(nutrients, rotation=45, ha="right")
-        ax_auto.set_ylabel("Ratio production / besoin")
+        ax_auto.set_ylabel("Production / need ratio")
         ax_auto.legend(fontsize=8)
         fig_auto.tight_layout()
         st.pyplot(fig_auto)
 else:
-    st.warning("Aucun run avec table facts_*.csv dans outputs/. Lancez python main.py pour un run comparable.")
+    st.warning("No run with a facts_*.csv table in outputs/. Run python main.py for a comparable run.")

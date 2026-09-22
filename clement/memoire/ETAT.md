@@ -4,7 +4,29 @@
 Il dit où en est le mémoire, ce qui a été décidé, ce qui reste, et ce qu'il ne faut pas
 refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémoire.
 
-> Dernière mise à jour : **2026-09-02**. Dépôt le **26/08**, soutenance **1-4 sept**.
+> Dernière mise à jour : **2026-09-22**. Dépôt le **26/08**, soutenance **1-4 sept** — **la
+> phase mémoire est close.**
+>
+> **2026-09-22 — bascule vers la suite du stage.** Le dossier `memoire/` a été déplacé sous
+> `clement/memoire/` (commit `1371e47`), à côté de `clement/soutenance/` et
+> `clement/student_context/`. Le mémoire n'est plus un chantier actif : ce fichier reste la
+> référence pour le rouvrir (note technique interne, article), mais **le travail en cours est
+> ailleurs**. La suite du stage — couplage avec MAELIA dans les deux sens, portage des données
+> vers le SI de MAELIA avec niveaux d'accès, passage du code à l'anglais, tableau d'état de ce
+> qui est implémenté — est cadrée dans
+> `docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md`, avec l'ordre
+> proposé et les questions ouvertes. Rien n'y est encore implémenté.
+>
+> ⚠ **Le déplacement a cassé deux générateurs.** `build_chiffres.py` et `build_figures.py`
+> calculent la racine du dépôt par `Path(__file__).parent.parent`, qui vaut désormais
+> `clement/` et non plus la racine : ils ne trouvent plus `outputs/`. Correctif :
+> `.parents[2]`. Même question pour `clement/soutenance/build_pptx.py` et
+> `build_carte_chlordecone.py` (`parents[1]`, qui visait `memoire/` et vise maintenant
+> `clement/`). **Non corrigé**, à faire avant de régénérer quoi que ce soit.
+>
+> ⚠ **La contrainte « aucun solve neuf » (§ 3) valait pour la rédaction.** Elle n'est ni
+> levée ni reconduite pour la suite du stage : c'est à Clément de le dire. Le couplage MAELIA
+> implique une recalibration, donc des solves.
 >
 > **Session du 2026-09-02 — échafaudage supprimé, annexes réduites aux tableaux, deux
 > erreurs de fond corrigées.** Demande de Clément, sans aucune reformulation de sa prose.
@@ -239,7 +261,9 @@ refaire. Il est tenu à jour à la fin de chaque session de travail sur le mémo
 
 Clément Le Borgne-Larivière, PFE Toulouse INP-ENSEEIHT (MF2E), stage à **INRAE UR ASTRO**
 (Guadeloupe) sur **MOSAICA** — modèle d'allocation de cultures porté de GAMS vers
-Python/Pyomo. Le dépôt de code est la racine de ce workspace ; le mémoire est ce dossier.
+Python/Pyomo. Le dépôt de code est la racine de ce workspace ; le mémoire est ce dossier
+(`clement/memoire/` ; les chemins `memoire/…` écrits dans ce fichier et dans le corpus sont
+antérieurs au déplacement).
 
 Le mémoire vise **30 pages de cœur** + ~20 pages d'annexes. Il alimente aussi quatre autres
 sorties : un **oral** de 20 min, une **note technique interne**, un éventuel **article**, et
@@ -315,9 +339,9 @@ article.
 ### L'audit — `memoire/audit_corpus.py` (fait)
 
 ```bash
-.venv/Scripts/python memoire/audit_corpus.py            # rapport -> corpus/_audit.md
-.venv/Scripts/python memoire/audit_corpus.py --graph    # + _graphe.dot, _graphe-<PREF>.mmd
-.venv/Scripts/python memoire/audit_corpus.py --strict   # sortie non nulle si une règle casse
+.venv/Scripts/python clement/memoire/audit_corpus.py            # rapport -> corpus/_audit.md
+.venv/Scripts/python clement/memoire/audit_corpus.py --graph    # + _graphe.dot, _graphe-<PREF>.mmd
+.venv/Scripts/python clement/memoire/audit_corpus.py --strict   # sortie non nulle si une règle casse
 ```
 
 État : **règle 1 : 1 · règle 2 : 0 · règle 3 : 0 · 0 arc pendant · 0 cycle.** La violation
@@ -362,8 +386,14 @@ là qu'une dérive s'est logée (`mesChecksums` annonçait 570 pour 681 réels).
 - [x] **Phase 5 — Rédaction.** Faite le 2026-08-16 : les 71 encadrés `MATIÈRE` remplacés par de
       la prose, les liminaires écrits (résumés FR/EN, mots-clés, remerciements en brouillon à
       personnaliser).
-- [ ] **Phase 6 — Réécriture par Clément, finition, dépôt du 26/08.** Voir § 6.
-- [ ] **Phase 8 — Soutenance (1-4 sept), note technique interne, analyse d'article.**
+- [x] **Phase 6 — Réécriture par Clément, finition, dépôt du 26/08.**
+- [x] **Phase 8 — Soutenance (1-4 sept).** Restent ouverts : la **note technique interne** et
+      l'**analyse d'article** — à reprendre depuis ce dossier le moment venu.
+- [ ] **Phase 9 — Suite du stage (MAELIA).** Hors mémoire. Voir la spec du 2026-09-22.
+
+> Le § 6 ci-dessous date de la rédaction. Ses points 2 à 7 (pages, logos, chiffres saisis à la
+> main, page de garde) portaient sur le dépôt et sont **périmés** ; il n'est gardé que pour une
+> éventuelle réouverture (note technique, article), où le point 5 redevient utile.
 
 ## 6. Ce qui reste, par ordre
 
@@ -434,10 +464,10 @@ conclusion et dans l'annexe B ; il reste à les **poser aux encadrants**.
 ## 8. Commandes utiles
 
 ```bash
-powershell memoire/compile.ps1                   # pdflatex + biber, puis compte de pages
-.venv/Scripts/python memoire/audit_corpus.py     # audit du corpus
-.venv/Scripts/python memoire/build_chiffres.py   # régénère chiffres.tex
-.venv/Scripts/python memoire/build_figures.py    # régénère les figures
+powershell clement/memoire/compile.ps1                   # pdflatex + biber, puis compte de pages
+.venv/Scripts/python clement/memoire/audit_corpus.py     # audit du corpus
+.venv/Scripts/python clement/memoire/build_chiffres.py   # régénère chiffres.tex (⚠ racine cassée, voir en tête)
+.venv/Scripts/python clement/memoire/build_figures.py    # régénère les figures (⚠ idem)
 .venv/Scripts/python scripts/golden_snapshot.py --check   # 681 checksums, ~7 s
 .venv/Scripts/python scripts/check_references.py          # garde-fou des 3 runs de référence
 ```

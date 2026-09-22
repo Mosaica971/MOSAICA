@@ -6,7 +6,7 @@ from case_studies.guadeloupe.reporting import indicators
 
 
 def _dataset() -> Dataset:
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {
             "PART_C_INIT": [4.0, 4.0],
             "TYPE_SOL": [1, 4],
@@ -16,7 +16,7 @@ def _dataset() -> Dataset:
         },
         index=["P1", "P2"],
     )
-    data_sol = pd.DataFrame(
+    soil_data = pd.DataFrame(
         {
             "NITISOL": [0.10, 1.0, 0.25, 3.0],
             "ANDOSOL": [0.20, 1.0, 0.25, 17.5],
@@ -26,7 +26,7 @@ def _dataset() -> Dataset:
         },
         index=["KAER", "DENS", "PROF", "KOC"],
     )
-    data_cult = pd.DataFrame(
+    crop_data = pd.DataFrame(
         {
             **{f"BESOIN_EAU_{m:02d}": [5.0, 5.0] for m in range(1, 13)},
             "BIOM_AER": [10.0, 10.0],
@@ -38,28 +38,28 @@ def _dataset() -> Dataset:
         index=["CROP_A", "CROP_B"],
     ).T
     # Un mois de pointe marqué: juillet à 50 mm pour CROP_A.
-    data_cult.loc["BESOIN_EAU_07", "CROP_A"] = 50.0
+    crop_data.loc["BESOIN_EAU_07", "CROP_A"] = 50.0
 
-    monthly = data_cult.loc[[f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]]
+    monthly = crop_data.loc[[f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]]
     parameters = {
-        "data_parc": data_parc,
-        "data_sol": data_sol,
-        "data_cult": data_cult,
-        "data_otk": pd.DataFrame(
+        "plot_data": plot_data,
+        "soil_data": soil_data,
+        "crop_data": crop_data,
+        "operation_data": pd.DataFrame(
             {"DOSE": [0.0], "HUM": [0.0], "CARB": [0.0], "FHUM": [0.0]}, index=["NONE"]
         ),
-        "matrice_otk_cult": pd.DataFrame(
+        "crop_operation_matrix": pd.DataFrame(
             {"CROP_A": [0.0], "CROP_B": [0.0]}, index=["NONE"]
         ),
-        "water_need_per_ha_cult": monthly.sum(axis=0),
-        "monthly_water_need_per_ha_cult": monthly,
-        "carbon_input_per_ha_cult": pd.Series({"CROP_A": 3.0, "CROP_B": 3.0}),
+        "crop_water_need_per_ha": monthly.sum(axis=0),
+        "crop_monthly_water_need_per_ha": monthly,
+        "crop_carbon_input_per_ha": pd.Series({"CROP_A": 3.0, "CROP_B": 3.0}),
         # Requis par compute_environmental_totals, neutralisés à 0 : ce test porte sur
         # l'eau et le carbone, pas sur les indicateurs préexistants.
-        "azote_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
-        "ges_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
-        "ift_per_ha_cult": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
-        "cld_uptake_cult": pd.Series({"CROP_A": 4.0, "CROP_B": 4.0}),
+        "crop_nitrogen_per_ha": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
+        "crop_ghg_per_ha": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
+        "crop_tfi_per_ha": pd.Series({"CROP_A": 0.0, "CROP_B": 0.0}),
+        "crop_chlordecone_uptake": pd.Series({"CROP_A": 4.0, "CROP_B": 4.0}),
     }
     return Dataset(sets={}, parameters=parameters, scalars={})
 
@@ -94,29 +94,29 @@ def test_carbon_balance_and_mineralization_scale_with_surface():
 
 def test_pre_existing_environmental_keys_are_preserved():
     """Le lot eau/carbone ne doit rien casser des indicateurs préexistants (azote, GES, IFT,
-    CLD). La fixture neutralise les taux azote/GES/IFT à 0.0 et met cld_uptake_cult à 4.0
+    CLD). La fixture neutralise les taux azote/GES/IFT à 0.0 et met crop_chlordecone_uptake à 4.0
     (classe « aucun risque ») pour les deux cultures, donc tous les totaux et moyennes/ha
     attendus sont nuls, et aucune parcelle n'est signalée à risque chlordécone."""
     totals = indicators.compute_environmental_totals(_dataset(), _allocation())
-    assert totals["total_azote"] == pytest.approx(0.0)
-    assert totals["total_ges"] == pytest.approx(0.0)
-    assert totals["total_ift"] == pytest.approx(0.0)
-    assert totals["surface_cld"] == pytest.approx(0.0)
-    assert totals["azote_per_ha"] == pytest.approx(0.0)
-    assert totals["ges_per_ha"] == pytest.approx(0.0)
-    assert totals["ift_per_ha"] == pytest.approx(0.0)
+    assert totals["total_nitrogen"] == pytest.approx(0.0)
+    assert totals["total_ghg"] == pytest.approx(0.0)
+    assert totals["total_tfi"] == pytest.approx(0.0)
+    assert totals["chlordecone_risk_area"] == pytest.approx(0.0)
+    assert totals["nitrogen_per_ha"] == pytest.approx(0.0)
+    assert totals["ghg_per_ha"] == pytest.approx(0.0)
+    assert totals["tfi_per_ha"] == pytest.approx(0.0)
 
 
 def test_facts_table_carries_water_and_carbon_measures():
     dataset = _dataset()
-    dataset.parameters["data_parc"]["REGION"] = [1, 1]
-    dataset.parameters["data_parc"]["ILE"] = [1, 1]
-    for name in ("rdt_cult", "sales_per_ha_cult", "subsidy_per_ha_cult_annualized",
-                 "margin_per_ha_cult", "labor_hours_per_ha_cult"):
+    dataset.parameters["plot_data"]["REGION"] = [1, 1]
+    dataset.parameters["plot_data"]["ILE"] = [1, 1]
+    for name in ("crop_yield", "crop_sales_per_ha", "crop_subsidy_per_ha_annualized",
+                 "crop_margin_per_ha", "crop_labor_hours_per_ha"):
         dataset.parameters[name] = pd.Series({"CROP_A": 0.0, "CROP_B": 0.0})
 
     facts = indicators.compute_facts_table(
-        dataset, _allocation(), hours_per_etp=1607.0, cost_per_hour=0.0
+        dataset, _allocation(), hours_per_fte=1607.0, cost_per_hour=0.0
     )
     assert "water_need_m3" in facts.columns
     assert "soil_carbon_balance" in facts.columns

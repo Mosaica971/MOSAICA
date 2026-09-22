@@ -7,7 +7,7 @@ from core.data.eligibility import (
     forbid_where,
     rule_attribute_forbidden,
     rule_exact_risk_value,
-    rule_friche_lock,
+    rule_fallow_lock,
     rule_irrigation_required,
     rule_max_risk_threshold,
     rule_region_crop_forbidden,
@@ -68,10 +68,10 @@ def test_forbid_where_clears_target_crops_only_for_plots_matching_condition():
 
 
 def test_rule_irrigation_required_forbids_crops_without_irrigation():
-    data_parc = pd.DataFrame({"IRRIG_PARC": [0, 1]}, index=["P1", "P2"])
+    plot_data = pd.DataFrame({"IRRIG_PARC": [0, 1]}, index=["P1", "P2"])
 
     crops, condition = rule_irrigation_required(
-        data_parc, crops=["ME"], irrigation_column="IRRIG_PARC"
+        plot_data, crops=["ME"], irrigation_column="IRRIG_PARC"
     )
 
     assert crops == ["ME"]
@@ -79,10 +79,10 @@ def test_rule_irrigation_required_forbids_crops_without_irrigation():
 
 
 def test_rule_soil_type_forbidden_matches_listed_soil_types():
-    data_parc = pd.DataFrame({"TYPE_SOL": [2, 3]}, index=["P1", "P2"])
+    plot_data = pd.DataFrame({"TYPE_SOL": [2, 3]}, index=["P1", "P2"])
 
     crops, condition = rule_soil_type_forbidden(
-        data_parc, crops=["AN_NU"], soil_column="TYPE_SOL", forbidden_soil_types=[2]
+        plot_data, crops=["AN_NU"], soil_column="TYPE_SOL", forbidden_soil_types=[2]
     )
 
     assert crops == ["AN_NU"]
@@ -113,10 +113,10 @@ def test_two_attribute_forbidden_entries_express_an_or_across_columns():
 
 
 def test_rule_max_risk_threshold_forbids_values_at_or_below_threshold():
-    data_parc = pd.DataFrame({"RISQUE_CLD": [3, 4]}, index=["P1", "P2"])
+    plot_data = pd.DataFrame({"RISQUE_CLD": [3, 4]}, index=["P1", "P2"])
 
     crops, condition = rule_max_risk_threshold(
-        data_parc, crops=["IG_TUT"], risk_column="RISQUE_CLD", max_allowed=3
+        plot_data, crops=["IG_TUT"], risk_column="RISQUE_CLD", max_allowed=3
     )
 
     assert crops == ["IG_TUT"]
@@ -124,10 +124,10 @@ def test_rule_max_risk_threshold_forbids_values_at_or_below_threshold():
 
 
 def test_rule_exact_risk_value_forbids_the_matching_value():
-    data_parc = pd.DataFrame({"RISQUE_CLD": [1, 2]}, index=["P1", "P2"])
+    plot_data = pd.DataFrame({"RISQUE_CLD": [1, 2]}, index=["P1", "P2"])
 
     crops, condition = rule_exact_risk_value(
-        data_parc, crops=["PN_PIQ"], risk_column="RISQUE_CLD", allowed_value=1
+        plot_data, crops=["PN_PIQ"], risk_column="RISQUE_CLD", allowed_value=1
     )
 
     assert crops == ["PN_PIQ"]
@@ -135,10 +135,10 @@ def test_rule_exact_risk_value_forbids_the_matching_value():
 
 
 def test_rule_region_crop_forbidden_matches_listed_regions():
-    data_parc = pd.DataFrame({"REGION_CODE": ["R1", "R2"]}, index=["P1", "P2"])
+    plot_data = pd.DataFrame({"REGION_CODE": ["R1", "R2"]}, index=["P1", "P2"])
 
     crops, condition = rule_region_crop_forbidden(
-        data_parc, crops=["ME"], region_column="REGION_CODE", forbidden_regions=["R1"]
+        plot_data, crops=["ME"], region_column="REGION_CODE", forbidden_regions=["R1"]
     )
 
     assert crops == ["ME"]
@@ -165,7 +165,7 @@ def test_attribute_bounds_from_config_keeps_only_enabled_entries():
 
 
 def test_rule_friche_lock_matches_plots_fallow_for_every_listed_year():
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {
             "cult_2015": [14, 14, 5],
             "cult_2016": [14, 5, 14],
@@ -174,8 +174,8 @@ def test_rule_friche_lock_matches_plots_fallow_for_every_listed_year():
         index=["P1", "P2", "P3"],
     )
 
-    crops, condition = rule_friche_lock(
-        data_parc,
+    crops, condition = rule_fallow_lock(
+        plot_data,
         crops=["AG", "CS"],
         history_columns=["cult_2015", "cult_2016", "cult_2017"],
         fallow_codes=[0, 10, 14],
@@ -190,9 +190,9 @@ def test_forbid_crops_forbids_listed_crops_on_all_plots():
     import pandas as pd
     from core.data.eligibility import CATEGORICAL_RULE_REGISTRY
 
-    data_parc = pd.DataFrame({"ILE": [1, 2, 3]}, index=["P1", "P2", "P3"])
+    plot_data = pd.DataFrame({"ILE": [1, 2, 3]}, index=["P1", "P2", "P3"])
     rule = CATEGORICAL_RULE_REGISTRY["forbid_crops"]
-    crops, condition = rule(data_parc, crops=["ME", "BA_IRR"])
+    crops, condition = rule(plot_data, crops=["ME", "BA_IRR"])
 
     assert crops == ["ME", "BA_IRR"]
     assert condition.all()  # forbidden on every plot
@@ -203,7 +203,7 @@ def test_attribute_forbidden_single_and_multi_condition():
     import pandas as pd
     from core.data.eligibility import CATEGORICAL_RULE_REGISTRY
 
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {"ILE": [1, 2, 3, 2], "REGION": [5, 3, 1, 5], "COMMUNE": [97110, 97102, 97130, 97117]},
         index=["P1", "P2", "P3", "P4"],
     )
@@ -211,7 +211,7 @@ def test_attribute_forbidden_single_and_multi_condition():
 
     # Single condition: forbid where COMMUNE not in the Nord-Grande-Terre commune list
     crops, cond = rule(
-        data_parc,
+        plot_data,
         crops=["CS_NGT_NISM"],
         conditions=[{"column": "COMMUNE", "op": "not_in", "value": [97102, 97119, 97122]}],
     )
@@ -220,7 +220,7 @@ def test_attribute_forbidden_single_and_multi_condition():
 
     # AND of two conditions: forbid CS_BT where ILE != 1 AND REGION != 5
     _, cond2 = rule(
-        data_parc,
+        plot_data,
         crops=["CS_BT_NISM"],
         conditions=[
             {"column": "ILE", "op": "ne", "value": 1},

@@ -120,7 +120,7 @@ def test_family_balancing_stops_a_finely_split_family_from_dominating():
         {
             "autonomy_kcal": [1.0, 0.0],
             "autonomy_prot": [1.0, 0.0],
-            "total_ges": [100.0, 0.0],
+            "total_ghg": [100.0, 0.0],
         },
         index=["P1", "P2"],
     )
@@ -138,7 +138,7 @@ def test_family_balancing_stops_a_finely_split_family_from_dominating():
 
 def test_family_balancing_defaults_to_on():
     raw = pd.DataFrame(
-        {"autonomy_kcal": [1.0, 0.0], "autonomy_prot": [1.0, 0.0], "total_ges": [100.0, 0.0]},
+        {"autonomy_kcal": [1.0, 0.0], "autonomy_prot": [1.0, 0.0], "total_ghg": [100.0, 0.0]},
         index=["P1", "P2"],
     )
     weights = {c: 1.0 for c in raw.columns}
@@ -146,23 +146,23 @@ def test_family_balancing_defaults_to_on():
 
 
 def test_cost_indicators_are_still_inverted_under_balancing():
-    raw = pd.DataFrame({"total_ges": [100.0, 0.0]}, index=["dirty", "clean"])
-    scores = comparison.compute_composite_scores(raw, {"total_ges": 1.0})
+    raw = pd.DataFrame({"total_ghg": [100.0, 0.0]}, index=["dirty", "clean"])
+    scores = comparison.compute_composite_scores(raw, {"total_ghg": 1.0})
     assert scores["clean"] == pytest.approx(1.0)
     assert scores["dirty"] == pytest.approx(0.0)
 
 
 def test_indicator_family_resolves_every_autonomy_key_by_prefix():
-    assert comparison.indicator_family("autonomy_fe") == "autonomie"
-    assert comparison.indicator_family("total_ges") == "environnement"
-    assert comparison.indicator_family("subsidy_per_etp") == "intensite"
-    assert comparison.indicator_family("inconnu") == "autre"
+    assert comparison.indicator_family("autonomy_fe") == "self_sufficiency"
+    assert comparison.indicator_family("total_ghg") == "environment"
+    assert comparison.indicator_family("subsidy_per_fte") == "intensity"
+    assert comparison.indicator_family("unknown") == "other"
 
 
 def test_every_labelled_indicator_has_a_family():
     unfamilied = [
         key for key in comparison.INDICATOR_LABELS
-        if comparison.indicator_family(key) == "autre"
+        if comparison.indicator_family(key) == "other"
     ]
     assert unfamilied == []
 
@@ -174,27 +174,27 @@ def test_bound_indicators_flags_what_a_constraint_pins():
     recap = {
         "constraints": [
             {"name": "territory_indicator_bound",
-             "args": {"label": "budget", "indicator": "subvention", "sense": "le"}},
+             "args": {"label": "budget", "indicator": "subsidy", "sense": "le"}},
             {"name": "territory_indicator_bound",
-             "args": {"label": "emploi", "indicator": "travail", "sense": "ge"}},
+             "args": {"label": "emploi", "indicator": "labor", "sense": "ge"}},
         ]
     }
     pinned = comparison.bound_indicators(recap)
     assert "total_subsidy" in pinned
-    assert "subsidy_per_etp" in pinned  # the derived ratios are pinned too
-    assert "total_etp" in pinned
-    assert "total_ges" not in pinned
+    assert "subsidy_per_fte" in pinned  # the derived ratios are pinned too
+    assert "total_fte" in pinned
+    assert "total_ghg" not in pinned
 
 
 def test_bound_indicators_covers_zone_bounds_and_production_bounds():
     recap = {
         "constraints": [
-            {"name": "zone_indicator_bound", "args": {"zone": "farms", "indicator": "azote"}},
+            {"name": "zone_indicator_bound", "args": {"zone": "farms", "indicator": "nitrogen"}},
             {"name": "territory_production_bound", "args": {"label": "cs_quota_max"}},
         ]
     }
     pinned = comparison.bound_indicators(recap)
-    assert "total_azote" in pinned
+    assert "total_nitrogen" in pinned
     assert "total_production_tonnes" in pinned
 
 
@@ -210,8 +210,8 @@ def test_bound_indicators_is_empty_for_a_run_without_such_constraints():
 def test_indicator_value_reads_each_family_from_its_own_recap_block():
     recap = {
         "economics": {"output": {"total_gross_margin": 1.0}},
-        "environment": {"output": {"total_ges": 2.0}},
-        "intensity": {"output": {"subsidy_per_etp": 3.0}},
+        "environment": {"output": {"total_ghg": 2.0}},
+        "intensity": {"output": {"subsidy_per_fte": 3.0}},
         "diversity": {"output": {"shannon": 4.0}},
         "resilience": {"output": {"revenue_concentration_hhi": 5.0}},
         "food_autonomy": {"output": {"crop_only": {"kcal": 6.0}, "limiting_crop_only": 7.0}},
@@ -219,8 +219,8 @@ def test_indicator_value_reads_each_family_from_its_own_recap_block():
     }
     read = lambda key: comparison.indicator_value(recap, "output", key)  # noqa: E731
     assert read("total_gross_margin") == 1.0
-    assert read("total_ges") == 2.0
-    assert read("subsidy_per_etp") == 3.0
+    assert read("total_ghg") == 2.0
+    assert read("subsidy_per_fte") == 3.0
     assert read("shannon") == 4.0
     assert read("revenue_concentration_hhi") == 5.0
     assert read("autonomy_kcal") == 6.0
@@ -229,5 +229,5 @@ def test_indicator_value_reads_each_family_from_its_own_recap_block():
 
 
 def test_indicator_value_returns_none_for_a_run_predating_a_block():
-    assert comparison.indicator_value({}, "output", "subsidy_per_etp") is None
+    assert comparison.indicator_value({}, "output", "subsidy_per_fte") is None
     assert comparison.indicator_value({}, "output", "shannon") is None

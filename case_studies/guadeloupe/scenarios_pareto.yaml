@@ -1,71 +1,72 @@
-# CATALOGUE DES BALAYAGES DE PARETO -- fronts par epsilon-contrainte.
+# PARETO SWEEP CATALOGUE -- epsilon-constraint fronts.
 #
-# CE QUE CA CHANGE. Un scenario repond « avec ce plafond d'azote, la marge vaut X ». Il ne dit
-# pas ce que coute le kilo suivant. Un front de Pareto le dit : on fixe l'objectif (marge
-# ajustee au risque), on serre un indicateur cran par cran, et la courbe obtenue EST
-# l'arbitrage -- c'est-a-dire l'objet meme d'un modele d'aide a la decision publique. Le prix
-# dual de `shadow_prices.py` donne la pente locale ; le front donne la courbe entiere, y
-# compris les decrochements que le dual ne peut pas voir (il est local par construction).
+# WHAT IT CHANGES. A scenario answers "with this nitrogen ceiling, the margin is X". It does
+# not say what the next kilogram costs. A Pareto front does: the objective (risk-adjusted
+# margin) is fixed, one indicator is tightened step by step, and the resulting curve IS the
+# trade-off -- the very object of a public decision-support model. The dual price from
+# `shadow_prices.py` gives the local slope; the front gives the whole curve, including the
+# kinks the dual cannot see (it is local by construction).
 #
-# COMMENT CA MARCHE. Un balayage est un run ordinaire portant un bloc `matrix:`, que
-# `core/config.expand_runs` deplie en produit cartesien : une valeur = un run = un vrai solve
-# MILP. La cle `args:<label>.<argument>` vise l'ARGUMENT de la contrainte portant ce label,
-# et non un chemin pointe de la config -- parce qu'un seuil de contrainte ne vit a aucun
-# chemin pointe. C'est aussi pourquoi `azote_max` et `emploi_min` existent en `enable: false`
-# dans `config.yaml` : `set_args` ne sait que patcher une entree DEJA declaree, si bien que
-# ces deux coquilles vides n'ont d'autre raison d'etre que de donner prise au balayage.
+# HOW IT WORKS. A sweep is an ordinary run carrying a `matrix:` block, which
+# `core/config.expand_runs` unfolds as a Cartesian product: one value = one run = one real
+# MILP solve. The key `args:<label>.<argument>` targets the ARGUMENT of the constraint
+# carrying that label, not a dotted config path -- because a constraint threshold lives at no
+# dotted path. That is also why `nitrogen_max` and `employment_min` exist as `enable: false`
+# in `config.yaml`: `set_args` can only patch an entry ALREADY declared, so those two empty
+# shells exist only to give the sweep something to hold.
 #
-# DEUX FACONS DE S'EN SERVIR.
-#   * seul, contre la config de reference -- le front du modele courant :
+# TWO WAYS TO USE IT.
+#   * alone, against the reference config -- the front of the current model:
 #       python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_pareto.yaml
-#   * attache a une politique, depuis `plan.yaml` -- le front SOUS cette politique, qui est
-#     l'objet interessant : le cout marginal de l'azote n'est pas le meme quand l'inertie est
-#     a 70 % et quand elle est a 30 %. Le run porte alors les trois coordonnees
-#     (politique / forcage / balayage) dans son recap.
+#   * attached to a policy, from `plan.yaml` -- the front UNDER that policy, which is the
+#     interesting object: the marginal cost of nitrogen is not the same at 70 % inertia and
+#     at 30 %. The run then carries the three coordinates (policy / forcing / sweep) in its
+#     recap.
 #
-# LES SEUILS SONT DES PARTS DU MESURE, PAS DES CHIFFRES CHOISIS. Chaque valeur ci-dessous est
-# un pourcentage du total realise par `calib_retenu` -- 1 930 903 kg N. Le premier point du
-# balayage vaut donc 100 % : la contrainte y est inactive et la marge doit y egaler celle de
-# la calibration retenue. C'EST LE CONTROLE A FAIRE EN PREMIER -- si elle en differe, ce n'est
-# pas le front qui est faux, c'est que le solveur n'a pas converge au meme endroit.
-# ATTENTION : sous une politique, ce controle ne tient plus tel quel -- le point a 100 % doit
-# alors egaler la politique NON balayee, pas `calib_retenu`.
+# THRESHOLDS ARE SHARES OF THE MEASURED VALUE, NOT CHOSEN NUMBERS. Each value below is a
+# percentage of the total achieved by `calib_selected` -- 1 930 903 kg N. The first point of
+# the sweep is therefore 100 %: the constraint is inactive there and the margin must equal
+# that of the selected calibration. THAT IS THE FIRST CHECK TO MAKE -- if it differs, the
+# front is not wrong; the solver did not converge to the same place.
+# WARNING: under a policy this check no longer holds as such -- the 100 % point must then
+# equal the UNSWEPT policy, not `calib_selected`.
 #
-# COUT, ET POURQUOI LES POINTS NE SORTENT PAS DANS L'ORDRE ECRIT. Un point = un vrai solve
-# MILP, donc 7 pour le balayage ci-dessous, et NE PAS lancer ca sans intention.
-# `core/config.order_sweep_points` reordonne le balayage AVANT de le lancer, du seuil le plus
-# SERRE vers le plus lache -- l'inverse de l'ordre de lecture ci-dessous. La raison est une
-# implication a sens unique : une allocation faisable a 55 % d'azote l'est encore a 100 %, la
-# reciproque est fausse. Dans le sens ecrit, chaque graine serait infaisable et le front
-# retomberait a 7 solves a froid SANS LE DIRE (HiGHS jette une MIP start infaisable en
-# silence). Dans le bon sens, chaque point amorce le suivant : 1 solve a froid (le plus serre,
-# donc aussi le plus lent) et 6 a chaud.
-# La regle vaut pour `sense: le` ; pour `sense: ge` (un plancher) elle s'inverse, le plus serre
-# etant le plus haut. Le reordonnancement le deduit du `sense` de la contrainte, et s'abstient
-# des qu'il n'en est pas sur (balayage a deux dimensions, argument qui n'est pas le niveau de
-# la borne comme `scale`, contrainte sans `sense`). `--no-warm-start-chain` le desactive.
+# COST, AND WHY THE POINTS DO NOT RUN IN THE ORDER WRITTEN. One point = one real MILP solve,
+# so 7 for the sweep below; do NOT launch it without meaning to.
+# `core/config.order_sweep_points` reorders the sweep BEFORE launching it, from the TIGHTEST
+# threshold to the loosest -- the reverse of the reading order below. The reason is a one-way
+# implication: an allocation feasible at 55 % of nitrogen is still feasible at 100 %, not the
+# converse. In the written order every seed would be infeasible and the front would fall back
+# to 7 cold solves WITHOUT SAYING SO (HiGHS discards an infeasible MIP start silently). In the
+# right order each point seeds the next: 1 cold solve (the tightest, hence also the slowest)
+# and 6 warm ones.
+# The rule holds for `sense: le`; for `sense: ge` (a floor) it inverts, the tightest being the
+# highest. The reordering infers it from the constraint's `sense`, and abstains whenever it is
+# not sure (two-dimensional sweep, an argument that is not the bound's level such as `scale`,
+# a constraint with no `sense`). `--no-warm-start-chain` disables it.
 #
-#   python scripts/run_scenarios.py --scenarios <ce fichier> --dry-run
-#   python scripts/check_scenario_feasibility.py --scenarios <ce fichier>
+#   python scripts/run_scenarios.py --scenarios <this file> --dry-run
+#   python scripts/check_scenario_feasibility.py --scenarios <this file>
 #
-# La page **Pareto** du dashboard lit ces runs et trace le front (points domines grises).
+# The dashboard's **Pareto** page reads these runs and draws the front (dominated points
+# greyed out).
 
 sweeps:
-  # ---------------------------------------------------------------- marge x azote
-  - name: pareto_azote
+  # ---------------------------------------------------------------- margin x nitrogen
+  - name: pareto_nitrogen
     description: >-
-      Front marge brute ajustee au risque × azote mineral total. Sept points, de 100 % a 55 %
-      de l'azote realise par la calibration retenue. L'axe environnemental le plus direct :
-      l'azote est lu sur les itineraires techniques, il n'y a aucune hypothese de conversion
-      entre le plafond et l'indicateur rapporte (contrairement a l'eau, ou il faut le poids
-      `irrigable`, ou au carbone, dont le bilan depend aussi du type de sol de la parcelle).
-      A lire avec le bloc `intensity` : un plafond d'azote se satisfait aussi en cultivant
-      MOINS d'hectares, ce qui n'est pas la meme politique que produire plus proprement.
-      L'azote PAR TONNE distingue les deux.
-    enable: [azote_max]
+      Front of risk-adjusted gross margin × total mineral nitrogen. Seven points, from 100 %
+      down to 55 % of the nitrogen used by the selected calibration. The most direct
+      environmental axis: nitrogen is read off the crop management sequences, with no
+      conversion assumption between the ceiling and the reported indicator (unlike water,
+      which needs the `irrigable` weight, or carbon, whose balance also depends on the plot's
+      soil type). Read it with the `intensity` block: a nitrogen ceiling can also be met by
+      farming FEWER hectares, which is not the same policy as producing more cleanly.
+      Nitrogen PER TONNE tells the two apart.
+    enable: [nitrogen_max]
     matrix:
-      args:azote_max.threshold:
-        - 1930903   # 100 % -- contrainte inactive, doit redonner `calib_retenu`
+      args:nitrogen_max.threshold:
+        - 1930903   # 100 % -- constraint inactive, must reproduce `calib_selected`
         - 1834358   #  95 %
         - 1737813   #  90 %
         - 1544722   #  80 %
@@ -73,94 +74,90 @@ sweeps:
         - 1158542   #  60 %
         - 1061997   #  55 %
 
-  # ---------------------------------------------------------------- marge x subvention
-  # CE BALAYAGE N'EST PAS AUTONOME, contrairement a `pareto_azote`. `azote_max` a une coquille
-  # `enable: false` dans `config.yaml` ; `budget_subventions` n'en a pas, parce que chaque
-  # politique pose la sienne par `enable_add`. `set_args` ne patchant qu'une entree DEJA
-  # declaree, ce front ne peut se tracer que SOUS une politique qui porte ce label -- P2, P3,
-  # P4, P5, P6, P8, P9. Lance seul, il leve `KeyError: set_args label 'budget_subventions'
-  # matched no entry`, et c'est la bonne erreur : un front d'enveloppe contre une config qui
-  # n'a pas d'enveloppe ne veut rien dire.
+  # ---------------------------------------------------------------- margin x subsidy
+  # THIS SWEEP IS NOT SELF-CONTAINED, unlike `pareto_nitrogen`. `nitrogen_max` has an
+  # `enable: false` shell in `config.yaml`; `subsidy_budget` does not, because each policy
+  # sets its own through `enable_add`. Since `set_args` only patches an entry ALREADY
+  # declared, this front can only be traced UNDER a policy carrying that label -- P2, P3, P4,
+  # P5, P6, P8, P9. Run alone it raises `KeyError: set_args label 'subsidy_budget' matched no
+  # entry`, and that is the right error: an envelope front against a config with no envelope
+  # means nothing.
   #
-  # ET LE CHOIX DE L'HOTE SE MESURE, IL NE SE DEVINE PAS. Un front n'a d'interet que la ou le
-  # plafond MORD. Releve sur les runs existants :
-  #   P4 nominal   plafond 72 M -- realise 71,20 M, dual 0,056, is_binding: true
-  #   P8 nominal   plafond 80 M -- realise 39,05 M, soit 41 M de mou
-  # Sous P8 les cinq premiers points rendraient la meme allocation : cinq solves pour une
-  # droite horizontale. P8 rabote la canne a 0,80 et redeploie vers un maraichage bio peu
-  # gourmand en hectares, donc elle depense spontanement la moitie de son enveloppe. C'est
-  # pourquoi ce front est accroche a P4 dans `plan.yaml` et pas a P8, alors que P8 porte deja
-  # les deux autres.
+  # AND THE HOST IS CHOSEN BY MEASUREMENT, NOT BY GUESS. A front is only worth tracing where
+  # the ceiling BINDS. Read on existing runs:
+  #   P4 nominal   ceiling 72 M -- achieved 71.20 M, dual 0.056, is_binding: true
+  #   P8 nominal   ceiling 80 M -- achieved 39.05 M, i.e. 41 M of slack
+  # Under P8 the first five points would return the same allocation: five solves for a flat
+  # line. P8 cuts cane to 0.80 and redeploys to organic market gardening, which needs few
+  # hectares, so it spends only half its envelope on its own. That is why this front hangs off
+  # P4 in `plan.yaml` and not off P8, although P8 already carries the other two.
   #
-  # LE PIEGE DU SCORE COMPOSITE NE S'APPLIQUE PAS ICI, ET C'EST LE SEUL CAS. Le dashboard
-  # signale `subvention` comme indicateur FIXE par une contrainte (`comparison.bound_indicators`),
-  # donc non attribuable a la politique. Sur un front c'est l'inverse : la borne EST l'abscisse,
-  # posee expres et balayee. L'avertissement reste juste pour une cellule ordinaire.
-  - name: pareto_subventions
+  # THE COMPOSITE-SCORE TRAP DOES NOT APPLY HERE, AND THIS IS THE ONLY CASE. The dashboard
+  # flags `subsidy` as an indicator FIXED by a constraint (`comparison.bound_indicators`),
+  # hence not attributable to the policy. On a front it is the other way round: the bound IS
+  # the x-axis, set on purpose and swept. The warning remains right for an ordinary cell.
+  - name: pareto_subsidies
     description: >-
-      Front marge brute ajustee au risque × enveloppe de subvention publique, sous P4. Sept
-      points, de 125 % a 50 % des 71,8 M EUR verses en 2017. Repond a « ce que le territoire
-      perd par euro public retire, si on laisse le modele choisir ou couper » -- a distinguer
-      de P5_austerite_budgetaire, qui coupe la MEME enveloppe a 43 M mais decide d'avance ou
-      (aides x 0,60, canne x 0,48). ATTENTION A CE QU'ON LIT DANS CET ECART : P5 ne differe
-      pas QUE par la facon de couper -- elle porte aussi le travail a 0,90 et l'inertie a 0,60.
-      La difference melange donc le ciblage, la contraction du travail et une reconfiguration
-      plus libre ; elle ne mesure PAS le cout du ciblage seul. Ce chiffre-la demanderait un P5
-      aligne sur P4 partout ailleurs -- un solve de plus, qui s'ajoute APRES coup sans avoir a
-      retracer le front.
-      DEUX CONTROLES. (1) Le point a 90 M doit etre inactif : si la subvention realisee y
-      touche 90 M, ce n'est pas le premier point du front, il faut monter le seuil. (2) Le
-      point a 72 M doit reproduire `p4_statu_quo_f0_nominal` -- au bruit de branch-and-bound
-      pres seulement, ce run ayant fini en `maxTimeLimit`. Les deux passent deja en LP : de
-      72 a 90 M, 18 M d'argent public de plus n'achetent que 32 k EUR de marge (0,002 EUR/EUR,
-      contre 0,118 entre 64,6 et 72 M), et le point a 72 M rend exactement la borne de P4 nue
-      (82 547 378).
-      RISQUE ATTENDU, MESURE ET ECARTE EN LP (2026-08-05) : l'inertie a 70 % de P4 epingle 70 %
-      des hectares dans leur groupe 2017, qui emportent leurs subventions avec eux -- d'ou la
-      crainte d'un PLANCHER structurel sous l'enveloppe qui rendrait les points bas
-      infaisables. Les sept points passent la relaxation, le plus bas compris. Reserve : c'est
-      precisement sur l'inertie que la LP est la plus permissive (elle la satisfait en
-      fractions de parcelle), donc une infaisabilite MILP a 35,9 M n'est pas exclue.
+      Front of risk-adjusted gross margin × public subsidy envelope, under P4. Seven points,
+      from 125 % down to 50 % of the 71.8 M EUR paid in 2017. Answers "what the territory
+      loses per public euro withdrawn, if the model is left to choose where to cut" -- to be
+      distinguished from P5_budget_austerity, which cuts the SAME envelope to 43 M but decides
+      in advance where (aid x 0.60, cane x 0.48). CAREFUL WHAT YOU READ INTO THAT GAP: P5
+      differs not ONLY in how it cuts -- it also sets labour to 0.90 and inertia to 0.60. The
+      difference therefore mixes targeting, labour contraction and a freer reconfiguration; it
+      does NOT measure the cost of targeting alone. That figure would need a P5 aligned on P4
+      everywhere else -- one more solve, added AFTERWARDS without retracing the front.
+      TWO CHECKS. (1) The 90 M point must be inactive: if the achieved subsidy reaches 90 M
+      there, it is not the first point of the front and the threshold must go up. (2) The
+      72 M point must reproduce `p4_statu_quo_f0_nominal` -- only up to branch-and-bound noise,
+      since that run ended at `maxTimeLimit`. Both already pass in LP: from 72 to 90 M, 18 M of
+      extra public money buys only 32 k EUR of margin (0.002 EUR/EUR, against 0.118 between
+      64.6 and 72 M), and the 72 M point returns exactly the bound of bare P4 (82 547 378).
+      EXPECTED RISK, MEASURED AND RULED OUT IN LP (2026-08-05): P4's 70 % inertia pins 70 % of
+      hectares to their 2017 group, which carry their subsidies with them -- hence the fear of a
+      structural FLOOR under the envelope that would make the low points infeasible. All seven
+      points pass the relaxation, the lowest included. Caveat: inertia is precisely where the
+      LP is most permissive (it meets it with fractions of plots), so a MILP infeasibility at
+      35.9 M is not excluded.
     overrides:
-      # P4 nominal a deja touche la limite d'1 h a froid ; un plafond budgetaire serre par
-      # dessus est plus dur, pas moins. Pire cas 7 x 2 h -- baisser a 3600 si le batch doit
-      # tenir dans une nuit, au prix de points non prouves optimaux.
+      # Nominal P4 already hit the 1 h limit cold; a tight budget ceiling on top is harder, not
+      # easier. Worst case 7 x 2 h -- lower to 3600 if the batch must fit in one night, at the
+      # price of points not proven optimal.
       solver.args.time_limit: 7200
-    # ORDRE CROISSANT -- A L'INVERSE DE `pareto_azote`, ET C'EST DELIBERE. Le
-    # reordonnancement automatique NE S'APPLIQUE PAS ici : `order_sweep_points` lit le `sense`
-    # de la contrainte dans `config.yaml` (`_bound_senses`, core/config.py:274), or
-    # `budget_subventions` n'y figure pas -- il est pose par `enable_add` de la politique.
-    # Faute de `sense`, la fonction s'abstient et garde l'ordre ECRIT. Il faut donc l'ecrire
-    # deja trie du plus serre au plus lache, sans quoi chaque graine serait infaisable et le
-    # front retomberait a sept solves a froid EN SILENCE (HiGHS jette une MIP start
-    # infaisable sans le dire). Plafond => le plus serre est le plus BAS.
-    # Ne pas re-trier ce bloc pour le faire ressembler au precedent.
+    # ASCENDING ORDER -- THE REVERSE OF `pareto_nitrogen`, ON PURPOSE. The automatic reordering
+    # DOES NOT APPLY here: `order_sweep_points` reads the constraint's `sense` in `config.yaml`
+    # (`_bound_senses` in core/config.py), and `subsidy_budget` is not there -- the policy sets
+    # it through `enable_add`. Without a `sense` the function abstains and keeps the WRITTEN
+    # order. It must therefore be written already sorted from tightest to loosest, otherwise
+    # every seed would be infeasible and the front would fall back to seven cold solves
+    # SILENTLY (HiGHS discards an infeasible MIP start without a word). Ceiling => the tightest
+    # is the LOWEST.
+    # Do not re-sort this block to make it look like the previous one.
     matrix:
-      args:budget_subventions.threshold:
+      args:subsidy_budget.threshold:
         - 35900000   #  50 %
-        - 43000000   #  60 % -- exactement le plafond de P5_austerite_budgetaire
+        - 43000000   #  60 % -- exactly the ceiling of P5_budget_austerity
         - 50300000   #  70 %
         - 57400000   #  80 %
         - 64600000   #  90 %
-        - 72000000   # 100 % -- le gel de P4, doit redonner p4_statu_quo_f0_nominal
-        - 90000000   # 125 % -- plafond inactif : l'optimum de P4 sans enveloppe
+        - 72000000   # 100 % -- P4's freeze, must reproduce p4_statu_quo_f0_nominal
+        - 90000000   # 125 % -- inactive ceiling: P4's optimum with no envelope
 
-  # ---------------------------------------------------------------- marge x emploi
-  # DESACTIVE PAR DEFAUT -- lire avant d'enlever le commentaire. Un plancher d'emploi
-  # au-dessus de ce que le plafond de main d'oeuvre autorise est infaisable, et desserrer le
-  # `slack` NE SUFFIT PAS : P10 s'est revele infaisable a 6 000 ETP alors que son slack en
-  # autorisait 8 561, parce que ce ne sont pas les heures qui manquaient mais les cultures
-  # capables de les absorber sous les plafonds environnementaux. Le maximum atteignable
-  # mesure en relaxation LP est ~4 875-4 975 ETP contre 3 503 realises. Un balayage qui
-  # depasse ce plafond produit des runs infaisables, pas un front.
-  # Verifier avec `check_scenario_feasibility.py` AVANT de lancer.
+  # ---------------------------------------------------------------- margin x employment
+  # DISABLED BY DEFAULT -- read before uncommenting. An employment floor above what the labour
+  # ceiling allows is infeasible, and loosening the `slack` IS NOT ENOUGH: P10 proved
+  # infeasible at 6 000 FTE while its slack allowed 8 561, because what was missing was not
+  # hours but crops able to absorb them under the environmental ceilings. The maximum
+  # reachable, measured in LP relaxation, is ~4 875-4 975 FTE against 3 503 achieved. A sweep
+  # beyond that ceiling produces infeasible runs, not a front.
+  # Check with `check_scenario_feasibility.py` BEFORE launching.
   #
-  # - name: pareto_emploi
-  #   description: Front marge × emploi, du realise (3 503 ETP) vers 4 500 ETP.
-  #   enable: [emploi_min]
+  # - name: pareto_employment
+  #   description: Margin × employment front, from the achieved 3 503 FTE up to 4 500 FTE.
+  #   enable: [employment_min]
   #   matrix:
-  #     args:emploi_min.threshold:
-  #       - 5629321   # 3 503 ETP -- contrainte inactive
-  #       - 6027000   # 3 750 ETP
-  #       - 6428000   # 4 000 ETP
-  #       - 6830000   # 4 250 ETP  (au-dessus du plafond MO a slack 1.0 : desserrer aussi)
+  #     args:employment_min.threshold:
+  #       - 5629321   # 3 503 FTE -- constraint inactive
+  #       - 6027000   # 3 750 FTE
+  #       - 6428000   # 4 000 FTE
+  #       - 6830000   # 4 250 FTE  (above the labour ceiling at slack 1.0: loosen it too)

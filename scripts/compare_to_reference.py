@@ -4,7 +4,7 @@
 
 Reads the reference folder written by scripts/build_reference_state.py and the CSV/recap
 files the run already wrote -- no dataset rebuild, no solve, ~1 s. Writes
-`comparaison_reference.md` into the run folder and prints the headline block.
+`reference_comparison.md` into the run folder and prints the headline block.
 
 Two readings the run's own recap does not give:
 
@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 import yaml
 
-from case_studies.guadeloupe.domain.farm_typology import TYPE_EXPL_LABELS
+from case_studies.guadeloupe.domain.farm_typology import FARM_TYPE_LABELS
 
 from scripts._common import OUTPUTS_ROOT, ROOT, format_number as _n
 
@@ -47,11 +47,11 @@ _RECAP_KEYS: dict[str, tuple[str, str]] = {
     "gross_margin": ("economics", "total_gross_margin"),
     "labor_cost": ("economics", "total_labor_cost"),
     "net_revenue": ("economics", "total_net_revenue"),
-    "etp": ("economics", "total_etp"),
-    "azote": ("environment", "total_azote"),
-    "ges": ("environment", "total_ges"),
-    "ift": ("environment", "total_ift"),
-    "surface_cld": ("environment", "surface_cld"),
+    "fte": ("economics", "total_fte"),
+    "nitrogen": ("environment", "total_nitrogen"),
+    "ghg": ("environment", "total_ghg"),
+    "tfi": ("environment", "total_tfi"),
+    "chlordecone_risk_area": ("environment", "chlordecone_risk_area"),
     "water_need_m3": ("environment", "total_water_need_m3"),
     "soil_carbon_balance": ("environment", "soil_carbon_balance"),
 }
@@ -105,7 +105,7 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
         reference_dir / "csv" / "reference_reproducibility.csv", index_col=0
     )
     run_config = yaml.safe_load((run_dir / "config_used.yaml").read_text(encoding="utf-8"))
-    hours_per_etp = float((run_config.get("labor") or {}).get("hours_per_etp", 1607.0))
+    hours_per_fte = float((run_config.get("labor") or {}).get("hours_per_fte", 1607.0))
 
     calib = recap["calibration"]
     universe = reference["univers"]
@@ -145,7 +145,7 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
         f"{'OK' if calib['area_match_pct'] >= 77 else 'HORS SEUIL'} |",
         "",
         f"Plancher de PAD induit par l'eligibilite seule : "
-        f"{reference['plancher_pad_pct']:.1f} % "
+        f"{reference['pad_floor_pct']:.1f} % "
         f"({_n(reference['surface_irreproductible_ha'])} ha irreproductibles). L'ecart",
         "constate est donc tres majoritairement un choix du modele, pas une impossibilite.",
         "",
@@ -190,11 +190,11 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
         if run_value is None or central is None:
             continue
         low, high = _reference_bracket(reference, name)
-        # ETP has no bracket of its own; it is labor_hours / hours_per_etp, so it inherits it.
-        if name == "etp":
+        # ETP has no bracket of its own; it is labor_hours / hours_per_fte, so it inherits it.
+        if name == "fte":
             hours = reference["indicateurs"].get("labor_hours") or {}
-            low = (hours.get("bas") or 0) / hours_per_etp or None
-            high = (hours.get("haut") or 0) / hours_per_etp or None
+            low = (hours.get("bas") or 0) / hours_per_fte or None
+            high = (hours.get("haut") or 0) / hours_per_fte or None
         inside = _within_bracket(run_value, low, high)
         verdicts.append((name, inside))
         bracket = "-" if low is None or high is None else f"{_n(low)} - {_n(high)}"
@@ -228,7 +228,7 @@ def compare(run_dir: Path, reference_dir: Path) -> str:
         observed = observed_totals.loc[code]
         share = f"{100.0 * diagonal / observed:.0f} %" if observed else "-"
         lines.append(
-            f"| {code} {TYPE_EXPL_LABELS.get(int(code), '')} | {_n(observed)} | "
+            f"| {code} {FARM_TYPE_LABELS.get(int(code), '')} | {_n(observed)} | "
             f"{_n(simulated_totals.get(str(code), 0))} | {share} |"
         )
     if recall:
@@ -275,7 +275,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     markdown = compare(args.run_dir, args.reference)
-    destination = args.run_dir / "comparaison_reference.md"
+    destination = args.run_dir / "reference_comparison.md"
     destination.write_text(markdown, encoding="utf-8")
     print(markdown)
     print(f"\nEcrit dans {destination}")

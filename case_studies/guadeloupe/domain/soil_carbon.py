@@ -29,66 +29,66 @@ _M2_PER_HA = 10000.0
 
 
 def _soil_attribute_by_plot(
-    data_parc: pd.DataFrame, data_sol: pd.DataFrame, attribute: str
+    plot_data: pd.DataFrame, soil_data: pd.DataFrame, attribute: str
 ) -> pd.Series:
     """One Data_Sol row (KAER, DENS, PROF...) resolved per plot through TYPE_SOL."""
-    soil_names = data_parc["TYPE_SOL"].map(TYPE_SOL_TO_SOIL_NAME)
-    return soil_names.map(data_sol.loc[attribute])
+    soil_names = plot_data["TYPE_SOL"].map(TYPE_SOL_TO_SOIL_NAME)
+    return soil_names.map(soil_data.loc[attribute])
 
 
-def compute_residue_carbon_per_ha_cult(data_cult: pd.DataFrame) -> pd.Series:
+def compute_crop_residue_carbon_per_ha(crop_data: pd.DataFrame) -> pd.Series:
     """Carbon returned by crop residues (t C/ha/year): aerial biomass plus root biomass,
     times carbon content, times the humification coefficient."""
-    aerial = data_cult.loc["BIOM_AER"]
-    total_residue = aerial * (1.0 + data_cult.loc["RAC"])
-    return total_residue * data_cult.loc["CARB"] * data_cult.loc["HRES"]
+    aerial = crop_data.loc["BIOM_AER"]
+    total_residue = aerial * (1.0 + crop_data.loc["RAC"])
+    return total_residue * crop_data.loc["CARB"] * crop_data.loc["HRES"]
 
 
-def compute_amendment_carbon_per_ha_cult(
-    data_otk: pd.DataFrame, matrice_otk_cult: pd.DataFrame
+def compute_crop_amendment_carbon_per_ha(
+    operation_data: pd.DataFrame, crop_operation_matrix: pd.DataFrame
 ) -> pd.Series:
     """Carbon brought by organic amendments (t C/ha/year): sum over the crop's ITK
     operations of DOSE * HUM * CARB * FHUM. Deliberately NOT annualized -- see module
     docstring."""
     per_operation = (
-        data_otk["DOSE"] * data_otk["HUM"] * data_otk["CARB"] * data_otk["FHUM"]
+        operation_data["DOSE"] * operation_data["HUM"] * operation_data["CARB"] * operation_data["FHUM"]
     )
-    return matrice_otk_cult.multiply(per_operation, axis=0).sum(axis=0)
+    return crop_operation_matrix.multiply(per_operation, axis=0).sum(axis=0)
 
 
-def compute_carbon_input_per_ha_cult(
-    data_cult: pd.DataFrame, data_otk: pd.DataFrame, matrice_otk_cult: pd.DataFrame
+def compute_crop_carbon_input_per_ha(
+    crop_data: pd.DataFrame, operation_data: pd.DataFrame, crop_operation_matrix: pd.DataFrame
 ) -> pd.Series:
     """Total carbon input per ha per year: residues + amendments."""
-    residues = compute_residue_carbon_per_ha_cult(data_cult)
-    amendments = compute_amendment_carbon_per_ha_cult(data_otk, matrice_otk_cult)
+    residues = compute_crop_residue_carbon_per_ha(crop_data)
+    amendments = compute_crop_amendment_carbon_per_ha(operation_data, crop_operation_matrix)
     return residues.add(amendments.reindex(residues.index).fillna(0.0), fill_value=0.0)
 
 
 def compute_initial_soil_carbon_per_ha_plot(
-    data_parc: pd.DataFrame, data_sol: pd.DataFrame
+    plot_data: pd.DataFrame, soil_data: pd.DataFrame
 ) -> pd.Series:
     """Initial soil organic carbon stock (t C/ha) per plot, from its measured carbon
     fraction and its soil type's bulk density and depth."""
-    density = _soil_attribute_by_plot(data_parc, data_sol, "DENS")
-    depth = _soil_attribute_by_plot(data_parc, data_sol, "PROF")
-    return data_parc["PART_C_INIT"] / _PERCENT * density * depth * _M2_PER_HA
+    density = _soil_attribute_by_plot(plot_data, soil_data, "DENS")
+    depth = _soil_attribute_by_plot(plot_data, soil_data, "PROF")
+    return plot_data["PART_C_INIT"] / _PERCENT * density * depth * _M2_PER_HA
 
 
 def compute_mineralization_per_ha_plot(
     allocation: pd.Series,
-    data_parc: pd.DataFrame,
-    data_sol: pd.DataFrame,
-    data_cult: pd.DataFrame,
+    plot_data: pd.DataFrame,
+    soil_data: pd.DataFrame,
+    crop_data: pd.DataFrame,
     initial_carbon: pd.Series,
 ) -> pd.Series:
     """Carbon lost to mineralization (t C/ha/year) on each allocated plot: the plot's
     carbon stock times its soil's aerobic mineralization rate times the crop's KCROP."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    kaer = _soil_attribute_by_plot(data_parc, data_sol, "KAER").reindex(allocation.index)
+    kaer = _soil_attribute_by_plot(plot_data, soil_data, "KAER").reindex(allocation.index)
     kcrop = pd.Series(
-        data_cult.loc["KCROP"].reindex(allocation.to_numpy()).to_numpy(),
+        crop_data.loc["KCROP"].reindex(allocation.to_numpy()).to_numpy(),
         index=allocation.index,
     )
     return initial_carbon.reindex(allocation.index) * kaer * kcrop
@@ -96,22 +96,22 @@ def compute_mineralization_per_ha_plot(
 
 def compute_carbon_balance_per_ha_plot(
     allocation: pd.Series,
-    data_parc: pd.DataFrame,
-    data_sol: pd.DataFrame,
-    data_cult: pd.DataFrame,
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
+    plot_data: pd.DataFrame,
+    soil_data: pd.DataFrame,
+    crop_data: pd.DataFrame,
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
 ) -> pd.Series:
     """Net annual carbon balance (t C/ha/year) per allocated plot. Negative means the
     system depletes soil carbon."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    inputs_by_crop = compute_carbon_input_per_ha_cult(data_cult, data_otk, matrice_otk_cult)
+    inputs_by_crop = compute_crop_carbon_input_per_ha(crop_data, operation_data, crop_operation_matrix)
     inputs = pd.Series(
         inputs_by_crop.reindex(allocation.to_numpy()).to_numpy(), index=allocation.index
     )
-    initial_carbon = compute_initial_soil_carbon_per_ha_plot(data_parc, data_sol)
+    initial_carbon = compute_initial_soil_carbon_per_ha_plot(plot_data, soil_data)
     outputs = compute_mineralization_per_ha_plot(
-        allocation, data_parc, data_sol, data_cult, initial_carbon
+        allocation, plot_data, soil_data, crop_data, initial_carbon
     )
     return inputs - outputs

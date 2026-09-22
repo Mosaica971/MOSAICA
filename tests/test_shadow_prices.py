@@ -17,7 +17,7 @@ def _config(threshold: float):
             {
                 "name": "territory_indicator_bound",
                 "enable": True,
-                "args": {"label": "plafond_azote", "indicator": "azote",
+                "args": {"label": "nitrogen_cap", "indicator": "nitrogen",
                          "sense": "le", "threshold": threshold},
             },
         ],
@@ -31,7 +31,7 @@ def _model(threshold: float):
         plot_surface_ha={"P1": 1.0, "P2": 1.0},
         crop_margin_per_ha={"RICHE": 100.0, "PAUVRE": 10.0},
         eligible_pairs=[("P1", "RICHE"), ("P1", "PAUVRE"), ("P2", "RICHE"), ("P2", "PAUVRE")],
-        crop_indicator_rates={"azote": {"RICHE": 10.0, "PAUVRE": 0.0}},
+        crop_indicator_rates={"nitrogen": {"RICHE": 10.0, "PAUVRE": 0.0}},
     )
     return build_crop_allocation_model(inputs, _config(threshold))
 
@@ -39,8 +39,8 @@ def _model(threshold: float):
 def test_a_binding_ceiling_gets_a_positive_dual():
     model = _model(10.0)  # room for one RICHE plot only
     prices = compute_shadow_prices(model, _config(10.0))
-    assert "plafond_azote" in prices
-    price = prices["plafond_azote"]
+    assert "nitrogen_cap" in prices
+    price = prices["nitrogen_cap"]
     assert price.binding
     # Swapping one plot from PAUVRE to RICHE gains 90 EUR for 10 kg N -> 9 EUR/kg.
     assert abs(price.dual) == pytest.approx(9.0, rel=1e-6)
@@ -49,8 +49,8 @@ def test_a_binding_ceiling_gets_a_positive_dual():
 def test_a_slack_ceiling_prices_at_zero():
     model = _model(1000.0)  # far more nitrogen than the two plots can use
     prices = compute_shadow_prices(model, _config(1000.0))
-    assert prices["plafond_azote"].dual == pytest.approx(0.0)
-    assert not prices["plafond_azote"].binding
+    assert prices["nitrogen_cap"].dual == pytest.approx(0.0)
+    assert not prices["nitrogen_cap"].binding
 
 
 def test_the_model_is_restored_after_the_relaxation():
@@ -72,9 +72,9 @@ def test_by_label_keeps_only_the_constraints_a_scenario_names():
     model = _model(10.0)
     config = _config(10.0)
     summary = by_label(compute_shadow_prices(model, config), config)
-    assert set(summary) == {"plafond_azote"}
-    assert summary["plafond_azote"]["members"] == 1
-    assert summary["plafond_azote"]["is_binding"]
+    assert set(summary) == {"nitrogen_cap"}
+    assert summary["nitrogen_cap"]["members"] == 1
+    assert summary["nitrogen_cap"]["is_binding"]
 
 
 def test_by_label_aggregates_an_indexed_constraint():
@@ -84,7 +84,7 @@ def test_by_label_aggregates_an_indexed_constraint():
         crop_margin_per_ha={"RICHE": 100.0, "PAUVRE": 10.0},
         eligible_pairs=[("P1", "RICHE"), ("P1", "PAUVRE"), ("P2", "RICHE"), ("P2", "PAUVRE")],
         farm_plots={"E1": ["P1"], "E2": ["P2"]},
-        crop_indicator_rates={"azote": {"RICHE": 10.0, "PAUVRE": 0.0}},
+        crop_indicator_rates={"nitrogen": {"RICHE": 10.0, "PAUVRE": 0.0}},
         plot_zones={"farms": {"P1": "E1", "P2": "E2"}},
     )
     config = {
@@ -93,7 +93,7 @@ def test_by_label_aggregates_an_indexed_constraint():
         "constraints": [
             {"name": "at_most_one_crop_per_plot", "enable": True, "args": {}},
             {"name": "zone_indicator_bound", "enable": True,
-             "args": {"label": "nitrates", "zone": "farms", "indicator": "azote",
+             "args": {"label": "nitrates", "zone": "farms", "indicator": "nitrogen",
                       "sense": "le", "threshold": 5.0}},
         ],
     }

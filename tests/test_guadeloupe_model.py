@@ -14,15 +14,15 @@ CONFIG = {
 
 
 def _fake_dataset() -> Dataset:
-    data_parc = pd.DataFrame({"SURF_HA": [1.0, 2.0]}, index=["P1", "P2"])
-    margin_per_ha_cult = pd.Series({"C1": 100.0, "C2": 200.0})
+    plot_data = pd.DataFrame({"SURF_HA": [1.0, 2.0]}, index=["P1", "P2"])
+    crop_margin_per_ha = pd.Series({"C1": 100.0, "C2": 200.0})
     eligible_pairs = [("P1", "C1"), ("P1", "C2"), ("P2", "C1")]
 
     return Dataset(
         sets={},
         parameters={
-            "data_parc": data_parc,
-            "margin_per_ha_cult": margin_per_ha_cult,
+            "plot_data": plot_data,
+            "crop_margin_per_ha": crop_margin_per_ha,
             "eligible_pairs": eligible_pairs,
         },
         scalars={},
@@ -65,11 +65,11 @@ def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint()
     model = build_model(dataset, config)
 
     for label in [
-        "an_agro_max_expl", "ig_agro_max_expl",
+        "an_agro_max_farm", "ig_agro_max_farm",
         "ba_ja", "ba_rota",
         "ba_quota_max", "cs_quota_max",
         # Calibration anchor, enabled 2026-07-21.
-        "mo_max_expl",
+        "labor_max_farm",
         # The two deliberate deviations from the CALIB block, both grounded in sources
         # outside the model: the plantain market ceiling (2026-07-27, GAMS Eq_BC_QUOTA_MAX /
         # article Eq. 6) and the forage floor (2026-07-28, GAMS Eq_PN_PROD_MIN, 27% below what
@@ -78,7 +78,7 @@ def test_build_model_from_real_dataset_creates_every_labeled_phase1_constraint()
     ]:
         assert hasattr(model, label), f"expected constraint '{label}' to be built"
 
-    # cs_gfa is off (infeasible with mo_max_expl on 7 GFA farms), and so is the rest of the
+    # cs_gfa is off (infeasible with labor_max_farm on 7 GFA farms), and so is the rest of the
     # production-floor family: those are SCENARIO equations, absent from the CALIB model we
     # reproduce, and infeasible against the per-farm labour cap. Read config.yaml's block.
     for disabled_label in [

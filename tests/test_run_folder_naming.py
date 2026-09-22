@@ -30,28 +30,28 @@ def test_a_name_that_slugifies_to_nothing_falls_back_to_the_counter(tmp_path):
 def test_a_repeated_name_is_suffixed_rather_than_overwritten(tmp_path):
     """Overwriting a past run in place would destroy the very thing this project
     compares against."""
-    first = create_output_folder(tmp_path, "calib_retenu")
-    second = create_output_folder(tmp_path, "calib_retenu")
-    third = create_output_folder(tmp_path, "calib_retenu")
+    first = create_output_folder(tmp_path, "calib_selected")
+    second = create_output_folder(tmp_path, "calib_selected")
+    third = create_output_folder(tmp_path, "calib_selected")
 
     assert [p.name for p in (first, second, third)] == [
-        "calib_retenu", "calib_retenu_2", "calib_retenu_3"
+        "calib_selected", "calib_selected_2", "calib_selected_3"
     ]
 
 
 def test_numbered_runs_keep_counting_from_the_highest_index(tmp_path):
     (tmp_path / "output_1").mkdir()
     (tmp_path / "output_3").mkdir()
-    (tmp_path / "calib_retenu").mkdir()  # a named run must not shift the counter
+    (tmp_path / "calib_selected").mkdir()  # a named run must not shift the counter
 
     assert create_output_folder(tmp_path) == tmp_path / "output_4"
 
 
 def test_discovery_finds_named_and_numbered_runs_alike(tmp_path):
     _run(tmp_path, "output_1")
-    _run(tmp_path, "calib_retenu")
+    _run(tmp_path, "calib_selected")
 
-    assert {p.name for p in list_run_folders(tmp_path)} == {"output_1", "calib_retenu"}
+    assert {p.name for p in list_run_folders(tmp_path)} == {"output_1", "calib_selected"}
 
 
 def test_named_runs_come_first_then_numbered_by_index(tmp_path):
@@ -60,10 +60,10 @@ def test_named_runs_come_first_then_numbered_by_index(tmp_path):
     _run(tmp_path, "output_1")
     _run(tmp_path, "output_3")
     _run(tmp_path, "output_2")
-    _run(tmp_path, "calib_retenu")
+    _run(tmp_path, "calib_selected")
 
     assert [p.name for p in list_run_folders(tmp_path)] == [
-        "calib_retenu", "output_3", "output_2", "output_1"
+        "calib_selected", "output_3", "output_2", "output_1"
     ]
 
 

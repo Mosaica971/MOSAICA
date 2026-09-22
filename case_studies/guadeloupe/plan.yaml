@@ -1,114 +1,121 @@
-# LE PLAN -- quels croisements sont effectivement resolus.
+# THE PLAN -- which crossings are actually solved.
 #
-# Les trois fichiers inclus sont des CATALOGUES : ils declarent ce qui existe, ils ne lancent
-# rien. Ce fichier-ci dit ce qu'on lance. C'est le seul a editer pour changer un batch, et le
-# seul a lire pour savoir ce qu'un batch a fait.
+# The three included files are CATALOGUES: they declare what exists and run nothing. This
+# file says what runs. It is the only one to edit to change a batch, and the only one to read
+# to know what a batch did.
 #
-#   scenarios_politiques.yaml   ce qu'une puissance publique DECIDE   (P1..P10)
-#   scenarios_forcages.yaml     ce que le climat et les marches IMPOSENT (F0..F11)
-#   scenarios_pareto.yaml       les balayages par epsilon-contrainte   (pareto_azote)
+#   scenarios_policies.yaml   what a public authority DECIDES          (P1..P10)
+#   scenarios_forcings.yaml   what climate and markets IMPOSE          (F0..F11)
+#   scenarios_pareto.yaml     the epsilon-constraint sweeps            (pareto_nitrogen, ...)
 #
-# GRAMMAIRE D'UNE CELLULE. Quatre ecritures equivalentes, de la plus breve a la plus explicite :
+# GRAMMAR OF A CELL. Four equivalent spellings, from the shortest to the most explicit:
 #
-#   P1_deregulation_totale:                       # la politique seule, non forcee
-#   P4_statu_quo: [F0_nominal, F9_crise_systemique]        # raccourci pour `forcings:`
-#   P5_austerite_budgetaire: {forcings: "*"}      # tous les forcages du catalogue
-#   P8_transition_agroecologique:
-#     forcings: [F0_nominal, F9_crise_systemique]
+#   P1_full_deregulation:                                  # the policy alone, unforced
+#   P4_status_quo: [F0_nominal, F9_systemic_crisis]        # shorthand for `forcings:`
+#   P5_budget_austerity: {forcings: "*"}                   # every forcing in the catalogue
+#   P8_agroecological_transition:
+#     forcings: [F0_nominal, F9_systemic_crisis]
 #     sweeps:
-#       - pareto_azote                            # front trace sur la politique seule
-#       - {name: pareto_azote, forcings: [F9_crise_systemique]}   # ... et sous le choc
+#       - pareto_nitrogen                                           # front on the policy alone
+#       - {name: pareto_nitrogen, forcings: [F9_systemic_crisis]}   # ... and under the shock
 #
-# UN BALAYAGE N'EST PAS CROISE AVEC LES FORCAGES DE SA CELLULE. C'est delibere : un front
-# coute un solve par point, et le multiplier par une liste de forcages est la facon dont un
-# apres-midi devient une semaine. Pour un front sous forcage, le nommer explicitement.
+# A SWEEP IS NOT CROSSED WITH ITS CELL'S FORCINGS. On purpose: a front costs one solve per
+# point, and multiplying it by a forcing list is how an afternoon becomes a week. For a front
+# under a forcing, name it explicitly.
 #
-# COMPTER AVANT DE LANCER. Une cellule coute (nombre de forcages, ou 1 si aucun) + (nombre de
-# points de chaque balayage). Le plan ci-dessous fait 37 runs -- 16 cellules et 3 fronts de
-# 7 points -- soit deux nuits. `--no-sweeps` le ramene a 16. `--dry-run` les enumere en
-# quelques secondes et c'est LE reflexe apres avoir edite ce fichier :
+# COUNT BEFORE LAUNCHING. A cell costs (number of forcings, or 1 if none) + (number of points
+# of each sweep). The plan below is 37 runs -- 16 cells and 3 fronts of 7 points -- i.e. two
+# nights. `--no-sweeps` brings it down to 16. `--dry-run` lists them in a few seconds, and it
+# is THE reflex after editing this file.
 #
-# CE PLAN EST LA CAMPAGNE COMPLETE, PAS LE PROCHAIN BATCH. Le relancer tel quel rejoue des
-# cellules deja resolues et cree des DOUBLONS aux memes coordonnees (create_output_folder
-# suffixe au lieu d'ecraser), ce qui trouble la grille Prospective du dashboard. Pour ne
-# lancer que le travail neuf, ecrire un spec d'etape -- voir `plan_budget.yaml`. Et noter que
-# `--forcings` n'y aide PAS : il ecarte les balayages non forces (core/config.py:545-548).
+# THIS PLAN IS THE FULL CAMPAIGN, NOT THE NEXT BATCH. Re-running it as is replays cells
+# already solved and creates DUPLICATES at the same coordinates (create_output_folder
+# suffixes rather than overwriting), which confuses the dashboard's Prospective grid. To run
+# only new work, write a one-off stage spec that includes the same three catalogues and lists
+# only the missing cells. The August 2026 stage specs (`plan_budget.yaml`,
+# `plan_etape_*.yaml`) did exactly that; they were executed and removed on 2026-09-22 --
+# `git show 5bf32d9:case_studies/guadeloupe/plan_budget.yaml` shows the pattern. Note that
+# `--forcings` does NOT help there: it drops the unforced sweeps.
 #
 #   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml --dry-run
 #   python scripts/check_scenario_feasibility.py --scenarios case_studies/guadeloupe/plan.yaml
 #   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml --no-sweeps
 #   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/plan.yaml
 #
-# `--policies P8_transition_agroecologique` restreint le plan a une politique,
-# `--forcings F9_crise_systemique` a une colonne, `--no-sweeps` laisse tomber les fronts --
-# c'est ainsi qu'on etage un batch trop gros pour une nuit.
+# `--policies P8_agroecological_transition` restricts the plan to one policy,
+# `--forcings F9_systemic_crisis` to one column, `--no-sweeps` drops the fronts -- that is how
+# a batch too large for one night is staged.
+#
+# The campaign was solved in August 2026 under the former French names (P4_statu_quo,
+# F9_crise_systemique, pareto_azote); those runs keep them on disk and the dashboard maps them
+# onto the names below.
 
 include:
   crop_groups: crop_groups.yaml
-  policies:    scenarios_politiques.yaml
-  forcings:    scenarios_forcages.yaml
+  policies:    scenarios_policies.yaml
+  forcings:    scenarios_forcings.yaml
   sweeps:      scenarios_pareto.yaml
 
 scenarios:
 
-  # --- Les bornes, non forcees -----------------------------------------------------------
-  # P1 et P10 encadrent l'axe. On les veut d'abord seules : leur role est de borner ce que le
-  # territoire peut donner, pas de tenir sous un choc. Et P1 change d'objectif, donc sa
-  # colonne `objective` n'est comparable a rien (cf. scenarios_politiques.yaml).
-  P1_deregulation_totale:
-  P10_bifurcation_agroecologique:
+  # --- The bounds, unforced -----------------------------------------------------------------
+  # P1 and P10 bracket the axis. They are wanted alone first: their role is to bound what the
+  # territory can give, not to hold under a shock. And P1 changes objective, so its
+  # `objective` column is comparable with nothing (see scenarios_policies.yaml).
+  P1_full_deregulation:
+  P10_agroecological_bifurcation:
 
-  # --- Le point de comparaison -----------------------------------------------------------
-  # Le statu quo passe par les quatre forcages qui separent le mieux les politiques : le
-  # temoin neutre, le choc physique, le choc de couts (celui qui devrait le plus separer les
-  # deux poles), et le pire cas plausible.
-  # Il porte aussi le front budgetaire, et c'est un choix MESURE : sous P4 le plafond de
-  # subvention mord (71,20 M realises contre 72 M, dual 0,056), sous P8 il ne mord pas
-  # (39,05 M contre 80 M). Un front sous P8 rendrait cinq fois la meme allocation.
-  P4_statu_quo:
-    forcings: [F0_nominal, F1_cyclone_majeur, F6_choc_intrants, F9_crise_systemique]
-    sweeps: [pareto_subventions]
+  # --- The point of comparison ----------------------------------------------------------------
+  # The status quo goes through the four forcings that best separate the policies: the neutral
+  # control, the physical shock, the cost shock (the one that should most separate the two
+  # poles), and the plausible worst case.
+  # It also carries the budget front, a MEASURED choice: under P4 the subsidy ceiling binds
+  # (71.20 M achieved against 72 M, dual 0.056), under P8 it does not (39.05 M against 80 M).
+  # A front under P8 would return the same allocation five times.
+  P4_status_quo:
+    forcings: [F0_nominal, F1_major_cyclone, F6_input_price_shock, F9_systemic_crisis]
+    sweeps: [pareto_subsidies]
 
-  # --- Payer ou interdire ? --------------------------------------------------------------
-  # P6 et P7 sont le meme objectif par deux instruments opposes ; ils ne se lisent qu'ensemble
-  # et sous les MEMES forcages, sinon l'ecart entre eux melange l'instrument et le choc.
-  P6_verdissement_incitatif:
-    forcings: [F0_nominal, F6_choc_intrants]
-  P7_ecophyto_reglementaire:
-    forcings: [F0_nominal, F6_choc_intrants]
+  # --- Pay or forbid? --------------------------------------------------------------------------
+  # P6 and P7 pursue the same goal with two opposite instruments; they are only read together
+  # and under the SAME forcings, otherwise the gap between them mixes instrument and shock.
+  P6_incentive_greening:
+    forcings: [F0_nominal, F6_input_price_shock]
+  P7_regulatory_ecophyto:
+    forcings: [F0_nominal, F6_input_price_shock]
 
-  # --- Le scenario agroecologique serieux, et son cout marginal --------------------------
-  # Les fronts ENVIRONNEMENTAUX sont ici : c'est sous P8 que la question « que coute le
-  # prochain kilo d'azote » se pose reellement, puisque c'est la politique qu'on envisagerait
-  # de mettre en oeuvre. Le second dit si ce cout marginal tient sous crise -- 14 solves a eux
-  # deux. Le front BUDGETAIRE est sous P4 et pas ici, faute d'enveloppe mordante (cf. P4).
-  P8_transition_agroecologique:
-    forcings: [F0_nominal, F9_crise_systemique]
+  # --- The serious agroecological scenario, and its marginal cost ------------------------------
+  # The ENVIRONMENTAL fronts are here: it is under P8 that "what does the next kilogram of
+  # nitrogen cost" really arises, since it is the policy one would consider implementing. The
+  # second says whether that marginal cost holds under crisis -- 14 solves between them. The
+  # BUDGET front is under P4, not here, for lack of a binding envelope (see P4).
+  P8_agroecological_transition:
+    forcings: [F0_nominal, F9_systemic_crisis]
     sweeps:
-      - pareto_azote
-      - {name: pareto_azote, forcings: [F9_crise_systemique]}
+      - pareto_nitrogen
+      - {name: pareto_nitrogen, forcings: [F9_systemic_crisis]}
 
-  # --- Le contrefactuel du front budgetaire ----------------------------------------------
-  # P5 plafonne l'enveloppe a 43 M, soit EXACTEMENT un point du front trace sur P4. Mais elle
-  # decide d'avance OU couper (aides x 0,60, canne x 0,48 au total), la ou le front laisse le
-  # modele repartir l'enveloppe qui retrecit. L'ecart entre les deux ne mesure donc pas le
-  # cout de l'austerite -- le front le donne deja -- mais celui du CIBLAGE. Sans elle le front
-  # est une courbe sans contrefactuel, et c'est sa seule raison d'etre ici : non forcee, un
-  # seul solve. (Elle abaisse aussi le slack de main d'oeuvre a 0,90 et l'inertie a 60 %,
-  # donc l'ecart n'est pas imputable au seul ciblage des aides -- a dire en le lisant.)
-  P5_austerite_budgetaire:
+  # --- The counterfactual of the budget front ---------------------------------------------------
+  # P5 caps the envelope at 43 M, EXACTLY one point of the front traced under P4. But it decides
+  # in advance WHERE to cut (aid x 0.60, cane x 0.48 in total), whereas the front lets the model
+  # spread the shrinking envelope. The gap between the two therefore does not measure the cost
+  # of austerity -- the front already gives that -- but the cost of TARGETING. Without it the
+  # front is a curve with no counterfactual, which is its only reason to be here: unforced, one
+  # solve. (It also lowers the labour slack to 0.90 and inertia to 60 %, so the gap is not due
+  # to aid targeting alone -- say so when reading it.)
+  P5_budget_austerity:
 
-  # --- Hors axe --------------------------------------------------------------------------
-  # P9 se juge sur le forcage qui lui est favorable (le marche revient au local) autant que
-  # sur le nominal : une politique de souverainete evaluee seulement en conditions 2017 est
-  # jugee sur le monde qu'elle cherche precisement a quitter.
-  P9_souverainete_alimentaire:
-    forcings: [F0_nominal, F7_inflation_alimentaire, F9_crise_systemique]
+  # --- Off the axis ------------------------------------------------------------------------------
+  # P9 is judged on the forcing favourable to it (the market turns back to local produce) as
+  # much as on the nominal one: a sovereignty policy evaluated only under 2017 conditions is
+  # judged on the very world it seeks to leave.
+  P9_food_sovereignty:
+    forcings: [F0_nominal, F7_food_inflation, F9_systemic_crisis]
 
-  # --- Non retenues dans ce plan ---------------------------------------------------------
-  # P2 et P3 restent au catalogue et ne sont pas jouees ici : ce sont deux points d'un meme
-  # axe deja borne par P1. Les rouvrir = deux lignes.
-  # (P5 y figurait jusqu'ici, ecartee au motif que F8_retrait_posei produit le meme choc
-  # budgetaire sur n'importe quelle politique. Elle est reintegree ci-dessus pour une autre
-  # raison : servir de contrefactuel au front `pareto_subventions`, ce qu'un forcage ne fait
-  # pas -- F8 coupe les aides, il ne les REDEPLOIE pas.)
+  # --- Not played in this plan -------------------------------------------------------------------
+  # P2 and P3 stay in the catalogue and are not played here: they are two points of an axis
+  # already bounded by P1. Reopening them = two lines.
+  # (P5 used to be excluded on the grounds that F8_posei_withdrawal produces the same budget
+  # shock on any policy. It is back above for another reason: to serve as the counterfactual of
+  # the `pareto_subsidies` front, which a forcing cannot do -- F8 cuts aid, it does not
+  # REDEPLOY it.)

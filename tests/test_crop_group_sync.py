@@ -25,15 +25,15 @@ CATALOGUE = Path("case_studies/guadeloupe/crop_groups.yaml")
 
 # Scenario group name -> the config.yaml crop_families key it must mirror. Only the groups
 # that genuinely duplicate a config family are listed; a scenario is free to define groups
-# of its own (bio_maraichage, vivrier, intensif_canne) that have no config counterpart.
+# of its own (organic_market_gardening, vivrier, intensive_sugarcane) that have no config counterpart.
 _MIRRORED = {
-    "banane_export": "ban_ex",
-    "canne": "cs",
-    "maraichage": "ma",
+    "export_banana": "ban_ex",
+    "sugarcane": "cs",
+    "market_gardening": "ma",
     "plantain": "bc",
-    "igname": "ig",
-    "ananas": "an",
-    "arboriculture": "plu",
+    "yam": "ig",
+    "pineapple": "an",
+    "orchards": "plu",
 }
 
 

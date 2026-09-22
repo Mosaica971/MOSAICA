@@ -4,9 +4,9 @@ import pandas as pd
 import pytest
 
 from case_studies.guadeloupe.domain.environment import (
-    compute_azote_per_ha_cult,
-    compute_phosphore_per_ha_cult,
-    compute_potasse_per_ha_cult,
+    compute_crop_nitrogen_per_ha,
+    compute_crop_phosphorus_per_ha,
+    compute_crop_potassium_per_ha,
     nutrient_grades,
 )
 
@@ -52,25 +52,25 @@ def test_a_bare_number_run_is_not_mistaken_for_a_grade():
 
 def _tiny_itk():
     """One crop, two operations: 100 kg of 08_20_20 and 50 kg of urea, both one-off."""
-    data_otk = pd.DataFrame(
+    operation_data = pd.DataFrame(
         {"DOSE": [100.0, 50.0], "AZOTE": [0.08, 0.46], "AMORTI": [0, 0]},
         index=["08_20_20", "UREE"],
     )
     matrice = pd.DataFrame({"CROP": [1.0, 1.0]}, index=["08_20_20", "UREE"])
     duree_plant = pd.Series({"CROP": 1.0})
     duree_cycle = pd.Series({"CROP": 12.0})
-    return data_otk, matrice, duree_plant, duree_cycle
+    return operation_data, matrice, duree_plant, duree_cycle
 
 
 def test_p_and_k_use_the_same_formula_as_nitrogen():
-    data_otk, matrice, plant, cycle = _tiny_itk()
+    operation_data, matrice, plant, cycle = _tiny_itk()
     kwargs = dict(
-        data_otk=data_otk, matrice_otk_cult=matrice,
-        duree_plant_cult=plant, duree_cycle_cult=cycle,
+        operation_data=operation_data, crop_operation_matrix=matrice,
+        crop_plantation_duration=plant, crop_cycle_duration=cycle,
     )
-    azote = compute_azote_per_ha_cult(**kwargs)["CROP"]
-    phosphore = compute_phosphore_per_ha_cult(**kwargs)["CROP"]
-    potasse = compute_potasse_per_ha_cult(**kwargs)["CROP"]
+    azote = compute_crop_nitrogen_per_ha(**kwargs)["CROP"]
+    phosphore = compute_crop_phosphorus_per_ha(**kwargs)["CROP"]
+    potasse = compute_crop_potassium_per_ha(**kwargs)["CROP"]
 
     # N: 100 x 0.08 + 50 x 0.46 = 8 + 23 = 31, annualised x12/12.
     assert azote == pytest.approx(31.0)

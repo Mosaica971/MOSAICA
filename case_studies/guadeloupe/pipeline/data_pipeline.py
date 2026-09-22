@@ -7,24 +7,24 @@ import pandas as pd
 
 from case_studies.guadeloupe.domain.economics import (
     apply_crop_multipliers,
-    compute_gross_margin_per_ha_cult,
-    compute_gross_product_per_ha_cult,
-    compute_labor_hours_per_ha_cult,
-    compute_sales_per_ha_cult,
-    compute_subsidy_per_ha_cult,
-    compute_variable_cost_per_ha_cult,
+    compute_crop_gross_margin_per_ha,
+    compute_crop_gross_product_per_ha,
+    compute_crop_labor_hours_per_ha,
+    compute_crop_sales_per_ha,
+    compute_crop_subsidy_per_ha,
+    compute_crop_variable_cost_per_ha,
 )
 from case_studies.guadeloupe.domain.environment import (
-    compute_azote_per_ha_cult,
-    compute_ges_per_ha_cult,
-    compute_ift_per_ha_cult,
-    compute_phosphore_per_ha_cult,
-    compute_potasse_per_ha_cult,
+    compute_crop_nitrogen_per_ha,
+    compute_crop_ghg_per_ha,
+    compute_crop_tfi_per_ha,
+    compute_crop_phosphorus_per_ha,
+    compute_crop_potassium_per_ha,
 )
 from case_studies.guadeloupe.domain.farm_typology import (
-    compute_avers,
+    compute_risk_aversion,
     compute_base_crop_group,
-    compute_type_expl,
+    compute_farm_type,
 )
 from case_studies.guadeloupe.domain import agroecology, rpest, soil_carbon, water
 from core.config import load_config, resolve_enabled
@@ -89,8 +89,8 @@ def _validate_data_selection(year: str, scenario: str) -> None:
         )
 
 
-def compute_farm_surface_ha(plot_surface: pd.Series, expl_parc: pd.DataFrame) -> pd.Series:
-    merged = expl_parc.assign(surface=expl_parc["plot"].map(plot_surface))
+def compute_farm_surface_ha(plot_surface: pd.Series, farm_plot_map: pd.DataFrame) -> pd.Series:
+    merged = farm_plot_map.assign(surface=farm_plot_map["plot"].map(plot_surface))
     return merged.groupby("farm")["surface"].sum()
 
 
@@ -98,8 +98,8 @@ def compute_farm_labor_capacity_hours(
     *,
     base_crop_group: pd.Series,
     plot_surface: pd.Series,
-    expl_parc: pd.DataFrame,
-    labor_hours_per_ha_cult: pd.Series,
+    farm_plot_map: pd.DataFrame,
+    crop_labor_hours_per_ha: pd.Series,
     representative_crops: dict[str, str],
 ) -> pd.Series:
     """Labour (h/year) each farm's OBSERVED 2017 cropping plan required -- GAMS MO_Expl_init
@@ -115,9 +115,9 @@ def compute_farm_labor_capacity_hours(
     docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
     """
     fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
-    rate = labor_hours_per_ha_cult.reindex(fine.to_numpy()).to_numpy()
+    rate = crop_labor_hours_per_ha.reindex(fine.to_numpy()).to_numpy()
     hours_by_plot = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
-    farm_of_plot = expl_parc.set_index("plot")["farm"]
+    farm_of_plot = farm_plot_map.set_index("plot")["farm"]
     return hours_by_plot.groupby(farm_of_plot.reindex(hours_by_plot.index)).sum()
 
 
@@ -151,8 +151,8 @@ def read_fine_baseline_allocation(path: str | Path) -> dict[str, dict[str, float
 def compute_farm_labor_capacity_hours_from_fine_baseline(
     *,
     fine_baseline: dict[str, dict[str, float]],
-    expl_parc: pd.DataFrame,
-    labor_hours_per_ha_cult: pd.Series,
+    farm_plot_map: pd.DataFrame,
+    crop_labor_hours_per_ha: pd.Series,
 ) -> pd.Series:
     """MO_Expl_init computed the way GAMS computes it (ENTREES.txt:466-469).
 
@@ -164,14 +164,14 @@ def compute_farm_labor_capacity_hours_from_fine_baseline(
     Validated end to end: these same rates applied to the GAMS CALIB allocation reproduce its
     reported TRAVAIL_TOT to 156 h out of 5 292 000 (0.003 %, GAMS's own 4-digit rounding).
     """
-    farm_of_plot = expl_parc.set_index("plot")["farm"]
+    farm_of_plot = farm_plot_map.set_index("plot")["farm"]
     hours: dict[str, float] = defaultdict(float)
     for plot, planted in fine_baseline.items():
         farm = farm_of_plot.get(plot)
         if farm is None:
             continue
         hours[farm] += sum(
-            surface * float(labor_hours_per_ha_cult.get(crop, 0.0))
+            surface * float(crop_labor_hours_per_ha.get(crop, 0.0))
             for crop, surface in planted.items()
         )
     return pd.Series(hours, dtype=float)
@@ -181,8 +181,8 @@ def compute_farm_baseline_production_t(
     *,
     base_crop_group: pd.Series,
     plot_surface: pd.Series,
-    expl_parc: pd.DataFrame,
-    rdt_cult: pd.Series,
+    farm_plot_map: pd.DataFrame,
+    crop_yield: pd.Series,
     representative_crops: dict[str, str],
 ) -> dict[str, dict[str, float]]:
     """Tonnes each farm's OBSERVED 2017 plan produced, per observed RPG group.
@@ -205,9 +205,9 @@ def compute_farm_baseline_production_t(
     approximation; wiring it in is a separate decision.
     """
     fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
-    rate = rdt_cult.reindex(fine.to_numpy()).fillna(0.0).to_numpy()
+    rate = crop_yield.reindex(fine.to_numpy()).fillna(0.0).to_numpy()
     tonnes = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
-    farm_of_plot = expl_parc.set_index("plot")["farm"].reindex(fine.index)
+    farm_of_plot = farm_plot_map.set_index("plot")["farm"].reindex(fine.index)
 
     frame = pd.DataFrame({"group": base_crop_group, "farm": farm_of_plot, "tonnes": tonnes})
     frame = frame.dropna(subset=["farm"])
@@ -251,33 +251,33 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "catchments": read_flat_set(SETS_DIR / "CPT_2017.set"),
     }
 
-    expl_parc = read_mapping_set(SETS_DIR / "EXPL_PARC_2017.set", "farm", "plot")
-    bv_parc = read_mapping_set(SETS_DIR / "BV_PARC_2017.set", "watershed", "plot")
-    reg_parc = read_mapping_set(SETS_DIR / "REG_PARC_2017.set", "region", "plot")
-    cpt_parc = read_mapping_set(SETS_DIR / "CPT_PARC_2017.set", "catchment", "plot")
+    farm_plot_map = read_mapping_set(SETS_DIR / "EXPL_PARC_2017.set", "farm", "plot")
+    watershed_plot_map = read_mapping_set(SETS_DIR / "BV_PARC_2017.set", "watershed", "plot")
+    region_plot_map = read_mapping_set(SETS_DIR / "REG_PARC_2017.set", "region", "plot")
+    catchment_plot_map = read_mapping_set(SETS_DIR / "CPT_PARC_2017.set", "catchment", "plot")
 
-    data_parc = read_wide_table(TABLES_DIR / "Data_Parc_Gwad_2017.txt")
-    data_rpg = read_wide_table(TABLES_DIR / "Data_RPG_Gwad_2017.txt")
-    data_cult = read_wide_table(TABLES_DIR / "Data_Cult.txt")
-    data_otk = read_wide_table(TABLES_DIR / "Data_OTK.txt")
-    data_sol = read_wide_table(TABLES_DIR / "Data_Sol.txt")
-    matrice_otk_cult = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt")
+    plot_data = read_wide_table(TABLES_DIR / "Data_Parc_Gwad_2017.txt")
+    rpg_data = read_wide_table(TABLES_DIR / "Data_RPG_Gwad_2017.txt")
+    crop_data = read_wide_table(TABLES_DIR / "Data_Cult.txt")
+    operation_data = read_wide_table(TABLES_DIR / "Data_OTK.txt")
+    soil_data = read_wide_table(TABLES_DIR / "Data_Sol.txt")
+    crop_operation_matrix = read_wide_table(TABLES_DIR / f"Matrice_OTK_Cult_{scenario}.txt")
     # Nutrition tables for the food self-sufficiency indicators (per-tonne content by crop;
     # per-individual annual needs + population + fishing contribution).
-    nutri_cult = read_wide_table(TABLES_DIR / "Nutri_Cult.txt")
-    nutri_alim = read_wide_table(TABLES_DIR / "Nutri_Alim.txt")
+    crop_nutrient_content = read_wide_table(TABLES_DIR / "Nutri_Cult.txt")
+    food_nutrient_needs = read_wide_table(TABLES_DIR / "Nutri_Alim.txt")
     # GAMS parity: DONNEES.txt:283-289 fills TABLE Prix_Cult(C,H) / Rdt_Cult(C,H) from the
     # *_CF_<scenario> files, NOT from Prix_Cult.txt / Rdt_Cult.txt (which sit unused in the
     # same directory). Reading the plain files diverged on 23 of 84 crops -- plantain at
     # 26 t/ha & 800 EUR/t instead of 20 & 700, pasture at 5 000 EUR/t instead of 5 400,
     # melon at 1 200 instead of 1 455, fodder cane priced instead of self-consumed at 0 --
     # and that alone drove the territorial PAD to 48% where GAMS reaches 3.8%.
-    prix_cult = apply_crop_multipliers(
+    crop_price = apply_crop_multipliers(
         read_wide_table(INDICE_H_DIR / f"Prix_Cult_CF_{scenario}.txt")[year], price_multipliers
     )
     # yield_multipliers (climate shock) scale rdt at source so the shock propagates to
     # variable cost, subsidy (POSEI_Q), sales, GES, and the yield-based territory quotas.
-    rdt_cult = apply_crop_multipliers(
+    crop_yield = apply_crop_multipliers(
         read_wide_table(INDICE_H_DIR / f"Rdt_Cult_CF_{scenario}.txt")[year], yield_multipliers
     )
     # variance_multipliers scale the yield variance Var_Rdt_Cult, which is what the Markowitz
@@ -286,157 +286,157 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     # necessarily lowering its mean, and under the risk-adjusted objective that alone shifts
     # risk-averse farms towards low-variance activities. Deliberately kept on the `init`
     # column like the unshocked series -- the shock is a scenario assumption, not a year.
-    var_rdt_cult = apply_crop_multipliers(
+    crop_yield_variance = apply_crop_multipliers(
         read_wide_table(INDICE_H_DIR / "Var_Rdt_Cult.txt")["init"], variance_multipliers
     )
-    bagasse_cult = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[year]
-    duree_plant_cult = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[year]
-    duree_cycle_cult = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[year]
-    cout_recolte_cult = read_wide_table(INDICE_H_DIR / "Cout_Recolte_Cult.txt")[year]
+    crop_bagasse = read_wide_table(INDICE_H_DIR / "Bagasse_Cult.txt")[year]
+    crop_plantation_duration = read_wide_table(INDICE_H_DIR / "Duree_Plant_Cult.txt")[year]
+    crop_cycle_duration = read_wide_table(INDICE_H_DIR / "Duree_Cycle_Cult.txt")[year]
+    crop_harvest_cost = read_wide_table(INDICE_H_DIR / "Cout_Recolte_Cult.txt")[year]
     # GAMS parity: DONNEES.txt:228 includes Cout_Transp_Cult_LAM.txt, not Cout_Transp_Cult.txt.
     # The two tables differ on the ten CF_* (fodder cane) rows only -- 0.98 to 4.50 EUR/t --
     # and since CV carries a (Cout_Recolte + Cout_Transp) * Rdt term, that fed a 71 to 290
     # EUR/ha margin gap on exactly those ten crops.
-    cout_transp_cult = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult_LAM.txt")[year]
-    posei_surf_cult = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[year]
-    posei_q_cult = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[year]
-    aide_indus_cult = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[year]
-    aide_replant_cult = read_wide_table(INDICE_H_DIR / "Aide_Replant_Cult.txt")[year]
-    aide_transp_cult = read_wide_table(INDICE_H_DIR / "Aide_Transp_Cult.txt")[year]
-    aide_garantie_prix_cult = read_wide_table(INDICE_H_DIR / "Aide_Garantie_Prix_Cult.txt")[year]
-    mae_recolte_vert_cult = read_wide_table(INDICE_H_DIR / "MAE_Recolte_Vert_Cult.txt")[year]
-    mae_jachere_sol_nu_cult = read_wide_table(INDICE_H_DIR / "MAE_Jachere_Sol_Nu_Cult.txt")[year]
-    mae_compost_cult = read_wide_table(INDICE_H_DIR / f"MAE_Compost_Cult_{scenario}.txt")[year]
-    mb_add_cult = read_wide_table(INDICE_H_DIR / "MB_ADD_Cult.txt")[year]
+    crop_transport_cost = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult_LAM.txt")[year]
+    posei_area_aid = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[year]
+    posei_volume_aid = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[year]
+    industry_aid = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[year]
+    replanting_aid = read_wide_table(INDICE_H_DIR / "Aide_Replant_Cult.txt")[year]
+    transport_aid = read_wide_table(INDICE_H_DIR / "Aide_Transp_Cult.txt")[year]
+    price_guarantee_aid = read_wide_table(INDICE_H_DIR / "Aide_Garantie_Prix_Cult.txt")[year]
+    aecm_green_harvest = read_wide_table(INDICE_H_DIR / "MAE_Recolte_Vert_Cult.txt")[year]
+    aecm_bare_fallow = read_wide_table(INDICE_H_DIR / "MAE_Jachere_Sol_Nu_Cult.txt")[year]
+    aecm_compost = read_wide_table(INDICE_H_DIR / f"MAE_Compost_Cult_{scenario}.txt")[year]
+    additional_margin = read_wide_table(INDICE_H_DIR / "MB_ADD_Cult.txt")[year]
 
-    data_parc = data_parc.assign(
-        REGION_CODE=data_parc.index.map(reg_parc.set_index("plot")["region"])
+    plot_data = plot_data.assign(
+        REGION_CODE=plot_data.index.map(region_plot_map.set_index("plot")["region"])
     )
-    data_parc = data_parc.join(data_rpg[["cult_2015", "cult_2016", "cult_2017"]])
+    plot_data = plot_data.join(rpg_data[["cult_2015", "cult_2016", "cult_2017"]])
 
-    plot_to_farm = expl_parc.set_index("plot")["farm"].reindex(data_parc.index)
+    plot_to_farm = farm_plot_map.set_index("plot")["farm"].reindex(plot_data.index)
     kept_plots = resolve_kept_plots(
-        data_parc.index,
+        plot_data.index,
         {
-            "islands": data_parc["ILE"],
-            "regions": data_parc["REGION_CODE"],
+            "islands": plot_data["ILE"],
+            "regions": plot_data["REGION_CODE"],
             "farms": plot_to_farm,
-            "plots": pd.Series(data_parc.index, index=data_parc.index),
+            "plots": pd.Series(plot_data.index, index=plot_data.index),
         },
         config,
     )
     # Share of the territory's hectares the filter retains, measured BEFORE the cut. It is
     # what `zone_filter.scale_territorial_bounds` multiplies the territorial thresholds by,
     # so a reduced run is a miniature of the real one instead of an infeasible fragment.
-    full_surface_ha = float(data_parc["SURF_HA"].sum())
-    data_parc = data_parc.loc[kept_plots]
+    full_surface_ha = float(plot_data["SURF_HA"].sum())
+    plot_data = plot_data.loc[kept_plots]
     zone_surface_fraction = (
-        float(data_parc["SURF_HA"].sum()) / full_surface_ha if full_surface_ha else 1.0
+        float(plot_data["SURF_HA"].sum()) / full_surface_ha if full_surface_ha else 1.0
     )
-    expl_parc = expl_parc[expl_parc["plot"].isin(kept_plots)]
-    bv_parc = bv_parc[bv_parc["plot"].isin(kept_plots)]
-    reg_parc = reg_parc[reg_parc["plot"].isin(kept_plots)]
-    cpt_parc = cpt_parc[cpt_parc["plot"].isin(kept_plots)]
+    farm_plot_map = farm_plot_map[farm_plot_map["plot"].isin(kept_plots)]
+    watershed_plot_map = watershed_plot_map[watershed_plot_map["plot"].isin(kept_plots)]
+    region_plot_map = region_plot_map[region_plot_map["plot"].isin(kept_plots)]
+    catchment_plot_map = catchment_plot_map[catchment_plot_map["plot"].isin(kept_plots)]
 
-    plot_surface = data_parc["SURF_HA"]
-    farm_surface_ha = compute_farm_surface_ha(plot_surface, expl_parc)
-    farm_plots = expl_parc.groupby("farm")["plot"].apply(list).to_dict()
+    plot_surface = plot_data["SURF_HA"]
+    farm_surface_ha = compute_farm_surface_ha(plot_surface, farm_plot_map)
+    farm_plots = farm_plot_map.groupby("farm")["plot"].apply(list).to_dict()
     farm_gfa_surface_ha = compute_farm_surface_ha(
-        plot_surface * data_parc["GFA_PARC"], expl_parc
+        plot_surface * plot_data["GFA_PARC"], farm_plot_map
     )
 
     # Eq_AN_PA (MODELE.txt:243) forbids AN_PA on any plot whose FARM total surface
     # (Surf_Expl_init = sum of the farm's plot SURF_HA, ENTREES.txt:116) is below
     # AN_SURF_EXPL_MIN = 10 ha (DONNEES.txt:135). Expose that per-plot farm surface as a
-    # data_parc column so the config's generic attribute_forbidden rule can express the ban,
+    # plot_data column so the config's generic attribute_forbidden rule can express the ban,
     # exactly like the geographic ITK bans -- no farm-indexed rule type needed.
     plot_farm_surface = pd.Series(
-        expl_parc["farm"].map(farm_surface_ha).to_numpy(), index=expl_parc["plot"]
+        farm_plot_map["farm"].map(farm_surface_ha).to_numpy(), index=farm_plot_map["plot"]
     )
-    data_parc = data_parc.assign(
-        SURF_EXPL_PARC=plot_farm_surface.reindex(data_parc.index)
+    plot_data = plot_data.assign(
+        SURF_EXPL_PARC=plot_farm_surface.reindex(plot_data.index)
     )
 
-    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
-    type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface)
-    farm_risk_aversion = compute_avers(type_expl, type_expl_bis)
+    base_crop_group = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
+    farm_type, farm_type_secondary = compute_farm_type(farm_plots, base_crop_group, plot_surface)
+    farm_risk_aversion = compute_risk_aversion(farm_type, farm_type_secondary)
 
     attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
-    plot_attributes = data_parc[list(attribute_bounds.keys())]
-    crop_bounds = data_cult.T
+    plot_attributes = plot_data[list(attribute_bounds.keys())]
+    crop_bounds = crop_data.T
     eligibility_mask = compute_eligibility_mask(plot_attributes, crop_bounds, attribute_bounds)
     for build_rule, args in resolve_enabled(
         config["categorical_rules"], CATEGORICAL_RULE_REGISTRY
     ):
-        crops, condition = build_rule(data_parc, **args)
+        crops, condition = build_rule(plot_data, **args)
         eligibility_mask = forbid_where(eligibility_mask, condition, crops)
     eligible_pairs = eligible_pairs_from_mask(eligibility_mask)
 
-    variable_cost_per_ha_cult = compute_variable_cost_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
-        cout_recolte_cult=cout_recolte_cult,
-        cout_transp_cult=cout_transp_cult,
-        rdt_cult=rdt_cult,
+    crop_variable_cost_per_ha = compute_crop_variable_cost_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
+        crop_harvest_cost=crop_harvest_cost,
+        crop_transport_cost=crop_transport_cost,
+        crop_yield=crop_yield,
     )
     # cost_multipliers (input/fuel shock) scale the variable cost only -- margin moves,
     # production/tonnage does not.
-    variable_cost_per_ha_cult = apply_crop_multipliers(variable_cost_per_ha_cult, cost_multipliers)
-    subsidy_per_ha_cult = compute_subsidy_per_ha_cult(
-        posei_surf_cult=posei_surf_cult,
-        posei_q_cult=posei_q_cult,
-        aide_indus_cult=aide_indus_cult,
-        aide_replant_cult=aide_replant_cult,
-        aide_transp_cult=aide_transp_cult,
-        aide_garantie_prix_cult=aide_garantie_prix_cult,
-        mae_recolte_vert_cult=mae_recolte_vert_cult,
-        mae_jachere_sol_nu_cult=mae_jachere_sol_nu_cult,
-        mae_compost_cult=mae_compost_cult,
-        mb_add_cult=mb_add_cult,
-        rdt_cult=rdt_cult,
-        duree_cycle_cult=duree_cycle_cult,
-        duree_plant_cult=duree_plant_cult,
+    crop_variable_cost_per_ha = apply_crop_multipliers(crop_variable_cost_per_ha, cost_multipliers)
+    crop_subsidy_per_ha = compute_crop_subsidy_per_ha(
+        posei_area_aid=posei_area_aid,
+        posei_volume_aid=posei_volume_aid,
+        industry_aid=industry_aid,
+        replanting_aid=replanting_aid,
+        transport_aid=transport_aid,
+        price_guarantee_aid=price_guarantee_aid,
+        aecm_green_harvest=aecm_green_harvest,
+        aecm_bare_fallow=aecm_bare_fallow,
+        aecm_compost=aecm_compost,
+        additional_margin=additional_margin,
+        crop_yield=crop_yield,
+        crop_cycle_duration=crop_cycle_duration,
+        crop_plantation_duration=crop_plantation_duration,
     )
-    subsidy_per_ha_cult = apply_crop_multipliers(subsidy_per_ha_cult, subsidy_multipliers)
+    crop_subsidy_per_ha = apply_crop_multipliers(crop_subsidy_per_ha, subsidy_multipliers)
     # The agri-environmental component on its own. Folded into the subsidy total above, but
     # a scenario that wants to steer agroecology needs to see it apart from POSEI and
     # national aid -- see domain/agroecology.py on what it does and does not identify.
-    mae_per_ha_cult = agroecology.compute_mae_per_ha_cult(
-        mae_recolte_vert_cult, mae_jachere_sol_nu_cult, mae_compost_cult
+    crop_aecm_per_ha = agroecology.compute_crop_aecm_per_ha(
+        aecm_green_harvest, aecm_bare_fallow, aecm_compost
     )
-    under_mae_cult = agroecology.compute_under_mae_cult(mae_per_ha_cult)
-    organic_cult = agroecology.compute_organic_cult(matrice_otk_cult)
-    sales_per_ha_cult = compute_sales_per_ha_cult(
-        rdt_cult=rdt_cult,
-        prix_cult=prix_cult,
-        bagasse_cult=bagasse_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_under_aecm = agroecology.compute_crop_under_aecm(crop_aecm_per_ha)
+    crop_is_organic = agroecology.compute_crop_is_organic(crop_operation_matrix)
+    crop_sales_per_ha = compute_crop_sales_per_ha(
+        crop_yield=crop_yield,
+        crop_price=crop_price,
+        crop_bagasse=crop_bagasse,
+        crop_cycle_duration=crop_cycle_duration,
     )
-    subsidy_per_ha_cult_annualized = subsidy_per_ha_cult / duree_cycle_cult * 12
-    gross_product_per_ha_cult = compute_gross_product_per_ha_cult(
-        rdt_cult=rdt_cult,
-        prix_cult=prix_cult,
-        bagasse_cult=bagasse_cult,
-        subsidy_per_ha_cult=subsidy_per_ha_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_subsidy_per_ha_annualized = crop_subsidy_per_ha / crop_cycle_duration * 12
+    crop_gross_product_per_ha = compute_crop_gross_product_per_ha(
+        crop_yield=crop_yield,
+        crop_price=crop_price,
+        crop_bagasse=crop_bagasse,
+        crop_subsidy_per_ha=crop_subsidy_per_ha,
+        crop_cycle_duration=crop_cycle_duration,
     )
-    margin_per_ha_cult = compute_gross_margin_per_ha_cult(
-        gross_product_per_ha_cult=gross_product_per_ha_cult,
-        variable_cost_per_ha_cult=variable_cost_per_ha_cult,
+    crop_margin_per_ha = compute_crop_gross_margin_per_ha(
+        crop_gross_product_per_ha=crop_gross_product_per_ha,
+        crop_variable_cost_per_ha=crop_variable_cost_per_ha,
     )
-    labor_hours_per_ha_cult = compute_labor_hours_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_labor_hours_per_ha = compute_crop_labor_hours_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
     )
     farm_baseline_production_t = compute_farm_baseline_production_t(
         base_crop_group=base_crop_group,
         plot_surface=plot_surface,
-        expl_parc=expl_parc,
-        rdt_cult=rdt_cult,
+        farm_plot_map=farm_plot_map,
+        crop_yield=crop_yield,
         representative_crops=config.get("baseline_representative_crops") or {},
     )
     # Opt-in: compute the farm labour budget on the OBSERVED FINE cropping plan rather than
@@ -447,84 +447,84 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     farm_labor_capacity_hours = compute_farm_labor_capacity_hours(
         base_crop_group=base_crop_group,
         plot_surface=plot_surface,
-        expl_parc=expl_parc,
-        labor_hours_per_ha_cult=labor_hours_per_ha_cult,
+        farm_plot_map=farm_plot_map,
+        crop_labor_hours_per_ha=crop_labor_hours_per_ha,
         representative_crops=config.get("baseline_representative_crops") or {},
     )
     if fine_baseline_path:
         farm_labor_capacity_hours = (
             compute_farm_labor_capacity_hours_from_fine_baseline(
                 fine_baseline=read_fine_baseline_allocation(fine_baseline_path),
-                expl_parc=expl_parc,
-                labor_hours_per_ha_cult=labor_hours_per_ha_cult,
+                farm_plot_map=farm_plot_map,
+                crop_labor_hours_per_ha=crop_labor_hours_per_ha,
             )
             .reindex(farm_labor_capacity_hours.index)
             .fillna(0.0)
         )
-    azote_per_ha_cult = compute_azote_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_nitrogen_per_ha = compute_crop_nitrogen_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
     )
-    ges_per_ha_cult = compute_ges_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
-        rdt_cult=rdt_cult,
+    crop_ghg_per_ha = compute_crop_ghg_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
+        crop_yield=crop_yield,
         coeff_c_co2=coeff_c_co2,
     )
-    phosphore_per_ha_cult = compute_phosphore_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_phosphorus_per_ha = compute_crop_phosphorus_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
     )
-    potasse_per_ha_cult = compute_potasse_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_potassium_per_ha = compute_crop_potassium_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
     )
-    ift_per_ha_cult = compute_ift_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    crop_tfi_per_ha = compute_crop_tfi_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
     )
     # Rpest (Tixier): pesticide risk to water, per (plot, crop) -- it needs the plot's runoff
     # and drainage as well as the crop's products, so unlike every other environmental rate
     # it cannot be a per-crop series. See domain/rpest.py.
-    r_tixier = read_wide_table(TABLES_DIR / "R_Tixier.txt")
+    tixier_thresholds = read_wide_table(TABLES_DIR / "R_Tixier.txt")
     rpest_crop_properties = rpest.compute_crop_properties(
-        data_otk, matrice_otk_cult, duree_plant_cult, duree_cycle_cult
+        operation_data, crop_operation_matrix, crop_plantation_duration, crop_cycle_duration
     )
     rpest_by_pair = rpest.compute_rpest_by_pair(
-        rpest_crop_properties, data_parc, r_tixier, list(matrice_otk_cult.columns)
+        rpest_crop_properties, plot_data, tixier_thresholds, list(crop_operation_matrix.columns)
     )
-    water_need_per_ha_cult = water.compute_water_need_per_ha_cult(data_cult)
-    monthly_water_need_per_ha_cult = water.compute_monthly_water_need_per_ha_cult(data_cult)
-    carbon_input_per_ha_cult = soil_carbon.compute_carbon_input_per_ha_cult(
-        data_cult, data_otk, matrice_otk_cult
+    crop_water_need_per_ha = water.compute_crop_water_need_per_ha(crop_data)
+    crop_monthly_water_need_per_ha = water.compute_crop_monthly_water_need_per_ha(crop_data)
+    crop_carbon_input_per_ha = soil_carbon.compute_crop_carbon_input_per_ha(
+        crop_data, operation_data, crop_operation_matrix
     )
     # Chlordécone uptake class per crop (Data_Cult["CLD"], 1=high..4=none), for the crop x
     # soil at-risk-surface indicator in reporting.
-    cld_uptake_cult = data_cult.loc["CLD"]
+    crop_chlordecone_uptake = crop_data.loc["CLD"]
 
     parameters = {
-        "expl_parc": expl_parc,
-        "bv_parc": bv_parc,
-        "reg_parc": reg_parc,
-        "cpt_parc": cpt_parc,
-        "data_parc": data_parc,
-        "data_cult": data_cult,
-        "data_otk": data_otk,
-        "matrice_otk_cult": matrice_otk_cult,
-        "prix_cult": prix_cult,
-        "rdt_cult": rdt_cult,
-        "duree_cycle_cult": duree_cycle_cult,
-        "crop_variance_per_ha": var_rdt_cult,
+        "farm_plot_map": farm_plot_map,
+        "watershed_plot_map": watershed_plot_map,
+        "region_plot_map": region_plot_map,
+        "catchment_plot_map": catchment_plot_map,
+        "plot_data": plot_data,
+        "crop_data": crop_data,
+        "operation_data": operation_data,
+        "crop_operation_matrix": crop_operation_matrix,
+        "crop_price": crop_price,
+        "crop_yield": crop_yield,
+        "crop_cycle_duration": crop_cycle_duration,
+        "crop_variance_per_ha": crop_yield_variance,
         # Each plot's OBSERVED 2017 use, folded onto the 12 RPG groups. Already computed for
         # the farm typology; exposed because the inertia constraint and the calibration
         # reporting both need to know what a plot was before the solver touched it.
@@ -537,31 +537,31 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         "farm_baseline_production_t": farm_baseline_production_t,
         "eligibility_mask": eligibility_mask,
         "eligible_pairs": eligible_pairs,
-        "margin_per_ha_cult": margin_per_ha_cult,
-        "variable_cost_per_ha_cult": variable_cost_per_ha_cult,
-        "sales_per_ha_cult": sales_per_ha_cult,
-        "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
-        "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
-        "azote_per_ha_cult": azote_per_ha_cult,
+        "crop_margin_per_ha": crop_margin_per_ha,
+        "crop_variable_cost_per_ha": crop_variable_cost_per_ha,
+        "crop_sales_per_ha": crop_sales_per_ha,
+        "crop_subsidy_per_ha_annualized": crop_subsidy_per_ha_annualized,
+        "crop_labor_hours_per_ha": crop_labor_hours_per_ha,
+        "crop_nitrogen_per_ha": crop_nitrogen_per_ha,
         # Mineral P/K, read off the fertiliser names (domain/environment.nutrient_grades).
-        "phosphore_per_ha_cult": phosphore_per_ha_cult,
-        "potasse_per_ha_cult": potasse_per_ha_cult,
+        "crop_phosphorus_per_ha": crop_phosphorus_per_ha,
+        "crop_potassium_per_ha": crop_potassium_per_ha,
         # Agroecology as the data defines it: MAE payments (a policy's reach) and organic
         # itineraries (a production method). Kept apart on purpose -- see domain/agroecology.
         "rpest_by_pair": rpest_by_pair,
         "rpest_crop_properties": rpest_crop_properties,
-        "mae_per_ha_cult": mae_per_ha_cult,
-        "under_mae_cult": under_mae_cult,
-        "organic_cult": organic_cult,
-        "ges_per_ha_cult": ges_per_ha_cult,
-        "ift_per_ha_cult": ift_per_ha_cult,
-        "data_sol": data_sol,
-        "water_need_per_ha_cult": water_need_per_ha_cult,
-        "monthly_water_need_per_ha_cult": monthly_water_need_per_ha_cult,
-        "carbon_input_per_ha_cult": carbon_input_per_ha_cult,
-        "cld_uptake_cult": cld_uptake_cult,
-        "nutri_cult": nutri_cult,
-        "nutri_alim": nutri_alim,
+        "crop_aecm_per_ha": crop_aecm_per_ha,
+        "crop_under_aecm": crop_under_aecm,
+        "crop_is_organic": crop_is_organic,
+        "crop_ghg_per_ha": crop_ghg_per_ha,
+        "crop_tfi_per_ha": crop_tfi_per_ha,
+        "soil_data": soil_data,
+        "crop_water_need_per_ha": crop_water_need_per_ha,
+        "crop_monthly_water_need_per_ha": crop_monthly_water_need_per_ha,
+        "crop_carbon_input_per_ha": crop_carbon_input_per_ha,
+        "crop_chlordecone_uptake": crop_chlordecone_uptake,
+        "crop_nutrient_content": crop_nutrient_content,
+        "food_nutrient_needs": food_nutrient_needs,
     }
 
     return Dataset(
@@ -577,6 +577,6 @@ if __name__ == "__main__":
     print(f"crops: {len(dataset.sets['crops'])}")
     print(f"soils: {len(dataset.sets['soils'])}")
     print(f"otk: {len(dataset.sets['otk'])}")
-    print(f"plots (expl_parc rows): {len(dataset.parameters['expl_parc'])}")
-    print(f"farms: {dataset.parameters['expl_parc']['farm'].nunique()}")
+    print(f"plots (farm_plot_map rows): {len(dataset.parameters['farm_plot_map'])}")
+    print(f"farms: {dataset.parameters['farm_plot_map']['farm'].nunique()}")
     print(f"farm_surface_ha sample:\n{dataset.parameters['farm_surface_ha'].head()}")

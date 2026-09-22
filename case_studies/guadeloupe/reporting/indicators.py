@@ -26,8 +26,8 @@ def decode_output_allocation(model: pyo.ConcreteModel) -> pd.Series:
 
 def decode_baseline_allocation(dataset: Dataset) -> pd.Series:
     """plot -> RPG base crop group (12 groups), from the observed 2017 land use."""
-    data_parc = dataset.parameters["data_parc"]
-    groups = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+    plot_data = dataset.parameters["plot_data"]
+    groups = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
     return groups[groups != _NON_CULTIVATED_GROUP].dropna()
 
 
@@ -45,21 +45,21 @@ def decode_baseline_representative_allocation(dataset: Dataset, config: dict[str
 
 
 def plot_to_farm(dataset: Dataset) -> pd.Series:
-    expl_parc = dataset.parameters["expl_parc"]
-    return expl_parc.set_index("plot")["farm"]
+    farm_plot_map = dataset.parameters["farm_plot_map"]
+    return farm_plot_map.set_index("plot")["farm"]
 
 
 def plot_to_region(dataset: Dataset) -> pd.Series:
-    return dataset.parameters["data_parc"]["REGION"]
+    return dataset.parameters["plot_data"]["REGION"]
 
 
 def plot_to_island(dataset: Dataset) -> pd.Series:
-    return dataset.parameters["data_parc"]["ILE"]
+    return dataset.parameters["plot_data"]["ILE"]
 
 
 def _plot_surface(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Surface (ha) of each allocated plot, aligned on the allocation index."""
-    return dataset.parameters["data_parc"]["SURF_HA"].reindex(allocation.index)
+    return dataset.parameters["plot_data"]["SURF_HA"].reindex(allocation.index)
 
 
 def _by_crop(dataset: Dataset, allocation: pd.Series, param_name: str) -> pd.Series:
@@ -94,15 +94,15 @@ def compute_aggregate_summary(dataset: Dataset, allocation: pd.Series) -> dict[s
 
 
 def compute_production_tonnes_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    return _by_crop(dataset, allocation, "rdt_cult")
+    return _by_crop(dataset, allocation, "crop_yield")
 
 
 def compute_sales_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    return _by_crop(dataset, allocation, "sales_per_ha_cult")
+    return _by_crop(dataset, allocation, "crop_sales_per_ha")
 
 
 def compute_subsidy_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    return _by_crop(dataset, allocation, "subsidy_per_ha_cult_annualized")
+    return _by_crop(dataset, allocation, "crop_subsidy_per_ha_annualized")
 
 
 def compute_total_revenue_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
@@ -110,15 +110,15 @@ def compute_total_revenue_by_crop(dataset: Dataset, allocation: pd.Series) -> pd
 
 
 def compute_gross_margin_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    """Gross margin (EUR) by crop: surface x margin_per_ha_cult (gross product minus variable
+    """Gross margin (EUR) by crop: surface x crop_margin_per_ha (gross product minus variable
     input costs, the same per-ha margin the objective maximizes). Labor is NOT priced in here
     -- that is compute_labor_cost_by_crop, subtracted separately for the net revenue."""
-    return _by_crop(dataset, allocation, "margin_per_ha_cult")
+    return _by_crop(dataset, allocation, "crop_margin_per_ha")
 
 
-def compute_azote_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    """Nitrogen applied (kg N) by crop: surface x azote_per_ha_cult."""
-    return _by_crop(dataset, allocation, "azote_per_ha_cult")
+def compute_nitrogen_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Nitrogen applied (kg N) by crop: surface x crop_nitrogen_per_ha."""
+    return _by_crop(dataset, allocation, "crop_nitrogen_per_ha")
 
 
 def compute_rpest_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.Series:
@@ -177,16 +177,16 @@ def compute_agroecology_totals(dataset: Dataset, allocation: pd.Series) -> dict[
         rate = _broadcast_rate(dataset.parameters[parameter], allocation)
         return float((surface * rate).sum())
 
-    mae_area = area_where("under_mae_cult")
-    organic_area = area_where("organic_cult")
-    mae_spend = float(_optional_by_crop(dataset, allocation, "mae_per_ha_cult").sum())
+    aecm_area = area_where("crop_under_aecm")
+    organic_area = area_where("crop_is_organic")
+    aecm_spend = float(_optional_by_crop(dataset, allocation, "crop_aecm_per_ha").sum())
 
     # Pasture qualifies as organic through the PROC_BIO_BOVIN operation of its itinerary,
     # which is faithful to the data but swamps the figure: on output_3 the whole 6 096 ha of
     # organic area IS the pasture floor. Reported separately so "organic share" is never read
     # as a statement about cropland when it is a statement about grass.
-    if "organic_cult" in dataset.parameters and not allocation.empty:
-        organic_rate = _broadcast_rate(dataset.parameters["organic_cult"], allocation)
+    if "crop_is_organic" in dataset.parameters and not allocation.empty:
+        organic_rate = _broadcast_rate(dataset.parameters["crop_is_organic"], allocation)
         is_pasture = allocation.map(
             lambda crop: _safe_base_group(crop) == "PN"
         ).astype(float)
@@ -198,13 +198,13 @@ def compute_agroecology_totals(dataset: Dataset, allocation: pd.Series) -> dict[
         return value / total_surface if total_surface else 0.0
 
     return {
-        "surface_mae_ha": mae_area,
-        "surface_mae_share": share(mae_area),
-        "mae_spending": mae_spend,
-        "surface_bio_ha": organic_area,
-        "surface_bio_share": share(organic_area),
-        "surface_bio_hors_prairie_ha": organic_cropland,
-        "surface_bio_hors_prairie_share": share(organic_cropland),
+        "aecm_area_ha": aecm_area,
+        "aecm_area_share": share(aecm_area),
+        "aecm_spending": aecm_spend,
+        "organic_area_ha": organic_area,
+        "organic_area_share": share(organic_area),
+        "organic_area_excl_grassland_ha": organic_cropland,
+        "organic_area_excl_grassland_share": share(organic_cropland),
     }
 
 
@@ -227,34 +227,34 @@ def _optional_by_crop(dataset: Dataset, allocation: pd.Series, parameter: str) -
     return _by_crop(dataset, allocation, parameter)
 
 
-def compute_phosphore_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    return _optional_by_crop(dataset, allocation, "phosphore_per_ha_cult")
+def compute_phosphorus_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    return _optional_by_crop(dataset, allocation, "crop_phosphorus_per_ha")
 
 
-def compute_potasse_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    return _optional_by_crop(dataset, allocation, "potasse_per_ha_cult")
+def compute_potassium_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    return _optional_by_crop(dataset, allocation, "crop_potassium_per_ha")
 
 
-def compute_ges_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    """Greenhouse-gas emissions (t CO2) by crop: surface x ges_per_ha_cult."""
-    return _by_crop(dataset, allocation, "ges_per_ha_cult")
+def compute_ghg_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+    """Greenhouse-gas emissions (t CO2) by crop: surface x crop_ghg_per_ha."""
+    return _by_crop(dataset, allocation, "crop_ghg_per_ha")
 
 
-def compute_ift_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+def compute_tfi_by_crop(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Pesticide treatment-frequency index (IFT, summed over ha) by crop:
-    surface x ift_per_ha_cult."""
-    return _by_crop(dataset, allocation, "ift_per_ha_cult")
+    surface x crop_tfi_per_ha."""
+    return _by_crop(dataset, allocation, "crop_tfi_per_ha")
 
 
-def _cld_at_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
+def _chlordecone_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Boolean per allocated plot: True where the assigned crop, the parcel's chlordécone
     soil-risk level (RISQUE_CLD, 1=worst..5=none) and its soil type (TYPE_SOL) trigger
     at-risk food production. Faithful to OPTIMISATION.txt indicator n°10 (NV_CLD_parc),
     with c = crop uptake class (Data_Cult["CLD"], 1=high..4=none)."""
-    data_parc = dataset.parameters["data_parc"]
-    r = data_parc["RISQUE_CLD"].reindex(allocation.index)
-    s = data_parc["TYPE_SOL"].reindex(allocation.index)
-    c = _per_plot_rate(dataset, allocation, "cld_uptake_cult")
+    plot_data = dataset.parameters["plot_data"]
+    r = plot_data["RISQUE_CLD"].reindex(allocation.index)
+    s = plot_data["TYPE_SOL"].reindex(allocation.index)
+    c = _per_plot_rate(dataset, allocation, "crop_chlordecone_uptake")
     return (
         ((c == 1) & (r <= 3))
         | ((c == 2) & (r <= 2))
@@ -263,16 +263,16 @@ def _cld_at_risk_mask(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     )
 
 
-def compute_cld_at_risk_surface(dataset: Dataset, allocation: pd.Series) -> float:
+def compute_chlordecone_risk_area(dataset: Dataset, allocation: pd.Series) -> float:
     """Cultivated surface (ha) flagged at chlordécone risk by the crop x soil rule."""
-    mask = _cld_at_risk_mask(dataset, allocation)
+    mask = _chlordecone_risk_mask(dataset, allocation)
     return float(_plot_surface(dataset, allocation)[mask].sum())
 
 
 def _irrigable_surface(dataset: Dataset, allocation: pd.Series) -> pd.Series:
     """Plot surface (ha), zeroed on plots that cannot be irrigated (IRRIG_PARC = 0) and
     therefore draw nothing from the resource. Faithful to OPTIMISATION.txt:2540-2542."""
-    irrigable = dataset.parameters["data_parc"]["IRRIG_PARC"].reindex(allocation.index) == 1
+    irrigable = dataset.parameters["plot_data"]["IRRIG_PARC"].reindex(allocation.index) == 1
     return _plot_surface(dataset, allocation).where(irrigable, 0.0)
 
 
@@ -281,7 +281,7 @@ def compute_water_need_m3_by_plot(dataset: Dataset, allocation: pd.Series) -> pd
     the monthly PLUVIO_*_PARC columns do not exist in the data (see docs/04-vigilance.md)."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    per_ha = _per_plot_rate(dataset, allocation, "water_need_per_ha_cult")
+    per_ha = _per_plot_rate(dataset, allocation, "crop_water_need_per_ha")
     return per_ha * _irrigable_surface(dataset, allocation) * water.M3_PER_MM_PER_HA
 
 
@@ -293,7 +293,7 @@ def compute_monthly_water_need_m3(dataset: Dataset, allocation: pd.Series) -> pd
     are flat across all 12 months for every crop in the real data, so the 12-row series would
     read as a genuine seasonal curve when it carries no seasonal information at all. Kept as-is
     (and still tested) for when a real monthly profile is supplied."""
-    monthly_rate = dataset.parameters["monthly_water_need_per_ha_cult"]
+    monthly_rate = dataset.parameters["crop_monthly_water_need_per_ha"]
     surface = _irrigable_surface(dataset, allocation)
     if allocation.empty:
         return pd.Series(0.0, index=monthly_rate.index)
@@ -310,13 +310,13 @@ def compute_soil_carbon_mineralization_by_plot(
     """Carbon mineralized (t C) per allocated plot: per-ha rate times plot surface."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
     initial = soil_carbon.compute_initial_soil_carbon_per_ha_plot(
-        data_parc, dataset.parameters["data_sol"]
+        plot_data, dataset.parameters["soil_data"]
     )
     per_ha = soil_carbon.compute_mineralization_per_ha_plot(
-        allocation, data_parc, dataset.parameters["data_sol"],
-        dataset.parameters["data_cult"], initial,
+        allocation, plot_data, dataset.parameters["soil_data"],
+        dataset.parameters["crop_data"], initial,
     )
     return per_ha * _plot_surface(dataset, allocation)
 
@@ -325,7 +325,7 @@ def compute_soil_carbon_balance_by_plot(dataset: Dataset, allocation: pd.Series)
     """Net annual carbon balance (t C) per allocated plot. Negative = soil depletion."""
     if allocation.empty:
         return pd.Series(dtype=float)
-    inputs_per_ha = _per_plot_rate(dataset, allocation, "carbon_input_per_ha_cult")
+    inputs_per_ha = _per_plot_rate(dataset, allocation, "crop_carbon_input_per_ha")
     inputs = inputs_per_ha * _plot_surface(dataset, allocation)
     return inputs - compute_soil_carbon_mineralization_by_plot(dataset, allocation)
 
@@ -337,9 +337,9 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
     single peak month, and the net annual soil organic carbon balance and mineralization
     flux (t C, see soil_carbon.py)."""
     total_surface = float(_plot_surface(dataset, allocation).sum())
-    total_azote = float(compute_azote_by_crop(dataset, allocation).sum())
-    total_ges = float(compute_ges_by_crop(dataset, allocation).sum())
-    total_ift = float(compute_ift_by_crop(dataset, allocation).sum())
+    total_nitrogen = float(compute_nitrogen_by_crop(dataset, allocation).sum())
+    total_ghg = float(compute_ghg_by_crop(dataset, allocation).sum())
+    total_tfi = float(compute_tfi_by_crop(dataset, allocation).sum())
 
     def per_ha(value: float) -> float:
         return value / total_surface if total_surface else 0.0
@@ -349,17 +349,17 @@ def compute_environmental_totals(dataset: Dataset, allocation: pd.Series) -> dic
 
     return {
         **compute_rpest_totals(dataset, allocation),
-        "total_azote": total_azote,
+        "total_nitrogen": total_nitrogen,
         # Mineral P/K only -- organic amendments declare no grade, see
         # domain/environment.nutrient_grades.
-        "total_phosphore": float(compute_phosphore_by_crop(dataset, allocation).sum()),
-        "total_potasse": float(compute_potasse_by_crop(dataset, allocation).sum()),
-        "total_ges": total_ges,
-        "total_ift": total_ift,
-        "surface_cld": compute_cld_at_risk_surface(dataset, allocation),
-        "azote_per_ha": per_ha(total_azote),
-        "ges_per_ha": per_ha(total_ges),
-        "ift_per_ha": per_ha(total_ift),
+        "total_phosphorus": float(compute_phosphorus_by_crop(dataset, allocation).sum()),
+        "total_potassium": float(compute_potassium_by_crop(dataset, allocation).sum()),
+        "total_ghg": total_ghg,
+        "total_tfi": total_tfi,
+        "chlordecone_risk_area": compute_chlordecone_risk_area(dataset, allocation),
+        "nitrogen_per_ha": per_ha(total_nitrogen),
+        "ghg_per_ha": per_ha(total_ghg),
+        "tfi_per_ha": per_ha(total_tfi),
         "total_water_need_m3": total_water,
         # Degenerate on the real dataset: BESOIN_EAU_01..12 are identical across all 12
         # months for every crop (see docs/04-vigilance.md), so the peak month is always exactly
@@ -388,13 +388,13 @@ def compute_resilience_totals(
     surface_by_crop = compute_surface_by_key(dataset, allocation)
     total_margin = float(compute_gross_margin_by_crop(dataset, allocation).sum())
 
-    at_risk_rate = resilience.compute_climate_margin_at_risk_per_ha_cult(
-        dataset.parameters["margin_per_ha_cult"], dataset.parameters["crop_variance_per_ha"]
+    at_risk_rate = resilience.compute_crop_climate_margin_at_risk_per_ha(
+        dataset.parameters["crop_margin_per_ha"], dataset.parameters["crop_variance_per_ha"]
     )
-    shock_rate = resilience.compute_price_shock_loss_per_ha_cult(
-        dataset.parameters["rdt_cult"],
-        dataset.parameters["prix_cult"],
-        dataset.parameters["duree_cycle_cult"],
+    shock_rate = resilience.compute_crop_price_shock_loss_per_ha(
+        dataset.parameters["crop_yield"],
+        dataset.parameters["crop_price"],
+        dataset.parameters["crop_cycle_duration"],
         price_shock_delta,
     )
 
@@ -417,8 +417,8 @@ def compute_resilience_totals(
 
 
 def _nutrients(dataset: Dataset) -> list[str]:
-    """Nutrient row labels of nutri_alim, excluding the Q_Tot (quantity/population) row."""
-    return [n for n in dataset.parameters["nutri_alim"].index if n != "Q_Tot"]
+    """Nutrient row labels of food_nutrient_needs, excluding the Q_Tot (quantity/population) row."""
+    return [n for n in dataset.parameters["food_nutrient_needs"].index if n != "Q_Tot"]
 
 
 def compute_nutrient_production(
@@ -428,14 +428,14 @@ def compute_nutrient_production(
     production in tonnes x per-tonne content (Nutri_Cult), optionally plus the fixed fishing
     contribution (Nutri_Alim[nutrient, 'peche'] x tonnage Nutri_Alim['Q_Tot', 'peche']).
     Faithful to OPTIMISATION.txt:1953-1959 (NUTRI_Gwad)."""
-    nutri_cult = dataset.parameters["nutri_cult"]
-    nutri_alim = dataset.parameters["nutri_alim"]
+    crop_nutrient_content = dataset.parameters["crop_nutrient_content"]
+    food_nutrient_needs = dataset.parameters["food_nutrient_needs"]
     nutrients = _nutrients(dataset)
     production_tonnes = compute_production_tonnes_by_crop(dataset, allocation)
-    content = nutri_cult.reindex(index=nutrients, columns=production_tonnes.index).fillna(0.0)
+    content = crop_nutrient_content.reindex(index=nutrients, columns=production_tonnes.index).fillna(0.0)
     result = content.dot(production_tonnes)
     if include_fishing:
-        fishing = nutri_alim.loc[nutrients, "peche"] * nutri_alim.loc["Q_Tot", "peche"]
+        fishing = food_nutrient_needs.loc[nutrients, "peche"] * food_nutrient_needs.loc["Q_Tot", "peche"]
         result = result + fishing
     return result
 
@@ -447,11 +447,11 @@ def compute_self_sufficiency_ratios(
     territory produces exactly the population's annual need of that nutrient. Need =
     Nutri_Alim[nutrient, 'Ind_Moy'] x population (Nutri_Alim['Q_Tot', 'Ind_Moy']). Faithful to
     RATIO_PROD_BESOIN, OPTIMISATION.txt:1962-1975."""
-    nutri_alim = dataset.parameters["nutri_alim"]
+    food_nutrient_needs = dataset.parameters["food_nutrient_needs"]
     nutrients = _nutrients(dataset)
     production = compute_nutrient_production(dataset, allocation, include_fishing)
-    population = nutri_alim.loc["Q_Tot", "Ind_Moy"]
-    need = nutri_alim.loc[nutrients, "Ind_Moy"] * population
+    population = food_nutrient_needs.loc["Q_Tot", "Ind_Moy"]
+    need = food_nutrient_needs.loc[nutrients, "Ind_Moy"] * population
     return (production / need).replace([np.inf, -np.inf], np.nan)
 
 
@@ -459,7 +459,7 @@ def compute_food_autonomy_totals(dataset: Dataset, allocation: pd.Series) -> dic
     """Food self-sufficiency summary for one allocation: per-nutrient ratios in two variants
     (crop-only and with the fishing contribution), each variant's limiting (minimum) ratio,
     and the population. Nutrient keys are lower-cased for stable recap keys."""
-    nutri_alim = dataset.parameters["nutri_alim"]
+    food_nutrient_needs = dataset.parameters["food_nutrient_needs"]
     crop = compute_self_sufficiency_ratios(dataset, allocation, include_fishing=False)
     fish = compute_self_sufficiency_ratios(dataset, allocation, include_fishing=True)
 
@@ -467,7 +467,7 @@ def compute_food_autonomy_totals(dataset: Dataset, allocation: pd.Series) -> dic
         return {str(k).lower(): float(v) for k, v in ratios.items()}
 
     return {
-        "population": float(nutri_alim.loc["Q_Tot", "Ind_Moy"]),
+        "population": float(food_nutrient_needs.loc["Q_Tot", "Ind_Moy"]),
         "crop_only": by_nutrient(crop),
         "with_fishing": by_nutrient(fish),
         "limiting_crop_only": float(crop.min()),
@@ -488,22 +488,22 @@ def compute_subsidy_per_euro_sold_by_crop(dataset: Dataset, allocation: pd.Serie
 
 
 def compute_revenue_by_farm(dataset: Dataset, allocation: pd.Series) -> pd.Series:
-    revenue_per_ha = _per_plot_rate(dataset, allocation, "sales_per_ha_cult") + _per_plot_rate(
-        dataset, allocation, "subsidy_per_ha_cult_annualized"
+    revenue_per_ha = _per_plot_rate(dataset, allocation, "crop_sales_per_ha") + _per_plot_rate(
+        dataset, allocation, "crop_subsidy_per_ha_annualized"
     )
     revenue_per_plot = _plot_surface(dataset, allocation) * revenue_per_ha
     farms = plot_to_farm(dataset).reindex(allocation.index)
     return revenue_per_plot.groupby(farms).sum()
 
 
-DEFAULT_HOURS_PER_ETP = 1607.0
+DEFAULT_HOURS_PER_FTE = 1607.0
 # No labor cost unless config sets one: net revenue then equals gross margin (current view).
 DEFAULT_COST_PER_HOUR = 0.0
 
 
-def hours_per_etp_from_config(config: dict[str, Any]) -> float:
+def hours_per_fte_from_config(config: dict[str, Any]) -> float:
     """Annual working hours per full-time-equivalent (ETP), from config['labor']."""
-    return float((config.get("labor") or {}).get("hours_per_etp", DEFAULT_HOURS_PER_ETP))
+    return float((config.get("labor") or {}).get("hours_per_fte", DEFAULT_HOURS_PER_FTE))
 
 
 def labor_cost_per_hour_from_config(config: dict[str, Any]) -> float:
@@ -519,22 +519,22 @@ def compute_labor_hours_by_plot(dataset: Dataset, allocation: pd.Series) -> pd.S
     baseline has no labor rate at that resolution, so ETP is an output-only indicator
     (see docs/04-vigilance.md, same limitation as the other per-crop indicators)."""
     return _plot_surface(dataset, allocation) * _per_plot_rate(
-        dataset, allocation, "labor_hours_per_ha_cult"
+        dataset, allocation, "crop_labor_hours_per_ha"
     )
 
 
-def compute_total_etp(dataset: Dataset, allocation: pd.Series, hours_per_etp: float) -> float:
-    """Total full-time-equivalent jobs across all plots (labor hours / hours_per_etp)."""
-    return float(compute_labor_hours_by_plot(dataset, allocation).sum() / hours_per_etp)
+def compute_total_fte(dataset: Dataset, allocation: pd.Series, hours_per_fte: float) -> float:
+    """Total full-time-equivalent jobs across all plots (labor hours / hours_per_fte)."""
+    return float(compute_labor_hours_by_plot(dataset, allocation).sum() / hours_per_fte)
 
 
-def compute_etp_by_key(
-    dataset: Dataset, allocation: pd.Series, grouping: pd.Series, hours_per_etp: float
+def compute_fte_by_key(
+    dataset: Dataset, allocation: pd.Series, grouping: pd.Series, hours_per_fte: float
 ) -> pd.Series:
     """ETP grouped by a plot-keyed Series (farm / region / island)."""
     hours = compute_labor_hours_by_plot(dataset, allocation)
     key = grouping.reindex(allocation.index)
-    return hours.groupby(key).sum() / hours_per_etp
+    return hours.groupby(key).sum() / hours_per_fte
 
 
 def compute_labor_cost_by_crop(
@@ -555,7 +555,7 @@ def compute_total_labor_cost(
 
 
 def compute_economic_totals(
-    dataset: Dataset, allocation: pd.Series, hours_per_etp: float, cost_per_hour: float
+    dataset: Dataset, allocation: pd.Series, hours_per_fte: float, cost_per_hour: float
 ) -> dict[str, float]:
     """Headline totals for one allocation: production (tonnes), subsidy (EUR), revenue
     (=gross product: sales+subsidy, EUR), gross margin (EUR, after variable input costs),
@@ -574,26 +574,26 @@ def compute_economic_totals(
         "total_variable_cost": revenue - gross_margin,
         "total_labor_cost": labor_cost,
         "total_net_revenue": gross_margin - labor_cost,
-        "total_etp": compute_total_etp(dataset, allocation, hours_per_etp),
+        "total_fte": compute_total_fte(dataset, allocation, hours_per_fte),
     }
 
 
 _FACT_MEASURES = [
     "surface", "production", "sales", "subsidy", "revenue",
-    "gross_margin", "labor_hours", "labor_cost", "etp",
-    "ges", "ift", "azote", "surface_cld",
+    "gross_margin", "labor_hours", "labor_cost", "fte",
+    "ghg", "tfi", "nitrogen", "chlordecone_risk_area",
     "water_need_m3", "soil_carbon_balance",
 ]
 
 
 def compute_facts_table(
-    dataset: Dataset, allocation: pd.Series, hours_per_etp: float, cost_per_hour: float
+    dataset: Dataset, allocation: pd.Series, hours_per_fte: float, cost_per_hour: float
 ) -> pd.DataFrame:
     """Tidy fact table for one allocation: every plot rolled up by (crop, region), with all
     additive economic/labor measures plus its island. Backs the comparison dashboard's free
     pivoting (x in culture/sous-culture/region/island, any measure, stacked by the other
-    dimension). ETP is labor_hours / hours_per_etp, which stays additive across rows."""
-    data_parc = dataset.parameters["data_parc"]
+    dimension). ETP is labor_hours / hours_per_fte, which stays additive across rows."""
+    plot_data = dataset.parameters["plot_data"]
     crops = allocation.to_numpy()
     surface = _plot_surface(dataset, allocation).to_numpy()
 
@@ -603,24 +603,24 @@ def compute_facts_table(
     per_plot = pd.DataFrame(
         {
             "crop": crops,
-            "region": data_parc["REGION"].reindex(allocation.index).to_numpy(),
-            "island": data_parc["ILE"].reindex(allocation.index).to_numpy(),
+            "region": plot_data["REGION"].reindex(allocation.index).to_numpy(),
+            "island": plot_data["ILE"].reindex(allocation.index).to_numpy(),
             "surface": surface,
-            "production": surface * rate("rdt_cult"),
-            "sales": surface * rate("sales_per_ha_cult"),
-            "subsidy": surface * rate("subsidy_per_ha_cult_annualized"),
-            "gross_margin": surface * rate("margin_per_ha_cult"),
-            "labor_hours": surface * rate("labor_hours_per_ha_cult"),
-            "ges": surface * rate("ges_per_ha_cult"),
-            "ift": surface * rate("ift_per_ha_cult"),
-            "azote": surface * rate("azote_per_ha_cult"),
+            "production": surface * rate("crop_yield"),
+            "sales": surface * rate("crop_sales_per_ha"),
+            "subsidy": surface * rate("crop_subsidy_per_ha_annualized"),
+            "gross_margin": surface * rate("crop_margin_per_ha"),
+            "labor_hours": surface * rate("crop_labor_hours_per_ha"),
+            "ghg": surface * rate("crop_ghg_per_ha"),
+            "tfi": surface * rate("crop_tfi_per_ha"),
+            "nitrogen": surface * rate("crop_nitrogen_per_ha"),
         }
     )
     per_plot["revenue"] = per_plot["sales"] + per_plot["subsidy"]
     per_plot["labor_cost"] = per_plot["labor_hours"] * cost_per_hour
-    per_plot["etp"] = per_plot["labor_hours"] / hours_per_etp
+    per_plot["fte"] = per_plot["labor_hours"] / hours_per_fte
     # Chlordécone-exposed surface: the plot's own surface when the crop x soil rule flags it.
-    per_plot["surface_cld"] = surface * _cld_at_risk_mask(dataset, allocation).to_numpy()
+    per_plot["chlordecone_risk_area"] = surface * _chlordecone_risk_mask(dataset, allocation).to_numpy()
     # Water is a per-crop rate, but soil carbon depends on the plot's soil type: it cannot
     # go through rate() and comes from the per-plot functions instead.
     per_plot["water_need_m3"] = compute_water_need_m3_by_plot(dataset, allocation).to_numpy()
@@ -711,25 +711,25 @@ def compute_intensity_totals(
     production = economics.get("total_production_tonnes") or 0.0
     subsidy = economics.get("total_subsidy") or 0.0
     margin = economics.get("total_gross_margin") or 0.0
-    etp = economics.get("total_etp") or 0.0
-    azote = environment.get("total_azote") or 0.0
-    ift = environment.get("total_ift") or 0.0
+    etp = economics.get("total_fte") or 0.0
+    azote = environment.get("total_nitrogen") or 0.0
+    ift = environment.get("total_tfi") or 0.0
 
     return {
         # Land intensity
         "gross_margin_per_ha": _ratio(margin, surface_ha),
-        "etp_per_ha": _ratio(etp, surface_ha),
+        "fte_per_ha": _ratio(etp, surface_ha),
         "production_per_ha": _ratio(production, surface_ha),
-        # Labour productivity -- the other side of etp_per_ha: a policy can raise employment
+        # Labour productivity -- the other side of fte_per_ha: a policy can raise employment
         # by making each job less productive, and only this ratio shows it.
-        "gross_margin_per_etp": _ratio(margin, etp),
+        "gross_margin_per_fte": _ratio(margin, etp),
         # Environmental intensity per unit produced, not per hectare: feeding the territory
         # with less nitrogen per tonne is a different claim from farming fewer hectares.
-        "azote_per_tonne": _ratio(azote, production),
-        "ift_per_tonne": _ratio(ift, production),
+        "nitrogen_per_tonne": _ratio(azote, production),
+        "tfi_per_tonne": _ratio(ift, production),
         # Public spending efficiency
         "subsidy_per_tonne": _ratio(subsidy, production),
-        "subsidy_per_etp": _ratio(subsidy, etp),
+        "subsidy_per_fte": _ratio(subsidy, etp),
         "subsidy_per_euro_margin": _ratio(subsidy, margin),
         "subsidy_per_ha": _ratio(subsidy, surface_ha),
     }

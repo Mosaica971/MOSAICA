@@ -8,7 +8,7 @@ def test_climate_margin_at_risk_is_margin_times_loss_fraction():
     margin = pd.Series({"SAFE": 1000.0, "RISKY": 1000.0, "ZERO": 500.0})
     var_rdt = pd.Series({"SAFE": 0.1, "RISKY": 0.7, "ZERO": 0.0})
 
-    at_risk = resilience.compute_climate_margin_at_risk_per_ha_cult(margin, var_rdt)
+    at_risk = resilience.compute_crop_climate_margin_at_risk_per_ha(margin, var_rdt)
 
     assert at_risk["SAFE"] == pytest.approx(100.0)
     assert at_risk["RISKY"] == pytest.approx(700.0)
@@ -19,7 +19,7 @@ def test_zero_variance_crop_carries_no_climate_risk():
     margin = pd.Series({"PRAIRIE": 800.0})
     var_rdt = pd.Series({"PRAIRIE": 0.0})
 
-    at_risk = resilience.compute_climate_margin_at_risk_per_ha_cult(margin, var_rdt)
+    at_risk = resilience.compute_crop_climate_margin_at_risk_per_ha(margin, var_rdt)
 
     assert at_risk["PRAIRIE"] == pytest.approx(0.0)
 
@@ -30,7 +30,7 @@ def test_price_shock_loss_is_delta_times_annualized_market_sales():
     prix = pd.Series({"CROP": 20.0})
     duree = pd.Series({"CROP": 6.0})
 
-    loss = resilience.compute_price_shock_loss_per_ha_cult(rdt, prix, duree, 0.20)
+    loss = resilience.compute_crop_price_shock_loss_per_ha(rdt, prix, duree, 0.20)
 
     assert loss["CROP"] == pytest.approx(400.0)  # 20% de 2000
 
@@ -40,8 +40,8 @@ def test_price_shock_of_zero_loses_nothing_and_of_one_loses_all_market_sales():
     prix = pd.Series({"CROP": 20.0})
     duree = pd.Series({"CROP": 6.0})
 
-    assert resilience.compute_price_shock_loss_per_ha_cult(rdt, prix, duree, 0.0)["CROP"] == 0.0
-    assert resilience.compute_price_shock_loss_per_ha_cult(
+    assert resilience.compute_crop_price_shock_loss_per_ha(rdt, prix, duree, 0.0)["CROP"] == 0.0
+    assert resilience.compute_crop_price_shock_loss_per_ha(
         rdt, prix, duree, 1.0
     )["CROP"] == pytest.approx(2000.0)
 

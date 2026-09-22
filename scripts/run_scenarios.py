@@ -133,14 +133,14 @@ def _try_warm_start(model: Any, allocation: dict[str, str], origin: str) -> bool
 # Headline numbers pulled back out of each run's recap.json, so one batch summary answers
 # "what did this policy do" without opening ten folders. (recap path, column name).
 _RECAP_COLUMNS: list[tuple[tuple[str, ...], str]] = [
-    (("economics", "output", "total_gross_margin"), "marge_brute"),
+    (("economics", "output", "total_gross_margin"), "gross_margin"),
     (("economics", "output", "total_subsidy"), "subventions"),
-    (("economics", "output", "total_etp"), "etp"),
+    (("economics", "output", "total_fte"), "fte"),
     (("economics", "output", "total_production_tonnes"), "production_t"),
     (("output", "total_surface_ha"), "surface_ha"),
-    (("environment", "output", "total_azote"), "azote_kg"),
-    (("environment", "output", "total_ift"), "ift"),
-    (("environment", "output", "total_ges"), "ges_tco2"),
+    (("environment", "output", "total_nitrogen"), "nitrogen_kg"),
+    (("environment", "output", "total_tfi"), "tfi"),
+    (("environment", "output", "total_ghg"), "ghg_tco2"),
     (("environment", "output", "total_water_need_m3"), "eau_m3"),
     (("food_autonomy", "output", "limiting_with_fishing"), "autonomie_min"),
     (("resilience", "output", "revenue_concentration_hhi"), "hhi_revenu"),
@@ -351,11 +351,11 @@ def _write_summary(outputs_root: Path, rows: list[dict[str, Any]]) -> Path:
 
     # The markdown table carries the readable subset; the CSV alongside it has every column.
     md_columns = [
-        ("marge_brute", "Marge brute"),
+        ("gross_margin", "Marge brute"),
         ("subventions", "Subventions"),
-        ("etp", "ETP"),
-        ("azote_kg", "N (kg)"),
-        ("ift", "IFT"),
+        ("fte", "ETP"),
+        ("nitrogen_kg", "N (kg)"),
+        ("tfi", "IFT"),
         ("eau_m3", "Eau (m3)"),
         ("autonomie_min", "Autonomie"),
     ]

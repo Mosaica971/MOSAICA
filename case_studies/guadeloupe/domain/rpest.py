@@ -52,7 +52,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from case_studies.guadeloupe.domain.itk import annual_rate_per_ha_cult
+from case_studies.guadeloupe.domain.itk import annual_rate_per_ha
 
 # Severity attached to each corner of the truth table, favourable-first. Straight from
 # R_PEST_NEW.txt: the two-variable rules run 0/4/6/10, the three-variable one 0/3/4/7/3/6/7/10.
@@ -103,30 +103,30 @@ def _fuzzy_combine(degrees: list[np.ndarray], weights: tuple[float, ...]) -> np.
 
 
 def compute_crop_properties(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
 ) -> pd.DataFrame:
     """Per-crop DT50 / ADI / AQUATOX / GUS / QMA, as the GAMS computes them.
 
     The first four are sums over the operations the crop performs (see the module note on
     why the documented dose weighting cancels); QMA is a genuine annualised load per hectare.
     """
-    used = matrice_otk_cult.fillna(0.0) > 0
-    table = pd.DataFrame(index=matrice_otk_cult.columns, dtype=float)
+    used = crop_operation_matrix.fillna(0.0) > 0
+    table = pd.DataFrame(index=crop_operation_matrix.columns, dtype=float)
     for column in _CROP_PROPERTIES:
-        if column not in data_otk.columns:
+        if column not in operation_data.columns:
             table[column] = 0.0
             continue
-        values = data_otk[column].reindex(matrice_otk_cult.index).fillna(0.0)
+        values = operation_data[column].reindex(crop_operation_matrix.index).fillna(0.0)
         table[column] = used.mul(values, axis=0).sum(axis=0)
 
-    if "QMA" in data_otk.columns:
-        amortized = data_otk["AMORTI"] == 1
-        per_application = data_otk["DOSE"] * data_otk["QMA"]
-        table["QMA"] = annual_rate_per_ha_cult(
-            matrice_otk_cult, per_application, duree_plant_cult, duree_cycle_cult, amortized
+    if "QMA" in operation_data.columns:
+        amortized = operation_data["AMORTI"] == 1
+        per_application = operation_data["DOSE"] * operation_data["QMA"]
+        table["QMA"] = annual_rate_per_ha(
+            crop_operation_matrix, per_application, crop_plantation_duration, crop_cycle_duration, amortized
         ).reindex(table.index).fillna(0.0)
     else:
         table["QMA"] = 0.0

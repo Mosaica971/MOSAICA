@@ -21,7 +21,7 @@ from case_studies.guadeloupe.domain.crop_labels import label_for
 # Region / island codes -> human names, and the labelling functions themselves. All defined
 # in domain/zones.py because reporting/ needs them too and reporting/ must not import
 # dashboard/; re-exported here under the historical names this module's callers use
-# (pages/2_Comparaison.py). `label_region` / `label_island` are aliases of the domain
+# (pages/2_Comparison.py). `label_region` / `label_island` are aliases of the domain
 # functions rather than second implementations -- the two used to diverge on how they
 # normalised a code, which is exactly the kind of duplication that produces two different
 # labels for the same region depending on which one a page happened to call.
@@ -34,32 +34,35 @@ from case_studies.guadeloupe.domain.zones import (  # noqa: F401
     region_label as label_region,
 )
 
-# Measures available on the y-axis, in display order, with French labels.
+# Measures available on the y-axis, in display order, with their labels.
 MEASURE_LABELS: dict[str, str] = {
-    "surface": "Surface (ha)",
+    "surface": "Area (ha)",
     "production": "Production (t)",
-    "revenue": "Revenu / produit brut (€)",
-    "gross_margin": "Marge brute (€)",
-    "subsidy": "Subvention (€)",
-    "sales": "Ventes (€)",
-    "labor_cost": "Coût main d'œuvre (€)",
-    "labor_hours": "Heures de travail (h)",
-    "etp": "Emploi (ETP)",
+    "revenue": "Revenue / gross product (€)",
+    "gross_margin": "Gross margin (€)",
+    "subsidy": "Subsidy (€)",
+    "sales": "Sales (€)",
+    "labor_cost": "Labour cost (€)",
+    "labor_hours": "Labour hours (h)",
+    "fte": "Employment (FTE)",
 }
 
 X_DIMENSION_LABELS: dict[str, str] = {
-    "culture": "Culture",
-    "subculture": "Sous-culture",
-    "region": "Région",
-    "island": "Île",
+    "culture": "Crop",
+    "subculture": "Sub-crop",
+    "region": "Region",
+    "island": "Island",
 }
+
+# How the two sides of a run are named in series labels.
+SIDE_LABELS: dict[str, str] = {"output": "output", "input": "input"}
 
 # Fixed, meaningful colors for the three real cane irrigation x harvest combos, so they read
 # the same across every chart regardless of which series/regions are shown.
 _CANE_COMBO_COLORS: dict[str, str] = {
-    "Non irrigué · récolte semi-mécanisée": "#8c6d31",
-    "Non irrigué · récolte mécanisée": "#e7ba52",
-    "Irrigué · récolte mécanisée": "#31a354",
+    "Rain-fed · semi-mechanised harvest": "#8c6d31",
+    "Rain-fed · mechanised harvest": "#e7ba52",
+    "Irrigated · mechanised harvest": "#31a354",
 }
 
 # Sugarcane cultures whose sub-crops encode an irrigation x harvest combo we color by
@@ -69,9 +72,9 @@ CANE_CULTURES = {"CS", "CF"}
 # Combo token (last "_"-separated token of a cane code) -> human label. Only three combos
 # exist in the data: irrigated is always mechanized (no "irrigated + semi-mechanized").
 _CANE_COMBO_LABELS = {
-    "NISM": "Non irrigué · récolte semi-mécanisée",
-    "NIM": "Non irrigué · récolte mécanisée",
-    "IM": "Irrigué · récolte mécanisée",
+    "NISM": "Rain-fed · semi-mechanised harvest",
+    "NIM": "Rain-fed · mechanised harvest",
+    "IM": "Irrigated · mechanised harvest",
 }
 
 X_DIMENSIONS = ("culture", "subculture", "region", "island")
@@ -85,7 +88,7 @@ SERIES_PALETTE_HEX: tuple[str, ...] = (
 
 
 def format_dim_value(dim: str, value: object) -> str:
-    """Human label for a value on a given dimension: French crop names for culture/subculture
+    """Human label for a value on a given dimension: crop names for culture/subculture
     (falls back to the raw code, so cane-combo strata labels pass through untouched), region /
     island names for those, str otherwise."""
     if dim in ("culture", "subculture"):
@@ -128,7 +131,7 @@ def culture_of(crop_code: str) -> str:
 
 def cane_combo_of(crop_code: str) -> str | None:
     """Irrigation x harvest combo label for a cane sub-crop, or None if the code is not a
-    recognized cane combo. Parsed from the last token ('CS_NGT_IM' -> 'Irrigué ...')."""
+    recognized cane combo. Parsed from the last token ('CS_NGT_IM' -> 'Irrigated ...')."""
     if culture_of(crop_code) not in CANE_CULTURES:
         return None
     return _CANE_COMBO_LABELS.get(str(crop_code).rsplit("_", 1)[-1])
@@ -214,14 +217,14 @@ INDICATOR_DIRECTION: dict[str, str] = {
     "total_revenue": "benefit",
     "total_gross_margin": "benefit",
     "total_net_revenue": "benefit",
-    "total_etp": "benefit",
+    "total_fte": "benefit",
     "total_subsidy": "cost",
     "total_labor_cost": "cost",
     "gini_revenue_by_farm": "cost",
-    "total_ges": "cost",
-    "total_ift": "cost",
-    "total_azote": "cost",
-    "surface_cld": "cost",
+    "total_ghg": "cost",
+    "total_tfi": "cost",
+    "total_nitrogen": "cost",
+    "chlordecone_risk_area": "cost",
     "total_water_need_m3": "cost",
     "soil_carbon_balance": "benefit",
     "soil_carbon_mineralization": "cost",
@@ -234,37 +237,37 @@ INDICATOR_DIRECTION: dict[str, str] = {
     # Cropping diversity: higher = more diverse.
     "shannon": "benefit",
     # Mineral P and K applied: like nitrogen, a load on the environment.
-    "total_phosphore": "cost",
-    "total_potasse": "cost",
+    "total_phosphorus": "cost",
+    "total_potassium": "cost",
     # Pesticide risk to water: every form of it is something to reduce.
     "rpest_surface_at_risk_ha": "cost",
     "rpest_surface_at_risk_share": "cost",
     "rpest_mean": "cost",
     "rpest_max": "cost",
     # Agroecological reach: more area under a measure or under organic management is the
-    # stated goal. `mae_spending` is the exception -- it is public money, hence a cost, and
-    # reading it next to surface_mae_ha is what shows whether the money buys area.
-    "surface_mae_ha": "benefit",
-    "surface_mae_share": "benefit",
-    "mae_spending": "cost",
-    "surface_bio_ha": "benefit",
-    "surface_bio_share": "benefit",
-    "surface_bio_hors_prairie_ha": "benefit",
-    "surface_bio_hors_prairie_share": "benefit",
+    # stated goal. `aecm_spending` is the exception -- it is public money, hence a cost, and
+    # reading it next to aecm_area_ha is what shows whether the money buys area.
+    "aecm_area_ha": "benefit",
+    "aecm_area_share": "benefit",
+    "aecm_spending": "cost",
+    "organic_area_ha": "benefit",
+    "organic_area_share": "benefit",
+    "organic_area_excl_grassland_ha": "benefit",
+    "organic_area_excl_grassland_share": "benefit",
     # Intensity ratios. The environmental ones are per TONNE, so lower is cleaner production
     # -- unlike the per-hectare totals, which a policy can lower simply by farming less.
     "gross_margin_per_ha": "benefit",
-    "etp_per_ha": "benefit",
+    "fte_per_ha": "benefit",
     "production_per_ha": "benefit",
-    "gross_margin_per_etp": "benefit",
-    "azote_per_tonne": "cost",
-    "ift_per_tonne": "cost",
+    "gross_margin_per_fte": "benefit",
+    "nitrogen_per_tonne": "cost",
+    "tfi_per_tonne": "cost",
     # Public spending efficiency: euros of subsidy bought per unit of result, so lower is
     # better value for public money. NOTE this judges the SPENDING, not the outcome -- a
     # policy that achieves nothing while spending nothing scores well here and badly on the
     # outcome axes. The two must be read together.
     "subsidy_per_tonne": "cost",
-    "subsidy_per_etp": "cost",
+    "subsidy_per_fte": "cost",
     "subsidy_per_euro_margin": "cost",
     "subsidy_per_ha": "cost",
 }
@@ -273,97 +276,97 @@ INDICATOR_DIRECTION: dict[str, str] = {
 # --- The scalar indicator catalogue -------------------------------------------
 # Which per-run scalars can be put on a comparison axis, how they are labelled, and where
 # each lives in recap.json. Defined here rather than in a page because two pages need them
-# (Comparaison and Prospective) and a Streamlit page must not be imported by another.
+# (Comparison and Prospective) and a Streamlit page must not be imported by another.
 
 ECON_INDICATORS: dict[str, str] = {
     "total_production_tonnes": "Production (t)",
-    # Revenu = marge brute + subvention, i.e. the exact sum of two other entries of this
+    # Revenue = gross margin + subsidy, i.e. the exact sum of two other entries of this
     # very list. Kept for continuity, but selecting all three counts the same euros twice.
-    "total_revenue": "Revenu (€) [= marge + subv.]",
-    "total_gross_margin": "Marge brute (€)",
-    "total_net_revenue": "Revenu net (€)",
-    "total_subsidy": "Subvention (€)",
-    "total_labor_cost": "Coût MO (€)",
-    "total_etp": "Emploi (ETP)",
+    "total_revenue": "Revenue (€) [= margin + subsidy]",
+    "total_gross_margin": "Gross margin (€)",
+    "total_net_revenue": "Net revenue (€)",
+    "total_subsidy": "Subsidy (€)",
+    "total_labor_cost": "Labour cost (€)",
+    "total_fte": "Employment (FTE)",
 }
 ENV_INDICATORS: dict[str, str] = {
-    "total_ges": "GES (t CO₂)",
-    "total_ift": "IFT (total)",
-    "total_azote": "Azote (kg N)",
-    "surface_cld": "Surface chlordécone (ha)",
-    "total_water_need_m3": "Besoin en eau (m³)",
+    "total_ghg": "GHG (t CO₂)",
+    "total_tfi": "TFI (total)",
+    "total_nitrogen": "Nitrogen (kg N)",
+    "chlordecone_risk_area": "Chlordecone-risk area (ha)",
+    "total_water_need_m3": "Water need (m³)",
     # These two are strongly correlated (balance = inputs - mineralization, and inputs are
     # near-constant), so selecting both roughly doubles soil carbon's weight in the score.
-    "soil_carbon_balance": "Bilan carbone du sol (t C)",
-    "soil_carbon_mineralization": "Minéralisation du carbone (t C) [redondant]",
-    "shannon": "Diversité de l'assolement (Shannon)",
-    "total_phosphore": "Phosphore (kg P₂O₅)",
-    "total_potasse": "Potasse (kg K₂O)",
+    "soil_carbon_balance": "Soil carbon balance (t C)",
+    "soil_carbon_mineralization": "Carbon mineralisation (t C) [redundant]",
+    "shannon": "Cropping diversity (Shannon)",
+    "total_phosphorus": "Phosphorus (kg P₂O₅)",
+    "total_potassium": "Potassium (kg K₂O)",
     # Rpest (Tixier). The surface at risk is the headline -- a mean hides the few very
     # exposed hectares that actually reach a catchment. Read the ranking, not the floor:
     # a pesticide-free crop scores ~2.4, not 0 (see domain/rpest.py).
-    "rpest_surface_at_risk_ha": "Rpest — surface à risque (ha)",
-    "rpest_surface_at_risk_share": "Rpest — part à risque",
-    "rpest_mean": "Rpest moyen (0-10)",
-    "rpest_max": "Rpest maximal (0-10)",
+    "rpest_surface_at_risk_ha": "Rpest — area at risk (ha)",
+    "rpest_surface_at_risk_share": "Rpest — share at risk",
+    "rpest_mean": "Mean Rpest (0-10)",
+    "rpest_max": "Maximum Rpest (0-10)",
 }
-# Agroecology as the data encodes it. The two families are NOT summable: an MAE pays a named
+# Agroecology as the data encodes it. The two families are NOT summable: an AECM pays a named
 # practice on conventional crops (green-harvest cane), the organic figure counts itineraries.
-# `surface_bio_ha` is dominated by pasture, whose itinerary uses an organic cattle process --
+# `organic_area_ha` is dominated by pasture, whose itinerary uses an organic cattle process --
 # on output_3 the entire organic area IS the pasture floor, and cropland is 0 ha. Hence the
-# "hors prairie" variant, which is the one to read for a statement about cropland.
+# "excluding grassland" variant, which is the one to read for a statement about cropland.
 AGROECOLOGY_INDICATORS: dict[str, str] = {
-    "surface_mae_ha": "Surface sous MAE (ha)",
-    "surface_mae_share": "Part sous MAE",
-    "mae_spending": "Dépense MAE (€)",
-    "surface_bio_ha": "Surface bio (ha, prairie incluse)",
-    "surface_bio_share": "Part bio (prairie incluse)",
-    "surface_bio_hors_prairie_ha": "Surface bio hors prairie (ha)",
-    "surface_bio_hors_prairie_share": "Part bio hors prairie",
+    "aecm_area_ha": "Area under AECM (ha)",
+    "aecm_area_share": "Share under AECM",
+    "aecm_spending": "AECM spending (€)",
+    "organic_area_ha": "Organic area (ha, grassland included)",
+    "organic_area_share": "Organic share (grassland included)",
+    "organic_area_excl_grassland_ha": "Organic area excluding grassland (ha)",
+    "organic_area_excl_grassland_share": "Organic share excluding grassland",
 }
 # Ratios derived from the totals. These stay comparable between scenarios allocating
 # different areas -- and the subsidy_* ones are the public-policy evaluation metric proper:
 # what a euro of public money buys.
 INTENSITY_INDICATORS: dict[str, str] = {
-    "gross_margin_per_ha": "Marge brute / ha (€)",
-    "etp_per_ha": "Emploi / ha (ETP)",
+    "gross_margin_per_ha": "Gross margin / ha (€)",
+    "fte_per_ha": "Employment / ha (FTE)",
     "production_per_ha": "Production / ha (t)",
-    "gross_margin_per_etp": "Marge brute / ETP (€)",
-    "azote_per_tonne": "Azote / tonne produite (kg N)",
-    "ift_per_tonne": "IFT / tonne produite",
-    "subsidy_per_tonne": "Subvention / tonne (€)",
-    "subsidy_per_etp": "Subvention / ETP (€)",
-    "subsidy_per_euro_margin": "Subvention / € de marge",
-    "subsidy_per_ha": "Subvention / ha (€)",
+    "gross_margin_per_fte": "Gross margin / FTE (€)",
+    "nitrogen_per_tonne": "Nitrogen / tonne produced (kg N)",
+    "tfi_per_tonne": "TFI / tonne produced",
+    "subsidy_per_tonne": "Subsidy / tonne (€)",
+    "subsidy_per_fte": "Subsidy / FTE (€)",
+    "subsidy_per_euro_margin": "Subsidy / € of margin",
+    "subsidy_per_ha": "Subsidy / ha (€)",
 }
 # Food self-sufficiency ratios (crop-only variant), all benefit (higher = more autonomous).
 AUTONOMY_INDICATORS: dict[str, str] = {
-    "autonomy_limiting": "Autonomie (nutriment limitant)",
-    "autonomy_kcal": "Autonomie énergie (Kcal)",
-    "autonomy_prot": "Autonomie protéines",
-    "autonomy_lip": "Autonomie lipides",
-    "autonomy_glu": "Autonomie glucides",
-    "autonomy_fibres": "Autonomie fibres",
-    "autonomy_ca": "Autonomie calcium",
-    "autonomy_p": "Autonomie phosphore",
-    "autonomy_mg": "Autonomie magnésium",
-    "autonomy_k": "Autonomie potassium",
-    "autonomy_fe": "Autonomie fer",
+    "autonomy_limiting": "Self-sufficiency (limiting nutrient)",
+    "autonomy_kcal": "Energy self-sufficiency (kcal)",
+    "autonomy_prot": "Protein self-sufficiency",
+    "autonomy_lip": "Lipid self-sufficiency",
+    "autonomy_glu": "Carbohydrate self-sufficiency",
+    "autonomy_fibres": "Fibre self-sufficiency",
+    "autonomy_ca": "Calcium self-sufficiency",
+    "autonomy_p": "Phosphorus self-sufficiency",
+    "autonomy_mg": "Magnesium self-sufficiency",
+    "autonomy_k": "Potassium self-sufficiency",
+    "autonomy_fe": "Iron self-sufficiency",
 }
 # Exposure of a FIXED allocation to shocks -- nothing is re-optimized. Not to be confused
 # with the robustness metrics of the prospective page, which re-solve under each forcing.
 RESILIENCE_INDICATORS: dict[str, str] = {
-    "climate_margin_at_risk": "Marge à risque climatique (€) [absolu]",
-    "climate_margin_at_risk_ratio": "Marge à risque climatique (part)",
-    "revenue_concentration_hhi": "Concentration du revenu (HHI)",
-    "price_shock_margin_loss": "Perte sous choc de prix (€) [absolu]",
-    "price_shock_margin_loss_ratio": "Perte sous choc de prix (part)",
+    "climate_margin_at_risk": "Climate margin at risk (€) [absolute]",
+    "climate_margin_at_risk_ratio": "Climate margin at risk (share)",
+    "revenue_concentration_hhi": "Revenue concentration (HHI)",
+    "price_shock_margin_loss": "Loss under price shock (€) [absolute]",
+    "price_shock_margin_loss_ratio": "Loss under price shock (share)",
 }
 GINI_KEY = "gini_revenue_by_farm"
 INDICATOR_LABELS: dict[str, str] = {
     **ECON_INDICATORS, **ENV_INDICATORS, **INTENSITY_INDICATORS,
     **AGROECOLOGY_INDICATORS, **AUTONOMY_INDICATORS, **RESILIENCE_INDICATORS,
-    GINI_KEY: "Gini (revenu/exploit.)",
+    GINI_KEY: "Gini (revenue per farm)",
 }
 
 
@@ -394,59 +397,59 @@ def indicator_value(recap: dict, side: str, indicator: str):
 # families are the ones the run report itself is organised in, plus "intensity" for the
 # derived ratios.
 INDICATOR_FAMILY: dict[str, str] = {
-    "total_production_tonnes": "economie",
-    "total_revenue": "economie",
-    "total_gross_margin": "economie",
-    "total_net_revenue": "economie",
-    "total_subsidy": "economie",
-    "total_labor_cost": "economie",
-    "total_etp": "economie",
-    "total_ges": "environnement",
-    "total_ift": "environnement",
-    "total_azote": "environnement",
-    "surface_cld": "environnement",
-    "total_water_need_m3": "environnement",
-    "total_phosphore": "environnement",
-    "total_potasse": "environnement",
-    "rpest_surface_at_risk_ha": "environnement",
-    "rpest_surface_at_risk_share": "environnement",
-    "rpest_mean": "environnement",
-    "rpest_max": "environnement",
-    "surface_mae_ha": "agroecologie",
-    "surface_mae_share": "agroecologie",
-    "mae_spending": "agroecologie",
-    "surface_bio_ha": "agroecologie",
-    "surface_bio_share": "agroecologie",
-    "surface_bio_hors_prairie_ha": "agroecologie",
-    "surface_bio_hors_prairie_share": "agroecologie",
-    "soil_carbon_balance": "environnement",
-    "soil_carbon_mineralization": "environnement",
-    "shannon": "environnement",
-    "gini_revenue_by_farm": "equite",
-    "climate_margin_at_risk": "exposition",
-    "climate_margin_at_risk_ratio": "exposition",
-    "revenue_concentration_hhi": "exposition",
-    "price_shock_margin_loss": "exposition",
-    "price_shock_margin_loss_ratio": "exposition",
-    "gross_margin_per_ha": "intensite",
-    "etp_per_ha": "intensite",
-    "production_per_ha": "intensite",
-    "gross_margin_per_etp": "intensite",
-    "azote_per_tonne": "intensite",
-    "ift_per_tonne": "intensite",
-    "subsidy_per_tonne": "intensite",
-    "subsidy_per_etp": "intensite",
-    "subsidy_per_euro_margin": "intensite",
-    "subsidy_per_ha": "intensite",
+    "total_production_tonnes": "economy",
+    "total_revenue": "economy",
+    "total_gross_margin": "economy",
+    "total_net_revenue": "economy",
+    "total_subsidy": "economy",
+    "total_labor_cost": "economy",
+    "total_fte": "economy",
+    "total_ghg": "environment",
+    "total_tfi": "environment",
+    "total_nitrogen": "environment",
+    "chlordecone_risk_area": "environment",
+    "total_water_need_m3": "environment",
+    "total_phosphorus": "environment",
+    "total_potassium": "environment",
+    "rpest_surface_at_risk_ha": "environment",
+    "rpest_surface_at_risk_share": "environment",
+    "rpest_mean": "environment",
+    "rpest_max": "environment",
+    "aecm_area_ha": "agroecology",
+    "aecm_area_share": "agroecology",
+    "aecm_spending": "agroecology",
+    "organic_area_ha": "agroecology",
+    "organic_area_share": "agroecology",
+    "organic_area_excl_grassland_ha": "agroecology",
+    "organic_area_excl_grassland_share": "agroecology",
+    "soil_carbon_balance": "environment",
+    "soil_carbon_mineralization": "environment",
+    "shannon": "environment",
+    "gini_revenue_by_farm": "equity",
+    "climate_margin_at_risk": "exposure",
+    "climate_margin_at_risk_ratio": "exposure",
+    "revenue_concentration_hhi": "exposure",
+    "price_shock_margin_loss": "exposure",
+    "price_shock_margin_loss_ratio": "exposure",
+    "gross_margin_per_ha": "intensity",
+    "fte_per_ha": "intensity",
+    "production_per_ha": "intensity",
+    "gross_margin_per_fte": "intensity",
+    "nitrogen_per_tonne": "intensity",
+    "tfi_per_tonne": "intensity",
+    "subsidy_per_tonne": "intensity",
+    "subsidy_per_fte": "intensity",
+    "subsidy_per_euro_margin": "intensity",
+    "subsidy_per_ha": "intensity",
 }
 # Every autonomy_* key belongs to one family, resolved by prefix in indicator_family().
-_AUTONOMY_FAMILY = "autonomie"
+_AUTONOMY_FAMILY = "self_sufficiency"
 
 
 def indicator_family(indicator: str) -> str:
     if indicator.startswith("autonomy_"):
         return _AUTONOMY_FAMILY
-    return INDICATOR_FAMILY.get(indicator, "autre")
+    return INDICATOR_FAMILY.get(indicator, "other")
 
 
 # An indicator a constraint PINS is an input of the scenario, not one of its results.
@@ -454,15 +457,15 @@ def indicator_family(indicator: str) -> str:
 # subsidies to zero wins the "public spending" axis by construction. This maps the
 # indicator name a bound targets onto the recap key it determines.
 _BOUND_INDICATOR_BY_RATE: dict[str, tuple[str, ...]] = {
-    "subvention": ("total_subsidy", "subsidy_per_tonne", "subsidy_per_etp",
+    "subsidy": ("total_subsidy", "subsidy_per_tonne", "subsidy_per_fte",
                    "subsidy_per_euro_margin", "subsidy_per_ha"),
-    "travail": ("total_etp", "etp_per_ha", "gross_margin_per_etp"),
-    "ift": ("total_ift", "ift_per_tonne"),
-    "azote": ("total_azote", "azote_per_tonne"),
-    "ges": ("total_ges",),
-    "eau": ("total_water_need_m3",),
-    "carbone": ("soil_carbon_balance",),
-    "marge": ("total_gross_margin", "gross_margin_per_ha", "gross_margin_per_etp"),
+    "labor": ("total_fte", "fte_per_ha", "gross_margin_per_fte"),
+    "tfi": ("total_tfi", "tfi_per_tonne"),
+    "nitrogen": ("total_nitrogen", "nitrogen_per_tonne"),
+    "ghg": ("total_ghg",),
+    "water": ("total_water_need_m3",),
+    "carbon": ("soil_carbon_balance",),
+    "margin": ("total_gross_margin", "gross_margin_per_ha", "gross_margin_per_fte"),
 }
 
 
@@ -549,8 +552,7 @@ def series_label(display_name: str, side: str) -> str:
     """Base label for a (run, side) series in legends and pickers: the run's display
     name (its recap `run_name`, or folder name) plus the side. Not guaranteed unique --
     two runs sharing a run_name collide; series_labels() disambiguates a full list."""
-    side_fr = {"output": "sortie", "input": "entrée"}.get(side, side)
-    return f"{display_name} · {side_fr}"
+    return f"{display_name} · {SIDE_LABELS.get(side, side)}"
 
 
 def series_labels(rows: list[tuple[str, str]]) -> list[str]:
@@ -615,7 +617,7 @@ def build_grouped_bar_figure(
     pos = np.arange(len(categories))
     width = 0.8 / n
     effective_log = log and not stacked and not relative
-    value_label = "Part relative (%)" if relative else measure_label
+    value_label = "Relative share (%)" if relative else measure_label
 
     if horizontal:
         fig, ax = plt.subplots(figsize=(10, max(4, len(categories) * 0.32 * n + 1.5)))

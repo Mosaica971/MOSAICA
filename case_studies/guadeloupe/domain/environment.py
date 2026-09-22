@@ -11,7 +11,7 @@ import re
 
 import pandas as pd
 
-from case_studies.guadeloupe.domain.itk import annual_rate_per_ha_cult
+from case_studies.guadeloupe.domain.itk import annual_rate_per_ha
 
 # --- Phosphorus and potassium, recovered from the fertiliser NAMES -------------
 # Data_OTK carries an AZOTE column but nothing for P or K. The fertiliser rows are named by
@@ -62,83 +62,83 @@ def nutrient_grades(name: str) -> tuple[float, float]:
 
 
 def _nutrient_rate(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
     index: int,
 ) -> pd.Series:
     grades = pd.Series(
-        [nutrient_grades(name)[index] for name in data_otk.index], index=data_otk.index
+        [nutrient_grades(name)[index] for name in operation_data.index], index=operation_data.index
     )
-    amortized = data_otk["AMORTI"] == 1
-    per_application = data_otk["DOSE"] * grades
-    return annual_rate_per_ha_cult(
-        matrice_otk_cult, per_application, duree_plant_cult, duree_cycle_cult, amortized
+    amortized = operation_data["AMORTI"] == 1
+    per_application = operation_data["DOSE"] * grades
+    return annual_rate_per_ha(
+        crop_operation_matrix, per_application, crop_plantation_duration, crop_cycle_duration, amortized
     )
 
 
-def compute_phosphore_per_ha_cult(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+def compute_crop_phosphorus_per_ha(
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
 ) -> pd.Series:
     """Mineral phosphorus applied per ha per year (kg P2O5/ha/an), by the nitrogen formula
     with the grade read off the fertiliser name. Organic amendments contribute 0."""
     return _nutrient_rate(
-        data_otk, matrice_otk_cult, duree_plant_cult, duree_cycle_cult, 0
+        operation_data, crop_operation_matrix, crop_plantation_duration, crop_cycle_duration, 0
     )
 
 
-def compute_potasse_per_ha_cult(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+def compute_crop_potassium_per_ha(
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
 ) -> pd.Series:
-    """Mineral potassium applied per ha per year (kg K2O/ha/an). See compute_phosphore."""
+    """Mineral potassium applied per ha per year (kg K2O/ha/an). See compute_phosphorus."""
     return _nutrient_rate(
-        data_otk, matrice_otk_cult, duree_plant_cult, duree_cycle_cult, 1
+        operation_data, crop_operation_matrix, crop_plantation_duration, crop_cycle_duration, 1
     )
 
 
-def compute_azote_per_ha_cult(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+def compute_crop_nitrogen_per_ha(
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
 ) -> pd.Series:
     """AZOTE_Ha_Cult: nitrogen applied per ha per year (kg N/ha/an). Per application =
     DOSE * AZOTE."""
-    amortized = data_otk["AMORTI"] == 1
-    per_application = data_otk["DOSE"] * data_otk["AZOTE"]
-    return annual_rate_per_ha_cult(
-        matrice_otk_cult, per_application, duree_plant_cult, duree_cycle_cult, amortized
+    amortized = operation_data["AMORTI"] == 1
+    per_application = operation_data["DOSE"] * operation_data["AZOTE"]
+    return annual_rate_per_ha(
+        crop_operation_matrix, per_application, crop_plantation_duration, crop_cycle_duration, amortized
     )
 
 
-def compute_ift_per_ha_cult(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+def compute_crop_tfi_per_ha(
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
 ) -> pd.Series:
     """IFT_Ha_Cult: treatment frequency index per ha per year. Per application = IFT
     (not scaled by DOSE, unlike azote/cost)."""
-    amortized = data_otk["AMORTI"] == 1
-    per_application = data_otk["IFT"]
-    return annual_rate_per_ha_cult(
-        matrice_otk_cult, per_application, duree_plant_cult, duree_cycle_cult, amortized
+    amortized = operation_data["AMORTI"] == 1
+    per_application = operation_data["IFT"]
+    return annual_rate_per_ha(
+        crop_operation_matrix, per_application, crop_plantation_duration, crop_cycle_duration, amortized
     )
 
 
-def compute_ges_per_ha_cult(
-    data_otk: pd.DataFrame,
-    matrice_otk_cult: pd.DataFrame,
-    duree_plant_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
-    rdt_cult: pd.Series,
+def compute_crop_ghg_per_ha(
+    operation_data: pd.DataFrame,
+    crop_operation_matrix: pd.DataFrame,
+    crop_plantation_duration: pd.Series,
+    crop_cycle_duration: pd.Series,
+    crop_yield: pd.Series,
     coeff_c_co2: float,
 ) -> pd.Series:
     """GES_Ha_Cult: greenhouse-gas emissions per ha per year (t CO2/ha/an). Two terms,
@@ -146,12 +146,12 @@ def compute_ges_per_ha_cult(
       - surface term GES_SURF, present in both branches (upfront + amortized/Duree_Plant);
       - production term GES_Q * Rdt_Cult, on one-off (AMORTI=0) operations only.
     """
-    amortized = data_otk["AMORTI"] == 1
-    surface_rate = annual_rate_per_ha_cult(
-        matrice_otk_cult, data_otk["GES_SURF"], duree_plant_cult, duree_cycle_cult, amortized
+    amortized = operation_data["AMORTI"] == 1
+    surface_rate = annual_rate_per_ha(
+        crop_operation_matrix, operation_data["GES_SURF"], crop_plantation_duration, crop_cycle_duration, amortized
     )
     # Production-linked emissions apply to upfront operations only.
-    ges_q_upfront = data_otk["GES_Q"] * (~amortized).astype(float)
-    otk_q = matrice_otk_cult.multiply(ges_q_upfront, axis=0)
-    production_rate = otk_q.sum(axis=0) * rdt_cult / duree_cycle_cult * 12
+    ghg_q_upfront = operation_data["GES_Q"] * (~amortized).astype(float)
+    otk_q = crop_operation_matrix.multiply(ghg_q_upfront, axis=0)
+    production_rate = otk_q.sum(axis=0) * crop_yield / crop_cycle_duration * 12
     return (surface_rate + production_rate) / coeff_c_co2

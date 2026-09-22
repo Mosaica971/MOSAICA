@@ -1,12 +1,12 @@
 """Join the RPG 2017 parcel geometry to the model's synthetic plot ids.
 
-THE PROBLEM. `data/gis/01_RPG 2017/` holds the real 2017 parcel layer; `data_parc` holds the
+THE PROBLEM. `data/gis/01_RPG 2017/` holds the real 2017 parcel layer; `plot_data` holds the
 same parcels under invented identifiers (P1..P24734) with no key in common. The two files
 were derived from one another upstream, but the link was not kept, so it has to be rebuilt
 from the attributes both sides carry.
 
 WHAT ESTABLISHES THE LINK. Three facts, measured on 2026-08-01:
-  * `RPG_2017_GC_MG_ss_doublon` holds exactly 24 734 records -- the count of data_parc, to
+  * `RPG_2017_GC_MG_ss_doublon` holds exactly 24 734 records -- the count of plot_data, to
     the unit (the full layer has 24 931, and a companion "Doublons" layer holds the 198
     duplicates removed);
   * both sides describe 4 638 farms with the SAME distribution of sizes (769 farms of one
@@ -69,7 +69,7 @@ def _signature(pairs: list[tuple[Any, float]]) -> tuple:
 
 
 def build_geometry_join(
-    data_parc: pd.DataFrame,
+    plot_data: pd.DataFrame,
     plot_farm: pd.Series,
     layer_path: str | Path = RPG_LAYER,
 ) -> GeometryJoin:
@@ -89,9 +89,9 @@ def build_geometry_join(
         sig_plots[row["pacage"]].append((commune, surface, polygon))
 
     model_plots: dict[Any, list[tuple[Any, float, str]]] = defaultdict(list)
-    farms = plot_farm.reindex(data_parc.index)
+    farms = plot_farm.reindex(plot_data.index)
     for plot, farm, commune, surface in zip(
-        data_parc.index, farms, data_parc["COMMUNE"], data_parc["SURF_HA"]
+        plot_data.index, farms, plot_data["COMMUNE"], plot_data["SURF_HA"]
     ):
         if pd.isna(farm):
             continue

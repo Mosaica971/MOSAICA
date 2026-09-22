@@ -92,10 +92,10 @@ def plot_labor_cost_by_crop(labor_cost_by_crop: pd.Series, output_path: Path) ->
     )
 
 
-def plot_etp_by_region(etp_by_region: pd.Series, output_path: Path) -> Path:
+def plot_fte_by_region(fte_by_region: pd.Series, output_path: Path) -> Path:
     """ETP (full-time-equivalent jobs) per region -- region keys, not crop codes."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    series = etp_by_region.sort_values(ascending=False)
+    series = fte_by_region.sort_values(ascending=False)
     fig, ax = plt.subplots(figsize=_FIGSIZE)
     ax.bar([str(key) for key in series.index], series.to_numpy(), color=_BAR_COLOR)
     _style_axes(ax, title="Emploi estimé par région (ETP)", ylabel="ETP")

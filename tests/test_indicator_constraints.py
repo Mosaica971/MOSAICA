@@ -26,9 +26,9 @@ def _inputs(**overrides):
         farm_plots={"E1": ["P1"], "E2": ["P2"]},
         farm_surface_ha={"E1": 10.0, "E2": 5.0},
         crop_indicator_rates={
-            "azote": {"INTENSIF": 200.0, "EXTENSIF": 20.0},
-            "travail": {"INTENSIF": 1000.0, "EXTENSIF": 100.0},
-            "eau": {"INTENSIF": 30.0, "EXTENSIF": 10.0},
+            "nitrogen": {"INTENSIF": 200.0, "EXTENSIF": 20.0},
+            "labor": {"INTENSIF": 1000.0, "EXTENSIF": 100.0},
+            "water": {"INTENSIF": 30.0, "EXTENSIF": 10.0},
         },
         plot_zones={
             "islands": {"P1": 1, "P2": 2},
@@ -76,7 +76,7 @@ def _is_satisfied(constraint, tol=1e-9):
 def test_territory_indicator_bound_sums_surface_times_rate():
     model = _build(
         "territory_indicator_bound",
-        {"label": "n_max", "indicator": "azote", "sense": "le", "threshold": 1500.0},
+        {"label": "n_max", "indicator": "nitrogen", "sense": "le", "threshold": 1500.0},
     )
     _assign(model, ("P1", "INTENSIF"), ("P2", "EXTENSIF"))  # 10x200 + 5x20
     assert pyo.value(model.n_max.body) == pytest.approx(2100.0)
@@ -89,17 +89,17 @@ def test_territory_indicator_bound_scale_converts_the_unit():
     model = _build(
         "territory_indicator_bound",
         {
-            "label": "emploi_min",
-            "indicator": "travail",
+            "label": "employment_min",
+            "indicator": "labor",
             "sense": "ge",
             "threshold": 5.0,
             "scale": 1 / 1607,
         },
     )
     _assign(model, ("P1", "INTENSIF"))  # 10 ha x 1000 h = 10 000 h = 6.22 ETP
-    assert pyo.value(model.emploi_min.body) == pytest.approx(10_000 / 1607)
-    assert model.emploi_min.lower() == pytest.approx(5.0)
-    assert _is_satisfied(model.emploi_min)
+    assert pyo.value(model.employment_min.body) == pytest.approx(10_000 / 1607)
+    assert model.employment_min.lower() == pytest.approx(5.0)
+    assert _is_satisfied(model.employment_min)
 
 
 def test_territory_indicator_bound_crops_restricts_the_scope():
@@ -107,7 +107,7 @@ def test_territory_indicator_bound_crops_restricts_the_scope():
         "territory_indicator_bound",
         {
             "label": "n_intensif",
-            "indicator": "azote",
+            "indicator": "nitrogen",
             "sense": "le",
             "threshold": 1e9,
             "crops": ["EXTENSIF"],
@@ -124,7 +124,7 @@ def test_territory_indicator_bound_plot_weight_zeroes_unweighted_plots():
         "territory_indicator_bound",
         {
             "label": "eau_max",
-            "indicator": "eau",
+            "indicator": "water",
             "sense": "le",
             "threshold": 1e9,
             "scale": 10.0,
@@ -140,7 +140,7 @@ def test_territory_indicator_bound_unknown_indicator_raises():
     with pytest.raises(KeyError, match="Unknown indicator"):
         _build(
             "territory_indicator_bound",
-            {"label": "x", "indicator": "phosphore", "sense": "le", "threshold": 1.0},
+            {"label": "x", "indicator": "phosphorus", "sense": "le", "threshold": 1.0},
         )
 
 
@@ -150,7 +150,7 @@ def test_territory_indicator_bound_unknown_plot_weight_raises():
             "territory_indicator_bound",
             {
                 "label": "x",
-                "indicator": "azote",
+                "indicator": "nitrogen",
                 "sense": "le",
                 "threshold": 1.0,
                 "plot_weight": "pente_forte",
@@ -162,26 +162,26 @@ def test_territory_indicator_bound_rejects_unknown_sense():
     with pytest.raises(ValueError, match="Unknown sense"):
         _build(
             "territory_indicator_bound",
-            {"label": "x", "indicator": "azote", "sense": "eq", "threshold": 1.0},
+            {"label": "x", "indicator": "nitrogen", "sense": "eq", "threshold": 1.0},
         )
 
 
 def test_territory_indicator_bound_empty_term_set_is_a_feasibility_verdict():
     # No crop carries the rate -> a plain 0, which must not reach Pyomo as a bare bool.
-    inputs = _inputs(crop_indicator_rates={"azote": {}})
+    inputs = _inputs(crop_indicator_rates={"nitrogen": {}})
     model = _build(
         "territory_indicator_bound",
-        {"label": "n_max", "indicator": "azote", "sense": "le", "threshold": 10.0},
+        {"label": "n_max", "indicator": "nitrogen", "sense": "le", "threshold": 10.0},
         inputs,
     )
     assert model.n_max.expr()  # 0 <= 10 -> Constraint.Feasible
 
 
 def test_territory_indicator_bound_empty_term_set_can_be_infeasible():
-    inputs = _inputs(crop_indicator_rates={"travail": {}})
+    inputs = _inputs(crop_indicator_rates={"labor": {}})
     model = _build(
         "territory_indicator_bound",
-        {"label": "emploi", "indicator": "travail", "sense": "ge", "threshold": 10.0},
+        {"label": "emploi", "indicator": "labor", "sense": "ge", "threshold": 10.0},
         inputs,
     )
     assert not model.emploi.expr()  # 0 >= 10 is false -> Constraint.Infeasible
@@ -196,7 +196,7 @@ def test_zone_indicator_bound_holds_once_per_zone():
         {
             "label": "n_ile",
             "zone": "islands",
-            "indicator": "azote",
+            "indicator": "nitrogen",
             "sense": "le",
             "threshold": 1000.0,
         },
@@ -220,7 +220,7 @@ def test_zone_indicator_bound_threshold_per_ha_scales_by_zone_surface():
         {
             "label": "nitrates",
             "zone": "farms",
-            "indicator": "azote",
+            "indicator": "nitrogen",
             "sense": "le",
             "threshold_per_ha": 170.0,
         },
@@ -235,7 +235,7 @@ def test_zone_indicator_bound_explicit_thresholds_limit_the_index_set():
         {
             "label": "n_ile",
             "zone": "islands",
-            "indicator": "azote",
+            "indicator": "nitrogen",
             "sense": "le",
             "thresholds": {1: 500.0},
         },
@@ -251,7 +251,7 @@ def test_zone_indicator_bound_per_ha_counts_only_weighted_hectares():
         {
             "label": "eau_ferme",
             "zone": "farms",
-            "indicator": "eau",
+            "indicator": "water",
             "sense": "le",
             "threshold_per_ha": 100.0,
             "plot_weight": "irrigable",
@@ -265,7 +265,7 @@ def test_zone_indicator_bound_requires_a_limit():
     with pytest.raises(ValueError, match="threshold"):
         _build(
             "zone_indicator_bound",
-            {"label": "x", "zone": "islands", "indicator": "azote", "sense": "le"},
+            {"label": "x", "zone": "islands", "indicator": "nitrogen", "sense": "le"},
         )
 
 
@@ -276,7 +276,7 @@ def test_zone_indicator_bound_unknown_zone_raises():
             {
                 "label": "x",
                 "zone": "cantons",
-                "indicator": "azote",
+                "indicator": "nitrogen",
                 "sense": "le",
                 "threshold": 1.0,
             },

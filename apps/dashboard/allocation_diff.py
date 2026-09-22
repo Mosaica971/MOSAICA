@@ -2,7 +2,7 @@
 
 The companion of `config_diff`. That module says two lines of YAML separate two runs; this
 one says what those two lines *moved* -- which hectares changed crop, from what to what,
-and where. Between `calib_gams_parite` and `calib_retenu` the config diff is two constraints;
+and where. Between `calib_gams_parity` and `calib_selected` the config diff is two constraints;
 the allocation diff is the ~1 300 ha of export banana that came back and the ~3 100 ha of
 pasture that stopped leaking into cane.
 

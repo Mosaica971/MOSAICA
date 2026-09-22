@@ -6,9 +6,9 @@ so the landing page opens instantly on any run folder.
 WHY THE ALERTS EXIST. This model has a handful of readings that are wrong in a way no chart
 reveals: a territorial PAD of 6.6 % looks like a triumph until you notice a constraint pins
 the crop that carries it; an objective value looks converged until you notice the solve hit
-its time limit and VIGILANCE records a hand-built solution beating that incumbent by 5.5 %.
-Each alert below encodes one such trap, keyed off what the recap itself says, so the caveat
-travels with the number instead of living only in a markdown file nobody opens.
+its time limit and docs/04-vigilance.md records a hand-built solution beating that incumbent
+by 5.5 %. Each alert below encodes one such trap, keyed off what the recap itself says, so the
+caveat travels with the number instead of living only in a markdown file nobody opens.
 
 Pure and Streamlit-free.
 """
@@ -39,20 +39,20 @@ class Alert:
 # not broken -- but a reader who opens the matching page and finds it empty deserves to know
 # why, rather than concluding the feature is broken.
 _EXPECTED_BLOCKS: dict[str, str] = {
-    "environment": "indicateurs environnementaux",
-    "food_autonomy": "autonomie alimentaire",
-    "resilience": "exposition aux chocs",
-    "calibration": "page Calibration",
-    "intensity": "ratios d'intensité (page Prospective)",
-    "agroecology": "surfaces MAE et bio",
+    "environment": "environmental indicators",
+    "food_autonomy": "food self-sufficiency",
+    "resilience": "exposure to shocks",
+    "calibration": "Calibration page",
+    "intensity": "intensity ratios (Prospective page)",
+    "agroecology": "AECM and organic areas",
 }
 
 # Constraint labels whose presence changes how a calibration score must be read: each PINS
 # the crop group that dominates the territorial PAD, so that headline number stops being a
-# result and becomes an assumption. Value = what to quote instead.
+# result and becomes an assumption. Value = why.
 _PAD_PINNING_CONSTRAINTS: dict[str, str] = {
-    "pn_prod_min": "le plancher de surface fourragère épingle la prairie",
-    "bc_quota_max": "le plafond de marché borne le plantain",
+    "pn_prod_min": "the fodder-area floor pins grassland",
+    "bc_quota_max": "the market ceiling bounds plantain",
 }
 
 _TERMINATION_OK = ("optimal", "globallyoptimal", "locallyoptimal")
@@ -69,7 +69,7 @@ def constraint_labels(recap: dict[str, Any]) -> set[str]:
 
 
 def calibration_verdicts(recap: dict[str, Any]) -> list[dict[str, Any]]:
-    """The four calibration metrics as {label, value, threshold, passed, unit} rows.
+    """The four calibration metrics as {label, value, threshold, passed, better} rows.
 
     `passed` is None when the metric has no threshold in the article (plot and area match
     rates are reported, never gated) or when the run was not scored at all.
@@ -80,28 +80,28 @@ def calibration_verdicts(recap: dict[str, Any]) -> list[dict[str, Any]]:
     thresholds = calibration.get("thresholds") or {}
     return [
         {
-            "label": "PAD territorial",
+            "label": "Territorial PAD",
             "value": calibration.get("regional_pad_pct"),
             "threshold": thresholds.get("regional_pad_max"),
             "passed": calibration.get("regional_within_threshold"),
             "better": "lower",
         },
         {
-            "label": "Types d'exploitation reproduits",
+            "label": "Farm types reproduced",
             "value": calibration.get("farm_type_match_pct"),
             "threshold": thresholds.get("farm_type_match_min"),
             "passed": calibration.get("farm_type_within_threshold"),
             "better": "higher",
         },
         {
-            "label": "Parcelles bien simulées",
+            "label": "Plots correctly simulated",
             "value": calibration.get("plot_match_pct"),
             "threshold": None,
             "passed": None,
             "better": "higher",
         },
         {
-            "label": "Surface bien simulée",
+            "label": "Area correctly simulated",
             "value": calibration.get("area_match_pct"),
             "threshold": None,
             "passed": None,
@@ -120,27 +120,27 @@ def run_alerts(recap: dict[str, Any]) -> list[Alert]:
         alerts.append(
             Alert(
                 ERROR,
-                f"Solve non prouvé optimal (`{recap.get('termination_condition')}`)",
-                "L'objectif affiché est un *incumbent*, pas un optimum démontré. Sur ce "
-                "modèle ce n'est pas une nuance : une solution faisable construite à la main "
-                "en quelques secondes a déjà battu de 5,5 % un incumbent obtenu en une heure "
-                "(docs/04-vigilance.md, entrée « PAD résiduel »). Réamorcez le run avec un warm "
-                "start (`solver.warm_start_from`) avant d'en tirer une conclusion.",
+                f"Solve not proven optimal (`{recap.get('termination_condition')}`)",
+                "The objective shown is an *incumbent*, not a proven optimum. On this model "
+                "that is not a nuance: a feasible solution built by hand in a few seconds has "
+                "already beaten by 5.5 % an incumbent obtained in one hour "
+                "(docs/04-vigilance.md, entry \"The residual PAD\"). Restart the run with a "
+                "warm start (`solver.warm_start_from`) before drawing a conclusion.",
             )
         )
 
     pinning = sorted(labels & set(_PAD_PINNING_CONSTRAINTS))
     if pinning:
-        reasons = " ; ".join(_PAD_PINNING_CONSTRAINTS[label] for label in pinning)
+        reasons = "; ".join(_PAD_PINNING_CONSTRAINTS[label] for label in pinning)
         alerts.append(
             Alert(
                 WARNING,
-                "Le PAD territorial n'est pas citable tel quel",
-                f"Ce run active {', '.join(f'`{c}`' for c in pinning)} — {reasons}. Le PAD "
-                "de la culture contrainte est nul par construction, ce qui tire le total "
-                "vers le bas sans rien démontrer. Les chiffres à citer sont **types "
-                "d'exploitation**, **parcelles** et **surface bien simulées**, qu'aucune de "
-                "ces contraintes ne borne.",
+                "The territorial PAD cannot be quoted as is",
+                f"This run enables {', '.join(f'`{c}`' for c in pinning)} — {reasons}. The "
+                "PAD of the constrained crop is zero by construction, which pulls the total "
+                "down without proving anything. The figures to quote are **farm types**, "
+                "**plots** and **area correctly simulated**, which none of these constraints "
+                "bounds.",
             )
         )
 
@@ -150,9 +150,9 @@ def run_alerts(recap: dict[str, Any]) -> list[Alert]:
         alerts.append(
             Alert(
                 WARNING,
-                "Des indicateurs sont fixés par une contrainte",
-                f"{named} — ce sont les **hypothèses** du scénario, pas ses résultats. Noter "
-                "une politique sur le plafond qu'elle s'est elle-même donné est circulaire.",
+                "Some indicators are fixed by a constraint",
+                f"{named} — these are the scenario's **hypotheses**, not its results. Scoring "
+                "a policy on the ceiling it set for itself is circular.",
             )
         )
 
@@ -161,10 +161,10 @@ def run_alerts(recap: dict[str, Any]) -> list[Alert]:
         alerts.append(
             Alert(
                 WARNING,
-                "Objectif de marge brute pure",
-                "Cet objectif ignore `Var_Rdt`, or c'est la seule chose qui sépare les "
-                "cultures : il abandonne totalement la canne à sucre et la banane export, et "
-                "porte le PAD territorial à ~193 %. L'objectif calibré est "
+                "Pure gross-margin objective",
+                "This objective ignores `Var_Rdt`, and that is the only thing separating the "
+                "crops: it drops sugarcane and export banana entirely and takes the "
+                "territorial PAD to ~193 %. The calibrated objective is "
                 "`maximize_risk_adjusted_gross_margin` (Markowitz).",
             )
         )
@@ -175,10 +175,10 @@ def run_alerts(recap: dict[str, Any]) -> list[Alert]:
         alerts.append(
             Alert(
                 INFO,
-                "Run antérieur à certains blocs de reporting",
-                f"Blocs absents du recap : {', '.join(f'`{n}`' for n in stale)}. "
-                f"Conséquence : {pages} — ces vues resteront vides pour ce run. Un "
-                "`python main.py` sur la config actuelle les remplit.",
+                "Run predates some reporting blocks",
+                f"Blocks missing from the recap: {', '.join(f'`{n}`' for n in stale)}. "
+                f"Consequence: {pages} — those views will stay empty for this run. A "
+                "`python main.py` on the current config fills them.",
             )
         )
 

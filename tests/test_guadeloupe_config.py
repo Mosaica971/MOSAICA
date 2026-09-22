@@ -62,7 +62,7 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
         # exact_risk_value (Eq_PN_PIQ_CLD) disabled 2026-07-27 for CALIB parity: that equation
         # is absent from the GAMS CALIB model block (commented in SCENARIO). See config comment.
         "region_crop_forbidden",
-        "friche_lock",
+        "fallow_lock",
         # GAMS geographic/soil/irrigation ITK bans, ported 2026-07-20.
         "attribute_forbidden",
         "forbid_crops",
@@ -71,7 +71,7 @@ def test_guadeloupe_config_loads_and_has_expected_sections():
 
 def test_ba_rota_numerator_crops_match_sc_cs_anchor_plus_ja_and_canne_fibre():
     # ba_rota's numerator is hand-written longhand (YAML can't splice an anchor list
-    # inline with extra items), unlike friche_lock's crop list which has a set-file
+    # inline with extra items), unlike fallow_lock's crop list which has a set-file
     # equivalence test. This guards it from silently drifting out of sync with the
     # *SC_CS anchor it's supposed to mirror.
     config = load_config(CONFIG_PATH)

@@ -21,9 +21,9 @@ import pandas as pd
 
 from case_studies.guadeloupe.domain import crop_families
 from case_studies.guadeloupe.domain.farm_typology import (
-    TYPE_EXPL_LABELS,
+    FARM_TYPE_LABELS,
     compute_base_crop_group,
-    compute_type_expl,
+    compute_farm_type,
 )
 from case_studies.guadeloupe.reporting import indicators
 from core.data.dataset import Dataset
@@ -131,7 +131,7 @@ def _surface_by_group_and_key(
     dataset: Dataset, groups: pd.Series, key: pd.Series
 ) -> pd.Series:
     """Allocated surface totalled by (key, group), for a plot-keyed grouping Series."""
-    surface = dataset.parameters["data_parc"]["SURF_HA"].reindex(groups.index)
+    surface = dataset.parameters["plot_data"]["SURF_HA"].reindex(groups.index)
     keys = key.reindex(groups.index)
     return surface.groupby([keys, groups]).sum()
 
@@ -243,8 +243,8 @@ def field_match_rate(dataset: Dataset, output_allocation: pd.Series) -> pd.DataF
     simulated = simulated_groups(dataset, output_allocation)
     plots = observed.index.union(simulated.index)
 
-    data_parc = dataset.parameters["data_parc"]
-    surface = data_parc["SURF_HA"].reindex(plots).astype(float)
+    plot_data = dataset.parameters["plot_data"]
+    surface = plot_data["SURF_HA"].reindex(plots).astype(float)
     region = indicators.plot_to_region(dataset).reindex(plots)
     matched = observed.reindex(plots).eq(simulated.reindex(plots))
 
@@ -277,36 +277,36 @@ def field_match_rate(dataset: Dataset, output_allocation: pd.Series) -> pd.DataF
     ]
 
 
-def _type_expl(dataset: Dataset, groups: pd.Series) -> pd.Series:
+def _farm_type(dataset: Dataset, groups: pd.Series) -> pd.Series:
     """farm -> TYPE_EXPL, for a plot -> base-group Series covering the full plot universe."""
-    plot_surface = dataset.parameters["data_parc"]["SURF_HA"]
-    type_expl, _bis = compute_type_expl(
+    plot_surface = dataset.parameters["plot_data"]["SURF_HA"]
+    farm_type, _bis = compute_farm_type(
         dataset.parameters["farm_plots"], groups, plot_surface
     )
-    return type_expl
+    return farm_type
 
 
 def farm_type_confusion(dataset: Dataset, output_allocation: pd.Series) -> pd.DataFrame:
     """Farm scale, Chopin et al. Table 4: observed farm type x simulated farm type.
 
-    Both sides go through compute_type_expl, which needs the FULL plot universe: NC plots
+    Both sides go through compute_farm_type, which needs the FULL plot universe: NC plots
     feed surf_non, which is subtracted from the denominator of every PART_* share. Dropping
     them -- as the NC-free baseline allocation does -- would shift the shares and could flip
-    a farm's type, so the observed side is recomputed here from data_parc and a plot the
+    a farm's type, so the observed side is recomputed here from plot_data and a plot the
     solver left unallocated counts as NC, its agronomic meaning.
 
     One asymmetry is deliberate: compute_base_crop_group returns NaN for an RPG code it
-    does not map, and compute_type_expl drops those rows. That is what the pipeline already
+    does not map, and compute_farm_type drops those rows. That is what the pipeline already
     does for the observed side, so it is reproduced rather than "fixed" here.
     """
-    data_parc = dataset.parameters["data_parc"]
-    observed = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+    plot_data = dataset.parameters["plot_data"]
+    observed = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
 
-    simulated = pd.Series(crop_families.NON_CULTIVATED, index=data_parc.index)
+    simulated = pd.Series(crop_families.NON_CULTIVATED, index=plot_data.index)
     simulated.update(crop_families.base_groups_for(output_allocation))
 
-    codes = sorted(TYPE_EXPL_LABELS)
-    confusion = pd.crosstab(_type_expl(dataset, observed), _type_expl(dataset, simulated))
+    codes = sorted(FARM_TYPE_LABELS)
+    confusion = pd.crosstab(_farm_type(dataset, observed), _farm_type(dataset, simulated))
     confusion = confusion.reindex(index=codes, columns=codes, fill_value=0).astype(int)
     confusion.index.name = "type_observe"
     confusion.columns.name = "type_simule"
@@ -324,7 +324,7 @@ def farm_type_match_summary(confusion: pd.DataFrame) -> dict[str, Any]:
         "matched_farms": matched,
         "match_pct": 100.0 * matched / total if total else float("nan"),
         "recall_by_type": {
-            TYPE_EXPL_LABELS[code]: 100.0 * float(confusion.loc[code, code]) / float(count)
+            FARM_TYPE_LABELS[code]: 100.0 * float(confusion.loc[code, code]) / float(count)
             for code, count in observed_totals.items()
             if count > 0
         },

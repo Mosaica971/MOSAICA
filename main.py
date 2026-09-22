@@ -78,7 +78,7 @@ def main(outputs_root: Path = OUTPUTS_ROOT, case_study: CaseStudy | str | None =
 
     total_revenue = pyo.value(model.objective)
     allocated_plots = sum(1 for index in model.Y if pyo.value(model.Y[index]) > 0.5)
-    total_plots = len(dataset.parameters["data_parc"])
+    total_plots = len(dataset.parameters["plot_data"])
 
     print(f"Total revenue (gross margin, MB_Ha_Cult): {total_revenue:,.2f}")
     print(f"Plots allocated to a crop: {allocated_plots} / {total_plots}")

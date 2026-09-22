@@ -28,25 +28,25 @@ from core.model.model_inputs import ModelInputs
 # `ges` is in the model's own unit -- its scale is an open question (see TODO.md) -- so GHG
 # thresholds here are calibrated as a share of the run's own baseline, not in t CO2.
 _INDICATOR_PARAMETERS: dict[str, str] = {
-    "azote": "azote_per_ha_cult",
-    "phosphore": "phosphore_per_ha_cult",
-    "potasse": "potasse_per_ha_cult",
-    "ift": "ift_per_ha_cult",
-    "ges": "ges_per_ha_cult",
-    "eau": "water_need_per_ha_cult",
-    "carbone": "carbon_input_per_ha_cult",
-    "travail": "labor_hours_per_ha_cult",
-    "subvention": "subsidy_per_ha_cult_annualized",
-    # Agroecology, as the data actually encodes it. `surface_mae` and `surface_bio` are 0/1
+    "nitrogen": "crop_nitrogen_per_ha",
+    "phosphorus": "crop_phosphorus_per_ha",
+    "potassium": "crop_potassium_per_ha",
+    "tfi": "crop_tfi_per_ha",
+    "ghg": "crop_ghg_per_ha",
+    "water": "crop_water_need_per_ha",
+    "carbon": "crop_carbon_input_per_ha",
+    "labor": "crop_labor_hours_per_ha",
+    "subsidy": "crop_subsidy_per_ha_annualized",
+    # Agroecology, as the data actually encodes it. `aecm_area` and `organic_area` are 0/1
     # rates, so multiplied by plot surface they sum to HECTARES -- which is how a scenario
     # writes "at least N ha under an agri-environmental measure" with an ordinary bound.
-    "mae": "mae_per_ha_cult",
-    "surface_mae": "under_mae_cult",
-    "surface_bio": "organic_cult",
-    "marge": "margin_per_ha_cult",
-    "cout": "variable_cost_per_ha_cult",
-    "vente": "sales_per_ha_cult",
-    "rendement": "rdt_cult",
+    "aecm": "crop_aecm_per_ha",
+    "aecm_area": "crop_under_aecm",
+    "organic_area": "crop_is_organic",
+    "margin": "crop_margin_per_ha",
+    "cost": "crop_variable_cost_per_ha",
+    "sales": "crop_sales_per_ha",
+    "yield": "crop_yield",
 }
 
 
@@ -72,16 +72,16 @@ def _plot_weights(dataset: Dataset) -> dict[str, dict[str, float]]:
     as total_water_need_m3 -- 56 Mm3 against 35 -- so a threshold read off one would be
     wrong against the other.
     """
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
     weights: dict[str, dict[str, float]] = {}
-    if "IRRIG_PARC" in data_parc.columns:
-        weights["irrigable"] = (data_parc["IRRIG_PARC"] == 1).astype(float).to_dict()
-    if "GFA_PARC" in data_parc.columns:
-        weights["gfa"] = data_parc["GFA_PARC"].fillna(0).astype(float).to_dict()
+    if "IRRIG_PARC" in plot_data.columns:
+        weights["irrigable"] = (plot_data["IRRIG_PARC"] == 1).astype(float).to_dict()
+    if "GFA_PARC" in plot_data.columns:
+        weights["gfa"] = plot_data["GFA_PARC"].fillna(0).astype(float).to_dict()
     # Plots at the highest chlordecone risk class, for a health-driven scenario that bounds
     # what may be grown on contaminated land.
-    if "RISQUE_CLD" in data_parc.columns:
-        weights["sol_contamine"] = (data_parc["RISQUE_CLD"] == 1).astype(float).to_dict()
+    if "RISQUE_CLD" in plot_data.columns:
+        weights["contaminated_soil"] = (plot_data["RISQUE_CLD"] == 1).astype(float).to_dict()
     return weights
 
 
@@ -89,16 +89,16 @@ def _plot_zones(dataset: Dataset) -> dict[str, dict[str, Any]]:
     """Groupings a bound may hold within. The four geographic columns come from the plot
     table; watersheds and catchments from their own plot-mapping sets; `farms` makes a
     per-farm environmental cap expressible with the same generic builder."""
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
     zones: dict[str, dict[str, Any]] = {
-        column.lower(): data_parc[column].dropna().to_dict()
+        column.lower(): plot_data[column].dropna().to_dict()
         for column in ("ILE", "REGION", "REGION_CODE", "COMMUNE")
-        if column in data_parc.columns
+        if column in plot_data.columns
     }
     for name, (parameter, key) in {
-        "watersheds": ("bv_parc", "watershed"),
-        "catchments": ("cpt_parc", "catchment"),
-        "farms": ("expl_parc", "farm"),
+        "watersheds": ("watershed_plot_map", "watershed"),
+        "catchments": ("catchment_plot_map", "catchment"),
+        "farms": ("farm_plot_map", "farm"),
     }.items():
         table = dataset.parameters.get(parameter)
         if table is not None:
@@ -118,23 +118,23 @@ def build_model(dataset: Dataset, config: dict[str, Any]) -> pyo.ConcreteModel:
     # feeds baseline_inertia_min, which is optional, so an unrecognised code must not sink
     # model building. Such a crop simply never counts as "unchanged".
     crop_group = {}
-    for crop in dataset.parameters["margin_per_ha_cult"].index:
+    for crop in dataset.parameters["crop_margin_per_ha"].index:
         try:
             crop_group[crop] = base_group_for(crop)
         except KeyError:
             continue
 
     inputs = ModelInputs(
-        plot_surface_ha=dataset.parameters["data_parc"]["SURF_HA"],
-        crop_margin_per_ha=dataset.parameters["margin_per_ha_cult"],
+        plot_surface_ha=dataset.parameters["plot_data"]["SURF_HA"],
+        crop_margin_per_ha=dataset.parameters["crop_margin_per_ha"],
         eligible_pairs=dataset.parameters["eligible_pairs"],
         farm_plots=dataset.parameters.get("farm_plots", {}),
         farm_surface_ha=dataset.parameters.get("farm_surface_ha", {}),
         farm_restricted_surface_ha=dataset.parameters.get("farm_gfa_surface_ha", {}),
-        crop_yield_per_ha=dataset.parameters.get("rdt_cult", {}),
+        crop_yield_per_ha=dataset.parameters.get("crop_yield", {}),
         crop_variance_per_ha=dataset.parameters.get("crop_variance_per_ha", {}),
         farm_risk_aversion=dataset.parameters.get("farm_risk_aversion", {}),
-        crop_labor_hours_per_ha=dataset.parameters.get("labor_hours_per_ha_cult", {}),
+        crop_labor_hours_per_ha=dataset.parameters.get("crop_labor_hours_per_ha", {}),
         # GAMS MO_Expl_init (ENTREES.txt:466-469): the labour the farm's OBSERVED 2017
         # cropping plan required, which Eq_MO_MAX_Expl then treats as its budget.
         farm_labor_capacity_hours=dataset.parameters.get("farm_labor_capacity_hours", {}),

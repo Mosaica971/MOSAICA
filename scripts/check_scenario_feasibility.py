@@ -43,7 +43,7 @@ _INFEASIBLE = {
 
 # Parameters that fully determine how the model sees a crop. Two crops equal on all of them
 # are interchangeable to the solver.
-_IDENTITY_PARAMETERS = ("margin_per_ha_cult", "crop_variance_per_ha", *_INDICATOR_PARAMETERS.values())
+_IDENTITY_PARAMETERS = ("crop_margin_per_ha", "crop_variance_per_ha", *_INDICATOR_PARAMETERS.values())
 
 
 def symmetric_crop_groups(dataset) -> list[list[str]]:

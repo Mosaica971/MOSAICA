@@ -1,0 +1,33 @@
+# GAMS-parity calibration with the PER-FARM labour budget computed on the observed 2017
+# FINE cropping plan (context/SORTIES/ASSOL_PARC_INIT.TXT).
+#
+# WHAT CHANGES, AND ONLY THAT. `Eq_MO_MAX_Expl` (farm_labor_hours_max, label labor_max_farm)
+# is already a per-farm constraint, at slack 1.0: each farm is bounded by the labour ITS OWN
+# 2017 cropping plan required. No territory-wide labour ceiling is active -- `employment_min`
+# (territory_indicator_bound on `labor`) stays `enable: false` in config.yaml. The run
+# therefore only touches how the budget is MEASURED, not its form: it replaces pricing
+# through a representative crop by the real fine ITK.
+#
+#   representative (default) : 6 252 740 h
+#   observed fine plan       : 5 592 326 h   (-10.6 %, the constraint TIGHTENS)
+#
+# CHECK. Our labour rates applied to the GAMS CALIB allocation give 5 292 156 h against the
+# 5 292 000 h of its INDICATEURS.TXT -- 0.003 %, GAMS's 4-digit rounding. The labour table is
+# therefore exact, and the budget above is indeed the GAMS one.
+#
+# DISTRIBUTION EFFECT, which a uniform factor cannot reproduce: 795 farms see their budget
+# fall, 456 the reverse, and 50 drop to zero because their observed plan is entirely NC or
+# fallow. Those 50 are frozen -- faithfully, GAMS freezes them too, and since
+# `at_most_one_crop_per_plot` allows the empty plot, it is not infeasible.
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration_fine_labor.yaml
+
+runs:
+  - name: calib_fine_labor_2017
+    description: >-
+      GAMS parity + per-farm labour budget read on the 2017 fine cropping plan. To compare
+      with calib_gams_parity_prices (territorial PAD 12.07 %) and with GAMS's Assol_Calib
+      (3.76 %).
+    disable: [bc_quota_max, pn_prod_min]
+    overrides:
+      data.fine_baseline_allocation: context/SORTIES/ASSOL_PARC_INIT.TXT

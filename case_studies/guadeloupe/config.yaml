@@ -12,8 +12,8 @@ data:
 # Optional targeted economic shocks, applied on top of the year/scenario economics.
 # Each list holds {crops: [...], factor: <float>} entries; the factor multiplies every
 # listed crop (entries stack when crop lists overlap), crops not listed keep factor 1.0.
-# price_multipliers scale prix_cult (sale price/ha, flows into sales + gross product);
-# subsidy_multipliers scale the total subsidy/ha per crop; yield_multipliers scale rdt_cult
+# price_multipliers scale crop_price (sale price/ha, flows into sales + gross product);
+# subsidy_multipliers scale the total subsidy/ha per crop; yield_multipliers scale crop_yield
 # at source (so a climate shock propagates to cost, POSEI_Q subsidy, sales, GES and the
 # tonnage quotas); cost_multipliers scale the variable cost only; variance_multipliers scale
 # Var_Rdt_Cult, the yield VARIANCE the Markowitz objective weighs -- the lever for climate
@@ -74,7 +74,7 @@ solver:
 # in the GAMS variable cost, so this is purely a reporting indicator (does not affect the
 # optimum). 0 = leave labor unpriced (net revenue then equals gross margin).
 labor:
-  hours_per_etp: 1607
+  hours_per_fte: 1607
   cost_per_hour: 15.5
 
 # Exposure indicators (reporting only -- no effect on the allocation). The price shock is
@@ -82,7 +82,7 @@ labor:
 # economics.price_multipliers / yield_multipliers do: those shock the inputs before the
 # solve, so the optimizer adapts to them. Both are useful; they answer different questions.
 resilience:
-  # Relative shock on prix_cult, e.g. 0.20 = a 20% market price drop. Subsidies, variable
+  # Relative shock on crop_price, e.g. 0.20 = a 20% market price drop. Subsidies, variable
   # costs and the bagasse by-product are deliberately left untouched.
   price_shock_delta: 0.20
 
@@ -210,10 +210,10 @@ constraints:
   # (agronomic rotation ceiling).
   - name: farm_area_share_max
     enable: true
-    args: {label: an_agro_max_expl, crops: *SC_AN, max_share: 0.75}  # pineapple <= 75% of farm area
+    args: {label: an_agro_max_farm, crops: *SC_AN, max_share: 0.75}  # pineapple <= 75% of farm area
   - name: farm_area_share_max
     enable: true
-    args: {label: ig_agro_max_expl, crops: *SC_IG, max_share: 0.66}  # yam <= 66% of farm area
+    args: {label: ig_agro_max_farm, crops: *SC_IG, max_share: 0.66}  # yam <= 66% of farm area
 
   # farm_area_ratio_min: numerator-crop area must be >= `ratio` x denominator-crop area per
   # farm (enforces fallow/rotation alongside banana).
@@ -239,7 +239,7 @@ constraints:
   # the SCENARIO equation list (MODELE.txt line 651) alongside Eq_FRICHE. But solving
   # the real 2017 Guadeloupe dataset with both active reveals a genuine algebraic
   # infeasibility: 3 real GFA farms (E1471, E273, E3955) have every plot fallow-locked
-  # by friche_lock (Task 7) for 2015-2017, which forbids CS on those plots, while this
+  # by fallow_lock (Task 7) for 2015-2017, which forbids CS on those plots, while this
   # constraint demands >=60% of the farm's GFA area be planted in CS -- unsatisfiable
   # for a farm with zero CS-eligible area. Both equations are individually correct and
   # match GAMS; this is a genuine interaction in the real dataset, not a porting bug.
@@ -282,7 +282,7 @@ constraints:
   # commented right under the formula: "x 1.7 pour S1, x 1.3 pour S2, x 10 pour S3".
   - name: farm_labor_hours_max
     enable: true
-    args: {label: mo_max_expl, slack: 1.0}
+    args: {label: labor_max_farm, slack: 1.0}
 
   # Eq_BA_QUOTA_Expl (MODELE.txt:361-366), ported 2026-09-08. Export-banana tonnage capped
   # FARM BY FARM at what the farm produced in 2017 -- a delivery right attached to the
@@ -298,7 +298,7 @@ constraints:
   - name: farm_production_bound
     enable: true
     args:
-      label: ba_quota_expl
+      label: ba_quota_farm
       crops: *SC_BAN_EX
       reference: BA
       sense: le
@@ -549,15 +549,15 @@ constraints:
   - name: territory_indicator_bound
     enable: false
     args:
-      label: azote_max      # nitrogen ceiling, kg N/an (calib retenu measured 1 930 903)
-      indicator: azote
+      label: nitrogen_max      # nitrogen ceiling, kg N/an (calib retenu measured 1 930 903)
+      indicator: nitrogen
       sense: le
       threshold: 1930903
   - name: territory_indicator_bound
     enable: false
     args:
-      label: emploi_min     # employment floor, in HOURS (scale converts to ETP-equivalent)
-      indicator: travail
+      label: employment_min     # employment floor, in HOURS (scale converts to ETP-equivalent)
+      indicator: labor
       sense: ge
       # 3 503 ETP x 1 607 h. Careful: `farm_labor_hours_max` grants 6 252 740 h (3 891 ETP)
       # at slack 1.0, so a floor above that is infeasible unless the same scenario raises
@@ -732,7 +732,7 @@ categorical_rules:
       region_column: REGION_CODE
       forbidden_regions: [R0, R1, R3, R4, R5, R6, R7, R9, R10, R12, R13, R14, R17, R19, R21, R25, R26, R27]
   # --- GAMS geographic/soil/irrigation ITK bans (MODELE.txt:243-319), ported 2026-07-20.
-  # Uses data_parc["REGION"] (1-7 macro agro-region), COMMUNE (INSEE), ILE (1=BT,2=GT,3=MG).
+  # Uses plot_data["REGION"] (1-7 macro agro-region), COMMUNE (INSEE), ILE (1=BT,2=GT,3=MG).
   # NOT REGION_CODE (R0-R27 petites-regions), which only drives the melon rule above.
   # Eq_CS_IRR: irrigated sugarcane disabled everywhere (condition IRRIG in {0,1} = all plots).
   # Labelled: lifting it (disable: [cs_irrig_ban]) is the single most intensifying move
@@ -858,12 +858,12 @@ categorical_rules:
     enable: false
     args: {crops: [VE_PLUIE], conditions: [{column: ILE, op: ne, value: 1}]}
   #
-  # friche_lock: plots left fallow (fallow_codes) across every year of history_columns are
+  # fallow_lock: plots left fallow (fallow_codes) across every year of history_columns are
   # locked out of the listed crops -- the GAMS Eq_FRICHE rule. crops list = CULT_NON_NC set.
-  - name: friche_lock
+  - name: fallow_lock
     enable: true
     args:
-      label: friche
+      label: fallow
       history_columns: [cult_2015, cult_2016, cult_2017]
       fallow_codes: [0, 10, 14]
       crops: &CULT_NON_NC  # the 83-crop CULT_NON_NC set, reused by Eq_NOCULT_NC below
@@ -882,7 +882,7 @@ categorical_rules:
 
   # Eq_NOCULT_NC (MODELE.txt:215): X(SP, SC_CULT_NON_NC)=0 on every plot whose OBSERVED 2017
   # land use resolves to NC -- a non-cultivated plot stays non-cultivated. DISTINCT from
-  # friche_lock/Eq_FRICHE, which needs three fallow years (2015-2017); this fires on the
+  # fallow_lock/Eq_FRICHE, which needs three fallow years (2015-2017); this fires on the
   # single-year 2017-NC state and so locks strictly more plots. "Resolved NC" is exactly
   # compute_base_crop_group's rule (farm_typology.py): cult_2017 == 14, OR both cult_2016 and
   # cult_2017 in the fallow set {0,10,14}. That OR is written as two entries (house style,

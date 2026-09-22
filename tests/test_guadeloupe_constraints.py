@@ -86,7 +86,7 @@ def test_crop_share_bound_ge_enforces_minimum_bio_share():
                 "name": "crop_share_bound",
                 "enable": True,
                 "args": {
-                    "label": "bio_min",
+                    "label": "organic_min",
                     "numerator_crops": ["MA_PLBIO"],
                     "denominator_crops": ["MA_PLBIO", "MA_ROTA"],
                     "sense": "ge",
@@ -117,12 +117,12 @@ def test_crop_share_bound_ge_enforces_minimum_bio_share():
     model.Y["P2", "MA_PLBIO"].fix(0)
     model.Y["P2", "MA_ROTA"].fix(1)
     # Assert on satisfaction, not on Pyomo's internal canonicalisation of the sides.
-    assert _is_satisfied(model.bio_min)  # bio share 10/20 = 50% >= 30%
+    assert _is_satisfied(model.organic_min)  # bio share 10/20 = 50% >= 30%
 
     # Drop bio to 0% of the filiere -> the same constraint must now be violated.
     model.Y["P1", "MA_PLBIO"].fix(0)
     model.Y["P1", "MA_ROTA"].fix(1)
-    assert not _is_satisfied(model.bio_min)
+    assert not _is_satisfied(model.organic_min)
 
 
 def test_crop_share_bound_empty_terms_are_guarded():
@@ -132,7 +132,7 @@ def test_crop_share_bound_empty_terms_are_guarded():
                 "name": "crop_share_bound",
                 "enable": True,
                 "args": {
-                    "label": "intensif_cap",
+                    "label": "intensive_cap",
                     "numerator_crops": ["BA_INT"],
                     "denominator_crops": ["MA_ROTA"],
                     "sense": "le",
@@ -152,7 +152,7 @@ def test_crop_share_bound_empty_terms_are_guarded():
         ),
         config,
     )
-    assert model.intensif_cap is not None  # built via guard (Constraint.Feasible)
+    assert model.intensive_cap is not None  # built via guard (Constraint.Feasible)
 
 
 def _labor_inputs(**overrides) -> ModelInputs:
@@ -254,7 +254,7 @@ def test_farm_labor_hours_max_without_rates_constrains_nothing():
 
 def _gfa_inputs_with_no_eligible_cane() -> ModelInputs:
     """A GFA farm whose only plot cannot carry sugarcane -- the real E1471/E273/E3955 shape,
-    where friche_lock forbids CS on every plot the farm owns."""
+    where fallow_lock forbids CS on every plot the farm owns."""
     return ModelInputs(
         plot_surface_ha={"P1": 10.0},
         crop_margin_per_ha={"JA": 50.0},

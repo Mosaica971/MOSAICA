@@ -62,14 +62,14 @@ def repair(
     """Return (repaired allocation, table of the switches made)."""
     dataset = build_dataset(config)
     parameters = dataset.parameters
-    data_parc = parameters["data_parc"]
-    surface = data_parc["SURF_HA"]
+    plot_data = parameters["plot_data"]
+    surface = plot_data["SURF_HA"]
     mask = parameters["eligibility_mask"]
-    margin = parameters["margin_per_ha_cult"]
+    margin = parameters["crop_margin_per_ha"]
     variance = parameters["crop_variance_per_ha"].fillna(0.0)
-    labor = parameters["labor_hours_per_ha_cult"]
+    labor = parameters["crop_labor_hours_per_ha"]
     cap = pd.Series(parameters["farm_labor_capacity_hours"], dtype=float)
-    farm = indicators.plot_to_farm(dataset).reindex(data_parc.index)
+    farm = indicators.plot_to_farm(dataset).reindex(plot_data.index)
     aversion = farm.map(parameters["farm_risk_aversion"]).fillna(0.0)
 
     allocation = dict(read_allocation(run_dir))

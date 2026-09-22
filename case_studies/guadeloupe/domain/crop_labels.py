@@ -1,99 +1,92 @@
-"""Human-readable French labels for the fine crop codes in CULT_2017.set.
+"""Human-readable English labels for the fine crop codes in CULT_2017.set.
 
-Ported from context/gams/DESCRIPTION_SETS.txt (GAMS source of
-truth). Figures and exports use these instead of raw codes. The 24 MA_<mulch>_*
-maraichage subtypes are not individually described in the GAMS source: mulch
-(BAG=bagasse/BRF/PAI=paille) and irrigation (I/NI) are decoded; the middle
-fertilisation token (BIO/VEG/FER/NON) is kept literal (meaning undocumented --
-see docs/04-vigilance.md). label_for() falls back to the raw code for anything unmapped.
+Translated from context/gams/DESCRIPTION_SETS.txt (the GAMS source of truth, in French).
+Figures and exports use these instead of raw codes. The 24 MA_<mulch>_* market-gardening
+subtypes are not individually described in the GAMS source: mulch (BAG = bagasse, BRF =
+ramial chipped wood, PAI = straw) and irrigation (I/NI) are decoded; the middle fertilisation
+token (BIO/VEG/FER/NON) is kept literal because its meaning is undocumented -- and it carries
+no data either (see crop_groups.yaml, "Karusmart"). label_for() falls back to the raw code
+for anything unmapped.
 """
 
+_MULCH = {"BAG": "bagasse", "BRF": "ramial wood chips", "PAI": "straw"}
+_WATER = {"I": "irrigated", "NI": "rain-fed"}
+
 CROP_LABELS: dict[str, str] = {
-    'AG': 'Agrumes',
-    'AN': 'Ananas',
-    'AN_NU': 'Ananas: systèmes technique sans paillage plastique',
-    'AN_PA': 'Ananas: systèmes technique avec paillage plastique',
-    'BA': 'Banane fruit',
-    'BA_INT': 'Banane: système technique intensif en plaine',
-    'BA_IRR': 'Banane: système technique irrigué',
-    'BA_PER': 'Banane: système technique extensif en montange',
-    'BA_SINT': 'Banane: système technique intensif en montagne',
-    'BC': 'Banane plantain',
-    'BC_BT': 'Banane plantain Basse-Terre',
-    'BC_GTMG': 'Banane plantain Grande-Terre & Marie-Galante',
-    'CF_NBT_NISM': 'Canne fibre: Nord Basse-Terre, non irrigué, récolte semi-mécanisée',
-    'CF_NBT_NIM': 'Canne fibre: Nord Basse-Terre, non irrigué, récolte mécanisée',
-    'CF_SBT_NISM': 'Canne fibre: Sud Basse-Terre, non irrigué, récolte semi-mécanisée',
-    'CF_SBT_NIM': 'Canne fibre: Nord Basse-Terre, non irrigué, récolte mécanisée',
-    'CF_NGT_NISM': 'Canne fibre: Nord Grande-Terre, non irrigué, récolte semi-mécanisée',
-    'CF_NGT_NIM': 'Canne fibre: Nord Grande-Terre, non irrigué, récolte mécanisée',
-    'CF_CGT_NISM': 'Canne fibre: Centre Grande-Terre, non irrigué, récolte semi-mécanisée',
-    'CF_CGT_NIM': 'Canne fibre: Centre Grande-Terre, non irrigué, récolte mécanisée',
-    'CF_EGT_NISM': 'Canne fibre: Est Grande-Terre, non irrigué, récolte semi-mécanisée',
-    'CF_EGT_NIM': 'Canne fibre: Est Grande-Terre, non irrigué, récolte mécanisée',
-    'CS': 'Canne à sucre',
-    'CS_BT_NISM': 'Canne à sucre: Basse-Terre, non irrigué, récolte semi-mécanisée',
-    'CS_BT_NIM': 'Canne à sucre: Basse-Terre, non irrigué, récolte mécanisée',
-    'CS_BT_IM': 'Canne à sucre: Basse-Terre, irrigué, récolte mécanisée',
-    'CS_SBT_NISM': 'Canne à sucre: Sud-Est Basse-Terre, non irrigué, récolte semi-mécanisée',
-    'CS_SBT_NIM': 'Canne à sucre: Sud-Est Basse-Terre, non irrigué, récolte mécanisée',
-    'CS_SBT_IM': 'Canne à sucre: Sud-Est Basse-Terre, irrigué, récolte mécanisée',
-    'CS_NGT_NISM': 'Canne à sucre: Nord Grande-Terre, non irrigué, récolte semi-mécanisée',
-    'CS_NGT_NIM': 'Canne à sucre: Nord Grande-Terre, non irrigué, récolte mécanisée',
-    'CS_NGT_IM': 'Canne à sucre: Nord Grande-Terre, irrigué, récolte mécanisée',
-    'CS_CGT_NISM': 'Canne à sucre: Centre Grande-Terre, non irrigué, récolte semi-mécanisée',
-    'CS_CGT_NIM': 'Canne à sucre: Centre Grande-Terre, non irrigué, récolte mécanisée',
-    'CS_CGT_IM': 'Canne à sucre: Centre Grande-Terre, irrigué, récolte mécanisée',
-    'CS_EGT_NISM': 'Canne à sucre: Est Grande-Terre, non irrigué, récolte semi-mécanisée',
-    'CS_EGT_NIM': 'Canne à sucre: Est Grande-Terre, non irrigué, récolte mécanisée',
-    'CS_EGT_IM': 'Canne à sucre: Est Grande-Terre, irrigué, récolte mécanisée',
-    'CS_MG_NISM': 'Canne à sucre: Marie-Galante, non irrigué, récolte semi-mécanisée',
-    'CS_MG_NIM': 'Canne à sucre: Marie-Galante, non irrigué, récolte mécanisée',
-    'CS_MG_IM': 'Canne à sucre: Marie-Galante, irrigué, récolte mécanisée',
-    'IG': 'Igname et tubercules tropicaux',
-    'IG_PLA': 'Igname à plat',
-    'IG_TUT': 'Igname tuteuré',
-    'JA': 'Jachère',
-    'MA': 'Maraîchage de plein champs hors tubercules tropicaux',
-    'MA_TO_CHOU_JA': 'Maraîchage plein champ (rotation TO/CHOU/JA)',
-    'MA_PLBIO': 'Maraichage biologique plurispécifique',
-    'MA_MOBIO': 'Maraichage biologique monospécifique',
-    'MA_ROTA': 'Maraichage en rotation',
-    'ME': 'Melon',
-    'NC': 'Non cultivé',
-    'PN': 'Prairies & savanes',
-    'PN_PIQ': 'Prairies naturelles avec elevage au piquet',
-    'PN_TOUR': 'Prairies naturelles avec paturage tournant',
-    'TH': 'Tomate',
-    'VE': 'Vergers hors agrumes',
-    'VE_BTGT': 'Vergers: Basse-Terre & Grande-Terre',
-    'VE_PLUIE': 'Vergers: Zones très pluvieuses',
-    'MA_TO_CO_JA': 'Maraîchage plein champ (rotation TO/CO/JA)',
-    'MA_BAG_BIO_I': 'Maraîchage plein champ (bagasse, BIO, irrigué)',
-    'MA_BAG_BIO_NI': 'Maraîchage plein champ (bagasse, BIO, non irrigué)',
-    'MA_BAG_VEG_I': 'Maraîchage plein champ (bagasse, VEG, irrigué)',
-    'MA_BAG_VEG_NI': 'Maraîchage plein champ (bagasse, VEG, non irrigué)',
-    'MA_BAG_FER_I': 'Maraîchage plein champ (bagasse, FER, irrigué)',
-    'MA_BAG_FER_NI': 'Maraîchage plein champ (bagasse, FER, non irrigué)',
-    'MA_BAG_NON_I': 'Maraîchage plein champ (bagasse, NON, irrigué)',
-    'MA_BAG_NON_NI': 'Maraîchage plein champ (bagasse, NON, non irrigué)',
-    'MA_BRF_BIO_I': 'Maraîchage plein champ (BRF, BIO, irrigué)',
-    'MA_BRF_BIO_NI': 'Maraîchage plein champ (BRF, BIO, non irrigué)',
-    'MA_BRF_VEG_I': 'Maraîchage plein champ (BRF, VEG, irrigué)',
-    'MA_BRF_VEG_NI': 'Maraîchage plein champ (BRF, VEG, non irrigué)',
-    'MA_BRF_FER_I': 'Maraîchage plein champ (BRF, FER, irrigué)',
-    'MA_BRF_FER_NI': 'Maraîchage plein champ (BRF, FER, non irrigué)',
-    'MA_BRF_NON_I': 'Maraîchage plein champ (BRF, NON, irrigué)',
-    'MA_BRF_NON_NI': 'Maraîchage plein champ (BRF, NON, non irrigué)',
-    'MA_PAI_BIO_I': 'Maraîchage plein champ (paille, BIO, irrigué)',
-    'MA_PAI_BIO_NI': 'Maraîchage plein champ (paille, BIO, non irrigué)',
-    'MA_PAI_VEG_I': 'Maraîchage plein champ (paille, VEG, irrigué)',
-    'MA_PAI_VEG_NI': 'Maraîchage plein champ (paille, VEG, non irrigué)',
-    'MA_PAI_FER_I': 'Maraîchage plein champ (paille, FER, irrigué)',
-    'MA_PAI_FER_NI': 'Maraîchage plein champ (paille, FER, non irrigué)',
-    'MA_PAI_NON_I': 'Maraîchage plein champ (paille, NON, irrigué)',
-    'MA_PAI_NON_NI': 'Maraîchage plein champ (paille, NON, non irrigué)',
+    "AG": "Citrus",
+    "AN": "Pineapple",
+    "AN_NU": "Pineapple: system without plastic mulch",
+    "AN_PA": "Pineapple: system with plastic mulch",
+    "BA": "Dessert banana",
+    "BA_INT": "Banana: intensive lowland system",
+    "BA_IRR": "Banana: irrigated system",
+    "BA_PER": "Banana: extensive upland system",
+    "BA_SINT": "Banana: intensive upland system",
+    "BC": "Plantain",
+    "BC_BT": "Plantain, Basse-Terre",
+    "BC_GTMG": "Plantain, Grande-Terre & Marie-Galante",
+    "CF_NBT_NISM": "Fibre cane: North Basse-Terre, rain-fed, semi-mechanised harvest",
+    "CF_NBT_NIM": "Fibre cane: North Basse-Terre, rain-fed, mechanised harvest",
+    "CF_SBT_NISM": "Fibre cane: South Basse-Terre, rain-fed, semi-mechanised harvest",
+    # The French source label read "Nord Basse-Terre" here, a copy slip: the code and the
+    # GAMS ban Eq_CF_SBT (MODELE.txt:75) both say South Basse-Terre.
+    "CF_SBT_NIM": "Fibre cane: South Basse-Terre, rain-fed, mechanised harvest",
+    "CF_NGT_NISM": "Fibre cane: North Grande-Terre, rain-fed, semi-mechanised harvest",
+    "CF_NGT_NIM": "Fibre cane: North Grande-Terre, rain-fed, mechanised harvest",
+    "CF_CGT_NISM": "Fibre cane: Central Grande-Terre, rain-fed, semi-mechanised harvest",
+    "CF_CGT_NIM": "Fibre cane: Central Grande-Terre, rain-fed, mechanised harvest",
+    "CF_EGT_NISM": "Fibre cane: East Grande-Terre, rain-fed, semi-mechanised harvest",
+    "CF_EGT_NIM": "Fibre cane: East Grande-Terre, rain-fed, mechanised harvest",
+    "CS": "Sugarcane",
+    "CS_BT_NISM": "Sugarcane: Basse-Terre, rain-fed, semi-mechanised harvest",
+    "CS_BT_NIM": "Sugarcane: Basse-Terre, rain-fed, mechanised harvest",
+    "CS_BT_IM": "Sugarcane: Basse-Terre, irrigated, mechanised harvest",
+    "CS_SBT_NISM": "Sugarcane: South-East Basse-Terre, rain-fed, semi-mechanised harvest",
+    "CS_SBT_NIM": "Sugarcane: South-East Basse-Terre, rain-fed, mechanised harvest",
+    "CS_SBT_IM": "Sugarcane: South-East Basse-Terre, irrigated, mechanised harvest",
+    "CS_NGT_NISM": "Sugarcane: North Grande-Terre, rain-fed, semi-mechanised harvest",
+    "CS_NGT_NIM": "Sugarcane: North Grande-Terre, rain-fed, mechanised harvest",
+    "CS_NGT_IM": "Sugarcane: North Grande-Terre, irrigated, mechanised harvest",
+    "CS_CGT_NISM": "Sugarcane: Central Grande-Terre, rain-fed, semi-mechanised harvest",
+    "CS_CGT_NIM": "Sugarcane: Central Grande-Terre, rain-fed, mechanised harvest",
+    "CS_CGT_IM": "Sugarcane: Central Grande-Terre, irrigated, mechanised harvest",
+    "CS_EGT_NISM": "Sugarcane: East Grande-Terre, rain-fed, semi-mechanised harvest",
+    "CS_EGT_NIM": "Sugarcane: East Grande-Terre, rain-fed, mechanised harvest",
+    "CS_EGT_IM": "Sugarcane: East Grande-Terre, irrigated, mechanised harvest",
+    "CS_MG_NISM": "Sugarcane: Marie-Galante, rain-fed, semi-mechanised harvest",
+    "CS_MG_NIM": "Sugarcane: Marie-Galante, rain-fed, mechanised harvest",
+    "CS_MG_IM": "Sugarcane: Marie-Galante, irrigated, mechanised harvest",
+    "IG": "Yam and tropical tubers",
+    "IG_PLA": "Yam, flat-grown",
+    "IG_TUT": "Yam, staked",
+    "JA": "Fallow",
+    "MA": "Open-field market gardening, excluding tropical tubers",
+    "MA_TO_CHOU_JA": "Open-field market gardening (tomato/cabbage/fallow rotation)",
+    # "CO" is not described in the GAMS source; kept literal rather than guessed.
+    "MA_TO_CO_JA": "Open-field market gardening (TO/CO/JA rotation)",
+    "MA_PLBIO": "Organic multi-species market gardening",
+    "MA_MOBIO": "Organic single-species market gardening",
+    "MA_ROTA": "Market gardening in rotation",
+    "ME": "Melon",
+    "NC": "Not cultivated",
+    "PN": "Grassland & savannah",
+    "PN_PIQ": "Natural grassland with tethered livestock",
+    "PN_TOUR": "Natural grassland with rotational grazing",
+    "TH": "Tomato",
+    "VE": "Orchards excluding citrus",
+    "VE_BTGT": "Orchards: Basse-Terre & Grande-Terre",
+    "VE_PLUIE": "Orchards: very rainy areas",
 }
+CROP_LABELS.update(
+    {
+        f"MA_{mulch}_{fert}_{water}": (
+            f"Open-field market gardening ({_MULCH[mulch]}, {fert}, {_WATER[water]})"
+        )
+        for mulch in _MULCH
+        for fert in ("BIO", "VEG", "FER", "NON")
+        for water in _WATER
+    }
+)
 
 
 def label_for(code: str) -> str:

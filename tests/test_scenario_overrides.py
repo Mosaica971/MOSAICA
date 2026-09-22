@@ -114,14 +114,14 @@ def test_expand_runs_folds_matrix_over_static_overrides():
 def test_matrix_can_sweep_a_constraint_argument():
     # The epsilon-constraint case: trace a Pareto front by varying a ceiling's threshold,
     # which lives in a constraint's args and at no dotted path.
-    runs = [{"name": "front", "matrix": {"args:plafond_azote.threshold": [1.0e6, 1.5e6]}}]
+    runs = [{"name": "front", "matrix": {"args:nitrogen_cap.threshold": [1.0e6, 1.5e6]}}]
     expanded = expand_runs(runs)
     assert [r["name"] for r in expanded] == [
         "front__threshold=1000000.0",
         "front__threshold=1500000.0",
     ]
     assert expanded[0]["set_args"] == [
-        {"label": "plafond_azote", "args": {"threshold": 1.0e6}}
+        {"label": "nitrogen_cap", "args": {"threshold": 1.0e6}}
     ]
     assert "overrides" not in expanded[0]
 
@@ -129,15 +129,15 @@ def test_matrix_can_sweep_a_constraint_argument():
 def test_matrix_argument_sweep_wins_over_a_static_set_args():
     runs = [{
         "name": "front",
-        "set_args": [{"label": "plafond_azote", "args": {"threshold": 999.0, "sense": "le"}}],
-        "matrix": {"args:plafond_azote.threshold": [1.0e6]},
+        "set_args": [{"label": "nitrogen_cap", "args": {"threshold": 999.0, "sense": "le"}}],
+        "matrix": {"args:nitrogen_cap.threshold": [1.0e6]},
     }]
     (only,) = expand_runs(runs)
     # Applied in order, so the swept value lands last and wins -- while `sense` survives.
     config = apply_overrides(
         {"constraints": [{
             "name": "territory_indicator_bound", "enable": True,
-            "args": {"label": "plafond_azote", "threshold": 0.0, "sense": "le"},
+            "args": {"label": "nitrogen_cap", "threshold": 0.0, "sense": "le"},
         }]},
         only,
     )
@@ -149,11 +149,11 @@ def test_matrix_argument_sweep_wins_over_a_static_set_args():
 def test_matrix_can_mix_dotted_paths_and_constraint_arguments():
     runs = [{
         "name": "mix",
-        "matrix": {"data.scenario": ["SMART"], "args:plafond_ift.threshold": [40000]},
+        "matrix": {"data.scenario": ["SMART"], "args:tfi_cap.threshold": [40000]},
     }]
     (only,) = expand_runs(runs)
     assert only["overrides"] == {"data.scenario": "SMART"}
-    assert only["set_args"] == [{"label": "plafond_ift", "args": {"threshold": 40000}}]
+    assert only["set_args"] == [{"label": "tfi_cap", "args": {"threshold": 40000}}]
 
 
 def test_a_malformed_args_matrix_key_raises():
@@ -171,7 +171,7 @@ def test_apply_overrides_can_add_a_new_constraint_entry():
             {
                 "name": "crop_share_bound",
                 "args": {
-                    "label": "bio_min",
+                    "label": "organic_min",
                     "numerator_crops": ["MA_PLBIO"],
                     "denominator_crops": ["MA_PLBIO", "MA_ROTA"],
                     "sense": "ge",
@@ -182,7 +182,7 @@ def test_apply_overrides_can_add_a_new_constraint_entry():
     }
     merged = apply_overrides(base, run)
     labels = [e["args"].get("label") for e in merged["constraints"] if e.get("enable")]
-    assert "bio_min" in labels
+    assert "organic_min" in labels
     assert base["constraints"] == [  # base config untouched (deep copy)
         {"name": "at_most_one_crop_per_plot", "enable": True, "args": {}}
     ]
@@ -208,14 +208,14 @@ def test_apply_overrides_enable_add_routes_to_an_explicit_section():
 def test_set_args_can_patch_an_entry_added_by_enable_add():
     # The composition an epsilon-constraint front needs: the policy POSES the bound through
     # enable_add (it is nowhere in config.yaml), the sweep MOVES it through set_args. Applying
-    # set_args first raised "label matched no entry" on every point of pareto_subventions.
+    # set_args first raised "label matched no entry" on every point of pareto_subsidies.
     from core.config import apply_overrides, merge_run_specs
 
     policy = {
         "enable_add": [
             {
                 "name": "territory_indicator_bound",
-                "args": {"label": "budget", "indicator": "subvention",
+                "args": {"label": "budget", "indicator": "subsidy",
                          "sense": "le", "threshold": 72_000_000},
             }
         ]
@@ -227,7 +227,7 @@ def test_set_args_can_patch_an_entry_added_by_enable_add():
         {
             "name": "territory_indicator_bound",
             "enable": True,
-            "args": {"label": "budget", "indicator": "subvention",
+            "args": {"label": "budget", "indicator": "subsidy",
                      "sense": "le", "threshold": 43_000_000},
         }
     ]
@@ -365,9 +365,9 @@ def test_expand_group_refs_flattens_references_and_drops_duplicates():
     groups = expand_group_refs({
         "bc": ["BC", "BC_BT"],
         "ig": ["IG"],
-        "vivrier": ["@bc", "@ig", "ME", "BC"],
+        "food_crops": ["@bc", "@ig", "ME", "BC"],
     })
-    assert groups["vivrier"] == ["BC", "BC_BT", "IG", "ME"]
+    assert groups["food_crops"] == ["BC", "BC_BT", "IG", "ME"]
 
 
 def test_expand_group_refs_rejects_a_cycle():
@@ -382,13 +382,13 @@ def test_resolve_crop_groups_substitutes_lists_wherever_they_appear():
 
     spec = {
         "overrides": {"economic_overrides.price_multipliers": [
-            {"crops": {"group": "canne"}, "factor": 0.75},
+            {"crops": {"group": "sugarcane"}, "factor": 0.75},
             {"crops": "*", "factor": 1.0},
         ]},
         "enable_add": [{"name": "crop_share_bound",
                         "args": {"numerator_crops": {"group": "bio"}}}],
     }
-    resolved = resolve_crop_groups(spec, {"canne": ["CS", "CS_BT"], "bio": ["MA_PLBIO"]})
+    resolved = resolve_crop_groups(spec, {"sugarcane": ["CS", "CS_BT"], "bio": ["MA_PLBIO"]})
     multipliers = resolved["overrides"]["economic_overrides.price_multipliers"]
     assert multipliers[0]["crops"] == ["CS", "CS_BT"]
     assert multipliers[1]["crops"] == "*"  # the wildcard is not a group
@@ -409,8 +409,8 @@ def test_resolve_crop_groups_leaves_a_constraints_own_groups_argument_alone():
 def test_resolve_crop_groups_names_the_available_groups_on_a_typo():
     from core.config import resolve_crop_groups
 
-    with pytest.raises(KeyError, match="canne"):
-        resolve_crop_groups({"crops": {"group": "cannne"}}, {"canne": ["CS"]})
+    with pytest.raises(KeyError, match="sugarcane"):
+        resolve_crop_groups({"crops": {"group": "cannne"}}, {"sugarcane": ["CS"]})
 
 
 def test_load_batch_spec_assembles_catalogues_and_resolves_groups(tmp_path):
@@ -419,12 +419,12 @@ def test_load_batch_spec_assembles_catalogues_and_resolves_groups(tmp_path):
     from core.config import load_batch_spec
 
     (tmp_path / "crop_groups.yaml").write_text(
-        yaml.safe_dump({"canne": ["@cs"], "vivrier": ["@canne", "ME"]}), encoding="utf-8"
+        yaml.safe_dump({"sugarcane": ["@cs"], "food_crops": ["@sugarcane", "ME"]}), encoding="utf-8"
     )
     (tmp_path / "politiques.yaml").write_text(
         yaml.safe_dump({"policies": [
             {"name": "P1", "overrides": {"economic_overrides.price_multipliers": [
-                {"crops": {"group": "vivrier"}, "factor": 1.4}
+                {"crops": {"group": "food_crops"}, "factor": 1.4}
             ]}}
         ]}),
         encoding="utf-8",
@@ -450,7 +450,7 @@ def test_load_batch_spec_assembles_catalogues_and_resolves_groups(tmp_path):
 
 
 def test_load_batch_spec_honours_a_catalogues_own_crop_groups_include(tmp_path):
-    # A catalogue must stay runnable on its own (--scenarios scenarios_politiques.yaml),
+    # A catalogue must stay runnable on its own (--scenarios scenarios_policies.yaml),
     # which means it declares where its groups come from -- and a plan including it must not
     # have to repeat that declaration.
     import yaml
@@ -606,10 +606,10 @@ def test_a_plan_rejects_an_unknown_cell_key():
 def _sweep_config():
     return {"constraints": [
         {"name": "territory_indicator_bound", "enable": False,
-         "args": {"label": "azote_max", "indicator": "azote", "sense": "le",
+         "args": {"label": "nitrogen_max", "indicator": "nitrogen", "sense": "le",
                   "threshold": 1930903}},
         {"name": "territory_indicator_bound", "enable": False,
-         "args": {"label": "emploi_min", "indicator": "travail", "sense": "ge",
+         "args": {"label": "employment_min", "indicator": "labor", "sense": "ge",
                   "threshold": 5629321, "scale": 0.00062228}},
     ]}
 
@@ -634,8 +634,8 @@ def _thresholds(runs, label, argument):
 def test_expand_runs_records_what_it_swept():
     from core.config import expand_runs
 
-    (only,) = expand_runs([{"name": "s", "matrix": {"args:azote_max.threshold": [1.0e6]}}])
-    assert only["matrix_values"] == {"args:azote_max.threshold": 1.0e6}
+    (only,) = expand_runs([{"name": "s", "matrix": {"args:nitrogen_max.threshold": [1.0e6]}}])
+    assert only["matrix_values"] == {"args:nitrogen_max.threshold": 1.0e6}
 
 
 def test_a_ceiling_sweep_is_ordered_tightest_first_so_each_point_seeds_the_next():
@@ -644,30 +644,30 @@ def test_a_ceiling_sweep_is_ordered_tightest_first_so_each_point_seeds_the_next(
     # which is the order that would make every seed infeasible.
     from core.config import order_sweep_points
 
-    runs = _sweep_runs("azote_max", "threshold", [1930903, 1544722, 1061997])
+    runs = _sweep_runs("nitrogen_max", "threshold", [1930903, 1544722, 1061997])
     ordered = order_sweep_points(runs, _sweep_config())
-    assert _thresholds(ordered, "azote_max", "threshold") == [1061997, 1544722, 1930903]
+    assert _thresholds(ordered, "nitrogen_max", "threshold") == [1061997, 1544722, 1930903]
 
 
 def test_a_floor_sweep_is_ordered_the_other_way_round():
     # sense: ge -- a floor tightens as it RISES, so the tightest point is the highest one.
     from core.config import order_sweep_points
 
-    runs = _sweep_runs("emploi_min", "threshold", [5629321, 6027000, 6428000])
+    runs = _sweep_runs("employment_min", "threshold", [5629321, 6027000, 6428000])
     ordered = order_sweep_points(runs, _sweep_config())
-    assert _thresholds(ordered, "emploi_min", "threshold") == [6428000, 6027000, 5629321]
+    assert _thresholds(ordered, "employment_min", "threshold") == [6428000, 6027000, 5629321]
 
 
 def test_two_fronts_are_ordered_independently_of_one_another():
     from core.config import order_sweep_points
 
     runs = (
-        _sweep_runs("azote_max", "threshold", [1930903, 1061997], forcing=None)
-        + _sweep_runs("azote_max", "threshold", [1930903, 1061997], forcing="F9")
+        _sweep_runs("nitrogen_max", "threshold", [1930903, 1061997], forcing=None)
+        + _sweep_runs("nitrogen_max", "threshold", [1930903, 1061997], forcing="F9")
     )
     ordered = order_sweep_points(runs, _sweep_config())
     assert [r["forcing"] for r in ordered] == [None, None, "F9", "F9"]
-    assert _thresholds(ordered, "azote_max", "threshold") == [
+    assert _thresholds(ordered, "nitrogen_max", "threshold") == [
         1061997, 1930903, 1061997, 1930903
     ]
 
@@ -679,7 +679,7 @@ def test_ordering_never_moves_a_run_out_of_its_sweep_block():
 
     cells = [{"name": "P", "policy": "P", "forcing": None, "sweep": None}]
     ordered = order_sweep_points(
-        cells + _sweep_runs("azote_max", "threshold", [1930903, 1061997]), _sweep_config()
+        cells + _sweep_runs("nitrogen_max", "threshold", [1930903, 1061997]), _sweep_config()
     )
     assert ordered[0]["name"] == "P"
 
@@ -690,8 +690,8 @@ def test_a_sweep_over_something_that_is_not_a_bound_level_is_left_alone():
     # which is worse than not chaining.
     from core.config import order_sweep_points
 
-    runs = _sweep_runs("azote_max", "scale", [10.0, 1.0])
-    assert _thresholds(order_sweep_points(runs, _sweep_config()), "azote_max", "scale") == [
+    runs = _sweep_runs("nitrogen_max", "scale", [10.0, 1.0])
+    assert _thresholds(order_sweep_points(runs, _sweep_config()), "nitrogen_max", "scale") == [
         10.0, 1.0
     ]
 
@@ -713,10 +713,10 @@ def test_a_two_dimensional_sweep_is_left_alone():
 
     runs = expand_runs([{
         "name": "S", "policy": "P", "forcing": None, "sweep": "S",
-        "matrix": {"args:azote_max.threshold": [1930903, 1061997], "data.year": ["2017"]},
+        "matrix": {"args:nitrogen_max.threshold": [1930903, 1061997], "data.year": ["2017"]},
     }])
     ordered = order_sweep_points(runs, _sweep_config())
-    assert _thresholds(ordered, "azote_max", "threshold") == [1930903, 1061997]
+    assert _thresholds(ordered, "nitrogen_max", "threshold") == [1930903, 1061997]
 
 
 def test_ordering_leaves_a_plain_batch_untouched():
@@ -730,13 +730,13 @@ def test_ordering_leaves_a_plain_batch_untouched():
 def test_seed_candidates_tries_the_previous_point_of_the_front_first():
     from scripts.run_scenarios import seed_candidates
 
-    run = {"policy": "P8", "forcing": None, "sweep": "pareto_azote"}
+    run = {"policy": "P8", "forcing": None, "sweep": "pareto_nitrogen"}
     previous = {"P1": "CS"}
     nominal = {"P1": "BA"}
-    global_seed = ({"P1": "MA"}, "outputs/calib_retenu")
+    global_seed = ({"P1": "MA"}, "outputs/calib_selected")
 
     candidates = seed_candidates(
-        run, {("P8", None, "pareto_azote"): (previous, "point_1")}, {"P8": nominal},
+        run, {("P8", None, "pareto_nitrogen"): (previous, "point_1")}, {"P8": nominal},
         global_seed,
     )
     assert [alloc for alloc, _ in candidates] == [previous, nominal, global_seed[0]]
@@ -748,18 +748,18 @@ def test_seed_candidates_does_not_offer_another_fronts_point():
     # allocation has no reason to be feasible here.
     from scripts.run_scenarios import seed_candidates
 
-    run = {"policy": "P8", "forcing": None, "sweep": "pareto_azote"}
-    other_front = {("P8", "F9", "pareto_azote"): ({"P1": "CS"}, "point_1")}
+    run = {"policy": "P8", "forcing": None, "sweep": "pareto_nitrogen"}
+    other_front = {("P8", "F9", "pareto_nitrogen"): ({"P1": "CS"}, "point_1")}
     assert seed_candidates(run, other_front, {}, None) == []
 
 
 def test_seed_candidates_offers_nothing_when_the_chain_is_off():
     from scripts.run_scenarios import seed_candidates
 
-    run = {"policy": "P8", "forcing": None, "sweep": "pareto_azote"}
-    global_seed = ({"P1": "MA"}, "outputs/calib_retenu")
+    run = {"policy": "P8", "forcing": None, "sweep": "pareto_nitrogen"}
+    global_seed = ({"P1": "MA"}, "outputs/calib_selected")
     candidates = seed_candidates(
-        run, {("P8", None, "pareto_azote"): ({"P1": "CS"}, "pt")}, {"P8": {"P1": "BA"}},
+        run, {("P8", None, "pareto_nitrogen"): ({"P1": "CS"}, "pt")}, {"P8": {"P1": "BA"}},
         global_seed, chain=False,
     )
     assert candidates == [global_seed]  # the explicit --warm-start-from survives
@@ -788,11 +788,11 @@ def test_a_standalone_front_is_ordered_and_chained_like_a_planned_one():
     from core.config import compose_runs, order_sweep_points
 
     spec = {"sweeps": [{
-        "name": "pareto_azote",
-        "matrix": {"args:azote_max.threshold": [1930903, 1544722, 1061997]},
+        "name": "pareto_nitrogen",
+        "matrix": {"args:nitrogen_max.threshold": [1930903, 1544722, 1061997]},
     }]}
     ordered = order_sweep_points(compose_runs(spec), _sweep_config())
-    assert _thresholds(ordered, "azote_max", "threshold") == [1061997, 1544722, 1930903]
+    assert _thresholds(ordered, "nitrogen_max", "threshold") == [1061997, 1544722, 1930903]
 
 
 def test_compose_runs_passes_a_legacy_runs_spec_straight_through():
@@ -870,14 +870,14 @@ def test_prospective_labour_slack_covers_every_employment_floor():
     from core.config import apply_overrides, compose_runs, load_batch_spec, load_config
 
     # Territory-wide labour capacity at slack 1.0, measured on the real dataset (see the
-    # header of scenarios_politiques.yaml).
+    # header of scenarios_policies.yaml).
     capacity_hours_at_slack_1 = 6_252_740
-    hours_per_etp = 1607
+    hours_per_fte = 1607
 
     base = load_config(Path("case_studies/guadeloupe/config.yaml"))
     # The catalogue, not the plan: a floor that only becomes infeasible once someone adds
     # its policy to the plan has been broken since it was written.
-    spec = load_batch_spec(Path("case_studies/guadeloupe/scenarios_politiques.yaml"), base)
+    spec = load_batch_spec(Path("case_studies/guadeloupe/scenarios_policies.yaml"), base)
     for run in compose_runs(spec):
         cfg = apply_overrides(base, run)
         floors = [
@@ -885,7 +885,7 @@ def test_prospective_labour_slack_covers_every_employment_floor():
             for entry in cfg["constraints"]
             if entry.get("enable")
             and entry["name"] == "territory_indicator_bound"
-            and entry["args"].get("indicator") == "travail"
+            and entry["args"].get("indicator") == "labor"
             and entry["args"].get("sense") == "ge"
         ]
         if not floors:
@@ -895,15 +895,15 @@ def test_prospective_labour_slack_covers_every_employment_floor():
             for entry in cfg["constraints"]
             if entry.get("enable") and entry["name"] == "farm_labor_hours_max"
         )
-        cap_etp = capacity_hours_at_slack_1 * slack / hours_per_etp
+        cap_fte = capacity_hours_at_slack_1 * slack / hours_per_fte
         for args in floors:
             # The bound reads `hours x scale >= threshold`, so the hours it demands are
             # threshold / scale -- dividing, not multiplying (the two happen to coincide
             # for scale = 1/1607, which is why this is worth writing out).
-            required_etp = args["threshold"] / args.get("scale", 1.0) / hours_per_etp
-            assert required_etp <= cap_etp, (
-                f"{run['name']}: plancher d'emploi {required_etp:,.0f} ETP au-dessus du "
-                f"plafond de main d'oeuvre {cap_etp:,.0f} ETP (slack {slack})"
+            required_fte = args["threshold"] / args.get("scale", 1.0) / hours_per_fte
+            assert required_fte <= cap_fte, (
+                f"{run['name']}: plancher d'emploi {required_fte:,.0f} ETP au-dessus du "
+                f"plafond de main d'oeuvre {cap_fte:,.0f} ETP (slack {slack})"
             )
 
 

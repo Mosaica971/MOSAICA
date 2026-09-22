@@ -38,7 +38,7 @@ def generate_report(
     # A run that knows its name gets a folder named after it (see run_folder.slugify);
     # `main.py` sets no run_name, so an ad-hoc solve still lands in outputs/output_N.
     output_dir = create_output_folder(outputs_root, config.get("run_name"))
-    hours_per_etp = indicators.hours_per_etp_from_config(config)
+    hours_per_fte = indicators.hours_per_fte_from_config(config)
     cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
 
     output_allocation = indicators.decode_output_allocation(model)
@@ -55,11 +55,11 @@ def generate_report(
     _write_crop_economics(dataset, input_representative, output_dir, "input", cost_per_hour)
     # Tidy (crop x region) fact tables backing the comparison dashboard's free pivoting.
     for side, allocation in (("output", output_allocation), ("input", input_representative)):
-        indicators.compute_facts_table(dataset, allocation, hours_per_etp, cost_per_hour).to_csv(
+        indicators.compute_facts_table(dataset, allocation, hours_per_fte, cost_per_hour).to_csv(
             _csv_path(output_dir, f"facts_{side}.csv"), index=False
         )
-    _write_etp_indicators(dataset, output_allocation, hours_per_etp, output_dir, "output")
-    _write_etp_indicators(dataset, input_representative, hours_per_etp, output_dir, "input")
+    _write_fte_indicators(dataset, output_allocation, hours_per_fte, output_dir, "output")
+    _write_fte_indicators(dataset, input_representative, hours_per_fte, output_dir, "input")
 
     gini_revenue_by_farm = _write_output_only_indicators(dataset, output_allocation, output_dir)
     _write_shannon_and_surface_by_key(dataset, input_allocation, output_allocation, output_dir)
@@ -72,10 +72,10 @@ def generate_report(
     delta_summary = {key: output_summary[key] - input_summary[key] for key in output_summary}
 
     output_econ = indicators.compute_economic_totals(
-        dataset, output_allocation, hours_per_etp, cost_per_hour
+        dataset, output_allocation, hours_per_fte, cost_per_hour
     )
     input_econ = indicators.compute_economic_totals(
-        dataset, input_representative, hours_per_etp, cost_per_hour
+        dataset, input_representative, hours_per_fte, cost_per_hour
     )
     delta_econ = {key: output_econ[key] - input_econ[key] for key in output_econ}
 
@@ -225,8 +225,8 @@ def _write_output_only_indicators(
     return indicators.compute_gini(revenue_by_farm)
 
 
-def _write_etp_indicators(
-    dataset: Dataset, allocation: pd.Series, hours_per_etp: float, output_dir: Path, side: str
+def _write_fte_indicators(
+    dataset: Dataset, allocation: pd.Series, hours_per_fte: float, output_dir: Path, side: str
 ) -> None:
     """Employment (ETP / full-time equivalents) by region/island/farm for one side, from
     the labor hours embedded in each crop's technical itinerary."""
@@ -234,17 +234,17 @@ def _write_etp_indicators(
     island = indicators.plot_to_island(dataset)
     farm = indicators.plot_to_farm(dataset)
 
-    etp_by_region = indicators.compute_etp_by_key(dataset, allocation, region, hours_per_etp)
-    indicators.compute_etp_by_key(dataset, allocation, island, hours_per_etp).to_csv(
-        _csv_path(output_dir, f"etp_by_island_{side}.csv"), header=["etp"], index_label="island"
+    fte_by_region = indicators.compute_fte_by_key(dataset, allocation, region, hours_per_fte)
+    indicators.compute_fte_by_key(dataset, allocation, island, hours_per_fte).to_csv(
+        _csv_path(output_dir, f"fte_by_island_{side}.csv"), header=["fte"], index_label="island"
     )
-    indicators.compute_etp_by_key(dataset, allocation, farm, hours_per_etp).to_csv(
-        _csv_path(output_dir, f"etp_by_farm_{side}.csv"), header=["etp"], index_label="farm"
+    indicators.compute_fte_by_key(dataset, allocation, farm, hours_per_fte).to_csv(
+        _csv_path(output_dir, f"fte_by_farm_{side}.csv"), header=["fte"], index_label="farm"
     )
-    etp_by_region.to_csv(
-        _csv_path(output_dir, f"etp_by_region_{side}.csv"), header=["etp"], index_label="region"
+    fte_by_region.to_csv(
+        _csv_path(output_dir, f"fte_by_region_{side}.csv"), header=["fte"], index_label="region"
     )
-    plots.plot_etp_by_region(etp_by_region, output_dir / "plots" / f"etp_by_region_{side}.png")
+    plots.plot_fte_by_region(fte_by_region, output_dir / "plots" / f"fte_by_region_{side}.png")
 
 
 def _write_shannon_and_surface_by_key(
@@ -305,16 +305,16 @@ def write_calibration(result: calibration.CalibrationResult, output_dir: Path) -
 
 
 def _write_allocation_csv(dataset: Dataset, allocation: pd.Series, path: Path) -> None:
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
     farm = indicators.plot_to_farm(dataset).reindex(allocation.index)
     frame = pd.DataFrame(
         {
             "plot": allocation.index,
             "crop": allocation.to_numpy(),
             "farm": farm.to_numpy(),
-            "region": data_parc["REGION"].reindex(allocation.index).to_numpy(),
-            "island": data_parc["ILE"].reindex(allocation.index).to_numpy(),
-            "surface_ha": data_parc["SURF_HA"].reindex(allocation.index).to_numpy(),
+            "region": plot_data["REGION"].reindex(allocation.index).to_numpy(),
+            "island": plot_data["ILE"].reindex(allocation.index).to_numpy(),
+            "surface_ha": plot_data["SURF_HA"].reindex(allocation.index).to_numpy(),
         }
     )
     frame.to_csv(path, index=False)
@@ -420,8 +420,8 @@ def _build_recap(
         # (Chopin et al. 2015 §2.6) -- a report card, never an input to the model.
         "calibration": calibration_summary,
         "gini_revenue_by_farm": gini_revenue_by_farm,
-        "total_plots": int(len(dataset.parameters["data_parc"])),
-        "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),
+        "total_plots": int(len(dataset.parameters["plot_data"])),
+        "total_farms": int(dataset.parameters["farm_plot_map"]["farm"].nunique()),
     }
 
 
@@ -476,8 +476,8 @@ def _render_recap_markdown(recap: dict[str, Any]) -> str:
         f"{econ['output']['total_labor_cost']:,.0f} (delta {econ['delta']['total_labor_cost']:+,.0f})",
         f"- Revenu net (marge brute - cout MO, EUR) : {econ['input']['total_net_revenue']:,.0f} -> "
         f"{econ['output']['total_net_revenue']:,.0f} (delta {econ['delta']['total_net_revenue']:+,.0f})",
-        f"- Emploi (ETP) : {econ['input']['total_etp']:,.1f} -> "
-        f"{econ['output']['total_etp']:,.1f} (delta {econ['delta']['total_etp']:+,.1f})",
+        f"- Emploi (ETP) : {econ['input']['total_fte']:,.1f} -> "
+        f"{econ['output']['total_fte']:,.1f} (delta {econ['delta']['total_fte']:+,.1f})",
     ]
 
     calib = recap["calibration"]

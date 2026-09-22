@@ -1,0 +1,382 @@
+# POLICY CATALOGUE -- what a public authority DECIDES.
+#
+# Ten public decisions (quotas, subsidies, bans, environmental ceilings, employment policy),
+# ordered along an axis running from accelerationist intensification to an agroecological
+# break, plus one (P9) deliberately off the axis.
+#
+# THIS FILE RUNS NOTHING. It is a catalogue: it declares the available policies, and
+# `plan.yaml` says which are played and under which forcings. Its counterpart is
+# `scenarios_forcings.yaml` (what climate and markets IMPOSE); the crop groups it names come
+# from `crop_groups.yaml` and from `crop_families` in `config.yaml`.
+#
+# It can still be run alone, without a plan, to replay one policy:
+#   .venv/Scripts/python scripts/run_scenarios.py --scenarios <this file> --policies P8_agroecological_transition
+#
+# Policy names were translated on 2026-09-22 (P4_statu_quo -> P4_status_quo, ...). Runs
+# solved earlier keep the French name in their folder and recap; the dashboard maps the old
+# coordinates onto the new ones (case_studies/guadeloupe/legacy_names.py).
+#
+# ---------------------------------------------------------------------------------------
+# REFERENCE ORDERS OF MAGNITUDE -- every threshold below is a percentage of one of these, and
+# that is the only reason the numbers are not arbitrary. Measured on outputs/output_3, i.e.
+# the default config.yaml solved on the real 2017 dataset:
+#
+#   gross margin     98 632 983 EUR        subsidies        71 805 112 EUR
+#   employment       3 503 FTE             allocated area   23 481 ha
+#   nitrogen         1 930 903 kg N        (82.2 kg N/ha)
+#   TFI              66 946                (2.85 /ha)
+#   GHG              142 733 204 u         (model unit, see docs/status/roadmap.yaml)
+#   water            34 660 000 m3         (irrigable area only, see plot_weight)
+#   kcal self-suff.  10.1 %                (limiting: lipids, 2.8 %)
+#
+# LABOUR IS THE BINDING CONSTRAINT AND THE FIRST CAUSE OF INFEASIBILITY.
+# Eq_MO_MAX_Expl caps each farm at the labour its observed 2017 cropping plan required; over
+# the territory that is 6 252 740 h = 3 891 FTE at slack 1.0, against 5 629 390 h actually
+# used. Hence:
+#   * an employment FLOOR above 3 891 FTE is infeasible unless the same scenario raises the
+#     slack of `labor_max_farm` -- slack 1.5 buys 5 837 FTE, slack 2.0 buys 7 782;
+#   * the food-crop floors (bc/ig/ma/an/me/plu_prod_min) claim 6 222 537 h through their
+#     cheapest crops, i.e. 0.5 % of margin on a lower bound that ignores competition for
+#     land, and they ARE infeasible against the ceiling at slack 1.0 (main.py failed on it,
+#     2026-07-21). Every policy that enables them raises the slack in the same move.
+# The GAMS author made the same move: the multipliers "x 1.7 for S1, x 1.3 for S2, x 10 for
+# S3" are commented under the formula in MODELE.txt.
+#
+# AND RAISING THE SLACK IS NOT ENOUGH. P10 was first written with a 6 000 FTE floor under a
+# slack of 2.2, which grants an 8 561 FTE budget -- and it was INFEASIBLE. The LP check found
+# it, and maximising labour under each policy's other constraints gave the real ceiling:
+#
+#   P8_agroecological_transition    max 4 875 FTE        P10_bifurcation   max 4 975 FTE
+#
+# What limits employment is not the hour budget but the CROPS able to absorb those hours
+# once the environmental ceilings apply. A bisection ruled out any single ceiling as the
+# cause (removing TFI, nitrogen or GHG left it infeasible), so it is the combination, plus
+# the per-farm form of the labour ceiling. The floors below sit at ~86-88 % of those measured
+# maxima, to leave room for the integrality gap the LP ignores. Re-measure before raising one.
+#
+# SOLVER COST -- read before launching.
+#   * NO POLICY REOPENS `ma_exp_supp`, on purpose: the 25 straw-mulch market-gardening
+#     variants are identical copies of one conventional activity (see the
+#     `organic_market_gardening` entry of crop_groups.yaml). Reopening them costs 548 000
+#     binaries of pure symmetry and makes the organic share inoperative. Every policy here
+#     therefore stays in the ~310-335 000 binary regime.
+#   * P9 and P10 carry an orchard-area floor, and 2026-07-29 established that this
+#     constraint hits the time limit with an incoherent incumbent when solved cold
+#     (docs/04-vigilance.md, "The residual PAD"). They keep a raised `solver.args.time_limit`.
+# The mitigation already exists: warm start from a repaired allocation
+# (scripts/repair_allocation.py, then solver.warm_start_from). Beyond ~309 000 binaries HiGHS
+# no longer finds a good incumbent unaided. run_scenarios.py also chains warm starts inside a
+# crossed batch -- see --warm-start-chain.
+# ---------------------------------------------------------------------------------------
+
+# Makes the catalogue self-contained: `--scenarios <this file> --policies P8` must work
+# without a plan, so the crop groups must resolve here too.
+include:
+  crop_groups: crop_groups.yaml
+
+policies:
+
+  # --- Accelerationist pole --------------------------------------------------------------
+
+  - name: P1_full_deregulation
+    description: >-
+      EXTREME BOUND. The market alone: no subsidy, no quota, no agronomic obligation, and a
+      farmer assumed risk-neutral. Politically unlikely; it bounds from above what pure
+      margin can extract from the territory, and measures what all the rules together cost.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.0}          # 1. end of all public aid
+    enable:
+      - maximize_gross_margin                 # 2. pure gross-margin objective (no aversion)
+    disable:
+      # WARNING -- P1 is the ONLY policy that changes objective, so its `objective` column in
+      # the batch_summary is NOT comparable with the others: it is not the same function.
+      # Compare P1 with the others on the physical and economic columns (gross_margin, fte,
+      # nitrogen_kg, tfi, water_m3...), which are computed identically whatever the objective.
+      - maximize_risk_adjusted_gross_margin
+      - ba_quota_max                          # 3. no banana ceiling
+      - cs_quota_max                          # 4. no sugar ceiling
+      - bc_quota_max                          # 5. no plantain ceiling
+      - pn_prod_min                           # 6. no grassland floor
+      - ba_ja                                 # 7. no mandatory fallow
+      - ba_rota                               # 8. no mandatory rotation
+      - an_agro_max_farm                      # 9. no per-farm agronomic ceiling
+      - ig_agro_max_farm
+      - cs_irrig_ban                          # 10. irrigated cane allowed
+      - fallow                                # 11. abandoned land back in cultivation
+      - nocult_nc_1
+      - nocult_nc_2
+    set_args:
+      - {label: labor_max_farm, args: {slack: 3.0}}   # 12. hired labour effectively unlimited
+
+  - name: P2_industrial_acceleration
+    description: >-
+      A developmental state serving the export chains: pay, lift the ceilings, mechanise,
+      irrigate. Labour contracts (slack < 1), which mechanically crowds out labour-intensive
+      crops in favour of what can be mechanised.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: sugarcane}, factor: 1.5}      # 1. massive support to cane
+        - {crops: {group: export_banana}, factor: 1.4}  # 2. massive support to banana
+    disable:
+      - cs_irrig_ban                          # 3. irrigated cane allowed
+      - fallow                                # 4. abandoned land back in cultivation
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 100000000}}   # 5. sugar ceiling lifted
+      - {label: ba_quota_max, args: {threshold: 100000000}}   # 6. banana ceiling lifted
+      - {label: bc_quota_max, args: {threshold: 40000}}       # 7. plantain nearly uncapped
+      - {label: ba_ja, args: {ratio: 0.10}}                   # 8. fallow halved
+      - {label: ba_rota, args: {ratio: 0.10}}
+      - {label: pn_prod_min, args: {threshold: 3000}}         # 9. livestock marginalised
+      - {label: labor_max_farm, args: {slack: 0.85}}          # 10. labour contraction
+    enable_add:
+      - name: crop_share_bound                                # 11. mandatory mechanisation
+        args: {label: cs_meca_min, numerator_crops: {group: intensive_sugarcane},
+               denominator_crops: {group: sugarcane}, sense: ge, share: 0.60}
+      - name: territory_indicator_bound                       # 12. public money is still
+        args: {label: subsidy_budget, indicator: subsidy,     #     not infinite
+               sense: le, threshold: 95000000}
+
+  - name: P3_moderate_intensification
+    description: >-
+      The credible ten-year productivist path: ceilings relaxed by 30 %, a little more
+      support, some mechanisation, and a gradual transition (40 % inertia). The point of the
+      spectrum closest to a POSEI reform that could actually happen.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: sugarcane}, factor: 1.20}       # 1.
+        - {crops: {group: export_banana}, factor: 1.15}   # 2.
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 139100}}   # 3. +30 % sugar
+      - {label: ba_quota_max, args: {threshold: 101240}}   # 4. +30 % banana
+      - {label: bc_quota_max, args: {threshold: 15000}}    # 5. wider plantain outlet
+      - {label: ba_ja, args: {ratio: 0.15}}                # 6. lighter fallow
+      - {label: labor_max_farm, args: {slack: 1.10}}       # 7. a little more labour
+    enable_add:
+      - name: crop_share_bound                             # 8. mechanisation encouraged
+        args: {label: cs_meca_min, numerator_crops: {group: intensive_sugarcane},
+               denominator_crops: {group: sugarcane}, sense: ge, share: 0.40}
+      - name: territory_indicator_bound                    # 9. bounded public envelope
+        args: {label: subsidy_budget, indicator: subsidy, sense: le, threshold: 85000000}
+      - name: baseline_inertia_min                         # 10. gradual transition
+        args: {label: inertia, min_share: 0.40}
+
+  # --- Status quo -------------------------------------------------------------------------
+
+  - name: P4_status_quo
+    description: >-
+      The status quo as a POLICY, not as the absence of one: quotas, aid and rules stay where
+      they are, the public envelope is frozen and environmental degradation is forbidden
+      (ceilings set at the observed level), and the territory changes slowly (70 % inertia).
+      It is the point every other policy is compared against.
+    set_args:
+      - {label: labor_max_farm, args: {slack: 1.0}}        # 1. labour unchanged
+    enable_add:
+      - name: baseline_inertia_min                         # 2. 70 % of hectares stay put
+        args: {label: inertia, min_share: 0.70}
+      - name: territory_indicator_bound                    # 3. envelope frozen at 2017 level
+        args: {label: subsidy_budget, indicator: subsidy, sense: le, threshold: 72000000}
+      - name: territory_indicator_bound                    # 4. no pesticide degradation
+        args: {label: tfi_cap, indicator: tfi, sense: le, threshold: 67000}
+      - name: territory_indicator_bound                    # 5. no nitrogen degradation
+        args: {label: nitrogen_cap, indicator: nitrogen, sense: le, threshold: 1950000}
+      - name: territory_indicator_bound                    # 6. farm employment maintained
+        args: {label: employment_floor, indicator: labor, sense: ge,
+               threshold: 3400, scale: 0.00062228}         # 1/1607 h per FTE
+
+  - name: P5_budget_austerity
+    description: >-
+      The status quo without public money: the envelope falls by 40 %, cane's coupled aid
+      is cut first, and nothing compensates. Tests how much of the farming geography is owed
+      to subsidies rather than to agronomy.
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.60}                  # 1. across-the-board cut
+        - {crops: {group: sugarcane}, factor: 0.80}   # 2. extra cut on cane
+                                                      #    (0.48 in total)
+    set_args:
+      - {label: labor_max_farm, args: {slack: 0.90}}   # 3. fewer new farmers, fewer workers
+    enable_add:
+      - name: territory_indicator_bound              # 4. hard budget ceiling
+        args: {label: subsidy_budget, indicator: subsidy, sense: le, threshold: 43000000}
+      - name: baseline_inertia_min                   # 5. the territory does not reconfigure fast
+        args: {label: inertia, min_share: 0.60}
+
+  # --- Agroecological pole ------------------------------------------------------------------
+
+  - name: P6_incentive_greening
+    description: >-
+      Agroecology by the carrot alone: no new ban; practices are paid for and the systems
+      that allow them are reopened (bagasse/BRF mulching, organic fertilisation, rotational
+      grazing). Measures what incentives achieve without constraint -- the public-policy
+      question most often asked.
+    overrides:
+      data.scenario: SMART                     # 1. SMART OTK matrix + compost AECM
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: market_gardening}, factor: 1.30}          # 2. market-gardening support
+        - {crops: {group: organic_market_gardening}, factor: 1.60}  # 3. organic premium (MA_PLBIO/MA_MOBIO)
+    disable:
+      - pn_tour_supp                           # 4. rotational grazing reopened
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.25}}    # 5. slightly stronger fallow
+      - {label: labor_max_farm, args: {slack: 1.20}}   # 6. a little more labour
+    enable_add:
+      - name: crop_share_bound                  # 7. incentive plus a modest organic share
+        args: {label: organic_min, numerator_crops: {group: organic_market_gardening},
+               denominator_crops: {group: market_gardening}, sense: ge, share: 0.10}
+      - name: territory_indicator_bound         # 8. the incentive has a bounded cost
+        args: {label: subsidy_budget, indicator: subsidy, sense: le, threshold: 85000000}
+      - name: baseline_inertia_min              # 9.
+        args: {label: inertia, min_share: 0.50}
+
+  - name: P7_regulatory_ecophyto
+    description: >-
+      Agroecology by the stick alone: firm environmental ceilings, no extra aid. The exact
+      counterpart of P6 -- the two are read together, and the gap between them answers
+      "should we pay or forbid?".
+    enable:
+      - pn_piq_cld                             # 1. grassland banned on chlordecone soils (health)
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.30}}    # 2. stronger fallow
+    enable_add:
+      - name: territory_indicator_bound        # 3. TFI -30 % (Ecophyto trajectory)
+        args: {label: tfi_cap, indicator: tfi, sense: le, threshold: 46862}
+      - name: territory_indicator_bound        # 4. nitrogen -20 %
+        args: {label: nitrogen_cap, indicator: nitrogen, sense: le, threshold: 1544722}
+      - name: zone_indicator_bound             # 5. nitrates directive: 170 kg N/ha per farm
+        args: {label: farm_nitrates, zone: farms, indicator: nitrogen, sense: le,
+               threshold_per_ha: 170}
+      - name: baseline_inertia_min             # 6.
+        args: {label: inertia, min_share: 0.50}
+
+  - name: P8_agroecological_transition
+    description: >-
+      The complete, coherent package: environmental ceilings, aid redeployed from export to
+      agroecology, and a new-farmer policy that loosens the labour ceiling (slack 1.5) so the
+      extra work becomes possible. The "serious" agroecological scenario, as opposed to the
+      P10 bound.
+    overrides:
+      data.scenario: SMART                     # 1.
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: organic_market_gardening}, factor: 1.80}  # 2. redeployed to organic
+        - {crops: {group: market_gardening}, factor: 1.30}          # 3.
+        - {crops: {group: sugarcane}, factor: 0.80}                 # 4. ... funded by export
+    disable:
+      - pn_tour_supp                           # 5. rotational grazing reopened
+    set_args:
+      - {label: ba_ja, args: {ratio: 0.35}}    # 6. clearly stronger rotations
+      - {label: labor_max_farm, args: {slack: 1.50}}  # 7. new-farmer policy (see header)
+    enable_add:
+      - name: territory_indicator_bound        # 9. TFI -40 %
+        args: {label: tfi_cap, indicator: tfi, sense: le, threshold: 40168}
+      - name: territory_indicator_bound        # 10. nitrogen -30 %
+        args: {label: nitrogen_cap, indicator: nitrogen, sense: le, threshold: 1351632}
+      - name: zone_indicator_bound             # 11. 150 kg N/ha per farm
+        args: {label: farm_nitrates, zone: farms, indicator: nitrogen, sense: le,
+               threshold_per_ha: 150}
+      - name: territory_indicator_bound        # 12. water -20 % (irrigable area only)
+        args: {label: water_cap, indicator: water, sense: le, threshold: 27700000,
+               scale: 10.0, plot_weight: irrigable}
+      - name: territory_indicator_bound        # 13. employment floor: +20 % over the 3 503
+        args: {label: employment_floor, indicator: labor, sense: ge,   #  reference FTE.
+               threshold: 4200, scale: 0.00062228}  # 86 % of the measured maximum (4 875 FTE)
+      - name: crop_share_bound                 # 14. 25 % of market gardening organic
+        args: {label: organic_min, numerator_crops: {group: organic_market_gardening},
+               denominator_crops: {group: market_gardening}, sense: ge, share: 0.25}
+      - name: territory_indicator_bound        # 15. bounded public envelope
+        args: {label: subsidy_budget, indicator: subsidy, sense: le, threshold: 80000000}
+      - name: baseline_inertia_min             # 16.
+        args: {label: inertia, min_share: 0.40}
+
+  - name: P9_food_sovereignty
+    description: >-
+      OFF THE AXIS. Neither intensive nor agroecological: feed the territory. The food-crop
+      production floors of the GAMS SCENARIO block are re-enabled, export is loosened to free
+      land, and aid shifts to local crops. Warning: the production floors are infeasible
+      without loosening the labour ceiling (see header), hence slack 1.6. SOLVER RISK:
+      contains an orchard floor.
+    overrides:
+      solver.args.time_limit: 7200             # orchard floor (see header)
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: food_crops}, factor: 1.50}      # 1. shift to food crops
+        - {crops: {group: export_banana}, factor: 0.70}   # 2. ... funded by export
+        - {crops: {group: sugarcane}, factor: 0.80}       # 3.
+    enable:
+      - bc_prod_min                            # 4. plantain floor (4 056 t)
+      - ig_prod_min                            # 5. yam floor (5 125 t)
+      - ma_prod_min                            # 6. market-gardening floor (26 404 t)
+      - an_prod_min                            # 7. pineapple floor (2 322 t)
+      - me_prod_min                            # 8. melon floor (4 135 t)
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 80000}}   # 9. less cane, land freed
+      - {label: bc_quota_max, args: {threshold: 20000}}   # 10. wider plantain outlet
+      - {label: labor_max_farm, args: {slack: 1.60}}      # 11. REQUIRED (see header)
+    enable_add:
+      - name: territory_production_bound       # 13. orchard floor as an AREA (200 ha).
+        args: {label: orchard_area_min,        #     External order of magnitude: Agreste 2017
+               groups: [{crops: {group: orchards}, use_yield: false,
+                         rate_multiplier: 1.0}],
+               sense: ge, threshold: 200}      #     reports 385 ha, i.e. 335 at our coverage.
+      - name: territory_indicator_bound        # 14. employment: 73 % of the measured maximum
+        args: {label: employment_floor, indicator: labor, sense: ge,   #  (5 734 FTE) -- the
+               threshold: 4200, scale: 0.00062228}   # loosest of the three floors, since
+                                                     # there is no pesticide ceiling here.
+      - name: territory_indicator_bound        # 15.
+        args: {label: subsidy_budget, indicator: subsidy, sense: le, threshold: 80000000}
+      - name: baseline_inertia_min             # 16. partial break accepted
+        args: {label: inertia, min_share: 0.30}
+
+  - name: P10_agroecological_bifurcation
+    description: >-
+      Agroecological EXTREME BOUND, the mirror of P1. Ecophyto met (-50 % TFI), nitrogen
+      -40 %, water -30 %, GHG -25 %, food sovereignty, half of market gardening organic,
+      export halved, and no inertia: the break is accepted. Unlikely within ten years; it is
+      a bound and a measure of the cost of the maximal constraint. SOLVER RISK (orchard
+      floor + stacked ceilings): warm start recommended.
+    overrides:
+      data.scenario: SMART                     # 1.
+      solver.args.time_limit: 7200             # orchard floor (see header)
+      economic_overrides.subsidy_multipliers:
+        - {crops: {group: organic_market_gardening}, factor: 2.00}  # 2.
+        - {crops: {group: market_gardening}, factor: 1.50}          # 3.
+        - {crops: {group: food_crops}, factor: 1.30}                # 4.
+        - {crops: {group: sugarcane}, factor: 0.60}                 # 5.
+        - {crops: {group: export_banana}, factor: 0.50}             # 6.
+    enable:
+      - bc_prod_min                            # 7. food-crop floors
+      - ig_prod_min
+      - ma_prod_min
+      - an_prod_min
+      - me_prod_min
+    disable:
+      - pn_tour_supp                           # 8. rotational grazing reopened
+    set_args:
+      - {label: cs_quota_max, args: {threshold: 70000}}   # 10. cane -35 %
+      - {label: ba_quota_max, args: {threshold: 40000}}   # 11. export banana -49 %
+      - {label: bc_quota_max, args: {threshold: 20000}}   # 12.
+      - {label: ba_ja, args: {ratio: 0.40}}               # 13.
+      - {label: labor_max_farm, args: {slack: 1.80}}      # 14. strong new-farmer policy
+    enable_add:
+      - name: territory_indicator_bound        # 15. TFI -50 % (Ecophyto target)
+        args: {label: tfi_cap, indicator: tfi, sense: le, threshold: 33473}
+      - name: territory_indicator_bound        # 16. nitrogen -40 %
+        args: {label: nitrogen_cap, indicator: nitrogen, sense: le, threshold: 1158542}
+      - name: zone_indicator_bound             # 17. 120 kg N/ha per farm
+        args: {label: farm_nitrates, zone: farms, indicator: nitrogen, sense: le,
+               threshold_per_ha: 120}
+      - name: territory_indicator_bound        # 18. GHG -25 % (model unit)
+        args: {label: ghg_cap, indicator: ghg, sense: le, threshold: 107049903}
+      - name: territory_indicator_bound        # 19. water -30 %
+        args: {label: water_cap, indicator: water, sense: le, threshold: 24262000,
+               scale: 10.0, plot_weight: irrigable}
+      - name: territory_indicator_bound        # 20. employment +26 % over 3 503 reference FTE.
+        args: {label: employment_floor, indicator: labor, sense: ge,   #  88 % of the measured
+               threshold: 4400, scale: 0.00062228}   # maximum (4 975 FTE) -- read the header
+      - name: crop_share_bound                 # 21. half of market gardening organic
+        args: {label: organic_min, numerator_crops: {group: organic_market_gardening},
+               denominator_crops: {group: market_gardening}, sense: ge, share: 0.50}
+      - name: territory_production_bound       # 22. orchard floor at the Agreste value
+        args: {label: orchard_area_min,
+               groups: [{crops: {group: orchards}, use_yield: false,
+                         rate_multiplier: 1.0}],
+               sense: ge, threshold: 335}

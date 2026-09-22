@@ -3,7 +3,7 @@ import pandas as pd
 from case_studies.guadeloupe.domain import water
 
 
-def _data_cult() -> pd.DataFrame:
+def _crop_data() -> pd.DataFrame:
     """Data_Cult miniature: lignes = attributs, colonnes = cultures (comme la vraie table)."""
     rows = {f"BESOIN_EAU_{m:02d}": [10.0 * m, 0.0] for m in range(1, 13)}
     rows["KCROP"] = [0.9, 0.5]  # ligne non liée à l'eau, doit être ignorée
@@ -11,7 +11,7 @@ def _data_cult() -> pd.DataFrame:
 
 
 def test_monthly_water_need_returns_twelve_rows_in_calendar_order():
-    monthly = water.compute_monthly_water_need_per_ha_cult(_data_cult())
+    monthly = water.compute_crop_monthly_water_need_per_ha(_crop_data())
     assert list(monthly.index) == [
         "BESOIN_EAU_01", "BESOIN_EAU_02", "BESOIN_EAU_03", "BESOIN_EAU_04",
         "BESOIN_EAU_05", "BESOIN_EAU_06", "BESOIN_EAU_07", "BESOIN_EAU_08",
@@ -23,12 +23,12 @@ def test_monthly_water_need_returns_twelve_rows_in_calendar_order():
 
 
 def test_monthly_water_need_ignores_unrelated_rows():
-    monthly = water.compute_monthly_water_need_per_ha_cult(_data_cult())
+    monthly = water.compute_crop_monthly_water_need_per_ha(_crop_data())
     assert "KCROP" not in monthly.index
 
 
 def test_annual_water_need_sums_the_twelve_months():
-    annual = water.compute_water_need_per_ha_cult(_data_cult())
+    annual = water.compute_crop_water_need_per_ha(_crop_data())
     # 10 + 20 + ... + 120 = 780
     assert annual["CROP_A"] == 780.0
     assert annual["CROP_B"] == 0.0

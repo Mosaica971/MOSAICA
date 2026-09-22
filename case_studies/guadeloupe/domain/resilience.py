@@ -14,7 +14,7 @@ Markovitz penalty). The loss is therefore linear in area -- no squaring, no cova
 
 import pandas as pd
 
-# Default relative price shock applied to prix_cult. Overridable via
+# Default relative price shock applied to crop_price. Overridable via
 # config.yaml resilience.price_shock_delta.
 DEFAULT_PRICE_SHOCK_DELTA = 0.20
 
@@ -23,27 +23,27 @@ DEFAULT_PRICE_SHOCK_DELTA = 0.20
 _MONTHS_PER_YEAR = 12
 
 
-def compute_climate_margin_at_risk_per_ha_cult(
-    margin_per_ha_cult: pd.Series, var_rdt_cult: pd.Series
+def compute_crop_climate_margin_at_risk_per_ha(
+    crop_margin_per_ha: pd.Series, crop_yield_variance: pd.Series
 ) -> pd.Series:
     """Gross margin at risk (EUR/ha/year) if a bad year hits: margin times the crop's
     fractional yield loss."""
-    return margin_per_ha_cult * var_rdt_cult.reindex(margin_per_ha_cult.index)
+    return crop_margin_per_ha * crop_yield_variance.reindex(crop_margin_per_ha.index)
 
 
-def compute_price_shock_loss_per_ha_cult(
-    rdt_cult: pd.Series,
-    prix_cult: pd.Series,
-    duree_cycle_cult: pd.Series,
+def compute_crop_price_shock_loss_per_ha(
+    crop_yield: pd.Series,
+    crop_price: pd.Series,
+    crop_cycle_duration: pd.Series,
     delta: float,
 ) -> pd.Series:
-    """Margin lost (EUR/ha/year) under a relative price shock `delta` on prix_cult.
+    """Margin lost (EUR/ha/year) under a relative price shock `delta` on crop_price.
 
     Closed form: subsidies are fixed amounts (not indexed on market prices), variable costs
     scale with yield rather than price, and the bagasse by-product price is left alone -- so
     the whole loss is `delta * annualized market sales`, with no need to re-run economics.py.
     """
-    annual_market_sales = rdt_cult * prix_cult / duree_cycle_cult * _MONTHS_PER_YEAR
+    annual_market_sales = crop_yield * crop_price / crop_cycle_duration * _MONTHS_PER_YEAR
     return delta * annual_market_sales
 
 

@@ -7,16 +7,16 @@ from case_studies.guadeloupe.reporting import indicators
 
 def _dataset() -> Dataset:
     """Deux parcelles, deux cultures. SAFE ne risque rien, RISKY perd 50%."""
-    data_parc = pd.DataFrame({"SURF_HA": [2.0, 3.0]}, index=["P1", "P2"])
+    plot_data = pd.DataFrame({"SURF_HA": [2.0, 3.0]}, index=["P1", "P2"])
     parameters = {
-        "data_parc": data_parc,
-        "margin_per_ha_cult": pd.Series({"SAFE": 100.0, "RISKY": 200.0}),
+        "plot_data": plot_data,
+        "crop_margin_per_ha": pd.Series({"SAFE": 100.0, "RISKY": 200.0}),
         "crop_variance_per_ha": pd.Series({"SAFE": 0.0, "RISKY": 0.5}),
-        "rdt_cult": pd.Series({"SAFE": 10.0, "RISKY": 20.0}),
-        "prix_cult": pd.Series({"SAFE": 6.0, "RISKY": 6.0}),
-        "duree_cycle_cult": pd.Series({"SAFE": 12.0, "RISKY": 12.0}),
-        "sales_per_ha_cult": pd.Series({"SAFE": 60.0, "RISKY": 120.0}),
-        "subsidy_per_ha_cult_annualized": pd.Series({"SAFE": 40.0, "RISKY": 80.0}),
+        "crop_yield": pd.Series({"SAFE": 10.0, "RISKY": 20.0}),
+        "crop_price": pd.Series({"SAFE": 6.0, "RISKY": 6.0}),
+        "crop_cycle_duration": pd.Series({"SAFE": 12.0, "RISKY": 12.0}),
+        "crop_sales_per_ha": pd.Series({"SAFE": 60.0, "RISKY": 120.0}),
+        "crop_subsidy_per_ha_annualized": pd.Series({"SAFE": 40.0, "RISKY": 80.0}),
     }
     return Dataset(sets={}, parameters=parameters, scalars={})
 

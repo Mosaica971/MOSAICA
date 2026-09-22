@@ -4,6 +4,13 @@ Ce qui reste à faire. Les limites connues et non planifiées sont dans `docs/04
 
 ## En cours / prêt à coder
 
+**Suite du stage — cadrée le 2026-09-22, rien d'implémenté.** Cinq chantiers, dans cet ordre :
+tableau d'état, passage à l'anglais, catalogue de données et niveaux d'accès, MAELIA →
+MOSAICA (rendements et ITK simulés), MOSAICA → MAELIA (test journalier de l'assolement). Spec :
+`docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md`. Elle absorbe
+l'item « classeur Excel type bilan carbone » ci-dessous et propose de remplacer ce fichier par
+un `roadmap.yaml`.
+
 **Documentation, portabilité et arborescence — livré le 2026-08-01.** Le dépôt a désormais une
 documentation destinée à quelqu'un qui débarque, indépendante de Claude Code : `docs/README.md`
 plus cinq fichiers numérotés — utilisation, arborescence, comment modifier, **vigilance**,
@@ -130,7 +137,7 @@ listés « bloqués » plus bas et ne l'étaient pas.
 - **Prix duaux** : `core/solve/shadow_prices.py`. Un point d'IFT vaut **566,68 €** sous P7 et
   **412,18 €** sous P8, un kg d'azote **5,27 €** sous P8 (lus le 2026-09-02 dans les recaps
   `p7_ecophyto_reglementaire_f0_nominal` et `p8_transition_agroecologique_f0_nominal` ; le
-  mémoire les génère via `memoire/build_chiffres.py`, bloc `DUALS`). ⚠ Cette ligne annonçait
+  mémoire les génère via `clement/memoire/build_chiffres.py`, bloc `DUALS`). ⚠ Cette ligne annonçait
   « 286 € / 9,81 € / 12,50 € l'heure de travail », valeurs d'une campagne antérieure qu'**aucun
   recap présent sur le disque ne reproduit** ; la troisième n'était en outre pas un prix horaire
   mais le dual du plafond de main-d'œuvre d'une exploitation (~42 000 €). Un dual n'a de sens que

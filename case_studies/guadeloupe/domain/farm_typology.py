@@ -52,30 +52,30 @@ _FAMILIES = ("can", "pat", "ban", "mar", "plu", "bc", "tt", "non")
 # TYPE_EXPL_Bis cascade below -- on the real data every type-4 farm gets a 41/42 value, so
 # 1.40 never survives. It is kept here as an explicit fallback: without it, a type-4 farm
 # with an unset Bis would map to NaN and propagate an undefined objective.
-_AVERS_BY_TYPE_EXPL: dict[int, float] = {
+_RISK_AVERSION_BY_FARM_TYPE: dict[int, float] = {
     1: 1.30, 2: 1.20, 3: 0.30, 4: 1.40, 5: 0.55, 6: 2.40, 7: 0.00, 8: 2.30,
 }
-_AVERS_BY_TYPE_EXPL_BIS: dict[int, float] = {41: 0.50, 42: 1.60}
+_RISK_AVERSION_BY_SECONDARY_TYPE: dict[int, float] = {41: 0.50, 42: 1.60}
 
 # Readable names for the TYPE_EXPL codes. The eight types are those of Chopin et al. (2015)
-# Table 2; 0 is the "no cultivated surface" short-circuit at the end of compute_type_expl,
+# Table 2; 0 is the "no cultivated surface" short-circuit at the end of compute_farm_type,
 # and -1 is np.select's default, which the cascade's final catch-all should make
 # unreachable. ASCII only: these labels reach recap.md, which carries no accents.
-TYPE_EXPL_LABELS: dict[int, str] = {
-    -1: "Non classe",
-    0: "Sans surface cultivee",
-    1: "Arboriculteurs",
-    2: "Bananiers",
-    3: "Canniers specialises",
-    4: "Canniers diversifies",
-    5: "Diversifies",
-    6: "Eleveurs",
-    7: "Maraichers",
-    8: "Canniers-eleveurs",
+FARM_TYPE_LABELS: dict[int, str] = {
+    -1: "Unclassified",
+    0: "No cultivated area",
+    1: "Fruit growers",
+    2: "Banana growers",
+    3: "Specialised cane growers",
+    4: "Diversified cane growers",
+    5: "Diversified",
+    6: "Livestock farmers",
+    7: "Market gardeners",
+    8: "Cane and livestock farmers",
 }
 
 
-def compute_type_expl(
+def compute_farm_type(
     farm_plots: Mapping[str, Sequence[str]],
     base_crop_group: pd.Series,
     plot_surface_ha: Mapping[str, float],
@@ -130,32 +130,32 @@ def compute_type_expl(
         & (part_plu < 0.522),
     ]
     choices = [4, 3, 6, 8, 2, 7, 1, 5]
-    type_expl = pd.Series(
+    farm_type = pd.Series(
         np.select(conditions, choices, default=-1), index=farms
     ).astype(int)
-    type_expl[surf_cultiv == 0] = 0
+    farm_type[surf_cultiv == 0] = 0
 
     # context/gams/OPTIMISATION.txt:1557-1561 -- sub-split for
     # TYPE_EXPL=4 farms. Both conditions are evaluated in GAMS's written order (41 then
     # 42); whichever is true last wins, so the 42 assignment below is applied after 41.
-    type_expl_bis = pd.Series(np.nan, index=farms)
-    is_type_4 = type_expl == 4
+    farm_type_secondary = pd.Series(np.nan, index=farms)
+    is_type_4 = farm_type == 4
     bis_41 = (part_mar > 0) | (part_plu > 0) | (part_bc > 0) | (part_tt > 0)
     bis_42 = (part_mar == 0) | (part_plu == 0) | (part_bc == 0) | (part_tt == 0)
-    type_expl_bis[is_type_4 & bis_41] = 41
-    type_expl_bis[is_type_4 & bis_42] = 42
+    farm_type_secondary[is_type_4 & bis_41] = 41
+    farm_type_secondary[is_type_4 & bis_42] = 42
 
-    return type_expl, type_expl_bis
+    return farm_type, farm_type_secondary
 
 
-def compute_avers(type_expl: pd.Series, type_expl_bis: pd.Series) -> pd.Series:
+def compute_risk_aversion(farm_type: pd.Series, farm_type_secondary: pd.Series) -> pd.Series:
     """Risk-aversion coefficient per farm, from its OBSERVED type -- GAMS indexes AVERS on
     STOCK_TYPE_EXPL("init") (OPTIMISATION.txt:1745), not on any re-derived typology.
 
     Type 4 goes through the Bis sub-cascade; its 1.40 base value only shows through if Bis
     is unset, which the real data never produces but which must not yield NaN.
     """
-    avers = type_expl.map(_AVERS_BY_TYPE_EXPL).fillna(0.0)
-    is_type_4 = type_expl == 4
-    bis_avers = type_expl_bis.map(_AVERS_BY_TYPE_EXPL_BIS)
-    return avers.where(~is_type_4, bis_avers.fillna(_AVERS_BY_TYPE_EXPL[4]))
+    aversion = farm_type.map(_RISK_AVERSION_BY_FARM_TYPE).fillna(0.0)
+    is_type_4 = farm_type == 4
+    secondary_aversion = farm_type_secondary.map(_RISK_AVERSION_BY_SECONDARY_TYPE)
+    return aversion.where(~is_type_4, secondary_aversion.fillna(_RISK_AVERSION_BY_FARM_TYPE[4]))

@@ -23,7 +23,11 @@ _VALID_SIDES = ("input", "output")
 
 @dataclass(frozen=True)
 class Reference:
-    """One declared reference. `run` is a folder name under outputs/, not a path."""
+    """One declared reference. `run` is a folder name under outputs/, not a path.
+
+    `run` may be declared as a list of folder names, tried in order: the current name first,
+    then the name the run was solved under before the 2026-09-22 renaming. `run` holds the
+    first, `runs` all of them."""
 
     id: str
     run: str
@@ -35,6 +39,11 @@ class Reference:
     # scripts/check_references.py; empty means "not guarded".
     expect: dict[str, float] = field(default_factory=dict)
     tolerance_pct: float = 2.0
+    runs: tuple[str, ...] = ()
+
+    @property
+    def candidates(self) -> tuple[str, ...]:
+        return self.runs or (self.run,)
 
 
 @dataclass(frozen=True)
@@ -62,7 +71,8 @@ def parse_references(document: dict[str, Any] | None) -> list[Reference]:
         if not isinstance(entry, dict):
             continue
         identifier, run = entry.get("id"), entry.get("run")
-        if not identifier or not run:
+        runs = tuple(str(r) for r in run) if isinstance(run, list) else ((str(run),) if run else ())
+        if not identifier or not runs:
             continue
         side = str(entry.get("side") or "output")
         if side not in _VALID_SIDES:
@@ -71,7 +81,8 @@ def parse_references(document: dict[str, Any] | None) -> list[Reference]:
         references.append(
             Reference(
                 id=str(identifier),
-                run=str(run),
+                run=runs[0],
+                runs=runs,
                 side=side,
                 label=str(entry.get("label") or identifier),
                 note=str(entry.get("note") or "").strip(),
@@ -105,9 +116,11 @@ def resolve(references: list[Reference], outputs_root: Path) -> list[ResolvedRef
     return [
         ResolvedReference(
             reference=reference,
-            run_dir=(outputs_root / reference.run)
-            if (outputs_root / reference.run).is_dir()
-            else None,
+            run_dir=next(
+                (outputs_root / name for name in reference.candidates
+                 if (outputs_root / name).is_dir()),
+                None,
+            ),
         )
         for reference in references
     ]

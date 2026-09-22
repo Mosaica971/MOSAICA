@@ -3,11 +3,11 @@ import pytest
 
 from case_studies.guadeloupe.domain.economics import (
     apply_crop_multipliers,
-    compute_gross_margin_per_ha_cult,
-    compute_gross_product_per_ha_cult,
-    compute_labor_hours_per_ha_cult,
-    compute_subsidy_per_ha_cult,
-    compute_variable_cost_per_ha_cult,
+    compute_crop_gross_margin_per_ha,
+    compute_crop_gross_product_per_ha,
+    compute_crop_labor_hours_per_ha,
+    compute_crop_subsidy_per_ha,
+    compute_crop_variable_cost_per_ha,
 )
 
 
@@ -42,19 +42,19 @@ def test_apply_crop_multipliers_ignores_unknown_crops():
 def test_compute_labor_hours_per_ha_cult_weights_otk_by_mo_expl():
     # OP1 one-off (AMORTI=0): 3 applications/cycle at DOSE*MO_EXPL = 2*3 = 6 -> 18.
     # OP2 amortized (AMORTI=1): 1 application at 5*4 = 20, spread over Duree_Plant=5 -> 4.
-    data_otk = pd.DataFrame(
+    operation_data = pd.DataFrame(
         {"DOSE": [2, 5], "MO_EXPL": [3, 4], "AMORTI": [0, 1]},
         index=["OP1", "OP2"],
     )
-    matrice_otk_cult = pd.DataFrame({"C1": [3, 1]}, index=["OP1", "OP2"])
-    duree_plant_cult = pd.Series({"C1": 5})
-    duree_cycle_cult = pd.Series({"C1": 24})
+    crop_operation_matrix = pd.DataFrame({"C1": [3, 1]}, index=["OP1", "OP2"])
+    crop_plantation_duration = pd.Series({"C1": 5})
+    crop_cycle_duration = pd.Series({"C1": 24})
 
-    result = compute_labor_hours_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
+    result = compute_crop_labor_hours_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
     )
 
     # (3*6 + (1*20)/5) / 24 * 12 = 11.0 hours/ha/year
@@ -64,25 +64,25 @@ def test_compute_labor_hours_per_ha_cult_weights_otk_by_mo_expl():
 def test_compute_variable_cost_per_ha_cult_combines_otk_and_harvest_transport_costs():
     # OP1 is a one-off cost (AMORTI=0): applied 3 times/cycle at 2*10=20 per application.
     # OP2 is amortized over the plantation lifetime (AMORTI=1): applied once at 5*4=20.
-    data_otk = pd.DataFrame(
+    operation_data = pd.DataFrame(
         {"DOSE": [2, 5], "PRIX_UNIT": [10, 4], "AMORTI": [0, 1]},
         index=["OP1", "OP2"],
     )
-    matrice_otk_cult = pd.DataFrame({"C1": [3, 1]}, index=["OP1", "OP2"])
-    duree_plant_cult = pd.Series({"C1": 5})
-    duree_cycle_cult = pd.Series({"C1": 24})
-    cout_recolte_cult = pd.Series({"C1": 2})
-    cout_transp_cult = pd.Series({"C1": 1})
-    rdt_cult = pd.Series({"C1": 10})
+    crop_operation_matrix = pd.DataFrame({"C1": [3, 1]}, index=["OP1", "OP2"])
+    crop_plantation_duration = pd.Series({"C1": 5})
+    crop_cycle_duration = pd.Series({"C1": 24})
+    crop_harvest_cost = pd.Series({"C1": 2})
+    crop_transport_cost = pd.Series({"C1": 1})
+    crop_yield = pd.Series({"C1": 10})
 
-    result = compute_variable_cost_per_ha_cult(
-        data_otk=data_otk,
-        matrice_otk_cult=matrice_otk_cult,
-        duree_plant_cult=duree_plant_cult,
-        duree_cycle_cult=duree_cycle_cult,
-        cout_recolte_cult=cout_recolte_cult,
-        cout_transp_cult=cout_transp_cult,
-        rdt_cult=rdt_cult,
+    result = compute_crop_variable_cost_per_ha(
+        operation_data=operation_data,
+        crop_operation_matrix=crop_operation_matrix,
+        crop_plantation_duration=crop_plantation_duration,
+        crop_cycle_duration=crop_cycle_duration,
+        crop_harvest_cost=crop_harvest_cost,
+        crop_transport_cost=crop_transport_cost,
+        crop_yield=crop_yield,
     )
 
     # OTK cost: (3*20 + (1*20)/5) / 24 * 12 = 32.0
@@ -91,20 +91,20 @@ def test_compute_variable_cost_per_ha_cult_combines_otk_and_harvest_transport_co
 
 
 def test_compute_subsidy_per_ha_cult_sums_posei_national_pdrg_and_additional_margin():
-    result = compute_subsidy_per_ha_cult(
-        posei_surf_cult=pd.Series({"C1": 100.0}),
-        posei_q_cult=pd.Series({"C1": 5.0}),
-        aide_indus_cult=pd.Series({"C1": 3.0}),
-        aide_replant_cult=pd.Series({"C1": 50.0}),
-        aide_transp_cult=pd.Series({"C1": 2.0}),
-        aide_garantie_prix_cult=pd.Series({"C1": 1.0}),
-        mae_recolte_vert_cult=pd.Series({"C1": 10.0}),
-        mae_jachere_sol_nu_cult=pd.Series({"C1": 20.0}),
-        mae_compost_cult=pd.Series({"C1": 30.0}),
-        mb_add_cult=pd.Series({"C1": 5.0}),
-        rdt_cult=pd.Series({"C1": 10.0}),
-        duree_cycle_cult=pd.Series({"C1": 24.0}),
-        duree_plant_cult=pd.Series({"C1": 5.0}),
+    result = compute_crop_subsidy_per_ha(
+        posei_area_aid=pd.Series({"C1": 100.0}),
+        posei_volume_aid=pd.Series({"C1": 5.0}),
+        industry_aid=pd.Series({"C1": 3.0}),
+        replanting_aid=pd.Series({"C1": 50.0}),
+        transport_aid=pd.Series({"C1": 2.0}),
+        price_guarantee_aid=pd.Series({"C1": 1.0}),
+        aecm_green_harvest=pd.Series({"C1": 10.0}),
+        aecm_bare_fallow=pd.Series({"C1": 20.0}),
+        aecm_compost=pd.Series({"C1": 30.0}),
+        additional_margin=pd.Series({"C1": 5.0}),
+        crop_yield=pd.Series({"C1": 10.0}),
+        crop_cycle_duration=pd.Series({"C1": 24.0}),
+        crop_plantation_duration=pd.Series({"C1": 5.0}),
     )
 
     # POSEI: 100 + (5+3)*10/24*12 + 50/5 = 150.0
@@ -115,12 +115,12 @@ def test_compute_subsidy_per_ha_cult_sums_posei_national_pdrg_and_additional_mar
 
 
 def test_compute_gross_product_per_ha_cult_annualizes_price_and_subsidy_income():
-    result = compute_gross_product_per_ha_cult(
-        rdt_cult=pd.Series({"C1": 10.0}),
-        prix_cult=pd.Series({"C1": 700.0}),
-        bagasse_cult=pd.Series({"C1": 50.0}),
-        subsidy_per_ha_cult=pd.Series({"C1": 230.0}),
-        duree_cycle_cult=pd.Series({"C1": 24.0}),
+    result = compute_crop_gross_product_per_ha(
+        crop_yield=pd.Series({"C1": 10.0}),
+        crop_price=pd.Series({"C1": 700.0}),
+        crop_bagasse=pd.Series({"C1": 50.0}),
+        crop_subsidy_per_ha=pd.Series({"C1": 230.0}),
+        crop_cycle_duration=pd.Series({"C1": 24.0}),
     )
 
     # (10*(700+50) + 230) / 24 * 12 = 3865.0
@@ -128,13 +128,13 @@ def test_compute_gross_product_per_ha_cult_annualizes_price_and_subsidy_income()
 
 
 def test_compute_sales_per_ha_cult_excludes_subsidy():
-    from case_studies.guadeloupe.domain.economics import compute_sales_per_ha_cult
+    from case_studies.guadeloupe.domain.economics import compute_crop_sales_per_ha
 
-    result = compute_sales_per_ha_cult(
-        rdt_cult=pd.Series({"C1": 10.0}),
-        prix_cult=pd.Series({"C1": 700.0}),
-        bagasse_cult=pd.Series({"C1": 50.0}),
-        duree_cycle_cult=pd.Series({"C1": 24.0}),
+    result = compute_crop_sales_per_ha(
+        crop_yield=pd.Series({"C1": 10.0}),
+        crop_price=pd.Series({"C1": 700.0}),
+        crop_bagasse=pd.Series({"C1": 50.0}),
+        crop_cycle_duration=pd.Series({"C1": 24.0}),
     )
 
     # 10*(700+50) / 24 * 12 = 3750.0
@@ -143,32 +143,32 @@ def test_compute_sales_per_ha_cult_excludes_subsidy():
 
 def test_sales_plus_annualized_subsidy_equals_gross_product():
     from case_studies.guadeloupe.domain.economics import (
-        compute_gross_product_per_ha_cult,
-        compute_sales_per_ha_cult,
+        compute_crop_gross_product_per_ha,
+        compute_crop_sales_per_ha,
     )
 
-    sales = compute_sales_per_ha_cult(
-        rdt_cult=pd.Series({"C1": 10.0}),
-        prix_cult=pd.Series({"C1": 700.0}),
-        bagasse_cult=pd.Series({"C1": 50.0}),
-        duree_cycle_cult=pd.Series({"C1": 24.0}),
+    sales = compute_crop_sales_per_ha(
+        crop_yield=pd.Series({"C1": 10.0}),
+        crop_price=pd.Series({"C1": 700.0}),
+        crop_bagasse=pd.Series({"C1": 50.0}),
+        crop_cycle_duration=pd.Series({"C1": 24.0}),
     )
     subsidy_annualized = pd.Series({"C1": 230.0}) / pd.Series({"C1": 24.0}) * 12
-    gross_product = compute_gross_product_per_ha_cult(
-        rdt_cult=pd.Series({"C1": 10.0}),
-        prix_cult=pd.Series({"C1": 700.0}),
-        bagasse_cult=pd.Series({"C1": 50.0}),
-        subsidy_per_ha_cult=pd.Series({"C1": 230.0}),
-        duree_cycle_cult=pd.Series({"C1": 24.0}),
+    gross_product = compute_crop_gross_product_per_ha(
+        crop_yield=pd.Series({"C1": 10.0}),
+        crop_price=pd.Series({"C1": 700.0}),
+        crop_bagasse=pd.Series({"C1": 50.0}),
+        crop_subsidy_per_ha=pd.Series({"C1": 230.0}),
+        crop_cycle_duration=pd.Series({"C1": 24.0}),
     )
 
     assert (sales + subsidy_annualized)["C1"] == pytest.approx(gross_product["C1"])
 
 
 def test_compute_gross_margin_per_ha_cult_subtracts_variable_cost_from_gross_product():
-    result = compute_gross_margin_per_ha_cult(
-        gross_product_per_ha_cult=pd.Series({"C1": 3865.0}),
-        variable_cost_per_ha_cult=pd.Series({"C1": 62.0}),
+    result = compute_crop_gross_margin_per_ha(
+        crop_gross_product_per_ha=pd.Series({"C1": 3865.0}),
+        crop_variable_cost_per_ha=pd.Series({"C1": 62.0}),
     )
 
     assert result["C1"] == pytest.approx(3803.0)

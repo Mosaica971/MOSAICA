@@ -14,7 +14,7 @@ def _small_dataset() -> Dataset:
     override of compute_base_crop_group is a no-op, except on P4 where both are 14 and it
     stays 14 (NC) anyway.
     """
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {
             "SURF_HA": [2.0, 3.0, 1.0, 4.0, 3.0, 1.0],
             "REGION": ["R1", "R1", "R2", "R2", "R1", "R2"],
@@ -24,7 +24,7 @@ def _small_dataset() -> Dataset:
         },
         index=["P1", "P2", "P3", "P4", "P5", "P6"],
     )
-    expl_parc = pd.DataFrame(
+    farm_plot_map = pd.DataFrame(
         {
             "farm": ["E1", "E1", "E2", "E2", "E3", "E3"],
             "plot": ["P1", "P2", "P3", "P4", "P5", "P6"],
@@ -33,8 +33,8 @@ def _small_dataset() -> Dataset:
     return Dataset(
         sets={},
         parameters={
-            "data_parc": data_parc,
-            "expl_parc": expl_parc,
+            "plot_data": plot_data,
+            "farm_plot_map": farm_plot_map,
             "farm_plots": {"E1": ["P1", "P2"], "E2": ["P3", "P4"], "E3": ["P5", "P6"]},
         },
         scalars={},
@@ -227,12 +227,12 @@ def test_field_match_rate_is_total_when_the_simulation_reproduces_the_baseline()
 
 
 def test_farm_type_confusion_is_a_square_matrix_over_the_full_type_universe():
-    from case_studies.guadeloupe.domain.farm_typology import TYPE_EXPL_LABELS
+    from case_studies.guadeloupe.domain.farm_typology import FARM_TYPE_LABELS
 
     dataset = _small_dataset()
     confusion = calibration.farm_type_confusion(dataset, _simulated())
-    assert list(confusion.index) == sorted(TYPE_EXPL_LABELS)
-    assert list(confusion.columns) == sorted(TYPE_EXPL_LABELS)
+    assert list(confusion.index) == sorted(FARM_TYPE_LABELS)
+    assert list(confusion.columns) == sorted(FARM_TYPE_LABELS)
     assert confusion.to_numpy().sum() == 3  # one cell per farm, three farms
 
 
@@ -255,9 +255,9 @@ def test_farm_type_match_summary_reports_the_diagonal_share():
     assert summary["matched_farms"] == 2
     assert summary["match_pct"] == pytest.approx(200.0 / 3)
     # Per-type recall, keyed by the readable label, only for types actually observed.
-    assert summary["recall_by_type"]["Canniers specialises"] == pytest.approx(0.0)
-    assert summary["recall_by_type"]["Eleveurs"] == pytest.approx(100.0)
-    assert "Bananiers" not in summary["recall_by_type"]
+    assert summary["recall_by_type"]["Specialised cane growers"] == pytest.approx(0.0)
+    assert summary["recall_by_type"]["Livestock farmers"] == pytest.approx(100.0)
+    assert "Banana growers" not in summary["recall_by_type"]
 
 
 def test_farm_type_confusion_is_diagonal_when_the_simulation_reproduces_the_baseline():

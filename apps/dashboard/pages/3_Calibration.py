@@ -18,7 +18,7 @@ import streamlit as st
 
 from apps.dashboard import loaders
 from case_studies.guadeloupe.domain.crop_labels import label_for
-from case_studies.guadeloupe.domain.farm_typology import TYPE_EXPL_LABELS
+from case_studies.guadeloupe.domain.farm_typology import FARM_TYPE_LABELS
 from case_studies.guadeloupe.domain.zones import region_label
 
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"
@@ -114,8 +114,8 @@ st.subheader("Échelle exploitation — types observés vs simulés")
 confusion = loaders.load_calibration(run_dir, "farm_type_confusion")
 if confusion is not None:
     matrix = confusion.set_index("type_observe")
-    matrix.index = [TYPE_EXPL_LABELS.get(int(key), key) for key in matrix.index]
-    matrix.columns = [TYPE_EXPL_LABELS.get(int(key), key) for key in matrix.columns]
+    matrix.index = [FARM_TYPE_LABELS.get(int(key), key) for key in matrix.index]
+    matrix.columns = [FARM_TYPE_LABELS.get(int(key), key) for key in matrix.columns]
     # Hide the types nobody starts in and nobody lands in, so the 10x10 universe does not
     # drown the handful of rows that carry farms.
     matrix = matrix.loc[matrix.sum(axis=1) > 0, matrix.sum(axis=0) > 0]

@@ -92,8 +92,8 @@ def load_batch_spec(
 
         include:
           crop_groups: crop_groups.yaml
-          policies:    scenarios_politiques.yaml
-          forcings:    scenarios_forcages.yaml
+          policies:    scenarios_policies.yaml
+          forcings:    scenarios_forcings.yaml
           sweeps:      scenarios_pareto.yaml
 
     Paths are relative to the including file. Each value is one path or a list of paths; the
@@ -101,7 +101,7 @@ def load_batch_spec(
     add a one-off policy without touching the catalogue. Includes are not recursive -- a spec
     that includes a spec that includes a spec is a dependency graph nobody wants to debug at
     3 a.m. -- with ONE exception: a catalogue's own `crop_groups` include is honoured. Without
-    it a catalogue could not be run on its own (`--scenarios scenarios_politiques.yaml
+    it a catalogue could not be run on its own (`--scenarios scenarios_policies.yaml
     --policies P8`), which is how a single policy is re-run.
 
     Returns a plain spec dict, ready for `compose_runs` -- every `{group: x}` already
@@ -318,7 +318,7 @@ def _parse_args_key(key: str) -> tuple[str | None, str]:
     if not separator or not label or not argument:
         raise ValueError(
             f"matrix key {key!r}: expected 'args:<label>.<argument>', e.g. "
-            f"'args:plafond_azote.threshold'"
+            f"'args:nitrogen_cap.threshold'"
         )
     return label, argument
 
@@ -484,14 +484,14 @@ def _compose_plan(
     Each key is a policy name from the catalogue; its value says what that policy is put
     through. Four equivalent ways to write a cell, from terse to explicit::
 
-        P1_deregulation_totale:                      # the policy alone, unforced
-        P4_statu_quo: [F0_nominal, F9_crise]         # shorthand for `forcings:`
+        P1_full_deregulation:                      # the policy alone, unforced
+        P4_status_quo: [F0_nominal, F9_crise]         # shorthand for `forcings:`
         P5_austerite: {forcings: "*"}                # every forcing in the catalogue
         P8_transition:
           forcings: [F0_nominal]
           sweeps:
-            - pareto_azote                           # front traced on the policy alone
-            - {name: pareto_azote, forcings: [F9_crise]}   # ... and again under a shock
+            - pareto_nitrogen                           # front traced on the policy alone
+            - {name: pareto_nitrogen, forcings: [F9_crise]}   # ... and again under a shock
 
     A sweep is deliberately NOT crossed with the cell's forcings by default: a front is one
     solve per point, and multiplying it by a forcing list is how an afternoon becomes a week.
@@ -620,8 +620,8 @@ def apply_overrides(base_config: dict[str, Any], run_spec: dict[str, Any]) -> di
     # enable_add appends a brand-new entry that does not exist in the base config; the
     # enable/disable/set_args channels can only touch entries ALREADY declared. It therefore
     # runs FIRST, so that what one spec adds another can still patch -- which is exactly what
-    # a Pareto sweep needs: `budget_subventions` is posed by the policy's enable_add, and the
-    # front's `matrix: {args:budget_subventions.threshold: [...]}` becomes a set_args on it.
+    # a Pareto sweep needs: `subsidy_budget` is posed by the policy's enable_add, and the
+    # front's `matrix: {args:subsidy_budget.threshold: [...]}` becomes a set_args on it.
     # Patch-then-add would raise "set_args label matched no entry" on every point.
     # `section` says which config list to append to (default: constraints); a scenario
     # adding an eligibility cut passes section: categorical_rules.

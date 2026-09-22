@@ -114,7 +114,7 @@ le CV vaut encore 96 %. Le goulot est la recherche branch-and-bound, pas l'envel
 > le 2026-08-01 — décrivaient une campagne depuis **écrasée** : plus aucune entrée n'en approche,
 > et les 20 entrées actuelles se répartissent sur **deux tailles** et non une, ce qui rend la
 > phrase « à taille constante, les 20 solves » elle-même mal formée. Toute reprise de ce
-> paragraphe doit **recompter** le fichier plutôt que recopier un chiffre : `memoire/build_chiffres.py`
+> paragraphe doit **recompter** le fichier plutôt que recopier un chiffre : `clement/memoire/build_chiffres.py`
 > (bloc `MEASUREMENTS`) porte les mêmes valeurs et la même date.
 
 → **Aucune estimation ponctuelle de durée n'est fiable.** `core/solve/progress.py` affiche donc

@@ -14,7 +14,7 @@ _MINIMAL_CONFIG = {
 
 
 def _small_dataset() -> Dataset:
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {
             "SURF_HA": [2.0, 3.0, 1.0, 4.0, 3.0, 1.0],
             "REGION": ["R1", "R1", "R2", "R2", "R1", "R2"],
@@ -33,34 +33,34 @@ def _small_dataset() -> Dataset:
         },
         index=["P1", "P2", "P3", "P4", "P5", "P6"],
     )
-    expl_parc = pd.DataFrame(
+    farm_plot_map = pd.DataFrame(
         {
             "farm": ["E1", "E1", "E2", "E2", "E3", "E3"],
             "plot": ["P1", "P2", "P3", "P4", "P5", "P6"],
         }
     )
-    rdt_cult = pd.Series({"CS": 80.0, "ME": 20.0})
-    sales_per_ha_cult = pd.Series({"CS": 3000.0, "ME": 5000.0})
-    subsidy_per_ha_cult_annualized = pd.Series({"CS": 500.0, "ME": 200.0})
-    labor_hours_per_ha_cult = pd.Series({"CS": 400.0, "ME": 800.0})
-    margin_per_ha_cult = pd.Series({"CS": 1500.0, "ME": 2000.0})
-    azote_per_ha_cult = pd.Series({"CS": 100.0, "ME": 50.0})
-    ges_per_ha_cult = pd.Series({"CS": 2.0, "ME": 1.0})
-    ift_per_ha_cult = pd.Series({"CS": 3.0, "ME": 6.0})
-    cld_uptake_cult = pd.Series({"CS": 4, "ME": 3})  # CS no uptake, ME class 3
+    crop_yield = pd.Series({"CS": 80.0, "ME": 20.0})
+    crop_sales_per_ha = pd.Series({"CS": 3000.0, "ME": 5000.0})
+    crop_subsidy_per_ha_annualized = pd.Series({"CS": 500.0, "ME": 200.0})
+    crop_labor_hours_per_ha = pd.Series({"CS": 400.0, "ME": 800.0})
+    crop_margin_per_ha = pd.Series({"CS": 1500.0, "ME": 2000.0})
+    crop_nitrogen_per_ha = pd.Series({"CS": 100.0, "ME": 50.0})
+    crop_ghg_per_ha = pd.Series({"CS": 2.0, "ME": 1.0})
+    crop_tfi_per_ha = pd.Series({"CS": 3.0, "ME": 6.0})
+    crop_chlordecone_uptake = pd.Series({"CS": 4, "ME": 3})  # CS no uptake, ME class 3
     # Nutrition: content per tonne (nutrient x crop) and per-individual annual needs +
     # population (Q_Tot x Ind_Moy = 100) + fishing (Q_Tot x peche = 5 t).
-    nutri_cult = pd.DataFrame(
+    crop_nutrient_content = pd.DataFrame(
         {"CS": [10.0, 2.0], "ME": [100.0, 5.0]}, index=["Kcal", "Prot"]
     )
-    nutri_alim = pd.DataFrame(
+    food_nutrient_needs = pd.DataFrame(
         {"Ind_Moy": [100.0, 20.0, 6.0], "peche": [5.0, 8.0, 2.0]},
         index=["Q_Tot", "Kcal", "Prot"],
     )
     # Water/carbon: only touched by compute_environmental_totals's new keys, not asserted
     # on by value here (see test_guadeloupe_reporting_water_carbon.py for that coverage) --
     # just enough shape to not KeyError.
-    data_sol = pd.DataFrame(
+    soil_data = pd.DataFrame(
         {
             "VERTISOL": [0.5, 1.0, 0.25],
             "FERRALSOL": [0.3, 1.0, 0.25],
@@ -70,7 +70,7 @@ def _small_dataset() -> Dataset:
         },
         index=["KAER", "DENS", "PROF"],
     )
-    data_cult = pd.DataFrame(
+    crop_data = pd.DataFrame(
         {
             **{f"BESOIN_EAU_{m:02d}": [5.0, 5.0] for m in range(1, 13)},
             "BIOM_AER": [10.0, 10.0],
@@ -81,32 +81,32 @@ def _small_dataset() -> Dataset:
         },
         index=["CS", "ME"],
     ).T
-    monthly_water_need_per_ha_cult = data_cult.loc[
+    crop_monthly_water_need_per_ha = crop_data.loc[
         [f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]
     ]
-    water_need_per_ha_cult = monthly_water_need_per_ha_cult.sum(axis=0)
-    carbon_input_per_ha_cult = pd.Series({"CS": 3.0, "ME": 3.0})
+    crop_water_need_per_ha = crop_monthly_water_need_per_ha.sum(axis=0)
+    crop_carbon_input_per_ha = pd.Series({"CS": 3.0, "ME": 3.0})
     return Dataset(
         sets={},
         parameters={
-            "data_parc": data_parc,
-            "expl_parc": expl_parc,
-            "rdt_cult": rdt_cult,
-            "sales_per_ha_cult": sales_per_ha_cult,
-            "subsidy_per_ha_cult_annualized": subsidy_per_ha_cult_annualized,
-            "labor_hours_per_ha_cult": labor_hours_per_ha_cult,
-            "margin_per_ha_cult": margin_per_ha_cult,
-            "azote_per_ha_cult": azote_per_ha_cult,
-            "ges_per_ha_cult": ges_per_ha_cult,
-            "ift_per_ha_cult": ift_per_ha_cult,
-            "cld_uptake_cult": cld_uptake_cult,
-            "nutri_cult": nutri_cult,
-            "nutri_alim": nutri_alim,
-            "data_sol": data_sol,
-            "data_cult": data_cult,
-            "water_need_per_ha_cult": water_need_per_ha_cult,
-            "monthly_water_need_per_ha_cult": monthly_water_need_per_ha_cult,
-            "carbon_input_per_ha_cult": carbon_input_per_ha_cult,
+            "plot_data": plot_data,
+            "farm_plot_map": farm_plot_map,
+            "crop_yield": crop_yield,
+            "crop_sales_per_ha": crop_sales_per_ha,
+            "crop_subsidy_per_ha_annualized": crop_subsidy_per_ha_annualized,
+            "crop_labor_hours_per_ha": crop_labor_hours_per_ha,
+            "crop_margin_per_ha": crop_margin_per_ha,
+            "crop_nitrogen_per_ha": crop_nitrogen_per_ha,
+            "crop_ghg_per_ha": crop_ghg_per_ha,
+            "crop_tfi_per_ha": crop_tfi_per_ha,
+            "crop_chlordecone_uptake": crop_chlordecone_uptake,
+            "crop_nutrient_content": crop_nutrient_content,
+            "food_nutrient_needs": food_nutrient_needs,
+            "soil_data": soil_data,
+            "crop_data": crop_data,
+            "crop_water_need_per_ha": crop_water_need_per_ha,
+            "crop_monthly_water_need_per_ha": crop_monthly_water_need_per_ha,
+            "crop_carbon_input_per_ha": crop_carbon_input_per_ha,
         },
         scalars={},
     )
@@ -252,7 +252,7 @@ def test_compute_economic_totals_sums_production_subsidy_revenue_and_etp():
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
 
     totals = indicators.compute_economic_totals(
-        dataset, allocation, hours_per_etp=1000.0, cost_per_hour=10.0
+        dataset, allocation, hours_per_fte=1000.0, cost_per_hour=10.0
     )
 
     assert totals["total_production_tonnes"] == pytest.approx(420.0)   # 5ha*80 + 1ha*20
@@ -266,14 +266,14 @@ def test_compute_economic_totals_sums_production_subsidy_revenue_and_etp():
     assert totals["total_labor_cost"] == pytest.approx(28000.0)
     # net revenue = gross margin - labor cost
     assert totals["total_net_revenue"] == pytest.approx(9500.0 - 28000.0)
-    assert totals["total_etp"] == pytest.approx(2.8)                   # (800+1200+800)/1000
+    assert totals["total_fte"] == pytest.approx(2.8)                   # (800+1200+800)/1000
 
 
 def test_compute_azote_by_crop_multiplies_surface_by_rate():
     dataset = _small_dataset()
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
 
-    result = indicators.compute_azote_by_crop(dataset, allocation)
+    result = indicators.compute_nitrogen_by_crop(dataset, allocation)
 
     assert result["CS"] == pytest.approx(500.0)   # 5 ha * 100
     assert result["ME"] == pytest.approx(50.0)     # 1 ha * 50
@@ -283,7 +283,7 @@ def test_compute_ges_by_crop_multiplies_surface_by_rate():
     dataset = _small_dataset()
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
 
-    result = indicators.compute_ges_by_crop(dataset, allocation)
+    result = indicators.compute_ghg_by_crop(dataset, allocation)
 
     assert result["CS"] == pytest.approx(10.0)     # 5 ha * 2
     assert result["ME"] == pytest.approx(1.0)      # 1 ha * 1
@@ -293,15 +293,15 @@ def test_compute_ift_by_crop_multiplies_surface_by_rate():
     dataset = _small_dataset()
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
 
-    result = indicators.compute_ift_by_crop(dataset, allocation)
+    result = indicators.compute_tfi_by_crop(dataset, allocation)
 
     assert result["CS"] == pytest.approx(15.0)     # 5 ha * 3
     assert result["ME"] == pytest.approx(6.0)      # 1 ha * 6
 
 
-def _cld_dataset() -> Dataset:
+def _chlordecone_dataset() -> Dataset:
     """Six plots covering every branch of the chlordécone crop×soil rule."""
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {
             "SURF_HA": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
             "RISQUE_CLD": [3, 4, 2, 1, 2, 1],
@@ -309,23 +309,23 @@ def _cld_dataset() -> Dataset:
         },
         index=["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"],
     )
-    cld_uptake_cult = pd.Series({"A": 1, "B": 2, "C": 3, "D": 4})
+    crop_chlordecone_uptake = pd.Series({"A": 1, "B": 2, "C": 3, "D": 4})
     return Dataset(
         sets={},
-        parameters={"data_parc": data_parc, "cld_uptake_cult": cld_uptake_cult},
+        parameters={"plot_data": plot_data, "crop_chlordecone_uptake": crop_chlordecone_uptake},
         scalars={},
     )
 
 
 def test_compute_cld_at_risk_surface_applies_crop_soil_rule():
-    dataset = _cld_dataset()
+    dataset = _chlordecone_dataset()
     allocation = pd.Series(
         {"Q1": "A", "Q2": "A", "Q3": "B", "Q4": "C", "Q5": "C", "Q6": "D"}
     )
     # Q1 A(c1) r=3<=3 -> risk ; Q2 A r=4 -> no ; Q3 B(c2) r=2<=2 -> risk ;
     # Q4 C(c3) r=1 soil3 in {1,3,5} -> risk ; Q5 C r=2 soil1 not in {2,4} -> no ;
     # Q6 D(c4) -> never. At-risk surface = Q1+Q3+Q4 = 3.0
-    result = indicators.compute_cld_at_risk_surface(dataset, allocation)
+    result = indicators.compute_chlordecone_risk_area(dataset, allocation)
 
     assert result == pytest.approx(3.0)
 
@@ -336,14 +336,14 @@ def test_compute_environmental_totals_sums_rates_and_cld_surface():
 
     totals = indicators.compute_environmental_totals(dataset, allocation)
 
-    assert totals["total_azote"] == pytest.approx(550.0)   # 500 + 50
-    assert totals["total_ges"] == pytest.approx(11.0)      # 10 + 1
-    assert totals["total_ift"] == pytest.approx(21.0)      # 15 + 6
-    assert totals["surface_cld"] == pytest.approx(1.0)     # P3 only
+    assert totals["total_nitrogen"] == pytest.approx(550.0)   # 500 + 50
+    assert totals["total_ghg"] == pytest.approx(11.0)      # 10 + 1
+    assert totals["total_tfi"] == pytest.approx(21.0)      # 15 + 6
+    assert totals["chlordecone_risk_area"] == pytest.approx(1.0)     # P3 only
     # per-ha averages over cultivated surface (6 ha)
-    assert totals["azote_per_ha"] == pytest.approx(550.0 / 6.0)
-    assert totals["ges_per_ha"] == pytest.approx(11.0 / 6.0)
-    assert totals["ift_per_ha"] == pytest.approx(21.0 / 6.0)
+    assert totals["nitrogen_per_ha"] == pytest.approx(550.0 / 6.0)
+    assert totals["ghg_per_ha"] == pytest.approx(11.0 / 6.0)
+    assert totals["tfi_per_ha"] == pytest.approx(21.0 / 6.0)
 
 
 def test_compute_nutrient_production_sums_tonnes_times_content():
@@ -437,7 +437,7 @@ def test_compute_total_etp_divides_total_hours_by_hours_per_etp():
     dataset = _small_dataset()
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
 
-    result = indicators.compute_total_etp(dataset, allocation, hours_per_etp=1000.0)
+    result = indicators.compute_total_fte(dataset, allocation, hours_per_fte=1000.0)
 
     assert result == pytest.approx(2.8)  # (800 + 1200 + 800) / 1000
 
@@ -447,15 +447,15 @@ def test_compute_etp_by_key_groups_hours_then_divides():
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
     farms = indicators.plot_to_farm(dataset)
 
-    result = indicators.compute_etp_by_key(dataset, allocation, farms, hours_per_etp=1000.0)
+    result = indicators.compute_fte_by_key(dataset, allocation, farms, hours_per_fte=1000.0)
 
     assert result["E1"] == pytest.approx(2.0)  # (800 + 1200) / 1000
     assert result["E2"] == pytest.approx(0.8)  # 800 / 1000
 
 
 def test_hours_per_etp_from_config_reads_value_or_defaults():
-    assert indicators.hours_per_etp_from_config({"labor": {"hours_per_etp": 1800}}) == 1800.0
-    assert indicators.hours_per_etp_from_config({}) == indicators.DEFAULT_HOURS_PER_ETP
+    assert indicators.hours_per_fte_from_config({"labor": {"hours_per_fte": 1800}}) == 1800.0
+    assert indicators.hours_per_fte_from_config({}) == indicators.DEFAULT_HOURS_PER_FTE
 
 
 def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures():
@@ -463,13 +463,13 @@ def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures
     allocation = pd.Series({"P1": "CS", "P2": "CS", "P3": "ME"})
 
     facts = indicators.compute_facts_table(
-        dataset, allocation, hours_per_etp=1000.0, cost_per_hour=10.0
+        dataset, allocation, hours_per_fte=1000.0, cost_per_hour=10.0
     )
 
     assert list(facts.columns) == [
         "crop", "region", "island", "surface", "production", "sales", "subsidy",
-        "revenue", "gross_margin", "labor_hours", "labor_cost", "etp",
-        "ges", "ift", "azote", "surface_cld",
+        "revenue", "gross_margin", "labor_hours", "labor_cost", "fte",
+        "ghg", "tfi", "nitrogen", "chlordecone_risk_area",
         "water_need_m3", "soil_carbon_balance",
     ]
     # P1+P2 = CS in R1 (island 1); P3 = ME in R2 (island 2)
@@ -484,19 +484,19 @@ def test_compute_facts_table_rolls_up_plots_by_crop_and_region_with_all_measures
     assert cs["gross_margin"] == pytest.approx(7500.0)  # 5 * 1500
     assert cs["labor_hours"] == pytest.approx(2000.0)   # 5 * 400
     assert cs["labor_cost"] == pytest.approx(20000.0)   # 2000 * 10
-    assert cs["etp"] == pytest.approx(2.0)              # 2000 / 1000
-    assert cs["ges"] == pytest.approx(10.0)             # 5 * 2
-    assert cs["ift"] == pytest.approx(15.0)             # 5 * 3
-    assert cs["azote"] == pytest.approx(500.0)          # 5 * 100
-    assert cs["surface_cld"] == pytest.approx(0.0)      # CS uptake class 4 -> never at risk
+    assert cs["fte"] == pytest.approx(2.0)              # 2000 / 1000
+    assert cs["ghg"] == pytest.approx(10.0)             # 5 * 2
+    assert cs["tfi"] == pytest.approx(15.0)             # 5 * 3
+    assert cs["nitrogen"] == pytest.approx(500.0)          # 5 * 100
+    assert cs["chlordecone_risk_area"] == pytest.approx(0.0)      # CS uptake class 4 -> never at risk
     me = facts[facts["crop"] == "ME"].iloc[0]
     assert me["island"] == 2
     assert me["labor_cost"] == pytest.approx(8000.0)    # 800 * 10
-    assert me["etp"] == pytest.approx(0.8)
-    assert me["ges"] == pytest.approx(1.0)              # 1 * 1
-    assert me["ift"] == pytest.approx(6.0)              # 1 * 6
-    assert me["azote"] == pytest.approx(50.0)           # 1 * 50
-    assert me["surface_cld"] == pytest.approx(1.0)      # P3: ME(c3), r=2, soil 4 -> at risk
+    assert me["fte"] == pytest.approx(0.8)
+    assert me["ghg"] == pytest.approx(1.0)              # 1 * 1
+    assert me["tfi"] == pytest.approx(6.0)              # 1 * 6
+    assert me["nitrogen"] == pytest.approx(50.0)           # 1 * 50
+    assert me["chlordecone_risk_area"] == pytest.approx(1.0)      # P3: ME(c3), r=2, soil 4 -> at risk
 
 
 def test_compute_facts_table_splits_same_crop_across_regions():
@@ -505,7 +505,7 @@ def test_compute_facts_table_splits_same_crop_across_regions():
     allocation = pd.Series({"P1": "CS", "P4": "CS"})
 
     facts = indicators.compute_facts_table(
-        dataset, allocation, hours_per_etp=1000.0, cost_per_hour=10.0
+        dataset, allocation, hours_per_fte=1000.0, cost_per_hour=10.0
     )
 
     assert set(zip(facts["crop"], facts["region"])) == {("CS", "R1"), ("CS", "R2")}

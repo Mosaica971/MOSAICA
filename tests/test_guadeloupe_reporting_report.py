@@ -18,7 +18,7 @@ _CONFIG = {
 
 
 def _tiny_dataset() -> Dataset:
-    data_parc = pd.DataFrame(
+    plot_data = pd.DataFrame(
         {
             "SURF_HA": [2.0, 3.0],
             "REGION": ["R1", "R1"],
@@ -36,13 +36,13 @@ def _tiny_dataset() -> Dataset:
         },
         index=["P1", "P2"],
     )
-    expl_parc = pd.DataFrame({"farm": ["E1", "E1"], "plot": ["P1", "P2"]})
+    farm_plot_map = pd.DataFrame({"farm": ["E1", "E1"], "plot": ["P1", "P2"]})
     # farm_plots is consumed by calibration.farm_type_confusion, which recomputes the farm
-    # typology on both sides through farm_typology.compute_type_expl.
+    # typology on both sides through farm_typology.compute_farm_type.
     farm_plots = {"E1": ["P1", "P2"]}
     # Water/carbon: only touched by compute_environmental_totals's new keys, not asserted
     # on by value here -- just enough shape to not KeyError.
-    data_sol = pd.DataFrame(
+    soil_data = pd.DataFrame(
         {
             "VERTISOL": [0.5, 1.0, 0.25],
             "FERRALSOL": [0.3, 1.0, 0.25],
@@ -52,7 +52,7 @@ def _tiny_dataset() -> Dataset:
         },
         index=["KAER", "DENS", "PROF"],
     )
-    data_cult = pd.DataFrame(
+    crop_data = pd.DataFrame(
         {
             **{f"BESOIN_EAU_{m:02d}": [5.0, 5.0] for m in range(1, 13)},
             "BIOM_AER": [10.0, 10.0],
@@ -63,44 +63,44 @@ def _tiny_dataset() -> Dataset:
         },
         index=["CS", "ME"],
     ).T
-    monthly_water_need_per_ha_cult = data_cult.loc[
+    crop_monthly_water_need_per_ha = crop_data.loc[
         [f"BESOIN_EAU_{m:02d}" for m in range(1, 13)]
     ]
-    water_need_per_ha_cult = monthly_water_need_per_ha_cult.sum(axis=0)
-    carbon_input_per_ha_cult = pd.Series({"CS": 3.0, "ME": 3.0})
+    crop_water_need_per_ha = crop_monthly_water_need_per_ha.sum(axis=0)
+    crop_carbon_input_per_ha = pd.Series({"CS": 3.0, "ME": 3.0})
     return Dataset(
         sets={},
         parameters={
-            "data_parc": data_parc,
-            "expl_parc": expl_parc,
+            "plot_data": plot_data,
+            "farm_plot_map": farm_plot_map,
             "farm_plots": farm_plots,
-            "rdt_cult": pd.Series({"CS": 80.0, "ME": 20.0}),
-            "sales_per_ha_cult": pd.Series({"CS": 3000.0, "ME": 5000.0}),
-            "subsidy_per_ha_cult_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
-            "labor_hours_per_ha_cult": pd.Series({"CS": 400.0, "ME": 800.0}),
-            "margin_per_ha_cult": pd.Series({"CS": 1500.0, "ME": 2000.0}),
+            "crop_yield": pd.Series({"CS": 80.0, "ME": 20.0}),
+            "crop_sales_per_ha": pd.Series({"CS": 3000.0, "ME": 5000.0}),
+            "crop_subsidy_per_ha_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
+            "crop_labor_hours_per_ha": pd.Series({"CS": 400.0, "ME": 800.0}),
+            "crop_margin_per_ha": pd.Series({"CS": 1500.0, "ME": 2000.0}),
             # Resilience (Task 3): fractional yield-loss margin variance, market price
             # (EUR/t) and cycle duration (months) -- only touched by
             # compute_resilience_totals, not asserted on by value in the pre-existing tests.
             "crop_variance_per_ha": pd.Series({"CS": 0.1, "ME": 0.15}),
-            "prix_cult": pd.Series({"CS": 37.5, "ME": 250.0}),
-            "duree_cycle_cult": pd.Series({"CS": 12.0, "ME": 12.0}),
-            "azote_per_ha_cult": pd.Series({"CS": 100.0, "ME": 50.0}),
-            "ges_per_ha_cult": pd.Series({"CS": 2.0, "ME": 1.0}),
-            "ift_per_ha_cult": pd.Series({"CS": 3.0, "ME": 6.0}),
-            "cld_uptake_cult": pd.Series({"CS": 4, "ME": 3}),
-            "nutri_cult": pd.DataFrame(
+            "crop_price": pd.Series({"CS": 37.5, "ME": 250.0}),
+            "crop_cycle_duration": pd.Series({"CS": 12.0, "ME": 12.0}),
+            "crop_nitrogen_per_ha": pd.Series({"CS": 100.0, "ME": 50.0}),
+            "crop_ghg_per_ha": pd.Series({"CS": 2.0, "ME": 1.0}),
+            "crop_tfi_per_ha": pd.Series({"CS": 3.0, "ME": 6.0}),
+            "crop_chlordecone_uptake": pd.Series({"CS": 4, "ME": 3}),
+            "crop_nutrient_content": pd.DataFrame(
                 {"CS": [10.0, 2.0], "ME": [100.0, 5.0]}, index=["Kcal", "Prot"]
             ),
-            "nutri_alim": pd.DataFrame(
+            "food_nutrient_needs": pd.DataFrame(
                 {"Ind_Moy": [100.0, 20.0, 6.0], "peche": [5.0, 8.0, 2.0]},
                 index=["Q_Tot", "Kcal", "Prot"],
             ),
-            "data_sol": data_sol,
-            "data_cult": data_cult,
-            "water_need_per_ha_cult": water_need_per_ha_cult,
-            "monthly_water_need_per_ha_cult": monthly_water_need_per_ha_cult,
-            "carbon_input_per_ha_cult": carbon_input_per_ha_cult,
+            "soil_data": soil_data,
+            "crop_data": crop_data,
+            "crop_water_need_per_ha": crop_water_need_per_ha,
+            "crop_monthly_water_need_per_ha": crop_monthly_water_need_per_ha,
+            "crop_carbon_input_per_ha": crop_carbon_input_per_ha,
         },
         scalars={},
     )
@@ -205,12 +205,12 @@ def test_generate_report_writes_additional_indicators(tmp_path):
         "labor_cost_by_crop_output.csv",
         "facts_input.csv",
         "facts_output.csv",
-        "etp_by_region_input.csv",
-        "etp_by_region_output.csv",
-        "etp_by_island_input.csv",
-        "etp_by_island_output.csv",
-        "etp_by_farm_input.csv",
-        "etp_by_farm_output.csv",
+        "fte_by_region_input.csv",
+        "fte_by_region_output.csv",
+        "fte_by_island_input.csv",
+        "fte_by_island_output.csv",
+        "fte_by_farm_input.csv",
+        "fte_by_farm_output.csv",
         "shannon_diversity_by_region_input.csv",
         "shannon_diversity_by_region_output.csv",
         "shannon_diversity_by_island_input.csv",
@@ -222,8 +222,8 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     ):
         assert (output_dir / "csv" / name).exists(), name
     for name in (
-        "etp_by_region_output.png",
-        "etp_by_region_input.png",
+        "fte_by_region_output.png",
+        "fte_by_region_input.png",
         "gross_margin_by_crop_output.png",
         "labor_cost_by_crop_output.png",
     ):
@@ -243,7 +243,7 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     # input production: (2+3)ha * rdt CS 80 = 400 t
     assert econ["input"]["total_production_tonnes"] == pytest.approx(400.0)
     # output ETP: both plots ME, labor 800 h/ha -> (2+3)*800 = 4000 h / 1607 default
-    assert econ["output"]["total_etp"] == pytest.approx(4000.0 / 1607.0)
+    assert econ["output"]["total_fte"] == pytest.approx(4000.0 / 1607.0)
     # output gross margin: both plots ME, margin 2000/ha -> (2+3)*2000 = 10000
     assert econ["output"]["total_gross_margin"] == pytest.approx(10000.0)
     # no cost_per_hour in _CONFIG -> labor cost defaults to 0, net revenue == gross margin
@@ -251,26 +251,26 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     assert econ["output"]["total_net_revenue"] == pytest.approx(10000.0)
     for key in (
         "total_production_tonnes", "total_subsidy", "total_revenue", "total_gross_margin",
-        "total_variable_cost", "total_labor_cost", "total_net_revenue", "total_etp",
+        "total_variable_cost", "total_labor_cost", "total_net_revenue", "total_fte",
     ):
         assert econ["delta"][key] == pytest.approx(econ["output"][key] - econ["input"][key])
     # Environment block: symmetric to economics. Output = both ME; input = both CS.
     env = recap["environment"]
     assert set(env) == {"input", "output", "delta"}
-    # output (both ME, 5 ha): GES 5*1=5, IFT 5*6=30, azote 5*50=250, surface_cld=P1=2.0
-    assert env["output"]["total_ges"] == pytest.approx(5.0)
-    assert env["output"]["total_ift"] == pytest.approx(30.0)
-    assert env["output"]["total_azote"] == pytest.approx(250.0)
-    assert env["output"]["surface_cld"] == pytest.approx(2.0)
-    assert env["output"]["ges_per_ha"] == pytest.approx(5.0 / 5.0)
+    # output (both ME, 5 ha): GES 5*1=5, IFT 5*6=30, azote 5*50=250, chlordecone_risk_area=P1=2.0
+    assert env["output"]["total_ghg"] == pytest.approx(5.0)
+    assert env["output"]["total_tfi"] == pytest.approx(30.0)
+    assert env["output"]["total_nitrogen"] == pytest.approx(250.0)
+    assert env["output"]["chlordecone_risk_area"] == pytest.approx(2.0)
+    assert env["output"]["ghg_per_ha"] == pytest.approx(5.0 / 5.0)
     # input (both CS, 5 ha): GES 5*2=10 ; CS uptake class 4 -> no chlordécone risk
-    assert env["input"]["total_ges"] == pytest.approx(10.0)
-    assert env["input"]["surface_cld"] == pytest.approx(0.0)
-    for key in ("total_ges", "total_ift", "total_azote", "surface_cld"):
+    assert env["input"]["total_ghg"] == pytest.approx(10.0)
+    assert env["input"]["chlordecone_risk_area"] == pytest.approx(0.0)
+    for key in ("total_ghg", "total_tfi", "total_nitrogen", "chlordecone_risk_area"):
         assert env["delta"][key] == pytest.approx(env["output"][key] - env["input"][key])
 
     facts_output = pd.read_csv(output_dir / "csv" / "facts_output.csv")
-    assert {"ges", "ift", "azote", "surface_cld"} <= set(facts_output.columns)
+    assert {"ghg", "tfi", "nitrogen", "chlordecone_risk_area"} <= set(facts_output.columns)
 
     # Food-autonomy block. Output = both ME (100 t): Kcal ratio 10000/2000=5.0, Prot
     # 500/600=0.833 (limiting). Input = both CS (400 t): Kcal 4000/2000=2.0.
@@ -287,8 +287,8 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     )
     assert auto["delta"]["crop_only"]["kcal"] == pytest.approx(5.0 - 2.0)
 
-    etp_by_region = pd.read_csv(output_dir / "csv" / "etp_by_region_output.csv")
-    assert list(etp_by_region.columns) == ["region", "etp"]
+    fte_by_region = pd.read_csv(output_dir / "csv" / "fte_by_region_output.csv")
+    assert list(fte_by_region.columns) == ["region", "fte"]
 
     surface_by_region_output = pd.read_csv(output_dir / "csv" / "surface_by_region_output.csv")
     assert "region" in surface_by_region_output.columns

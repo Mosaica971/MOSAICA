@@ -19,14 +19,14 @@ CONFIG = load_config(
 
 def test_compute_farm_surface_ha_sums_plot_surface_per_farm():
     plot_surface = pd.Series({"P1": 3.68, "P2": 3.3, "P3": 1.36, "P4": 1.24})
-    expl_parc = pd.DataFrame(
+    farm_plot_map = pd.DataFrame(
         {
             "farm": ["E1", "E1", "E1", "E2"],
             "plot": ["P1", "P2", "P3", "P4"],
         }
     )
 
-    result = compute_farm_surface_ha(plot_surface, expl_parc)
+    result = compute_farm_surface_ha(plot_surface, farm_plot_map)
 
     assert result["E1"] == 3.68 + 3.3 + 1.36
     assert result["E2"] == 1.24
@@ -38,8 +38,8 @@ def test_build_dataset_loads_known_set_sizes():
     assert len(dataset.sets["crops"]) == 84
     assert len(dataset.sets["soils"]) == 5
     assert len(dataset.sets["otk"]) == 189
-    assert len(dataset.parameters["expl_parc"]) == 24734
-    assert dataset.parameters["expl_parc"]["farm"].nunique() == 4638
+    assert len(dataset.parameters["farm_plot_map"]) == 24734
+    assert dataset.parameters["farm_plot_map"]["farm"].nunique() == 4638
 
 
 def test_build_dataset_computes_farm_surface_ha_matching_gams_init_logic():
@@ -54,8 +54,8 @@ def test_build_dataset_computes_farm_surface_ha_matching_gams_init_logic():
 def test_build_dataset_selects_2017_column_for_price_and_yield():
     dataset = build_dataset(CONFIG)
 
-    assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
-    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(18.5)
+    assert dataset.parameters["crop_price"]["AG"] == pytest.approx(700)
+    assert dataset.parameters["crop_yield"]["AG"] == pytest.approx(18.5)
 
 
 def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
@@ -81,12 +81,12 @@ def test_build_dataset_computes_eligibility_mask_from_agronomic_bounds():
 def test_build_dataset_computes_gross_margin_per_ha_cult():
     dataset = build_dataset(CONFIG)
 
-    margin_per_ha_cult = dataset.parameters["margin_per_ha_cult"]
+    crop_margin_per_ha = dataset.parameters["crop_margin_per_ha"]
 
     # AG: PB=rdt*prix=18.5*700=12950 (no subsidies/bagasse for citrus), CV~8001.31
     # from OTK variable costs. Cross-checked against the GAMS run's own output
     # (context/SORTIES/RECAP_CULT_init.TXT, line MB, column AG = 4948.69).
-    assert margin_per_ha_cult["AG"] == pytest.approx(4948.69, abs=0.01)
+    assert crop_margin_per_ha["AG"] == pytest.approx(4948.69, abs=0.01)
 
 
 def test_build_dataset_applies_guadeloupe_categorical_eligibility_rules():
@@ -146,12 +146,12 @@ def test_build_dataset_computes_farm_gfa_surface_ha():
 def test_build_dataset_merges_land_use_history_columns_into_data_parc():
     dataset = build_dataset(CONFIG)
 
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
 
     # P9: fallow/non-cultivated (code 14) in 2015, 2016, and 2017 -- a friche-lock case
-    assert data_parc.loc["P9", "cult_2015"] == 14
-    assert data_parc.loc["P9", "cult_2016"] == 14
-    assert data_parc.loc["P9", "cult_2017"] == 14
+    assert plot_data.loc["P9", "cult_2015"] == 14
+    assert plot_data.loc["P9", "cult_2016"] == 14
+    assert plot_data.loc["P9", "cult_2017"] == 14
 
 
 def test_build_dataset_applies_friche_lock_categorical_rule():
@@ -166,15 +166,15 @@ def test_build_dataset_applies_friche_lock_categorical_rule():
 def test_friche_lock_config_crops_match_cult_non_nc_set_file_exactly():
     from core.data.readers import read_flat_set
 
-    friche_entry = next(
-        entry for entry in CONFIG["categorical_rules"] if entry["name"] == "friche_lock"
+    fallow_entry = next(
+        entry for entry in CONFIG["categorical_rules"] if entry["name"] == "fallow_lock"
     )
     expected = read_flat_set(
         Path(__file__).resolve().parent.parent / "data" / "sets" / "CULT_NON_NC_2017.set"
     )
 
-    assert set(friche_entry["args"]["crops"]) == set(expected)
-    assert len(friche_entry["args"]["crops"]) == len(expected)
+    assert set(fallow_entry["args"]["crops"]) == set(expected)
+    assert len(fallow_entry["args"]["crops"]) == len(expected)
 
 
 def test_build_dataset_computes_crop_variance_per_ha_from_var_rdt_cult_init_column():
@@ -194,8 +194,8 @@ def test_build_dataset_defaults_to_2017_restit_without_data_section():
 
     # 2017 economics reproduced, read from Prix_Cult_CF_<scenario>/Rdt_Cult_CF_<scenario>
     # -- the tables GAMS itself includes (DONNEES.txt:283-289).
-    assert dataset.parameters["prix_cult"]["AG"] == pytest.approx(700)
-    assert dataset.parameters["rdt_cult"]["AG"] == pytest.approx(18.5)
+    assert dataset.parameters["crop_price"]["AG"] == pytest.approx(700)
+    assert dataset.parameters["crop_yield"]["AG"] == pytest.approx(18.5)
 
 
 def test_build_dataset_rejects_unknown_year():
@@ -218,7 +218,7 @@ def test_build_dataset_year_selects_requested_economic_column():
 
     dataset = build_dataset(config)
 
-    assert dataset.parameters["prix_cult"].equals(raw_2018)
+    assert dataset.parameters["crop_price"].equals(raw_2018)
 
 
 def test_build_dataset_accepts_init_baseline_column_as_year():
@@ -227,7 +227,7 @@ def test_build_dataset_accepts_init_baseline_column_as_year():
 
     dataset = build_dataset(config)
 
-    assert dataset.parameters["prix_cult"].equals(raw_init)
+    assert dataset.parameters["crop_price"].equals(raw_init)
 
 
 def test_build_dataset_scenario_selects_requested_otk_matrix():
@@ -236,7 +236,7 @@ def test_build_dataset_scenario_selects_requested_otk_matrix():
 
     dataset = build_dataset(config)
 
-    assert dataset.parameters["matrice_otk_cult"].equals(raw_smart)
+    assert dataset.parameters["crop_operation_matrix"].equals(raw_smart)
 
 
 def test_build_dataset_var_rdt_stays_on_init_column_regardless_of_year():
@@ -263,8 +263,8 @@ def test_build_dataset_farm_risk_aversion_is_not_degenerately_uniform():
 
     farm_risk_aversion = dataset.parameters["farm_risk_aversion"]
 
-    # Every farm in expl_parc must get a classification (no missing/NaN AVERS).
-    all_farms = set(dataset.parameters["expl_parc"]["farm"].unique())
+    # Every farm in farm_plot_map must get a classification (no missing/NaN AVERS).
+    all_farms = set(dataset.parameters["farm_plot_map"]["farm"].unique())
     assert set(farm_risk_aversion.index) == all_farms
     assert not farm_risk_aversion.isna().any()
 
@@ -280,10 +280,10 @@ def test_build_dataset_farm_risk_aversion_is_not_degenerately_uniform():
 def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     dataset = build_dataset(CONFIG)
 
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
     from case_studies.guadeloupe.domain.farm_typology import compute_base_crop_group
 
-    base_crop_group = compute_base_crop_group(data_parc["cult_2016"], data_parc["cult_2017"])
+    base_crop_group = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
 
     assert not base_crop_group.isna().any()
 
@@ -293,16 +293,16 @@ def test_build_dataset_zone_filter_include_restricts_to_one_island():
 
     dataset = build_dataset(config)
 
-    data_parc = dataset.parameters["data_parc"]
-    assert len(data_parc) == 8376  # real count of island-1 plots in Data_Parc_Gwad_2017.txt
-    assert (data_parc["ILE"] == 1).all()
+    plot_data = dataset.parameters["plot_data"]
+    assert len(plot_data) == 8376  # real count of island-1 plots in Data_Parc_Gwad_2017.txt
+    assert (plot_data["ILE"] == 1).all()
     # E1's plots (P1,P2,P3) are on island 2 -- must be gone.
     assert "E1" not in dataset.parameters["farm_plots"]
-    # Every plot-mapping table must be filtered consistently, not just data_parc/expl_parc.
-    assert dataset.parameters["reg_parc"]["plot"].isin(data_parc.index).all()
-    assert len(dataset.parameters["reg_parc"]) == len(data_parc)
-    assert dataset.parameters["bv_parc"]["plot"].isin(data_parc.index).all()
-    assert dataset.parameters["cpt_parc"]["plot"].isin(data_parc.index).all()
+    # Every plot-mapping table must be filtered consistently, not just plot_data/farm_plot_map.
+    assert dataset.parameters["region_plot_map"]["plot"].isin(plot_data.index).all()
+    assert len(dataset.parameters["region_plot_map"]) == len(plot_data)
+    assert dataset.parameters["watershed_plot_map"]["plot"].isin(plot_data.index).all()
+    assert dataset.parameters["catchment_plot_map"]["plot"].isin(plot_data.index).all()
 
 
 def test_build_dataset_zone_filter_exclude_removes_one_farm():
@@ -310,10 +310,10 @@ def test_build_dataset_zone_filter_exclude_removes_one_farm():
 
     dataset = build_dataset(config)
 
-    data_parc = dataset.parameters["data_parc"]
-    assert len(data_parc) == 24734 - 3  # E1 has exactly 3 plots: P1, P2, P3
-    assert "P1" not in data_parc.index
-    assert "E1" not in dataset.parameters["expl_parc"]["farm"].values
+    plot_data = dataset.parameters["plot_data"]
+    assert len(plot_data) == 24734 - 3  # E1 has exactly 3 plots: P1, P2, P3
+    assert "P1" not in plot_data.index
+    assert "E1" not in dataset.parameters["farm_plot_map"]["farm"].values
 
 
 def test_build_dataset_zone_filter_raises_when_selection_is_empty():
@@ -326,9 +326,9 @@ def test_build_dataset_zone_filter_raises_when_selection_is_empty():
 def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
     dataset = build_dataset(CONFIG)
 
-    sales = dataset.parameters["sales_per_ha_cult"]
-    subsidy_annualized = dataset.parameters["subsidy_per_ha_cult_annualized"]
-    margin = dataset.parameters["margin_per_ha_cult"]
+    sales = dataset.parameters["crop_sales_per_ha"]
+    subsidy_annualized = dataset.parameters["crop_subsidy_per_ha_annualized"]
+    margin = dataset.parameters["crop_margin_per_ha"]
 
     # AG: PB=rdt*prix=18.5*700=12950, no subsidies/bagasse (see the existing
     # gross-margin test's comment) -- sales alone should equal the full gross
@@ -338,11 +338,11 @@ def test_build_dataset_exposes_sales_and_annualized_subsidy_per_ha_cult():
     assert subsidy_annualized["AG"] == pytest.approx(0.0, abs=0.01)
     assert (sales["AG"] + subsidy_annualized["AG"] - margin["AG"]) == pytest.approx(8001.31, abs=1.0)
 
-    # BA_INT (intensive banana): subsidy_per_ha_cult=18658.0 (POSEI + national aid,
-    # dominated by Aide_Indus_Cult/POSEI_Q_Cult), duree_cycle_cult=12 --
+    # BA_INT (intensive banana): crop_subsidy_per_ha=18658.0 (POSEI + national aid,
+    # dominated by Aide_Indus_Cult/POSEI_Q_Cult), crop_cycle_duration=12 --
     # hand-verified via a one-off script calling
-    # case_studies.guadeloupe.domain.economics.compute_subsidy_per_ha_cult against the
-    # real data tables, giving subsidy_per_ha_cult_annualized = 18658.0 / 12 * 12
+    # case_studies.guadeloupe.domain.economics.compute_crop_subsidy_per_ha against the
+    # real data tables, giving crop_subsidy_per_ha_annualized = 18658.0 / 12 * 12
     # = 18658.0. Unlike AG (subsidy=0), this exercises the annualization
     # division/multiplication against a meaningfully nonzero subsidy.
     assert subsidy_annualized["BA_INT"] == pytest.approx(18658.0, abs=0.01)
@@ -365,8 +365,8 @@ def test_yield_multiplier_scales_rdt_in_dataset():
     }
     shocked = build_dataset(shocked_cfg)
 
-    assert shocked.parameters["rdt_cult"]["CS_MG_NISM"] == (
-        base.parameters["rdt_cult"]["CS_MG_NISM"] * 0.5
+    assert shocked.parameters["crop_yield"]["CS_MG_NISM"] == (
+        base.parameters["crop_yield"]["CS_MG_NISM"] * 0.5
     )
 
 
@@ -387,8 +387,8 @@ def test_cost_multiplier_scales_variable_cost_in_dataset():
     }
     shocked = build_dataset(shocked_cfg)
 
-    assert shocked.parameters["variable_cost_per_ha_cult"]["CS_MG_NISM"] == (
-        base.parameters["variable_cost_per_ha_cult"]["CS_MG_NISM"] * 1.3
+    assert shocked.parameters["crop_variable_cost_per_ha"]["CS_MG_NISM"] == (
+        base.parameters["crop_variable_cost_per_ha"]["CS_MG_NISM"] * 1.3
     )
 
 
@@ -397,9 +397,9 @@ def test_build_dataset_registers_water_and_carbon_rates():
     dataset = build_dataset(CONFIG)
     crops = dataset.sets["crops"]
 
-    water_need = dataset.parameters["water_need_per_ha_cult"]
-    carbon_input = dataset.parameters["carbon_input_per_ha_cult"]
-    monthly = dataset.parameters["monthly_water_need_per_ha_cult"]
+    water_need = dataset.parameters["crop_water_need_per_ha"]
+    carbon_input = dataset.parameters["crop_carbon_input_per_ha"]
+    monthly = dataset.parameters["crop_monthly_water_need_per_ha"]
 
     assert set(water_need.index) == set(crops)
     assert set(carbon_input.index) == set(crops)
@@ -413,20 +413,20 @@ def test_build_dataset_registers_water_and_carbon_rates():
 
 def test_build_dataset_loads_soil_table_with_all_five_soils():
     dataset = build_dataset(CONFIG)
-    data_sol = dataset.parameters["data_sol"]
+    soil_data = dataset.parameters["soil_data"]
 
-    assert set(data_sol.index) >= {"KAER", "DENS", "PROF"}
-    assert set(data_sol.columns) == {
+    assert set(soil_data.index) >= {"KAER", "DENS", "PROF"}
+    assert set(soil_data.columns) == {
         "NITISOL", "ANDOSOL", "FERRALSOL", "AUTRES", "VERTISOL"
     }
     # Les coefficients de minéralisation diffèrent entre sols -- sinon le choix du sol
     # n'aurait aucun effet sur le bilan carbone.
-    assert data_sol.loc["KAER"].nunique() > 1
+    assert soil_data.loc["KAER"].nunique() > 1
 
 
 def test_build_dataset_registers_duree_cycle_cult():
     dataset = build_dataset(CONFIG)
-    duree = dataset.parameters["duree_cycle_cult"]
+    duree = dataset.parameters["crop_cycle_duration"]
 
     assert set(duree.index) == set(dataset.sets["crops"])
     # Une duree de cycle nulle ferait exploser l'annualisation du choc de prix.

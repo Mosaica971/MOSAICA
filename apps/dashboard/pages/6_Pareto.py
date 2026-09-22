@@ -54,7 +54,7 @@ controls = st.columns(4)
 sweep = controls[0].selectbox("Balayage", sweeps)
 x_indicator = controls[1].selectbox(
     "Axe contraint (x)", list(comparison.INDICATOR_LABELS),
-    index=list(comparison.INDICATOR_LABELS).index("total_azote"),
+    index=list(comparison.INDICATOR_LABELS).index("total_nitrogen"),
     format_func=lambda i: comparison.INDICATOR_LABELS[i],
 )
 y_indicator = controls[2].selectbox(

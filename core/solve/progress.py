@@ -36,7 +36,7 @@ class SolveHistory:
     goes stale silently -- this paragraph used to say "the 20 recorded solves run 155 s to
     1 007 s, factor 6.5, CV 64 %", measured 2026-08-01 and overwritten since. Recount the file
     (2026-08-30 here) rather than trusting the figure; `docs/04-vigilance.md` B.1 and
-    `memoire/build_chiffres.py` carry the same values and must move together.
+    `clement/memoire/build_chiffres.py` carry the same values and must move together.
 
     A RANGE from the same data is honest and still answers the question actually being asked
     -- "is this three minutes or three hours?". Hence `estimate_range`, which returns

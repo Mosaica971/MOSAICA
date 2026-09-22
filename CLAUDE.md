@@ -8,15 +8,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > investigation log. Keep `docs/04-vigilance.md` in sync when a new limitation is found: it is the
 > file a newcomer reads, and this one is not.
 
-> **Travailler sur le mémoire ? Lire `memoire/ETAT.md` D'ABORD, avant toute autre chose.**
-> C'est le fichier de reprise de contexte : où en est le document, les trois décisions déjà
-> arbitrées qu'il ne faut pas rouvrir, les deux contraintes permanentes (aucun solve neuf ;
-> **les chapitres actuels ont été rédigés par Claude et Clément compte s'en éloigner**), le
-> plan par phases, et les points ouverts. Le tenir à jour à la fin de chaque session de
-> rédaction — c'est ce qui évite de tout réexpliquer à chaque conversation.
-> L'inventaire raisonné du stage vit dans `memoire/corpus/` (491 items typés, 1 271 arcs de
-> justification) ; `memoire/audit_corpus.py` en vérifie la complétude et écrit
-> `corpus/_audit.md`.
+> **Current workstream (since 2026-09-22): post-thesis — MAELIA coupling, data porting to
+> MAELIA's information system with access levels, English renaming, implementation-status
+> board.** Read `docs/superpowers/specs/2026-09-22-suite-du-stage-maelia-si-anglais-design.md`
+> first: it fixes the order of the five sub-projects and lists the open decisions. Nothing in
+> it is implemented yet.
+>
+> **The thesis (mémoire) is closed** (submitted 26/08, defended 1-4 Sept) and now lives in
+> `clement/memoire/`, next to `clement/soutenance/` and `clement/student_context/`. To reopen
+> it (internal technical note, article), read `clement/memoire/ETAT.md` first. Its
+> "no new solve" rule applied to the writing phase and has not been renewed or lifted for the
+> current workstream — ask before running solves. The move broke the repo-root computation in
+> `clement/memoire/build_chiffres.py` and `build_figures.py` (`parent.parent` is now
+> `clement/`); see the top of `ETAT.md`. The reasoned inventory of the internship is
+> `clement/memoire/corpus/` (491 items, 1 271 arcs), checked by
+> `clement/memoire/audit_corpus.py`.
 
 ## What this is
 

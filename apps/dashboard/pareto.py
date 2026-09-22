@@ -27,8 +27,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from apps.dashboard.comparison import INDICATOR_DIRECTION, INDICATOR_LABELS, indicator_value
+from case_studies.guadeloupe.legacy_names import rename as _current_name
 
-# Runs of a sweep share a name prefix ending here: `pareto_azote__threshold=1544722`.
+# Runs of a sweep share a name prefix ending here: `pareto_nitrogen__threshold=1544722`.
 SWEEP_SEPARATOR = "__"
 
 
@@ -63,12 +64,14 @@ def sweep_of(recap: dict, fallback_name: str = "") -> str:
         # apart is what keeps them from being averaged into one.
         return SWEEP_SEPARATOR.join(part for part in (policy, forcing, sweep) if part)
     name = recap.get("run_name") or fallback_name
-    return str(name).split(SWEEP_SEPARATOR, 1)[0]
+    # run_name is kept verbatim by the legacy reader, so a pre-2026-09-22 front still reads
+    # `pareto_azote`; renaming the prefix groups it with the fronts traced since.
+    return _current_name(str(name).split(SWEEP_SEPARATOR, 1)[0])
 
 
 def sweep_name(run_name: str) -> str:
     """The sweep a run belongs to, read from its name alone: everything before the matrix
-    suffix. `pareto_azote__threshold=1544722` -> `pareto_azote`. Prefer `sweep_of`, which
+    suffix. `pareto_nitrogen__threshold=1544722` -> `pareto_nitrogen`. Prefer `sweep_of`, which
     reads the recap's own coordinates when it has them."""
     return str(run_name).split(SWEEP_SEPARATOR, 1)[0]
 

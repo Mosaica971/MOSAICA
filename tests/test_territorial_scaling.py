@@ -11,14 +11,14 @@ def _config():
             {"name": "territory_production_bound", "enable": True,
              "args": {"label": "pn_prod_min", "sense": "ge", "threshold": 6096.0}},
             {"name": "territory_indicator_bound", "enable": True,
-             "args": {"label": "plafond_azote", "sense": "le", "threshold": 1_930_903.0}},
+             "args": {"label": "nitrogen_cap", "sense": "le", "threshold": 1_930_903.0}},
             {"name": "zone_indicator_bound", "enable": True,
              "args": {"label": "nitrates", "zone": "farms", "threshold_per_ha": 170.0}},
             {"name": "zone_indicator_bound", "enable": True,
              "args": {"label": "eau_bv", "zone": "watersheds", "threshold": 1000.0,
                       "thresholds": {"BV1": 400.0, "BV2": 600.0}}},
             {"name": "crop_share_bound", "enable": True,
-             "args": {"label": "bio_min", "sense": "ge", "share": 0.25}},
+             "args": {"label": "organic_min", "sense": "ge", "share": 0.25}},
             {"name": "farm_area_share_max", "enable": True,
              "args": {"label": "an_max", "max_share": 0.75}},
             {"name": "farm_labor_hours_max", "enable": True,
@@ -38,7 +38,7 @@ def _args(config, label):
 def test_absolute_territorial_thresholds_are_scaled():
     scaled = scale_territorial_bounds(_config(), 0.25)
     assert _args(scaled, "pn_prod_min")["threshold"] == pytest.approx(1524.0)
-    assert _args(scaled, "plafond_azote")["threshold"] == pytest.approx(482_725.75)
+    assert _args(scaled, "nitrogen_cap")["threshold"] == pytest.approx(482_725.75)
     assert _args(scaled, "eau_bv")["threshold"] == pytest.approx(250.0)
 
 
@@ -52,7 +52,7 @@ def test_scale_free_arguments_are_left_alone():
     # them would change what the scenario says rather than resize it.
     scaled = scale_territorial_bounds(_config(), 0.25)
     assert _args(scaled, "nitrates")["threshold_per_ha"] == pytest.approx(170.0)
-    assert _args(scaled, "bio_min")["share"] == pytest.approx(0.25)
+    assert _args(scaled, "organic_min")["share"] == pytest.approx(0.25)
     assert _args(scaled, "an_max")["max_share"] == pytest.approx(0.75)
     assert _args(scaled, "mo")["slack"] == pytest.approx(1.5)
     assert _args(scaled, "inertie")["min_share"] == pytest.approx(0.7)

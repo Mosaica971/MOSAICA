@@ -29,7 +29,7 @@ def test_code_key_normalises_every_type_a_code_arrives_as():
 
 
 def test_comparison_still_exposes_the_moved_symbols():
-    # pages/2_Comparaison.py reads them through `comparison`; the move must be invisible.
+    # pages/2_Comparison.py reads them through `comparison`; the move must be invisible.
     assert comparison.REGION_LABELS is zones.REGION_LABELS
     assert comparison.ISLAND_LABELS is zones.ISLAND_LABELS
     assert comparison.REGION_CODES is zones.REGION_CODES

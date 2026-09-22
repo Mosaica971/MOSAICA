@@ -10,7 +10,7 @@ from scripts import check_references
 
 def _reference(**overrides):
     entry = {
-        "id": "retained", "run": "calib_retenu", "side": "output", "label": "Calib retenu",
+        "id": "retained", "run": "calib_selected", "side": "output", "label": "Calib retenu",
         "tolerance_pct": 5.0,
         "expect": {"calibration.regional_pad_pct": 6.60, "objective.value": 81222224},
     }
@@ -40,7 +40,7 @@ def test_resolve_metric_returns_none_rather_than_raising_on_a_missing_path():
 
 
 def test_values_within_the_band_pass(tmp_path):
-    run = _run(tmp_path, "calib_retenu", {
+    run = _run(tmp_path, "calib_selected", {
         "calibration": {"regional_pad_pct": 6.63}, "objective": {"value": 81230000},
     })
 
@@ -52,7 +52,7 @@ def test_values_within_the_band_pass(tmp_path):
 def test_the_band_is_wide_enough_for_measured_solver_noise(tmp_path):
     """Three HiGHS seeds give PAD 48.44 / 48.29 / 48.31 -- 0.15 point, 2.3 % relative on the
     smallest guarded value. An exact-match guard would fail on a re-run that changed nothing."""
-    run = _run(tmp_path, "calib_retenu", {
+    run = _run(tmp_path, "calib_selected", {
         "calibration": {"regional_pad_pct": 6.60 + 0.15}, "objective": {"value": 81222224},
     })
 
@@ -62,7 +62,7 @@ def test_the_band_is_wide_enough_for_measured_solver_noise(tmp_path):
 
 
 def test_a_real_drift_is_flagged(tmp_path):
-    run = _run(tmp_path, "calib_retenu", {
+    run = _run(tmp_path, "calib_selected", {
         "calibration": {"regional_pad_pct": 12.0}, "objective": {"value": 81222224},
     })
 
@@ -74,7 +74,7 @@ def test_a_real_drift_is_flagged(tmp_path):
 
 
 def test_a_metric_absent_from_the_recap_reads_as_missing_not_as_a_drift(tmp_path):
-    run = _run(tmp_path, "calib_retenu", {"objective": {"value": 81222224}})
+    run = _run(tmp_path, "calib_selected", {"objective": {"value": 81222224}})
 
     rows = check_references.check_reference(_reference(), run)
     by_metric = {row["metric"]: row["status"] for row in rows}
@@ -96,11 +96,11 @@ def test_an_expected_value_of_zero_falls_back_to_absolute_drift(tmp_path):
     reference = _reference(expect={"calibration.regional_pad_pct": 0.0})
 
     near = check_references.check_reference(
-        reference, _run(tmp_path / "a", "calib_retenu",
+        reference, _run(tmp_path / "a", "calib_selected",
                         {"calibration": {"regional_pad_pct": 3.0}})
     )
     far = check_references.check_reference(
-        reference, _run(tmp_path / "b", "calib_retenu",
+        reference, _run(tmp_path / "b", "calib_selected",
                         {"calibration": {"regional_pad_pct": 9.0}})
     )
 
@@ -111,28 +111,28 @@ def test_an_expected_value_of_zero_falls_back_to_absolute_drift(tmp_path):
 def test_main_exits_non_zero_when_a_reference_drifts(tmp_path, capsys):
     manifest = tmp_path / "references.yaml"
     manifest.write_text(yaml.safe_dump({"references": [{
-        "id": "retained", "run": "calib_retenu", "side": "output", "label": "Calib retenu",
+        "id": "retained", "run": "calib_selected", "side": "output", "label": "Calib retenu",
         "tolerance_pct": 5.0, "expect": {"calibration.regional_pad_pct": 6.60},
     }]}), encoding="utf-8")
     outputs = tmp_path / "outputs"
-    _run(outputs, "calib_retenu", {"calibration": {"regional_pad_pct": 40.0}})
+    _run(outputs, "calib_selected", {"calibration": {"regional_pad_pct": 40.0}})
 
     code = check_references.main(
         ["--references", str(manifest), "--outputs", str(outputs)]
     )
 
     assert code == 1
-    assert "ÉCART" in capsys.readouterr().out
+    assert "DRIFT" in capsys.readouterr().out
 
 
 def test_main_exits_zero_when_everything_holds(tmp_path):
     manifest = tmp_path / "references.yaml"
     manifest.write_text(yaml.safe_dump({"references": [{
-        "id": "retained", "run": "calib_retenu", "side": "output", "label": "Calib retenu",
+        "id": "retained", "run": "calib_selected", "side": "output", "label": "Calib retenu",
         "expect": {"calibration.regional_pad_pct": 6.60},
     }]}), encoding="utf-8")
     outputs = tmp_path / "outputs"
-    _run(outputs, "calib_retenu", {"calibration": {"regional_pad_pct": 6.60}})
+    _run(outputs, "calib_selected", {"calibration": {"regional_pad_pct": 6.60}})
 
     assert check_references.main(
         ["--references", str(manifest), "--outputs", str(outputs)]
