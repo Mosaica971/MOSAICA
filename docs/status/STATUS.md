@@ -75,83 +75,83 @@ Source: `case_studies/guadeloupe/status/indicator_catalog.yaml`. ● reported by
 
 Derived from `case_studies/guadeloupe/config.yaml` itself. `gams_equation` is filled only when the equation is found in `context/gams/`.
 
-| section | name | label | enabled | role | gams_equation | threshold | crops | pairs_removed |
-|---|---|---|---|---|---|---|---|---|
-| constraints | at_most_one_crop_per_plot |  | True | structure |  |  | all |  |
-| constraints | farm_area_share_max | an_agro_max_farm | True | ceiling | Eq_AN_AGRO_MAX_Expl | 0.75 | 3: AN, AN_NU, AN_PA |  |
-| constraints | farm_area_share_max | ig_agro_max_farm | True | ceiling | Eq_IG_AGRO_MAX_Expl | 0.66 | 3: IG, IG_PLA, IG_TUT |  |
-| constraints | farm_area_ratio_min | ba_ja | True | floor | Eq_BA_JA | 0.2 | 4: JA, BA_INT, BA_IRR, BA_SINT |  |
-| constraints | farm_area_ratio_min | ba_rota | True | floor | Eq_BA_ROTA | 0.2 | 33: JA, CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM ... |  |
-| constraints | cs_gfa_minimum_share | cs_gfa | False | floor | Eq_CS_GFA | 0.6 | 19: CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM ... |  |
-| constraints | farm_labor_hours_max | labor_max_farm | True | ceiling | Eq_MO_MAX_Expl |  | all |  |
-| constraints | farm_production_bound | ba_quota_farm | True | ceiling | Eq_BA_QUOTA_Expl |  | 5: BA, BA_INT, BA_IRR, BA_PER, BA_SINT |  |
-| constraints | territory_production_bound | ba_quota_max | True | ceiling | Eq_BA_QUOTA_MAX | 77877 | 5: BA, BA_INT, BA_IRR, BA_PER, BA_SINT |  |
-| constraints | territory_production_bound | me_quota_max | False | ceiling | Eq_ME_QUOTA_MAX | 80000 | 1: ME |  |
-| constraints | territory_production_bound | an_quota_max | False | ceiling | Eq_AN_QUOTA_MAX | 70000 | 3: AN, AN_NU, AN_PA |  |
-| constraints | territory_production_bound | ig_quota_max | False | ceiling | Eq_IG_QUOTA_MAX | 50000 | 3: IG, IG_PLA, IG_TUT |  |
-| constraints | territory_production_bound | bc_quota_max | True | ceiling | Eq_BC_QUOTA_MAX | 6440 | 3: BC, BC_BT, BC_GTMG |  |
-| constraints | territory_production_bound | cs_quota_max | True | ceiling | Eq_CS_QUOTA_MAX | 107000 | 19: CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM ... |  |
-| constraints | territory_production_bound | bc_prod_min | False | floor | Eq_BC_PROD_MIN | 4056 | 3: BC, BC_BT, BC_GTMG |  |
-| constraints | territory_production_bound | ig_prod_min | False | floor | Eq_IG_PROD_MIN | 5125 | 3: IG, IG_PLA, IG_TUT |  |
-| constraints | territory_production_bound | ma_prod_min | False | floor | Eq_MA_PROD_MIN | 26404 | 30: MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA ... |  |
-| constraints | territory_production_bound | an_prod_min | False | floor | Eq_AN_PROD_MIN | 2322 | 3: AN, AN_NU, AN_PA |  |
-| constraints | territory_production_bound | plu_prod_min | False | floor | Eq_PLU_PROD_MIN | 5879 | 4: AG, VE, VE_BTGT, VE_PLUIE |  |
-| constraints | territory_production_bound | me_prod_min | False | floor | Eq_ME_PROD_MIN | 4135 | 1: ME |  |
-| constraints | territory_production_bound | pn_prod_min | True | floor | Eq_PN_PROD_MIN | 6096 | 1: PN_PIQ |  |
-| constraints | territory_production_bound | leg_prod_obj | False | floor | Eq_LEG_PROD_OBJ | 63059 | 30: MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA ... |  |
-| constraints | territory_production_bound | tub_prod_obj | False | floor | Eq_TUB_PROD_OBJ | 0 | 3: IG, IG_PLA, IG_TUT |  |
-| constraints | territory_production_bound | fru_prod_obj | False | floor | Eq_FRU_PROD_OBJ | 30789 | 11: BC, BC_BT, BC_GTMG, AN, AN_NU, AN_PA ... |  |
-| constraints | territory_production_bound | pat_surf_obj | False | floor | Eq_PAT_SURF_OBJ | 12193 | 1: PN_PIQ |  |
-| constraints | territory_indicator_bound | nitrogen_max | False | ceiling |  | 1930903 | all |  |
-| constraints | territory_indicator_bound | employment_min | False | floor |  | 5629321 | all |  |
-| eligibility_criteria | altitude | altitude | True | eligibility bound |  |  | all |  |
-| eligibility_criteria | slope | slope | True | eligibility bound |  |  | all |  |
-| eligibility_criteria | rainfall | rainfall | True | eligibility bound |  |  | all |  |
-| eligibility_criteria | plot_size | plot_size | True | eligibility bound |  |  | all |  |
-| categorical_rules | forbid_crops |  | True | ban |  |  | 8: AN, BA, BC, CS, IG, MA ... | 197872 |
-| categorical_rules | forbid_crops |  | True | ban | Eq_TH_SUPP |  | 1: TH | 24734 |
-| categorical_rules | forbid_crops | pn_tour_supp | True | ban | Eq_PN_TOUR_SUPP |  | 1: PN_TOUR | 24734 |
-| categorical_rules | forbid_crops | cf_supp | True | ban | Eq_CF_SUPP |  | 10: CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM, CF_NGT_NIM ... | 247340 |
-| categorical_rules | forbid_crops |  | True | ban | Eq_CS_SBT_NISM_SUPP |  | 2: CS_SBT_NISM, CS_MG_NIM | 49468 |
-| categorical_rules | forbid_crops | ma_exp_supp | True | ban | Eq_MA_EXP_SUPP |  | 25: MA_TO_CHOU_JA, MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI, MA_BAG_FER_I ... | 618350 |
-| categorical_rules | irrigation_required |  | True | ban |  |  | 2: ME, MA_ROTA | 24740 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_AN_SOL_Parc |  | 3: AN, AN_NU, AN_PA | 58344 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_AN_PA |  | 1: AN_PA | 16965 |
-| categorical_rules | attribute_forbidden |  | True | ban |  |  | 1: ME | 8390 |
-| categorical_rules | attribute_forbidden |  | True | ban |  |  | 1: ME | 8376 |
-| categorical_rules | attribute_forbidden | ig_tut_chlordecone | True | ban | Eq_IG_CLD |  | 1: IG_TUT | 4443 |
-| categorical_rules | attribute_forbidden | pn_piq_cld | False | ban | Eq_PN_PIQ_CLD |  | 1: PN_PIQ |  |
-| categorical_rules | region_crop_forbidden |  | True | ban |  |  | 1: ME | 8887 |
-| categorical_rules | forbid_crops | cs_irrig_ban | True | ban | Eq_CS_IRR |  | 6: CS_BT_IM, CS_SBT_IM, CS_NGT_IM, CS_CGT_IM, CS_EGT_IM, CS_MG_IM | 148404 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_SOL_SQUE |  | 12: CS_BT_NIM, CS_BT_IM, CS_SBT_NIM, CS_SBT_IM, CS_NGT_NIM, CS_NGT_IM ... | 40332 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_CONFORM |  | 12: CS_BT_NIM, CS_BT_IM, CS_SBT_NIM, CS_SBT_IM, CS_NGT_NIM, CS_NGT_IM ... | 17052 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_BT |  | 3: CS_BT_NISM, CS_BT_NIM, CS_BT_IM | 49074 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_SBT |  | 3: CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM | 65124 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_NGT |  | 3: CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM | 57519 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_CGT |  | 3: CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM | 69399 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_EGT |  | 3: CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM | 62760 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_MG |  | 3: CS_MG_NISM, CS_MG_NIM, CS_MG_IM | 58056 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_MA_TO_CHOU_JA_LOC |  | 1: MA_TO_CHOU_JA | 7105 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_ME_MG |  | 1: ME | 5382 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_IG_PLA_ILE |  | 1: IG_PLA | 8376 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_IG_TUT_ILE |  | 1: IG_TUT | 16358 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_BA_IRR |  | 1: BA_IRR | 12370 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_BA_IRR_BT |  | 1: BA_IRR | 8376 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_BT |  | 1: BC_BT | 16358 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_GTMG |  | 1: BC_GTMG | 8376 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_IRR_BT |  | 1: BC_BT | 10369 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_IRR_GTMG |  | 1: BC_GTMG | 7105 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_AG_IRR |  | 1: AG | 11727 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_AG_BT |  | 1: AG | 16358 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_VE_IRR |  | 1: VE_BTGT | 10809 |
-| categorical_rules | attribute_forbidden |  | True | ban | Eq_VE_BTGT |  | 1: VE_BTGT | 4325 |
-| categorical_rules | attribute_forbidden |  | False | ban | Eq_VE_BTGT |  | 1: VE_BTGT |  |
-| categorical_rules | forbid_crops |  | True | ban | Eq_VE_PLUIE |  | 1: VE_PLUIE | 24734 |
-| categorical_rules | attribute_forbidden |  | False | ban | Eq_VE_PLUIE |  | 1: VE_PLUIE |  |
-| categorical_rules | attribute_forbidden |  | False | ban | Eq_VE_PLUIE |  | 1: VE_PLUIE |  |
-| categorical_rules | fallow_lock | fallow | True | ban | Eq_FRICHE |  | 83: AG, AN, AN_NU, AN_PA, BA, BA_INT ... | 162265 |
-| categorical_rules | attribute_forbidden | nocult_nc_1 | True | ban | Eq_NOCULT_NC |  | 83: AG, AN, AN_NU, AN_PA, BA, BA_INT ... | 86569 |
-| categorical_rules | attribute_forbidden | nocult_nc_2 | True | ban | Eq_NOCULT_NC |  | 83: AG, AN, AN_NU, AN_PA, BA, BA_INT ... | 201939 |
+| section | name | label | enabled | role | gams_equation | threshold | crops |
+|---|---|---|---|---|---|---|---|
+| constraints | at_most_one_crop_per_plot |  | True | structure |  |  | all |
+| constraints | farm_area_share_max | an_agro_max_farm | True | ceiling | Eq_AN_AGRO_MAX_Expl | 0.75 | 3: AN, AN_NU, AN_PA |
+| constraints | farm_area_share_max | ig_agro_max_farm | True | ceiling | Eq_IG_AGRO_MAX_Expl | 0.66 | 3: IG, IG_PLA, IG_TUT |
+| constraints | farm_area_ratio_min | ba_ja | True | floor | Eq_BA_JA | 0.2 | 4: JA, BA_INT, BA_IRR, BA_SINT |
+| constraints | farm_area_ratio_min | ba_rota | True | floor | Eq_BA_ROTA | 0.2 | 33: JA, CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM ... |
+| constraints | cs_gfa_minimum_share | cs_gfa | False | floor | Eq_CS_GFA | 0.6 | 19: CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM ... |
+| constraints | farm_labor_hours_max | labor_max_farm | True | ceiling | Eq_MO_MAX_Expl |  | all |
+| constraints | farm_production_bound | ba_quota_farm | True | ceiling | Eq_BA_QUOTA_Expl |  | 5: BA, BA_INT, BA_IRR, BA_PER, BA_SINT |
+| constraints | territory_production_bound | ba_quota_max | True | ceiling | Eq_BA_QUOTA_MAX | 77877 | 5: BA, BA_INT, BA_IRR, BA_PER, BA_SINT |
+| constraints | territory_production_bound | me_quota_max | False | ceiling | Eq_ME_QUOTA_MAX | 80000 | 1: ME |
+| constraints | territory_production_bound | an_quota_max | False | ceiling | Eq_AN_QUOTA_MAX | 70000 | 3: AN, AN_NU, AN_PA |
+| constraints | territory_production_bound | ig_quota_max | False | ceiling | Eq_IG_QUOTA_MAX | 50000 | 3: IG, IG_PLA, IG_TUT |
+| constraints | territory_production_bound | bc_quota_max | True | ceiling | Eq_BC_QUOTA_MAX | 6440 | 3: BC, BC_BT, BC_GTMG |
+| constraints | territory_production_bound | cs_quota_max | True | ceiling | Eq_CS_QUOTA_MAX | 107000 | 19: CS, CS_BT_NISM, CS_BT_NIM, CS_BT_IM, CS_SBT_NISM, CS_SBT_NIM ... |
+| constraints | territory_production_bound | bc_prod_min | False | floor | Eq_BC_PROD_MIN | 4056 | 3: BC, BC_BT, BC_GTMG |
+| constraints | territory_production_bound | ig_prod_min | False | floor | Eq_IG_PROD_MIN | 5125 | 3: IG, IG_PLA, IG_TUT |
+| constraints | territory_production_bound | ma_prod_min | False | floor | Eq_MA_PROD_MIN | 26404 | 30: MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA ... |
+| constraints | territory_production_bound | an_prod_min | False | floor | Eq_AN_PROD_MIN | 2322 | 3: AN, AN_NU, AN_PA |
+| constraints | territory_production_bound | plu_prod_min | False | floor | Eq_PLU_PROD_MIN | 5879 | 4: AG, VE, VE_BTGT, VE_PLUIE |
+| constraints | territory_production_bound | me_prod_min | False | floor | Eq_ME_PROD_MIN | 4135 | 1: ME |
+| constraints | territory_production_bound | pn_prod_min | True | floor | Eq_PN_PROD_MIN | 6096 | 1: PN_PIQ |
+| constraints | territory_production_bound | leg_prod_obj | False | floor | Eq_LEG_PROD_OBJ | 63059 | 30: MA, MA_PLBIO, MA_MOBIO, MA_ROTA, MA_TO_CHOU_JA, MA_TO_CO_JA ... |
+| constraints | territory_production_bound | tub_prod_obj | False | floor | Eq_TUB_PROD_OBJ | 0 | 3: IG, IG_PLA, IG_TUT |
+| constraints | territory_production_bound | fru_prod_obj | False | floor | Eq_FRU_PROD_OBJ | 30789 | 11: BC, BC_BT, BC_GTMG, AN, AN_NU, AN_PA ... |
+| constraints | territory_production_bound | pat_surf_obj | False | floor | Eq_PAT_SURF_OBJ | 12193 | 1: PN_PIQ |
+| constraints | territory_indicator_bound | nitrogen_max | False | ceiling |  | 1930903 | all |
+| constraints | territory_indicator_bound | employment_min | False | floor |  | 5629321 | all |
+| eligibility_criteria | altitude | altitude | True | eligibility bound |  |  | all |
+| eligibility_criteria | slope | slope | True | eligibility bound |  |  | all |
+| eligibility_criteria | rainfall | rainfall | True | eligibility bound |  |  | all |
+| eligibility_criteria | plot_size | plot_size | True | eligibility bound |  |  | all |
+| categorical_rules | forbid_crops |  | True | ban |  |  | 8: AN, BA, BC, CS, IG, MA ... |
+| categorical_rules | forbid_crops |  | True | ban | Eq_TH_SUPP |  | 1: TH |
+| categorical_rules | forbid_crops | pn_tour_supp | True | ban | Eq_PN_TOUR_SUPP |  | 1: PN_TOUR |
+| categorical_rules | forbid_crops | cf_supp | True | ban | Eq_CF_SUPP |  | 10: CF_NBT_NISM, CF_NBT_NIM, CF_SBT_NISM, CF_SBT_NIM, CF_NGT_NISM, CF_NGT_NIM ... |
+| categorical_rules | forbid_crops |  | True | ban | Eq_CS_SBT_NISM_SUPP |  | 2: CS_SBT_NISM, CS_MG_NIM |
+| categorical_rules | forbid_crops | ma_exp_supp | True | ban | Eq_MA_EXP_SUPP |  | 25: MA_TO_CHOU_JA, MA_BAG_BIO_I, MA_BAG_BIO_NI, MA_BAG_VEG_I, MA_BAG_VEG_NI, MA_BAG_FER_I ... |
+| categorical_rules | irrigation_required |  | True | ban |  |  | 2: ME, MA_ROTA |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_AN_SOL_Parc |  | 3: AN, AN_NU, AN_PA |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_AN_PA |  | 1: AN_PA |
+| categorical_rules | attribute_forbidden |  | True | ban |  |  | 1: ME |
+| categorical_rules | attribute_forbidden |  | True | ban |  |  | 1: ME |
+| categorical_rules | attribute_forbidden | ig_tut_chlordecone | True | ban | Eq_IG_CLD |  | 1: IG_TUT |
+| categorical_rules | attribute_forbidden | pn_piq_cld | False | ban | Eq_PN_PIQ_CLD |  | 1: PN_PIQ |
+| categorical_rules | region_crop_forbidden |  | True | ban |  |  | 1: ME |
+| categorical_rules | forbid_crops | cs_irrig_ban | True | ban | Eq_CS_IRR |  | 6: CS_BT_IM, CS_SBT_IM, CS_NGT_IM, CS_CGT_IM, CS_EGT_IM, CS_MG_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_SOL_SQUE |  | 12: CS_BT_NIM, CS_BT_IM, CS_SBT_NIM, CS_SBT_IM, CS_NGT_NIM, CS_NGT_IM ... |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_CONFORM |  | 12: CS_BT_NIM, CS_BT_IM, CS_SBT_NIM, CS_SBT_IM, CS_NGT_NIM, CS_NGT_IM ... |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_BT |  | 3: CS_BT_NISM, CS_BT_NIM, CS_BT_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_SBT |  | 3: CS_SBT_NISM, CS_SBT_NIM, CS_SBT_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_NGT |  | 3: CS_NGT_NISM, CS_NGT_NIM, CS_NGT_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_CGT |  | 3: CS_CGT_NISM, CS_CGT_NIM, CS_CGT_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_EGT |  | 3: CS_EGT_NISM, CS_EGT_NIM, CS_EGT_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_CS_MG |  | 3: CS_MG_NISM, CS_MG_NIM, CS_MG_IM |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_MA_TO_CHOU_JA_LOC |  | 1: MA_TO_CHOU_JA |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_ME_MG |  | 1: ME |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_IG_PLA_ILE |  | 1: IG_PLA |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_IG_TUT_ILE |  | 1: IG_TUT |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_BA_IRR |  | 1: BA_IRR |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_BA_IRR_BT |  | 1: BA_IRR |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_BT |  | 1: BC_BT |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_GTMG |  | 1: BC_GTMG |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_IRR_BT |  | 1: BC_BT |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_BC_IRR_GTMG |  | 1: BC_GTMG |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_AG_IRR |  | 1: AG |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_AG_BT |  | 1: AG |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_VE_IRR |  | 1: VE_BTGT |
+| categorical_rules | attribute_forbidden |  | True | ban | Eq_VE_BTGT |  | 1: VE_BTGT |
+| categorical_rules | attribute_forbidden |  | False | ban | Eq_VE_BTGT |  | 1: VE_BTGT |
+| categorical_rules | forbid_crops |  | True | ban | Eq_VE_PLUIE |  | 1: VE_PLUIE |
+| categorical_rules | attribute_forbidden |  | False | ban | Eq_VE_PLUIE |  | 1: VE_PLUIE |
+| categorical_rules | attribute_forbidden |  | False | ban | Eq_VE_PLUIE |  | 1: VE_PLUIE |
+| categorical_rules | fallow_lock | fallow | True | ban | Eq_FRICHE |  | 83: AG, AN, AN_NU, AN_PA, BA, BA_INT ... |
+| categorical_rules | attribute_forbidden | nocult_nc_1 | True | ban | Eq_NOCULT_NC |  | 83: AG, AN, AN_NU, AN_PA, BA, BA_INT ... |
+| categorical_rules | attribute_forbidden | nocult_nc_2 | True | ban | Eq_NOCULT_NC |  | 83: AG, AN, AN_NU, AN_PA, BA, BA_INT ... |
 
 ### Enabled rules x RPG crop groups
 
@@ -249,8 +249,8 @@ Source: `docs/status/roadmap.yaml`.
 | calibration | 5 | 1 | 1 | 1 | 1 | 1 |
 | coupling | 0 | 0 | 2 | 0 | 0 | 0 |
 | dashboard | 2 | 0 | 0 | 1 | 1 | 0 |
-| data | 0 | 0 | 1 | 0 | 0 | 0 |
-| information_system | 0 | 2 | 1 | 0 | 0 | 0 |
+| data | 0 | 0 | 2 | 0 | 0 | 0 |
+| information_system | 1 | 1 | 4 | 0 | 0 | 0 |
 | model | 6 | 0 | 0 | 0 | 3 | 2 |
 | reporting | 5 | 0 | 3 | 0 | 1 | 1 |
 | scenarios | 2 | 0 | 0 | 1 | 0 | 2 |
@@ -259,6 +259,7 @@ Source: `docs/status/roadmap.yaml`.
 ### done
 
 - **status-board** (tooling) -- Status board (indicators x levels, constraints x crops, parameter choices, roadmap) ([spec](../../docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md)). Constraint x crop view counts eligibility removals only when the data is present.
+- **data-catalogue** (information_system) -- Data catalogue with sensitivity levels, fill-in workbook and validator ([spec](../../docs/data/README.md)). docs/data/catalogue.yaml, scripts/build_data_templates.py, scripts/validate_data_workbook.py (core/data/catalogue.py, core/data/workbook.py). The levels are a proposal: see data-levels-validation and data-provenance.
 - **farm-banana-quota** (model) -- Per-farm export-banana delivery right (Eq_BA_QUOTA_Expl). The per-farm reference is ~18 % above the true observed mix (representative crop).
 - **calibration-validation** (calibration) -- PAD at every scale, farm-type confusion, plot agreement (Chopin et al. 2015 §2.6) ([spec](../../docs/superpowers/specs/2026-07-21-calibration-validation-design.md))
 - **calibration-levers** (calibration) -- Markowitz objective, Eq_*_SUPP, PN_PIQ, labour cap (PAD 193 % -> 51 %) ([spec](../../docs/superpowers/specs/2026-07-21-calibration-levers-design.md))
@@ -285,12 +286,15 @@ Source: `docs/status/roadmap.yaml`.
 ### in progress
 
 - **english-renaming** (tooling) -- Code, config, scenarios, dashboard and docs in English ([spec](../../docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md)). Code, config, scenario files, recap keys, CSV names, dashboard and tests are done; the numbered docs are translated. The dated specs and the archived journal are kept in French as historical records.
-- **data-catalogue** (information_system) -- Data catalogue with sensitivity levels, fill-in workbook and validator ([spec](../../docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md)). Access levels to validate with INRAE's data protection officer.
 - **fine-labour-budget** (calibration) -- Per-farm labour budget from the observed fine plan (ASSOL_PARC_INIT.TXT). Experiment runs exist (calib_fine_labor_2017, fine_labor_observed); adoption pending.
 - **excel-carbon-workbook** (information_system) -- Fill-in workbook in the style of a carbon assessment. Folded into data-catalogue.
 
 ### todo
 
+- **data-levels-validation** (information_system) -- Validate the three access levels with INRAE's data protection officer ([spec](../../docs/data/README.md)). The plot <-> farm border and the statistical-confidentiality rule (>= 3 units, <= 85 %) are assumptions until confirmed; nothing checks the small-cell rule on level-0 aggregates yet.
+- **data-provenance** (information_system) -- Fill the owners and licences marked "to confirm" in the data catalogue ([spec](../../docs/data/catalogue.yaml)). A prerequisite to sharing anything; the PPDB terms cover the pesticide columns of Data_OTK.
+- **data-fingerprints** (information_system) -- Record in each run's recap the SHA-256 of the tables it read ([spec](../../docs/data/README.md)). The export manifest already computes them; build_dataset does not record them yet.
+- **slope-unit** (data) -- Confirm the unit of PENTE (plots in degrees vs crop bounds in %) ([spec](../../docs/04-vigilance.md)). Vigilance C.7. The eligibility compares the two directly.
 - **level-export** (information_system) -- Export a run at a given access level (aggregate, suppress what exceeds it) ([spec](../../docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md))
 - **maelia-yields** (coupling) -- MAELIA -> MOSAICA, simulated yields and ITKs as per-(plot, crop) coefficients ([spec](../../docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md)). MAELIA training; tropical crop parameterisation in MAELIA to confirm.
 - **maelia-daily-test** (coupling) -- MOSAICA -> MAELIA, daily simulation of the optimised cropping plan ([spec](../../docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md)). maelia-yields; decision on multi-year rotations.

@@ -33,11 +33,40 @@ items:
     left: Constraint x crop view counts eligibility removals only when the data is present.
   - id: data-catalogue
     title: Data catalogue with sensitivity levels, fill-in workbook and validator
-    status: in_progress
+    status: done
     area: information_system
     since: 2026-09-22
-    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
-    left: Access levels to validate with INRAE's data protection officer.
+    spec: docs/data/README.md
+    left: >-
+      docs/data/catalogue.yaml, scripts/build_data_templates.py, scripts/validate_data_workbook.py
+      (core/data/catalogue.py, core/data/workbook.py). The levels are a proposal: see
+      data-levels-validation and data-provenance.
+  - id: data-levels-validation
+    title: Validate the three access levels with INRAE's data protection officer
+    status: todo
+    area: information_system
+    spec: docs/data/README.md
+    left: >-
+      The plot <-> farm border and the statistical-confidentiality rule (>= 3 units, <= 85 %) are
+      assumptions until confirmed; nothing checks the small-cell rule on level-0 aggregates yet.
+  - id: data-provenance
+    title: Fill the owners and licences marked "to confirm" in the data catalogue
+    status: todo
+    area: information_system
+    spec: docs/data/catalogue.yaml
+    left: A prerequisite to sharing anything; the PPDB terms cover the pesticide columns of Data_OTK.
+  - id: data-fingerprints
+    title: Record in each run's recap the SHA-256 of the tables it read
+    status: todo
+    area: information_system
+    spec: docs/data/README.md
+    left: The export manifest already computes them; build_dataset does not record them yet.
+  - id: slope-unit
+    title: Confirm the unit of PENTE (plots in degrees vs crop bounds in %)
+    status: todo
+    area: data
+    spec: docs/04-vigilance.md
+    left: Vigilance C.7. The eligibility compares the two directly.
   - id: level-export
     title: Export a run at a given access level (aggregate, suppress what exceeds it)
     status: todo

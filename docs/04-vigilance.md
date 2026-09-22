@@ -396,6 +396,23 @@ Potassium nitrate contains ~13 % nitrogen. On the 15 fertilisers named as an NPK
 nitrogen deduced from the name equals the `AZOTE` column **to the thousandth** — the file's
 convention is safe — but chemically named salts escape the check. Not corrected (parity mandate).
 
+### C.7 — Minor — What the data catalogue found in the tables
+
+Checking `data/` against `docs/data/catalogue.yaml` (`validate_data_workbook.py --check-data`)
+passes, but only after writing down five facts:
+
+- `Data_OTK.GES_SURF` is **empty for `DICOPUR_600`**, an input of every CS and CF itinerary. The
+  pandas sum in `domain/itk.py` skips it, like GAMS reads 0 — no figure changes, but a gap is
+  not a zero (and the GHG scale is itself unconfirmed, roadmap `ghg-unit`).
+- **`PENTE` has two documented units**: degrees for the plots (`DESCRIPTION_SETS.txt`), % for
+  the crops' `PENTE_MIN/MAX`, and the eligibility compares them directly. Plot values reach 100,
+  which points to %. To confirm with the source before quoting a slope.
+- `CONFORM = round(PERIMETRE / SURF_HA)` was computed on the unrounded perimeter: recomputing it
+  from the file moves 57 plots by one unit, none across the 1 500 threshold of `Eq_CS_CONFORM`.
+  The validator keeps stored values within ±0.5.
+- `Avers.txt` has 5 336 farm ids where `EXPL_PARC_2017.set` has 4 638 (unused, see C.5).
+- `R_Tixier.txt` pads `SEUIL_GUS_CULT` with trailing spaces (stripped in `domain/rpest.py`).
+
 ---
 
 ## D. GAMS bugs ported faithfully

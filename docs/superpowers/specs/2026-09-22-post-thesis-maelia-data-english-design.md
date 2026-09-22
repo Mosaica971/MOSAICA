@@ -1,6 +1,6 @@
 # After the thesis — MAELIA coupling, data porting to the information system, English renaming, status board
 
-Date: 2026-09-22. Status: **A and B done, C in progress, D and E postponed** (decision of
+Date: 2026-09-22. Status: **A, B and C done, D and E postponed** (decision of
 2026-09-22: the MAELIA couplings come later). This document orders the five work items announced
 after the defence, and isolates the decisions that belong to Clément or to the supervisors.
 Everything said here about MAELIA itself is **to be checked** against its documentation: the
@@ -22,7 +22,7 @@ Decisions taken on 2026-09-22:
 |---|---|---|---|
 | A | **Status board** (indicators x levels, constraints x crops, multi-valued parameters, implementation status) | Quick, and already the specification of the coupling: the table of sourced parameters lists exactly what MAELIA will replace. | done |
 | B | **English renaming + comment review** | Before writing the MAELIA interfaces; otherwise everything is renamed twice. | done (code, config, dashboard, numbered docs) |
-| C | **Data catalogue, access levels, exchange formats** | The data contract with MAELIA and the one with the information system are the same object. Define it once. | in progress |
+| C | **Data catalogue, access levels, exchange formats** | The data contract with MAELIA and the one with the information system are the same object. Define it once. | done (`docs/data/`) |
 | D | **MAELIA -> MOSAICA**: simulated yields and ITKs | Needs C (format) and a localised change of the model (§ 4). | postponed |
 | E | **MOSAICA -> MAELIA**: the cropping plan tested at a daily time step | Needs D (same plot and crop referential) and a decision on dynamics (§ 5). | postponed |
 
@@ -115,7 +115,13 @@ strings, and the docs.
 
 ---
 
-## 3. Work item C — data: catalogue, access levels, formats (in progress)
+## 3. Work item C — data: catalogue, access levels, formats (done)
+
+Delivered 2026-09-22 as described below: `docs/data/catalogue.yaml` (41 tables, the levels of
+every run-output file), `core/data/catalogue.py` + `core/data/workbook.py`,
+`scripts/build_data_templates.py` and `scripts/validate_data_workbook.py`. The export by level
+exists for inputs (`--max-level`); for run outputs it remains roadmap `level-export`. The levels
+themselves stay a proposal (`data-levels-validation`). Usage: `docs/data/README.md`.
 
 ### The prerequisite: classify before protecting
 

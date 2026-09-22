@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > **Current workstream (since 2026-09-22): post-thesis.** Read
 > `docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md` first. Done: the
 > English renaming (code, config, scenarios, recap keys, dashboard, numbered docs) and the status
-> board. In progress: the data catalogue with access levels and fill-in workbooks. Postponed
+> board, and the data catalogue with access levels and fill-in workbooks (`docs/data/`). Postponed
 > until the MAELIA training: the two MAELIA couplings. What is left is in
 > **`docs/status/roadmap.yaml`**, which replaced `docs/TODO.md`. The thesis-era "no new solve"
 > rule is **lifted** — but the standing preference on full solves below still holds.

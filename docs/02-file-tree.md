@@ -95,6 +95,8 @@ real run**. Spec: `superpowers/specs/2026-07-10-solver-progress-capture-fd-confl
 | `eligibility.py` | boolean plot x crop mask: numeric bounds ∩ categorical rules |
 | `zone_filter.py` | restrict to a sub-territory |
 | `shapefile.py` | ESRI reader in **pure Python** — no GDAL, no geopandas |
+| `catalogue.py` | a data catalogue: table schemas, validation, GAMS text export (`docs/data/`) |
+| `workbook.py` | the fill-in Excel workbook of a catalogue, and reading it back (openpyxl) |
 
 ### `core/reporting/`
 
