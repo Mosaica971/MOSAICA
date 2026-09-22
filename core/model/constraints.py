@@ -462,3 +462,60 @@ def build_farm_labor_hours_max_constraint(
         return hours <= limit
 
     setattr(model, label, pyo.Constraint(model.FARMS, rule=_rule))
+
+
+@register_constraint("farm_production_bound")
+def build_farm_production_bound_constraint(
+    model: pyo.ConcreteModel,
+    inputs: ModelInputs,
+    *,
+    label: str,
+    crops: list[str],
+    reference: str,
+    sense: str = "le",
+    scale: float = 1.0,
+    **_args,
+) -> None:
+    """Bound each farm's own production of a crop group against a per-farm reference.
+
+    The territory-wide `territory_production_bound` says how much the whole island may
+    produce; this says how much EACH farm may. The two are not interchangeable: a single
+    territorial ceiling lets the model concentrate the whole quota on the few farms where
+    the crop pays best, which is exactly what a delivery right attached to the holding
+    forbids. GAMS Eq_BA_QUOTA_Expl (MODELE.txt:361-366) is that case -- export-banana
+    tonnage capped, farm by farm, at what the farm produced in the reference year.
+
+    `reference` names an entry of ModelInputs.farm_production_capacity, so several quotas
+    (one per market) can coexist without a builder each. `scale` multiplies every cap
+    uniformly, so the strictness of the assumption is a config question, not a code change.
+
+    A farm with no entry under `reference` is left unconstrained -- defaulting a missing
+    farm to zero would silently freeze it, the same reasoning as farm_labor_hours_max.
+    """
+    if sense not in ("le", "ge"):
+        raise ValueError(f"farm_production_bound[{label}]: sense must be 'le' or 'ge'")
+    yields = inputs.crop_yield_per_ha
+    capacities = inputs.farm_production_capacity.get(reference, {})
+    wanted = set(crops)
+    plot_crops = defaultdict(list)
+    for plot, crop in inputs.eligible_pairs:
+        if crop in wanted and yields.get(crop, 0.0):
+            plot_crops[plot].append(crop)
+
+    def _rule(model, farm):
+        if farm not in capacities:
+            return pyo.Constraint.Feasible
+        produced = sum(
+            model.Y[plot, crop] * inputs.plot_surface_ha[plot] * yields[crop]
+            for plot in inputs.farm_plots.get(farm, [])
+            for crop in plot_crops.get(plot, [])
+        )
+        limit = scale * capacities[farm]
+        # No eligible pair on this farm carries the group: the sum is a plain 0, not a
+        # Pyomo expression -- see the note in territory_production_bound above.
+        if isinstance(produced, (int, float)):
+            satisfied = produced <= limit if sense == "le" else produced >= limit
+            return pyo.Constraint.Feasible if satisfied else pyo.Constraint.Infeasible
+        return produced <= limit if sense == "le" else produced >= limit
+
+    setattr(model, label, pyo.Constraint(model.FARMS, rule=_rule))

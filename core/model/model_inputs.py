@@ -48,3 +48,9 @@ class ModelInputs:
     # plot_baseline_group have no historical use to keep.
     crop_group: Mapping[str, str] = field(default_factory=dict)
     plot_baseline_group: Mapping[str, str] = field(default_factory=dict)
+    # Production a farm is allowed, in the crop's own output unit, keyed by reference name
+    # then farm: {"BA": {"E1": 1200.0, ...}}. Like farm_labor_capacity_hours this is a stock
+    # the case study derives from its own observed baseline -- core only reads it -- but
+    # indexed by reference so several independent quotas (one per market) can coexist.
+    # A farm absent from a reference is left unconstrained, never defaulted to zero.
+    farm_production_capacity: Mapping[str, Mapping[str, float]] = field(default_factory=dict)

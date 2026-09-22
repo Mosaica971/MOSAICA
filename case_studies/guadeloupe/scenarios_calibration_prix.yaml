@@ -1,0 +1,30 @@
+# Rejeu du run de PARITÉ GAMS après la correction de la source des prix et rendements.
+#
+# POURQUOI CE FICHIER. Le 2026-09-08, la comparaison avec les sorties réelles du GAMS
+# (`context/SORTIES/`) a montré que le pipeline lisait `Prix_Cult.txt` / `Rdt_Cult.txt` là où
+# DONNEES.txt:283-289 remplit les tables depuis `Prix_Cult_CF_<scenario>.txt` /
+# `Rdt_Cult_CF_<scenario>.txt`, et DONNEES.txt:228 le coût de transport depuis
+# `Cout_Transp_Cult_LAM.txt`. Deux fichiers lus au mauvais endroit, 23 cultures sur 84 en
+# divergeaient. Après les deux corrections : marge, charges variables, aides, prix, produit
+# brut et main-d'oeuvre sont EXACTS sur 84/84 cultures, à la seule exception du rendement de
+# TH (15 en colonne `calib`, que lit le GAMS ; 18 en colonne `2017`, que lit notre config) --
+# et TH n'a aucune parcelle éligible.
+#
+# Le run porte un nom DISTINCT de `calib_gams_parite` pour ne pas écraser la référence
+# déclarée dans references.yaml avant d'avoir comparé les deux.
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration_prix.yaml
+
+runs:
+  - name: calib_gams_parite_prix
+    description: >-
+      Configuration strictement identique à `calib_gams_parite` (bloc CALIB porté sans les
+      deux déviations assumées : ni bc_quota_max, ni pn_prod_min), mais avec les prix et
+      rendements lus dans les tables que le GAMS inclut réellement.
+      Cible : les sorties GAMS de `context/SORTIES/ASSOL_GWAD.TXT` colonne Assol_Calib --
+      PAD territorial 3,76 % sur les 12 groupes RPG, AG 106,80 ha, PN_PIQ 6 096,17 ha,
+      BC 202,84 ha, ME 206,76 ha, CS 12 907,67 ha. Avant correction, le même run donnait
+      PAD 48,44 %, AG 10,27 ha, PN 2 575,62 ha, BC 2 875,26 ha, ME 0 ha.
+    disable:
+      - bc_quota_max
+      - pn_prod_min

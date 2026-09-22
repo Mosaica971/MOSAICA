@@ -1,0 +1,33 @@
+# Calibration de parite GAMS avec le budget de main-d'oeuvre PAR EXPLOITATION calcule sur
+# l'assolement FIN observe de 2017 (context/SORTIES/ASSOL_PARC_INIT.TXT).
+#
+# CE QUI CHANGE, ET SEULEMENT CA. `Eq_MO_MAX_Expl` (farm_labor_hours_max, label mo_max_expl)
+# est deja une contrainte par exploitation, a slack 1.0 : chaque exploitation est bornee par
+# le travail que SON propre plan de culture 2017 demandait. Aucun plafond global de
+# main-d'oeuvre n'est actif -- `emploi_min` (territory_indicator_bound sur `travail`) reste
+# `enable: false` dans config.yaml. Le run ne touche donc qu'a la MESURE du budget, pas a sa
+# forme : il remplace la valorisation par culture representante par l'ITK fin reel.
+#
+#   representant (defaut) : 6 252 740 h
+#   assolement fin observe: 5 592 326 h   (-10,6 %, la contrainte se RESSERRE)
+#
+# CONTROLE. Nos temps de travaux appliques a l'allocation CALIB du GAMS donnent 5 292 156 h
+# contre les 5 292 000 h de son INDICATEURS.TXT -- 0,003 %, l'arrondi a 4 chiffres de GAMS.
+# La table de main-d'oeuvre est donc exacte, et le budget ci-dessus est bien celui du GAMS.
+#
+# EFFET DE DISTRIBUTION, qu'un facteur uniforme ne peut pas reproduire : 795 exploitations
+# voient leur budget baisser, 456 l'inverse, et 50 tombent a zero parce que leur assolement
+# observe est entierement en NC ou en jachere. Ces 50 sont figees -- fidele, le GAMS les fige
+# pareil, et `at_most_one_crop_per_plot` autorisant la parcelle vide, ce n'est pas infaisable.
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration_mo_fine.yaml
+
+runs:
+  - name: calib_mo_fin_2017
+    description: >-
+      Parite GAMS + budget de main-d'oeuvre par exploitation lu sur l'assolement fin 2017.
+      A comparer a calib_gams_parite_prix (PAD territorial 12,07 %) et a l'Assol_Calib du
+      GAMS (3,76 %).
+    disable: [bc_quota_max, pn_prod_min]
+    overrides:
+      data.fine_baseline_allocation: context/SORTIES/ASSOL_PARC_INIT.TXT

@@ -284,6 +284,26 @@ constraints:
     enable: true
     args: {label: mo_max_expl, slack: 1.0}
 
+  # Eq_BA_QUOTA_Expl (MODELE.txt:361-366), ported 2026-09-08. Export-banana tonnage capped
+  # FARM BY FARM at what the farm produced in 2017 -- a delivery right attached to the
+  # holding, which the territorial ba_quota_max cannot express: a single island-wide ceiling
+  # lets the model concentrate the whole quota on the few farms where banana pays best, and
+  # that is precisely what it did (banana 1 921 ha observed -> 2 107 ha simulated, +391 ha
+  # against the GAMS calib's 1 717).
+  # The per-farm reference comes from data_pipeline.compute_farm_baseline_production_t --
+  # READ ITS DOCSTRING: the observed fine ITK mix is unavailable, so the group is priced
+  # through its representative variant (BA -> BA_INT, 45 t/ha), which overstates the
+  # reference by ~18 % (86 436 t against the 73 097 t of the true observed mix). The cap is
+  # therefore looser than GAMS's, never tighter. `scale` is the lever to tighten it.
+  - name: farm_production_bound
+    enable: true
+    args:
+      label: ba_quota_expl
+      crops: *SC_BAN_EX
+      reference: BA
+      sense: le
+      scale: 1.0
+
   # territory_production_bound: territory-wide production floor/ceiling. `sense` le = cap,
   # ge = floor. A group contributes sum(plot surface x crop yield x rate_multiplier) when
   # use_yield: true (tonnes), or x rate_multiplier only when false (hectares). rate_multiplier

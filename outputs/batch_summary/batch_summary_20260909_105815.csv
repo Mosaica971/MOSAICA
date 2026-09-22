@@ -1,0 +1,3 @@
+name,policy,forcing,status,objective,marge_brute,subventions,etp,production_t,surface_ha,azote_kg,ift,ges_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+mo_fin_observe,,,optimal,81649158.5133615,98030222.68,74251661.46,3343.5,924001.89,23477.2,1892228.3,66657.4,173549383.92,36905372.4,0.04,0.12,10.98,22039,4046.6,C:\Users\clleborgne\Desktop\mosaica\claude_mosaica_workspace\outputs\mo_fin_observe,
+mo_6712553,,,optimal,84470125.35943426,110027435.73,73401212.46,3777.5,917906.29,23477.49,1977119.96,72554.21,169847902.18,40719090.0,0.03,0.12,12.94,22041,238.7,C:\Users\clleborgne\Desktop\mosaica\claude_mosaica_workspace\outputs\mo_6712553,

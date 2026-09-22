@@ -12,4 +12,5 @@ venv/
 # Golden snapshot de refactor : derive de data/, reste local
 .golden/
 /data/
+context/SORTIES
 
