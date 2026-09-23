@@ -44,6 +44,10 @@ choice).
 - **[Glossary](glossary.md)** — the English name of every French source term, fixed once.
 - **[Data catalogue](data/README.md)** — every input table, its source, licence and access
   level, and the fill-in workbooks.
+- **[MAELIA](maelia/README.md)** — the agent-based platform MOSAICA is to be coupled with:
+  its user guide digested, and what it changes for the coupling
+  ([file-by-file reference](maelia/reference.md), [coupling to-do](maelia/coupling-todo.md),
+  [what each crop needs in MAELIA](maelia/crop-parameters.md)).
 - **[GAMS port inventory](gams_port_inventory.md)** — equation by equation, what is ported,
   what is not, and why.
 - **[Design specs](superpowers/specs/)** — one per work item, with the reasoning and the
@@ -62,3 +66,5 @@ choice).
   calibration method (PAD) and thresholds; Tables 1 and 2 the yields/margins and the
   risk-aversion coefficients.
 - `context/Rapport technique variables MOSAICA_v2.docx` — variable dictionary (not versioned).
+- `context/maelia/` — the MAELIA user guide (French PDFs, 2026-08-18) and `text/`, their plain-text
+  extracts to grep. Digested in [maelia/](maelia/README.md).

@@ -1,0 +1,125 @@
+Glossaire
+dossiers includes : contiennent les fichiers de données d’entrée et de paramètres qui
+décrivent un territoire (fichiers includes). Ils sont générés par des prétraitements ou
+manuellement. Ces fichiers sont appelés par le code informatique pour réaliser les calculs
+des simulations de la situation de référence ou de scénarios. Ils peuvent être modifiés pour
+créer des scénarios.
+
+implémentation d’un nouveau territoire : mise en œuvre par un utilisateur expert de
+prétraitements permettant de mettre au format des données brutes de différentes natures
+et de générer les fichiers includes pour un nouveau terrain. ont été développés. Ils
+nécessitent une expertise importante pour bien les utiliser.
+
+launcher ou lanceur : fichier de code (.gaml) qui permet de paramétrer et de lancer une
+simulation. Ils se trouvent dans le sous-répertoire /models/main.
+
+solution de modélisation : combinaison choisie d’un ensemble de modules de
+modélisation, de jeux de données et de valeur de paramètres, utilisée pour conduire une
+ou plusieurs simulations avec MAELIA.
+
+GAMA : plateforme de développement de modèles multi-agents dans laquelle MAELIA est
+développée. Elle gère les simulations. Elle possède un langage de programmation propre,
+le GAML, dont la syntaxe est proche de JAVA, et permet de développer des modèles multi-
+agent spatialement explicite. Elle est développée par une équipe de recherche franco-
+vietnamienne de l’UMI UMMISCO.
+
+BVe ou bassin versant élémentaire : unité spatialement explicite de référence dans
+MAELIA, nécessaire à la simulation des processus hydrologiques (modèle SWAT©). Leur
+taille et nature peut être définis selon le besoin des utilisateurs (en amont de MAELIA). Des
+BV élémentaires ont été définis sur tout le bassin Adour Garonne par l’équipe MAELIA, sur
+la base des tronçons de masse d’eau de surfaces définies par le SANDRE.
+ZH ou zone hydrologique : Les zones hydrologiques sont des unités spatiales tirées de la
+base de données CARTHAGE. Elles ont été utilisées comme BV élémentaire dans MAELIA et
+le terme de ZH est donc toujours utilisé dans le code de MAELIA pour signifier BVe.
+
+ITK ou Itinéraire de Culture : ensemble des opérations techniques réalisées pour conduire
+une culture, caractérisées par une période de réalisation, un ou des outils, potentiellement
+une dose de produit, des conditions de déclenchement de l’opération technique.
+
+
+
+Eléments introductifs
+La plateforme de simulation MAELIA se compose d’un simulateur représentant les
+processus bio-décisionnels et biophysiques (models) et de bases de données permettant
+ces simulations. Par extension, elle inclut aussi un ensemble prétraitements informatiques,
+qui transforment des données génériques et locales en une base de données unique par
+territoire d’utilisation (includes).
+
+
+
+
+schéma descriptif de la chaine d’information dans la plateforme MAELIA. Des prétraitements
+génèrent une base de données fonctionnelle pour un territoire, stockée dans un dossier includes.
+Lors de la simulation, le code informatique stocké dans un dossier models mobilise l’information de
+la base de données pour appliquer ses calculs. La plateforme génère des sorties choisies par
+l’utilisateur
+
+Un territoire de simulation est ainsi décrit via un ensemble de fichiers, fournissant les
+informations sur les îlots PAC (du Registre Parcellaire Graphique), les systèmes de cultures
+et les [bassins versants élémentaires][Glossaire], les cours d’eau, les retenues, les nappes,
+les sols, le climat…. Des fichiers fournissent également les valeurs des paramètres des
+processus simulés (ex. les seuils utilisés dans les règles de décisions des agents
+agriculteurs) qui doivent être renseignés par l’utilisateur.
+
+MAELIA peut-être utile pour simuler des scénarios de gestion de l’eau et les comparer entre
+eux ou avec une situation de référence. La prochaine section présente dans un premier
+temps le contenu de la plateforme, puis les étapes nécessaires pour lancer des simulations
+dans la plateforme GAMA, puis les étapes qui permettent de créer des scénarios et de les
+simuler.
+
+En utilisant MAELIA, on est amené à manipuler
+
+     Les fichiers du dossier [includes][Glossaire], pour redéfinir la simulation de la
+     situation actuelle et/ou définir des scénarios à simuler
+
+     Un fichier de code appelé [launcher][Glossaire] qui permet de définir les modules
+     de simulation activés et les sorties souhaitées (à l’aide d’un fichier de code
+     appelé outputs/ecritureResultats.gaml).
+
+
+
+Conduire une simulation de scénario
+
+En amont de la simulation
+
+Comprendre la structure globale de la plateforme
+La plateforme MAELIA est stockée dans une arborescence de répertoires qui contiennent
+des données, des fichiers de paramétrages et de code informatique. La figure
+@ref(fig:figArborescence) illustre son organisation.
+arborescence des répertoires dans l’espace de travail (workspace)
+
+
+
+Définir ses objectifs
+Avant d’utiliser MAELIA, il faut déterminer ce que l’on veut en faire :
+
+     Quels processus souhaite-t-on simuler avec MAELIA ? Par exemple, veut-on simuler
+     l’hydrologie ?
+
+=> Cela permet d’identifier les modules à activer (la solution de modélisation) et les
+données à fournir
+
+     Quels sont les scénarios à simuler (i.e. quels sont les éléments changeant d’une
+     simulation à l’autre) ? Par exemple, la distribution spatiale des systèmes de culture
+     (rotations et [ITK][Glossaire]), modalité de gestion des barrages / de prise de
+     restriction, séries climatiques, scénarios de prix…
+
+=> Cela conduit à modifier les données en entrée ou le paramétrage des modules
+     Quelle information souhaite-t-on obtenir grâce à la plateforme ? Par exemple, quelles
+     variables et à quel grain (parcelle, ilot, sol, bassins versant, territoire, …)
+
+=> Cela doit permettre de savoir quelles sorties activer/créer pour répondre aux
+questions
+
+
+Instancier un terrain
+Pour pouvoir faire des simulations, il faut avoir instancié un terrain, c’est-à-dire collecté,
+organisé et formaté les données d’entrée nécessaires.
+
+  1. Générer ou récupérer les données au format MAELIA permettant de caractériser le
+     terrain voulu ;
+
+  2. Ajouter les fichiers de paramétrage depuis les fichiers de référence dans les terrains
+     déjà instanciés, éventuellement les modifier pour les adapter au contexte du
+     territoire.
+

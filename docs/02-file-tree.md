@@ -165,6 +165,8 @@ map, which reads `data/gis/`).
 - `report.py` (~510 lines) — writes the run folder.
 - `plots.py` — the PNGs.
 - `status.py` — the status board (indicators x levels, constraints x crops, parameter choices, roadmap).
+- `maelia_crops.py` — per crop, which MAELIA parameters MOSAICA's tables already give
+  (`scripts/build_maelia_crop_table.py` -> `docs/maelia/crop-parameters.md`).
 
 ---
 
@@ -207,7 +209,8 @@ references.py             loading the reference runs
 **Guadeloupe-specific** (they import `domain/` or `reporting/`, by nature):
 `build_reference_state.py`, `compare_to_reference.py`, `evaluate_calibration.py`,
 `pad_all_scales.py`, `check_references.py`, `check_scenario_feasibility.py`,
-`build_status_board.py`, `build_data_templates.py`, `validate_data_workbook.py`.
+`build_status_board.py`, `build_data_templates.py`, `validate_data_workbook.py`,
+`build_maelia_crop_table.py`.
 
 ---
 
@@ -245,6 +248,7 @@ context/gams/                            the original GAMS -- SOURCE OF TRUTH fo
 context/Chopin et al 2015 pour Hal.pdf   the reference article
 context/Rapport technique … .docx        variable dictionary (not versioned)
 context/SORTIES/                         outputs of the real GAMS run (used since 2026-09-08)
+context/maelia/                          the MAELIA user guide (PDFs) and text/, their text extracts
 ```
 
 In `context/gams/`: `MODELE.txt` (the equations), `OPTIMISATION.txt` (the computations),
@@ -261,6 +265,8 @@ README.md                      index
 glossary.md                    French source terms and their English names
 status/                        STATUS.md (generated) and roadmap.yaml
 data/                          data catalogue, access levels, fill-in workbooks
+maelia/                        MAELIA user guide digested: README (coupling), reference (files),
+                               coupling-todo, crop-parameters (generated table per crop)
 gams_port_inventory.md         state of the port, equation by equation
 superpowers/specs/             one spec per work item -- the WHY of each decision
 archives/journal-vigilance.md  the full investigation log (French)

@@ -321,7 +321,10 @@ covers the island with them as soon as no outlet bounds them.** That is the comm
 plantain, pineapple and yam. Under the parity mandate it is not touched (these are the yields of
 the article's Table 1), but it explains *why* market ceilings are needed: **they are not
 crutches**, they compensate for a productivity overstated upstream. Simulated yields (the MAELIA
-coupling on the [roadmap](status/roadmap.yaml)) attack the cause rather than the symptom.
+coupling on the [roadmap](status/roadmap.yaml)) attack the cause rather than the symptom —
+**but only if MAELIA's potential yield comes from a territorial source**: its crop model
+(AqYield) scales down a `RENDEMENT_OPTIMAL` that is an *input*, so seeding it with `Rdt_Cult`
+would carry the same overstatement through ([MAELIA M.1](maelia/README.md)).
 
 ### C.2 — Major — The fine 2017 allocation on the input side never existed
 
@@ -382,6 +385,13 @@ wake up as soon as rain is actually subtracted.
 Corollary: the 12 columns `BESOIN_EAU_01..12` are **identical for the 84 crops** — any monthly
 indicator is degenerate (the "peak month" is always the total / 12). That is why it is excluded
 from the composite score.
+
+Second corollary (found 2026-09-23, mapping the crops to MAELIA —
+[maelia/crop-parameters.md](maelia/crop-parameters.md)): `BESOIN_EAU_*` is **0 for the whole
+cane family**, tomato, pineapple, the very-rainy-area orchards and grassland. The water
+indicator counts no water for them — including the irrigated cane variants `CS_*_IM`, which
+carry irrigation operations (and their cost, in the margin) but no need. A water total or a
+water ceiling therefore says nothing about cane.
 
 ### C.5 — Minor — Data present but never read
 
@@ -568,7 +578,8 @@ always ≥ the declared area (median ratio 1.74, 0 anomaly out of 2 000).
 **What it does not allow**: **~1 557 plots** share commune AND area with a neighbour of the same
 farm — they may have been swapped. Territorial and regional readings are reliable; **a single
 plot proves nothing.** The page says so. This join is also the first obstacle to handing the
-optimised plan to MAELIA, which needs real parcels.
+optimised plan to MAELIA, which needs real parcels — and the RPG layer already carries the
+keys MAELIA uses (`pacage`, `pac_ilot`, `parcelle`: [MAELIA M.6](maelia/README.md)).
 
 ### F.2 — Minor — No coordinate in the tables
 

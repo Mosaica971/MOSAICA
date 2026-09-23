@@ -478,7 +478,10 @@ def render_markdown(
             continue
         lines += [f"### {status.replace('_', ' ')}", ""]
         for _, item in chunk.iterrows():
-            extra = item.get("left") or item.get("blocked_by") or ""
+            # An item can carry both: what remains, and what stops it moving.
+            left, blocked_by = item.get("left") or "", item.get("blocked_by") or ""
+            extra = " ".join(filter(None, [left, f"Blocked by: {blocked_by}" if left and blocked_by
+                                           else blocked_by]))
             # STATUS.md sits in docs/status/, the spec paths are repo-relative.
             spec = f" ([spec](../../{Path(item['spec']).as_posix()}))" if item.get("spec") else ""
             lines.append(f"- **{item['id']}** ({item['area']}) -- {item['title']}{spec}"

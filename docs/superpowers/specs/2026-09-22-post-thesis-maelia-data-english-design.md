@@ -6,6 +6,10 @@ after the defence, and isolates the decisions that belong to Clément or to the 
 Everything said here about MAELIA itself is **to be checked** against its documentation: the
 training has not taken place yet.
 
+**2026-09-23 — the MAELIA user guide has been read** (`context/maelia/`, digest in
+[`docs/maelia/README.md`](../../maelia/README.md)). What it settles is noted inline below
+("Guide:"); its § M holds the consequences, some of which change §4 and §5.
+
 Decisions taken on 2026-09-22:
 
 - **Everything in English** — code, config, scenario files, dashboard, docs. The thesis and its
@@ -223,6 +227,14 @@ GAMA platform and relies on a simplified crop model of the AqYield type — **to
 **are parameterised in it**, which may alone be the largest cost of the work item; the input and
 output formats; the licence and the access to the information system.
 
+Guide: GAMA and AqYield / AqYieldNC confirmed (HerbSim for grassland); licence GPLv3; formats
+in `docs/maelia/reference.md`. **No tropical crop is mentioned** and no mechanism for
+multi-year crops is described (M.2). Two corrections to the plan above: the simulated yield is
+`RENDEMENT_OPTIMAL` scaled down by water and nitrogen stress, and `RENDEMENT_OPTIMAL` is an
+**input to adapt to the territory** — so the coupling moves the yield-level question of
+vigilance C.1, it does not answer it (M.1); and the "simulation unit" exists as MAELIA's
+**virtual-plot** mode (forced rotation, soil, weather cell), sweepable in batch (M.7).
+
 ---
 
 ## 5. Work item E — MOSAICA -> MAELIA: the cropping plan tested at a daily time step (postponed)
@@ -260,6 +272,12 @@ of one being tested. For the test, the agent must **execute** the plan: only tac
 (sowing dates, irrigation triggers, order of field operations) stay free. To check: that MAELIA
 allows a cropping plan to be imposed.
 
+Guide: **it does** — `nomChoixAssolement = 'Donnees'` reads each plot's crop sequence from
+`parcelles.shp` (`SEQUENCE`) and leaves the agents only tactical decisions (M.3). But the ITK
+is not chosen in MAELIA, it follows from (crop, previous crop, soil, farm type, climate,
+irrigation): a MOSAICA variant must become its own MAELIA species to be imposed (M.4). And
+the machinery row of §5.4 cannot be measured: tool entries have no effect in MAELIA yet (M.8).
+
 ### 5.4 — Define what is measured before launching
 
 A list of gap indicators, written before the first run, otherwise one reads what suits:
@@ -289,7 +307,9 @@ to date.
 **For the MAELIA training / the supervisors**
 
 1. Tropical crops parameterised or not; crop model used; input and output formats; possibility
-   of imposing a cropping plan.
+   of imposing a cropping plan. *(Guide, 2026-09-23: crop model, formats and imposing a plan
+   answered; tropical and perennial crops still open — the updated list is in
+   `docs/maelia/README.md` § Questions left for the training.)*
 2. Does the information system hold the RPG with its real ids? (Decides § 5.1.)
 3. Who validates the access levels (INRAE's data protection officer, agreements with the data
    providers)?

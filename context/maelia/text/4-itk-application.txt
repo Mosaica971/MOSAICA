@@ -1,0 +1,1794 @@
+Guide utilisateur > 4 Application ITK
+
+4 Application ITK
+4.1 Introduction
+La plateforme de déclaration des ITK permet de stocker, de façon unique et organisée, les
+informations relatives aux itinéraires techniques (ITK) d’un terrain d’étude. Elle permet
+également de générer le fichier contenant les ITK au format attendu par MAELIA.
+
+
+4.1.1 Login
+L’utilisation de la plateforme ITK nécessite un identifiant et un mot de passe fournis par
+Renaud. Le mot de passe est généré aléatoirement et peut être changé sur demande. Il
+sera connu par les gestionnaires de la base de données. Ces informations de login vous
+donneront accès à votre/vos terrain(s) d’étude.
+
+
+4.1.2 Appui technique à l’utilisation de la plateforme
+L’appui technique à la déclaration des ITK est assuré par Renaud Misslin (MAELAB). Les
+demandes d’appui devront suivre la procédure suivante :
+
+     Si un bug (message d’erreur rouge ou application déconnectée) de l’application
+     bloque la déclaration des ITK :
+        1. Informer Renaud de la présence du bug en essayant d’expliquer ce qui l’a
+          provoqué (ex : “le bug est survenu après la copie d’un ITK”).
+        2. Les données posant problème seront corrigées : elles seront soient supprimées,
+          soient modifiées (voir avec Renaud selon les cas).
+        3. Si sa provenance est identifiée, le bug sera corrigé.
+     Si la question ou le problème ne concerne pas un bug de l’application :
+        1. L’utilisateur / utilisatrice consulte la documentation.
+        2. Si la documentation est incomplète ou peu claire, il/elle contacte Renaud en
+          détaillant le problème.
+       3. La doc est complétée ou précisée par Renaud avec l’aide de la personne
+          concernée.
+
+Tous les problèmes et questions survenant au lancement de MAELIA ou après devront être
+adressés à Jean.
+
+
+4.1.3 Trucs et astuces pour accélérer le processus de
+déclaration des ITK
+Déplacement sur la page : Vous pouvez vous déplacer d’un menu au suivant en utilisant la
+touche tab ou d’un menu au précédent en utilisant la combinaison tab + shift
+
+Menus déroulants : Les listes proposées dans les menus déroulant peuvent être filtrées en
+écrivant des caractères compris dans la chaine de caractères que vous cherchez. Par
+exemple, si vous ne souhaitez afficher que les maïs dans un menu proposant une liste
+d’espèces : cliquez sur le menu pour dérouler la liste, cliquer sur la touche “retour arrière”,
+entrez les caractères recherchés (‘tour’ pour ‘tournesol’ par exemple).
+
+Cases à cocher : Vous pouvez utiliser la barre d’espace pour cocher/décocher une case
+préalablement sélectionnée.
+
+Entrer des chiffres : Dans les cases pour lequelles un chiffre est attendu, vous pouvez
+directement entrer le chiffre que vous souhaitez dans la case ou utiliser les deux flèches de
+côté. Le séparateur décimal est toujours une virgule.
+
+Conversion en jours juliens : Les dates peuvent être converties en jours julien (jour entre 1
+et 365) à partir de l’outil proposé en bas de page lors de la déclaration ou la modification
+d’une opération technique.
+
+
+4.2 Déclarer un nouveau territoire
+La déclaration d’un nouveau territoire nécessite d’abord la définition d’un nom ainsi que
+de la liste des utilisateurs/utilisatrices qui pourront modifier les données. Le nom choisi et
+la liste des utilisateurs/utilisatrices sont transmis à Renaud.
+Nous utiliserons un terrain fictif appelé MAELAND pour illustrer les propos de ce document.
+
+
+4.3 Critères de spatialisation
+Un itinéraire technique (ITK) couvre une ou plusieurs situation(s) agronomique(s)
+correspondant à un ensemble de critères de spatialisation. Ces critères de spatialisation
+servent à différencier des modes de conduites de culture. Une situation agronomique doit
+donc être couverte par un et un seul ITK. Ces critères de spatialisation doivent être compris
+d’un point de vue agronomique et doivent être définis en amont du processus de
+déclaration des ITK. Il existe actuellement 6 critères permettant de déterminer quel ITK
+appliquer à chaque situation agronomique :
+
+     la culture
+
+     le précédent de cette culture
+
+     la zone pédologique
+
+     le type d’exploitation
+
+     la zone climatique
+
+     le matériel d’irrigation
+
+Chacun de ces critères s’exprime à un niveau spatial spécifique.
+
+Au début du processus de création d’un terrain d’étude, les utilisateurs et utilisatrices de
+MAELIA doivent déterminer quels sont les critères différenciant sur leur terrain.
+
+Exemple :
+
+Dans le terrain MAELAND les cultures sont conduites différemment selon (1) leur précédent
+cultural et (2) le type de sol sur lequel ils sont cultivés. Les experts ont rassemblé les sols
+du terrain en deux grands groupes agronomiquement significatifs : “Sol A” et “Sol B”. Deux
+espèces sont cultivées sur ce terrain : blé et maïs.
+Les situations possibles oberservées dans les données de ce terrain fictif sont les suivantes
+:
+
+
+    Culture         Précédent               Zone pédologique                        ITK
+
+    blé             blé                     Sol A                                   ITK 1
+
+    blé             maïs                    Sol A                                   ITK 2
+
+    maïs            blé                     Sol A                                   ITK 3
+
+    maïs            maïs                    Sol A                                   ITK 4
+
+    blé             blé                     Sol B                                   ITK 1
+
+    blé             maïs                    Sol B                                   ITK 2
+
+    maïs            blé                     Sol B                                   ITK 5
+
+    maïs            maïs                    Sol B                                   ITK 6
+
+Sur ce terrain, il existe 8 situations agronomiques. Chacune d’entre-elles doit être couverte
+par un et un seul ITK. Ces situations agronomqiues sont définies selon 3 critères de
+spatialisation : culture, précédent, zone pédologique. Dans l’exemple ci-dessus, les 8
+situations agronomiques sont couvertes par un ensemble de 6 ITK différents. Cela siginifie
+que plusieurs situations différentes sont associées à un seul et même ITK : par exemple,
+l’ITK 1 est le même pour deux situations différentes (c’est également le cas de l’ITK 2). Dans
+ce terrain, le type d’exploitation, le matériel d’irrigation et la zone climatique ne sont pas
+des critères différenciant pour la conduite des cultures.
+
+A garder en mémoire : toutes les situations agronomiques que MAELIA rencontrera sur
+votre terrain d’étude devront être associées à UN ET UN SEUL ITK.
+
+
+Zone pédologique :
+Le critère de spatialisation “zone pédologique” fait référence à un sol ou un groupe de sols
+homogènes d’un point de vue agronomique : les cultures y sont conduites de la même
+façon.
+
+Dans l’exemple donné dans le tableau ci-dessus, les ITK de maïs diffèrent selon la zone
+pédologique dans laquelle ils se trouvent. Pour cet exemple, il est donc important d’avoir
+deux zones pédologiques disctinctes. En revanche, les ITK blé ne diffèrent pas selon la
+zone pédologique dans laquelle ils se trouvent : ils ne diffèrent qu’en fonction du
+précédent cultural (voir la partie dédiée). Les deux ITK blé s’appliquent indistinctement à
+une zone pédologique et à l’autre (ces ITK blé diffèrent seulement selon le précédent
+cultural).
+
+Exemples de zones pédologiques : sols profonds, sols superficiels, sols limoneux, sols
+argilo-calcaires
+
+Niveau spatial : groupe de type(s) de sol
+
+
+Zone climatique :
+Ce critère de spatialisation permet de différencier des situations pour lesquelles les
+cultures seraient gérées différemment selon le climat associé à une “sous-zone” du terrain
+d’étude. Ce critère peut notamment être utilisé sur les très grands terrains d’étude pour
+lesquels les caractéristiques des sols ne suffisent pas à différencier les situations.
+
+Exemples de zones climatiques : climat plateau, climat plaine
+
+Niveau spatial : sous-zone du terrain d’étude
+
+
+Type d’exploitation :
+Le type d’exploitation permet de préciser les ITK d’un terrain d’étude lorsque deux
+exploitations sont confrontées à la même situation agro-pédoclimatique mais la gère
+diféremment.
+A titre d’exemple, on peut imaginer en reprenant le tableau ci-dessus vouloir ajouter une
+exploitation de type “bio” qui conduirait les cultures de façon différente sur des situations
+identifiques à celles déjà déclarées. Dans ce cas là, le type d’exploitation deviendrait un
+critère différenciant. Par exemple, le blé, précédent maïs cultivé sur la zone pédologique
+“Sol A” serait cultivé différement dans cette exploitation bio par rapport aux autres
+exploitations.
+
+Exemples de types d’exploitation : conventionnel, bio, exploitation utilisatrice de boues
+de STEP, exploitation grande culture / élevage, exploitation innovante
+
+Niveau spatial : exploitation
+
+
+Matériel d’irrigation :
+Le matériel d’irrigation permet d’adapter la conduite des cultures en fonction du matériel
+d’irrigation présent sur les ilots (groupe de parcelles). A noter que le matériel d’irrigation
+est obligatoirement un critère de spatialisation si les cultures du terrain d’étude sont
+irriguées. Cela signifie que si tous les ilots du terrain sont irrigués avec le même matériel
+d’irrigation (par exemple : “pivot” partout), le terrain d’étude aura un critère de
+spatialisation “matériel d’irrigation” unique (“pivot”).
+
+Par exemple, pour une situation culture - précédent - zone pédologique donnée, la
+conduite de la culture en question peut être différente selon que l’ilot soit irrigué avec un
+pivot, avec un enrouleur 25 mm ou pas irrigué du tout.
+
+Exemples de matériels d’irrigation : pivot, enrouleur 25 mm, enrouleur 12 mm, rampe,
+non irrigué (sans matériel)
+
+Niveau spatial : ilot
+
+
+Culture :
+La culture fait référence à l’espèce qui sera cultivée par l’intermédiaire du/des ITK qui s’y
+rattacheront. Contrairement aux autres critères de spatialisation, un ITK ne peut être
+rattaché qu’à une seule culture. Dans MAELIA, les cultures sont données au niveau de la
+parcelle, sous la forme d’une rotation. Par exemple maïs_blé_colza_blé_ciCruciLong .
+Cette rotation se déroule sur 3 ans (3 cultures principales + un couvert intermédiaire). Si
+MAELIA est lancé sur plus de 3 ans, la rotation est répétée.
+
+Cas spécifique du gel : PAS BESOIN DE DECLARER UN ITK GEL. Dans MAELIA, le gel sera
+simulé comme les autres cultures mais n’aura pas d’impact sur la parcelle sur laquelle il
+sera simulé (pas d’opérations techniques, pas de prélèvement d’eau ou d’azote par la
+plante). L’ITK gel est fourni automatiquement dans le fichier reglesDeDecision.csv , vous
+n’avez donc pas besoin de lui associer un ITK.
+
+Exemples de cultures : blé, ciCruciCourt, triticale, prairie
+
+Niveau spatial : parcelle
+
+
+Précédent :
+Ce critère de spatialisation permet d’appliquer des ITK différents à une culture selon son
+précédent cultural. Par exemple, le maïs peut ne pas être conduit de la même façon selon
+que son précédent soit un blé ou un colza. Dans la séquence
+maïs_blé_colza_blé_ciCruciLong , le précédent du blé peut être un maïs ou un colza.
+Dans MAELIA, les séquences sont lues en boucle : dans l’exemple précédent, le
+précédent du maïs est donc le ciCruciLong . Vous devez tenir compte de cela lors de la
+déclaration des précédents associés à une culture.
+
+Cas spécifique du gel : lorsque vous déclarez les précédents associés à une culture, vous
+devez tenir compte du fait que si vos séquences contiennent des cultures “gel”, une partie
+ou tous vos ITK devront obligatoirement avoir la culture “gel” déclarée comme
+précédent.
+
+Exemples de précédents : blé, ciCruciCourt, triticale, prairie, gel
+
+Niveau spatial : parcelle
+
+
+4.4 Ajout et modification des critères
+Les critères de spatialisation suivants sont à transmettre à Renaud sous forme de liste au
+moment de la création du terrain dans l’application ITK :
+
+     Zone pédologique
+
+     Type d’exploitation
+
+     Zone climatique
+
+     Matériel d’irrigation
+
+Ils pourront être modifiés, supprimés ou complémentés sur demande à Renaud.
+
+Les couverts (cultures) et les précédents doivent être ajoutés directement depuis
+l’application ITK. Ils font l’objet d’une section spécifique. Dans l’application ITK, les
+cultures et les précédents sont gérés via l’onglet Gestion des couverts .
+
+Niveau spatial : parcelle
+
+
+Cultures (couverts) :
+Au début de la création d’un terrain, la liste des cultures de ce terrain est vide. Pour pouvoir
+associer des ITK à des cultures, vous devrez donc d’abord indiquer les cultures de votre
+terrain.
+
+Les cultures peuvent être ajoutées par l’intermédiaire de la page Ajouter / supprimer
+une culture au terrain . Une fois sur cette page, la culture sera ajoutée par
+l’intermédiaire du menu déroulant Culture à ajouter . Si la culture que vous souhaitez
+ajouter à votre terrain existe dans la liste, vous pouvez la sélectionner et cliquer
+Enregistrer la nouvelle culture . Si la culture ne figure pas dans la liste des cultures
+déjà existantes, vous pouvez l’ajouter manuellement dans la case appellée Ajout manuel .
+
+Les cultures associées à un terrain peuvent être supprimées par l’intermédiaire de la page
+Ajouter / supprimer une culture au terrain . La culture à supprimer est sélectionnée
+par le biais du menu déroulant Culture à supprimer . Pour rendre la suppression
+effective, sélectionnez la culture à supprimer puis cliquer sur Supprimer la culture .
+L’outil vérifiera si la culture n’est pas associée à un ITK en tant qu’espèce principale. Si c’est
+le cas, la suppression sera annulée. Si la culture est associée à un ITK en tant que
+“précédent”, une boîte de dialogue vous demandera de confirmer la suppression. Cette
+culture sera alors supprimée des précédents des ITK en question.
+
+
+Précédents culturaux :
+Lors de l’ajout d’une culture à un terrain, toutes les cultures de ce terrain ainsi que la
+culture que vous venez d’ajouter sont ajoutés par défaut comme des précédents possibles.
+Si vous souhaitez rendre la déclaration d’un couple précédent / suivant impossible, vous
+pouvez modifier la liste des “précédents possibles”. Lors de la déclaration des critères de
+spatialisation d’un ITK, ces “précédents possibles” formeront une liste dans laquelle vous
+cocherez les précédents auxquels s’appliqueront l’ITK en question. La présence d’une
+culture dans la liste des précédents possibles n’implique pas qu’un itk devrait être déclaré
+pour le couple précédent / suivant en question. Cela permet en revanche d’éviter des
+erreurs de déclaration. A vous de voir.
+
+     Lors de l’ajout d’une culture à un terrain, toutes les cultures de ce terrain ainsi que la
+     culture ajoutée sont considérées comme des précédents possibles.
+     Pour ajouter un/des “précédent(s) possible(s)”, cochez la/les case(s) correspondant à
+     ce(s) précédent(s) et cliquer Enregistrer les précédents .
+     Pour supprimer un/des “précédent(s) possible(s)”, décochez la/les case(s)
+     correspondant à ce(s) précédent(s) et cliquer Enregistrer les précédents .
+
+
+4.4.0.1 Association des espèces déclarées à des espèces MAELIA
+Pour pouvoir être simulées dans MAELIA, les cultures doivent avoir un nom spécifique qui
+ne correspond pas forcément au nom que vous avez choisi lors de la déclaration des
+cultures de votre terrain. Vous devrez donc spécifier à quelle culture MAELIA se rattache
+chaque culture de votre terrain d’étude. La règle générale est la suivante : une culture du
+terrain ne peut être rattachée qu’à une et une seule culture MAELIA. Cette règle vous
+permet d’être certain qu’un ensemble de critère de spatialisation (dont la culture fait
+partie) ne sera pas couverte par deux ITK différents.
+Plusieurs cas de figure peuvent se présenter à vous :
+
+    Cas simple : La culture de votre terrain d’étude correspond à une et une seule culture
+    de la liste des cultures MAELIA. Vous sélectionnez la culture et la culture MAELIA en
+    question, puis vous cliquez sur Enregistrer l'association .
+
+    Exemple : ‘tournesol’ devient ‘tour’
+
+    Cas où vous souhaiteriez rattacher deux cultures de votre terrain à une même
+    culture MAELIA : cela n’est pas possible ! Si cela était permis, vous risqueriez de vous
+    retrouver dans une situation où un même ensemble de critères de spatialisation serait
+    couvert par deux ITK. Pour résoudre le problème :
+
+         soit les critères de spatialisation doivent être revus dans le but de différencier les
+         deux cultures sur un autre critère : il n’y aurait donc plus qu’une seule culture
+         délcarée à associer à une seule culture MAELIA.
+         soit une des deux cultures est un couvert intermédiaire : la liste des espèces
+         MAELIA contient un certain nombre de couverts intermédiaires (commencant par
+         ‘ci’). Si le couvert souhaité figure dans la liste des cultures MAELIA en tant que
+         culture classique mais pas en tant que ‘CI’, vous pouvez demander à Olivier et
+         Renaud à ce que cette culture soit ajoutée en tant que CI (et inversement pour
+         une culture qui figurerait dans les CI proposés mais pas dans les cultures
+         principales).
+         soit vous créez manuellement une nouvelle culture MAELIA dans le fichier
+          especesCultivees.csv qui sera associée à la culture déclarée (pour plus de
+         détail, voir la solution au troisième cas de figure donnée ci-dessous).
+
+    Exemple : vous souhaitez que ‘orge’ devienne ‘CP’ et que ‘blé’ devienne ‘CP’
+
+    Cas où une culture déclarée n’existerait pas dans la liste des cultures MAELIA : la
+    liste des cultures MAELIA contient l’intégralité des cultures simulables dans MAELIA. Si
+    la culture souhaitée ne figure pas dans cette liste mais que vous souhaitez tout de
+    même avoir une culture sur les parcelles concernées avec un/des ITK spécifique(s) à
+    cette culture, vous pouvez procéder de la façon suivante (1) ne pas créer une
+     association culture déclarée - culture maelia, (2) créer une nouvelle culture dans le
+     fichier especesCultivees.csv en récupérant les paramètres de croissance d’une
+     espèce existante. Cette manipulation doit être faite en pleine connaissance de cause
+     et en coordination avec le/la référent.e MAELIA “thématique”. Cette opération n’est
+     pas permise par la plateforme. Elle doit être réalisée manuellement, en-dehors de la
+     plateforme. A noter que les donnnées de règles de décision peuvent être téléchargées
+     même si toutes les associations culture déclarée - culture MAELIA n’ont pas été faites.
+     Les cultures des ITK pour lesquels l’association culture déclarée - culture MAELIA n’est
+     pas disponible ne changeront pas de nom. Le nom original de la culture (celui que
+     vous avez déclaré) sera conservé lors de la création du fichier reglesDeDecision.csv .
+
+     Exemple : ‘chanvre’ devient ‘leNomQueVousChoississez’
+
+
+4.5 Gestion des itinéraires techniques
+Un itinéraire technique (ITK) est une suite ordonnée d’opérations techniques s’appliquant
+à une situation agronomique. Cette dernière est caractérisée par un ensemble de critères
+de spatialisation.
+
+Dans l’application, la gestion des ITK est réalisée dans l’onglet Gestion des ITK . Cette
+onglet mène vers une liste de boutons radio vous permettant de :
+
+     Déclarer un nouvel ITK
+
+     Ajouter une opération technique (ou modifier une opération de fertilisation)
+
+     Copier une opération technique ou un ITK
+
+     Modifier les critères de spatialisation ITK
+
+     Modifier une opération technique
+
+     Afficher un ITK
+
+     Supprimer un ITK, une OT ou une stratégie
+Chacune de ces actions fait l’objet d’une section ci-dessous.
+
+
+4.6 Déclarer un nouvel ITK
+D’abord, choisissez la culture à laquelle se rapporte l’ITK. Cette culture est unique : un ITK
+ne peut se rapporter qu’à une et une seule culture. Si vous souhaitez appliquer le même
+ITK à deux cultures différentes, il vous faudra créer deux ITK.
+
+Ensuite, choisissez les autres critères de spatialisation auxquels se rapportent cet ITK. Vous
+pouvez en choisir plusieurs à condition qu’une situation agronomique ne soit pas couverte
+par deux ITK différents.
+
+Enfin, choisissez un nom pour votre ITK. Celui-ci doit porter suffisamment d’information
+pour vous permettre de l’identifier et de déterminer par le biais de son nom à quelle
+situation agronomique il se rapporte. Par exemple, un ITK de blé précédent colza ou blé
+valable pour une zone pédologique appellée “Sol A” pourrait être nommé de la façon
+suivante : ble_precColzaBle_SolA . Afin de permettre à MAELIA de réutiliser ce nom, évitez
+les accents et les caractères spéciaux. Le nom de l’ITK doit être unique. Si le nom que vous
+souhaitez entrer existe déjà dans votre terrain d’étude ou dans un autre terrain d’étude,
+vous devrez changer ce nom pour pouvoir enregistrer l’ITK.
+
+Une fois ces différentes étapes réalisées, vous pouvez enregistrer l’ITK en cliquant sur
+Enregistrer l'ITK .
+
+
+
+4.7 Ajouter une opération technique (ou modifier
+une opération de fertilisation)
+Lorsqu’un nouvel ITK est créé, celui-ci est vide : aucune opération technique n’y est
+rattachée. Vous devrez ajouter les opérations techniques en entrant manuellement ou en
+allant les récupérer dans un autre ITK (voir section Copier une opération technique ou
+un ITK ).
+Sélectionnez l’ITK concerné dans le menu déroulant ITK concerné . Si cet ITK n’apparait
+pas dans le menu, actualisez la page (F5). Si d’autres opérations ont déjà été renseignées
+pour cet ITK, une frise chronologique représentant ces opérations apparait (pour plus
+d’information sur cette frise, reportez-vous à la section “Afficher un ITK”).
+
+Sélectionnez ensuite le type d’opération à déclarer par l’intermédiaire du menu déroulant
+Sélectionner un type d'opération et modifiez le nom de l’opération. Ce nom n’a pas
+besoin d’être unique et vous servira uniquement à identifier les opérations dans
+l’application. Il ne sera pas utilisé par MAELIA.
+
+
+4.7.1 Paramètres généraux de l’opération technique
+Les paramètres généraux de l’opération technique décrivent ses caractéristiques, dont
+certaines sont spécifiques au type d’opération :
+
+
+ Nom du
+ paramètre               Type (unité)               Type d’opération        Explication
+
+ Profondeur du           Nombre entier (cm)         Travail du sol,
+ travail du sol                                     Semis, Fertilisation,
+                                                    Binage, Récolte,
+                                                    Traitement
+                                                    phytosanitaire
+
+ Opération réalisé       Booléen (oui / non)        Toutes les              L’opération est-elle
+ par l’agricultureur                                opérations              réalisée par l’agent
+                                                                            agriculteur ou par un
+                                                                            tiers ?
+
+ Outil                   Texte (menu                Toutes les              L’outil utilisé pour
+                         déroulant)                 opérations              réaliser l’opération
+
+ Temps de travail        Nombre décimal             Toutes les
+                         (h/ha)                     opérations
+Nom du
+paramètre            Type (unité)          Type d’opération   Explication
+
+Nombre de            Nombre entier         Toutes les         Ne pas utiliser
+passages                                   opérations
+
+Opération            Texte (menu           Toutes les         Ne pas utiliser
+préliminaire         déroulant)            opérations
+
+Opération réalisée   Texte (menu           Toutes les         L’opération est-elle
+simultanément        déroulant)            opérations         réalisée en même
+                                                              temps qu’une autre
+                                                              opération ?
+
+Produit              Texte (menu           Fertilisation,
+                     déroulant)            Traitement
+                                           phytosanitaire
+
+Dose                 Nombre décimal        Fertilisation,
+                     (t/ha si organique,   Traitement
+                     kg/ha si minéral,     phytosanitaire,
+                     L/ha si phyto., mm    Irrigation
+                     si irrigation)
+
+Apport réalisé       Texte (menu           Fertilisation      L’apport est-il réalisé
+simultanément        déroulant)                               en même temps
+                                                              qu’une autre
+                                                              opération ?
+ Nom du
+ paramètre              Type (unité)            Type d’opération       Explication
+
+ Délais minimal de      Nombre entier           Irrigation             Nombre de jour(s)
+ retour sur la          (jours)                                        suivant une irrigation
+ parcelle                                                              durant lesquels
+                                                                       aucune irrigation ne
+                                                                       sera réalisée
+
+
+4.7.2 Sous-période de l’opération technique
+Dans MAELIA, les opération techniques sont réalisées par les agents agriculteurs en
+fonction de règles énoncées au format SI […] –> ALORS […]. Ces règles expriment le fait
+que dans la réalité, la réalisation des opérations techniques est conditionnée par une série
+de contraintes météorologiques et agronomiques (portance de la parcelle, stade végétatif,
+température de l’air, pluies passées / pluies prévues, etc).
+
+Une opération technique peut être divisée en 1, 2 ou 3 sous-période(s). Chaque sous-
+période se caractérise par une date de début et de fin (en jours julien, entre 1 et 365) ainsi
+qu’une série de contraintes. A noter qu’une sous-période peut commencer au jour 360
+(26/12) et terminer au jour 5 (05/01). Déterminez le nombre de sous-période par
+l’intermédiaire du menu Nombre de sous-période(s) . Les sous-périodes d’une opération
+doivent être associées à 1 ou plusieurs contraintes. Cochez la/les contrainte(s) souhaitée(s)
+dans le menu Contraintes de déclenchement de l'opération . Les différentes
+contraintes sont définies et détaillées dans le tableau ci-dessous.
+
+L’opération IRRIGATION a la particularité d’avoir une fenêtre temporelle unique qui couvre
+l’ensemble de la période d’irrigation. Il n’est donc pas possible de déclarer des sous-
+périodes temporelles pour l’irrigation. En revanche des sous-périodes peuvent être
+définies en fonction de seuils d’échelle de végétation, afin de spéicifer des doses
+différentes selon le stade de la culture.
+Dans MAELIA, si un agent agriculteur doit réaliser une opération technique, il va d’abord
+essayer de la réaliser durant la première sous-période. Si les valeurs de contraintes
+données pour cette sous-période le permettent, l’opération est réalisée. Si non on passe à
+la seconde sous-période.
+
+Exemple :
+
+
+ N° de la sous-période             Début        Fin     contrainte HUM_MAX_SOL
+
+ 1                                 363          5       0,6
+
+ 2                                 6            14      0,7
+
+ 3                                 15           22      1
+
+Cette opération est divisée en 3 sous-périodes s’étalant entre le jour n°363 et le jour n°22.
+Si son emploi du temps lui permet, l’agent agriculteur va essayer de réaliser l’opération à
+partir du jour 363. Tous les jours, il va consulter l’humidité du sol (exprimée entre 0 et 1 où
+0 équivaut à 0 % d’humidité et 1 équivaut à 100 % d’humidité). Si l’humidité du sol est
+inférieure ou égale à 0,6, l’agriculteur va réaliser l’opération dès que possible. Si l’humidité
+du sol est supérieure à 0,6 ET que le n° du jour est compris entre 363 et 5, l’opération ne
+sera pas réalisée durant la première sous-période. Durant la seconde sous-période, la
+valeur d’humidité en-dessous de laquelle l’opération est réalisée est 0,7. La contrainte a
+donc été allégée par rapport à la première sous-période. Cet allègement progressif des
+contraintes représente la baisse du niveau d’exigence de l’agriculteur au fil des jours. Si
+l’opération n’est toujours pas réalisée durant la seconde sous-période, on passe alors dans
+la troisième sous-période. Dans l’exemple ci-dessus, si l’humidité du sol est inférieure ou
+égale à 1 entre les jours n°15 et 22, l’opération est réalisée. L’humidité du sol ne pouvant ici
+pas être supérieure à 1, l’opération sera réalisée dès que l’emploi du temps de l’agriculteur
+le permet.
+
+Certaines règles de déclenchement fonctionnent par couple. Si pour une opération
+technique, une des règles contient une valeur, l’autre règle doit obligatoirement contenir
+une valeur. Le tableau ci-dessous donne plus de détail sur la signification des contraintes
+pouvant être choisies ainsi que la contrainte avec laquelle elles doivent être couplées
+quand c’est nécessaire :
+
+
+                                 Obligatoirement couplé                            Opération(s)
+ Nom dans l’application ITK      avec…                            Explication      concernée(s)
+
+ hum_max_sol                     -                                Humidité         Travail du
+                                                                  maximum          sol, Semis,
+                                                                  du sol (0 à 1)   Fertilisation,
+                                                                                   Binage,
+                                                                                   Récolte,
+                                                                                   Traitement
+                                                                                   phyto-
+                                                                                   sanitaire
+
+ cumul_pluie                     n_j_cumul_pluie                  Hauteur de       Travail du
+                                                                  pluie            sol, Semis,
+                                                                  cumulée          Fertilisation,
+                                                                  (mm)             Binage,
+                                                                                   Récolte,
+                                                                                   Traitement
+                                                                                   phyto-
+                                                                                   sanitaire
+
+ n_j_cumul_pluie                 cumul_pluie                      Nombre de        Travail du
+                                                                  jours passés     sol, Semis,
+                                                                  sur lesquels     Fertilisation,
+                                                                  le cumul de      Binage,
+                                                                  pluie est        Récolte,
+                                                                  calculé          Traitement
+                                                                                   phyto-
+                                                                                   sanitaire
+                             Obligatoirement couplé                  Opération(s)
+Nom dans l’application ITK   avec…                    Explication    concernée(s)
+
+cumul_pluie_eva              n_j_cumul_pluie_eva      Hauteur de     Travail du
+                                                      pluie -        sol, Semis,
+                                                      evaporation    Fertilisation,
+                                                      cumulée        Binage
+                                                      (mm)
+
+n_j_cumul_pluie_eva          cumul_pluie_eva          Nombre de      Travail du
+                                                      jours passés   sol, Semis,
+                                                      sur lesquels   Fertilisation,
+                                                      le cumul de    Binage
+                                                      pluie -
+                                                      évaporation
+                                                      est calculé
+
+temp_min                     n_j_cumul_temp_min       Température    Travail du
+                                                      minimale       sol, Semis
+                                                      durant une
+                                                      durée de
+                                                      jours
+
+n_j_cumul_temp_min           temp_min                 Nombre de      Travail du
+                                                      jours passés   sol, Semis
+                                                      durant
+                                                      lesquels la
+                                                      température
+                                                      minimale
+                                                      est
+                                                      consultée
+                             Obligatoirement couplé                   Opération(s)
+Nom dans l’application ITK   avec…                    Explication     concernée(s)
+
+temp_max                     n_j_cumul_temp_max       Température     Travail du
+                                                      maximale        sol, Semis
+                                                      durant une
+                                                      durée de
+                                                      jours
+
+n_j_cumul_temp_max           temp_max                 Nombre de       Travail du
+                                                      jours passés    sol, Semis
+                                                      durant
+                                                      lesquels la
+                                                      température
+                                                      maximale
+                                                      est
+                                                      consultée
+
+hum_min_sol                  -                        Humidité        Semis
+                                                      minimale du
+                                                      sol (0 à 1)
+
+seuil_vege                   -                        Seuil           Fertilisation,
+                                                      d’échelle de    Binage,
+                                                      végétation à    Récolte,
+                                                      partir          Traitement
+                                                      duquel          phyto-
+                                                      l’opération     sanitaire
+                                                      est effectuée
+
+hauteur_pluie_signif                                  Hauteur de      Irrigation
+                                                      pluie
+                                                      significative
+                             Obligatoirement couplé                   Opération(s)
+Nom dans l’application ITK   avec…                    Explication     concernée(s)
+
+cumul_pluie_prevue           n_j_cumul_pluie_prevue   Hauteur de      Irrigation,
+                                                      pluie prévue    Fertilisation,
+                                                      cumulée         Récolte
+                                                      (mm)
+
+n_j_cumul_pluie_prevue       cumul_pluie_prevue       Nombre de       Irrigation,
+                                                      jours futurs    Fertilisation,
+                                                      sur lesquels    Récolte
+                                                      le cumul de
+                                                      pluie prévue
+                                                      est calculé
+
+seuil_vege_pre               -                        Seuil           Irrigation
+                                                      d’échelle de
+                                                      végétation à
+                                                      partir
+                                                      duquel
+                                                      l’opération
+                                                      n’est plus
+                                                      effectuée
+
+seul_vege_post               -                        Seuil           Irrigation
+                                                      d’échelle de
+                                                      végétation à
+                                                      partir
+                                                      duquel
+                                                      l’opération
+                                                      est effectuée
+                             Obligatoirement couplé                     Opération(s)
+Nom dans l’application ITK   avec…                       Explication    concernée(s)
+
+temp_max_inf                 n_j_cumul_temp_max_inf      Température    Traitement
+                                                         maximale       phyto-
+                                                         jusqu’à        sanitaire
+                                                         laquelle
+                                                         l’opération
+                                                         est réalisée
+
+n_j_cumul_temp_max_inf       temp_max_inf                Nombre de      Traitement
+                                                         jours passés   phyto-
+                                                         sur lesquels   sanitaire
+                                                         cette
+                                                         température
+                                                         max est
+                                                         consultée
+
+hygrometrie_min              n_j_cumul_hygrometrie_min   Taux           Traitement
+                                                         d’humidité     phyto-
+                                                         minimal à      sanitaire
+                                                         partir
+                                                         duquel une
+                                                         opération
+                                                         est réalisée
+
+n_j_cumul_hygrometrie_min    hygrometrie_min             Nombre de      Traitement
+                                                         jours passés   phyto-
+                                                         sur lesquels   sanitaire
+                                                         le taux
+                                                         d’humidité
+                                                         est consulté
+4.7.3 Le cas spécifique des stratégies et opérations de
+fertilisation
+     Qu’est-ce qu’une stratégie de fertilisation dans MAELIA ? Qu’est-ce qu’un apport
+     dans MAELIA ?
+
+Les opérations de fertilisation sont gérées différement des autres opérations techniques.
+Leur particularité principale réside dans le fait qu’un ITK peut être rattaché à aucune, une
+ou plusieurs stratégie(s) de fertilisation. Une stratégie de fertilisation est composée d’un
+ensemble cohérent d’apports. La déclaration et l’usage de plusieurs stratégies de
+fertilisation par ITK est intéressant lorsque les stocks d’engrais (organiques ou minéraux)
+sont limités.
+
+Au cours d’une simulation et pour une culture donnée, l’agent agriculteur de MAELIA choisi
+la stratégie à appliquer pour l’ensemble de l’ITK associé à la culture en question. Ce choix
+est réalisé 15 jours avant le début de la fenêtre temporelle associée à l’apport le plus
+précoce parmis les apports des stratégies de l’ITK. Ce choix est réalisé sur la base des
+stocks d’engrais disponibles, soit au niveau du terrain d’étude, soit dans les unités de
+transformation fournissant les engrais à l’exploitation (dans le cas où le module filière est
+utilisé).
+
+Les stratégies sont ordonnées par ordre de préférence pour l’agent agriculteur. La
+disponibilité des engrais associés aux apport de la stratégie 1 est testée en premier. Si un
+ou plusieurs engrais ne sont pas disponibles en quantité suffisante, l’agent agriculteur se
+rabat sur une seconde stratégie. Si la réalisation de celle-ci n’est toujours pas possible, une
+troisième stratégie est testée. Ces tests successifs impliquent évidemment la disponibilité
+d’une stratégie 2 et d’une stratégie 3. En fin de compte, une manière d’assurer la réalisation
+d’une stratégie de fertilisation si toutes les stratégies précédentes échouent est de (1)
+déclarer une stratégie 100 % minérale en dernière position dans l’ordre de préférence et (2)
+faire en sorte que les engrais minéraux soient disponibles en quantité illimitée pour le
+terrain d’étude.
+
+     Déclaration une ou plusieurs stratégie(s) de fertilisation
+Dans le menu déroulant Sélectionner un type d'opération , sélectionnez
+Fertilisation . Choisissez le nombre de stratégies souhaité, nommez les, puis cliquez
+Ajouter ou actualiser la/les stratégie(s) . Ces stratégies deviendront disponibles
+dans le menu déroulant Stratégie en cours de description .
+
+Attention : si vous déclarez plusieurs stratégies et leurs apports puis que vous réduisez le
+nombre de stratégies par l’intermédiaire du menu Nombre de stratégie(s)
+alternative(s) . La ou les stratégie(s) retirées de la liste seront intégralement supprimées.
+Une confirmation vous sera demandée lorsque vous cliquerez sur ‘Ajouter ou actualiser
+la/les stratégies’. Lorsque vous réduisez le nombre de stratégies, la liste des stratégies est
+réduite en commencant par la dernière stratégie dans l’ordre de préférence.
+
+Si vous avez réduit le nombre de stratégies, que vous avez cliqué sur ‘ajouter ou actualiser
+la/les stratégies’ mais que vous ne souhaitez finalement pas supprimer de stratégie :
+cliquez sur ‘Annuler’. Ensuite vous pourrez actualiser l’ensemble de la page (F5) ou ré-
+augmenter le nombre de stratégie (par l’intermédiaire du menu ‘Nombre de stratégie(s)
+alternative(s)’) pour récupérer la liste complète des stratégies (stratégie n° 1, stratégie n° 2,
+etc).
+
+        Déclaration un ou plusieurs apport(s)
+
+Choisissez la stratégie à laquelle vous souhaitez ajouter un ou plusieurs apports par
+l’intermédiaire du menu déroulant Stratégie en cours de description . Si ce n’est pas
+déjà fait, déterminez ensuite le nombre d’apports associés à la stratégie via le menu
+Nombre d'apport(s) (4 apports au maximum). Cliquez ensuite sur Actualiser la liste
+des apport(s) . Les apports deviendront disponibles dans le menu déroulant Apport à
+déclarer/modifier .
+
+Dans le menu Apport à déclarer/modifier , sélectionnez l’apport que vous souhaitez
+déclarer (Apport 1 / Apport 2 / Apport 3 / Apport 4) puis modifiez ses caractéristiques en
+suivant la même méthode que celle présentée pour les opérations techniques classiques
+(voir ci-dessus).
+Note 1 : lorsque l’apport 1 est sélectionné, un message d’erreur peut apparaitre sous le
+titre Paramètres généraux de l'opération (Error: An error has occurred. Check your logs
+or contact the app author for clarification.). Dans ce cas, sélectionnez l’apport 2, puis
+revenez sur l’apport 1. Les paramètres devraient alors être disponibles. Ce bug fera
+prochainement l’objet d’une correction.
+
+Note 2 : Contrairement aux autres opérations techniques, les paramètres des opérations
+de fertilisation ne sont pas pré-remplis. Veillez à ce que chaque paramètre soit rempli
+avant d’enregistrer l’apport. Ce problème fera prochainement l’objet d’une correction. -
+Modifier des stratégies de fertilisation ou des apports
+
+Contrairement aux autres opérations techniques qui peuvent être modifiées dans l’onglet
+Modifier une opération technique , les opérations de fertilisation sont modifiées à
+l’endroit où elles sont déclarées. Vous pouvez sélectionner un apport préalablement
+déclaré par l’intermédiaire du menu déroulant Apport à déclarer/modifier . Les valeurs
+de paramètres concernant cet apport s’afficheront et pourront être modifiées. Une fois la
+modification effectuée, enregistrez les modification en cliquant Enregistrer l'apport .
+
+
+4.8 Copier une opération technique ou un ITK
+Cet outil permet de rappatrier une opération technique, une ou plusieurs stratégie(s) de
+fertilisation ou un ensemble d’opérations techniques d’un ITK vers un autre.
+
+
+4.8.1 Copier un ITK
+Ce processus consiste à copier un ITK dans un nouvel ITK.
+
+Choisissez l’espèce (culture) dont vous souhaitez copier l’ITK (menu Espèce associée à
+l'ITK à copier ) ainsi que le terrain d’étude pour lequel l’ITK que vous souhaitez copier a
+été déclaré ( Territoire contenant l'ITK à copier ). Choisissez ensuite l’ITK à copier
+( ITK à copier ou contenant l'opération à copier ).
+Maintenant, choisissez l’espèce à laquelle le nouvel ITK sera associé ( Espèce cible ).
+Choisissez l’option Copier : Tout l'ITK , modifiez le nom qui sera donné à l’ITK
+nouvellement créé ( Nom du nouvel ITK ), puis cliquez sur Copier l'ITK sélectionné .
+
+Note : Les critères de spatialisation de l’ITK nouvellement créé sont vides. Ceux-ci doivent
+être remplis par l’intermédiaire du menu Modifier les critères de spatialisation
+ITK (pour plus de détail, voir la section se rapportant à ce menu).
+
+
+4.8.2 Copier une opération technique
+Cet outil permet de copier une opération d’un ITK pour l’insérer dans un ITK existant.
+
+Choisissez l’espèce (culture) rattachée à l’ITK dont vous souhaitez copier une opération
+technique (menu Espèce associée à l'ITK à copier ) ainsi que le terrain d’étude pour
+lequel l’ITK dont vous souhaitez copier l’opération a été déclaré ( Territoire contenant
+l'ITK à copier ). Choisissez ensuite l’ITK contenant l’opération ( ITK à copier ou
+contenant l'opération à copier ).
+
+Maintenant, choisissez l’espèce à laquelle l’ITK qui recevra l’opération est associé ( Espèce
+cible ). Choisissez l’option Copier : Une opération de l'ITK , sélectionnez l’ITK qui
+recevra cette opération ( ITK cible ), sélectionnez l’opération à copier ( Opération
+technique à copier ) puis définissez le nom de l’opération telle qu’il apparaitra dans l’ITK
+cible ( Nom de l'opération dans l'itk receveur ). Pour finir, cliquez sur Copier
+l'opération sélectionnée .
+
+
+4.8.3 Copier un ensemble de stratégies de fertilisation (+
+apports)
+Cet outil permet de copier l’ensemble des stratégies de fertilisation ainsi que les apports
+contenus dans un ITK.
+
+Choisissez l’espèce (culture) rattachée à l’ITK dont vous souhaitez copier des stratégies et
+des apports (menu Espèce associée à l'ITK à copier ) ainsi que le terrain d’étude pour
+lequel l’ITK dont vous souhaitez copier les stratégies a été déclaré ( Territoire contenant
+l'ITK à copier ). Choisissez ensuite l’ITK contenant les stratégies et les apports ( ITK à
+copier ou contenant l'opération à copier ).
+
+Maintenant, choisissez l’espèce à laquelle l’ITK qui recevra l’opération est associé ( Espèce
+cible ). Choisissez l’option Copier : Un ensemble de stratégies de fertilisation (+
+apports) et sélectionnez l’ITK qui recevra cette ensemble de stratégie(s) ( ITK cible ).
+Pour finir, cliquez sur Copier l'ensemble de stratégies sélectionné .
+
+
+4.8.4 Copier une stratégie de fertilisation (+ apports)
+Cet outil permet de copier une stratégie de fertilisation contenus dans un ITK ainsi que ses
+apports.
+
+Choisissez l’espèce (culture) rattachée à l’ITK dont vous souhaitez copier une stratégie et
+ses apports (menu Espèce associée à l'ITK à copier ) ainsi que le terrain d’étude pour
+lequel l’ITK dont vous souhaitez copier les stratégies a été déclaré ( Territoire contenant
+l'ITK à copier ). Choisissez ensuite l’ITK contenant la stratégie et ses apports ( ITK à
+copier ou contenant l'opération à copier ).
+
+Maintenant, choisissez l’espèce à laquelle l’ITK qui recevra l’opération est associé ( Espèce
+cible ). Choisissez l’option Copier : Un ensemble de stratégies de fertilisation (+
+apports) et sélectionnez l’ITK qui recevra cette ensemble de stratégie(s) ( ITK cible ).
+Pour finir, cliquez sur Copier l'ensemble de stratégies sélectionné
+
+Maintenant, choisissez l’espèce à laquelle l’ITK qui recevra la stratégie et ses apports est
+associé ( Espèce cible ). Choisissez l’option Copier : Une stratégie de fertilisation
+(+ apports) , sélectionnez l’ITK qui recevra la stratégie et ses apports ( ITK cible ),
+sélectionnez la stratégie à copier ( Opération technique à copier ) puis définissez le nom
+de l’opération telle qu’il apparaitra dans l’ITK cible ( Nom de l'opération dans l'itk
+receveur ). Ensuite, définissez l’ordre de préférence pour cette stratégie ( Ordre de
+priorité de la stratégie dans son nouvel ITK ). Pour finir, cliquez sur Copier la
+stratégie sélectionnée .
+4.9 Modifier les critères de spatialisation ITK
+Les critères de spatialisation sont déclarés au moment de la création de l’ITK. Dans le cas
+d’un ITK créé à partir de l’outil de copie, ces critères sont vides et peuvent être modifiés ici.
+
+Choisissez l’ITK dont vous voulez modifier les critères ( ITK à modifier ) puis modifier les
+critères de spatialisation en cochant/décochant les cases correspondantes. Vous pouvez
+également modifier l’espèce rattachée à cet ITK par l’intermédiaire du menu déroulant
+Espèce .
+
+Pour finaliser l’opération, cliquez sur Enregistrer les modifications .
+
+
+4.10 Modifier une opération technique
+Note : Pour modifier une stratégie de fertilisation ou un apport, veuillez vous reporter à la
+section “Modifier des stratégies de fertilisation ou des apports”.
+
+Cet outil permet de modifier le détail des opérations techniques. Choisissez l’ITK dans
+lequel se trouve l’opération que vous souhaitez modifier ( ITK concerné ) puis sélectionnez
+l’opération à modifier ( Opération technique à modifier ). A partir de là, l’outil se
+présente de la même manière que l’outil de déclaration d’une opération technique (voir
+section “Ajouter une opération technique”).
+
+
+4.11 Afficher un ITK
+Cet outil permet d’afficher une frise chronologique représentant les différentes opérations
+techniques contenues dans un ITK. Vous pouvez notamment vérifier la cohérence de
+l’enchainement des opérations techniques.
+
+Note : Les données sont affichées sur une année unique, aux dates que vous avez déclarées
+en jour julien. Une opération déclarée pour le mois de novembre apparaitra donc après
+une opération déclarée pour le mois de février. Ce cas de figure peut par exemple
+apparaitre pour les cultures d’hiver. Le semis (autonomne) apparaitra après la récolte (été).
+Cela est tout à fait normal et ne posera pas de problème lors des simulations MAELIA.
+
+
+4.12 Supprimer un ITK, une OT ou une stratégie
+ATTENTION : les opérations décrites dans cette section sont irréversibles.
+
+
+4.12.1 Supprimer un itinéraire technique
+Cet outil permet de supprimer un ITK rattaché à votre terrain d’étude.
+
+Pour supprimer un ITK, sélectionnez l’ITK ( ITK à supprimer ), puis cliquez sur Supprimer
+l'ITK sélectionné pour finaliser l’opération de suppression.
+
+Une boite de dialogue s’affiche pour confirmer la suppression.
+
+
+4.12.2 Supprimer une opération technique
+Cet outil permet de supprimer une opération technique contenue dans ITK rattaché à votre
+terrain d’étude.
+
+Pour supprimer une opération, sélectionnez l’ITK contenant l’opération technique à
+supprimer ( ITK contenant l'opération technique à supprimer ), sélectionnez
+l’opération à supprimer ( Opération technique à supprimer ), puis cliquez sur Supprimer
+l'opération sélectionnée pour finaliser l’opération de suppression.
+
+Une boite de dialogue s’affiche pour confirmer la suppression.
+
+
+4.12.3 Supprimer une stratégie alternative
+Cet outil permet de supprimer une stratégie de fertilisation et les apports qui y sont
+rattachés.
+
+Pour supprimer une stratégie de fertilisation, sélectionnez l’ITK contenant la stratégie à
+supprimer ( ITK contenant la stratégie à supprimer ), sélectionnez la stratégie à
+supprimer ( Stratégie à supprimer ), puis cliquez sur Supprimer la stratégie
+sélectionnée pour finaliser l’opération de suppression.
+
+Une boite de dialogue s’affiche pour confirmer la suppression.
+
+
+4.13 Téléchargement des règles de décision
+Une fois les ITK déclarés, vous pouvez télécharger les fichiers de règles de décision
+( reglesDeDecisions.csv et reglesDeDecisions_fertilisation.csv ) correspondant afin
+les intégrer à votre dossier de données d’entrée pour MAELIA (appelé “includes” dans ce
+document).
+
+Pour télécharger ces deux fichiers, cliquez sur les boutons correspondant.
+
+    Si le téléchargement est correctement réalisé, vous obtiendez le message suivant : “Le
+    fichier […] a bien été téléchargé.”. Le fichier sera téléchargé dans votre dossier
+    habituel contenant les fichers téléchargés.
+
+    Si vous n’obtenez pas de message de confirmation de téléchargement, c’est que la
+    tentative de construction du fichier à échouer. Certains ITK posent probablement
+    problème. L’erreur la plus courante est un apport non renseigné dans une stratégie de
+    fertilisation. Si après vérification des ITK l’erreur persiste, contactez Renaud.
+
+
+4.14 Contrôle de cohérence
+
+4.15 Chargement du dossier d’includes
+Le dossier d’includes doit être uploadé en format “.zip”. Pour cela, cliquez avec le bouton
+droit sur le dossier contenant vos includes, sélectionnez “Envoyer vers”, puis sélectionnez
+“Dossier compressé”.
+La taille du fichier zippé ne doit pas excéder 30 Mo. Si la taille du fichier est trop élevée, le
+message d’erreur suivant s’affichera : “Maximum upload size exceeded”. Dans ce cas,
+vérifiez que votre dossier ne contient QUE des données includes. Si la taille du fichier est
+toujours trop élevée après vérification, contactez Renaud.
+
+
+4.16 Terminologie du contrôle de cohérence
+     OK = La coherence est verifiee
+
+     ATTENTION = Une incoherence existe mais ne causera pas forcement de bug dans
+     MAELIA Cela signifie que l’incohérence identifiée pourrait passer inappercu dans une
+     simulation MAELIA. Cela ne posera pas forcément de problème dans les résultats mais
+     pourrait en poser. Si une telle incohérence est identifiée, essayez de comprendre
+     pourquoi elle apparait. Si vous considérez que cela ne posera pas de problème, vous
+     pouvez procéder à vos simulations.
+
+     ERREUR = Une incoherence existe et provoquera un bug dans MAELIA Cela signifie
+     qu’une incohérence critique a été identifiée. Celle-ci est à corriger impérativement si
+     vous souhaitez que votre simulation se déroule sans bug bloquant.
+
+Dans le cas où vous auriez un message [ERREUR] ou [ATTENTION] que vous ne
+comprendriez pas, reportez-vous à la / aux section(s) faisant référence aux fichiers
+concernés pour plus de détail.
+
+
+4.17 Eléments d’accompagnement à la correction
+des fichiers
+Localisation des fichiers : La localisation attendue des différents fichiers composants votre
+répertoire includes est décrite dans les sections suivantes. Le chemin d’accès est donné de
+la façon suivante ./modeleAgricole/agriculteurs/materiel.csv . Le . représente le
+dossier racine de votre dossier d’includes. modeleAgricole et agriculteurs sotn deux
+sous-dossiers imbriqués et le fichier pointé correspond ici à materiel.csv .
+Les différents fichiers doivent impérativement être localisés au bon endroit pour que le
+test puisse être réalisé. Si vous obtenez le message suivant “[ERREUR] Le fichier
+‘materiel.csv’ n’existe pas dans ‘./modeleAgricole/agriculteurs/’”, cela signifie que le fichier
+recherché n’a pas été trouvé. Vérifiez que le fichier (et l’ensemble des fichiers associés dans
+le cas d’un fichier “.shp”) est localisé au bon endroit et a le bon nom.
+
+Décimales :
+
+     Les décimales sont toujours des « . ».
+
+     Eviter de modifier les documents csv avec Excel. Préférez R ou bloc-notes. Si vous
+     modifier un fichier csv sous Excel, faites attention que Excel n’ait pas changé le
+     séparateur lors de l’enregistrement.
+
+
+4.17.1 Données météo
+Fichiers :
+
+     ./modeleCommun/meteo/polygoneMeteoFrance.shp (grille météo)
+
+     ./modeleCommun/meteo/observee/1980.csv (météo par année)
+
+A surveiller :
+
+     Les colonnes doivent être données en respectant l’ordre suivant :
+     ID_PDG;DATE;RRmm;Tmin;Tmax;ETP;RGI
+
+     Les noms des titres et des colonnes ne doivent pas contenir de guillemets
+
+     Le séparateur du fichier est un “;”
+
+     La colonne ID_PDG permet de faire le lien entre les fichiers années et les mailles
+     (polygones) de la grille climatique. Les valeurs des identifiants doivent être commune.
+     Dans l’exemple ci-dessus, les données dont la valeur de ID_PDG est 2590
+     correspondent à la maille 2590 sélectionnée dans la table attributaire de la couche
+     polygoneMeteoFrance.shp.
+4.17.2 Sols
+Fichier : ./modeleCommun/typesDeSol/typeDeSolParZH.shp
+
+A noter :
+
+     Les colonnes n’ont pas besoin de suivre un ordre défini
+
+     Certains champs sont obligatoires. La liste des champs obligatoire dépend de la
+     version de AqYield utilisée. Voici la liste des champs obligatoires selon la version de
+     AqYield :
+
+     AqYield : ARG1, CSTRU, DAH1, ID_SOL, ID_ZH, KSAT1, P1, PIRm, PRO_OC, RUPRH1,
+     STU_DOM, ZONE_PEDO, DAH_OC
+
+     AqYieldNC : ARG1, CSTRU, DAH1, ID_SOL, ID_ZH, KSAT1, P1, PIRm, PRO_OC, RUPRH1,
+     STU_DOM, ZONE_PEDO, CAL1, CN1, EG1, HCC1, HPFP1, MO1, SAB1
+
+A surveiller :
+
+     Le champ ID_SOL doit contenir des valeurs uniques. Il permettra aux ilots de
+     connaitre le sol auquel ils sont rattachés.
+
+     Certains champs sont nommés avec des chiffres correspondant aux horizons de sol
+     (par ex : ARG1, ARG2, ARG3, ARG4). Les champs P1, P2, P3 et P4 indiquent la
+     profondeur de chaque horizon. À titre d’exemple, par mesure de cohérence, si P4
+     existe, alors ARG4 doit exister. Cela ne provoque pas d’erreur, un contrôle de
+     cohérence doit être réalisé par l’utilisateur.
+
+
+4.17.3 Type d’exploitation
+Fichier : ./modeleAgricole/agriculteurs/exploitations.csv
+
+A noter :
+
+     Les valeurs du champ ID_EXPL sont uniques. Ce fichier doit contenir autant d’entrées
+     qu’il y a d’exploitants dans le terrain d’étude. Les numéros d’exploitants sont tirés du
+     fichier ilots.shp.
+
+A surveiller :
+
+     Le séparateur du fichier est un « ; »
+
+     Les valeurs du champ TYPE_EXPL doivent correspondre aux valeurs de l’entrée
+     TYPE_EXPL du fichier reglesDeDecisions.csv
+
+
+4.17.4 Matériel d’irrigation
+Fichier : ./modeleAgricole/agriculteurs/materiel.csv
+
+A noter :
+
+     La première ligne commence par un “;”
+
+A surveiller :
+
+     Le séparateur du fichier est un “;”
+
+     Les valeurs du champ sans nom (le premier champ) doivent correspondre aux valeurs
+     de l’entrée MATERIEL du fichier reglesDeDecisions.csv et aux valeurs du champ
+     MATERIEL du fichier ilots.csv (pour les ilots irrigués).
+
+     Dans le fichier reglesDeDecisions.csv, la materiel appellé “NA” signifie “non irrigué”.
+     Ce materiel est le seul qui n’a pas besoin de correspondance dans le fichier
+     materiel.csv
+
+
+4.17.5 Ilots
+Fichier : ./modeleAgricole/ilots/dansZone/ilots.shp
+
+A noter :
+
+     Chaque ilot doit être rattaché à un seul sol par l’intermédiaire du champs ID_SOL des
+     fichiers ilots.shp et TypeDeSolParZH.shp. Le champ ID_SOL de ilots.shp doit
+     correspondre à la valeur de l’ID_SOL renseigné dans le fichier TypeDeSolParZH.shp.
+     Plusieurs ilots peuvent être rattachés au même sol.
+
+A surveiller :
+
+     Les valeurs figurant dans le champ ID_SOL du fichier ilots.shp doivent exister dans le
+     champ ID_SOL du fichier TypeDeSolParZH.shp
+
+     Pour les ilots irrigués, les valeurs du champ MATERIEL du fichier ilots.shp doivent
+     exister dans le fichier materiel.csv
+
+
+4.17.6 Parcelles
+Fichier : ./modeleAgricole/ilots/dansZone/parcelles.shp
+
+A noter :
+
+     Une parcelle est rattachée à un ilot par l’intermédiaire du champ ID_ILOT. Pour qu’une
+     parcelle soit simulée, il est nécessaire que le champ ID_ILOT corresponde à un ilot qui
+     existe dans le fichier ilots.shp.
+
+     Pour l’instant, le module AqYieldNC ne peut pas simuler de prairie. Cela implique que
+     si ce module est utilisé, les séquences ne doivent pas contenir de prairies (« prairiep »
+     et « prairiet »).
+
+     Comme les autres cultures, l’ITK gel doit être associé à des sols, des types
+     d’exploitation, des précédents, etc
+
+A surveiller :
+
+     Les cultures figurant dans les séquences doivent exister dans le fichier
+     especesCultivees.csv ET dans l’entrée ID_ESPECE du fichier reglesDeDecisions.csv
+
+     Les séquences vides sont interdites
+
+
+4.17.7 Règles de décision classiques (non fertilisation)
+Fichier : ./modeleAgricole/cultures/reglesDeDecisions.csv
+
+A noter :
+
+     Une colonne décrit les caractéristiques d’un ITK. Chaque combinaison de critères de
+     spatialisation (espèce/précédent/type d’exploitation/sol) doit correspondre à un (et
+     un seul) ITK.
+
+     Le caractère « * » signifie « tous ». Par exemple, un ITK dont la valeur de l’entrée
+     ZONE_PEDO est « * » signifie que cet ITK vaut pour toutes les zones pédologiques.
+
+     Une sous-période est toujours composée d’une ou plusieurs dates de début ainsi que
+     d’une ou plusieurs dates de fin. Le nombre de dates de début et de fin doit être le
+     même. Par exemple :
+
+
+      Paramètre                             Valeurs exemples
+
+      Dates début                           80|105|130
+
+      Dates fin                             104|129|140
+
+     Les entrées contenant les motifs “AGRIW”, “OUTIL” et “PASSAGES” n’ont pour l’instant
+     aucun effet dans MAELIA. Elles peuvent figurer dans le fichier mais ne seront pas lues.
+     Elles peuvent ne pas figurer dans le fichier, cela ne posera pas de problème.
+
+     Les entrées du fichier reglesDeDecisions.csv commençant par « IS_ » sont utilisées par
+     MAELIA pour définir si l’opération technique existe pour l’ITK correspondant.
+
+     Le “gel” est géré comme les autres cultures. A ce titre, il doit figurer dans les
+     précédents possibles des autres cultures lorsque c’est pertinent. A noter qu’il ne peut
+     pas apparaitre dans les précédents possibles de toutes les cultures : comme pour les
+     autres cultures, il faut choisir quel ITK appliquer lorsque le précédent est un gel. Pour
+     rappel, il ne peut y avoir qu’un seul ITK correspondant à un ensemble de critères de
+     spatialisation donné.
+A surveiller :
+
+     Le séparateur du fichier est un “;”
+
+     Les séparateurs de sous-périodes sont des “|”
+
+     Les précédents (entrée « ID_PREC ») doivent correspondre à des espèces que l’on
+     retrouve dans le tableau especesCultivees.csv
+
+     Si une opération est composée de plusieurs sous-périodes, alors les règles de
+     déclenchement de l’opération doivent être définies explicitement pour chaque sous-
+     période. A noter que le travail du sol peut être donné qu’une seule fois (« W2 » au lieu
+     de « W2|W2 » dans l’exemple ci-dessus). Dans ce cas, la profondeur de travail du sol
+     sera la même quelle que soit la sous-période.
+
+     Certaines règles de déclenchement fonctionnent par couple. Si pour une opération
+     technique, une des règles contient une valeur, l’autre règle doit obligatoirement
+     contenir une valeur. Voici la liste exhaustive de ces couples (une ligne correspond à un
+     couple) :
+
+
+ PREPA_JOURS_PLUIE                         PREPA_HAUTEURS_PLUIE_MAX
+
+ PREPA_TEMPERATURE_MIN                     PREPA_JOURS_TEMP_MIN
+
+ PREPA_TEMPERATURE_MAX                     PREPA_JOURS_TEMP_MAX
+
+ PREPA_TEMPERATURE_MAX_INF                 PREPA_JOURS_TEMP_MAX_INF
+
+ REPRISE_JOURS_P-ETP_MIN                   REPRISE_P-ETP_MIN
+
+ REPRISE_JOURS_PLUIE                       REPRISE_HAUTEURS_PLUIE_MAX
+
+ REPRISE_TEMPERATURE_MIN                   REPRISE_JOURS_TEMP_MIN
+
+ REPRISE_TEMPERATURE_MAX                   REPRISE_JOURS_TEMP_MAX
+REPRISE_TEMPERATURE_MAX_INF      REPRISE_JOURS_TEMP_MAX_INF
+
+REPRISE_TEMPERATURE_MIN          REPRISE_JOURS_TEMP_MIN
+
+REPRISE_TEMPERATURE_MAX          REPRISE_JOURS_TEMPERATURE_MAX
+
+REPRISE_TEMPERATURE_MAX_INF      REPRISE_JOURS_TEMP_MAX_INF
+
+SEMIS_JOURS_PLUIE                SEMIS_HAUTEURS_PLUIE_MAX
+
+SEMIS_TEMPERATURE_MIN            SEMIS_JOURS_TEMP_MIN
+
+SEMIS_TEMPERATURE_MAX            SEMIS_JOURS_TEMP_MAX
+
+SEMIS_TEMPERATURE_MAX_INF        SEMIS_JOURS_TEMP_MAX_INF
+
+BINAGE_TEMPERATURE_MIN           BINAGE_JOURS_TEMP_MIN
+
+BINAGE_TEMPERATURE_MAX           BINAGE_JOURS_TEMP_MAX
+
+BINAGE_TEMPERATURE_MAX_INF       BINAGE_JOURS_TEMP_MAX_INF
+
+RECOLTE_JOURS_PLUIE              ECOLTE_HAUTEURS_PLUIE_MAX
+
+RECOLTE_TEMPERATURE_MIN          RECOLTE_JOURS_TEMP_MIN
+
+RECOLTE_TEMPERATURE_MAX          RECOLTE_JOURS_TEMP_MAX
+
+RECOLTE_TEMPERATURE_MAX_INF      RECOLTE_JOURS_TEMP_MAX_INF
+
+IRRIGATION_JOURS_PLUIE_CUMUL     IRRIGATION_HAUTEUR_PLUIE_CUMUL_ANNULATION
+
+IRRIGATION_JOURS_PLUIE_SIGNIF    IRRIGATION_HAUTEUR_PLUIE_SIGNIF_REPORT
+
+IRRIGATION_JOURS_PLUIE_PREVUES   IRRIGATION_HAUTEURS_PLUIE_PREVUES
+
+IRRIGATION_JOURS_P-ETP_MAX       IRRIGATION_P-ETP_MAX
+ IRRIGATION_TEMPERATURE_MIN                IRRIGATION_JOURS_TEMP_MIN
+
+ IRRIGATION_TEMPERATURE_MAX                IRRIGATION_JOURS_TEMP_MAX
+
+ IRRIGATION_TEMPERATURE_MAX_INF            IRRIGATION_JOURS_TEMP_MAX_INF
+
+ FERTI_JOURS_PLUIE_OBS_MIN                 FERTI_HAUTEURS_PLUIE_OBS_MIN
+
+ FERTI_TEMPERATURE_MIN                     FERTI_JOURS_TEMP_MIN
+
+ FERTI_TEMPERATURE_MAX                     FERTI_JOURS_TEMP_MAX
+
+ FERTI_TEMPERATURE_MAX_INF                 FERTI_JOURS_TEMP_MAX_INF
+
+ PHYTO_JOURS_PLUIE_OBS_MIN                 PHYTO_HAUTEURS_PLUIE_OBS_MIN
+
+ PHYTO_JOURS_PLUIE_PREVUES_MIN             PHYTO_HAUTEURS_PLUIE_PREVUES_MIN
+
+ PHYTO_TEMPERATURE_MIN                     PHYTO_JOURS_TEMP_MIN
+
+ PHYTO_TEMPERATURE_MAX                     PHYTO_JOURS_TEMP_MAX
+
+ PHYTO_TEMPERATURE_MAX_INF                 PHYTO_JOURS_TEMP_MAX_INF
+
+ PHYTO_JOURS_HYGROMETERIE                  PHYTO_HYGROMETERIE
+
+
+4.17.8 Règles de décision de fertilisation
+Fichier : ./modeleAgricole/cultures/reglesDeDecisions_fertilisation.csv
+
+A noter :
+
+     Une colonne décrit les caractéristiques d’un apport. Il peut y avoir un ou plusieurs
+     apports par alternative de fertilisation et une ou plusieurs alternatives de fertilisation
+     par ITK.
+Une sous-période est toujours composée d’une ou plusieurs dates de début ainsi que
+d’une ou plusieurs dates de fin. Le nombre de dates de début et de fin doit être le
+même. Par exemple :
+
+
+ Paramètre                           Valeurs exemples
+
+ Dates début                         80|105|130
+
+ Dates fin                           104|129|140
+
+Les entrées contenant les motifs “AGRIW”, “OUTIL”, “OT_SIMULTANEE” et “PASSAGES”
+n’ont pour l’instant aucun effet dans MAELIA.
+
+Pour l’instant, les seules règles de déclenchement d’opération de fertilisation lues par
+MAELIA sont les suivantes :
+
+     FERTIALT_HUM_MAX_SOL
+
+     FERTIALT_N_J_CUMUL_PLUIE / FERTIALT_CUMUL_PLUIE
+
+     FERTIALT_SEUIL_VEGE
+
+Certaines règles de déclenchement fonctionnent par couple. Si pour une opération
+technique, une des règles contient une valeur, l’autre règle doit obligatoirement
+contenir une valeur. Voici la liste exhaustive de ces couples (une ligne correspond à un
+couple) :
+
+
+ FERTIALT_N_J_CUMUL_PLUIE                          FERTIALT_CUMUL_PLUIE
+
+ FERTIALT_N_J_CUMUL_PLUIE_EVA                      FERTIALT_CUMUL_PLUIE_EVA
+
+ FERTIALT_N_J_CUMUL_TEMP_MIN                       FERTIALT_TEMP_MIN
+
+ FERTIALT_N_J_CUMUL_TEMP_MAX                       FERTIALT_TEMP_MAX
+      FERTIALT_N_J_CUMUL_TEMP_MAX_INF                   FERTIALT_TEMP_MAX_INF
+
+      FERTIALT_SEUIL_VEGE_PRE                           FERTIALT_SEUIL_VEGE_POST
+
+      FERTIALT_N_J_CUMUL_PLUIE_PREVUE                   FERTIALT_CUMUL_PLUIE_PREVUE
+
+      FERTIALT_N_J_CUMUL_HYGROMETRIE_MIN                FERTIALT_HYGROMETRIE_MIN
+
+     Les temps de retour associés aux fertilisants organiques sont pour l’instant indiqués
+     en dur dans le code de MAELIA (ligne 290 de parcelleAqYieldNC.gaml). [C’est à
+     modifier, ils apparaitront prochainement dans le fichier exploitations.]
+
+A surveiller :
+
+     Le séparateur du fichier est un “;”
+
+     Les séparateurs de sous-périodes sont des “|”
+
+     Les ordres des alternatives (FERTIALT_ORDRE_ALTERNATIVE) et les ordres des apports
+     (FERTIALT_ORDRE_APPORT) doivent être vérifiés.
+
+     Les noms des produits (FERTIALT_NOM_PRODUIT) doivent correspondre à des noms
+     de produits figurant dans le tableau engrais.csv. Cela vaut également pour les engrais
+     minéraux.
+
+     Les quantités de N, de P et de K doivent être calculées (kg d’élément/ha pour les
+     engrais minéraux) et reportées dans les entrées correspondantes (FERTIALT_DOSE,
+     FERTIALT_DOSE_P et FERTIALT_DOSE_K). Les quantités apportées pour une
+     fertilisation organique doivent être renseignées en tonne de matière brute/ha dans
+     l’entrée FERTIALT_DOSE. [modification à venir pour séparer les quantités minérales
+     des quantités organiques]
+
+     Dans le tableau engrais.csv, les quantités disponibles (QuantiteDispoAnnuelleT)
+     associées aux produits utilisés dans les ITK doivent être vérifiées. Si ces quantités sont
+     à 0, les opérations de fertilisation utilisant ce produit ne seront pas réalisées. Pour une
+     quantité infinie (par ex : engrais minéraux) mettre “1000000000”.
+
+     Si une opération est composée de plusieurs sous-périodes, alors les règles de
+     déclenchement de l’opération (ainsi que les profondeurs de travail du sol si besoin)
+     doivent être définies explicitement pour chaque sous-période (cf. ci-dessus, même
+     remarque que pour les règles de décision classiques).
+
+
+4.17.9 Espèces
+Fichier : ./modeleAgricole/cultures/especesCultivees
+
+A noter :
+
+     Les rendements optimaux associés à chaque culture sont à adapter au terrain d’étude
+     (obligatoire !)
+
+
+4.18 Modification des séquences de culture
+
+4.18.1 Introduction
+Les séquences de culture (SDC) peuvent être modifiées dans le cadre de la préparation des
+données d’entrée de MAELIA ainsi que dans l’optique de construire des scénarios de
+simulation. Les fonctions permettant de réaliser les opérations de modification des
+séquences sont décrites dans cette section. Chaque section correspond à une fonction.
+
+Pour utiliser ces fonctions, collez l’instruction suivante au début de votre script :
+
+ source("http://www.misslin.com/renaud/maelia/fonctions_pretraitements_sequenc
+
+                                                                                            
+
+A noter : cette solution d’hébergement est temporaire, votre script devra donc être modifié
+le jour où une solution pérenne sera mise en place.
+La plupart des fonctions nécessitent le chargement d’un shp contenant les parcelles et
+leurs attributs. Les instructions suivantes permettent de charger le fichier en début de
+script puis, une fois modifié, de le réécrire en fin de script.
+
+ library(rgdal)
+ parcelles <- readOGR(dsn = "C:/../..", layer="parcelles") # Lecture du fichie
+ writeOGR(parcelles_modifiees, "C:/../..", layer="parcelles", driver = "ESRI S
+
+                                                                                           
+
+Certaines fonctions demandent des arguments de type data.frame contenant les
+informations décrivant les modifications à réaliser sur les séquences. Ces tableaux peuvent
+être déclarés sous la forme de csv. L’important est de respecter les noms de colonnes et les
+formats de données attendus (donnés en description des fonctions). Des exemples de
+tableaux peuvent être téléchargés dans les descriptions associées à chaque fonction. De
+façon générale, il est largement préférable de créer et manipuler ces petits tableaux à
+partir du logiciel Bloc-notes plutôt que sur Excel. L’exemple ci-dessous permet de charger
+un tableau tels que ceux fournis en guise d’exemples :
+
+ df_remplacement_seq_monoculture <- read.csv("C:/../../remplacement_seq_monocu
+
+                                                                                           
+
+Les variables données en argument des fonctions doivent correspondre aux types attendus
+par la fonction. Ceux-ci sont donnés entre []. Pour connaitre le type d’une variable déjà
+déclarée, vous pouvez utiliser l’instruction typeof() :
+
+ ma_premiere_variable <- 0.5
+ typeof(ma_premiere_variable) # "double"
+ ma_deuxieme_variable <- "0.5"
+ typeof(ma_deuxieme_variable) # "character"
+
+
+###Calcul de la part de surface occupée par les cultures d’un terrain
+
+Nom : part_surfcult_sdc(df, cname_sdc, cname_surf, sep_sdc)
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Calcul de la part de surface occupée par chaque culture dans un terrain.
+
+Arguments et données en entrée :
+
+    df –> [list] variable de type data.frame contenant les séquences à analyser
+    cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+    cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+    sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+    données MAELIA)
+
+Données en sortie : data.frame contenant les parts (%) d’occupation moyenne annuelles
+de chaque culture.
+
+Description : Les séquences sont parcourues les unes à la suite des autres. Si toutes les
+séquences n’ont pas la même taille, une première étape consiste à les rendre comprables :
+on construit des séquences de la même taille pour chaque parcelle (cela peut
+éventuellement conduire à composer des séquences très longues). Une seconde étape
+consiste à cumuler les surfaces occupée par les cultures : dans chaque séquence, pour
+chaque culture rencontrée on additionne la surface de la parcelle en cours de traitement à
+un total de surface par culture. La troisième et dernière étape consiste à calculer des
+pourcentages d’occupation sur la base du total de surfaces accumulées. Ce total devrait
+correspondre à la superficie du terrain multipliée par le nombre de cultures composant les
+séquences.
+
+Attention :
+
+    Cette fonction n’est pas forcément adaptée dans le cas où certaines séquences
+    comporteraient plusieurs cultures par an (par exemple, des couverts intermédiaires).
+    L’exécution de la fonction peut être très longue si toutes les séquences n’ont pas la
+    même longueur
+
+###Calcul de la part de séquence contenant une culture
+
+Nom : part_1culture_dans_seq(df_parcelles, cname_sdc, cname_surf, sep_sdc,
+culture_a_chercher, seuil_pourcentage)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Calcul de la part de séquence contenant une part donnée d’une culture donnée.
+Cette fonction peut notamment être utilisée pour calculer la part de monocultures (et
+semi-monocultures si besoin) d’une culture spécifique dans un terrain d’étude
+
+Arguments et données en entrée :
+
+    df_parcelles –> [list] variable de type data.frame contenant les séquences à analyser
+    cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+    cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+    sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+    données MAELIA)
+    culture_a_chercher –> [character] Culture d’intérêt composant la monoculture ou la
+    semi-monoculture (exemple : “maisT”)
+    seuil_pourcentage –> [double] Seuil (entre 0 et 1) définissant ce qu’est une semi-
+    monoculture dans le cas présent (exemple : 0.75 pour “si une séquence contient plus
+    de 75 % de”maisT”, il s’agit d’une semi-monoculture de “maisT”)
+
+Données en sortie : nombre décimal représentant le pourcentage de séquences
+comportant la caractéristique recherchée
+Description : Les séquences sont inspectées les unes à la suite des autres. Pour chaque
+séquence, on détermine si oui ou non il s’agit d’une monoculture ou une semi-
+monoculture d’après les caractéristiques renseignées en argument de la fonction. En
+sortie, le résultat obtenu est un pourcentage de séquences correspondant aux
+caractéristiques données par l’utilisateur.
+
+Attention :
+
+     Le résultat est un pourcentage du nombre total de séquences de culture explorées et
+     non de la surface analysée.
+
+###Suppression de parcelles selon les cultures qu’elles contiennent
+
+Nom : suppr_cult_parc(parc, cname_sdc, cname_surf, sep_sdc, cult_parcSuppr, seuil)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Supression parcelles dont la séquence est composée de plus de x % d’une
+culture donnée.
+
+Arguments et données en entrée :
+
+     parc –> [S4] fichier contenant les parcelles (shp)
+     cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+     cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+     sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+     données MAELIA)
+     cult_parcSuppr –> [character] Culture à chercher dans chaque séquence
+     seuil –> [double] Seuil de présence d’une culture à partir duquel la parcelle est
+     totalement supprimée
+Données en sortie : fichier de parcelle modifié
+
+Description : Cette fonction permet de supprimer les parcelles dont la séquence est
+composée de plus de x % d’une culture donnée.
+
+###Suppression de certaines culture dans les séquences
+
+Nom : suppr_cult(parc, cname_sdc, cname_surf, sep_sdc, cult_suppr)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif :
+
+Arguments et données en entrée :
+
+    parc –> [S4] fichier contenant les parcelles (shp)
+    cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+    cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+    sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+    données MAELIA)
+    cult_suppr –> [character] culture à supprimer des séquences
+
+Données en sortie : fichier de parcelle modifié
+
+Description : Suppression d’une culture donnée dans les séquences d’un terrain
+
+Attention :
+
+    Certaines séquences peuvent devenir vides dans le cas où toutes les cultures de la
+    séquences auraient été supprimées
+###Insertion de cultures dans les séquences
+
+Nom : insertion_culture(parc, cname_sdc, cname_surf, sep_sdc, insertion_cult)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Insertion d’une culture entre un précédent et un suivant donnés.
+
+Arguments et données en entrée :
+
+    parc –> [S4] fichier contenant les parcelles (shp)
+    cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+    cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+    sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+    données MAELIA)
+    insertion_cult –> [list] Tableau décrivant les règles d’insertion de culture (exemple)
+
+Données en sortie : fichier de parcelle modifié
+
+Description : Cette fonction permet d’insérer des cultures avant, après ou entre des
+cultures données. Le tableau insertion_cult doit comporter les colonnes suivantes :
+
+    precedent [optionnel si suivant renseigné]: culture après laquelle la culture à insérer
+    est insérée
+    culture : nom de la culture à insérer
+    suivant [optionnel si précédent renseigné] : culture avant laquelle la culture à insérer
+    est insérée
+    cult_monoculture : culture composant la monoculture ou semi-monoculture au sein
+    de laquelle la culture à insérer est insérée
+    seuil_semimonoculture : seuil de présence de la culture donnée dans
+    “cult_monoculture” à partir duquel la séquence est considérée comme une semi-
+    monoculture
+
+Exemple de tableau ‘insertion_cult’ :
+
+Le tableau exemple comporte deux règles d’insertion de cultures dans les séquences. La
+première règle permet d’insérer des “ciVesce” avant les “maisT” pour des séquences
+comportant au moins 75 % de “maisT”. La deuxième règle permet d’insérer des
+“ciFeverole” après les “ble” pour des séquences comportant au moins 75 % de “ble”.
+
+###Changement intégrale de séquences spécifiques
+
+Nom : changement_integral_seq(parc, cname_sdc, cname_surf, sep_sdc,
+remplacement_seq_monoculture, insertion_cult_subseq=NULL)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Identification et remplacement d’une monoculture par une séquence donnée.
+
+Arguments et données en entrée :
+
+    parc –> [S4] fichier contenant les parcelles (shp)
+    cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+    cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+    sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+    données MAELIA)
+    remplacement_seq_monoculture –> [list] Tableau décrivant les règles de
+    remplacement intégrale de séquences spécifiques (exemple)
+     insertion_cult_subseq –> [list, optionnel] Tableau décrivant les règles d’insertion de
+     culture (exemple)
+
+Données en sortie :
+
+fichier de parcelle modifié
+
+Description :
+
+Exemple de tableau ‘remplacement_seq_monoculture’ :
+
+Le tableau exemple comporte une règle de remplacement des séquences. Celle-ci permet
+de remplacer les séquences comportant 100 % de “maisT” (valeur “1” dans la colonne
+“seuil_semimonoculture”) par une séquence “maisDP_orge_soja”. A noter que cette règle
+comporte une information “TRUE” dans la colonne “activer_insertion_culture”, ce qui a
+pour effet d’appeler la fonction d’insertion de culture entre un précédent et un suivant
+donné. Le tableau à fournir pour réaliser cette modification est construit de la même façon
+que pour la fonction insertion_culture() décrite précédemment.
+
+###Remplacement de sous-séquences (composées de deux cultures aux max.) par de
+nouvelles sous-séquences
+
+Nom : changement_subseq_deuxCult(parc, cname_sdc, cname_surf, sep_sdc,
+remplacement_subseq, insertion_cult_subseq=NULL)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Permet de remplacer des sous-séquences (composées de deux cultures aux
+max.) par de nouvelles sous-séquences composées d’autant de cultures que nécessaire.
+
+Arguments et données en entrée :
+     parc –> [S4] fichier contenant les parcelles (shp)
+     cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+     cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+     sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+     données MAELIA)
+     remplacement_subseq –> [list] Tableau décrivant les règles de remplacement de sous
+     séquences (exemple)
+     insertion_cult_subseq –> [list, optionnel] Tableau décrivant les règles d’insertion de
+     culture (exemple)
+
+Données en sortie :
+
+fichier de parcelle modifié
+
+Description :
+
+Exemple de tableau ‘remplacement_subseq’ :
+
+Le tableau exemple comporte deux règles d’insertion de cultures dans les séquences. La
+première règle permet de remplacer les sous-séquences “maisT_maisT” par des sous-
+séquences “maisDP_orge_soja” pour les séquences comportant au moins 75 % de “maisT”.
+Il est également préciser dans cette règle qu’aucun couvert n’est inséré (valeur “FALSE”
+dans la colonne “activer_insertion_culture”). La deuxième règle permet de remplacer les
+sous-séquences “maisT” restantes (non remplacées par la première règle) par des sous-
+séquences “maisDP” pour les séquences comportant au moins 75 % de “maisT”. A noter
+que cette deuxième règle comporte une information “TRUE” dans la colonne
+“activer_insertion_culture”, ce qui a pour effet d’appeler la fonction d’insertion de culture
+entre un précédent et un suivant donné. Le tableau à fournir pour réaliser cette
+modification est construit de la même façon que pour la fonction insertion_culture()
+décrite précédemment.
+
+Attention :
+
+     Les séquences à remplacer peuvent être composées d’autant de culture que
+     nécessaires (une, deux ou plus)
+    Les séquences de remplacement doivent être composées d’une culture au minimum
+    et de deux cultures au maximum.
+
+###Définition des séquences exportation / restitution
+
+Nom : def_exp_rest_selon_cultures(parc, cname_sdc, cname_surf, sep_sdc,
+def_exp_rest_cult)
+
+Auteur : Renaud Misslin
+
+Employeur : MAELAB
+
+Date de création : 15/07/2022
+
+Date de modification : 15/07/2022
+
+Objectif : Redéfini intégralement les séquences exportation / restitution
+
+Arguments et données en entrée :
+
+    parc –> [S4] fichier contenant les parcelles (shp)
+    cname_sdc –> [character] nom de la colonne contenant les séquences à analyser
+    cname_surf –> [character] nom de la colonne contenant les surfaces des parcelles
+    sep_sdc –> [character] séparateur des séquences (habituellement “_” pour les
+    données MAELIA)
+    def_exp_rest_cult –> [list] tableau décrivant les cultures à exporter
+
+Données en sortie : fichier de parcelle modifié
+
+Description : Après avoir fait des modifications sur les séquences de culture, si vous
+n’utilisez le module NC sans le module filière, vous pourriez avoir besoin de définir quelles
+cultures doivent être exportées et quelles cultures doivent être restituées. Cette fonction
+de changer le caractère exportation / restitution de cultures données avec une probabilité
+données. Le tableau exemple comporte une seule règle. Elle permet d’associer la
+caractéristique “exportation” aux cultures appellées “CP-presse” avec une probabilité de
+100 %.
+Attention :
+
+    Si une culture ne figure pas dans le tableau, on lui attribue par défaut la
+    caractéristiques “restitution”
+    Les séquences exportation / restitution doivent avoir exactement le même nombre de
+    composants que les séquences culturales auxquelles elles sont associées. Cela
+    implique qu’il est très important d’appliquer la fonction présente si vous avez
+    modifier le contenu et la taille des séquences.
+
+###Cas d’application : exemple d’utilisation combinée des fonctions présentées ci-dessus
+
+Dans cet exemple, nous souhaitons changer les séquences associées aux parcelles d’un
+terrain dans le but de réaliser des simulations MAELIA mobilisant le module NC sans le
+module filière. Voici les modifications que nous souhaitons réaliser :
+
+    Les monocultures de “maisT” (100 % de maisT) doivent être remplacées par des
+    séquences “maisDP_orge_soja”
+    Les sous-séquences “maisT_maisT” des semi-monocultures de “maisT” contenant au
+    moins 75 % de “maisT” doivent être remplacées par la sous-séquence suivante
+    “maisDP_orge_soja”
+    Les sous-séquences “maisT” des semi-monocultures de “maisT” contenant au moins
+    75 % de “maisT” doivent être remplacées par la sous-séquence suivante “maisDP”
+    Une fois ces modifications réalisées, nous souhaitons insérer des couverts
+    intermédiaires “ciVesce” avant les “maisDP”
+    Enfin, étant donné que nous utilisons le module NC sans le module filière il est
+    nécessaire de modifier les séquences exportation / restitution pour les rendre
+    cohérentes avec les modifications réalisés sur les séquences. La règle a appliquer
+    consiste à exporter l’intégralité des résidus de culture associés à la culture “CP-
+    presse”
+
+Le script ci-dessous permet d’appliquer ces cinq modifications. L’application des fonctions
+nécessite plusieurs fichiers que vous retrouverez ici : Télécharger exemples.
+source("http://www.misslin.com/renaud/maelia/fonctions_pretraitements_sequenc
+
+library(rgdal)
+parcelles <- readOGR(dsn = "C:/../..", layer="parcelles") # Lecture du fichie
+
+# ETAPE 1 : Modification des monocultures de maisT
+df_remplacement_seq_monoculture <- read.csv("C:/../../remplacement_seq_monocu
+df_insertion_cult <- read.csv("C:/../../insertion_ciVesce_avantMaisDP.csv", h
+nouvelles_parcelles <- changement_integral_seq(parcelles, 'SEQUENCE', 'SURFAC
+
+# ETAPE 2 : Modification des couples maisT_maisT sur les semi-monoculture et
+df_remplacement_subseq <- read.csv("C:/../../remplacement_subseq - maisT_mais
+df_insertion_cult <- read.csv("C:/../../insertion_ciVesce_avantMaisDP.csv", h
+nouvelles_parcelles <- changement_subseq_deuxCult(nouvelles_parcelles, 'SEQUE
+
+# ETAPE 3 : Redéfinition des séquence exportation / restitution
+df_def_exp_rest_cult <- read.csv("C:/../../def_exp_rest_cult.csv", header = T
+nouvelles_parcelles <- def_exp_rest_selon_cultures(nouvelles_parcelles, 'SEQU
+
+# ETAPE 4 : Ecriture des fichiers
+writeOGR(nouvelles_parcelles, "C:/../..", layer="parcelles_modifiees", driver
+View(nouvelles_parcelles@data) # Affichage de la table attributaire pour véri
+
+                                                                         
+

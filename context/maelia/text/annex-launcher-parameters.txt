@@ -1,0 +1,248 @@
+Appendices > Annexe: paramètres du lanceur
+
+Annexe: paramètres du lanceur
+Paramètres généraux
+
+        paramètre                  exemple        description
+
+       nomTerritoire              AveyronRef      nom du territoire à simuler
+
+   anneeDebutSimulation              2008         année de début de simulation.⚠ attention la
+                                                  première année de simulation commence en août
+                                                  afin d'avoir un assolement cohérent à partir de la
+                                                  deuxième année
+
+    nbAnneesSimulation                 8          nombre d'années à simuler
+
+     simulationSurZH                FALSE         TRUE: permet de ne simuler qu'un sous-ensemble
+                                                  de Bve listés dans le paramètre suivant FALSE:
+                                                  simulation sur le terrain entier
+
+       idZHASimuler               ['230','540']   si simulationSurZH=TRUE: liste des identifiants de
+                                                  Bve à simuler, doivent correspondre à des valeurs
+                                                  du champ ID_ZH du shapefile ZH.shp
+
+executerSurEnsembleExploit           TRUE         TRUE: permet de ne simuler qu'un ensemble
+                                                  d'exploitations identifiées par le paramètre suivant
+                                                  FALSE: simulation sur le terrain entier
+
+ listIdExploitationAexecuter ['expl_13','expl_15'] si simulationSurExploitation=TRUE: identifiants des
+                                                   exploitations à simuler, doit correspondre à des
+                                                   valeurs du champ ID_EXPL du shapefile ilots.shp
+
+   simulationSurParcelle             TRUE         TRUE: permet de ne simuler qu'une parcelle
+                                                  identifiée par le paramètre suivant FALSE:
+                                                  simulation sur le terrain entier
+
+     idParcelleASimuler        '081-5576417_01' si simulationSurParcelle=TRUE: identifiant de la
+                                                parcelle à simuler, doit correspondre à une valeur
+       paramètre               exemple       description
+                                             du champ ID_PARCELL du shapefile parcelles.shp
+
+ nomScenarioClimatique         'rcp2.6'      nom du scénario climatique pour les données
+                                             météo projetées qui doivent se trouver dans
+                                             /modeleCommun/simulee/nomScenarioClimatique
+                                             si absent: on considère les données météos
+                                             observées qui doivent se trouver dans
+                                             /modeleCommun/meteo/observee
+
+utiliserMemeMeteoPartout        FALSE        TRUE:utilise les mêmes données météo sur
+                                             l'ensemble du terrain
+
+   idPointMeteoUnique           '3115'       si utiliserMemeMeteoPartout=TRUE, identifiant du
+                                             polygone météo à considérer, doit correspondre à
+                                             une valeur de ID_PGD du shapefile
+                                             polygonesMeteoFrance.shp
+
+      modeVerbeux               TRUE         TRUE: affiche des informations complémentaires
+                                             dans la console au cours de la simulation
+
+
+
+
+Paramètres du module hydrologique
+
+         paramètre                        exemple              description
+
+executerModeleHydrographique               TRUE                TRUE: exécute le modèle
+                                                               hydrographique\nFALSE:
+                                                               n'exécute pas le modèle
+                                                               hydrographique, les ressources
+                                                               en eau sont alors illimitées
+
+nomChoixModeleHydrographique              'SWAT'               nom du modèle choisi pour
+                                                               simuler l'hydrologie 'Simple':
+                                                               modèle pluie-débit
+                                                               simplifié'SWAT': implémentation
+                                                               du modèle SWAT
+        paramètre                       exemple             description
+
+isPrelevementEtRejetSimules               TRUE              simulation des prélèvements et
+                                                            rejets ?
+
+  affecterEqIrrSiInexistant               TRUE              si oui, affectation de
+                                                            l'équipement de prélèvement le
+                                                            plus proche à un îlot irrigué qui
+                                                            n'en a pas (cas où on simule sur
+                                                            un sous-ensemble de ZH dont
+                                                            l'îlot fait partie mais pas
+                                                            l'équipement)
+
+   listNomsZHsDebitForce               ['121','125']        identifiants de BVe pour lesquels
+                                                            l'hydrologie est forcée, doivent
+                                                            correspondre à des valeurs du
+                                                            champ ID_ZH du shapefile
+                                                            ZH.shp
+
+listNomsZHsDebitComplement             ['171','185']        identifiants de BVe pour lesquels
+                                                            on ajoute un flux d'eau extérieur
+                                                            à la zone d'étude en entrée du
+                                                            BVe (permet de simuler l'arrivée
+                                                            d'un affluent extérieur au
+                                                            territoire d'étude), doivent
+                                                            correspondre à des valeurs du
+                                                            champ ID_ZH du shapefile
+                                                            ZH.shp
+
+  listeExutoiresZoneMaelia                ['59']            identifiants des BVe exutoires,
+                                                            doivent correspondre à des
+                                                            valeurs du champ ID_ZH du
+                                                            shapefile ZH.shp
+
+ ID_RESSOURCES_INFINIES       ['SURF_EAU0000000025689668'] identifiants des ressources en
+                                                           eau dont le volume est considéré
+                                                            infini
+Paramètres du module agricole
+
+          paramètre                                exemple                    description
+
+    executerModeleAgricole                          TRUE                      TRUE: exécute le modè
+                                                                              agricole donc pas de p
+                                                                              surfaces agricoles est s
+                                                                              le module hydrologiqu
+
+     nomChoixAssolement                           'Donnees'                   modèle de choix d'ass
+                                                                              cultures sont fournies
+                                                                              FonctionsDeCroyances
+                                                                              méthode multicritère D
+                                                                              opérations techniques
+
+    anneeDeReferenceRPG                              2014                     si assolement par don
+                                                                              \@ref(anneeRefRPG)
+
+        fichierDateDose           '/modeleAgricole/agriculteurs/dateDose.csv' si assolement par Date
+                                                                              séparateur point-virgu
+                                                                              id_parcelle;culture;an
+
+      activerITKAlternatif                          TRUE                      comportement en cas
+                                                                              semis alternatif FALSE
+                                                                              fenêtre temporelle
+
+         forcerSemisCI                              TRUE                      si activerITKAlternatif=
+                                                                              couverts intermédiaire
+
+ avecContrainteDeMainOeuvre                         TRUE                      faut-il prendre en com
+                                                                              réalisation des opérati
+
+ plusieursTravauxDuSolParITK                        TRUE                      plusieurs campagnes d
+
+plusieursTraitementsPhytoParITK                     TRUE                      plusieurs campagnes d
+                                                                              même ITK ?
+
+  plusieursFertilisationsParITK                     TRUE                      plusieurs stratégies de
+                                                                              nécessite la présence d
+                                                                              dans le répertoire mod
+                                                                              Uniquement compatib
+        paramètre               exemple         description
+
+  executerModelePaturage          TRUE          exécuter le modèle pât
+
+  adaptationFertilisation    'corpen_tronque'   'corpen_tronque' ou '',
+                                                rendements sur les n d
+                                                corpenProfondeurTem
+                                                l'azote et bilan pour l'a
+
+corpenProfondeurTemporelle           3          profondeur temporelle
+
+   gestionStocksEngrais         'territoire'    niveau de gestion des s
+                                                filiere)
+
+    avecIlotsHorsZone             TRUE          prise en compte d'éven
+
+    isIrrigationSimulee           TRUE          si FALSE, l'opération te
+
+ nomChoixModeleIrrigation        'Simple'       choix du modèle de dy
+                                                parcelles indépendam
+                                                pics d'irrigation au sei
+                                                répartition de la surfac
+                                                tours d'eau
+
+     scénarios de prix         ['SC1','SC2']    liste de scénarios de p
+                                                chaque scénario XX do
+                                                /modeleAgricole/marc
+
+     scénario principal            'SC1'        nom du scénario de pr
+
+   option_valeur_finert          'defaut'       modalités initialisation
+                                                0.65 pour tous les type
+                                                %MO (équation Hugue
+                                                entrée via l'attirbut FIN
+                                                éventuellement écrasé
+                                                typeDeSolParZH.csv
+
+   denit_fTemp_option             'Stics'       choix de la fonction de
+                                                Stics ou SystN
+
+     denit_pot_option             'fixed'       choix de la fonction de
+                                                l'émission de N2O: fixe
+                                                Corg(idem Stics)
+          paramètre                                   exemple                        description
+
+           profDenit                                     20.0                        profondeur maximale
+
+     avecStressClimatique                               FALSE                        stress climatique (gel,
+
+
+
+
+Paramètres du module normatif
+
+          paramètre                  exemple description
+
+    executerModeleNormatif             TRUE      TRUE: exécute le modèle normatifFALSE: n'exécute pas
+                                                 le modèle hydrographique donc pas de gestion des
+                                                 barrages et pas de restrictions
+
+        simulerBarrage                 TRUE      simuler les barrages ?
+
+accelerationTourEauSiRestriction      FALSE      activer l'accélération des tours d'eau en cas de
+                                                 restriction ?
+
+
+
+
+Paramètres avancés
+
+         paramètre                    exemple        description
+
+   executerParcelleVirtuelle            FALSE        simulation d'une parcelle uniquement dont
+                                                     l'assollement est forcé
+
+    rotationForceeParcelle         'colza_CP_orge' si executerParcelleVirtuelle=TRUE,rotation de la
+                                                   parcelle virtuelle, au format 'c1_c2_c3_...' où les ck
+                                                   sont des espèces existantes
+
+ gestionPaillesForceeParcelle        'restitution'   si executerParcelleVirtuelle, mode de gestion des
+                                                     pailles: 'exportation' ou 'restitution' (possibilité de
+                                                     laisser à vide si tout est restitué)
+
+         idSdcForce                     'cbo'        si executerParcelleVirtuelle, identifiant du système
+                                                     de culture de référence
+        paramètre              exemple      description
+
+  typeDeSolForceParcelle      'rendosols'   si executerParcelleVirtuelle, identifiant du type de
+                                            sol
+
+surfaceHectareForceParcelle      10.0       si executerParcelleVirtuelle, surface de la parcelle
+                                            en hectares
+

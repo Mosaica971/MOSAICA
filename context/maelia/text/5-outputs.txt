@@ -1,0 +1,415 @@
+Guide utilisateur > 5 Sorties
+
+5 Sorties
+5.1 Module agricole
+Les fichiers de sortie générés au cours de la simulation sont stockés dans
+/models/main/log/ au sein d’un répertoire dont le nom est la concaténation du nom du
+terrain et de l’horodatage du début de la simulation.
+
+
+5.1.1 Assolement et opérations techniques
+Le fichier suiviOTParParcelle.csv est organisé comme suit:
+
+     une ligne par opération technique réalisée
+     les champs dépendent de l’opération considérée, pour une ligne il y a donc de
+     nombreuses colonnes vide: exemple sur la ligne concerne une opération IRRIGATION,
+     la colonne spécifiant la dose irriguée sera renseignée mais pas la colonne relative au
+     rendement qui concerne l’opération RECOLTE
+
+Le tableau ci-dessous décrit les colonnes de ce fichier. Les champ commençant par le nom
+d’une opération ne concernent que celle-ci. Par exemple la colonne RECOLTE_rendement
+ne sera renseignée que pour les ligne concernant une récolte.
+
+
+                 champ                   unité    signfication
+
+                  année                           année de réalisation de l'opération
+
+                   date                 [1-366]   jour julien de réalisation de l'opération
+
+                 parcelle                         identifiant de la parcelle
+
+               exploitation                       identifiant de l'exploitation
+
+                 culture                          culture de l'ITK en cours
+
+                   ITK                            identifiant de l'ITK en cours
+              champ                 unité   signfication
+
+                OT                          type de l'opération réalisée: SEMIS, RECOLTE,
+                                            IRRIGATION, ...
+
+              temps                  h      durée de réalisation de l'opération
+
+            profondeur               cm     profondeur de sol impactée par l'opération
+
+       RECOLTE\_rendement           t/ha    rendement du produit de la culture ou
+                                            biomasse exportée du couvert intermédiaire ou
+                                            biomasse restituée du couvert intermédiaire s'il
+                                            n'est pas exporté
+
+        IRRIGATION\_dose            mm      volume apporté
+
+          FERTI\_produit                    nom du produit de fertilisation apporté
+
+          FERTI\_nature                     nature du produit: minéral ou organique
+
+        FERTI\_doseBrute            kg/ha   si minéral: non renseigné si organique:
+                                            1000*dose déclarée dans ITK (car en t/ha dans
+                                            l'ITK)
+
+        FERTI\_apportNmin           kg/ha   apport azote minéral si minéral: dose déclarée
+                                            dans l'ITK si organique: variable
+                                            QNapport\_pro\_direct\_calc
+
+    FERTI\_apportNorg\_labile       kg/ha   apport azote organique labile si minéral: 0 si
+                                            organique: variable N\_labile
+
+  FERTI\_apportNorg\_recalcitrant   kg/ha   apport azote organique récalcitrant si minéral: 0
+                                            si organique: variable N\_recalcitrant
+
+        BIOMASSE\_export            t/ha    biomasse exportée en dehors du produit pour
+                                            les cultures et biomasse exportée pour les
+                                            couverts intermédiaires exportés (=RECOLTE
+                                            dans ce cas)
+
+      BIOMASSE\_aer\_restit         t/ha    biomasse aerienne restituée au sol
+
+      BIOMASSE\_rac\_restit         t/ha    biomasse racinaire restituée au sol
+
+
+
+5.1.2 eau
+Le fichier sorties_eau.csv est découpé par périodes. Une période correspond au
+croisement des dates de couverture du sol avec les années civiles. Une période débute soit
+
+    le 1er janvier, et correspond à la suite du couvert en place le 31 décembre
+    un jour de semis, le nouveau couvert est la culture semée
+    un jour de récolte, le nouveau couvert est le sol nu
+
+Une période s’échève soit
+
+    le 31 décembre
+    un jour de semis, fin d’une période de sol nu
+    un jour de récolte, fin d’une période de culture
+
+Ce découpage permet d’agréger les valeurs soit par couvert soit par année civile. Contactez
+l’équipe pour vous procurer des scripts R réalisant ces agrégations.
+
+
+             champ                unité     signfication
+
+             annee                          année civile de la période
+
+           jourDebut              [1-366]   jour julien de début de la période
+
+             jourFin              [1-366]   jour julien de fin de la période
+
+            parcelle                        identifiant de la parcelle
+
+            couvert                         couvert en place durant la période: nom d'une epèce
+                                            ou 'solnu'
+
+               itk                          identifiant de l'ITK en cours, vide pour solnu
+
+          evaporation              mm       cumul des volumes d'évaporation journaliers
+
+          transpiration            mm       cumul des volumes de transpiration journaliers
+
+           percolation             mm       cumul des volumes de percolation journaliers
+
+           capilarite              mm       cumul des volumes de remontées capilaires journaliers
+
+              pluie                mm       cumul des volumes de pluie journaliers
+            champ                 unité   signfication
+
+           irrigation              mm     cumul des volumes d'irrigation journaliers (0 si module
+                                          Hydrologique activité, voir suiviOTParParcelles)
+
+      satisfactionHydrique         %      moyenne de l'indice de satisfaction hydrique (100 : pas
+                                          de stress, 0 : stress)
+
+           Hr_debut                mm     quantité d'eau dans l'horizon racinaire au début de la
+                                          période
+
+             Hr_fin                mm     quantité d'eau dans l'horizon racinaire à la fin de la
+                                          période
+
+          Hr_1erJanv               mm     quantité d'eau dans l'horizon racinaire au 1er janvier
+                                          de l'année civile
+
+           Hm_debut                mm     quantité d'eau dans l'horizon total au début de la
+                                          période
+
+            Hm_fin                 mm     quantité d'eau dans l'horizon total à la fin de la période
+
+          Hm_1erJanv               mm     quantité d'eau dans l'horizon total au 1er janvier
+
+    sommeDegresJourCulture         °C     somme de degrés-jours depuis le semis, 0 si sol nu
+
+
+
+5.1.3 carbone et azote
+Le fichier sorties_CN.csv est découpé par périodes. Une période correspond au
+croisement des dates de couverture du sol avec les années civiles. Une période débute soit
+
+    le 1er janvier, et correspond à la suite du couvert en place le 31 décembre
+    un jour de semis, le nouveau couvert est la culture semée
+    un jour de récolte, le nouveau couvert est le sol nu
+
+Une période s’échève soit
+
+    le 31 décembre
+    un jour de semis, fin d’une période de sol nu
+    un jour de récolte, fin d’une période de culture
+Ce découpage permet d’agréger les valeurs soit par couvert soit par année civile. Contactez
+l’équipe pour vous procurer des scripts R réalisant ces agrégations.
+
+
+            champ                unité     signfication
+
+            annee                          année civile de la période
+
+          jourDebut              [1-366]   jour julien de début de la période
+
+            jourFin              [1-366]   jour julien de fin de la période
+
+            parcelle                       identifiant de la parcelle
+
+            couvert                        couvert en place durant la période: nom d'une epèce
+                                           ou 'solnu'
+
+              itk                          identifiant de l'ITK en cours, vide pour solnu
+
+           N_lixivie            kg N/ha    cumul d'azote lixivié
+
+       N_volatilise_NH3         kg N/ha    cumul d'azote volatilisé sous forme de NH3
+
+    N_mineralise_net_SOM        kg N/ha    cumul d'azote minéralisé net pour SOM
+
+   N_mineralise_net_residus     kg N/ha    cumul d'azote minéralisé net pour résidus
+
+       N_acquis_couvert         kg N/ha    cumul d'azote acquis par le couvert
+
+       N_mineral_debut          kg N/ha    azote minéral au début de la période
+
+        N_mineral_fin           kg N/ha    azote minéral à la fin de la période
+
+    emissions_N2O_directes      kg N/ha    cumul d'émissions de N2O directes
+
+         emissions_N2           kg N/ha    cumul d'émissions de N2
+
+     N_fixe_legumineuses        kg N/ha    cumul d'azote fixé par les légumineuses
+
+   satisfactionAzote_culture       %       effet stress azoté sur rendement des cultures
+                                           correspondant à une satisfaction azoté
+                                           (QN_acquis_cumul/QNmax, 100 : pas de stress, 0 :
+                                           stress)
+
+      satisfactionAzote_ci         %       effet stress azoté sur rendement des couverts
+                                           intermédiaires correspondant à une satisfaction azoté
+            champ                 unité     signfication
+                                            (moyenne sur la période de meaniNN10j, 100 : pas de
+                                            stress, 0 : stress)
+
+          delta_Corg              kg C/ha   delta de stock de carbone organique à la fin de la
+                                            période
+
+     emissions_N2O_denit           kg N-    cumul d'émissions de N2O dénitrification
+                                  N2O/ha
+
+      emissions_N2O_nit            kg N-    cumul d'émissions de N2O nitrification
+                                  N2O/ha
+
+emissions_N2O_indirectes_volat     kg N-    cumul d'émissions indirectes de N2O liées à l'azote
+                                  N2O/ha    volatilisé
+
+ emissions_N2O_indirectes_lixiv    kg N-    cumul d'émissions indirectes de N2O liées à l'azote
+                                  N2O/ha    lixivié
+
+
+
+5.1.4 carbone et gaz à effet de serre
+Le fichier sorties_carboneGES.csv est découpé par périodes. Une période correspond au
+croisement des dates de couverture du sol avec les années civiles. Une période débute soit
+
+     le 1er janvier, et correspond à la suite du couvert en place le 31 décembre
+     un jour de semis, le nouveau couvert est la culture semée
+     un jour de récolte, le nouveau couvert est le sol nu
+
+Une période s’échève soit
+
+     le 31 décembre
+     un jour de semis, fin d’une période de sol nu
+     un jour de récolte, fin d’une période de culture
+
+Ce découpage permet d’agréger les valeurs soit par couvert soit par année civile. Contactez
+l’équipe pour vous procurer des scripts R réalisant ces agrégations.
+          champ                unité      signfication
+
+          annee                           année civile de la période
+
+        jourDebut             [1-366]     jour julien de début de la période
+
+          jourFin             [1-366]     jour julien de fin de la période
+
+         parcelle                         identifiant de la parcelle
+
+          couvert                         couvert en place durant la période: nom d'une
+                                          epèce ou 'solnu'
+
+            itk                           identifiant de l'ITK en cours, vide pour solnu
+
+        delta_Corg          kg eqCO2/ha   carbone stocké durant la période (delta début -
+                                          fin) (équivalent CO2)
+
+        tx_MO_fin               %         taux de matière organique sur le 1er horizon à la
+                                          fin de la période
+
+   emissions_N2O_denit      kg eqCO2/ha   cumul d'émissions de N2O dénitrification
+                                          (équivalent CO2)
+
+    emissions_N2O_nit       kg eqCO2/ha   cumul d'émissions de N2O nitrification
+                                          (équivalent CO2)
+
+ emissions_eqN2O_NH3volat   kg eqCO2/ha   cumul d'émissions indirectes de N2O liées à
+                                          l'azote volatilisé (équivalent CO2)
+
+   emissions_eqN2O_lixiv    kg eqCO2/ha   cumul d'émissions indirectes de N2O liées à
+                                          l'azote lixivié (équivalent CO2)
+
+      emissions_ferti       kg eqCO2/ha   cumul d'émissions liées aux fertilisants
+                                          (fabrication, stockage, transport) (équivalent
+                                          CO2)
+
+      bilan_net_GES         kg eqCO2/ha   bilan net de GES (émissions + stockage C)
+                                          (équivalent CO2)
+
+      ratio_Corg_Arg            %         rapport Corg/Argile
+
+
+
+
+5.2 Module hydrographique
+5.2.1 retenues collinaires
+Le fichier sorties_retenues.csv contient une ligne par jour et par retenue collinaire.
+
+
+           champ              unité signfication
+
+            date                       date au format aaaa/mm/jj
+
+             ZH                        identifiant du BVe
+
+          idRetenue                    identifiant de la retenue
+
+        typeRetenue                    type de retenue (connectée, déconnectée, sur nappe)
+
+      surDrainPrincipal                si retenue connectée, sur drain principal ?
+
+        volumeDebut            m
+                                   3
+                                       volume de la retenue au début de la journée
+
+         volumeFin             m
+                                   3
+                                       volume de la retenue à la fin de la journée
+
+      tauxRemplissage          [0-1]   taux de remplissage de la retenue
+
+    volumePrecipitations       m
+                                   3
+                                       volume des précipitations
+
+   volumeRechargeParHRU        m
+                                   3
+                                       volume rechargé via les HRU
+
+ volumeRechargeParCoursEau     m
+                                   3
+                                       volume rechargé par les cours d’eau
+
+     volumeEvaporation         m
+                                   3
+                                       volume perdu par évaporation
+
+     volumePrelevements        m
+                                   3
+                                       volume prélevé (hors lâchers de barrage)
+
+    volumeSurplusRejete        m
+                                   3
+                                       volume en surplus rejeté
+
+
+
+
+5.3 Module normatif
+
+5.3.1 barrages
+Le fichier sorties_barrages.csv contient une ligne par jour et par barrage.
+
+
+           champ              unité signfication
+
+            date                       date au format aaaa/mm/jj
+         champ              unité signfication
+
+            ZH                       identifiant du BVe
+
+      volumeCourant          m
+                                 3
+                                     volume courant
+
+    debitLacherCourant       m
+                                 3
+                                     débit de lâcher courant
+
+       debitReserve          m
+                                 3
+                                     débit réservé
+
+ quotaLacherAnnuelRestant    m
+                                 3
+                                     volume restant sur le quota annuel de lachers
+
+    idRetenueAssociee                identifiant de la retenue associée
+
+       typeRetenue                   type de retenue (connectée, déconnectée, sur nappe)
+
+     surDrainPrincipal               si retenue connectée, sur drain principal ?
+
+       volumeDebut           m
+                                 3
+                                     volume de la retenue au début de la journée
+
+        volumeFin            m
+                                 3
+                                     volume de la retenue à la fin de la journée
+
+     tauxRemplissage        [0-1]    taux de remplissage de la retenue
+
+   volumePrecipitations      m
+                                 3
+                                     volume des précipitations
+
+  volumeRechargeParHRU       m
+                                 3
+                                     volume rechargé via les HRU
+
+volumeRechargeParCoursEau    m
+                                 3
+                                     volume rechargé par les cours d’eau
+
+    volumeEvaporation        m
+                                 3
+                                     volume perdu par évaporation
+
+   volumePrelevements        m
+                                 3
+                                     volume prélevé (hors lâchers de barrage)
+
+   volumeSurplusRejete       m
+                                 3
+                                     volume en surplus rejeté
+

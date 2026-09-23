@@ -79,6 +79,23 @@ names, dashboard text, comments and docs.
 | calibration retenue | selected calibration (`calib_selected`) |
 | calibration à parité GAMS | GAMS-parity calibration (`calib_gams_parity`) |
 
+## MAELIA vocabulary
+
+MAELIA's files and code are in French and keep their names (`SEQUENCE`, `ID_ILOT`,
+`reglesDeDecisions.csv`), like the GAMS identifiers. The full table, with each term's MOSAICA
+counterpart, is in [maelia/README.md](maelia/README.md#vocabulary).
+
+| French (MAELIA) | English |
+|---|---|
+| îlot (PAC) | CAP block |
+| terrain | study area |
+| dossier *includes* | input folder |
+| lanceur | launcher |
+| BVe, ZH | elementary watershed |
+| couvert intermédiaire (CI) | cover crop |
+| gel | set-aside |
+| marge semi-nette | semi-net margin (after machinery costs) |
+
 ## Programmes and data sources (proper nouns)
 
 | name | what it is |

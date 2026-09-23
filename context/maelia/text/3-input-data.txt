@@ -1,0 +1,2444 @@
+Guide utilisateur > 3 Données d’entrée
+
+3 Données d’entrée
+3.1 Remarques générales
+Cette section détaille la constitution du dossier includes qui comporte les données
+d’entrées du modèle.
+
+Pour tous les fichiers d’entrée l’ordre des colonnes n’a pas d’importance, elles sont
+reconnues dans MAELIA à partir du titre de celles-ci. Dans certains fichiers l’ordre des
+clignes est à conserver (indiqué ci-après).
+
+Pour de nombreuses données il existe des bases de données nationales ou européennes
+qui peuvent être utilisées pour générer les fichiers d’entrée.
+
+L’équipe MAELIA peut vous accompagner pour définir le travail de génération de ces
+fichiers.
+
+
+3.2 Données d’entrée communes à plusieurs
+modules
+Chemin : … / includes / CAS_DE_ÉTUDE / modelCommun
+
+Sous-dossiers : communes; typesDeSol; date; meteo
+
+
+3.2.1 Département (departement.shp)
+Description : Zonage administratif des départements. Nécessaire par exemple au calcul des
+aides couplées.
+
+Chemin: … / communes
+Champs
+
+
+ champ BDF             Valeurs        Désignation                          Remarque
+
+ CODE_DEPT             Texte          Code du département
+
+
+3.2.2 Découpage de communes (communes.shp)
+Description : Information géographique des communes et leur code INSEE
+
+Chemin : … /communes
+
+Champs
+
+
+ champ BDF            Valeurs       Désignation                              Remarque
+
+ CODE_INSEE           Texte         Code INSEE de la commune
+
+ NOM                  Texte         Nom de la commune
+
+
+3.2.3 Données de sol (TypeDeSolparZH.shp)
+Description : Différentes BD sols peuvent être utilisées (ex. 1/50 000, 1/250 000, 1/1 000
+000). Les données de la BDGSF (1/1 000 000) sont disponibles sur toute la France et
+l’Europe. Pour chaque type de sol, il est possible de définir jusqu’à 10 couches ou horizons
+(N ∈ [1 :10], pour chaque horizon de sol explorable par les racines numéroté de 1 (surface)
+à n (plus profond)). Pour le moment les types de sols sont à décrire par ZH (Cf. tableau ci-
+dessous). La notion de Zone_PEDO est utilisée pour pouvoir décrire un ensemble de types
+de sol considéré homogène du point de vue des systèmes de culture c.-à-d. sur lesquels le
+même de pratiques agricoles est réalisé toutes choses égales par ailleurs.
+
+Chemin: … / typeDeSol
+
+Champs
+champ BDF   Valeurs   Désignation                Remarque
+
+ID_SOL      Texte     Identifiant unique de      Nécessaire pour
+                      combinaison ZH-            faire le lien entre
+                      STU_DOM-                   les trois
+                      ZONE_PEDO utilisé          composantes du
+                      par MAELIA                 code de
+                                                 l’identifiant
+
+STU_DOM     Texte     Identifiant unique de      Actuellement type
+                      sol. Cet identifiant       de sol dominant de
+                      doit impérativement        l’unité
+                      être unique.               cartographique de
+                                                 sol
+
+ZONE_PEDO   Texte     Identifiant du zonage      A rajouter par
+                      pédologique, utilisé       rapport à la BDGSF
+                      pour la définition des
+                      ITKs et l’affectation du
+                      type de matériel (ex.
+                      d’irrigation) aux ilots
+
+PIRM        Décimal   L’infiltrabilité du sol    mm/ jour (pour
+                      (perméabilité/capacité l’horizon de surface
+                      d’infiltration)            seulement)
+
+PRO         Décimal   Profondeur totale du       cm
+                      sol explorable par les
+                      racines
+
+P[1-10]     Décimal   Profondeur totale de       cm
+                      la couche de sol N. Les
+                      profondeurs indiquées
+                      sont donc emboitées:
+champ BDF     Valeurs   Désignation                Remarque
+
+                        Pn+1 contient Pn
+                        (vs. des épaisseurs
+                        individuelles).
+
+ARG[1-10]     Décimal   Taux d’argile de la        % (argile après
+                        couche N                   décarbonatation)
+
+CX[1-10]      Décimal   Taux de cailloux par       %
+                        couche
+
+DAH[1-10]     Décimal   Densité apparente de       g/cm3
+                        la couche N
+
+RUPRH[1-10]   Décimal   Reserve utile pour la      mm
+                        couche N
+
+KSAT[1-10]    Décimal   Conductivité               mm/h
+                        hydraulique à
+                        saturation de la
+                        couche N
+
+CSTRU         Texte     Note entre 0 et 1 sur la   Échelle : 0 (les
+                        qualité de la structure    racines ne peuvent
+                        du sol/Note estimée à      pas accéder au sol)
+                        dire d’experts             à 1 (les racines
+                                                   peuvent accéder à
+                                                   tout le sol). Valeur
+                                                   standard 0,9
+
+PH[1-10]      Décimal   pH                         (module NC)
+
+CN[1-10]      Décimal   C/N                        Ratio C/N
+ champ BDF                Valeurs               Désignation               Remarque
+
+ CAL[1-10]                Décimal               Taux de calcaire          % (module NC)
+
+ MO[1-10]                 Décimal               Taux de matière           % (module NC)
+                                                organique
+
+ HCC1                     Décimal               Humidité à la capacité    % volumique
+                                                au champs                 (module NC)
+                                                (volumique)
+
+ HPF1                     Décimal               Humidité au point de      % volumique
+                                                flétrissement             (module NC)
+                                                (volumique)
+
+Fonctions de prédotransfert :
+
+Pour PIRM, pas de fonction de pédotransfert.
+Pour DAH, on utilise Saxton&Rawls (2006) avec les paramètres d’entrée suivants :
+# Sfr : fraction de sables (ratio 1)
+# Afr : fraction d’argiles (ratio 1)
+# EGfr : éléments grossiers (%)
+# MO : taux de matiere organique (%)
+# densFac : facteur de densité (compaction), valeur 1 par defaut, qui peut varier mais pour
+l’instant pas utilisé dans le cadre de MAELIA
+
+Pour calculer le paramètre DAH (en considérant les EGfr) la fonction est :
+
+DAH <- gravelV ol ∗ 2.65 + (1 − gravelV ol) ∗ matricDen
+
+DAH est calculé par le volume d’EG * 2.65 + (1 - le volume d’EG) * la densité apparente de la
+matrice de terre fine en g/cc.
+
+Voir le détail du calcul ici de gravelVol et matricDen et qui précise les inputs requis.
+3.2.4 Mailles climatiques (polygonesMeteoFrance.shp)
+Description: Shape de points ou de pixels de grille sur laquelle est fournie la météo. La
+grille SAFRAN1 est disponible sur toute la France, France. Une grille différente est
+disponible sur toute l’Europe dans le base de données E-OBS2, mis à disposition par le
+service Copernicus (C3S3). Le jeu de données fournit des champs quadrillés à un
+espacement de 0,1x0,1° et 0,25x0,25° en coordonnées régulières de latitude/longitude. Ces
+données sont fournies en accès libre et gratuit.
+
+Chemin : … / meteo
+
+Champs
+
+
+ champ BDF               Valeurs                   Désignation            Remarque
+
+ ID_PDG                  Texte                     Identifiant du point
+                                                   de grille
+
+ POSX                    Décimal                   Coordonnées X, en      Sert à construire les
+                                                   Lambert II étendu      polygones
+                                                   (IGNF:LAMBE), en
+                                                   hm (100m)
+
+ POSY                    Décimal                   Coordonnées Y, en      Sert à construire les
+                                                   Lambert II étendu      polygones
+                                                   (IGNF:LAMBE), en
+                                                   hm (100m)
+
+ ALTI_MOY                Décimal                   Altitude moyenne
+                                                   de la zone
+                                                   météorologique (m)
+
+
+3.2.5 Séries de données météorologiques annuelles
+(year.csv)
+Description: Série de données météorologiques journalières fournie par année (fichier :
+année.csv). Les données SAFRAN sont disponible pour toutes la France. La base de
+données E-OBS est disponible, en accès libre et gratuit, sur toute l’Europe et couvre la
+période remontant à 1950. Elle fournit aussi des projections (climats futures). Cette base
+de données E-OBS consiste en des interpolations quotidiennes contenant des informations
+concernant la température moyenne (TG), la température minimale (TN), la température
+maximale (TX), la somme des précipitations (RR), la pression moyenne au niveau de la mer
+(PP) et le rayonnement global moyen (QQ).
+
+Chemin : … / observée
+
+Champs
+
+
+ champ CSV          Valeurs        Désignation                           Remarque
+
+ ID_PDG             Texte          Identifiant du point de grille
+
+ DATE               Texte          Date                                  jj/mm/aaaa
+
+ RRmm               Décimal        Précipitation                         mm
+
+ Tmin               Décimal        Température minimale                  °C
+
+ Tmax               Décimal        Température maximale                  °C
+
+ ETP                Décimal        Evapotranspiration                    mm
+
+ RGI                Décimal        Radiation                             MJ.m-2.jour-1
+
+
+3.2.6 Nombre de jours par mois (joursParMois.csv)
+Description: Fichier csv permettant de connaitre le nombre de jour par mois selon que
+l’année est bissextile ou non. La première ligne du tableau qui contient le nom de la
+colonne n’est pas utilisée. Le séparateur actuel est le ‘;’.
+Chemin: … / date
+
+Champs
+
+
+ Colonne                 Valeurs                Désignation           Remarque
+
+ Colonne 1               Entier [1-13]          Numéro du mois
+ (numeroMois)
+
+ Colonne 2               Entier [1-13]          Numéro du premier     On compte à partir
+ (anneeBissextile)                              jour du mois, si      de 0
+                                                année bissextile
+
+ Colonne 3               Entier [1-13]          Numéro du premier     On compte à partir
+ (anneeNonBissextile)                           jour du mois, si      de 0
+                                                année non
+                                                bissextile
+
+Fichier csv avec les informations précises suivantes:
+
+numeroMois;anneeBessextile;anneeNonBissextile 1;0;0 2;31;31 3;60;59 4;91;90 5;121;120
+6;152;151 7;182;181 8;213;212 9;244;243 10;274;273 11;305;304 12;335;334 13;366;365
+
+
+3.2.7 Altitude moyenne par ZH
+(altitudeAgregeesParZH.shp)
+Description: Fichier shape fournissant l’altitude moyenne par ZH.
+
+Chemin: … / altitude
+
+Champs
+
+
+ Colonne                Valeurs                Désignation            Remarque
+
+ ID_ZH                  Texte                  Identifiant de la ZH
+ Colonne                 Valeurs                  Désignation             Remarque
+
+ ALTI_MOY                Décimal                  Altitude moyenne        Utile pour estimer
+                                                  de la ZH estimée à      les bandes de
+                                                  partir d’un MNT         température dans la
+                                                                          ZH en fonction de
+                                                                          l’altitude et simuler
+                                                                          la neige
+
+ ID_ALTI                 Texte                    Code utilisé dans
+                                                  MAELIA composé
+                                                  ID_ZH-ALTI_MOY-0
+
+
+
+3.3 Module Agricole
+Chemin : … / includes / CAS_DE_ÉTUDE / modeleAgricole
+
+Sous-dossiers : communes; typesDeSol; date; meteo
+
+
+3.3.1 Ilots du RPG (ilots.shp et ilots_HZ.shp)
+Description: Ilots PAC à l’intérieur et hors du terrain d’étude. Les îlots hors du terrain
+d’étude (hors zone = HZ) correspondent aux îlots des exploitations qui ont au moins un îlot
+dans la zone mais ces îlots n’appartiennent pas à celle-ci.
+
+Chemin : … / ilots / dansZone
+
+Champs
+
+
+ champ BDF               Valeurs                  Désignation             Remarque
+
+ ID_ILOT                 Texte                    Identifiant de l’ilot
+champ BDF    Valeurs   Désignation             Remarque
+
+ID_EXPL      Texte     Identifiant             Si absent alors il
+                       d’exploitation          n’est pas possible
+                                               de construire les
+                                               ilots hors-zone (i.e.
+                                               ilots d’une
+                                               exploitation
+                                               contenant au moins
+                                               un ilot dans la zone
+                                               d’étude). De plus, la
+                                               simulation
+                                               considèrerait alors
+                                               que les ilots
+                                               appartiennent tous
+                                               à la même
+                                               exploitation.
+
+ID_SOL       Texte     Identifiant du type     Un seul type de sol
+                       de sol associé à        associé par îlot : le
+                       l’îlot                  sol dominant en
+                                               terme de surface
+
+ID_ZH                  Identifiant du BVé
+                       associé à l’îlot
+
+CARACT_IRR   O/N       Caractère irrigable     L’îlot sera considéré
+                       de l’ilot (Oui/Non)     comme irrigable et
+                                               devra avoir un
+                                               matériel d’irrigation
+
+MATERIEL     Texte     ID du type de           Optionnel. Permet
+                       matériel d’irrigation   d’affecter un type
+champ BDF     Valeurs   Désignation          Remarque
+
+                                             de matériel.
+
+LISTE_EQUIS   Texte     ID des équipements   Lorsque plusieurs
+                        de prélèvement       équipements sont
+                        (point irrigation,   liés à un même îlot
+                        voir section         (possibilité
+                        correspondante)      d’accéder à
+                                             plusieurs
+                                             ressources) séparer
+                                             les ID par–
+
+PENTE_MOY     Décimal   Pente moyenne de     Estimé à partir du
+                        l’îlot               MNT
+
+PENTE_SWAT    Décimal   Classe de pente
+                        moyenne du
+                        module
+                        hydrologique
+                        correspondant à la
+                        classe moyenne
+
+EQU_0         Texte     Équipement           Défini ordre de
+                        prioritaire pour     priorité entre les
+                        l’irrigation         équipements
+
+EQU_1         Texte     Équipement           Défini ordre de
+                        secondaire pour      priorité entre les
+                        l’irrigation         équipements
+
+EQU_2         Texte     Équipement           Défini ordre de
+                        tertiaire pour       priorité entre les
+                        l’irrigation         équipements
+3.3.2 Parcelles du RPG, séquences de cultures reconstruites
+sur les ilots RPG (parcelles.shp et parcelles_HZ.shp)
+Description: fichier shape représentant les limites des parcelles à l’intérieur des ilots. Les
+limites de parcelles peuvent être crées artificiellement ou générée sur la base de données
+observées. Elles sont essentiellement utilisées quand on désire afficher des résultats à
+l’échelle de la parcelle et pour gérer le déplacement de matériel entre les parcelles (ex.
+matériel d’irrigation).
+
+Chemin : … / ilots / dansZone et horsZone
+
+Champs
+
+
+ champ BDF                Valeurs                Désignation             Remarque
+
+ ID_PARCELL                                      Identificateur de       Type
+                                                 parcelle, indique       d’identificateur :
+                                                 également l’îlot        “ILOT_xx”. E.g.
+                                                 auquel elle             100_00, 100_01, etc.
+                                                 appartient
+
+ ID_ILOT                  Texte                  Identifiant de l’ilot
+                                                 (doit être le même
+                                                 que celui du fichier
+                                                 ilots.shp)
+
+ ID_EXPL                  Texte                  Identifiant             Si absent alors il
+                                                 d’exploitation          n’est pas possible
+                                                                         de construire les
+                                                                         ilots hors-zone (i.e.
+                                                                         ilots d’une
+                                                                         exploitation
+                                                                         contenant au moins
+                                                                         un ilot dans la zone
+champ BDF    Valeurs   Désignation           Remarque
+
+                                             d’étude). De plus, la
+                                             simulation
+                                             considèrera que les
+                                             ilots appartiennent
+                                             tous à la même
+                                             exploitation
+
+SEQUENCE     Texte     Séquence de           Peut venir de la
+                       cultures observée     base de données
+                       séparé par ‘_’        INRAE développée à
+                                             partir de l’analyse
+                                             du RPG
+
+POURCENTAG   Décimal   Ratio (pourcentage)
+                       de parcelles dans
+                       les îlots
+
+INDEX_DEP    Entier    Rang de démarrage
+                       de la rotation pour
+                       le module de choix
+                       d’assolement
+                       (OPTIONNEL)
+
+CULT_REF     Texte     Culture sur l’année   Peut ne rien
+                       de référence          contenir
+                       (dernière année du
+                       RPG utilisé)
+
+SURFACE      Décimal   Surface de la
+                       parcelle (ha)
+ champ BDF              Valeurs                  Désignation              Remarque
+
+ EXPREST                Texte                    Séquence de
+                                                 valeurs parmi
+                                                 {‘exportation’, ‘exp’,
+                                                 ‘restitution’, ‘rest’}
+                                                 pour chaque
+                                                 culture (paille pour
+                                                 culture, biomasse
+                                                 totale pour couverts
+
+ intermédiaires)
+ séparées par ‘_’
+
+
+3.3.3 Fichier des espèces de cultures cultivées
+(especesCultivees.csv)
+Description: Le fichier contient les paramètres des modèles de culture «AqYield» et
+«simple» pour les espèces de cultures.
+
+Chemin : … / culture
+
+Description des lignes correspondant à la colonne ID_ESPECE.
+
+
+                                                                                      Used in
+                                                                                      MAELIA
+Name                    Unit      Type    Definition                  Model Mandatory code
+
+RENDEMENT_MOYEN         t/ha      float   Average yield                     no        yes
+
+RENDEMENT_MIN           t/ha      float   Minimum yield                     no        yes
+
+RENDEMENT_OPTIMAL       t/ha      float   Potential yield                   yes       yes
+                                                                                      Used in
+                                                                                      MAELIA
+Name                   Unit      Type    Definition                   Model Mandatory code
+
+COULEUR_R              -         integer Value of the red channel            yes      yes
+                                         in the RGB color used to
+                                         visually represent the
+                                         crop
+
+COULEUR_V              -         integer Value of the green                  yes      yes
+                                         channel in the RGB color
+                                         used to visually represent
+                                         the crop
+
+COULEUR_B              -         integer Value of the blue channel           yes      yes
+                                         in the RGB color used to
+                                         visually represent the
+                                         crop
+
+Tbase                  celsius   integer Base temperature used in AqYield yes         yes
+                       degree            the calculation of degree-
+                                         days and vegetation scale
+
+Tmax                   celsius   integer Maximum temperature          AqYield yes     yes
+                       degree            considered in the degree-
+                                         day calculation and
+                                         vegetation scale
+
+DEGRES_J_LevTbase      Degree- integer Sum of degree-days at          AqYield yes     yes
+                       day             emergence
+
+DEGRES_J_Flor          Degree- integer Sum of degree-days at          AqYield yes     yes
+                       day               flowering
+
+DEGRES_J_matPhyTbase Degree- integer Sum of degree-days at            AqYield yes     yes
+                     day             physiological maturity
+
+FREIN                  -         float   Fraction of the sum of  AqYield yes          yes
+                                         temperatures considered
+                                         during the winter period
+                                                                                     Used in
+                                                                                     MAELIA
+Name                  Unit     Type     Definition                   Model Mandatory code
+
+CRACINE               Degree- integer Root growth vigor              AqYield yes     yes
+                      day/mm          coefficient
+                      AWC
+
+CVIG                  -        float    Crop vigor coefficient       AqYield yes     yes
+
+
+KMAX                  -        float    Maximum crop coefficient AqYield yes         yes
+                                        (Kc)
+
+CSTO                  -        float    Effect of stomatal closure AqYield yes       yes
+                                        on water stress
+
+coeff_Fonction_Prod   -        float    Shape coefficient of the     AqYield yes     yes
+                                        production function
+                                        (Yield
+                                        ETR/YIeldMax=f(ETR/ETM)
+
+ZonesClimatiques      -        string   List of climate zones that          no       yes
+                                        can support this crop
+
+BESOIN_N              kg N/t   float    N requirement by             AqYield yes     yes
+                                        production unit              NC
+
+DEBUT_BESOIN_N        Degree- integer Number of degree days      AqYield yes         yes
+                      day             required before starting N NC
+                                      uptake
+
+FREIN_BESOIN_N                 float    Parameter used to            AqYield yes     yes
+                                        calculate the N demand       NC
+                                        of CstFloMat and CIfrein
+                                        crop types
+
+PRE_FLO_BESOIN_N               float    Parameter used to            AqYield yes     yes
+                                        calculate the N demand       NC
+                                        of CstFloMat and FloMat
+                                        crop types
+                                                                               Used in
+                                                                               MAELIA
+Name               Unit     Type    Definition                 Model Mandatory code
+
+PRE_MAT_BESOIN_N            float   Parameter used to          AqYield yes     yes
+                                    calculate the N demand     NC
+                                    of CstFloMat and FloMat
+                                    crop types
+
+Tms                g/g      float   Dry matter content of      AqYield yes     yes
+                                    harvested product          NC
+
+C_aer              g C/g of float   C content of aboveground AqYield yes       yes
+                   dry              crop residues            NC
+                   matter
+
+C_rac              g C/g of float   C content of belowground AqYield yes       yes
+                   dry              crop residues            NC
+                   matter
+
+isLEG              -        bool    Is leguminous crop         AqYield yes     yes
+                                                               NC
+
+ABSCISSION         -        float   Parameter used to          AqYield yes     yes
+                                    calculate abscission of    NC
+                                    plant aerial parts
+
+isCouvert          -        bool    Is cover crop              AqYield yes     yes
+                                                               NC
+
+HI                 -        float   Crop harvest Index :       AqYield yes     yes
+                                    harvested product (grain NC
+                                    or sillage) to total
+                                    aboveground biomass
+                                    (product + residues) ratio
+
+Pse                -        float   Fraction of aboveground    AqYield yes     yes
+                                    residues returned to the   NC
+                                    soil when residues are
+                                    exported
+                                                                            Used in
+                                                                            MAELIA
+Name          Unit     Type     Definition                  Model Mandatory code
+
+beta          -        float    Parameter used to           AqYield yes     yes
+                                calculate the cumulative    NC
+                                root fraction in the soil
+
+
+
+
+SR_ratio      -        float    Shoot to root ratio after   AqYield yes     yes
+                                harvest exportation         NC
+
+RootC_fixed   t C/ha   float    Alternative value for       AqYield no      yes
+                                forcing a fixed root C      NC
+                                input instead of
+                                allometric relationships
+                                represented by Shoot to
+                                root ratio
+
+CN_ratio      -        float    C to N ratio of crop        AqYield yes     yes
+                                residues                    NC
+
+adil          -        float    Parameter of the function AqYield yes       yes
+                                used to describe the         NC
+                                critical dilution curve of N
+
+bdil          -        float    Parameter of the function AqYield yes       yes
+                                used to describe the         NC
+                                critical dilution curve of N
+                                (e.g. in the STICS model
+                                (Brisson et al, 2003)
+
+Type_Nacq     -        string   Type of N acquisition in    AqYield yes     yes
+                                the AqYield-N model         NC
+                                                                                   Used in
+                                                                                   MAELIA
+Name                   Unit     Type     Definition                Model Mandatory code
+
+a_Ndemand_ci           -        float    Parameter used to         AqYield yes     yes
+                                         calculate the N demand    NC
+                                         of cover crops (CI and
+                                         CIfrein crop types)
+
+b_Ndemand_ci           -        float    Parameter used to         AqYield yes     yes
+                                         calculate the N demand    NC
+                                         of cover crops (CI and
+                                         CIfrein crop types)
+
+coef_500Mat            -        float    Parameter used to         AqYield yes     yes
+                                         calculate the N demand    NC
+                                         of 500Mat crop type
+
+Dde                    ?        integer Parameter used to          AqYield no      no
+                                        calculate emergence        NC
+                                         duration of cover crops
+
+N_grain                pct of   float    Nitrogen content of       AqYield yes     yes
+                       dry               harvested product         NC
+                       matter
+
+especeRepousse         -        string   Nom du couvert utilis
+
+
+
+Chaque culture est représentée par une colonne. Remarque : ciVesce peut être simulé sur
+5-6 mois maximum et ciMoutardeBlanche sur 3 mois maximum.
+
+
+3.3.4 Fichier des espèces prairiales
+(especesHerbSim.csv)
+Description: Le fichier contient les paramètres des modèles de culture «HerbSim» et
+«HerbSimNC» pour les espèces prairiales simulées. Voir le paramètre
+nomChoixModeleCroissancePrairie du launcher pour la sélection du modèle de croissance.
+
+Chemin : … / culture
+Description des lignes correspondant à la colonne ID_ESPECE.
+
+
+   Label                            Description                    unit
+
+character(0)              c(":-----:", ":-----------:", ":----")   character(0)
+
+Chaque culture est représentée par une colonne. Remarque : ciVesce peut être simulé sur
+5-6 mois maximum et ciMoutardeBlanche sur 3 mois maximum.
+
+
+3.3.5 Fichier des paramètres des règles de décisions de
+conduite des cultures (reglesDeDecisions.csv)
+Description: Ce fichier contient les paramètres des règles de décision de déclenchement
+des opérations techniques (stratégie de conduite des cultures). Autrement dit, il décrit les
+itinéraires techniques (ITK). Ces ITK sont définis par culture et par situation de production
+caractérisée par la rotation ou le précédent cultural, le sol, le climat, le type
+d’exploitation…
+
+Le fichier csv fournit les paramètres des règles de décision pour chaque type d’opérations
+techniques (OT) : PREPA (préparation du sol) ; REPRISE (récupération du sol) ; SEMIS
+(semis) ; BINAGE (binage) ; RECOLTE (récolte) ; IRRIGATION (irrigation) ; FERTI
+(application(s) d’engrais) ; et PHYTO (application(s) de pesticides).
+
+Le renseignement de ces paramètres d’ITK est a réalisé via une interface dédiée sur le web
+(prendre contact avec l’équipe MAELIA-INRAE pour obtenir un accès).
+
+Chemin : … / culture
+
+Pour le descriptif du fichier voir les supports de formation et l’interface.
+
+
+3.3.6 Fichier des engrais (Engrais.csv)
+Description: Le fichier contient les paramètres des modèles de culture «HerbSim» et
+«HerbSimNC» pour les espèces prairiales simulées. Voir le paramètre
+nomChoixModeleCroissancePrairie du launcher pour la sélection du modèle de croissance.
+Chemin : … / Engrais
+
+Description des lignes correspondant à la colonne nom.
+
+Chaque engrais est représentée par une colonne.
+
+
+
+
+Name                   Unit      Type    Definition       Mandatory Note
+
+C                      pct of    Float   Carbon           yes
+                       fresh             content of
+                       matter            organic
+                                         fertilizer
+
+N                      pct of    Float   Nitrogen         yes
+                       fresh             content of
+                       matter            organic
+                                         fertilizer
+
+Norg                   pct of    Float   Organic          yes
+                       fresh             nitrogen
+                       matter            content of
+                                         organic
+                                         fertilizer
+
+Nmin                   pct of    Float   Mineral          yes
+                       fresh             nitrogen
+                       matter            content of
+                                         organic
+                                         fertilizer
+
+CNorg                  pct of    Float   carbon/organic yes
+                       fresh             nitrogen ratio
+                       matter            of organic
+                                         fertilizer
+
+hum                    pct of    Float   Water content    yes
+                       fresh             of the organic
+                       matter            fertilizer
+Name    Unit   Type    Definition          Mandatory Note
+
+
+
+
+K1      -      Float   Humification        no        from AMG
+                       coefficient; i.e.
+                       conversion
+                       efficiency of
+                       fresh carbon
+                       inputs into
+                       humified
+                       carbon
+
+C2      -      Float   Fraction of         yes       RES2 dans Levavasseur
+                       carbon in the                 2021
+                       recalcitrant
+                       pool
+
+kres1   /day   Float   Decomposition yes             Levavasseur 2021
+                       rate constant
+                       of the labile
+                       fraction of
+                       organic
+                       fertilizer
+
+kres2   /day   Float   Mineralization      no        On peut le définir comme
+                       rate of the                   paramètre variable selon
+                       recalcitrant                  les PRO; mais pour
+                       fraction of                   MAELIA on l’a pris égal au
+                       organic matter                taux de minéralisation de
+                                                     la matière organique
+                                                     active du sol (ce que
+                                                     j’avais fait aussi dans la
+                                                     publi de 2022)
+
+kbio    /day   Float   Decomposition no              Levavasseur 2021
+                       rate constant
+Name     Unit         Type    Definition         Mandatory Note
+                              of the
+                              zymogenous
+                              microbial
+                              biomass
+
+CNbio    -            Float   C:N ratio of the yes         Levavasseur 2021
+                              zymogenous
+                              microbial
+                              biomass
+
+aCN1     -            Float   Ratio between yes            Levavasseur 2021 ;
+                              CNres1 and                   EOM:exogenous organic
+                              CNres; where                 matter
+                              CNres is the
+                              C:N ratio of the
+                              EOM
+
+Y        -            Float   Assimilation       yes       Y dans Levavasseur 2021
+                              yield of the
+                              labile fraction
+                              by the
+                              zymogenous
+                              microbial
+                              biomass
+
+H        -            Float   Humification       yes       H dans Levavasseur 2021
+                              yield of the
+                              zymogenous
+                              microbial
+                              biomass into
+                              SOM
+
+ETM_Cd   mg/kg of     Float   Cadmium            no        ETM = élément trace
+         dry matter           content in                   métallique
+                              fertilizer
+Name              Unit         Type    Definition      Mandatory Note
+
+ETM_Cu            mg/kg of Float       Copper          no
+                  dry matter           content in
+                                       fertilizer
+
+
+ETM_Ni            mg/kg of Float       Nickel content no
+                  dry matter           in fertilizer
+
+
+
+
+ETM_Pb            mg/kg of Float       Lead content    no
+                  dry matter           in fertilizer
+
+
+
+
+ETM_Zn            mg/kg of     Float   Zinc content in no
+                  dry matter           fertilizer
+
+
+
+
+ETM_Hg            mg/kg of Float       Mercury         no
+                  dry matter           content in
+                                       fertilizer
+
+
+ETM_Cr            mg/kg of Float       Chromium        no
+                  dry matter           content in
+                                       fertilizer
+
+
+Fertilizer_type   -            Text    Type of         yes
+                                       fertilizer:
+                                       mineral or
+                                       organic
+
+EF_normal_pH      kg of N-     Float   NH3 emission    yes       EF from the EMEP/EEA air
+                  NH3/kg of            factor for                pollutant emission
+Name              Unit         Type    Definition          Mandatory Note
+                  mineral N            mineral                       inventory guidebook
+                  applied              fertilizers at pH             2019
+                                       <= 7.0
+
+EF_high_pH        kg of N-  Float      NH3 emission yes              EF from the EMEP/EEA air
+                  NH3/kg of            factor for                    pollutant emission
+                  mineral N            mineral                       inventory guidebook
+                  applied              fertilizers at pH             2019
+                                       > 7.0
+
+EF                kg of N-  Float      NH3 emission        yes       EF from Brockmann
+                  NH3/kg of            factor for                    (2018)
+                  mineral N            organic
+                  applied              fertilizer
+
+Fertilizer_form   -            Texte   Form of             yes
+                                       fertilizer: solid
+                                       or liquid
+
+eqCO2_MinN        kg           Float   kg CO2              yes       in engrais.gaml:
+                  CO2eq/kg             equivalent per                eqCO2_N
+                  of mineral           kg of element
+                  nitrogen             for fertilizer
+                                       synthesis and
+                                       transport
+
+eqCO2_MinP        kg         Float     kg CO2         yes
+                  CO2eq/kg             equivalent per
+                  of mineral           kg of element
+                  phophorus            for fertilizer
+                                       synthesis and
+                                       transport
+
+eqCO2_MinK        kg         Float     kg CO2         yes
+                  CO2eq/kg             equivalent per
+                  of mineral           kg of element
+                  potassium            for fertilizer
+Name                    Unit         Type    Definition        Mandatory Note
+                                             synthesis and
+                                             transport
+
+eqCO2_PRO               kg           Float   kg CO2            yes       GESTIM+
+                        CO2eq/t of           equivalent per
+                        residual             t of EOM
+                        organic              product for
+                        product              production;
+                                             storage and
+                                             transport
+
+CoutT                   euros/t      Integer Price of a ton    no
+                                             of fertilizer
+
+QuantiteDispoAnnuelleT kg for        Integer Amount of         no        in engrais.gaml:
+                       mineral               available                   quantiteDispoAnnuelleKg
+                        and t for            fertilizer at
+                        organic              territory level
+                        fertilizer
+
+plan_epandage           -            Text    Specifies      yes
+                                             whether the
+                                             fertilizer is
+                                             covered by the
+                                             spreading
+                                             plan: ‘true’ or
+                                             ‘false’.
+
+
+
+
+3.3.7 Prix de vente des cultures (prixVentes.csv)
+Description: Ce fichier décrit les prix de vente des cultures dont la production est simulée
+dans MAELIA. Il doit comprendre toutes les cultures simulées qui sont commercialisées. Il
+est possible de fournir plusieurs fichiers correspondant à plusieurs scénarios de prix de
+vente des cultures comme intrant. Toutefois, ces fichiers doivent porter le nom :
+“prixVentes” + nom du scénario + “.csv” (par exemple prixVentesSC1.csv). Dans MAELIA, la
+liste des scénarios est définie dans la variable “listScenarioPrix” et le scénario de prix
+principal dans “MainPriceScenario”.
+
+Chemin : … / marcheAgricole
+
+Champs
+
+
+ champ CSV               Valeurs                 Désignation             Remarque
+
+ ID_TYPE                 Texte                   Identifiant des
+                                                 espèces cultivées
+
+ NOM                     Texte                   Nom de l’espèce         Information
+                                                 cultivée                indicative pour
+                                                                         l’utilisateur
+                                                                         uniquement, non
+                                                                         utilisée par MAELIA
+
+ Colonnes années         Décimal                 Prix par an             €/ha
+
+
+3.3.8 Prime des cultures (primes.csv)
+Description: Ce fichier décrit les primes couplées aux cultures par an. Il doit comprendre
+toutes les cultures simulées bénéficiant d’une prime couplée. Ces primes peuvent être
+définies par département.
+
+Chemin : … / marcheAgricole
+
+Champs
+ champ CSV               Valeurs                 Désignation             Remarque
+
+ ID_TYPE                 Texte                   Identifiant des
+                                                 espèces cultivées
+
+ NOM                     Texte                   Nom de l’espèce         Information
+                                                 cultivée                indicative pour
+                                                                         l’utilisateur
+                                                                         uniquement, non
+                                                                         utilisée par MAELIA
+
+ ID_DEPARTEMENT          Texte                   ID du département
+
+ Colonnes années         Décimal                 Prix par an             €/ha
+
+
+3.3.9 Charges opérationnelles par ITK hors irrigation
+(chargesOp.csv)
+Description: Ce fichier décrit les charges de opérationnelles (hors frais d’irrigation) par an
+par ITK. Ces coûts représentent le coût cumulé des intrants par ITK par an. La prise en
+compte de ces coûts permet de calculer une marge-brute en retranchant ceux-ci de la
+somme (rendement x prix + primes).
+
+Chemin : … / marcheAgricole
+
+Champs
+ champ CSV                        Valeurs         Désignation                 Remarque
+
+ NOM_ITK_AFFICHAGE                Texte           Identifiant unique de
+                                                  l’ITK tel que défini dans
+                                                  le fichier de règles de
+                                                  décision
+                                                  (reglesDeDecisions.csv)
+
+ ESPECE_x_materielIrrigation      Texte           Description des             Information
+                                                  combinaisons espèces        indicative pour
+                                                  de cultures x matériel      l’utilisateur
+                                                  d’irrigation                uniquement,
+                                                                              i.e. non utilisée
+                                                                              par MAELIA
+
+ Colonnes années                  Décimal         Prix par an                 €/ha
+
+
+3.3.10 Charges de passage par ITK
+(chargesDePassage.csv)
+Description: Ce fichier décrit les charges de passage (hors frais d’irrigation) par an par ITK.
+Ces coûts représentent le coût matériel cumulé par ITK par an. La prise en compte de ces
+coûts permet de calculer une marge-semi nette en retranchant ceux-ci de la marge brute.
+
+Chemin : … /marcheAgricole
+
+Champs
+
+
+ champ CSV                        Valeurs         Désignation                 Remarque
+
+ NOM_ITK_AFFICHAGE                Texte           Identifiant unique de
+                                                  l’ITK tel que défini dans
+                                                  le fichier de règles de
+ champ CSV                         Valeurs        Désignation                Remarque
+
+                                                  décision
+                                                  (reglesDeDecisions.csv)
+
+ ESPECE_x_materielIrrigation       Texte          Nom d’affichage de         Information
+                                                  l’ITK ouespèce cultivée    indicative pour
+                                                  x matériel d’irrigation    l’utilisateur
+                                                                             uniquement,
+                                                                             i.e. non utilisée
+                                                                             par MAELIA
+
+ Colonnes années                   Décimal        Prix par an                (€/ha)
+
+
+3.3.11 Prix et taxe sur l’eau (prixEau.csv et
+redevanceEau.csv)
+Description: ces deux fichiers décrivent les redevances sur l’eau brute et le prix de l’eau
+(lorsqu’il y en a un).
+
+Chemin : … / marcheAgricole
+
+Champs
+
+
+ champ CSV
+ prixEau.csv             Valeurs                 Désignation             Remarque
+
+ source                  Texte                   Nature de le            NAPP : nappe
+                                                 ressource               phréatique, SURF :
+                                                                         eau de surface, RET
+                                                                         : eau retenue ou
+                                                                         CAN : eau de canal
+
+ Colonnes années         Décimal                 Prix par m3             €/m3
+ champ CSV de
+ redevanceEau.csv        Valeurs                Désignation             Remarque
+
+ source                  Texte                  Nature de le            NAPP : nappe
+                                                ressource               phréatique, SURF :
+                                                                        eau de surface, RET
+                                                                        : eau retenue ou
+                                                                        CAN : eau de canal
+
+ Colonnes années         Décimal                Taxe par an             €/m3
+
+
+3.3.12 Autres coûts (prixEau.csv)
+D’autres fichiers de coûts plus spécialisés sont également disponibles:
+
+     coûts ASA (voir documentation ici: http://maelia-platform.inra.fr/donnees/donnees-
+     agricoles/marche-agricole-2/charges-operationnelles-irrigation/charges-collectifs-
+     dirrigation/)
+
+     charge fixe matériel irrigation et d’accès aux ressources eaux (voir documentation ici :
+     maelia-platform.inra.fr/donnees/donnees-agricoles/marche-agricole-2/charges-fixes-
+     irrigation/)
+
+     ….
+
+Ils sont à instruire spécifiquement en fonction des objectifs des projets.
+
+
+3.3.13 Biais de perception des agriculteur
+(perceptionAgriculteurs.csv)
+Description: Ce fichier permet d’affecter à chaque agriculteur un biais de perception de
+l’état de l’environnement. Ces biais permettent d’éviter une synchronisation parfaite des
+actions des agriculteurs qui ont les mêmes règles de décision de déclenchement des
+opérations techniques.
+Chemin : … / agriculteur
+
+Champs
+
+
+                                              Identifiant de
+ Colonne 0             Texte                  l’agriculteur
+
+ Colonne 1             Décimal                Biais de perception   Jour
+                                              des fenêtres
+                                              temporelles
+
+ Colonne 2             Décimal                Biais de perception   Coefficient
+                                              végétation
+
+ Colonne 3             Décimal                Biais de perception   Coefficient
+                                              des précipitations
+                                              et teneur en eau du
+                                              sol
+
+Exemple de fichier perceptionAgriculteurs :
+3.3.14 Profil de comportement d’agriculteur
+(profilesAgriculteurs.csv)
+Description: Ce fichier permet d’affecter à chaque agriculteur un profil (type) de
+comportement traduisant un poids affecté aux objectifs de maximisation du revenu,
+minimisation de la variabilité du revenu, maximisation des jours sans travail et
+minimisation des coûts de transaction (Cf. http://maelia-
+platform.inra.fr//modeles/processus-agricoles/choix-dassolement/assolement-par-
+fonctions-de-croyance/). Ce fichier n’est utile que si l’on active le module de choix
+d’assolement (vs. assolement via les données d’entrée). L’utilisation de ce fichier relève
+d’une utilisation suivant un mode expert de MAELIA.
+
+Chemin : … / agriculteur
+
+La structure de ce fichier est décrite via l’exemple de fichier profilesAgriculteurs ci-dessous:
+3.4 Module hydrologique
+Chemin: … / includes /CAS_DE_ÉTUDE /modeleHydrographique
+
+Sous-dossier : zonesHydrographiques
+
+
+3.4.1 Bassins versants élémentaires (ZH.shp)
+Description: Ce fichier décrit les bassins versants élémentaires (BVe, ou zone
+hydrographiques-ZH) de MAELIA c.-à-d. le zonage des sous-bassins versant spatialement
+explicite correspondant à la résolution du module hydrologique (sub-watershed in SWAT).
+L’INRA a développé une base de données fournissant les informations ci-dessous pour tout
+le bassin hydrographique Adour-Garonne (disponible sur demande).
+
+Chemin: … / zonesHydrographiques
+
+Champs
+
+
+ champ BDF              Valeurs                Désignation             Remarque
+
+ ID_ZH                  Texte                  Identifiant unique
+                                               du BVe
+
+ EU_CD                  Texte                  Identifiant de la       Optionnel. A utiliser
+                                               masse d’eau             s’il est intéressant
+                                               élémentaire             de produire des
+                                               (zonage Agence de       sorties à l’échelle
+                                               l’eau) majoritaire du   des masses d’eau
+                                               BVe                     des agences de
+                                                                       l’eau
+ champ BDF              Valeurs                Désignation            Remarque
+
+ EU_CD_exut             Texte                  Identifiant de la      Optionnel. A utiliser
+                                               masse d’eau            s’il est intéressant
+                                               élémentaire            de produire des
+                                               contenant l’exutoire   sorties à l’échelle
+                                               du BVe                 des masses d’eau
+                                                                      des agences de
+                                                                      l’eau.
+
+ PERCENTAGE             Décimal                Pourcentage du BVe     Optionnel. A utiliser
+                                               étant réellement       s’il est intéressant
+                                               rattaché à la masse    de produire des
+                                               d’eau élémentaire      sorties à l’échelle
+                                                                      des masses d’eau
+                                                                      des agences de
+                                                                      l’eau
+
+ ID_ND_EXUT             Texte                  Identifiant du BVe     Sert à décrire le
+                                               dans lequel le BVe     chaînage des BVe
+                                               considéré se jette     en terme
+                                                                      d’écoulement
+                                                                      amont-aval (arbre
+                                                                      d’écoulement entre
+                                                                      les BVe)
+
+
+3.4.2 Géomorphologie des bassins versants élémentaires
+(donneesMNT_ZH.csv)
+Description: Données attributaires des ZH fournissant les informations sur la
+géomorphologie des celles-ci nécessaires à la simulation de l’hydrologie avec SWAT (les
+codes entre parenthèses indiquent le nom des variables SWAT). La valeur de ces variables
+est à estimer en utilisant l’outil ARCSWAT, extension ArcGIS/ArcView développé par le
+consortium SWAT pour les calculer (https://swat.tamu.edu/software/arcswat/).
+
+Chemin: … / zonesHydrographiques
+
+Champs
+
+
+ champ BDF          Valeurs    Désignation                        Remarque
+
+ No. ZH MAELIA      Texte      Identifiant unique de la bassin
+                               versant élémentaire concernée
+
+ W_bnkful           Décimal Width of channel at top of bank       Voir variable SWAT
+ (CH_W2)                       (m)                                correspondante
+
+ depth_bnkful       Décimal Depth of water in channel when        Voir variable SWAT
+ (CH_D)                        filled to bank (m)                 correspondante
+
+ slp_ch (CH_S2)     Décimal Average channel slope along           Voir variable SWAT
+                               channel length (m/m                correspondante
+
+ L_Ch (CH_L2)       Décimal Length of main channel (m)            Not used anymore
+
+ L_slp.zh           Décimal Average slope length (m)              Voir variable SWAT
+ (SLSUBBSN)                                                       correspondante
+
+ CH_S1              Décimal Average slope of tributary            Voir variable SWAT
+                               channels (m/m)                     correspondante
+
+ CH_W1              Décimal Average width of tributary            Voir variable SWAT
+                               channel (m)                        correspondante
+
+
+3.4.3 Contour du territoire d’étude (contourZH.shp)
+Description: Ce fichier décrit le contour du territoire d’étude. Il correspond à un agrégat de
+bassins versants élémentaires (BVe) lorsque l’on simule l’hydrologie.
+
+Chemin: … /zonesHydrographiques
+
+Champs
+
+Vide, c’est un contour
+
+
+3.4.4 Homogeneous Respons Units (HRU_0.25.shp et
+HRU_SansIlots.shp)
+Description: Ces fichiers décrivent les HRU utilisé pour simuler la phase sol de l’hydrologie
+(SWAT®). Ils correspondent à un croisement de classes de sols (type de sol), d’occupation
+du sol (voir section dédiée), et de pentes (XXXX). Dans la plateforme Maelia, il est possible
+de choisir de ne simuler que la partie hydrologique, sans la partie agricole. Dans ce cas, les
+surfaces agricoles sont simulées via les formalismes SWAT® (vs. modèle de culture). De ce
+fait, deux types de fichiers HRU sont disponibles en entrée de Maelia :
+
+     hru_0.25.shp quand le module agricole n’est pas activé. Ce fichier couvre toute la
+     surface du terrain d’étude sur la base des informations de la couche Occupation du
+     sol.
+     hruSansIlots_0.25.shp quand le module agricole est activé. Dans ce fichier, les
+     surfaces des îlots RPG ne sont pas représentées, les autres surfaces sont renseignées à
+     partir de la couche Occupation du sol.
+
+La structure des deux fichiers est la même.
+
+Chemin: … /HRU
+
+Champs
+champ BDF      Valeurs        Désignation           Remarque
+
+ID_HRU         Texte          Identifiant unique
+                              du HRU
+
+FRACTION       Décimal        Pourcentage de la
+                              surface du sous
+                              bassin versant
+                              couvert par ce HRU
+
+ID_ZH          Texte          Identifiant unique
+                              du BVe dans lequel
+                              se trouve le HRU
+
+SURFACE        Décimal        Surface du HRU        m2
+
+ID_SOL         Texte          Identifiant du type
+                              de sol
+                              correspondant à ce
+                              HRU
+
+ID_PENTE       Décimal        Valeur de la classe   5 classes possibles
+                              de pente moyenne      (%): 1,5 - 5 - 11 -
+                              correspondant à ce    22,5 - 35
+                              HRU
+
+ID_CLC         Texte          Identifiant du type
+                              d’occupation du sol
+                              correspondant à ce
+                              HRU
+
+
+3.4.5 Flux d’eau via les canaux (canaux.csv) - OPTIONEL
+Description: Ce fichier décrit les flux d’eau entre les BVé via des canaux. Dans MAELIA, les
+canaux sont considérés comme des équipements de captage dans un BVé et de rejet dans
+un autre BVé. Ils sont créés à l’initialisation de MAELIA. Seuls les canaux qui transfèrent de
+l’eau d’un BVé à un autre, ou ceux qui prélèvent de l’eau dans le terrain d’étude, mais
+rejettent l’eau à l’extérieur (ou inversement) sont pris en compte ici.
+
+Chemin: …/canaux
+
+Champs
+
+
+ champ BDF                Valeurs            Désignation                          Remarque
+
+ Nom_Canal                Texte              Information utilisée pour
+                                             l’affichage des sorties
+
+ ID_Canal                 Texte              Identifiant de la ressource (de
+                                             type canal) associée
+
+ BVe_origine              Texte              Code du BVe de départ du canal
+                                             et donc de prélèvement de l’eau.
+
+ dataObs                  Texte              Nom du fichier contenant les
+                                             données de prélèvements
+                                             journaliers (ce dernier ayant la
+                                             forme d’une colonne de date
+                                             (jour de l’année) puis d’une
+                                             colonne par année (cette
+                                             dernière étant l’entête de la
+                                             colonne). Les débits sont
+                                             exprimés en m3/s (voir exemple
+                                             ci-dessous).
+
+ NoDataHiver              Décimal            Débit de prélèvement en cas          m3/s
+                                             d’absence de donnée. Peut être
+champ BDF        Valeurs   Désignation                          Remarque
+
+                           fixé au débit max.
+
+idPointRef       Texte     Identifiant de la station de
+                           mesure à considérer pour la
+                           période de prédictions
+                           (i.e. période post-observations).
+
+BVeAvantObs      Texte     BVe à considérer pour estimer la
+                           moyenne des prélèvements
+                           entre le débit observés au point
+                           de référence et le canal.
+
+debitmax         Décimal   Débit maximum autorisé du            m3/s
+                           canal ; n’est pas considéré
+                           pendant le période de forçage.
+
+BVe_retourX      Texte     [Point de rejet] Code du BVe du
+                           point de rejet. Le X indique le n°
+                           d’ordre.
+
+fractionEteX     Décimal   [Point de rejet] Fraction du
+                           prélèvement devant être relâché
+                           à ce point de prélèvement, si
+                           débit de prélèvement forcée par
+                           les données mesurées
+                           journalièrement et date
+                           comprise entre (1 juin et 31
+                           octobre). Le X indique le n°
+                           d’ordre.
+
+fractionHiverX   Décimal   [Point de rejet] Fraction du
+                           prélèvement devant être relâché
+ champ BDF                 Valeurs            Désignation                           Remarque
+
+                                              à ce point de prélèvement, si
+                                              débit de prélèvement de
+                                              période sans donnée ou hiver (1
+                                              novembre au 31 mai). Le X
+                                              indique le n° d’ordre.
+
+ *Remarque : Dans le       ’ dans
+ cas où l’on a             BVe_origine,
+ plusieurs points          dataObs,
+ d’alimentation du         NoDataHiver et
+ canal alors mettre les    debitmax.*
+ différentes valeurs
+ séparées par ’
+
+Exemple de fichier contenant les données de prélèvements journaliers:
+
+
+
+
+3.4.6 Données des retenues (retenueParZH.shp)
+Description: Ce fichier décrit les retenues collinaires et autres plans d’eau. Il a été constitué
+par l’INRA via l’intégration des informations spatiales des BD TOPO® et BD CARTHAGE®, des
+informations attributaires des bases de données des DDT et des données issues de
+traitements SIG.
+
+Chemin: …/retenuesCollinaires
+Champs
+
+
+champ BDF    Valeurs         Désignation            Remarque
+
+ID_RESSOUR   Texte           Identifiant unique
+                             de la retenue
+
+ID_ZH        Texte           Identifiant unique
+                             du BVe
+
+ORDREDRAIN   Entier          Numéro d’ordre de      Seules les retenues
+                             la retenue sur le      sur le drain
+                             drain principal dans   principal sont
+                             le sens amont ->       positionnées sur le
+                             aval au sein des BVe   gradient amont-
+                                                    aval. Pour les autres
+                                                    retenues la valeur
+                                                    est égale à zéro
+
+FRACTIONDR   Décimal [0-1]   Rapport impluvium      Issus de traitements
+                             unique/ surface du     SIG. Disponible sur
+                             BVe de MAELIA          le bassin Adour-
+                                                    Garonne
+
+SURFACERET   Décimal         Surface du plan        m2. Estimée à partir
+                             d’eau                  des données de la
+                                                    BD TOPO®
+
+TYPEOFRET    Entier          Type de retenue        ‘SURNAPPE’;
+                                                    ‘Deconnectees’;
+                                                    ‘Connectees’
+
+VOLMAX       Décimal         Volume de la
+                             retenue
+ champ BDF               Valeurs                 Désignation             Remarque
+
+ TOPONYME                Texte                   Toponyme de la          (optionnel) Sert à
+                                                 retenue                 spatialiser les
+                                                                         points de
+                                                                         prélèvement
+
+ TYPEDEDRAIN             Texte                   Si retenue              ‘principal’
+                                                 connectée: préciser
+                                                 si connectée au
+                                                 cours d’eau
+                                                 principal
+
+ Q_RESERVE               Décimal                 Débit réservé           m3/s (donnée non
+                                                                         renseignée
+                                                                         actuellement)
+
+
+3.4.7 Points de prélèvement ou de rejet
+(ppAep.shp, rjAep.shp, ppInd.shp, rjInd.shp, ppIrr.shp)
+
+Description : Ces fichiers décrivent les points de prélèvement pour l’AEP, Industrie et
+l’irrigation et de rejet des STEPs publiques et industrielles. Ils correspondent à des
+données issues des Agence de l’eau ou des bases de données des OUGC pour les points de
+prélèvement d’irrigation. Ces données ont été utilisées pour faire le lien entre les îlots
+irrigables et des ressources en eau. Elles ne sont pas utilisées par le simulateur.
+
+Chemin : …/équipements
+
+Champs
+champ BDF    Valeurs   Désignation           Remarque
+
+ID_EQU       Texte     Identifiant de        Attention, pour les
+                       l’équipement de       prélèvements pour
+                       prélèvement ou de     irrigation, cet
+                       rejet                 identifiant n’est pas
+                                             nécessairement
+                                             unique : un
+                                             équipement (une
+                                             pompe) peut être
+                                             déplacé en
+                                             plusieurs endroit
+                                             pour prélever de
+                                             l’eau. Dans certains
+                                             cas, la clé unique se
+                                             compose de cet
+                                             identifiant et du
+                                             code_irrigant. On
+                                             parle aussi de
+                                             « code ouvrage »
+
+ID_RESS_ZH   Texte     ID ressource en eau
+                       objet du
+                       prélèvement ou du
+                       rejet
+
+ID_ZH        ID_ZH     Identifiant unique
+                       du BVe
+
+TAUX         Double    Importance du         %
+                       point dans la zone
+                       d’étude
+champ BDF    Valeurs   Désignation           Remarque
+
+NATURE       Texte     Type de ressource     NAPP, SURF, RET
+                       objet du
+                       prélèvement ou du
+                       rejet
+
+VOL_AGENCE   Décimal   Volume moyen          Si la donnée
+                       estimé par l’agence   n’existe pas pour les
+                       (m3/an)               points de rejet il est
+                                             possible de
+                                             l’estimer à partir de
+                                             la donnée de
+                                             prélèvement en
+                                             appliquant un
+                                             coefficient constant
+                                             de part d’eau non
+                                             consommée (eau
+                                             non rejetée). Pour
+                                             permettre cette
+                                             estimation il faut
+                                             alors remplir le
+                                             fichier IND_RJI.csv
+                                             qui décrit les liens
+                                             entre point de
+                                             prélèvement et de
+                                             rejet industriel. I
+                                             doit contenir au
+                                             moins 4 colonnes
+                                             séparées par des ‘ ;’.
+                                             La première
+                                             colonne contient
+champ BDF      Valeurs   Désignation             Remarque
+
+                                                 l’identifiant du
+                                                 point de
+                                                 prélèvement et la
+                                                 4ème l’identifiant
+                                                 du point de rejet.
+
+CODE_INSEE     Texte     Identifiant de la       Utilisé dans le
+                         commune du point        module
+                                                 d’estimation des
+                                                 prélèvements pour
+                                                 l’AEP en mobilisant
+                                                 les données sur les
+                                                 caractéristiques
+                                                 socio-
+                                                 professionnelles
+                                                 des habitants
+                                                 (données INSEE)
+
+ID_RESSOURCE             Identifiant précis de   Optionnel. Non
+                         la ressource            utilisé dans
+                         prélevée (non           MAELIA.Sert à
+                         utilisé)                spatialiser les
+                                                 points de
+                                                 prélèvement/rejet
+
+TOPONYME       Texte     Toponyme de la          Optionnel. Non
+                         ressource               utilisé dans MAELIA.
+                                                 Sert à spatialiser les
+                                                 points de
+                                                 prélèvement/rejet
+ champ BDF             Valeurs               Désignation           Remarque
+
+ cours_eau             Texte                 ID du cours d’eau     Optionnel. Non
+                                             pour prélèvement      utilisé dans MAELIA.
+                                             ou rejet              Sert à spatialiser les
+                                                                   points de
+                                                                   prélèvement/rejet
+
+ syst_aqui             Texte                 ID ressource en eau   Optionnel. Non
+                                             pour les              utilisé dans MAELIA.
+                                             prélèvements en       Sert à spatialiser les
+                                             aquifère              points de
+                                                                   prélèvement/rejet
+
+Champs supplémentaires si points de prélèvement pour irrigation (ppIrr.shp)
+
+
+ champ BDF             Valeurs               Désignation           Remarque
+
+ NOM_ASA et ID_ASA     Texte                 Identifiant ASA       Optionnel. Utilisé
+                                                                   pour établir le lien
+                                                                   entre exploitation
+                                                                   et point de
+                                                                   prélèvements. En
+                                                                   absence de
+                                                                   données, le lien
+                                                                   point de
+                                                                   prélèvement – ilot
+                                                                   sera simplement
+                                                                   basé sur des règles
+                                                                   de distance
+
+ CODE_IRRIG et         Texte                 Identifiant de        Optionnel. Utilisé
+ ID_IRRIG                                    préleveur             pour établir le lien
+champ BDF    Valeurs   Désignation      Remarque
+
+                                        entre exploitation
+                                        et point de
+                                        prélèvements. En
+                                        absence de
+                                        données, le lien
+                                        point de
+                                        prélèvement – ilot
+                                        sera simplement
+                                        basé sur des règles
+                                        de distance
+
+VOLUME_AUT   Entier    Quota de la      Optionnel. Sert à
+                       dernière année   savoir si le point de
+                                        prélèvement est
+                                        toujours
+                                        opérationnel et à
+                                        déterminer les
+                                        code_irrigant étant
+                                        des collectifs
+
+rssce_NOM    Texte     Nom de la        Optionnel. Si
+                       ressource        présent, si le nom
+                                        contient la chaine
+                                        de caractère ‘canal’
+                                        alors la ressource
+                                        est déclarée de type
+                                        CAN. Si donnée non
+                                        présente, la
+                                        ressource est de
+                                        type CAN si le point
+                                        de prélèvement est
+ champ BDF              Valeurs                Désignation             Remarque
+
+                                                                       à moins de 50m du
+                                                                       tracé du canal
+
+
+3.4.8 Bandes d’élévation (altitudeAgregeesParZH.shp)
+Description: Ce fichier décrit les bandes d’altitudes utilisée dans le module hydrologique
+pour estimer les chutes de neige.
+
+Chemin : … /altitude
+
+Fichiers
+
+
+ champ BDF              Valeurs                Désignation             Remarque
+
+ ID_ALTI                Texte                  Identifiant de la
+                                               couche d’élévation
+
+ ID_ZH                  Texte                  Identifiant unique
+                                               du BVe dans lequel
+                                               se trouve la bande
+                                               d’élévation
+
+ ALTI_MOY               Décimal                Altitude moyenne        m
+                                               de la bande
+                                               d’élévation. Des
+                                               classes d’altitude
+                                               ont été
+                                               sélectionnées pour
+                                               des raisons de
+                                               temps de calcul.
+                                               Sept valeurs
+                                               possibles : 250, 750,
+ champ BDF               Valeurs                    Désignation              Remarque
+
+                                                    1250, 1750, 2250,
+                                                    2750, 3250
+
+
+3.4.9 Modèle Numérique de Terrain
+Description : Modèle numérique de Terrain servant à calculer les altitudes et les pentes.
+Utilisé dans le module hydrologique pour estimer des bandes d’altitudes puis les chutes de
+neige.
+
+Chemin : … /zonesHydrographiques
+
+Fichiers
+
+     alti25m_ascii.txt : fichier ASCII d’altitude
+     MNTTIFN_Alti.tif : fichier TIFF d’altitude
+     pente_percent_ascii.txt: fichier ASCII de pente exprimé en %
+
+
+3.4.10 Occupation du sol (CLC.shp) - OPTIONEL
+Description : Ce fichier décrit l’occupation du sol. Il correspond le plus souvent à Corine
+land Cover. Il n’est pas utilisé par le simulateur puisque les informations sont contenues
+dans les HRU.
+
+Chemin : … /clc
+
+Champs
+
+
+ champ BDF               Valeurs                    Désignation              Remarque
+
+ TYPE_CLC                Texte                      Descriptif
+                                                    occupation du sol :
+                                                    Bati, Agricole, Foret,
+ champ BDF                 Valeurs                Désignation             Remarque
+
+                                                  ZoneHumide,
+                                                  SurfaceEnEau
+
+ ID_ZH                     Entier                 Identifiant unique
+                                                  de BVe
+
+ ID-CLC                    Texte                  Identifiant de          Pour faire le lien
+                                                  nomenclature CLC        avec CLC
+
+ INDICE_CLC                Entier                 Code d’occupation       Attention les codes
+                                                  du sol : Bati=1,        de nomenclatures
+                                                  Agricole=2, Foret=3,    renvoient à des
+                                                  ZoneHumide=4,           codes prédéfinis
+                                                  SurfaceEnEau=5,         dans MAELIA
+
+
+3.4.11 Cours d’eau principaux
+(tronconsPrincipauxParZH.shp) - OPTIONEL
+Description : Ce fichier décrit les drains principaux (cours d’eau) des bassins versants
+élémentaires (BVe). Ce fichier n’est pas utilisé par le simulateur. Il peut être utilisé lorsque
+l’on désire produire des cartes réalistes et explicités sur les cours d’eau. Dans la même
+logique le fichier tronconsParZH décrivant tous les cours d’eau (ex. de la BD CARTAGE®)
+peux être aussi utilisé.
+
+Chemin : …/troncons
+
+Champs
+
+
+ champ BDF                     Valeurs               Désignation            Remarque
+
+ CODE_HYDROARCIDarcid          Texte                 Identifiant de la
+                                                     ressource =
+ champ BDF                     Valeurs               Désignation            Remarque
+
+                                                     identifiant du BVe
+
+
+3.4.12 Tracé des canaux (canaux.shp) - OPTIONEL
+Description : Ce fichier décrit les canaux. Il a été constitué par l’INRA via l’intégration des
+informations spatiales de la BD TOPO® et BD CARTHAGE®, des bases de données
+attributaires des DDT et des résultats de traitements SIG. Dans Maelia, tous les canaux de la
+zone d’étude ne sont pas représentés.
+
+Chemin : …/canaux
+
+Champs
+
+
+ champ BDF               Valeurs                  Désignation              Remarque
+
+ ID_ZH                   Texte                    Identifiant unique
+                                                  du BVe
+
+ ID_RESSOUR              Texte                    ID du canal              Cet identifiant de
+                                                                           ressource en eau
+                                                                           doit être unique
+                                                                           (Attention à ne pas
+                                                                           prendre un id de
+                                                                           BVe)
+
+
+3.4.13 Tracé des aquifères (napeParZH.shp) - OPTIONEL
+Description : Ce fichier décrit les nappes superficielles. Les nappes profondes ne sont pas
+prises en compte explicitement dans MAELUA. En France, ces données proviennent du
+Référentiel Hydrogéologique Français (BDRHF) disponible sur le site des Agence de l’eau ou
+dans la Banque Hydro (http://www.hydro.eaufrance.fr/). Ce fichier est utilisé pour des
+objectifs d’affichage mais pas de simulation.
+Chemin : …/nappe
+
+Champs
+
+Aucun champ utilisé à l’état actuel
+
+
+3.4.14 Tracés des collectifs (reseaux_asa.shp) -
+OPTIONEL
+Description : Ce fichier décrit le tracé des réseaux collectifs d’irrigation (ex. ASA). Il n’est pas
+utilisé dans la simulation. Il est utilisé pour établir une relation entre les ilots irrigables et
+les points de prélèvements des réseaux collectifs. Peut être utilisé lors de la production de
+cartographie.
+
+Chemin :
+
+Champs
+
+
+ champ BDF          Valeurs       Désignation                                       Remarque
+
+ ID_ASA             Texte         Identifiant de l’ASA (ou du collectif)
+
+ NOM                Texte         Nom du collectif                                  Optionnel
+
+
+
+3.5 Module Normatif
+Chemin : … / includes /CAS_DE_ÉTUDE /modeleNormatif
+
+Sous-dossiers : barrages, pointsDeReference, ZoneAdministrative
+
+
+3.5.1 Points de mesure de l’hydrologie et de référence pour
+les débits (pointsDeReference.shp)
+Description : Ce fichier décrit les points de mesure de débits (station hydrographique –
+STH) et points nodaux sur lesquels on cherche à maintenir un débit réglementaire (DOE
+pour Débit d’Objectif d’Etiage et DCR pour Débit de Crise).
+
+Chemin : …/pointsDeReference
+
+Champs
+
+
+ champ BDF              Valeurs                Désignation            Remarque
+
+ ID_STH                 Texte                  Identifiant de la
+                                               station
+                                               hydrographique
+                                               (STH)
+
+ ID_ZH                  Texte                  Identifiant du BVé
+                                               dans lequel se
+                                               trouve le point de
+                                               référence
+
+ IS_NODAL               O/N                    Booléen sur le fait    Oui/Non
+                                               que la STH est un
+                                               point nodal
+
+ DOE                    Décimal                Débit d’objectif       (m3/s)
+                                               d’étiage lorsque le
+                                               point est un point
+                                               nodal
+
+ DCR                    Décimal                Débit de crise         (m3/s)
+                                               lorsque le point est
+                                               un point nodal
+
+
+3.5.2 Barrages (barrage.csv)
+Description : Ce fichier décrit les barrages. Dans MAELIA, seuls les lâchers pour le soutien
+d’étiage sont simulés. Les lâchers d’hydroélectricité ou d’eau domestique ne sont pas
+simulés.
+
+Chemin : …/barrage
+
+Champs
+
+Dans ce fichier chaque colonne représente un barrage alors que les variables sont en ligne
+(voir exemple ci-dessous).
+
+ATTENTION : l’ordre des lignes de ce fichier doit être conservé.
+
+
+ champ BDF                      Valeurs    Désignation                 Remarque
+
+ Nom                            String     Identifiant unique du
+                                           barrage
+
+ ID_STATION_REF                 String     Identifiant de la station   S’il y a plusieurs
+                                           de mesure réalimentée       stations les séparer
+                                           par le barrage              par ‘
+
+ NOM_Station_ref                String     Champ indicatif pour
+                                           l’utilisateur pour
+                                           rappeler le nom de la
+                                           station de mesure
+
+ PRIORITE                       Entier     Indique la priorité du      Une plus petite
+                                           barrage par rapport aux     valeur de l’indice
+                                           autres                      indique qu’il sera
+                                                                       prioritairement
+                                                                       utilisé
+
+ ZH_ENTREE                      String     Identifiant du premier
+                                           BVequi recevra les
+champ BDF              Valeurs    Désignation                Remarque
+
+                                  lâchers du barrage
+
+DATE_LACHER_POSSIBLE   Entier     Le jour de l’année à
+                                  partir duquel le premier
+                                  lâcher pour l’étiage est
+                                  possible (si pertinent)
+
+JOURS_DECISION_LACHER liste       Le ou les jours de la      ’.
+                       d’Entier   semaine où l’on prend la
+                                  décision du soutien
+                                  d’étiage. Dans le cas de
+                                  plusieurs jours, séparer
+                                  les valeurs par le
+                                  caractère ‘
+
+V_total                Double     Le volume total du         hm3
+                                  barrage
+
+V_soutien              Double     Le volume maximal          hm3
+                                  alloué pour le soutien
+                                  d’étiage
+
+V_critique             Double     Le volume seuil à partir   hm3
+                                  duquel le débit maximal
+                                  de lâcher doit être
+                                  diminué
+
+Q_reserve              Double     Le débit réservé           m3/s
+
+Qse_max                Double     Le débit maximal de        m3/s
+                                  lâcher
+ champ BDF                    Valeurs    Désignation                 Remarque
+
+ Qse_critique                 Double     Fraction du débit
+                                         maximal de lâcher
+                                         utilisé lorsque le volume
+                                         du barrage est en
+                                         dessous de volume
+                                         critique
+
+ EfficienceEntreeTerritoire   Double     L’efficience d’un           fraction
+                                         transfert en entrée du
+                                         terrain (une partie de
+                                         l’eau est perdue entre la
+                                         sortie du barrage et
+                                         l’entrée de la zone
+                                         d’étude)
+
+ EfficienceDeGestion          Double     L’efficience de gestion     fraction
+                                         est la fraction du débit
+                                         lâcher atteignant le
+                                         point DOE
+
+ tps_transfert                Entier     Le temps nécessaire         Jours
+                                         à l’eau pour arriver à
+                                         l’entrée zone d’étude,
+                                         depuis la sortie du
+                                         barrage. Minimum 1 jour
+
+ ID_RETENUES                  String     Précise la retenue
+                                         associée, si celle-ci est
+                                         sur le territoire
+
+Remarque : Pour les jours de la semaines utilisés pour prendre des décisions de soutiens
+d’étiage (JOURS_DECISION_LACHER), la valeur est renseignée dans ce fichier par barrage,
+mais en fait une seule valeur sera considérée par gestionnaire de barrage.
+
+Exemple de fichier descriptif de barrages :
+
+
+
+
+3.5.3 Zone administrative (zonesAdministratives.shp)
+Description : Ce fichier décrit les zones administratives de régulation des prélèvements.
+Ces zones sont découpées en secteurs administratifs (section suivante) dans lesquels
+tournent les restrictions.
+
+Chemin : …/zonesAdministratives
+
+Champs :
+
+
+ champ BDF               Valeurs               Désignation            Remarque
+
+ ID_ZA                   Texte                 Identifiant de la
+                                               zone administrative
+ champ BDF               Valeurs                 Désignation               Remarque
+
+ ID_STH                  Texte                   Identifiant de la
+                                                 station de mesure
+                                                 correspondant à un
+                                                 point nodal
+
+
+3.5.4 Seuils de restriction par zone administrative
+(seuilsDeRestriction.csv)
+Description : Ce fichier décrit les seuils de restriction par zone administrative.
+
+Chemin : …/zonesAdministratives
+
+Champs :
+
+
+ champ BDF                       Valeurs             Désignation            Remarque
+
+ ID_ZA                           Texte               Identifiant de la
+                                                     zone
+                                                     administrative
+
+ NIVEAU_RESTRICTION              Entier              Niveau de la           [1-N]
+                                                     restriction
+
+ SEUIL                           Décimal             Seuil de débit pour    m3/s
+                                                     déclencher ce
+                                                     niveau de
+                                                     restriction
+ champ BDF                       Valeurs            Désignation            Remarque
+
+ NOM_AFFICHAGE_NIVEAU            Texte              Nom du niveau de
+                                                    restriction utilisé
+                                                    dans l’affichage
+                                                    des sorties
+
+
+3.5.5 Secteurs administratifs
+(secteursAdministratifs.shp)
+Description : Ce fichier décrit les secteurs administratifs (section suivante) dans lesquels
+tournent les restrictions.
+
+Chemin : …/zonesAdministratives
+
+Champs :
+
+
+ champ BDF               Valeurs                Désignation               Remarque
+
+ ID_SECTEUR              Texte                  Identifiant du
+                                                secteur
+                                                administratif
+
+ ID_ZA                   Texte                  Identifiant de la
+                                                zone administrative
+                                                à laquel le secteur
+                                                appartient
+
+ NATURE                  Texte                  Nature de ressource       SURF, NAPP, RET ou
+                                                en eau concernée          CAN
+                                                par les restrictions
+3.5.6 Jours de restriction par secteur administratif
+(joursDeRestriction.csv)
+Description : Ce fichier décrit les jours de restriction par secteur administratif.
+
+Chemin : …/zonesAdministratives
+
+Champs :
+
+
+ champ BDF                             Valeurs            Désignation          Remarque
+
+ ID_SECTEUR                            Texte              Identifiant du
+                                                          secteur
+                                                          administratif
+
+ MATERIEL                              Texte              Liste des types      ’).
+                                                          de matériel
+                                                          d’irrigation
+                                                          (séparé par ‘
+
+ NiveauRestriction                     Entier             Niveau de la         [1-4]
+                                                          restriction
+
+ BaseDeDefinitionDeLaRestriction       Entier             Nombre de jours
+                                                          sur lesquels les
+                                                          restrictions sont
+                                                          définis
+
+ JoursDeRestriction                    Entier             Jours de             Les jours sont
+                                                          restriction          séparés par le
+                                                          numérotés            caractère ‘
+                                                          depuis la date
+                                                          de prise de
+                                                          restriction
+Remarques :
+
+    Dans le cas de restrictions définis sur 7 jours, les numéros de jours définis dans
+    JoursDeRestriction correspondent aux jours de la semaine (i.e. 1 = lundi; 2 = mardi …)
+    MAELIA ayant un pas de temps journalier, il n’est donc pas possible de gérer des
+    restrictions d’une demi-journée. Ainsi une restriction de type 3,5 jours de restriction
+    par semaine devra être modélisé comme 3 ou 4 jours par semaine ou 7 jours sur deux
+    semaines (mais en perdant l’effet semaine, cf. remarque 1)
+    Chaque zone administrative doit n’avoir qu’une valeur de
+    BaseDeDefinitionDeLaRestriction pour un niveau de restriction (i.e. une valeur
+    identique pour les secteurs d’une même zone administrative)
+
+Exemple de fichier de joursDeRestriction :
+3.5.7 Restrictions spécifiques aux canaux
+(RestrictionsDebitCanaux.csv)
+Description : Ce fichier décrit les restrictions spécifiques aux canaux.
+
+Chemin : …/canaux
+
+Champs :
+
+
+ champ BDF                 Valeurs                Désignation              Remarque
+
+ Nom_Canal                 Texte                  Il s’agit du nom du      Cette information
+                                                  canal.                   non utilisée par
+                                                                           MAELIA est là pour
+                                                                           aider la saisie du
+                                                                           fichier par
+                                                                           l’utilisateur
+
+ ID_Canal                  Texte                  Identifiant du canal
+
+ NiveauRestriction         Entier                 Niveau de la             [1-4]
+                                                  restriction
+
+ debitMaxFloat             Décimal                Limitation du débit      ’.
+                                                  de prélèvement
+                                                  pour remplir le
+                                                  canal. Si plusieurs
+                                                  BVe de remplissage
+                                                  alors séparer les
+                                                  valeurs par le
+                                                  caractère ‘
+
+ LimitationSortieCanal     Décimal                Fraction de l’eau du     La valeur 1 signifie
+                                                  canal étant              que l’on relâche,
+                                                  considérée par les       dans les cours
+ champ BDF               Valeurs               Désignation         Remarque
+
+                                               points de rejet «   d’eau, au jour j
+                                               canal »             toute l’eau
+                                                                   contenue dans le
+                                                                   canal à la fin du
+                                                                   jour j-1. A
+                                                                   l’opposée, la valeur
+                                                                   0 implique que le
+                                                                   canal ne rend plus
+                                                                   d’eau au cours
+                                                                   d’eau.
+
+Exemple de fichier RestrictionsDebitCanaux :
+3.6 Module Filières
+
+3.6.1 Produits entrants et sortants des unités de
+transformation (produits.csv)
+Description : Fichier de description de l’ensemble des produits entrants et sortants des
+unités de transformation du territoire d’étude. Ce sont donc des produits bruts et des
+produits finis.. Ces produits sont définis pas leurs propriétés.
+
+Chemin : … /includes/NOM (terrain d’étude)
+
+Champs
+
+
+ Composantes             Valeurs                 Désignation            Unité
+
+ Prix                    Décimal                 Prix de vente du       €/t
+                                                 produit par unité
+                                                 (même prix pour
+                                                 tous les
+                                                 producteurs)
+
+ coutTransportForfait    Décimal                 Prix de transport      €/t
+                                                 pour une quantité
+                                                 définie
+                                                 indépendamment
+                                                 de la distance
+
+ coutTransportKm         Décimal                 Prix de transport au   €/t/km
+                                                 km
+
+ coutEpandage            Décimal                 Prix d’épandage        €/t
+
+ partMS                  Décimal                 Teneur en matière      Coefficient : % de
+                                                 sèche dans le          produits bruts (0 à
+Composantes   Valeurs   Désignation         Unité
+
+                        produit brut        1)
+
+partMO        Décimal   Teneur en matière   Coefficient : % de
+                        organique dans le   produits bruts (0 à
+                        produit brut        1)
+
+N             Décimal   Teneur en azote     kg/t de produits
+                                            bruts
+
+P             Décimal   Teneur en           kg/t de produits
+                        phosphore           bruts
+
+K             Décimal   Teneur en           kg/t de produits
+                        potassium           bruts
+
+Mg            Décimal   Teneur en           kg/t de produits
+                        magnésium           bruts
+
+Ca            Décimal   Teneur en calcium   kg/t de produits
+                                            bruts
+
+Fe            Décimal   Teneur de fer       kg/t de produits
+                                            bruts
+
+Mn            Décimal   Teneur en           kg/t de produits
+                        manganèse           bruts
+
+Zn            Décimal   Teneur en zinc      kg/t de produits
+                                            bruts
+
+Cu            Décimal   Teneur en cuivre    kg/t de produits
+                                            bruts
+ Composantes              Valeurs               Désignation             Unité
+
+ Ni                       Décimal               Teneur en nickel        kg/t de produits
+                                                                        bruts
+
+ Cr                       Décimal               Teneur en chrome        kg/t de produits
+                                                                        bruts
+
+ Pb                       Décimal               Teneur en plomb         kg/t de produits
+                                                                        bruts
+
+ Cd                       Décimal               Teneur en cadmium       kg/t de produits
+                                                                        bruts
+
+ stockable                Booléen               Renseigne si le         0 (non) ou 1 (oui)
+                                                produit peut être
+                                                stocké ou non
+
+
+3.6.2 Processus des unités de transformation
+(recettes.csv)
+Description : Fichier définissant l’ensemble des recettes pour procéder à l’élaboration de
+différents types de PRO et autres produits sortants des unités de transformation.
+
+Chemin : … /includes/NOM (terrain d’étude)
+
+Champs
+
+
+ Composantes                          Valeurs         Désignation           Unité
+
+ categorieProduitSortie               Texte           Type de produit       NA
+                                                      de sortie après
+                                                      transformation
+Composantes                    Valeurs   Désignation          Unité
+
+categorieProduitsEntree        Texte     Liste des            NA
+                                         produits
+                                         nécessaires pour
+                                         l’élaboration du
+                                         produit de sortie
+
+proportionsProduitsEntree      Décimal   Quantité             Coefficient : %
+                                         nécessaire de
+                                         chaque produit
+                                         d’entrée
+
+TauxAbattementN                Décimal   Perte relative       Coefficient : %
+                                         d’azote lors de la
+                                         transformation
+
+TauxAbattementC                Décimal   Perte relative de    Coefficient : %
+                                         carbone lors de
+                                         la transformation
+
+dureeTransformation            Entier    Temps de             Jours
+                                         transformation
+                                         pour obtenir le
+                                         produit de sortie
+
+quantiteMinimalePourDeclencher Entier    Quantité             Tonne de
+                                         minimale             matière bruteSi
+                                         nécessaire de        0, on ne peut
+                                         chaque produit       pas stocker la
+                                         d’entrée en stock    matière, il faut
+                                         pour déclencher      la traiter
+                                         la transformation    directement
+3.6.3 Routes du terrain d’étude (routes.shp)
+Description : Ce fichier recense les routes présentes dans la zone étudiée. Ce fichier est de
+type « shapefile ».
+
+Chemin : … /includes/NOM (terrain d’étude)/shapes/misc
+
+Champs
+
+
+ Composantes            Valeurs                 Désignation             Unité
+
+ osm_id                 Entier                  Open street map         NA
+                                                identifiant
+
+ name                   Texte                   Nom de la route         NA
+
+ type                   Texte                   Indique le type de      NA
+                                                route : secondaire,
+                                                résidentielle,
+                                                service, pédestre,
+                                                …
+
+ oneway                 Booléen                 Indique si la route     0 (non) ou 1 (oui)
+                                                est à sens unique ou
+                                                non
+
+ bridge                 Booléen                 Indique la présence     0 (non) ou 1 (oui)
+                                                de pont ou non sur
+                                                la route
+
+ tunnel                 Booléen                 Indique la présence     0 (non) ou 1 (oui)
+                                                de tunnel ou non
+                                                sur la route
+ Composantes             Valeurs                 Désignation              Unité
+
+ maxspeed                Entier                  Vitesse maximale         km/h
+                                                 autorisée
+
+ DEPART                  Texte                   Nom du                   NA
+                                                 département de
+                                                 rattachement
+
+ CODE_INSEE              Entier                  Numéro INSEE de la       NA
+                                                 commune
+
+
+3.6.4 Unités de production (UP.shp)
+Description : Ce fichier décrit et positionne les différentes unités de production (UP)
+présentes dans le territoire d’étude. Ce fichier est de type « shapefile ».
+
+Chemin : … /includes/NOM (terrain d’étude)/shapes/up
+
+Champs
+
+
+ Composantes             Valeurs                 Désignation              Unité
+
+ IdUP                    Entier                  Numéro unique            NA
+
+ Nom                     Texte                   Nom de l’unité de        NA
+                                                 production
+
+ nom_commune             Texte                   Nom de la                NA
+                                                 commune dans
+                                                 laquelle est située
+                                                 l’unité de
+                                                 production
+Composantes   Valeurs   Désignation           Unité
+
+unite_tran    Texte     Unité de              NA
+                        transformation
+                        rattachée à cette
+                        unité de production
+
+produit       Texte     Nom du produit (ex.   NA
+                        déchet_vert)
+
+traitement    Booléen   Renseigne si les      0 (non) ou 1 (oui)
+                        déchets vont être
+                        pris en compte ou
+                        non dans la
+                        simulation (e.g. si
+                        on met non, cette
+                        up ne sera pas lue
+                        par le simulateur)
+
+INSEE         Entier    Numéro INSEE de la    NA
+                        commune
+
+quantité      Entier    Quantité totale       tSomme des
+                        produite              quant_prod
+
+capa_stock    Décimal   Capacité de           t
+                        stockage
+
+coef_vid_f    Décimal   Coefficient de        NA
+                        vidange forcé
+
+date_prod     Entier    Date de production.   date
+                        Certaines UP ont
+                        des productions
+ Composantes             Valeurs                 Désignation             Unité
+
+                                                 constantes tout au
+                                                 long de l’année (ex :
+                                                 12 t par mois) alors
+                                                 que d’autres
+                                                 produisent de façon
+                                                 évènementielle (ex :
+                                                 14 t au mois d’août
+                                                 uniquement)
+
+ quant_prod              Décimal                 Quantité de             t
+                                                 productionDéfinie
+                                                 pour chaque
+                                                 période de
+                                                 production
+                                                 renseignée dans
+                                                 date_prod
+
+ distance                Décimal                 Distance entre UP et    km
+                                                 UT
+
+ tr_direct               Booléen                 Renseigne si le         0 (non) ou 1 (oui)
+                                                 trajet est direct
+                                                 entre UP et UT
+
+
+3.6.5 Unité de transformation (UT.shp)
+Description : Ce fichier décrit et positionne les unités de transformation (UT). Ce fichier est
+de type « shapefile ».
+
+Chemin : … /includes/NOM (terrain d’étude)/shapes/ut
+
+Champs
+Composantes   Valeurs   Désignation               Unité
+
+ID            Entier    Identifiant de            NA
+                        l’unité de
+                        transformation
+
+NOM           Texte     Nom de l’unité de         NA
+                        transformation
+
+PROD_IN       Texte     Produit d’entrée          NA
+
+CAP_PRD_IN    Entier    Capacité de               t
+                        production en
+                        entrée
+
+CAPA_STOCK    Entier    Capacité de               t
+                        stockage
+
+COEF_VID_F    Décimal   Coefficient de            %
+                        vidange forcé
+
+FXMXPRODIN    Entier    Flux maximal en           -1 - infini
+                        tonne que l’unité de
+                        transformation peut
+                        accepter. S’il est
+                        égal à -1, il n’y a pas
+                        de limite
+
+NOMPRODOUT    Texte     Nom du produit de         NA
+                        sortie
+
+nbandmax      Entier    Pour les unités de        NA
+                        compostage :
+ Composantes            Valeurs               Désignation            Unité
+
+                                              nombre d’andain
+                                              maximal
+
+
+
+3.7 Module Autres Usages
+Le module autres usage de l’eau est en cours de stabilisation. La documentation est à
+retrouver ici :
+
+http://maelia-platform.inra.fr/donnees/donnees-generales/
+
+Il permet d’estimer la demande en eau « potable » à partir des données sur les
+caractéristiques socio-professionnelles de la population par commune.
+
+
+1. https://www.umr-cnrm.fr/spip.php?article788&lang=fr
+
+  https://www.cerfacs.fr/~page/publications/report_cerfacs_scenarii_safran_format.pdf ↩︎
+
+2. http://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php ↩︎
+
+3. https://climate.copernicus.eu/ ↩︎
+

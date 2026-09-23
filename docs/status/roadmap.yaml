@@ -72,18 +72,47 @@ items:
     status: todo
     area: information_system
     spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
+  - id: maelia-guadeloupe-instance
+    title: Instantiate Guadeloupe in MAELIA (weather, soils, species, ITKs, plots; agricultural module only)
+    status: todo
+    area: coupling
+    spec: docs/maelia/coupling-todo.md
+    left: >-
+      Steps I.0-I.9 of docs/maelia/coupling-todo.md: daily weather (SAFRAN and E-OBS do not
+      cover Guadeloupe), soil horizons, the species and ITKs (per-crop work list in
+      docs/maelia/crop-parameters.md), ilots/parcelles from the RPG layer (M.6). Hydrology
+      (SWAT) left off at first. The exporters (I.4, I.6, I.7, I.9) can start now.
+    blocked_by: MAELIA training; tropical and perennial crops in MAELIA (docs/maelia M.2).
   - id: maelia-yields
     title: MAELIA -> MOSAICA, simulated yields and ITKs as per-(plot, crop) coefficients
     status: todo
     area: coupling
-    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
-    blocked_by: MAELIA training; tropical crop parameterisation in MAELIA to confirm.
+    spec: docs/maelia/coupling-todo.md
+    left: >-
+      Steps D.1-D.8 of docs/maelia/coupling-todo.md: virtual plots swept in batch (docs/maelia
+      M.7); the simulated yield scales RENDEMENT_OPTIMAL, itself an input, so vigilance C.1
+      needs a territorial source for it (M.1); recalibrate, not just swap the column.
+    blocked_by: maelia-guadeloupe-instance.
+  - id: pair-coefficients
+    title: Per-(plot, crop) margin, indicator rates and variance, falling back on the per-crop value
+    status: todo
+    area: model
+    spec: docs/maelia/coupling-todo.md
+    left: >-
+      Step D.5: ModelInputs.pair_margin_per_ha, data.yield_source gams_table | maelia,
+      check_references kept on gams_table. Needs no MAELIA; the MILP keeps its size.
   - id: maelia-daily-test
     title: MOSAICA -> MAELIA, daily simulation of the optimised cropping plan
     status: todo
     area: coupling
-    spec: docs/superpowers/specs/2026-09-22-post-thesis-maelia-data-english-design.md
-    blocked_by: maelia-yields; decision on multi-year rotations.
+    spec: docs/maelia/coupling-todo.md
+    left: >-
+      Steps E.1-E.8 of docs/maelia/coupling-todo.md: the plan is imposed by writing
+      parcelles.shp SEQUENCE under nomChoixAssolement='Donnees' (docs/maelia M.3); each MOSAICA
+      ITK variant must be its own MAELIA species (M.4); gap indicators written before the first
+      run, against a control run of the observed 2017 plan; machinery conflicts are not
+      simulated (M.8).
+    blocked_by: maelia-guadeloupe-instance; decision on multi-year rotations.
   - id: per-plot-facts
     title: One per-plot indicator table, aggregated to any zone (commune, farm, watershed, arbitrary)
     status: proposal
