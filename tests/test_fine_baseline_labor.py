@@ -56,14 +56,14 @@ def test_reader_restores_the_two_glued_trailing_crop_names(table):
 
 
 def test_labour_is_summed_per_farm_over_the_fine_plan(table):
-    expl_parc = pd.DataFrame(
+    farm_plot_map = pd.DataFrame(
         {"farm": ["E1", "E1", "E2", "E2"], "plot": ["P1", "P2", "P3", "P4"]}
     )
 
     hours = compute_farm_labor_capacity_hours_from_fine_baseline(
         fine_baseline=read_fine_baseline_allocation(table),
-        expl_parc=expl_parc,
-        labor_hours_per_ha_cult=_RATES,
+        farm_plot_map=farm_plot_map,
+        crop_labor_hours_per_ha=_RATES,
     )
 
     # E1 = 3.68 x 12.7 + 2.0 x 1653 = 46.736 + 3306 ; E2 = 5.0 x 6 = 30.
@@ -72,12 +72,12 @@ def test_labour_is_summed_per_farm_over_the_fine_plan(table):
 
 
 def test_plots_of_no_known_farm_are_ignored(table):
-    expl_parc = pd.DataFrame({"farm": ["E1"], "plot": ["P1"]})
+    farm_plot_map = pd.DataFrame({"farm": ["E1"], "plot": ["P1"]})
 
     hours = compute_farm_labor_capacity_hours_from_fine_baseline(
         fine_baseline=read_fine_baseline_allocation(table),
-        expl_parc=expl_parc,
-        labor_hours_per_ha_cult=_RATES,
+        farm_plot_map=farm_plot_map,
+        crop_labor_hours_per_ha=_RATES,
     )
 
     assert list(hours.index) == ["E1"]
@@ -85,12 +85,12 @@ def test_plots_of_no_known_farm_are_ignored(table):
 
 
 def test_crop_absent_from_the_rate_table_contributes_nothing(table):
-    expl_parc = pd.DataFrame({"farm": ["E1", "E1"], "plot": ["P1", "P2"]})
+    farm_plot_map = pd.DataFrame({"farm": ["E1", "E1"], "plot": ["P1", "P2"]})
 
     hours = compute_farm_labor_capacity_hours_from_fine_baseline(
         fine_baseline=read_fine_baseline_allocation(table),
-        expl_parc=expl_parc,
-        labor_hours_per_ha_cult=_RATES.drop("MA_ROTA"),
+        farm_plot_map=farm_plot_map,
+        crop_labor_hours_per_ha=_RATES.drop("MA_ROTA"),
     )
 
     # MA_ROTA drops out; only P1's cane remains. A missing rate must not raise.

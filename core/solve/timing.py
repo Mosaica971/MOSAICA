@@ -12,6 +12,8 @@ def time_phases(
     build_model: Callable[[TDataset], TModel],
     solve: Callable[[TModel], TResults],
 ) -> tuple[TDataset, TModel, TResults, dict[str, float]]:
+    """Run the three phases in order and return their results plus wall-clock seconds
+    per phase (data_pipeline, model_build, solve). Used by scripts/profile_solver.py."""
     start = time.monotonic()
     dataset = build_dataset()
     after_dataset = time.monotonic()

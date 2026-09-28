@@ -51,7 +51,7 @@ def _assign(model, *chosen):
         model.Y[index].fix(1)
 
 
-_ARGS = {"label": "ba_quota_expl", "crops": ["BA_INT"], "reference": "BA"}
+_ARGS = {"label": "ba_quota_farm", "crops": ["BA_INT"], "reference": "BA"}
 
 
 def test_farm_at_its_reference_production_is_allowed():
@@ -59,8 +59,8 @@ def test_farm_at_its_reference_production_is_allowed():
     _assign(model, ("P1", "BA_INT"))
 
     # E1 produces exactly its 450 t reference.
-    assert pyo.value(model.ba_quota_expl["E1"].body) == pytest.approx(450.0)
-    assert pyo.value(model.ba_quota_expl["E1"].upper) == pytest.approx(450.0)
+    assert pyo.value(model.ba_quota_farm["E1"].body) == pytest.approx(450.0)
+    assert pyo.value(model.ba_quota_farm["E1"].upper) == pytest.approx(450.0)
 
 
 def test_farm_above_its_reference_production_violates_the_bound():
@@ -68,9 +68,9 @@ def test_farm_above_its_reference_production_violates_the_bound():
     _assign(model, ("P2", "BA_INT"))
 
     # E2 would produce 225 t against a 100 t reference.
-    body = pyo.value(model.ba_quota_expl["E2"].body)
+    body = pyo.value(model.ba_quota_farm["E2"].body)
     assert body == pytest.approx(225.0)
-    assert body > pyo.value(model.ba_quota_expl["E2"].upper)
+    assert body > pyo.value(model.ba_quota_farm["E2"].upper)
 
 
 def test_bound_is_per_farm_not_territorial():
@@ -78,8 +78,8 @@ def test_bound_is_per_farm_not_territorial():
     model = _build(_ARGS)
     _assign(model, ("P2", "BA_INT"))
 
-    assert pyo.value(model.ba_quota_expl["E1"].body) == pytest.approx(0.0)
-    assert pyo.value(model.ba_quota_expl["E2"].body) == pytest.approx(225.0)
+    assert pyo.value(model.ba_quota_farm["E1"].body) == pytest.approx(0.0)
+    assert pyo.value(model.ba_quota_farm["E2"].body) == pytest.approx(225.0)
     # Territory-wide the 225 t sits well under the 550 t of combined reference; per farm
     # it is a violation. A territorial bound would have accepted this allocation.
     total_reference = 450.0 + 100.0
@@ -89,19 +89,19 @@ def test_bound_is_per_farm_not_territorial():
 def test_scale_relaxes_every_cap_uniformly():
     model = _build({**_ARGS, "scale": 2.0})
 
-    assert pyo.value(model.ba_quota_expl["E1"].upper) == pytest.approx(900.0)
-    assert pyo.value(model.ba_quota_expl["E2"].upper) == pytest.approx(200.0)
+    assert pyo.value(model.ba_quota_farm["E1"].upper) == pytest.approx(900.0)
+    assert pyo.value(model.ba_quota_farm["E2"].upper) == pytest.approx(200.0)
 
 
 def test_farm_missing_from_the_reference_is_left_unconstrained():
     inputs = _inputs(farm_production_capacity={"BA": {"E1": 450.0}})
     model = _build(_ARGS, inputs)
 
-    assert "E2" not in model.ba_quota_expl or model.ba_quota_expl["E2"].equality is False
+    assert "E2" not in model.ba_quota_farm or model.ba_quota_farm["E2"].equality is False
     # E2 carries no bound at all rather than a zero one, which would freeze the farm.
-    assert pyo.value(model.ba_quota_expl["E1"].upper) == pytest.approx(450.0)
-    assert model.ba_quota_expl["E2"].body is None or pyo.value(
-        model.ba_quota_expl["E2"].body
+    assert pyo.value(model.ba_quota_farm["E1"].upper) == pytest.approx(450.0)
+    assert model.ba_quota_farm["E2"].body is None or pyo.value(
+        model.ba_quota_farm["E2"].body
     ) in (None, 0.0)
 
 
@@ -109,7 +109,7 @@ def test_unknown_reference_constrains_nothing():
     model = _build({**_ARGS, "reference": "INEXISTANT"})
 
     for farm in model.FARMS:
-        constraint = model.ba_quota_expl[farm]
+        constraint = model.ba_quota_farm[farm]
         assert constraint.body is None or pyo.value(constraint.body) in (None, 0.0)
 
 
@@ -117,8 +117,8 @@ def test_sense_ge_expresses_a_floor():
     model = _build({**_ARGS, "sense": "ge"})
     _assign(model, ("P1", "BA_INT"))
 
-    assert pyo.value(model.ba_quota_expl["E1"].lower) == pytest.approx(450.0)
-    assert pyo.value(model.ba_quota_expl["E1"].body) == pytest.approx(450.0)
+    assert pyo.value(model.ba_quota_farm["E1"].lower) == pytest.approx(450.0)
+    assert pyo.value(model.ba_quota_farm["E1"].body) == pytest.approx(450.0)
 
 
 def test_rejects_an_unknown_sense():
@@ -131,4 +131,4 @@ def test_crops_outside_the_group_are_not_counted():
     model = _build(_ARGS)
     _assign(model, ("P1", "AUTRE"))
 
-    assert pyo.value(model.ba_quota_expl["E1"].body) == pytest.approx(0.0)
+    assert pyo.value(model.ba_quota_farm["E1"].body) == pytest.approx(0.0)

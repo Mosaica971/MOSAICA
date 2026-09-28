@@ -8,6 +8,8 @@ OBJECTIVE_REGISTRY: dict[str, Callable] = {}
 
 
 def _make_register(registry: dict[str, Callable]) -> Callable[[str], Callable[[F], F]]:
+    """A decorator factory that files a builder under a unique name in `registry`."""
+
     def register(name: str) -> Callable[[F], F]:
         def decorator(fn: F) -> F:
             if name in registry:

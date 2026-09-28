@@ -1,83 +1,84 @@
-# Les trois runs de calibration de référence -- consommé par scripts/run_scenarios.py.
+# The three reference calibration runs -- consumed by scripts/run_scenarios.py.
 #
-# POURQUOI UN SPEC À PART. `scenarios.yaml` explore des politiques, `scenarios_prospective.yaml`
-# croise politiques et forçages. Ces trois runs-ci ne sont ni l'un ni l'autre : ce sont les
-# **points fixes** du projet, ceux que `references.yaml` déclare et contre lesquels tout le
-# reste se lit. Les tenir dans leur propre fichier permet de les régénérer en une commande
-# quand le reporting gagne un bloc, sans relancer un batch entier.
+# WHY A SEPARATE SPEC. `scenarios.yaml` explores policies, `plan.yaml` crosses policies and
+# forcings. These three runs are neither: they are the project's **fixed points**, the ones
+# `references.yaml` declares and against which everything else is read. Keeping them in their
+# own file lets them be regenerated in one command when the reporting gains a block, without
+# rerunning a whole batch.
 #
-# ILS SE LISENT COMME UNE SÉRIE, pas comme trois runs indépendants : zéro déviation
-# (`calib_gams_parite`), une seule (`calib_bc_seul`), les deux (`calib_retenu`). C'est cet
-# ordre qui attribue le gain de calibration à chaque déviation ; `references.yaml` ne déclare
-# que les deux bornes, le palier du milieu n'existe que pour l'attribution.
+# THEY READ AS A SERIES, not as three independent runs: zero deviation (`calib_gams_parity`),
+# one (`calib_bc_only`), both (`calib_selected`). That order attributes the calibration gain
+# to each deviation; `references.yaml` only declares the two ends, the middle step exists for
+# attribution only.
 #
-# Ils portent un `name:` explicite, donc leur dossier de sortie s'appelle
-# `outputs/calib_gams_parite/` et `outputs/calib_retenu/` -- pas `output_7`.
+# They carry an explicit `name:`, so their output folder is `outputs/calib_gams_parity/` and
+# `outputs/calib_selected/` -- not `output_7`. Runs solved before 2026-09-22 sit under their
+# former French names (`calib_gams_parite/`, `calib_bc_seul/`, `calib_retenu/`);
+# `references.yaml` looks for both.
 #
-# Régénérer les deux :
+# Regenerate them:
 #   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration.yaml
-# Contrôler avant de lancer (secondes) :
+# Check before launching (seconds):
 #   python scripts/run_scenarios.py --scenarios ... --dry-run
 #   python scripts/check_scenario_feasibility.py --scenarios ...
 
 runs:
   # --------------------------------------------------------------------------------------
-  - name: calib_gams_parite
+  - name: calib_gams_parity
     description: >-
-      Le bloc CALIB porté à l'identique, SANS aucune des deux déviations assumées. C'est la
-      référence de PARITÉ : ce que le modèle GAMS d'origine produit sur nos données, et donc
-      le point de comparaison honnête pour juger ce que les deux déviations apportent.
-      Attendu (mesuré sur output_1 le 2026-07-27) : PAD territorial 48,4 %, types 64,0 %,
-      parcelles 56,0 %, surface 64,3 %, objectif 84,98 M€.
-      Son écart aux chiffres de l'article (PAD <15 %, types 81 %) tient à la provenance des
-      données -- 4 638 exploitations contre 5 336, année de base 2010 hors d'atteinte -- et
-      non à un défaut de portage : l'enquête source-à-source du 2026-07-27 a écarté une à une
-      les causes de modélisation.
+      The CALIB block ported as is, WITHOUT either of the two accepted deviations. It is the
+      PARITY reference: what the original GAMS model produces on our data, hence the honest
+      point of comparison to judge what the two deviations bring.
+      Expected (measured on output_1 on 2026-07-27): territorial PAD 48.4 %, farm types
+      64.0 %, plots 56.0 %, area 64.3 %, objective 84.98 M EUR.
+      Its gap to the article's figures (PAD <15 %, types 81 %) comes from the provenance of
+      the data -- 4 638 farms against 5 336, 2010 base year out of reach -- and not from a
+      porting defect: the source-to-source investigation of 2026-07-27 ruled out the
+      modelling causes one by one.
     disable:
-      # Eq_BC_QUOTA_MAX : plafond de marché du plantain. Commentée dans les deux blocs
-      # modèles du GAMS, donc hors CALIB -- même si l'article la décrit (Éq. 6).
+      # Eq_BC_QUOTA_MAX: plantain market ceiling. Commented out of both GAMS model blocks, so
+      # outside CALIB -- even though the article describes it (Eq. 6).
       - bc_quota_max
-      # Eq_PN_PROD_MIN : plancher de surface fourragère. Vit dans le bloc SCENARIO, pas CALIB.
+      # Eq_PN_PROD_MIN: fodder-area floor. Lives in the SCENARIO block, not CALIB.
       - pn_prod_min
 
   # --------------------------------------------------------------------------------------
-  - name: calib_bc_seul
+  - name: calib_bc_only
     description: >-
-      Le palier INTERMÉDIAIRE : `bc_quota_max` seule, sans le plancher fourrager. Il n'a
-      d'intérêt qu'à trois, entre `calib_gams_parite` et `calib_retenu`, parce que c'est lui
-      qui répartit le gain de calibration entre les deux déviations -- PAD territorial
-      48,4 % -> 31,7 % -> 6,6 %, types 64,0 % -> 67,0 % -> 86,9 %. Autrement dit : le plafond
-      de marché du plantain fait un tiers du chemin, le plancher de prairie fait le reste.
-      Sans ce point on ne peut attribuer le résultat ni à l'une ni à l'autre.
-      Attendu (mesuré le 2026-07-28, dossier alors nommé `output_2`) : objectif 81,79 M€,
-      PAD territorial 31,69 %, types 66,97 %.
-      MÊME MISE EN GARDE que `calib_retenu` sur le PAD : dès que `pn_prod_min` est active le
-      PAD de la prairie est nul par construction -- ici elle ne l'est PAS, donc le 31,7 %
-      est, lui, un PAD honnête.
+      The INTERMEDIATE step: `bc_quota_max` alone, without the fodder floor. It only matters
+      as the middle of three, between `calib_gams_parity` and `calib_selected`, because it
+      splits the calibration gain between the two deviations -- territorial PAD
+      48.4 % -> 31.7 % -> 6.6 %, farm types 64.0 % -> 67.0 % -> 86.9 %. In other words the
+      plantain market ceiling covers a third of the way, the grassland floor the rest.
+      Without this point the result can be attributed to neither.
+      Expected (measured on 2026-07-28, folder then named `output_2`): objective
+      81.79 M EUR, territorial PAD 31.69 %, farm types 66.97 %.
+      SAME CAVEAT as `calib_selected` on the PAD: once `pn_prod_min` is active the grassland
+      PAD is zero by construction -- here it is NOT, so the 31.7 % is an honest PAD.
     disable:
-      # Seule Eq_PN_PROD_MIN est retirée : on garde le plafond plantain pour mesurer ce
-      # qu'il apporte à lui seul.
+      # Only Eq_PN_PROD_MIN is removed: the plantain ceiling is kept to measure what it
+      # brings on its own.
       - pn_prod_min
 
   # --------------------------------------------------------------------------------------
-  - name: calib_retenu
+  - name: calib_selected
     description: >-
-      La calibration de travail : le CALIB plus les deux seules déviations assumées, toutes
-      deux adossées à une source EXOGÈNE à l'assolement observé (c'est ce qui les distingue
-      des plafonds de marché écartés le 2026-07-23, qui étaient calés SUR l'observé et dont
-      le PAD était donc nul par construction).
-        * bc_quota_max = 6 440 t de plantain -- chiffre de l'auteur du GAMS, corroboré par
-          l'Éq. 6 de l'article (4 650 t). Le balayage 4 650 -> 40 000 t montre un palier plat
-          dont l'optimum (9 240 t) est LOIN de l'observé : la contrainte corrige un mécanisme,
-          elle ne recopie pas une réponse.
-        * pn_prod_min = 6 096 ha de prairie -- paramètre GAMS QUOTA_PN_PIQ_MIN, soit 27 % SOUS
-          les 8 341 ha qu'implique la Statistique agricole annuelle 2017. Sans lui le modèle
-          impliquait 9,99 UGB/ha, trois à quatre fois le chargement réel : le défaut est
-          prouvé hors modèle.
-      Attendu (mesuré sur output_3 le 2026-07-28) : types 86,9 %, parcelles 67,6 %, surface
-      77,1 %, canne 12 782 ha contre 12 813 observés sans qu'aucune contrainte ne la nomme.
-      NE PAS citer son PAD territorial de 6,6 % : le plancher épingle la prairie, dont le PAD
-      est nul par construction.
-    # Aucun override : c'est config.yaml tel quel. L'entrée existe pour que le run porte un
-    # nom, une justification, et un dossier de sortie lisible.
+      The working calibration: CALIB plus the only two accepted deviations, both backed by
+      a source EXOGENOUS to the observed land use (which is what sets them apart from the
+      market ceilings discarded on 2026-07-23, which were fitted ON the observation and
+      whose PAD was therefore zero by construction).
+        * bc_quota_max = 6 440 t of plantain -- the GAMS author's figure, corroborated by
+          the article's Eq. 6 (4 650 t). The 4 650 -> 40 000 t sweep shows a flat plateau
+          whose optimum (9 240 t) is FAR from the observation: the constraint corrects a
+          mechanism, it does not copy an answer.
+        * pn_prod_min = 6 096 ha of grassland -- GAMS parameter QUOTA_PN_PIQ_MIN, i.e. 27 %
+          BELOW the 8 341 ha implied by the 2017 annual agricultural statistics. Without it
+          the model implied 9.99 LU/ha, three to four times the real stocking rate: the defect
+          is proven outside the model.
+      Expected (measured on output_3 on 2026-07-28): farm types 86.9 %, plots 67.6 %, area
+      77.1 %, cane at 12 782 ha against 12 813 observed without any constraint naming it.
+      DO NOT quote its 6.6 % territorial PAD: the floor pins grassland, whose PAD is zero by
+      construction.
+    # No override: this is config.yaml as is. The entry exists so that the run carries a
+    # name, a justification, and a readable output folder.
     overrides: {}

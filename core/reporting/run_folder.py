@@ -2,7 +2,7 @@
 
 Two naming schemes coexist on purpose. A run with no name gets the historical
 `output_N` counter; a run that knows what it is gets a **folder named after itself**
-(`calib_gams_parite/`), because `outputs/output_7` tells a reader nothing six weeks later
+(`calib_gams_parity/`), because `outputs/output_7` tells a reader nothing six weeks later
 and the reference runs of this project are consulted for months. Both are discovered the
 same way -- by carrying a `recap.json` -- so nothing downstream has to care which it got.
 """

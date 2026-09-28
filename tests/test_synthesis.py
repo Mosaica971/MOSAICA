@@ -30,7 +30,7 @@ def test_a_clean_run_raises_no_alert():
 
 
 def test_a_solve_that_did_not_prove_optimality_is_an_error():
-    """VIGILANCE records a hand-built solution beating a one-hour incumbent by 5.5 %, so a
+    """docs/04-vigilance.md records a hand-built solution beating a one-hour incumbent by 5.5 %, so a
     non-converged run is not a nuance."""
     alerts = synthesis.run_alerts(_recap(termination_condition="maxTimeLimit"))
 
@@ -45,8 +45,8 @@ def test_the_pasture_floor_makes_the_territorial_pad_uncitable():
 
     alerts = synthesis.run_alerts(recap)
 
-    assert any("PAD territorial" in a.title for a in alerts)
-    assert any("types" in a.body for a in alerts)
+    assert any("territorial PAD" in a.title for a in alerts)
+    assert any("farm types" in a.body for a in alerts)
 
 
 def test_the_plantain_ceiling_triggers_the_same_caveat():
@@ -54,24 +54,24 @@ def test_the_plantain_ceiling_triggers_the_same_caveat():
         {"name": "territory_production_bound", "args": {"label": "bc_quota_max"}}
     ])
 
-    assert any("PAD territorial" in a.title for a in synthesis.run_alerts(recap))
+    assert any("territorial PAD" in a.title for a in synthesis.run_alerts(recap))
 
 
 def test_an_indicator_pinned_by_a_bound_is_flagged_as_a_hypothesis():
     recap = _recap(constraints=[
         {"name": "territory_indicator_bound",
-         "args": {"label": "budget", "indicator": "subvention"}}
+         "args": {"label": "budget", "indicator": "subsidy"}}
     ])
 
     alerts = synthesis.run_alerts(recap)
 
-    assert any("fixés par une contrainte" in a.title for a in alerts)
+    assert any("fixed by a constraint" in a.title for a in alerts)
 
 
 def test_the_pure_gross_margin_objective_is_flagged():
     recap = _recap(objective={"name": "maximize_gross_margin", "value": 1.0})
 
-    assert any("marge brute pure" in a.title for a in synthesis.run_alerts(recap))
+    assert any("Pure gross-margin" in a.title for a in synthesis.run_alerts(recap))
 
 
 def test_a_run_predating_a_recap_block_says_which_page_will_be_empty():

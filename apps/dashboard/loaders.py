@@ -1,5 +1,10 @@
-"""Pure, Streamlit-free functions to read an outputs/output_N/ run folder (brique A)
-for the dashboard (brique B). Read-only: never writes, never triggers a solve."""
+"""Pure, Streamlit-free functions to read an outputs/output_N/ run folder for the dashboard.
+Read-only: never writes, never triggers a solve.
+
+Every reader goes through `case_studies.guadeloupe.legacy_names`, so a run written before
+the English renaming of 2026-09-22 (French recap keys, labels and CSV names) reads exactly
+like a new one. The files on disk are never rewritten.
+"""
 
 import json
 from pathlib import Path
@@ -8,17 +13,20 @@ from typing import Any
 import pandas as pd
 import yaml
 
+from case_studies.guadeloupe import legacy_names
 from core.reporting.run_folder import list_run_folders
 
+
 def list_output_runs(outputs_root: Path) -> list[Path]:
-    """Every run folder, newest first -- named (`calib_retenu/`) and numbered
+    """Every run folder, newest first -- named (`calib_selected/`) and numbered
     (`output_3/`) alike. Delegates to core so the dashboard and the scripts agree on what
     counts as a run: a folder carrying a `recap.json`."""
     return list_run_folders(outputs_root)
 
 
 def load_recap(run_dir: Path) -> dict[str, Any]:
-    return json.loads((run_dir / "recap.json").read_text())
+    recap = json.loads((run_dir / "recap.json").read_text(encoding="utf-8"))
+    return legacy_names.upgrade_recap(recap)
 
 
 def load_config_used(run_dir: Path) -> dict[str, Any] | None:
@@ -29,9 +37,10 @@ def load_config_used(run_dir: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        config = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError):
         return None
+    return legacy_names.upgrade_config(config)
 
 
 def run_display_name(run_dir: Path, recap: dict[str, Any]) -> str:
@@ -54,11 +63,13 @@ def load_calibration(run_dir: Path, name: str) -> pd.DataFrame | None:
 
 
 def load_csv(run_dir: Path, name: str) -> pd.DataFrame | None:
-    # CSVs now live in run_dir/csv/; fall back to the run root for older output folders
-    # written before that reorg.
-    path = run_dir / "csv" / name
-    if not path.exists():
-        path = run_dir / name
-    if not path.exists():
-        return None
-    return pd.read_csv(path)
+    """A run's CSV by its current name, or None. Looks in csv/ then the run root (folders
+    written before the 2026-07-13 reorganisation), and under the legacy file name for runs
+    written before the English renaming. Column names are upgraded to the current ones."""
+    for candidate in legacy_names.csv_candidates(name):
+        for path in (run_dir / "csv" / candidate, run_dir / candidate):
+            if path.exists():
+                frame = pd.read_csv(path)
+                frame.columns = [legacy_names.rename(str(c)) for c in frame.columns]
+                return frame
+    return None

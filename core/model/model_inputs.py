@@ -26,7 +26,7 @@ class ModelInputs:
     crop_labor_hours_per_ha: Mapping[str, float] = field(default_factory=dict)
     farm_labor_capacity_hours: Mapping[str, float] = field(default_factory=dict)
     # Per-hectare rate of any indicator the case study chooses to expose, keyed by indicator
-    # name then crop: {"azote": {"CS_BT_NISM": 118.0, ...}, "ift": {...}}. This is what makes
+    # name then crop: {"nitrogen": {"CS_BT_NISM": 118.0, ...}, "tfi": {...}}. This is what makes
     # a regulatory ceiling (nitrogen, pesticide index, GHG, water) or a public-spending
     # envelope expressible from config without a new builder per indicator -- the units are
     # the case study's business, core only multiplies by hectares. A crop missing from a rate

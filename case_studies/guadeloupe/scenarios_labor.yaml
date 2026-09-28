@@ -1,0 +1,39 @@
+# Two measurements of the reference labour budget (GAMS MO_Expl_init, ENTREES.txt:466-469),
+# both on the parity configuration `calib_gams_parity_prices`.
+#
+# WHY. The budget `Eq_MO_MAX_Expl` grants each farm is computed here by pricing each observed
+# RPG group through a representative fine crop, for lack of a fine cropping plan. GAMS reads
+# `Matrice_Parc_Cult`, which carries the FINE ITK per plot. That fine plan is now available
+# (context/SORTIES/ASSOL_PARC_INIT.TXT), hence these two runs.
+#
+# PRIOR CHECK: our labour rates applied to the GAMS CALIB allocation give 5 292 156 h against
+# the 5 292 000 h of its INDICATEURS.TXT -- 0.003 %, GAMS's rounding. The labour table is
+# therefore exact, and the totals below are comparable.
+#
+#   representative (current default) : 6 252 740 h
+#   observed fine plan               : 5 592 326 h
+#   figure proposed by Clement       : 6 712 553 h
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_labor.yaml
+
+runs:
+  - name: fine_labor_observed
+    description: >-
+      Per-farm labour budget recomputed on the observed 2017 FINE cropping plan, to the letter
+      of ENTREES.txt:466-469. Total 5 592 326 h, i.e. 10.6 % BELOW the default: the constraint
+      tightens. 795 farms see their budget fall, 456 the reverse, 50 drop to zero (their
+      observed plan is entirely NC or fallow) -- faithful behaviour, GAMS freezes them the
+      same way.
+    disable: [bc_quota_max, pn_prod_min]
+    overrides:
+      data.fine_baseline_allocation: context/SORTIES/ASSOL_PARC_INIT.TXT
+
+  - name: mo_6712553
+    description: >-
+      The figure proposed by Clement, 6 712 553 h, applied as a uniform factor on the default
+      budgets: slack = 6 712 553 / 6 252 740 = 1.073538. Total 7.3 % ABOVE the default, so
+      the constraint LOOSENS. To be read as a sensitivity test: the factor is uniform, it
+      redistributes nothing between farms.
+    disable: [bc_quota_max, pn_prod_min]
+    set_args:
+      - {label: labor_max_farm, args: {slack: 1.073538}}

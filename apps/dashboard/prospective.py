@@ -88,38 +88,38 @@ def _as_float(value) -> float:
 
 
 _ROBUSTNESS_COLUMNS = (
-    "Nominal", "Pire cas", "Médiane", "Meilleur", "Rétention", "Instabilité (CV)",
-    "Regret max", "Viabilité", "Forçages", "Infaisables",
+    "Nominal", "Worst case", "Median", "Best", "Retention", "Instability (CV)",
+    "Max regret", "Viability", "Forcings", "Infeasible",
 )
 
 
 def robustness_frame(summaries: list[PolicyRobustness]) -> pd.DataFrame:
-    """The robustness table, one row per policy, with French column names for display.
+    """The robustness table, one row per policy, with display column names.
 
     An empty list yields an empty frame carrying the right columns rather than raising:
-    `set_index` on a frame with no rows has no "Politique" column to find, and a table with
+    `set_index` on a frame with no rows has no "Policy" column to find, and a table with
     nothing in it is a legitimate state (every policy filtered out of the grid).
     """
     if not summaries:
-        return pd.DataFrame(columns=list(_ROBUSTNESS_COLUMNS), index=pd.Index([], name="Politique"))
+        return pd.DataFrame(columns=list(_ROBUSTNESS_COLUMNS), index=pd.Index([], name="Policy"))
     return pd.DataFrame(
         [
             {
-                "Politique": s.policy,
+                "Policy": s.policy,
                 "Nominal": s.nominal,
-                "Pire cas": s.worst,
-                "Médiane": s.median,
-                "Meilleur": s.best,
-                "Rétention": s.retention,
-                "Instabilité (CV)": s.coefficient_of_variation,
-                "Regret max": s.max_regret,
-                "Viabilité": s.viability,
-                "Forçages": s.forcings_evaluated,
-                "Infaisables": s.forcings_infeasible,
+                "Worst case": s.worst,
+                "Median": s.median,
+                "Best": s.best,
+                "Retention": s.retention,
+                "Instability (CV)": s.coefficient_of_variation,
+                "Max regret": s.max_regret,
+                "Viability": s.viability,
+                "Forcings": s.forcings_evaluated,
+                "Infeasible": s.forcings_infeasible,
             }
             for s in summaries
         ]
-    ).set_index("Politique")
+    ).set_index("Policy")
 
 
 def build_heatmap_figure(
@@ -207,7 +207,7 @@ def build_performance_robustness_figure(
 
     plotted = [s for s in summaries if s.nominal is not None]
     if not plotted:
-        ax.text(0.5, 0.5, "Aucune politique évaluable", ha="center", va="center")
+        ax.text(0.5, 0.5, "No policy to evaluate", ha="center", va="center")
         return fig
 
     xs = [s.nominal for s in plotted]
@@ -225,12 +225,12 @@ def build_performance_robustness_figure(
             edgecolor="black" if broken else "none", linewidth=1.2,
         )
         ax.annotate(
-            summary.policy + (" (infaisable)" if broken else ""),
+            summary.policy + (" (infeasible)" if broken else ""),
             (summary.nominal, ys[idx]), textcoords="offset points", xytext=(7, 5), fontsize=8,
         )
 
-    ax.set_xlabel(f"Performance nominale — {performance_label}")
-    ax.set_ylabel("Rétention au pire cas (pire / nominal)")
+    ax.set_xlabel(f"Nominal performance — {performance_label}")
+    ax.set_ylabel("Worst-case retention (worst / nominal)")
     ax.grid(alpha=0.25)
     ax.set_axisbelow(True)
     _annotate_quadrants(ax, x_split, y_split)
@@ -242,10 +242,10 @@ def _annotate_quadrants(ax, x_split: float, y_split: float) -> None:
     x_low, x_high = ax.get_xlim()
     y_low, y_high = ax.get_ylim()
     labels = [
-        (x_low, y_high, "modeste\nmais robuste", "left", "top"),
-        (x_high, y_high, "performant\net robuste", "right", "top"),
-        (x_low, y_low, "à éviter", "left", "bottom"),
-        (x_high, y_low, "performant\nmais fragile", "right", "bottom"),
+        (x_low, y_high, "modest\nbut robust", "left", "top"),
+        (x_high, y_high, "performant\nand robust", "right", "top"),
+        (x_low, y_low, "to avoid", "left", "bottom"),
+        (x_high, y_low, "performant\nbut fragile", "right", "bottom"),
     ]
     for x, y, text, ha, va in labels:
         ax.text(x, y, text, ha=ha, va=va, fontsize=7, color="0.5", style="italic")
@@ -268,7 +268,7 @@ def build_tornado_figure(
     row = frame.loc[policy]
     if nominal_forcing not in row.index or not np.isfinite(row[nominal_forcing]):
         fig, ax = plt.subplots(figsize=(7, 2))
-        ax.text(0.5, 0.5, f"Pas de valeur nominale ({nominal_forcing})",
+        ax.text(0.5, 0.5, f"No nominal value ({nominal_forcing})",
                 ha="center", va="center")
         return fig
 
@@ -289,13 +289,13 @@ def build_tornado_figure(
     # they get their own rows at the top rather than being silently absent.
     for offset, forcing in enumerate(broken):
         y = len(values) + offset
-        ax.text(0, y, "  infaisable", va="center", fontsize=8, color="#e41a1c", weight="bold")
+        ax.text(0, y, "  infeasible", va="center", fontsize=8, color="#e41a1c", weight="bold")
         labels.append(forcing)
 
     ax.set_yticks(range(len(labels)))
     ax.set_yticklabels(labels, fontsize=8)
     ax.axvline(0, color="black", linewidth=1)
-    ax.set_xlabel(f"Écart au nominal ({nominal_forcing}) — {value_label}")
+    ax.set_xlabel(f"Gap to nominal ({nominal_forcing}) — {value_label}")
     ax.set_title(policy, fontsize=10)
     ax.grid(axis="x", alpha=0.25)
     ax.set_axisbelow(True)

@@ -1,0 +1,232 @@
+# Parameters with several plausible values: the candidates, their source, what was retained
+# and why.
+#
+# Read by case_studies/guadeloupe/reporting/status.py. When an entry names a `config` path,
+# the status board reads the value actually in config.yaml and flags a DRIFT if it differs
+# from `retained` -- so this file cannot quietly go stale after an edit to the config.
+# Path syntax: dotted keys; `list[label=x]` picks the entry whose args.label is x;
+# `list[name=x]` the entry whose name is x; `list[0]` by position.
+#
+# `status`: retained | open (still to settle) | not_adopted (candidate kept for the record).
+# `vigilance` points at the docs/04-vigilance.md entry that carries the measurement.
+
+parameters:
+  - id: plantain_ceiling
+    name: Plantain market ceiling (bc_quota_max)
+    config: constraints[label=bc_quota_max].args.threshold
+    unit: t
+    candidates:
+      - {value: 4650, source: "Chopin et al. (2015) Eq. 6: local production + imports"}
+      - {value: 6440, source: "GAMS author's own computation, commented under the parameter"}
+      - {value: 40000, source: "GAMS parameter as set (equation commented out of both blocks)"}
+    retained: 6440
+    status: retained
+    reason: >-
+      Sourced, not fitted: the 4 650 -> 9 240 t sweep is a flat plateau (PAD inside solver
+      noise), so the exact value does not drive the result. Figure dates from 2010.
+    vigilance: E.4
+
+  - id: grassland_floor
+    name: Grassland floor (pn_prod_min)
+    config: constraints[label=pn_prod_min].args.threshold
+    unit: ha
+    candidates:
+      - {value: 6096, source: "GAMS parameter QUOTA_PN_PIQ_MIN"}
+      - {value: 8341, source: "Agreste 2017 permanent grassland x 87 % dataset coverage"}
+      - {value: 9595, source: "Agreste 2017 (Memento Guadeloupe 2019), permanent grassland"}
+    retained: 6096
+    status: retained
+    reason: >-
+      Raising it towards Agreste takes land from sugarcane, the crop the RPG measures best
+      (98 % of Agreste); the missing grassland is outside the plot universe, not mislabelled.
+    vigilance: E.4
+
+  - id: price_yield_tables
+    name: Price and yield tables
+    unit: file
+    candidates:
+      - {value: Prix_Cult.txt / Rdt_Cult.txt, source: "plain tables in the same folder"}
+      - {value: Prix_Cult_CF_<scenario>.txt / Rdt_Cult_CF_<scenario>.txt, source: "DONNEES.txt:283-289, what GAMS includes"}
+    retained: Prix_Cult_CF_<scenario>.txt / Rdt_Cult_CF_<scenario>.txt
+    status: retained
+    reason: >-
+      Fixed 2026-09-08: the plain tables diverged on 23 of 84 crops. Runs solved before that
+      date used the plain tables; the reference runs must be regenerated (roadmap).
+    vigilance: E.1
+
+  - id: transport_cost_table
+    name: Transport cost table
+    unit: file
+    candidates:
+      - {value: Cout_Transp_Cult.txt, source: "plain table"}
+      - {value: Cout_Transp_Cult_LAM.txt, source: "DONNEES.txt:228, what GAMS includes"}
+    retained: Cout_Transp_Cult_LAM.txt
+    status: retained
+    reason: The two differ on the ten fibre-cane rows only (71-290 EUR/ha of margin).
+
+  - id: crop_yields_origin
+    name: Origin of crop yields (Rdt_Cult)
+    unit: t/ha
+    candidates:
+      - {value: GAMS tables (Chopin et al. 2015 Table 1), source: "context/gams, data/tables/indice_H"}
+      - {value: Agreste territorial yields, source: "1 to 4x lower than the model's (potential vs mean)"}
+      - {value: MAELIA simulated yields, source: "future coupling, per plot x crop x ITK"}
+    retained: GAMS tables (Chopin et al. 2015 Table 1)
+    status: open
+    reason: >-
+      Untouchable under the GAMS-parity mandate. The yield gap is the common cause behind
+      the market ceilings; the MAELIA coupling is meant to replace the source.
+    vigilance: C.1
+
+  - id: risk_aversion
+    name: Risk-aversion coefficients (AVERS)
+    unit: "-"
+    candidates:
+      - {value: Chopin et al. (2015) Table 2, source: "published coefficients (domain/farm_typology.py)"}
+      - {value: recalibrated (section 2.5 method), source: "PAD 40 % but absurd coefficients"}
+    retained: Chopin et al. (2015) Table 2
+    status: retained
+    reason: The recalibration lowers the PAD with coefficients that make no agronomic sense.
+    vigilance: E.5
+
+  - id: objective
+    name: Objective function
+    config: objectives[name=maximize_risk_adjusted_gross_margin].enable
+    unit: "-"
+    candidates:
+      - {value: false, source: "maximize_gross_margin (pure margin, PAD ~193 %)"}
+      - {value: true, source: "maximize_risk_adjusted_gross_margin (Markowitz, as GAMS CALIB)"}
+    retained: true
+    status: retained
+    reason: Risk is the only thing separating the crops; GAMS solves the Markowitz form.
+
+  - id: chlordecone_layer
+    name: Chlordecone risk layer read by the eligibility rules
+    config: categorical_rules[label=ig_tut_chlordecone].args.conditions[0].column
+    unit: column
+    candidates:
+      - {value: RISQUE_CLD, source: "Data_Parc, aggregated at the MINIMUM (most permissive)"}
+      - {value: CLD_REEL, source: "Data_Parc, aggregated at the MAXIMUM"}
+    retained: RISQUE_CLD
+    status: open
+    reason: >-
+      Faithful to GAMS, but the two layers are aggregated in opposite directions and the
+      rules read the permissive one. Question to the supervisors (thesis item PERSP-62).
+
+  - id: economic_year
+    name: Economic year
+    config: data.year
+    unit: column
+    candidates:
+      - {value: "2017", source: "indice_H tables"}
+      - {value: "2018..2022", source: "indice_H tables (copies of 2017 in the current data)"}
+      - {value: calib, source: "GAMS CALIB column (TH yield 15 instead of 18)"}
+    retained: "2017"
+    status: retained
+    reason: The only year whose structural (plot/farm) data exists.
+
+  - id: itk_scenario
+    name: Technical-operation scenario
+    config: data.scenario
+    unit: "-"
+    candidates:
+      - {value: RESTIT, source: "Matrice_OTK_Cult_RESTIT"}
+      - {value: SMART, source: "Matrice_OTK_Cult_SMART (agroecological variants)"}
+    retained: RESTIT
+    status: retained
+    reason: Reproduces the historical behaviour; SMART is a scenario lever.
+
+  - id: mip_gap
+    name: Relative MIP gap
+    config: solver.args.mip_rel_gap
+    unit: share
+    candidates:
+      - {value: 0.0001, source: "HiGHS default: no finish in 37 h"}
+      - {value: 0.001, source: "tested (output_4): hits the time limit, same incumbent"}
+      - {value: 0.01, source: "tractable (~175 s at the time)"}
+    retained: 0.01
+    status: retained
+    reason: The only tractable setting; the branch-and-bound noise it leaves is 0.15 PAD point.
+    vigilance: B.1
+
+  - id: labour_budget_basis
+    name: Basis of the per-farm labour budget (Eq_MO_MAX_Expl)
+    config: constraints[label=labor_max_farm].args.slack
+    unit: slack
+    candidates:
+      - {value: 1.0, source: "observed 2017 plan priced through representative crops (6 252 740 h)"}
+      - {value: 1.073538, source: "figure proposed by Clement (6 712 553 h), uniform factor"}
+      - {value: fine plan, source: "observed FINE plan, ASSOL_PARC_INIT.TXT (5 592 326 h), scenarios_labor.yaml"}
+    retained: 1.0
+    status: open
+    reason: >-
+      The fine plan is what GAMS reads and redistributes budgets between farms; it was run
+      as an experiment (fine_labor_observed) and not yet adopted as the default.
+    vigilance: B.4
+
+  - id: representative_cane
+    name: Representative crop of observed sugarcane
+    config: baseline_representative_crops.CS
+    unit: crop
+    candidates:
+      - {value: CS_NGT_NISM, source: "one variant for the whole island"}
+      - {value: per-plot eligible variant, source: "choose among the variants eligible on each plot"}
+    retained: CS_NGT_NISM
+    status: open
+    reason: >-
+      Eligible on only 31 % of observed cane hectares, and it feeds the labour cap, hence
+      the optimum. Region-aware representatives are on the roadmap.
+    vigilance: C.2
+
+  - id: hours_per_fte
+    name: Working hours per FTE
+    config: labor.hours_per_fte
+    unit: h/yr
+    candidates:
+      - {value: 1607, source: "French legal full-time base (35 h/week)"}
+    retained: 1607
+    status: retained
+    reason: Legal convention; reporting only.
+
+  - id: labour_cost
+    name: Labour cost per hour
+    config: labor.cost_per_hour
+    unit: EUR/h
+    candidates:
+      - {value: 15.5, source: "assumption, source not documented"}
+    retained: 15.5
+    status: open
+    reason: Reporting only (not in the objective). The source of the figure is to document.
+
+  - id: price_shock
+    name: Price shock of the exposure indicators
+    config: resilience.price_shock_delta
+    unit: share
+    candidates:
+      - {value: 0.2, source: "convention of the resilience spec (2026-07-20)"}
+    retained: 0.2
+    status: retained
+    reason: Reporting only; applied after the solve to a frozen allocation.
+
+  - id: calibration_thresholds
+    name: Calibration thresholds (territorial PAD)
+    config: reporting.calibration.regional_pad_max
+    unit: "%"
+    candidates:
+      - {value: 15, source: "Chopin et al. (2015) section 2.6, after Kanellopoulos et al. (2010)"}
+    retained: 15
+    status: retained
+    reason: Review convention; 20 % applies to sub-regions and farms.
+
+  - id: orchard_floor
+    name: Orchard area floor
+    unit: ha
+    candidates:
+      - {value: 200, source: "first test"}
+      - {value: 335, source: "Agreste 2017 (385 ha) x 87 % coverage"}
+    retained: none
+    status: not_adopted
+    reason: >-
+      Solver-bound, not model-bound: both runs hit the 1 h limit with an incoherent
+      incumbent. Would also be a change of form (GAMS bounds orchards in tonnes).
+    vigilance: E.5

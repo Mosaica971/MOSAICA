@@ -17,12 +17,12 @@ M3_PER_MM_PER_HA = 10.0
 MONTHLY_WATER_ROWS = [f"BESOIN_EAU_{month:02d}" for month in range(1, 13)]
 
 
-def compute_monthly_water_need_per_ha_cult(data_cult: pd.DataFrame) -> pd.DataFrame:
+def compute_crop_monthly_water_need_per_ha(crop_data: pd.DataFrame) -> pd.DataFrame:
     """Monthly crop water need (mm/month): rows = the 12 months in calendar order,
     columns = crops."""
-    return data_cult.loc[MONTHLY_WATER_ROWS]
+    return crop_data.loc[MONTHLY_WATER_ROWS]
 
 
-def compute_water_need_per_ha_cult(data_cult: pd.DataFrame) -> pd.Series:
+def compute_crop_water_need_per_ha(crop_data: pd.DataFrame) -> pd.Series:
     """Annual crop water need per ha (mm/year): sum of the 12 monthly rows."""
-    return compute_monthly_water_need_per_ha_cult(data_cult).sum(axis=0)
+    return compute_crop_monthly_water_need_per_ha(crop_data).sum(axis=0)

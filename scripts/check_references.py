@@ -2,7 +2,7 @@
 
 The calibration of this model is the product of months of investigation, and its headline
 figures -- PAD 48.4 % at GAMS parity, 86.9 % of farm types reproduced with the two assumed
-deviations -- are quoted in VIGILANCE, in TODO and in the dashboard. Nothing today notices
+deviations -- are quoted in docs/04-vigilance.md and in the dashboard. Nothing today notices
 if a refactor, a config edit or a data change quietly moves them: the unit tests are
 deliberately data-free, and `golden_snapshot.py` covers the pipeline and the indicators but
 NOT the solve.
@@ -12,9 +12,9 @@ This script closes that gap. It reads the expectations declared next to each ref
 dataset rebuild -- it reads `recap.json`, so it runs in milliseconds and can be a habit.
 
 WHAT THE TOLERANCE IS FOR, AND WHY IT IS NOT ZERO. Three HiGHS seeds on this exact model
-give PAD 48.44 / 48.29 / 48.31 and objectives within 0.025 % (VIGILANCE, 2026-07-27): the
+give PAD 48.44 / 48.29 / 48.31 and objectives within 0.025 % (docs/04-vigilance.md, 2026-07-27): the
 arbitrariness of branch-and-bound is worth about 0.15 point of PAD. An exact-match guard
-would therefore fail on a re-run that changed nothing. The default 2 % band sits well above
+would therefore fail on a re-run that changed nothing. The 5 % band declared in references.yaml sits well above
 that noise and well below any change worth knowing about.
 
     python scripts/check_references.py            # all declared references
@@ -99,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
 
     declared = references.load_references(args.references)
     if not declared:
-        print(f"Aucune référence déclarée dans {args.references}.")
+        print(f"No reference declared in {args.references}.")
         return 1
 
     resolved = references.resolve(declared, args.outputs)
@@ -109,30 +109,31 @@ def main(argv: list[str] | None = None) -> int:
     for item in resolved:
         reference = item.reference
         if not reference.expect:
-            print(f"  {reference.label:<24} (non gardée)")
+            print(f"  {reference.label:<24} (not guarded)")
             continue
         rows = check_reference(reference, item.run_dir)
         guarded += len(rows)
         bad = [row for row in rows if row["status"] != "ok"]
         failures += len(bad)
 
-        state = "OK" if not bad else f"{len(bad)} ÉCART(S)"
-        print(f"\n  {reference.label}  ({reference.run}, ±{reference.tolerance_pct:g} %)  -> {state}")
+        state = "OK" if not bad else f"{len(bad)} DRIFT(S)"
+        folder = item.run_dir.name if item.run_dir else reference.run
+        print(f"\n  {reference.label}  ({folder}, ±{reference.tolerance_pct:g} %)  -> {state}")
         for row in rows if (args.verbose or bad) else []:
             if row["status"] == "ok" and not args.verbose:
                 continue
             actual = "—" if row["actual"] is None else f"{row['actual']:,.3f}"
-            drift = "" if row["drift_pct"] is None else f"  (écart {row['drift_pct']:.2f} %)"
+            drift = "" if row["drift_pct"] is None else f"  (drift {row['drift_pct']:.2f} %)"
             marker = " " if row["status"] == "ok" else "!"
-            print(f"    {marker} {row['metric']:<38} attendu {row['expected']:>14,.3f}"
-                  f"   obtenu {actual:>14}{drift}   [{row['status']}]")
+            print(f"    {marker} {row['metric']:<38} expected {row['expected']:>14,.3f}"
+                  f"   got {actual:>14}{drift}   [{row['status']}]")
 
-    print(f"\n{guarded - failures}/{guarded} métriques gardées conformes.")
+    print(f"\n{guarded - failures}/{guarded} guarded metrics hold.")
     if failures:
         print(
-            "\nUn écart n'est pas forcément une régression : si le changement est voulu, "
-            "mettez à jour `expect:` dans references.yaml ET la ligne correspondante de "
-            "docs/04-vigilance.md, pour que le chiffre publié et le chiffre gardé restent les mêmes."
+            "\nA drift is not necessarily a regression: if the change is intended, "
+            "update `expect:` in references.yaml AND the matching line of "
+            "docs/04-vigilance.md, so that the published figure and the guarded one stay the same."
         )
     return 1 if failures else 0
 

@@ -9,6 +9,12 @@ def resolve_kept_plots(
     criteria: dict[str, pd.Series],
     config: dict[str, Any],
 ) -> pd.Index:
+    """Plots kept by `config.zone_filter`, or every plot when there is none.
+
+    `criteria` maps a filter key (islands, regions, farms, plots) to each plot's value.
+    A plot is kept when it matches every non-empty `include` list and no `exclude`
+    list. Unknown keys raise; values that match no plot warn; an empty result raises.
+    """
     zone_filter = config.get("zone_filter")
     if not zone_filter:
         return plot_index

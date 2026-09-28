@@ -2,7 +2,7 @@
 
 Every run folder carries the exact `config_used.yaml` it was solved with. Two runs of this
 model differ in results because they differ in *hypotheses*, and the honest way to read a
-gap between, say, the strict-GAMS calibration and the retained one is to look at the four
+gap between, say, the strict-GAMS calibration and the selected one is to look at the four
 lines of YAML that separate them -- not to guess from the output.
 
 The config is two very different kinds of thing, and this module keeps them apart:
@@ -38,15 +38,15 @@ COMPONENT_SECTIONS: tuple[str, ...] = (
 )
 
 SECTION_LABELS: dict[str, str] = {
-    "objectives": "Objectif",
-    "constraints": "Contraintes",
-    "eligibility_criteria": "Critères d'éligibilité",
-    "categorical_rules": "Règles catégorielles",
+    "objectives": "Objective",
+    "constraints": "Constraints",
+    "eligibility_criteria": "Eligibility criteria",
+    "categorical_rules": "Categorical rules",
 }
 
 # Component states, in the order a reader cares about them.
-ENABLED = "activé"
-DISABLED = "désactivé"
+ENABLED = "enabled"
+DISABLED = "disabled"
 ABSENT = "absent"
 
 
@@ -101,9 +101,9 @@ def diff_components(
 
     Each row is {section, component, left, right, args, verdict}. `verdict` names the change
     in the terms that matter for reading a result gap:
-      * "activé à droite" / "désactivé à droite" -- the model itself changed;
-      * "seuils modifiés"                        -- same rule, different numbers;
-      * "identique"                              -- kept only when changes_only is False.
+      * "enabled on the right" / "disabled on the right" -- the model itself changed;
+      * "thresholds changed"                        -- same rule, different numbers;
+      * "identical"                              -- kept only when changes_only is False.
     """
     left_index = index_components(left_config.get(section))
     right_index = index_components(right_config.get(section))
@@ -116,18 +116,18 @@ def diff_components(
 
         if left_state != right_state:
             became_active = right_state == ENABLED
-            verdict = "activé à droite" if became_active else (
-                "désactivé à droite" if left_state == ENABLED else "présence différente"
+            verdict = "enabled on the right" if became_active else (
+                "disabled on the right" if left_state == ENABLED else "presence differs"
             )
         elif args and left_state == ENABLED:
-            verdict = "seuils modifiés"
+            verdict = "thresholds changed"
         elif args:
             # Both sides disabled: an argument change cannot affect either run.
-            verdict = "seuils modifiés (inactif des deux côtés)"
+            verdict = "thresholds changed (inactive on both sides)"
         else:
-            verdict = "identique"
+            verdict = "identical"
 
-        if changes_only and verdict == "identique":
+        if changes_only and verdict == "identical":
             continue
         rows.append(
             {
@@ -179,7 +179,7 @@ def summarise(left_config: dict[str, Any], right_config: dict[str, Any]) -> dict
     `headline` is the short sentence a reader wants first -- which constraints one side
     activates that the other does not -- because in this model that is nearly always the
     explanation of a result gap (the plantain ceiling and the pasture floor between the
-    strict-GAMS calibration and the retained one, for instance).
+    strict-GAMS calibration and the selected one, for instance).
     """
     components = {
         section: diff_components(left_config, right_config, section)
@@ -189,19 +189,19 @@ def summarise(left_config: dict[str, Any], right_config: dict[str, Any]) -> dict
         row["component"]
         for rows in components.values()
         for row in rows
-        if row["verdict"] == "activé à droite"
+        if row["verdict"] == "enabled on the right"
     ]
     deactivated = [
         row["component"]
         for rows in components.values()
         for row in rows
-        if row["verdict"] == "désactivé à droite"
+        if row["verdict"] == "disabled on the right"
     ]
     retuned = [
         row["component"]
         for rows in components.values()
         for row in rows
-        if row["verdict"] == "seuils modifiés"
+        if row["verdict"] == "thresholds changed"
     ]
     return {
         "components": components,

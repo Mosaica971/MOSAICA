@@ -76,7 +76,7 @@ def _snapshot_parameters(dataset: Dataset) -> dict[str, Any]:
 
 def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, Any]:
     allocation = indicators.decode_baseline_representative_allocation(dataset, config)
-    hours_per_etp = indicators.hours_per_etp_from_config(config)
+    hours_per_fte = indicators.hours_per_fte_from_config(config)
     cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
     price_shock = (config.get("resilience") or {}).get("price_shock_delta", 0.20)
 
@@ -92,7 +92,7 @@ def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, 
     snapshot = {"allocation_plots": len(allocation), "distinct_crops": int(allocation.nunique())}
     snapshot.update(
         flatten("econ", indicators.compute_economic_totals(
-            dataset, allocation, hours_per_etp, cost_per_hour))
+            dataset, allocation, hours_per_fte, cost_per_hour))
     )
     snapshot.update(flatten("env", indicators.compute_environmental_totals(dataset, allocation)))
     snapshot.update(
@@ -100,7 +100,7 @@ def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, 
     )
     snapshot.update(flatten("auto", indicators.compute_food_autonomy_totals(dataset, allocation)))
 
-    facts = indicators.compute_facts_table(dataset, allocation, hours_per_etp, cost_per_hour)
+    facts = indicators.compute_facts_table(dataset, allocation, hours_per_fte, cost_per_hour)
     snapshot["facts"] = _summarise_frame(facts)
 
     # Calibration blocks. The allocation here is the representative baseline, which folds

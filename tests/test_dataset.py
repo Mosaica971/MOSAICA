@@ -20,7 +20,7 @@ def test_build_registry_lists_every_entry_with_category_type_and_size():
         sets={"crops": ["AG", "AN"]},
         parameters={
             "prices": pd.Series({"AG": 700, "AN": 0}),
-            "data_parc": pd.DataFrame({"SURF_HA": [3.68, 3.3]}),
+            "plot_data": pd.DataFrame({"SURF_HA": [3.68, 3.3]}),
         },
         scalars={"quota_ba_max": 77877},
     )
@@ -30,6 +30,6 @@ def test_build_registry_lists_every_entry_with_category_type_and_size():
     assert registry == [
         {"category": "sets", "name": "crops", "type": "list", "size": 2},
         {"category": "parameters", "name": "prices", "type": "Series", "size": 2},
-        {"category": "parameters", "name": "data_parc", "type": "DataFrame", "size": (2, 1)},
+        {"category": "parameters", "name": "plot_data", "type": "DataFrame", "size": (2, 1)},
         {"category": "scalars", "name": "quota_ba_max", "type": "int", "size": 1},
     ]

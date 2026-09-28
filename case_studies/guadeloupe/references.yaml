@@ -1,62 +1,67 @@
-# Les runs de référence du dashboard : quel dossier de `outputs/` joue quel rôle.
+# The dashboard's reference runs: which `outputs/` folder plays which role.
 #
-# POURQUOI CE FICHIER EXISTE. La page Comparaison sait afficher n'importe quelle série
-# (run × côté), mais trois d'entre elles ne sont pas des scénarios parmi d'autres : ce sont
-# les points fixes contre lesquels tout le reste se lit. Les nommer ici plutôt que de les
-# redemander à chaque ouverture du dashboard rend le choix explicite, versionné et
-# justifiable — et le `note:` de chaque entrée porte la justification.
+# WHY THIS FILE EXISTS. The Comparison page can show any series (run × side), but three of
+# them are not scenarios among others: they are the fixed points everything else is read
+# against. Naming them here rather than re-picking them every time the dashboard opens makes
+# the choice explicit, versioned and justifiable -- and each entry's `note:` carries the
+# justification.
 #
-# COMMENT LES RÉGÉNÉRER. Les deux runs de calibration sont décrits dans
-# `scenarios_calibration.yaml` et se relancent en une commande :
+# HOW TO REGENERATE THEM. The two calibration runs are described in
+# `scenarios_calibration.yaml` and rerun in one command:
 #   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration.yaml
-# Leurs dossiers portent leur nom (`outputs/calib_retenu/`), pas un numéro.
+# Their folders carry their name (`outputs/calib_selected/`), not a number.
 #
-# COMMENT LE METTRE À JOUR. Après un run qui change la référence retenue, remplacer le
-# `run:`, réécrire le `note:` ET les valeurs `expect:`. Un `run:` qui ne correspond à aucun
-# dossier n'est pas une erreur fatale : la page signale la référence manquante et continue.
+# WHY `run:` IS A LIST. The first name is the current one; the second is the folder the run
+# was solved under before the English renaming of 2026-09-22 (`calib_retenu/`). The first
+# folder that exists wins, so regenerating a run under its new name takes over silently and
+# the old folder can be deleted whenever convenient.
 #
-# CE QUE « side » VEUT DIRE. Chaque run porte deux côtés. `input` est l'assolement 2017
-# observé (identique d'un run à l'autre, à config de données constante) ; `output` est
-# l'allocation optimisée. L'observé est donc le côté `input` d'un run quelconque, et non un
-# dossier à part. (`outputs/reference_2017/` est un artefact séparé et plus riche — il porte
-# l'encadrement bas/haut des indicateurs — mais il n'a pas de table de faits, donc il ne peut
-# pas alimenter les graphiques comparatifs.)
+# HOW TO UPDATE IT. After a run that changes the selected reference, replace `run:`, rewrite
+# `note:` AND the `expect:` values. A `run:` matching no folder is not a fatal error: the page
+# flags the missing reference and carries on.
 #
-# À QUOI SERT `expect:`. `scripts/check_references.py` compare ces valeurs à ce que le
-# dossier contient réellement et sort en erreur au-delà de `tolerance_pct`. C'est le seul
-# garde-fou du dépôt sur le SOLVE : les tests unitaires sont sans données par choix, et
-# `golden_snapshot.py` couvre le pipeline et les indicateurs, pas la résolution.
-# La tolérance est à 5 % parce que le bruit de branch-and-bound mesuré vaut 0,15 point de PAD
-# (trois graines HiGHS : 48,44 / 48,29 / 48,31), soit 2,3 % en relatif sur la plus petite
-# valeur gardée ici. Une garde à l'égalité exacte échouerait sur un simple re-run.
+# WHAT "side" MEANS. Every run has two sides. `input` is the observed 2017 land use
+# (identical from one run to the next at constant data config); `output` is the optimised
+# allocation. The observation is therefore the `input` side of any run, not a separate
+# folder. (`outputs/reference_2017/` is a separate, richer artefact -- it carries the low/high
+# bracket of the indicators -- but it has no facts table, so it cannot feed the comparison
+# charts.)
+#
+# WHAT `expect:` IS FOR. `scripts/check_references.py` compares these values with what the
+# folder actually holds and exits with an error beyond `tolerance_pct`. It is the repo's only
+# guard on the SOLVE: the unit tests are data-free by choice, and `golden_snapshot.py` covers
+# the pipeline and the indicators, not the resolution.
+# The tolerance is 5 % because the measured branch-and-bound noise is 0.15 point of PAD
+# (three HiGHS seeds: 48.44 / 48.29 / 48.31), i.e. 2.3 % relative on the smallest value
+# guarded here. An exact-equality guard would fail on a mere re-run.
 
 references:
   - id: observed
-    run: calib_retenu
+    run: [calib_selected, calib_retenu]
     side: input
-    label: "Observé 2017 (RPG)"
+    label: "Observed 2017 (RPG)"
     note: >-
-      L'assolement réellement déclaré en 2017, tel que le pipeline le reconstruit. Le côté
-      `input` de n'importe quel run donne la même chose à config de données constante.
-      ATTENTION : l'allocation FINE de 2017 n'a jamais été observée — seuls les 12 groupes
-      RPG le sont — donc les indicateurs économiques de cette série reposent sur l'hypothèse
-      `baseline_representative_crops`, et cette hypothèse est fragile : la culture
-      représentante n'est éligible que sur 31 % des hectares de canne observés, 61 % du
-      maraîchage. Les surfaces par groupe, elles, sont observées.
+      The land use actually declared in 2017, as the pipeline rebuilds it. The `input` side
+      of any run gives the same thing at constant data config.
+      WARNING: the FINE 2017 allocation was never observed -- only the 12 RPG groups are --
+      so the economic indicators of this series rest on the `baseline_representative_crops`
+      assumption, and that assumption is fragile: the representative crop is eligible on only
+      31 % of the observed cane hectares and 61 % of market gardening. Areas per group, on the
+      other hand, are observed.
 
   - id: gams_parity
-    run: calib_gams_parite
+    run: [calib_gams_parity, calib_gams_parite]
     side: output
-    label: "Calib parité GAMS"
+    label: "Calib GAMS parity"
     note: >-
-      Le bloc CALIB porté à l'identique, sans aucune déviation assumée. C'est la référence de
-      PARITÉ : ce que le modèle GAMS d'origine produit sur nos données, et donc le point de
-      comparaison honnête pour juger ce que les deux déviations apportent. Son écart aux
-      chiffres de l'article (PAD <15 %, types 81 %) tient à la provenance des données — 4 638
-      exploitations contre 5 336, année de base 2010 hors d'atteinte — et non à un défaut de
-      portage : l'enquête source-à-source du 2026-07-27 a écarté une à une les causes de
-      modélisation. Régénéré le 2026-08-01, identique au chiffre près au run d'origine
-      (`output_1`, supprimé le 2026-08-02 comme doublon exact).
+      The CALIB block ported as is, with no accepted deviation. It is the PARITY reference:
+      what the original GAMS model produces on our data, hence the honest point of comparison
+      to judge what the two deviations bring. Its gap to the article's figures (PAD <15 %,
+      types 81 %) comes from the provenance of the data -- 4 638 farms against 5 336, 2010
+      base year out of reach -- and not from a porting defect: the source-to-source
+      investigation of 2026-07-27 ruled out the modelling causes one by one. Regenerated on
+      2026-08-01, identical to the digit to the original run (`output_1`, deleted on
+      2026-08-02 as an exact duplicate).
     tolerance_pct: 5.0
     expect:
       objective.value: 84978687
@@ -66,23 +71,24 @@ references:
       calibration.area_match_pct: 64.28
 
   - id: retained
-    run: calib_retenu
+    run: [calib_selected, calib_retenu]
     side: output
-    label: "Calib retenu"
+    label: "Calib selected"
     note: >-
-      La calibration de travail, avec les deux seules déviations assumées au bloc CALIB,
-      toutes deux adossées à une source EXOGÈNE à l'assolement observé : le plafond de marché
-      du plantain `bc_quota_max` à 6 440 t (chiffre de l'auteur du GAMS, corroboré par l'Éq. 6
-      de l'article à 4 650 t) et le plancher de surface fourragère `pn_prod_min` à 6 096 ha
-      (paramètre GAMS QUOTA_PN_PIQ_MIN, 27 % SOUS les 8 341 ha que donne la Statistique
-      agricole annuelle 2017). Types 86,9 %, parcelles 67,6 %, surface 77,1 %, et la canne
-      revenue à 12 782 ha contre 12 813 observés sans qu'aucune contrainte ne la nomme.
-      NE PAS citer son PAD territorial de 6,6 % : le plancher épingle la prairie, dont le PAD
-      est nul par construction. Régénéré le 2026-08-01, identique au chiffre près au run
-      d'origine (`output_3`, supprimé le 2026-08-02 comme doublon exact).
-      Le palier intermédiaire entre cette entrée et `gams_parity` -- `bc_quota_max` seule --
-      vit dans `outputs/calib_bc_seul/` et se régénère par le même spec ; il n'est pas déclaré
-      ici parce qu'il ne sert pas de point de comparaison, seulement d'attribution.
+      The working calibration, with the only two deviations accepted in the CALIB block, both
+      backed by a source EXOGENOUS to the observed land use: the plantain market ceiling
+      `bc_quota_max` at 6 440 t (the GAMS author's figure, corroborated by the article's
+      Eq. 6 at 4 650 t) and the fodder-area floor `pn_prod_min` at 6 096 ha (GAMS parameter
+      QUOTA_PN_PIQ_MIN, 27 % BELOW the 8 341 ha given by the 2017 annual agricultural
+      statistics). Types 86.9 %, plots 67.6 %, area 77.1 %, and cane back at 12 782 ha
+      against 12 813 observed without any constraint naming it.
+      DO NOT quote its 6.6 % territorial PAD: the floor pins grassland, whose PAD is zero by
+      construction. Regenerated on 2026-08-01, identical to the digit to the original run
+      (`output_3`, deleted on 2026-08-02 as an exact duplicate).
+      The intermediate step between this entry and `gams_parity` -- `bc_quota_max` alone --
+      lives in `outputs/calib_bc_seul/` (to be regenerated as `calib_bc_only`) from the same
+      spec; it is not declared here because it serves for attribution, not as a point of
+      comparison.
     tolerance_pct: 5.0
     expect:
       objective.value: 81222224

@@ -43,7 +43,7 @@ _INFEASIBLE = {
 
 # Parameters that fully determine how the model sees a crop. Two crops equal on all of them
 # are interchangeable to the solver.
-_IDENTITY_PARAMETERS = ("margin_per_ha_cult", "crop_variance_per_ha", *_INDICATOR_PARAMETERS.values())
+_IDENTITY_PARAMETERS = ("crop_margin_per_ha", "crop_variance_per_ha", *_INDICATOR_PARAMETERS.values())
 
 
 def symmetric_crop_groups(dataset) -> list[list[str]]:
@@ -105,10 +105,10 @@ def check(
             dataset = build_dataset(config)
             for group in symmetric_crop_groups(dataset):
                 print(
-                    f"      SYMETRIE: {len(group)} cultures indistinguables par le modele "
+                    f"      SYMMETRY: {len(group)} crops the model cannot tell apart "
                     f"({', '.join(group[:4])}{'...' if len(group) > 4 else ''}) -- "
-                    f"branch-and-bound bien plus lent, et toute contrainte qui les "
-                    f"distingue est satisfaite par simple renommage."
+                    f"a much slower branch-and-bound, and any constraint telling them "
+                    f"apart is met by mere relabelling."
                 )
             model = build_model(dataset, config)
             for var in model.Y.values():

@@ -1,0 +1,29 @@
+# Replay of the GAMS-PARITY run after fixing the source of prices and yields.
+#
+# WHY THIS FILE. On 2026-09-08, the comparison with the real GAMS outputs (`context/SORTIES/`)
+# showed that the pipeline read `Prix_Cult.txt` / `Rdt_Cult.txt` where DONNEES.txt:283-289
+# fills the tables from `Prix_Cult_CF_<scenario>.txt` / `Rdt_Cult_CF_<scenario>.txt`, and
+# DONNEES.txt:228 the transport cost from `Cout_Transp_Cult_LAM.txt`. Two files read from the
+# wrong place; 23 crops out of 84 diverged. After both fixes: margin, variable costs, aid,
+# prices, gross product and labour are EXACT on 84/84 crops, the only exception being the
+# yield of TH (15 in the `calib` column, which GAMS reads; 18 in the `2017` column, which our
+# config reads) -- and TH has no eligible plot.
+#
+# The run carries a name DISTINCT from `calib_gams_parity` so as not to overwrite the
+# reference declared in references.yaml before the two have been compared.
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration_prices.yaml
+
+runs:
+  - name: calib_gams_parity_prices
+    description: >-
+      Configuration strictly identical to `calib_gams_parity` (CALIB block ported without the
+      two accepted deviations: neither bc_quota_max nor pn_prod_min), but with prices and
+      yields read from the tables GAMS actually includes.
+      Target: the GAMS outputs of `context/SORTIES/ASSOL_GWAD.TXT`, column Assol_Calib --
+      territorial PAD 3.76 % over the 12 RPG groups, AG 106.80 ha, PN_PIQ 6 096.17 ha,
+      BC 202.84 ha, ME 206.76 ha, CS 12 907.67 ha. Before the fix, the same run gave
+      PAD 48.44 %, AG 10.27 ha, PN 2 575.62 ha, BC 2 875.26 ha, ME 0 ha.
+    disable:
+      - bc_quota_max
+      - pn_prod_min

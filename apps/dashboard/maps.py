@@ -36,7 +36,7 @@ GROUP_COLORS: dict[str, str] = {
     "ME": "#66c2a5",   # melon
     "VE": "#377eb8",   # vergers
     "AG": "#1f78b4",   # agrumes
-    "NC": "#f0f0f0",   # non cultive
+    "NC": "#f0f0f0",   # not cultivated
 }
 _UNKNOWN_COLOR = "#bdbdbd"
 
@@ -129,20 +129,20 @@ def build_change_figure(
     group, red changed, grey was never allocated on either side.
     """
     fig, ax = plt.subplots(figsize=_figsize(bounds or _bounds_of(polygons)))
-    palette = {"inchange": "#4daf4a", "change": "#e41a1c", "hors": "#e0e0e0"}
+    palette = {"unchanged": "#4daf4a", "changed": "#e41a1c", "unallocated": "#e0e0e0"}
     vertices: list[list[tuple[float, float]]] = []
     colors: list[str] = []
-    tally = {"inchange": 0, "change": 0, "hors": 0}
+    tally = {"unchanged": 0, "changed": 0, "unallocated": 0}
 
     for plot, polygon in polygons.items():
         old, new = before.get(plot), after.get(plot)
         if old is None or new is None:
-            kind = "hors"
+            kind = "unallocated"
         else:
             try:
-                kind = "inchange" if base_group_for(old) == base_group_for(new) else "change"
+                kind = "unchanged" if base_group_for(old) == base_group_for(new) else "changed"
             except KeyError:
-                kind = "hors"
+                kind = "unallocated"
         tally[kind] += 1
         for ring in polygon.rings:
             if len(ring) >= 3:
@@ -162,15 +162,15 @@ def build_change_figure(
     ax.set_axis_off()
     ax.set_title(title, fontsize=11)
     labels = {
-        "inchange": f"inchangé ({tally['inchange']:,})",
-        "change": f"changé ({tally['change']:,})",
-        "hors": f"non alloué ({tally['hors']:,})",
+        "unchanged": f"unchanged ({tally['unchanged']:,})",
+        "changed": f"changed ({tally['changed']:,})",
+        "unallocated": f"unallocated ({tally['unallocated']:,})",
     }
     ax.legend(
         handles=[
             Line2D([0], [0], marker="s", linestyle="", markersize=8,
                    markerfacecolor=palette[k], markeredgecolor="none", label=labels[k])
-            for k in ("inchange", "change", "hors")
+            for k in ("unchanged", "changed", "unallocated")
         ],
         fontsize=8, loc="upper left", bbox_to_anchor=(1.01, 1.0), frameon=False,
     )

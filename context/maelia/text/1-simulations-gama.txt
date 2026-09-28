@@ -1,0 +1,333 @@
+Guide utilisateur > 1 Réaliser des simulations – utilisation de GAMA
+
+1 Réaliser des simulations – utilisation de
+GAMA
+Il faudra avoir préalablement installé GAMA, MAELIA, ainsi que généré les données includes
+du terrain à simuler.
+
+1.1 Installation de GAMA
+Chaque version de MAELIA a pour identifiant MAELIA_xxx_GAMA_yyy où xxx désigne le
+numéro de version de MAELIA et yyy le numéro de la version de GAMA pour laquelle elle a
+été développée. Dans l’idéal il convient d’installer la version yyy de GAMA ou à défaut une
+version supérieure.
+
+  1. Téléchargez la version adéquate sur la page de téléchargement. Le cas échéant,
+     préférez une version avec JDK inclus (with JDK) afin d’éviter les conflits de versions de
+     JAVA. Suivez la procédure d’installation.
+
+  2. Lancez GAMA (aide). Une fenêtre vous invite à choisir un répertoire destiné à devenir
+     le répertoire de travail (workspace) de GAMA. Si le répertoire spécifié n’existe pas, il
+     sera créé par GAMA (aide). L’écran d’accueil ci-dessous s’affiche.
+1.2 Installation de MAELIA
+Vous devez être en possession d’une version compressée de MAELIA sous la forme d’un
+fichier MAELIA_xxx_GAMA_yyy.zip. Rapprochez-vous de l’équipe MAELIA pour l’obtenir.
+
+  1. Ne décompessez pas le fichier MAELIA_xxx_GAMA_yyy.zip
+
+  2. Dans GAMA, cliquez-droit sur User models > Import > GAMA Project
+3. Dans la fenêtre ci-dessous, choisissez select archive file et sélectionnez le fichier
+  MAELIA_xxx_GAMA_yyy.zip. Un projet nommé MAELIA_xxx_GAMA_yyy doit apparaître
+  dans la zone Projects de la fenêtre. Cliquez sur Finish pour valider.
+4. Dans GAMA, un sous-répertoire MAELIA_xxx_GAMA_yyy doit apparaître sous User
+  models comme ci-dessous. Il contient tous les éléments de la Figure
+  @ref(fig:figArborescence). En effet, l’installation de MAELIA a eu pour effet de
+  décompresser le fichier MAELIA_xxx_GAMA_yyy.zip dans le répertoire workspace.
+1.3 Paramétrer une simulation
+Ces étapes décrivent le paramétrage et le lancement d’une simulation via le [lanceur
+(launcher)][Glossaire]. L’utilisateur pourra choisir
+
+     des modules à activer/désactiver
+     des années climatiques de simulation
+     des sorties (en cohérence avec les indicateurs recherchés)
+     des affichages en cours de simulation (et de leurs éventuelles sauvegardes sous forme
+     d’image)
+
+
+1.4 Créer et modifier un lanceur
+Dans le cadre de gauche de GAMA, accédez au répertoire
+MAELIA_xxx_GAMA_yyy/models/main/ et double-cliquez sur le fichier
+launcherBase.gaml comme ci-dessous.
+Vous pouvez modifier directement ce launceur ou bien choisir d’en créer une copie
+personnalisée. Pour cela cliquez-droit sur launcherBase.gaml dans le cadre de gauche
+puis copy et paste (ou CTRL-C CTRL-V) afin de créer un nouveau launceur que vous pouvez
+nommer par exemple launcherBase_monTerrain.gaml. Double-cliquez sur ce nouveau
+lanceur et modifiez son nom:
+
+model launcherBase
+
+en
+
+model launcherBaseAveyron
+
+comme dans la figure ci-dessous.
+Notez l’astérisque dans l’entête du fichier dans le cadre de droite qui indique que la
+modification n’a pas été enregistrée. Pour cela, allez dans le menu File > Save (ou CTRL-S).
+
+La partie experiment du lanceur contient des lignes de code GAML de la forme
+
+parameter 'nomDuParamètre : ' var: variableDansLeCode <-
+valeurPasseeAuParametre;
+
+Par exemple, la ligne suivante
+
+parameter 'annee de debut de simulation : ' var: anneeDebutSimulation <-
+2008; //2011
+
+permet de spécifier que la simulation débutera en 2008: la valeur 2008 sera affectée à la
+variable anneeDebutSimulation. Les caractères //2011 permettent de conserver pour
+mémoire une autre valeur de paramètre (ici l’année 2011): en effet tout ce qui suit // est
+considéré comme un commentaire et n’est pas interprété.
+
+
+1.5 Principaux paramètres du lanceur
+Le tableau ci-dessous présente les principaux paramètres du lanceur dont la liste
+exhaustive est détaillée en Annexe.
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+
+     filter, lag
+
+The following objects are masked from 'package:base':
+
+
+     intersect, setdiff, setequal, union
+
+
+             paramètre                 exemple    description
+
+nomDecoupageZonePourLectureFichiers AveyronRef nom du territoire à simuler
+
+        anneeDebutSimulation             2008     année de début de simulation. Attention la
+                                                  première année de simulation commence en
+                                                  août afin d'avoir un assolement cohérent à
+                                                  partir de la deuxième année
+
+         nbAnneesSimulation                8      nombre d'années à simuler
+
+           simulationSurZH              FALSE     TRUE:permet de ne simuler qu'un sous-
+                                                  ensemble de Bve listés dans le paramètre
+                                                  suivant FALSE: simulation sur le terrain entier
+
+            idZHASimuler              ['230','540'] si simulationSurZH=TRUE: liste des identifiants
+                                                  de Bve à simuler, doivent correspondre à des
+                                                  valeurs du champ ID_ZH du shapefile ZH.shp
+
+    executerModeleHydrographique        TRUE      TRUE: exécute le modèle hydrographique
+                                                  FALSE: n'exécute pas le modèle
+                                                  hydrographique, les ressources en eau sont
+                                                  alors illimitées
+
+        listNomsZHsDebitForce         ['121','125'] identifiants de BVe pour lesquels l'hydrologie
+                                                    est forcée, doivent correspondre à des valeurs
+              paramètre                 exemple     description
+                                                    du champ ID_ZH du shapefile ZH.shp
+
+     listNomsZHsDebitComplement        ['171','185'] identifiants de BVe pour lesquels on ajoute un
+                                                     flux d'eau extérieur à la zone d'étude en entrée
+                                                     du BVe (permet de simuler l'arrivée d'un
+                                                     affluent extérieur au territoire d'étude),
+                                                    doivent correspondre à des valeurs du champ
+                                                    ID_ZH du shapefile ZH.shp
+
+       listeExutoiresZoneMaelia           ['59']    identifiants des BVe exutoires, doivent
+                                                    correspondre à des valeurs du champ ID_ZH du
+                                                    shapefile ZH.shp
+
+       executerModeleNormatif             TRUE      TRUE: exécute le modèle normatif FALSE:
+                                                    n'exécute pas le modèle hydrographique donc
+                                                    pas de gestion des barrages et pas de
+                                                    restrictions
+
+        executerModeleAgricole            TRUE      TRUE: exécute le modèle agricole FALSE:
+                                                    n'exécute pas le modèle agricole donc pas de
+                                                    prélèvements, de plus l'hydrologie des
+                                                    surfaces agricoles est simulée via un module
+                                                    simplifié inclus dans le module hydrologique.
+
+
+
+
+1.6 Année de référence
+Les séquences culturales sont construites pour chaque parcelle à partir des données issues
+du RPG. En fonction des données disponibles, les séquences reconstituées utilisées dans
+MAELIA ont des longueurs variables entre 2 et 8 ans.
+
+Afin de prendre en compte cette hétérogénéité de longueur des séquences, une année de
+référence est définie. Un des objectifs de la définition de l’année de référence est de
+permettre d’avoir un assolement simulé correspondant aux données observées quel que
+soit l’année de début de simulation (ex. année de début différence de l’année de
+référence). Dans ce cas, il faut que l’année de référence corresponde à l’année de la
+dernière culture de la séquence culturale (attribut SEQUENCE de parcelles.shp).
+
+Exemple : si les séquences sont reconstituées sur les années 2006-2014, et si l’on veut un
+assolement simulé reproduisant au mieux l’assolement observé sur ces années l’année de
+référence doit être fixée à 2014.
+
+L’année de référence peut être modifiée via la ligne suivante du launcher :
+
+parameter 'anneeReferenceRPG :' var: anneeDeReferenceRPG <- 2012;
+
+La figure ci-dessous montre la reconstitution de deux séquences
+
+     maïs-blé (séquence sur 2 ans)
+     pois-blé-tournesol (séquence sur 3 ans)
+1.7 Affichages
+De nombreux affichages sont disponibles pour suivre l’évolution du système en cours de
+simulation. L’utilisateur peut choisir d’en activer / désactiver selon les besoins (cf. Annexes)
+
+
+1.8 Sorties
+Une simulation génère des fichiers correspondant aux sorties spécifiées dans le lanceur.
+Les principales sorties sont les suivantes. Leur description est détaillée dans la section
+Sorties.
+     parameter "sorties eau" var: sorties_eau    <- true;
+     parameter "sorties azote"   var: sorties_azote <- false;
+     parameter "sorties carbone et GES" var: sorties_carboneGES <- false;
+     parameter "sorties retenues"            var: sorties_retenues        <- true;
+     parameter "sorties barrages"            var: sorties_barrages        <- true;
+
+Attention ces sorties sont au pas de temps journalier, ce qui peut générer des fichiers
+volumineux selon la taille du terrain simulé et le nombre d’années simulées. En outre,
+sélectionner plusieurs sorties ralentit la simulation du fait des temps d’écriture. Il est
+conseillé de tester les sorties sur un sous-terrain (en utilisant le paramètre
+executerModeleSurUneZH).
+
+A l’issue de la simulation, un répertoire est créé dans /models/main/log/ avec pour nom
+l’identifiant du terrain suivi de l’horodatage du début de la simulation. Ce répertoire
+contient les fichiers générés au cours de la simulation. Par exemple, le répertoire
+Aveyron_Ref_2022-09-01_12_23_30 contient les fichiers générés durant la simulation
+lancée le 1er septembre 2022 à 12h23m30s sur le terrain Aveyron_Ref.
+
+
+1.9 Lancer une simulation
+Une fois les valeurs des paramètres du lanceur correctement renseignées, cliquez sur
+l’icône verte
+
+
+
+
+Cela déclenche l’initialisation de la simulation, i.e. la lecture et le chargement des
+données. Cette étape peut durer plusieurs dizaines de secondes, sa progression peut être
+suivie dans la console en bas à gauche de la fenêtre GAMA. Il est recommandé de lire les
+informations écrites sur la console au cours de l’initialisation, notamment les erreurs
+(bloquantes) et les avertissements (warning, non bloquants), révélateurs de problèmes
+dans les includes.
+
+Extrait d’informations écrites sur la console pendant l’initialisation d’une simulation:
+...
+*********** MODELE SWAT ***********
+Création des bandes d'altitudes...
+      ❗ WARNING fichier inexistant:
+../../includes/Aveyron_Ref/modeleCommun/altitude/altitudeAgregeesParZH.shp →
+neige non simulée
+    ✅ OK 0 bande(s) d'altitude créée(s)
+Création des HRU non agricoles...
+      ✅ OK 847 HRU non agricole(s) créée(s)
+Création des HRU agricoles...
+    ✅ OK 0 HRU agricole(s) créée(s)
+Création zone(s) météo moyenne(s)...
+      ✅ OK 54 zone(s) créée(s)
+...
+
+Une fois l’initialisation terminée, la simulation proprement dite est lancée en cliquant sur
+le bouton lecture ci-dessous
+
+
+
+
+Au cours de la simulation, différentes informations sont écrites dans la console,
+notamment l’évolution du pas de temps. L’extrait ci-dessous montre que la simulation s’est
+terminée le 31 décembre 2004 (jour julien 366), correspondant au pas de temps 1613
+(nombre de jours simulés), et qu’elle a duré 60 s.
+
+...
+-----------------Ma 31/12/2004 (j 366) (1613) ----------------- (60 s)
+
+*********** FIN DE SIMULATION ***********
+temps de simulation: 60.0 s
+
+
+
+1.10 Lancer une ou plusieurs simulations en mode
+headless (sans interface)
+Gama propose un mode headless, c’est-à-dire sans interface, pour lancer des simulations
+documentation Gama headless. Ce mode présente l’intérêt de diminuer fortement le
+temps des simulations. Il existe plusieurs modes headless : legacy ou batch. Ces deux
+modes permettent de lancer une ou plusieurs simulations à la suite mais aussi si besoin en
+simultannée. Cela permet d’utiliser le maximum du potentiel de calcul du PC (les différents
+coeurs du PC). Dans la version Gama 1.9, seul le mode batch est maintenu.
+
+
+1.11 Mode batch
+Pour utiliser le mode batch (= plusieurs simulations à la suite ou en parralèle), il faut
+paramétrer le launcher en mode batch. Pour cela, on remplace la ligne :
+
+experiment simulationBase type: gui {
+
+par la ligne :
+
+experiment simulationBase type: batch until:simulationTerminee parallel:4 {
+
+Le chiffre 4 peut être modifié si on veut parraléliser n simulations en même temps.
+Attention de ne pas dépasser le nombre de coeur du PC.
+
+Ensuite, on modifie le paramètre qui va être remplacé pour chaque simulation. Si on a
+découpé notre territoire en plusieurs morceaux pour accélerer le temps de simulation et
+qu’on veut lancer les simulations des différents morceaux en parralèle, on modifie le
+paramètre de nom des includes de par exemple :
+
+      parameter 'nomDecoupageZonePourLectureFichiers : '
+            var: nomDecoupageZonePourLectureFichiers <- 'RVGB_BEST_SC2';
+
+à:
+
+      parameter 'nomDecoupageZonePourLectureFichiers : '
+          var: nomDecoupageZonePourLectureFichiers    <- 'RVGB_BEST_SC2_1'
+              among:
+['RVGB_BEST_SC2_1','RVGB_BEST_SC2_2','RVGB_BEST_SC2_3','RVGB_BEST_SC2_4'];
+Il faut bien indiquer la première valeur que va prendre le paramètre avant le among.
+
+On vérifiera bien qu’il n’y a pas de display (affichages) configurés dans le launcher et que
+l’on a bien choisi les sorties à écrire de manière parcimonieuse. Dans le cas d’un
+découpage de terrain en plusieurs morceaux, on conseille de lancer l’initialisation de tous
+les morceaux avec l’interface en mode gui (classique) pour vérifier qu’il n’y a pas d’erreur à
+l’initialisation.
+
+
+1.12 Headless en mode batch
+Une fois le launcher en mode batch configuré, on peut lancer le mode batch en dehors de
+l’interface Gama via l’invite de commande.
+
+   1. On ouvre l’invite de commande en tapant cmd dans la barre de recherche windows de
+     l’écran.
+
+   2. On se déplace jusqu’au dossier du programme Gama (pas le workspace) en faisant cd
+     .. pour remonter et cd "Program Files\Gama\headless" par exemple pour
+     atteindre le dossier headless dans Gama.
+
+   3. On lance Gama et on lui indique où trouver le launcher batch dans le workspace Gama
+     où se trouve votre MAELIA en écrivant dans la console par exemple:
+
+gama-headless.bat -batch simulationBase
+
+
+"C:\Users\XXX\Gama_Workspace\MAELIA_X.X.X_GAMA_1.9.3\models\main\launcher_ter
+rain_batch.gaml"
+
+Vous pouvez ajouter à la fin -memory XG avec X le nombre de Giga que vous voulez allouer
+à Gama si vous ne l’avez pas déjà paramétré via l’interface de Gama. Pensez à ne pas
+dédier toute la mémoire à Gama.
+
+   4. Les initialisations vont se faire en parralèle si vous avez choisi de parraléliser dans le
+     launcher puis les écritures vont s’écrire dans la console toutes mélangées. Vous
+     pourrez trouver les log des simulations dans votre dossier habituel avec un dossier
+     par simulation. Si vous avez choisi de ne pas parraléliser, les simulations vont se faire
+     l’une à la suite de l’autre.
+
+Pour tout problème vous pouvez consulter la documentation Gama sur le mode headless
+batch lien.
+

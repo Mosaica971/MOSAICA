@@ -1,0 +1,33 @@
+Guide de l’utilisateur de MAELIA
+Votre livre de chevet pour l’utilisation de MAELIA
+
+AUTEUR·RICE                                                  DATE DE PUBLICATION
+écrit par l’équipe MAELIA                                    18 août 2026
+
+
+
+Bienvenue
+
+
+
+
+Ce livre vous accompagnera à utiliser la plateforme de modélisation MAELIA. Il a été réalisé par l’équipe MAELIA,
+composée de membre de l’UMR LAE et de MAELAB. Pour toute question relative à ce document, veuillez contacter un
+membre de l’équipe MAELIA.
+
+Ce guide a pour objectif de permettre de réaliser des simulations MAELIA de manière autonome en décrivant le
+procédé de paramétrage et de lancement d’une simulation. Il inclut une annexe qui décrit le procédé d’installation
+des composants informatiques nécessaires.
+
+Pour faciliter la compréhension des utilisateurs,le guide éclaire aussi sur la structure informatique de la plateforme
+et sur la possibilité de créer des scénarios de gestion.
+
+Il décrit en détail des données d’entrées nécessaires, ainsi que leur formatage. Il inclue notamment l’application de
+renseignement des itinéraires de culture et l’utilisation du contrôle de cohérrence des fichiers d’entrée de MAELIA.
+Enfin, ce guide détaille les sorties génériques des différents modules de MAELIA.
+
+Pour une description du contenu de la plateforme MAELIA, il faudra se référer au site de documentation en ligne:
+http://maelia-platform.inra.fr.
+
+Bonne lecture !
+

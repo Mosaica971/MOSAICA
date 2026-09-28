@@ -35,17 +35,24 @@ def generate_report(
     *,
     outputs_root: Path = Path("outputs"),
 ) -> Path:
+    """Write one run folder and return its path. Case-study contract, called by main.py
+    and scripts/run_scenarios.py after the solve.
+
+    The folder holds recap.json (every indicator block, input and output side),
+    config_used.yaml (the exact configuration solved), the CSV tables under csv/ and the
+    charts under plots/. Nothing here changes the solution; it only reads it back.
+    """
     # A run that knows its name gets a folder named after it (see run_folder.slugify);
     # `main.py` sets no run_name, so an ad-hoc solve still lands in outputs/output_N.
     output_dir = create_output_folder(outputs_root, config.get("run_name"))
-    hours_per_etp = indicators.hours_per_etp_from_config(config)
+    hours_per_fte = indicators.hours_per_fte_from_config(config)
     cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
 
     output_allocation = indicators.decode_output_allocation(model)
     input_allocation = indicators.decode_baseline_allocation(dataset)
     # Input economics use a representative fine crop per aggregate baseline family, since
     # the observed 2017 baseline is only known at aggregate resolution (see docs/04-vigilance.md
-    # "point 4"). Surface/diversity below stay on the raw aggregate baseline.
+    # C.2). Surface/diversity below stay on the raw aggregate baseline.
     input_representative = indicators.decode_baseline_representative_allocation(dataset, config)
 
     _write_allocation_csv(dataset, output_allocation, _csv_path(output_dir, "allocation_output.csv"))
@@ -55,11 +62,11 @@ def generate_report(
     _write_crop_economics(dataset, input_representative, output_dir, "input", cost_per_hour)
     # Tidy (crop x region) fact tables backing the comparison dashboard's free pivoting.
     for side, allocation in (("output", output_allocation), ("input", input_representative)):
-        indicators.compute_facts_table(dataset, allocation, hours_per_etp, cost_per_hour).to_csv(
+        indicators.compute_facts_table(dataset, allocation, hours_per_fte, cost_per_hour).to_csv(
             _csv_path(output_dir, f"facts_{side}.csv"), index=False
         )
-    _write_etp_indicators(dataset, output_allocation, hours_per_etp, output_dir, "output")
-    _write_etp_indicators(dataset, input_representative, hours_per_etp, output_dir, "input")
+    _write_fte_indicators(dataset, output_allocation, hours_per_fte, output_dir, "output")
+    _write_fte_indicators(dataset, input_representative, hours_per_fte, output_dir, "input")
 
     gini_revenue_by_farm = _write_output_only_indicators(dataset, output_allocation, output_dir)
     _write_shannon_and_surface_by_key(dataset, input_allocation, output_allocation, output_dir)
@@ -72,10 +79,10 @@ def generate_report(
     delta_summary = {key: output_summary[key] - input_summary[key] for key in output_summary}
 
     output_econ = indicators.compute_economic_totals(
-        dataset, output_allocation, hours_per_etp, cost_per_hour
+        dataset, output_allocation, hours_per_fte, cost_per_hour
     )
     input_econ = indicators.compute_economic_totals(
-        dataset, input_representative, hours_per_etp, cost_per_hour
+        dataset, input_representative, hours_per_fte, cost_per_hour
     )
     delta_econ = {key: output_econ[key] - input_econ[key] for key in output_econ}
 
@@ -225,8 +232,8 @@ def _write_output_only_indicators(
     return indicators.compute_gini(revenue_by_farm)
 
 
-def _write_etp_indicators(
-    dataset: Dataset, allocation: pd.Series, hours_per_etp: float, output_dir: Path, side: str
+def _write_fte_indicators(
+    dataset: Dataset, allocation: pd.Series, hours_per_fte: float, output_dir: Path, side: str
 ) -> None:
     """Employment (ETP / full-time equivalents) by region/island/farm for one side, from
     the labor hours embedded in each crop's technical itinerary."""
@@ -234,17 +241,17 @@ def _write_etp_indicators(
     island = indicators.plot_to_island(dataset)
     farm = indicators.plot_to_farm(dataset)
 
-    etp_by_region = indicators.compute_etp_by_key(dataset, allocation, region, hours_per_etp)
-    indicators.compute_etp_by_key(dataset, allocation, island, hours_per_etp).to_csv(
-        _csv_path(output_dir, f"etp_by_island_{side}.csv"), header=["etp"], index_label="island"
+    fte_by_region = indicators.compute_fte_by_key(dataset, allocation, region, hours_per_fte)
+    indicators.compute_fte_by_key(dataset, allocation, island, hours_per_fte).to_csv(
+        _csv_path(output_dir, f"fte_by_island_{side}.csv"), header=["fte"], index_label="island"
     )
-    indicators.compute_etp_by_key(dataset, allocation, farm, hours_per_etp).to_csv(
-        _csv_path(output_dir, f"etp_by_farm_{side}.csv"), header=["etp"], index_label="farm"
+    indicators.compute_fte_by_key(dataset, allocation, farm, hours_per_fte).to_csv(
+        _csv_path(output_dir, f"fte_by_farm_{side}.csv"), header=["fte"], index_label="farm"
     )
-    etp_by_region.to_csv(
-        _csv_path(output_dir, f"etp_by_region_{side}.csv"), header=["etp"], index_label="region"
+    fte_by_region.to_csv(
+        _csv_path(output_dir, f"fte_by_region_{side}.csv"), header=["fte"], index_label="region"
     )
-    plots.plot_etp_by_region(etp_by_region, output_dir / "plots" / f"etp_by_region_{side}.png")
+    plots.plot_fte_by_region(fte_by_region, output_dir / "plots" / f"fte_by_region_{side}.png")
 
 
 def _write_shannon_and_surface_by_key(
@@ -305,16 +312,16 @@ def write_calibration(result: calibration.CalibrationResult, output_dir: Path) -
 
 
 def _write_allocation_csv(dataset: Dataset, allocation: pd.Series, path: Path) -> None:
-    data_parc = dataset.parameters["data_parc"]
+    plot_data = dataset.parameters["plot_data"]
     farm = indicators.plot_to_farm(dataset).reindex(allocation.index)
     frame = pd.DataFrame(
         {
             "plot": allocation.index,
             "crop": allocation.to_numpy(),
             "farm": farm.to_numpy(),
-            "region": data_parc["REGION"].reindex(allocation.index).to_numpy(),
-            "island": data_parc["ILE"].reindex(allocation.index).to_numpy(),
-            "surface_ha": data_parc["SURF_HA"].reindex(allocation.index).to_numpy(),
+            "region": plot_data["REGION"].reindex(allocation.index).to_numpy(),
+            "island": plot_data["ILE"].reindex(allocation.index).to_numpy(),
+            "surface_ha": plot_data["SURF_HA"].reindex(allocation.index).to_numpy(),
         }
     )
     frame.to_csv(path, index=False)
@@ -420,94 +427,94 @@ def _build_recap(
         # (Chopin et al. 2015 §2.6) -- a report card, never an input to the model.
         "calibration": calibration_summary,
         "gini_revenue_by_farm": gini_revenue_by_farm,
-        "total_plots": int(len(dataset.parameters["data_parc"])),
-        "total_farms": int(dataset.parameters["expl_parc"]["farm"].nunique()),
+        "total_plots": int(len(dataset.parameters["plot_data"])),
+        "total_farms": int(dataset.parameters["farm_plot_map"]["farm"].nunique()),
     }
 
 
 def _render_recap_markdown(recap: dict[str, Any]) -> str:
     econ = recap["economics"]
     lines = [
-        "# Recap de simulation",
+        "# Simulation recap",
         "",
-        *([f"- Scenario : {recap['run_name']}"] if recap.get("run_name") else []),
-        f"- Horodatage : {recap['timestamp']}",
-        f"- Duree de resolution : {recap['solve_duration_seconds']:.2f}s",
-        f"- Condition de terminaison : {recap['termination_condition']}",
-        f"- Solveur : {recap['solver']['name']}",
-        f"- Annee / scenario : {recap['data']['year']} / {recap['data']['scenario']}",
-        f"- Nombre de parcelles (total) : {recap['total_plots']}",
-        f"- Nombre d'exploitations (total) : {recap['total_farms']}",
+        *([f"- Scenario: {recap['run_name']}"] if recap.get("run_name") else []),
+        f"- Timestamp: {recap['timestamp']}",
+        f"- Solve duration: {recap['solve_duration_seconds']:.2f}s",
+        f"- Termination condition: {recap['termination_condition']}",
+        f"- Solver: {recap['solver']['name']}",
+        f"- Year / scenario: {recap['data']['year']} / {recap['data']['scenario']}",
+        f"- Number of plots (total): {recap['total_plots']}",
+        f"- Number of farms (total): {recap['total_farms']}",
         "",
-        "## Objectif",
+        "## Objective",
         f"- {recap['objective']['name']} = {recap['objective']['value']:,.2f}",
         "",
-        "## Contraintes activees",
+        "## Enabled constraints",
     ]
     for constraint in recap["constraints"]:
         lines.append(f"- {constraint['name']} {constraint['args']}")
     lines += [
         "",
-        "## Entree vs sortie (surface)",
-        f"- Surface cultivee (ha) : {recap['input']['total_surface_ha']:.2f} -> "
+        "## Input vs output (area)",
+        f"- Cultivated area (ha): {recap['input']['total_surface_ha']:.2f} -> "
         f"{recap['output']['total_surface_ha']:.2f} "
         f"(delta {recap['delta']['total_surface_ha']:+.2f})",
-        f"- Parcelles actives : {recap['input']['active_plot_count']} -> "
+        f"- Active plots: {recap['input']['active_plot_count']} -> "
         f"{recap['output']['active_plot_count']} "
         f"(delta {recap['delta']['active_plot_count']:+d})",
-        f"- Exploitations actives : {recap['input']['farm_count']} -> "
+        f"- Active farms: {recap['input']['farm_count']} -> "
         f"{recap['output']['farm_count']} "
         f"(delta {recap['delta']['farm_count']:+d})",
         "",
-        "## Entree vs sortie (economie)",
-        "_Entree = baseline 2017 a economie representative par famille (voir docs/04-vigilance.md point 4)._",
-        f"- Production (t) : {econ['input']['total_production_tonnes']:,.0f} -> "
+        "## Input vs output (economics)",
+        "_Input = 2017 baseline priced through one representative crop per family (see docs/04-vigilance.md)._",
+        f"- Production (t): {econ['input']['total_production_tonnes']:,.0f} -> "
         f"{econ['output']['total_production_tonnes']:,.0f} "
         f"(delta {econ['delta']['total_production_tonnes']:+,.0f})",
-        f"- Subvention (EUR) : {econ['input']['total_subsidy']:,.0f} -> "
+        f"- Subsidy (EUR): {econ['input']['total_subsidy']:,.0f} -> "
         f"{econ['output']['total_subsidy']:,.0f} (delta {econ['delta']['total_subsidy']:+,.0f})",
-        f"- Revenu / produit brut (EUR) : {econ['input']['total_revenue']:,.0f} -> "
+        f"- Revenue / gross product (EUR): {econ['input']['total_revenue']:,.0f} -> "
         f"{econ['output']['total_revenue']:,.0f} (delta {econ['delta']['total_revenue']:+,.0f})",
-        f"- Cout variable (EUR) : {econ['input']['total_variable_cost']:,.0f} -> "
+        f"- Variable cost (EUR): {econ['input']['total_variable_cost']:,.0f} -> "
         f"{econ['output']['total_variable_cost']:,.0f} (delta {econ['delta']['total_variable_cost']:+,.0f})",
-        f"- Marge brute (EUR) : {econ['input']['total_gross_margin']:,.0f} -> "
+        f"- Gross margin (EUR): {econ['input']['total_gross_margin']:,.0f} -> "
         f"{econ['output']['total_gross_margin']:,.0f} (delta {econ['delta']['total_gross_margin']:+,.0f})",
-        f"- Cout main d'oeuvre (EUR) : {econ['input']['total_labor_cost']:,.0f} -> "
+        f"- Labour cost (EUR): {econ['input']['total_labor_cost']:,.0f} -> "
         f"{econ['output']['total_labor_cost']:,.0f} (delta {econ['delta']['total_labor_cost']:+,.0f})",
-        f"- Revenu net (marge brute - cout MO, EUR) : {econ['input']['total_net_revenue']:,.0f} -> "
+        f"- Net revenue (gross margin - labour cost, EUR): {econ['input']['total_net_revenue']:,.0f} -> "
         f"{econ['output']['total_net_revenue']:,.0f} (delta {econ['delta']['total_net_revenue']:+,.0f})",
-        f"- Emploi (ETP) : {econ['input']['total_etp']:,.1f} -> "
-        f"{econ['output']['total_etp']:,.1f} (delta {econ['delta']['total_etp']:+,.1f})",
+        f"- Employment (FTE): {econ['input']['total_fte']:,.1f} -> "
+        f"{econ['output']['total_fte']:,.1f} (delta {econ['delta']['total_fte']:+,.1f})",
     ]
 
     calib = recap["calibration"]
 
     def _verdict(passed: bool) -> str:
-        return "OK" if passed else "HORS SEUIL"
+        return "OK" if passed else "OUTSIDE THRESHOLD"
 
     def _pct(value: float | None) -> str:
         return "n/a" if value is None else f"{value:,.1f}%"
 
     lines += [
         "",
-        "## Calibration (observe 2017 vs simule)",
-        "_Ecart mesure au niveau des 12 groupes RPG observes. Seuils : Chopin et al. 2015"
-        " section 2.6. Voir docs/superpowers/specs/2026-07-21-calibration-validation-design.md._",
-        f"- PAD territorial : {_pct(calib['regional_pad_pct'])} "
-        f"(seuil {calib['thresholds']['regional_pad_max']:.0f}%) "
+        "## Calibration (observed 2017 vs simulated)",
+        "_Gap measured at the level of the 12 observed RPG groups. Thresholds: Chopin et al. 2015"
+        " section 2.6. See docs/superpowers/specs/2026-07-21-calibration-validation-design.md._",
+        f"- Territorial PAD: {_pct(calib['regional_pad_pct'])} "
+        f"(threshold {calib['thresholds']['regional_pad_max']:.0f}%) "
         f"-> {_verdict(calib['regional_within_threshold'])}",
-        f"- Cultures sous seuil : {calib['crops_within_threshold']} / {calib['crops_evaluated']}",
-        f"- Cellules sous-regionales sous seuil : "
+        f"- Crops under threshold: {calib['crops_within_threshold']} / {calib['crops_evaluated']}",
+        f"- Sub-regional cells under threshold: "
         f"{calib['subregional_cells_within_threshold']} / {calib['subregional_cells_evaluated']} "
-        f"(seuil {calib['thresholds']['subregional_pad_max']:.0f}%)",
-        f"- Exploitations sous seuil : {calib['farms_within_threshold']} / "
-        f"{calib['farms_evaluated']} (seuil {calib['thresholds']['farm_pad_max']:.0f}%)",
-        f"- Types d'exploitation correctement simules : {_pct(calib['farm_type_match_pct'])} "
-        f"(seuil {calib['thresholds']['farm_type_match_min']:.0f}%) "
+        f"(threshold {calib['thresholds']['subregional_pad_max']:.0f}%)",
+        f"- Farms under threshold: {calib['farms_within_threshold']} / "
+        f"{calib['farms_evaluated']} (threshold {calib['thresholds']['farm_pad_max']:.0f}%)",
+        f"- Farm types correctly simulated: {_pct(calib['farm_type_match_pct'])} "
+        f"(threshold {calib['thresholds']['farm_type_match_min']:.0f}%) "
         f"-> {_verdict(calib['farm_type_within_threshold'])}",
-        f"- Parcelles avec la bonne culture : {_pct(calib['plot_match_pct'])} "
+        f"- Plots with the right crop: {_pct(calib['plot_match_pct'])} "
         f"({calib['matched_plots']} / {calib['total_plots']})",
-        f"- Surface avec la bonne culture : {_pct(calib['area_match_pct'])} "
+        f"- Area with the right crop: {_pct(calib['area_match_pct'])} "
         f"({calib['matched_ha']:,.0f} / {calib['total_ha']:,.0f} ha)",
     ]
     return "\n".join(lines) + "\n"

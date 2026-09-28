@@ -1,16 +1,16 @@
 {
-  "univers": {
-    "parcelles": 24734,
-    "exploitations": 4638,
-    "surface_totale_ha": 26136.660000000003,
-    "surface_cultivee_ha": 23577.99,
-    "surface_non_cultivee_ha": 2558.67,
-    "parcelles_cultivees": 22197,
-    "exploitations_cultivees": 4588,
-    "annee_economique": "2017",
-    "scenario_economique": "RESTIT",
+  "universe": {
+    "plots": 24734,
+    "farms": 4638,
+    "total_area_ha": 26136.660000000003,
+    "cultivated_area_ha": 23577.99,
+    "uncultivated_area_ha": 2558.67,
+    "cultivated_plots": 22197,
+    "cultivated_farms": 4588,
+    "economic_year": "2017",
+    "economic_scenario": "RESTIT",
     "zone_filter": null,
-    "cultures_representantes": {
+    "representative_crops": {
       "AN": "AN_NU",
       "BA": "BA_INT",
       "BC": "BC_BT",
@@ -21,7 +21,7 @@
       "VE": "VE_BTGT"
     }
   },
-  "assolement_observe_ha": {
+  "observed_land_use_ha": {
     "AG": 100.84,
     "AN": 132.67000000000002,
     "BA": 1920.8,
@@ -34,22 +34,22 @@
     "PN": 6109.43,
     "VE": 310.89
   },
-  "reclassement_jachere_vers_nc_ha": 1208.1299999999999,
-  "types_exploitation": {
-    "Sans surface cultivee": 50,
-    "Arboriculteurs": 67,
-    "Bananiers": 146,
-    "Canniers specialises": 1371,
-    "Canniers diversifies": 862,
-    "Diversifies": 282,
-    "Eleveurs": 1047,
-    "Maraichers": 216,
-    "Canniers-eleveurs": 597
+  "fallow_reclassified_to_nc_ha": 1208.1299999999999,
+  "farm_types": {
+    "No cultivated area": 50,
+    "Fruit growers": 67,
+    "Banana growers": 146,
+    "Specialised cane growers": 1371,
+    "Diversified cane growers": 862,
+    "Diversified": 282,
+    "Livestock farmers": 1047,
+    "Market gardeners": 216,
+    "Cane and livestock farmers": 597
   },
-  "plancher_pad_pct": 1.475401423106889,
-  "surface_irreproductible_ha": 347.87,
-  "parcelles_sans_variante_eligible": 482,
-  "representante_eligible_pct": {
+  "pad_floor_pct": 1.475401423106889,
+  "irreproducible_area_ha": 347.87,
+  "plots_without_eligible_variant": 482,
+  "representative_eligible_pct": {
     "AG": 48.04641015470052,
     "AN": 92.26652596668424,
     "BA": 68.6625364431487,
@@ -62,81 +62,81 @@
     "PN": 100.0,
     "VE": 46.22535301875261
   },
-  "indicateurs": {
+  "indicators": {
     "production_tonnes": {
-      "central": 722093.5048000001,
-      "bas": 704784.1048,
-      "haut": 912863.5828
+      "central": 694463.7998,
+      "low": 703241.6797999998,
+      "high": 891116.7478
     },
     "sales": {
-      "central": 160789070.24170667,
-      "bas": 103332142.10674667,
-      "haut": 152958846.21602666
+      "central": 162015810.59504002,
+      "low": 104495838.52207999,
+      "high": 153906676.70186
     },
     "subsidy": {
       "central": 68977158.52548571,
-      "bas": 48207434.10214858,
-      "haut": 72059977.74952
+      "low": 48207434.10214858,
+      "high": 72059977.74952
     },
     "revenue": {
-      "central": 229766228.7671924,
-      "bas": 151671857.47089523,
-      "haut": 224765879.34804666
+      "central": 230992969.12052575,
+      "low": 152703272.62422857,
+      "high": 225966654.45138
     },
     "gross_margin": {
-      "central": 87558952.47521858,
-      "bas": 50840298.529674865,
-      "haut": 93187837.82502303
+      "central": 88785692.8285519,
+      "low": 51801744.52980819,
+      "high": 95628374.17835638
     },
     "labor_hours": {
       "central": 6252739.71127381,
-      "bas": 3785525.2167499997,
-      "haut": 6195233.294278408
+      "low": 3785525.2167499997,
+      "high": 6195233.294278408
     },
-    "azote": {
+    "nitrogen": {
       "central": 2065681.7056666669,
-      "bas": 1315420.933666667,
-      "haut": 1914715.928666667
+      "low": 1315420.933666667,
+      "high": 1914715.928666667
     },
-    "ges": {
+    "ghg": {
       "central": 178071029.99552476,
-      "bas": 137166566.5756473,
-      "haut": 172946068.01173228
+      "low": 137166566.5756473,
+      "high": 172946068.01173228
     },
-    "ift": {
+    "tfi": {
       "central": 68133.19647619048,
-      "bas": 42224.64647619047,
-      "haut": 65834.83433333333
+      "low": 42224.64647619047,
+      "high": 65834.83433333333
     },
-    "etp": {
+    "fte": {
       "central": 3890.9394594112073,
-      "bas": null,
-      "haut": null
+      "low": null,
+      "high": null
     },
     "labor_cost": {
       "central": 96917465.52474405,
-      "bas": null,
-      "haut": null
+      "low": null,
+      "high": null
     },
     "net_revenue": {
-      "central": -9358513.04952547,
-      "bas": null,
-      "haut": null
+      "central": -8131772.696192145,
+      "low": null,
+      "high": null
     },
-    "surface_cld": {
+    "chlordecone_risk_area": {
       "central": 691.49,
-      "bas": null,
-      "haut": null
+      "low": null,
+      "high": null
     },
     "water_need_m3": {
       "central": 35629950.0,
-      "bas": null,
-      "haut": null
+      "low": null,
+      "high": null
     },
     "soil_carbon_balance": {
       "central": -11836.919108310416,
-      "bas": null,
-      "haut": null
+      "low": null,
+      "high": null
     }
   }
 }

@@ -1,0 +1,773 @@
+# Data catalogue: what each input table holds, where it comes from, and who may see it.
+#
+# Versioned even though data/ is not. One entry per file of data/ that the pipeline reads, plus
+# the files of a run folder (outputs:). It drives two tools:
+#   scripts/build_data_templates.py   -> the fill-in Excel workbook (one sheet per table)
+#   scripts/validate_data_workbook.py -> reads a filled workbook back, checks it, exports .txt
+# Human-readable guide: docs/data/README.md.
+#
+# Column descriptions come from context/gams/DESCRIPTION_SETS.txt (the GAMS data dictionary)
+# and DONNEES.txt (table declarations), translated. "to confirm" marks what nobody has written
+# down yet -- mostly licences and owners. Levels are the PROPOSAL of the 2026-09-22 framing spec
+# (section 3), not a validated policy: see docs/data/README.md before sharing anything.
+#
+# Layouts
+#   set      one element per line (GAMS .set)
+#   mapping  `parent.child` per line (GAMS two-dimensional .set)
+#   records  one row per entity (rows.name), one column per field (fields:)
+#   matrix   rows x columns, both keyed; one value spec for every cell (value:), or one spec
+#            per row when the rows are variables (row_fields:)
+# Field keys
+#   type     int | float | code (an int from `values`) | binary (0/1) | key (a referential id)
+#   unit, min, max, values ({code: meaning}), description, note
+#   computed {expr, round, tolerance}: a pandas expression over the same row; the workbook
+#            writes it as a locked formula, the validator recomputes it
+#   derived  a cross-table rule the validator recomputes; today only {siblings_in: <mapping>}
+#            = how many children share this row's parent in that mapping
+#   optional true = an empty cell is allowed (default: every cell is required)
+# `{scenario}` in a file name is expanded over `variants`.
+
+version: 1
+
+levels:
+  0:
+    name: public
+    rule: aggregates at commune level or above; sources already published
+  1:
+    name: partner
+    rule: >-
+      per-crop coefficients, aggregates by sub-region / farm type / crop, scenario results;
+      shared under agreement with the project partners
+  2:
+    name: restricted
+    rule: >-
+      anything at plot or farm level. The plot <-> farm link is what makes a record personal
+      (GDPR): the anonymised RPG is public, the same plot attached to a farm and its revenue is not
+
+referentials:
+  crops: {set: sets/CULT_2017.set, description: the 84 crops (and cropping systems) the model allocates}
+  operations: {set: sets/OTK.set, description: technical operations and inputs (OTK)}
+  soils: {set: sets/SOL.set, description: the five MORGWANIK soil groups}
+  watersheds: {set: sets/BV_2017.set, description: watersheds}
+  catchments: {set: sets/CPT_2017.set, description: drinking-water catchments}
+  plots: {index_of: plot_data, description: synthetic plot ids P1..Pn}
+  farms: {column_of: [farm_plot_map, farm], description: synthetic farm ids E1..En}
+  periods:
+    values: [init, calib, "2017", "2018", "2019", "2020", "2021", "2022"]
+    description: >-
+      economic time series column; data.year in config.yaml picks one. init / calib are the
+      GAMS baseline and calibration columns
+
+tables:
+
+  # --- referential sets --------------------------------------------------------------------
+  crops:
+    file: sets/CULT_2017.set
+    layout: set
+    title: Crops
+    description: The crops the model can allocate (GAMS set C). Fine codes, e.g. CS_BT_NIM.
+    source: MOSAICA team (GAMS SETS.txt)
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: crop
+    level: 0
+  operations:
+    file: sets/OTK.set
+    layout: set
+    title: Technical operations
+    description: Operations and inputs of the technical itineraries (GAMS set K).
+    source: MOSAICA team (GAMS SETS.txt)
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: operation
+    level: 0
+  soils:
+    file: sets/SOL.set
+    layout: set
+    title: Soil groups
+    description: The five MORGWANIK soil groups (VERTISOL, FERRALSOL, ANDOSOL, NITISOL, AUTRES).
+    source: MORGWANIK soil-carbon model
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: soil group
+    level: 0
+  watersheds:
+    file: sets/BV_2017.set
+    layout: set
+    title: Watersheds
+    description: Watershed ids (GAMS set BV).
+    source: to confirm
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: watershed
+    level: 0
+  catchments:
+    file: sets/CPT_2017.set
+    layout: set
+    title: Water catchments
+    description: Drinking-water catchment protection areas (GAMS set CPT).
+    source: to confirm
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: catchment
+    level: 0
+
+  # --- plot structure (level 2: plot and farm level) ----------------------------------------
+  farm_plot_map:
+    file: sets/EXPL_PARC_2017.set
+    layout: mapping
+    parent: {name: farm}
+    child: {name: plot, referential: plots, unique: true}
+    title: Farm -> plots
+    description: >-
+      Which farm operates which plot (GAMS EXPL_PARC). Farms are recovered from the RPG PACAGE
+      number and pseudonymised as E1..En. Each plot belongs to exactly one farm.
+    source: RPG 2017 (ASP), PACAGE number pseudonymised
+    owner: to confirm
+    licence: to confirm (the pseudonymised link is not the public anonymised RPG)
+    vintage: 2017
+    resolution: plot x farm
+    level: 2
+    level_reason: the plot <-> farm link identifies a farmer
+  watershed_plot_map:
+    file: sets/BV_PARC_2017.set
+    layout: mapping
+    parent: {name: watershed, referential: watersheds}
+    child: {name: plot, referential: plots, unique: true}
+    title: Watershed -> plots
+    description: Which watershed each plot drains to (GAMS BV_PARC).
+    source: GIS overlay (RPG x watershed layer)
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: plot
+    level: 2
+    level_reason: plot ids are shared with farm_plot_map
+  region_plot_map:
+    file: sets/REG_PARC_2017.set
+    layout: mapping
+    parent: {name: region}
+    child: {name: plot, referential: plots, unique: true}
+    title: Region -> plots
+    description: Sub-region of each plot (GAMS REG_PARC), the same partition as plot_data.REGION.
+    source: GIS overlay
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: plot
+    level: 2
+    level_reason: plot ids are shared with farm_plot_map
+  catchment_plot_map:
+    file: sets/CPT_PARC_2017.set
+    layout: mapping
+    parent: {name: catchment, referential: catchments}
+    child: {name: plot, referential: plots}
+    title: Catchment -> plots
+    description: Plots inside a drinking-water catchment protection area (GAMS CPT_PARC).
+    source: GIS overlay (protection perimeters)
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: plot
+    level: 2
+    level_reason: plot ids are shared with farm_plot_map
+
+  plot_data:
+    file: tables/Data_Parc_Gwad_2017.txt
+    layout: records
+    rows: {name: plot, defines: plots}
+    title: Plots
+    description: >-
+      One row per plot of the 2017 RPG: location, size, soil, climate, constraints. The
+      structure of every run (years other than 2017 change economics only).
+    source: RPG 2017 + GIS layers (IGN relief, Colmet-Daage soil map, Meteo-France rainfall, CG971 irrigation network, chlordecone risk map, ZNIEFF)
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: plot
+    level: 2
+    level_reason: carries farm attributes (NB_PARC, GFA_EXPL) and shares plot ids with farm_plot_map
+    fields:
+      COMMUNE: {type: int, unit: INSEE code, min: 97101, max: 97134, description: commune of the plot}
+      REGION:
+        type: code
+        values: {1: Central Grande-Terre, 2: East Grande-Terre, 3: North Grande-Terre, 4: North Basse-Terre, 5: South-East Basse-Terre, 6: South-West Basse-Terre, 7: Marie-Galante}
+        description: sub-region
+      ILE:
+        type: code
+        values: {1: Basse-Terre, 2: Grande-Terre, 3: Marie-Galante}
+        description: island
+      CULT_MORG:
+        type: code
+        values: {1: sugarcane, 2: banana, 3: savanna, 4: diversification}
+        description: MORGWANIK land-use class
+      SURF_HA: {type: float, unit: ha, min: 0.0001, max: 1000, description: plot area}
+      PENTE:
+        type: float
+        unit: "% (to confirm)"
+        min: 0
+        max: 100
+        description: mean slope
+        note: >-
+          DESCRIPTION_SETS.txt says degrees, but values reach 100 and are compared with the
+          crops' PENTE_MIN/MAX, documented in %. Unit to confirm with the source.
+      ALTITUDE: {type: float, unit: m, min: 0, max: 1500, description: mean altitude}
+      PERIMETRE: {type: float, unit: m, min: 0, description: plot perimeter}
+      CONFORM:
+        type: float
+        unit: m/ha
+        computed: {expr: PERIMETRE / SURF_HA, round: 0, tolerance: 0.5}
+        description: shape index (perimeter / area); above 1500 mechanised sugarcane is banned
+      IRRIG_PARC: {type: binary, description: "1 = served by the irrigation network"}
+      ZNIEFF1T: {type: binary, description: "1 = inside a type-1 ZNIEFF (natural area of ecological interest)"}
+      ZNIEFF2T: {type: binary, description: "1 = inside a type-2 ZNIEFF"}
+      RISQUE_CLD:
+        type: code
+        values: {1: very high, 2: high, 3: medium, 4: low, 5: other}
+        description: chlordecone contamination risk class
+      PLUVIO_PARC: {type: float, unit: mm/yr, min: 0, max: 12000, description: mean annual rainfall}
+      TYPE_SOL:
+        type: code
+        values: {1: vertisol, 2: ferralsol, 3: andosol, 4: nitisol, 5: other}
+        description: soil group (derived in GAMS from TYPE_SOL_INIT)
+      SOL_COURT: {type: binary, description: "1 = skeletal soil or limestone outcrop (bans mechanised cane)"}
+      NB_PARC:
+        type: int
+        min: 1
+        derived: {siblings_in: farm_plot_map}
+        description: number of plots of the plot's farm (counted from farm_plot_map)
+      GFA_EXPL: {type: binary, description: "1 = the farm belongs to a land-tenure group (GFA, SAFER)"}
+      RUI_PARC: {type: float, unit: mm/yr, min: 0, description: mean annual runoff}
+      CLD_KG_HA:
+        type: float
+        unit: kg/ha
+        min: -1
+        description: mean chlordecone stock; currently a mean per soil type
+        note: -1 = no value
+      DRAI_PARC: {type: float, unit: mm/yr, min: 0, description: mean annual drainage}
+      TYPE_SOL_INIT: {type: int, min: 1, max: 30, description: soil class of the source soil map (1..18)}
+      GFA_PARC: {type: binary, description: "1 = the plot itself is GFA land"}
+      PART_C_INIT: {type: float, unit: "%", min: 0, max: 100, description: initial soil organic carbon content}
+
+  rpg_history:
+    file: tables/Data_RPG_Gwad_2017.txt
+    layout: records
+    rows: {name: plot, referential: plots}
+    title: Observed land use 2012-2017
+    description: >-
+      RPG crop group declared on each plot, 2012 to 2017. The 2017 column is the observed
+      state every run is scored against; 2015-2017 drive the fallow lock and the farm typology.
+    source: RPG 2012-2017 (ASP)
+    owner: ASP / IGN
+    licence: Licence Ouverte (Etalab 2.0) for the anonymised RPG -- to confirm for this extract
+    vintage: 2012-2017
+    resolution: plot
+    level: 2
+    level_reason: plot ids are shared with farm_plot_map; alone it would be level 0
+    fields:
+      cult_2012: &rpg_code
+        type: code
+        values: {0: not declared, 1: AG, 2: AN, 3: BC, 4: BA, 5: VE, 6: CS, 7: PN, 8: MA, 9: MA, 10: JA (fallow), 11: MA, 12: MA, 13: ME, 14: NC (not cultivated), 15: MA, 16: PN, 17: PN, 18: IG, 19: VE, 20: VE}
+        description: RPG group declared that year (mapping to model groups in farm_typology.py)
+      cult_2013: *rpg_code
+      cult_2014: *rpg_code
+      cult_2015: *rpg_code
+      cult_2016: *rpg_code
+      cult_2017: *rpg_code
+
+  farm_risk_aversion_table:
+    file: tables/Avers.txt
+    layout: records
+    rows: {name: farm}
+    title: Risk aversion (unused)
+    description: >-
+      GAMS AVERS(E). Not read: the model recomputes risk aversion from the farm type
+      (farm_typology.compute_risk_aversion); this file holds 1 everywhere, for 5 336 farm ids
+      where farm_plot_map has 4 638 -- hence no foreign-key check.
+    source: MOSAICA team
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: farm
+    level: 2
+    level_reason: one row per farm
+    unused: true
+    fields:
+      AVERS: {type: float, min: 0, description: risk-aversion coefficient}
+
+  # --- crops and itineraries (level 1: per-crop coefficients) --------------------------------
+  crop_data:
+    file: tables/Data_Cult.txt
+    layout: matrix
+    rows: {name: variable}
+    columns: {name: crop, referential: crops}
+    title: Crop parameters
+    description: >-
+      Agronomic bounds and coefficients per crop (GAMS Data_Cult(VAR_C, C)). The MIN/MAX rows
+      are the numeric eligibility bounds; the others feed water, soil-carbon and pesticide indicators.
+    source: MOSAICA team, expert knowledge; MORGWANIK for KCROP/HRES/CARB/RAC/BIOM_AER
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: crop
+    level: 1
+    row_fields:
+      SURF_PARC_MIN: {type: float, unit: ha, min: 0, description: smallest plot the crop is allowed on}
+      SURF_PARC_MAX: {type: float, unit: ha, min: 0, description: largest plot the crop is allowed on}
+      ALTI_MIN: {type: float, unit: m, description: lowest altitude}
+      ALTI_MAX: {type: float, unit: m, description: highest altitude}
+      PENTE_MIN: {type: float, unit: "%", min: 0, description: smallest slope}
+      PENTE_MAX: {type: float, unit: "%", min: 0, description: steepest slope}
+      PLUVIO_MIN: {type: float, unit: mm/yr, min: 0, description: least rainfall}
+      PLUVIO_MAX: {type: float, unit: mm/yr, min: 0, description: most rainfall}
+      CLD:
+        type: code
+        values: {1: very sensitive, 2: sensitive, 3: slightly sensitive, 4: not sensitive}
+        description: sensitivity of the crop to chlordecone
+      MW: {type: float, unit: MWh/t, min: 0, description: electricity producible per tonne of biomass}
+      COUV_SOL: {type: float, unit: "0-100", min: 0, max: 100, description: soil cover index (Tixier)}
+      PROF_SILLONS: {type: float, unit: cm, min: 0, description: furrow depth (Tixier)}
+      BESOIN_EAU_01: &water_need {type: float, unit: mm/month, min: 0, description: monthly water need}
+      BESOIN_EAU_02: *water_need
+      BESOIN_EAU_03: *water_need
+      BESOIN_EAU_04: *water_need
+      BESOIN_EAU_05: *water_need
+      BESOIN_EAU_06: *water_need
+      BESOIN_EAU_07: *water_need
+      BESOIN_EAU_08: *water_need
+      BESOIN_EAU_09: *water_need
+      BESOIN_EAU_10: *water_need
+      BESOIN_EAU_11: *water_need
+      BESOIN_EAU_12: *water_need
+      LONG_RAC: {type: float, unit: cm, min: 0, description: rooting depth}
+      KCROP: {type: float, min: 0, description: "mineralisation coefficient of the cropping system (MORGWANIK; 0.9 where unknown)"}
+      HRES: {type: float, min: 0, max: 1, description: "humification coefficient of residues (MORGWANIK; 0.3 where unknown)"}
+      CARB: {type: float, min: 0, max: 1, description: "carbon fraction of residues (0.4 where unknown)"}
+      RAC: {type: float, min: 0, max: 1, description: "root biomass / yield ratio (0.1 where unknown)"}
+      BIOM_AER: {type: float, unit: t/ha, min: 0, description: "above-ground residue biomass (6 where unknown)"}
+
+  operation_data:
+    file: tables/Data_OTK.txt
+    layout: records
+    rows: {name: operation, referential: operations}
+    title: Operations and inputs
+    description: >-
+      One row per operation or input of the technical itineraries (GAMS Data_OTK(K, VAR_OTK)):
+      dose, price, labour, nitrogen, GHG, and the pesticide properties the Tixier indicator reads.
+    source: MOSAICA team; pesticide properties from the PPDB (University of Hertfordshire)
+    owner: to confirm
+    licence: to confirm -- PPDB values are under the PPDB terms of use
+    vintage: 2017
+    resolution: operation
+    level: 1
+    fields:
+      DOSE: {type: float, min: 0, description: quantity per hectare and per application (unit of the input)}
+      PRIX_UNIT: {type: float, unit: EUR/unit, min: 0, description: unit price}
+      NATURE: {type: code, values: {0: input, 1: operation}, description: input or technical operation}
+      AMORTI: {type: code, values: {0: every cycle, 1: once per plantation}, description: "1 = spread over Duree_Plant_Cult cycles"}
+      MO_EXPL: {type: float, unit: h/unit, min: 0, description: labour per unit of dose}
+      AZOTE: {type: float, unit: kg N/unit, min: 0, max: 1, description: nitrogen per unit of dose}
+      GES_SURF:
+        type: float
+        min: 0
+        optional: true
+        description: GHG per hectare, scale to confirm (roadmap ghg-unit)
+        note: >-
+          empty for DICOPUR_600 (used by every sugarcane and fibre-cane itinerary); GAMS and the
+          pandas sum both read it as 0
+      GES_Q: {type: float, min: 0, description: GHG per tonne produced, scale to confirm (roadmap ghg-unit)}
+      IFT: {type: binary, description: "1 = counts as one pesticide treatment"}
+      DLRAT: {type: float, unit: mg/kg, min: 0, description: rat oral LD50 (PPDB)}
+      SOLUBILITE: {type: float, unit: mg/l, min: 0, description: water solubility at 20 C (PPDB)}
+      QMA: {type: float, unit: kg/unit, min: 0, description: active substance per unit}
+      HOUDART_TOX_SCORE: {type: float, min: 0, max: 5, description: qualitative toxicity score (Houdart)}
+      HOUDART_SOLUB_SCORE: {type: float, min: 0, max: 5, description: qualitative solubility score (Houdart)}
+      HARMFUL_FACTOR: {type: float, min: 0, max: 5, description: qualitative harmfulness score}
+      ADI: {type: float, unit: mg/kg bw/day, min: 0, description: acute reference dose (PPDB)}
+      AQUATOX: {type: float, unit: mg/l, min: 0, description: fish 96 h LC50 (PPDB)}
+      DT50: {type: float, unit: days, min: 0, description: field half-life in soil (PPDB)}
+      GUS:
+        type: float
+        description: groundwater ubiquity score, log10(DT50) x (4 - log10(KOC)) (PPDB)
+        note: not recomputed -- the stored values differ from the formula for some products
+      KOC: {type: float, unit: cm3/g, min: 0, description: organic-carbon partition coefficient (PPDB)}
+      BIRD: {type: float, unit: mg/kg, min: 0, description: bird oral LD50 (PPDB)}
+      HUM: {type: float, min: 0, max: 1, description: moisture content of an organic amendment}
+      CARB: {type: float, min: 0, max: 1, description: carbon fraction of an organic amendment}
+      FHUM: {type: float, min: 0, max: 1, description: humification factor of an organic amendment}
+
+  crop_operation_matrix:
+    file: tables/Matrice_OTK_Cult_{scenario}.txt
+    variants: {scenario: [RESTIT, SMART]}
+    layout: matrix
+    rows: {name: operation, referential: operations}
+    columns: {name: crop, referential: crops}
+    value: {type: float, min: 0, unit: applications/cycle, description: how many times the crop's itinerary applies the operation (0 = never)}
+    title: Itineraries (operation x crop)
+    description: >-
+      The technical itinerary of every crop (GAMS Matrice_OTK_Cult(K, C)). data.scenario in
+      config.yaml picks RESTIT or SMART.
+    source: MOSAICA team, technical itinerary sheets
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: operation x crop
+    level: 1
+
+  soil_data:
+    file: tables/Data_Sol.txt
+    layout: matrix
+    rows: {name: variable}
+    columns: {name: soil, referential: soils}
+    title: Soil parameters
+    description: MORGWANIK soil-carbon parameters per soil group (GAMS Data_Sol(VAR_SOL, SOL)).
+    source: MORGWANIK
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017
+    resolution: soil group
+    level: 1
+    row_fields:
+      KAER: {type: float, unit: 1/yr, min: 0, max: 1, description: carbon mineralisation rate}
+      DENS: {type: float, unit: t/m3, min: 0, description: bulk density}
+      PROF: {type: float, unit: m, min: 0, description: depth of the carbon layer}
+      KOC: {type: float, min: 0, description: water / organic-matter partition coefficient of chlordecone}
+
+  crop_nutrient_content:
+    file: tables/Nutri_Cult.txt
+    layout: matrix
+    rows: {name: nutrient}
+    columns: {name: crop, referential: crops, subset: true}
+    value: {type: float, min: 0, description: nutrient content per tonne of product}
+    title: Nutrient content of crops
+    description: Nutritional content per crop (GAMS Nutri_Cult), for the food self-sufficiency ratios.
+    source: food composition tables -- to confirm (Ciqual?)
+    owner: to confirm
+    licence: to confirm
+    vintage: to confirm
+    resolution: crop
+    level: 1
+
+  food_nutrient_needs:
+    file: tables/Nutri_Alim.txt
+    layout: matrix
+    rows: {name: nutrient}
+    columns: {name: population_group}
+    value: {type: float, min: 0, description: annual need of the population group (Q_Tot = headcount)}
+    title: Nutrient needs of the population
+    description: Needs per age and sex class (GAMS Nutri_Alim), for the self-sufficiency ratios.
+    source: INSEE population + nutritional references -- to confirm
+    owner: to confirm
+    licence: to confirm
+    vintage: to confirm
+    resolution: territory
+    level: 0
+
+  tixier_thresholds:
+    file: tables/R_Tixier.txt
+    layout: matrix
+    rows: {name: threshold}
+    columns: {name: bound}
+    value: {type: float, description: "favourable / unfavourable threshold; proportional in between"}
+    title: Tixier thresholds
+    description: Thresholds of the Tixier fuzzy pesticide-risk tree (domain/rpest.py).
+    source: Tixier et al. (Rpest method)
+    owner: to confirm
+    licence: to confirm
+    vintage: to confirm
+    resolution: territory
+    level: 0
+
+  # --- economic time series (crop x period) --------------------------------------------------
+  crop_price:
+    file: tables/indice_H/Prix_Cult_CF_{scenario}.txt
+    variants: {scenario: [RESTIT, SMART]}
+    layout: matrix
+    rows: {name: crop, referential: crops}
+    columns: {name: period, referential: periods}
+    value: {type: float, unit: EUR/t, min: 0, description: market price}
+    title: Crop prices
+    description: Market price per crop and period (GAMS Prix_Cult, filled from the _CF_ file as DONNEES.txt does).
+    source: MOSAICA team, Agreste / DAAF price series -- to confirm per crop
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017-2022
+    resolution: crop
+    level: 1
+  crop_yield:
+    file: tables/indice_H/Rdt_Cult_CF_{scenario}.txt
+    variants: {scenario: [RESTIT, SMART]}
+    layout: matrix
+    rows: {name: crop, referential: crops}
+    columns: {name: period, referential: periods}
+    value: {type: float, unit: t/ha, min: 0, description: marketable yield}
+    title: Crop yields
+    description: Marketable yield per crop and period (GAMS Rdt_Cult). A MAELIA coupling would replace this table (roadmap, postponed).
+    source: MOSAICA team, Agreste -- to confirm per crop
+    owner: to confirm
+    licence: to confirm
+    vintage: 2017-2022
+    resolution: crop
+    level: 1
+  crop_yield_variance:
+    file: tables/indice_H/Var_Rdt_Cult.txt
+    layout: matrix
+    rows: {name: crop, referential: crops}
+    columns: {name: period, referential: periods}
+    value: {type: float, min: 0, description: yield variance (only the init column is read)}
+    title: Yield variance
+    description: Yield variability per crop (GAMS Var_Rdt_Cult), used by the risk-adjusted objective and the climate exposure indicator.
+    source: MOSAICA team; Chopin et al. 2015
+    owner: to confirm
+    licence: to confirm
+    vintage: init
+    resolution: crop
+    level: 1
+  crop_bagasse:
+    file: tables/indice_H/Bagasse_Cult.txt
+    layout: matrix
+    rows: &crop_rows {name: crop, referential: crops}
+    columns: &period_cols {name: period, referential: periods}
+    value: {type: float, unit: EUR/t, min: 0, description: bagasse valuation price}
+    title: Bagasse price
+    description: Bagasse valuation price (GAMS Bagasse_Cult).
+    source: &econ_source MOSAICA team (GAMS DONNEES.txt tables) -- primary source to confirm
+    owner: &tbc to confirm
+    licence: *tbc
+    vintage: &econ_vintage 2017-2022
+    resolution: crop
+    level: 1
+  crop_plantation_duration:
+    file: tables/indice_H/Duree_Plant_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: yr, min: 0, description: years between two replantings}
+    title: Plantation duration
+    description: Years between two replantings (GAMS Duree_Plant_Cult); spreads AMORTI=1 operations.
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 1
+  crop_cycle_duration:
+    file: tables/indice_H/Duree_Cycle_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: yr, min: 0, description: length of one crop cycle}
+    title: Cycle duration
+    description: Length of one crop cycle (GAMS Duree_Cycle_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 1
+  crop_harvest_cost:
+    file: tables/indice_H/Cout_Recolte_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/t, min: 0, description: harvest cost (sugarcane, banana)}
+    title: Harvest cost
+    description: Harvest cost per tonne (GAMS Cout_Recolte_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 1
+  crop_transport_cost:
+    file: tables/indice_H/Cout_Transp_Cult_LAM.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/t, min: 0, description: transport cost}
+    title: Transport cost
+    description: Transport cost per tonne (GAMS Cout_Transp_Cult, read from the _LAM file as DONNEES.txt:228 does).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 1
+  posei_area_aid:
+    file: tables/indice_H/POSEI_Surf_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/ha, min: 0, description: POSEI area aid}
+    title: POSEI aid per hectare
+    description: POSEI aid paid per hectare (GAMS POSEI_Surf_Cult).
+    source: POSEI programme (DAAF) -- to confirm
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  posei_volume_aid:
+    file: tables/indice_H/POSEI_Q_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/t, min: 0, description: POSEI volume aid}
+    title: POSEI aid per tonne
+    description: POSEI aid paid per tonne (GAMS POSEI_Q_Cult).
+    source: POSEI programme (DAAF) -- to confirm
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  industry_aid:
+    file: tables/indice_H/Aide_Indus_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/t, min: 0, description: EU aid to sugar manufacturers}
+    title: Industry aid
+    description: EU aid to sugar manufacturers, per tonne (GAMS Aide_Indus_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  replanting_aid:
+    file: tables/indice_H/Aide_Replant_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/ha, min: 0, description: EU sugarcane replanting aid}
+    title: Replanting aid
+    description: EU sugarcane replanting aid (GAMS Aide_Replant_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  transport_aid:
+    file: tables/indice_H/Aide_Transp_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/t, min: 0, description: national sugarcane transport aid}
+    title: Transport aid
+    description: National sugarcane transport aid (GAMS Aide_Transp_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  price_guarantee_aid:
+    file: tables/indice_H/Aide_Garantie_Prix_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/t, min: 0, description: national sugarcane price guarantee}
+    title: Price guarantee aid
+    description: National sugarcane price-guarantee aid (GAMS Aide_Garantie_Prix_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  aecm_green_harvest:
+    file: tables/indice_H/MAE_Recolte_Vert_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/ha, min: 0, description: agri-environment payment for green cane harvest}
+    title: AECM green harvest
+    description: Agri-environment-climate measure for green sugarcane harvest (GAMS MAE_Recolte_Vert_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  aecm_bare_fallow:
+    file: tables/indice_H/MAE_Jachere_Sol_Nu_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/ha, min: 0, description: agri-environment payment for bare fallow}
+    title: AECM bare fallow
+    description: Agri-environment-climate measure for bare-soil fallow (GAMS MAE_Jachere_Sol_Nu_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  aecm_compost:
+    file: tables/indice_H/MAE_Compost_Cult_{scenario}.txt
+    variants: {scenario: [RESTIT, SMART]}
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/ha, min: 0, description: agri-environment payment for compost}
+    title: AECM compost
+    description: Agri-environment-climate measure for compost on fibre cane (GAMS MAE_Compost_Cult).
+    source: *econ_source
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 0
+  additional_margin:
+    file: tables/indice_H/MB_ADD_Cult.txt
+    layout: matrix
+    rows: *crop_rows
+    columns: *period_cols
+    value: {type: float, unit: EUR/ha, description: ad hoc gross-margin adjustment}
+    title: Additional margin
+    description: Ad hoc gross-margin adjustment per hectare (GAMS MB_ADD_Cult) -- a calibration lever, not an observation.
+    source: MOSAICA team (calibration)
+    owner: *tbc
+    licence: *tbc
+    vintage: *econ_vintage
+    resolution: crop
+    level: 1
+
+# Files of a run folder (outputs/<run>/). A whole folder is level 2 today; an export by level
+# (roadmap level-export) keeps the files at or below the requested level, and aggregates or
+# suppresses the rest. `{side}` is input (observed 2017) or output (simulated).
+outputs:
+  recap.json: {level: 1, note: territorial and regional aggregates, calibration scores; no plot or farm row}
+  recap.md: {level: 1}
+  config_used.yaml: {level: 0}
+  reference_comparison.md: {level: 1}
+  csv/allocation_{side}.csv: {level: 2, note: one row per plot with its farm}
+  csv/facts_{side}.csv: {level: 1, note: per crop}
+  csv/revenue_by_farm.csv: {level: 2}
+  csv/fte_by_farm_{side}.csv: {level: 2}
+  csv/calibration_pad_by_farm.csv: {level: 2}
+  csv/calibration_field_match.csv: {level: 2}
+  csv/calibration_farm_type_confusion.csv: {level: 1, note: counts of farms per type pair; check small cells}
+  csv/calibration_pad_by_crop.csv: {level: 1}
+  csv/calibration_pad_by_crop_and_region.csv: {level: 1}
+  csv/production_by_crop_{side}.csv: {level: 1}
+  csv/subsidy_by_crop_{side}.csv: {level: 1}
+  csv/revenue_by_crop_{side}.csv: {level: 1}
+  csv/gross_margin_by_crop_{side}.csv: {level: 1}
+  csv/labor_cost_by_crop_{side}.csv: {level: 1}
+  csv/subsidy_per_tonne_by_crop.csv: {level: 1}
+  csv/subsidy_per_euro_sold_by_crop.csv: {level: 1}
+  csv/fte_by_island_{side}.csv: {level: 0}
+  csv/fte_by_region_{side}.csv: {level: 1}
+  csv/shannon_diversity_by_island_{side}.csv: {level: 0}
+  csv/shannon_diversity_by_region_{side}.csv: {level: 1}
+  csv/surface_by_island_{side}.csv: {level: 0}
+  csv/surface_by_region_{side}.csv: {level: 1}
+  plots/*.png: {level: 1, note: per-crop and per-region charts}

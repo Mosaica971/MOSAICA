@@ -175,7 +175,7 @@ quel — c'est une contrainte *case study*, pas du `core`, et son nom est un poi
 
 ### Lot 4 — Commentaires
 
-Uniformisation en anglais (les docs projet — `docs/04-vigilance.md`, `TODO.md`, `docs/01-utilisation.md` —
+Uniformisation en anglais (les docs projet — `docs/04-vigilance.md`, `TODO.md`, `docs/01-usage.md` —
 restent en français), docstrings verbeuses resserrées de 8-10 lignes à 3-4, suppression des
 commentaires qui paraphrasent le code.
 

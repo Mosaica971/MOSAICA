@@ -43,42 +43,42 @@ ORGANIC_OPERATIONS: tuple[str, ...] = (
 )
 
 
-def compute_mae_per_ha_cult(
-    mae_recolte_vert_cult: pd.Series,
-    mae_jachere_sol_nu_cult: pd.Series,
-    mae_compost_cult: pd.Series,
+def compute_crop_aecm_per_ha(
+    aecm_green_harvest: pd.Series,
+    aecm_bare_fallow: pd.Series,
+    aecm_compost: pd.Series,
 ) -> pd.Series:
     """Agri-environmental payment per ha per year, by crop (EUR/ha/an).
 
-    The same sum `compute_subsidy_per_ha_cult` folds into its `pdrg` term -- isolated here
+    The same sum `compute_crop_subsidy_per_ha` folds into its `pdrg` term -- isolated here
     because a scenario needs to see the agri-environmental component on its own, and the
     total subsidy hides it among POSEI and national aid.
     """
     return (
-        mae_recolte_vert_cult.fillna(0.0)
-        + mae_jachere_sol_nu_cult.fillna(0.0)
-        + mae_compost_cult.fillna(0.0)
+        aecm_green_harvest.fillna(0.0)
+        + aecm_bare_fallow.fillna(0.0)
+        + aecm_compost.fillna(0.0)
     )
 
 
-def compute_under_mae_cult(mae_per_ha_cult: pd.Series) -> pd.Series:
+def compute_crop_under_aecm(crop_aecm_per_ha: pd.Series) -> pd.Series:
     """1.0 for a crop drawing an agri-environmental payment, 0.0 otherwise.
 
     A 0/1 rate is what makes "at least N hectares under an agri-environmental measure"
     expressible as an ordinary territory_indicator_bound: multiplied by plot surface, it
     sums to hectares.
     """
-    return (mae_per_ha_cult.fillna(0.0) > 0).astype(float)
+    return (crop_aecm_per_ha.fillna(0.0) > 0).astype(float)
 
 
-def compute_organic_cult(matrice_otk_cult: pd.DataFrame) -> pd.Series:
+def compute_crop_is_organic(crop_operation_matrix: pd.DataFrame) -> pd.Series:
     """1.0 for a crop whose technical itinerary uses an organic-only operation.
 
     Reads the ITK matrix (operations x crops) rather than the crop code, so a crop is
     organic because of what it DOES, not because of how it is named.
     """
-    present = [op for op in ORGANIC_OPERATIONS if op in matrice_otk_cult.index]
+    present = [op for op in ORGANIC_OPERATIONS if op in crop_operation_matrix.index]
     if not present:
-        return pd.Series(0.0, index=matrice_otk_cult.columns)
-    used = (matrice_otk_cult.loc[present].fillna(0.0) > 0).any(axis=0)
+        return pd.Series(0.0, index=crop_operation_matrix.columns)
+    used = (crop_operation_matrix.loc[present].fillna(0.0) > 0).any(axis=0)
     return used.astype(float)

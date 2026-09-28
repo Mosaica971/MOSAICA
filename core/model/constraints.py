@@ -12,6 +12,7 @@ from core.model.registry import register_constraint
 def build_at_most_one_crop_per_plot_constraint(
     model: pyo.ConcreteModel, inputs: ModelInputs, **_args
 ) -> None:
+    """Each plot carries at most one crop. "At most": a plot may also stay empty (NC)."""
     plots_to_crops = defaultdict(list)
     for plot, crop in inputs.eligible_pairs:
         plots_to_crops[plot].append(crop)
@@ -33,6 +34,13 @@ def build_territory_production_bound_constraint(
     threshold: float,
     **_args,
 ) -> None:
+    """Territory-wide bound on the output of some crops: sum(Y * area * rate) <= or >= threshold.
+
+    Each group lists `crops` and how a hectare counts: its yield (`use_yield: true`, so the
+    bound is in tonnes) or 1 (`use_yield: false`, so it is in hectares), times
+    `rate_multiplier` (e.g. 0.072 t of sugar per tonne of cane). Several groups add up into
+    one bound. `sense` is "le" for a ceiling (a market quota) and "ge" for a floor.
+    """
     if sense not in ("le", "ge"):
         raise ValueError(f"Unknown sense {sense!r}, expected 'le' or 'ge'")
 
@@ -74,6 +82,7 @@ def build_farm_area_share_max_constraint(
     max_share: float,
     **_args,
 ) -> None:
+    """Per farm: the area under `crops` is at most `max_share` of the farm's total area."""
     crop_set = set(crops)
     plot_crops = defaultdict(list)
     for plot, crop in inputs.eligible_pairs:
@@ -107,6 +116,11 @@ def build_farm_area_ratio_min_constraint(
     ratio: float,
     **_args,
 ) -> None:
+    """Per farm and per denominator crop: area(numerator_crops) >= ratio * area(that crop).
+
+    One constraint per (farm, denominator crop) rather than one per farm, as in GAMS
+    (Eq_BA_JA, Eq_BA_ROTA): each banana system needs its own share of fallow or rotation.
+    """
     numerator_set = set(numerator_crops)
     denominator_set = set(denominator_crops)
     plot_numerator_crops = defaultdict(list)

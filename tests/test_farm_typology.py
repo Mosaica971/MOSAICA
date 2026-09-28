@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 
-from case_studies.guadeloupe.domain.farm_typology import compute_avers, compute_base_crop_group, compute_type_expl
+from case_studies.guadeloupe.domain.farm_typology import compute_risk_aversion, compute_base_crop_group, compute_farm_type
 
 
 def test_compute_base_crop_group_maps_rpg_codes_to_base_groups():
@@ -55,7 +55,7 @@ def test_compute_base_crop_group_does_not_override_when_2016_is_not_fallow():
 # Each scenario is a farm made of (base_group, area_ha) plots, hand-computed against
 # the PART_* share formulas and threshold cascade at context/gams/
 # OPTIMISATION.txt:1467-1561, and the AVERS lookup at :1744-1758.
-_TYPE_EXPL_SCENARIOS = {
+_FARM_TYPE_SCENARIOS = {
     # PART_CAN = 8.34/8.34 = 1.0 >= 0.939 -> type 3 (Canniers) -> AVERS 0.30
     "canniers": ([("CS", 8.34)], 3, 0.30),
     # PART_PLU = 1.0 >= 0.522, all earlier branches false -> type 1 (Arboriculteurs)
@@ -84,11 +84,11 @@ _TYPE_EXPL_SCENARIOS = {
 
 
 @pytest.mark.parametrize(
-    "plots, expected_type, expected_avers", _TYPE_EXPL_SCENARIOS.values(),
-    ids=_TYPE_EXPL_SCENARIOS.keys(),
+    "plots, expected_type, expected_aversion", _FARM_TYPE_SCENARIOS.values(),
+    ids=_FARM_TYPE_SCENARIOS.keys(),
 )
 def test_compute_type_expl_and_avers_classify_each_farm_type(
-    plots, expected_type, expected_avers
+    plots, expected_type, expected_aversion
 ):
     farm_plots = {"FARM": [f"P{i}" for i in range(len(plots))]}
     base_crop_group = pd.Series(
@@ -96,11 +96,11 @@ def test_compute_type_expl_and_avers_classify_each_farm_type(
     )
     plot_surface_ha = {f"P{i}": area for i, (_group, area) in enumerate(plots)}
 
-    type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface_ha)
-    avers = compute_avers(type_expl, type_expl_bis)
+    farm_type, farm_type_secondary = compute_farm_type(farm_plots, base_crop_group, plot_surface_ha)
+    aversion = compute_risk_aversion(farm_type, farm_type_secondary)
 
-    assert type_expl["FARM"] == expected_type
-    assert avers["FARM"] == pytest.approx(expected_avers)
+    assert farm_type["FARM"] == expected_type
+    assert aversion["FARM"] == pytest.approx(expected_aversion)
 
 
 def test_compute_type_expl_returns_nan_bis_for_non_type_4_farms():
@@ -108,23 +108,23 @@ def test_compute_type_expl_returns_nan_bis_for_non_type_4_farms():
     base_crop_group = pd.Series({"P0": "CS"})
     plot_surface_ha = {"P0": 1.0}
 
-    type_expl, type_expl_bis = compute_type_expl(farm_plots, base_crop_group, plot_surface_ha)
+    farm_type, farm_type_secondary = compute_farm_type(farm_plots, base_crop_group, plot_surface_ha)
 
-    assert type_expl["FARM"] == 3
-    assert pd.isna(type_expl_bis["FARM"])
+    assert farm_type["FARM"] == 3
+    assert pd.isna(farm_type_secondary["FARM"])
 
 
 def test_type_expl_labels_cover_the_eight_article_types_plus_the_edge_codes():
     from case_studies.guadeloupe.domain.farm_typology import (
-        TYPE_EXPL_LABELS,
-        _AVERS_BY_TYPE_EXPL,
+        FARM_TYPE_LABELS,
+        _RISK_AVERSION_BY_FARM_TYPE,
     )
 
     # The eight farm types of Chopin et al. (2015) Table 2, plus 0 (no cultivated surface)
     # and -1 (the np.select default, which no condition should ever leave standing).
-    assert set(TYPE_EXPL_LABELS) == {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8}
+    assert set(FARM_TYPE_LABELS) == {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8}
     # Every type carrying a risk-aversion coefficient must be named.
-    assert set(_AVERS_BY_TYPE_EXPL) <= set(TYPE_EXPL_LABELS)
+    assert set(_RISK_AVERSION_BY_FARM_TYPE) <= set(FARM_TYPE_LABELS)
 
 
 def test_avers_falls_back_to_the_type_4_base_value_when_bis_is_unset():
@@ -134,15 +134,15 @@ def test_avers_falls_back_to_the_type_4_base_value_when_bis_is_unset():
     import numpy as np
     import pandas as pd
 
-    from case_studies.guadeloupe.domain.farm_typology import compute_avers
+    from case_studies.guadeloupe.domain.farm_typology import compute_risk_aversion
 
-    type_expl = pd.Series({"E1": 4, "E2": 4, "E3": 4, "E4": 6})
-    type_expl_bis = pd.Series({"E1": 41.0, "E2": 42.0, "E3": np.nan, "E4": np.nan})
+    farm_type = pd.Series({"E1": 4, "E2": 4, "E3": 4, "E4": 6})
+    farm_type_secondary = pd.Series({"E1": 41.0, "E2": 42.0, "E3": np.nan, "E4": np.nan})
 
-    avers = compute_avers(type_expl, type_expl_bis)
+    aversion = compute_risk_aversion(farm_type, farm_type_secondary)
 
-    assert avers["E1"] == 0.50
-    assert avers["E2"] == 1.60
-    assert avers["E3"] == 1.40  # fallback, not NaN
-    assert avers["E4"] == 2.40
-    assert avers.notna().all()
+    assert aversion["E1"] == 0.50
+    assert aversion["E2"] == 1.60
+    assert aversion["E3"] == 1.40  # fallback, not NaN
+    assert aversion["E4"] == 2.40
+    assert aversion.notna().all()

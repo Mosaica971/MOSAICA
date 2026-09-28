@@ -1,0 +1,44 @@
+La plateforme MAELIA
+Tout d’abord, MAELIA est une plateforme, multi-agent, de modélisation et évaluation
+intégrées des territoires agricoles et systèmes de bioéconomie territoriale. Elle a pour
+objectif d’évaluer les impacts environnementaux, économiques et sociaux des
+changements combinés d’activités agricoles, de transformation et recyclage des
+biomasses, de modes gestion des ressources naturelles (ex. eau) et globaux (démographie,
+dynamique d’occupation du sol et changements climatiques).
+
+Les principaux indicateurs évalués sont relatifs aux cycles de l’eau, de l’azote et du
+carbone, à la qualité physique et biologique des sols, aux marges semi-nette et à la nature
+et aux quantités de travail, de l’échelle de la parcelle à celle du territoire. MAELIA permet à
+la fois d’évaluer le niveau moyen de ces indicateurs sur une période pluriannuelle mais
+aussi d’analyser leur dynamique et donc d’évaluer la résilience/vulnérabilité de ces
+performances face à la variabilité du climat (passé ou futur), des prix et/ou des politiques
+agricoles et environnementales.
+
+Actuellement, cette plateforme permet de représenter, à des résolutions spatiale et
+temporelle fines, les interactions entre les activités agricoles (choix d’assolement, conduite
+des différents systèmes de culture au sein de chaque système de production), l’hydrologie
+des différentes ressources en eau (basé sur les formalismes de la plateforme SWAT®) et la
+gestion des ressources en eau (lâchers, restrictions, choix entre ressources). Elle est
+actuellement utilisée pour évaluer les impacts de scénarios (i) de distribution de systèmes
+de culture agroécologiques sur les flux d’eau verte et bleue, d’azote et de carbone dans les
+bassins versant, (ii) d’échanges de production entre céréaliers et éleveurs sur les
+performances environnementales et socio-économiques individuelles et collectives et (iii)
+de modalités de gestion territoriale des produits résiduaires organiques (boues de STEP,
+digestats, compost…).
+
+Des projets d’extension des fonctionnalités de Maelia sont en cours. Ils permettront de
+traiter les questions relatives aux filières des produits résiduaires organiques (PRO) et de
+transformation et recyclage de biomasses (ex. bois), des régulations biologiques à l’échelle
+du paysage et aux déploiement des systèmes agroforestiers.
+
+Plus généralement, MAELIA propose une architecture logicielle pour traiter des questions
+concernant les interactions entre activités agricoles, filières de transformation et recyclage
+des biomasses, dynamiques du paysage agricole et gestion des ressources naturelles à
+l’échelle du territoire. De manière originale, elle permet de représenter le fonctionnement
+et les interactions entre les 4 grands sous-systèmes d’un système socio-agro-écologique :
+(i) l’écosystème, (ii) le système de ressources générées par cet écosystème, (iii) les activités
+des usagers de ces ressources et (iv) le système de gouvernance qui cherche à réguler les
+interactions entre usagers et ressources.
+
+MAELIA est distribuée sous licence GPLv3.
+

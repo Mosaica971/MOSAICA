@@ -1,28 +1,27 @@
-"""Audit une allocation passee comme graine d'un run a venir, SANS resoudre.
+"""Audit a past allocation as the seed of an upcoming run, WITHOUT solving.
 
-POURQUOI. `run_scenarios.py` audite deja chaque graine avant de l'utiliser, mais il le fait
-au moment ou le batch tourne : on apprend que la graine est rejetee apres avoir engage la
-machine, et on repart a froid. Quand un run a deja echoue faute d'incumbent -- HiGHS rendant
-`maxTimeLimit and no loadable solution` apres deux heures -- la question « une graine
-existante serait-elle acceptee, et sinon quelles contraintes la refusent » se pose AVANT de
-payer la seconde tentative. Ce script y repond en une minute et sans solve.
+WHY. `run_scenarios.py` already audits every seed before using it, but it does so while the
+batch runs: one learns the seed is rejected after committing the machine, and the run
+restarts cold. When a run has already failed for lack of an incumbent -- HiGHS returning
+`maxTimeLimit and no loadable solution` after two hours -- the question "would an existing
+seed be accepted, and if not which constraints reject it" must be answered BEFORE paying
+for the second attempt. This script answers it in a minute and without a solve.
 
-CE QU'IL FAIT. Il construit le modele exactement comme le batch le construirait (memes
-overrides de scenario, meme dataset), y ecrit l'allocation de chaque graine candidate, puis
-evalue toutes les contraintes actives. Une graine est utilisable si et seulement si la liste
-des violations est vide -- c'est la definition que `core/solve/warm_start.py` applique, et le
-point est qu'HiGHS jette une MIP start infaisable EN SILENCE : sans cet audit, un run parait
-chaud et se comporte a froid.
+WHAT IT DOES. It builds the model exactly as the batch would (same scenario overrides, same
+dataset), writes each candidate seed's allocation into it, then evaluates every active
+constraint. A seed is usable if and only if the list of violations is empty -- the
+definition `core/solve/warm_start.py` applies, the point being that HiGHS discards an
+infeasible MIP start SILENTLY: without this audit a run looks warm and behaves cold.
 
     .venv/Scripts/python scripts/audit_warm_start_seed.py \
-        --scenarios case_studies/guadeloupe/plan_etape_A.yaml \
-        --run P10_bifurcation_agroecologique \
+        --scenarios case_studies/guadeloupe/plan.yaml \
+        --run P10_agroecological_bifurcation \
         --seed outputs/p8_transition_agroecologique_f0_nominal \
         --seed outputs/pareto_azote_threshold_1158542
 
-Sortie : par graine, le nombre de parcelles reprises, celles que le masque d'eligibilite du
-nouveau run ecarte, et les contraintes violees avec l'ampleur. Le verdict est binaire ; le
-detail sert a savoir s'il manque une reparation ou si la graine est hors sujet.
+Output: per seed, the number of plots taken over, those the new run's eligibility mask
+excludes, and the violated constraints with their magnitude. The verdict is binary; the
+detail tells whether a repair is missing or the seed is off-topic.
 """
 
 from __future__ import annotations
@@ -38,37 +37,37 @@ from core.config import apply_overrides, compose_runs, load_batch_spec, load_con
 from core.reporting.run_folder import read_allocation
 from core.solve.warm_start import apply_allocation, constraint_violations
 
-# Au-dela, la liste cesse d'informer : on veut savoir QUELLES familles de contraintes
-# bloquent, pas enumerer 4 000 contraintes par exploitation.
+# Beyond this the list stops being informative: what matters is WHICH constraint families
+# block, not enumerating 4 000 per-farm constraints.
 _MAX_SHOWN = 20
 
 
 def _select_run(runs: list[dict], wanted: str) -> dict:
-    """Le run du spec dont le nom contient `wanted`, en exigeant l'unicite.
+    """The spec's run whose name contains `wanted`, requiring uniqueness.
 
-    On matche sur une sous-chaine et non sur l'egalite : les noms composes portent leurs
-    coordonnees (`P8__F9__pareto_azote__threshold=...`) et personne ne veut les retaper.
+    Matching is on a substring rather than equality: composed names carry their coordinates
+    (`P8__F9__pareto_nitrogen__threshold=...`) and nobody wants to retype them.
     """
     matches = [run for run in runs if wanted in (run.get("name") or "")]
     if not matches:
         available = "\n  ".join(sorted(run.get("name") or "?" for run in runs))
-        raise SystemExit(f"Aucun run ne correspond a '{wanted}'. Disponibles :\n  {available}")
+        raise SystemExit(f"No run matches '{wanted}'. Available:\n  {available}")
     if len(matches) > 1:
         found = "\n  ".join(sorted(run.get("name") or "?" for run in matches))
-        raise SystemExit(f"'{wanted}' est ambigu, {len(matches)} runs correspondent :\n  {found}")
+        raise SystemExit(f"'{wanted}' is ambiguous, {len(matches)} runs match:\n  {found}")
     return matches[0]
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--scenarios", type=Path, required=True, help="Spec de batch")
-    parser.add_argument("--run", required=True, help="Nom (ou fragment de nom) du run a auditer")
+    parser.add_argument("--scenarios", type=Path, required=True, help="Batch spec")
+    parser.add_argument("--run", required=True, help="Name (or name fragment) of the run to audit")
     parser.add_argument(
         "--seed", type=Path, action="append", required=True,
-        help="Dossier de run servant de graine. Repetable : les graines sont testees dans "
-             "l'ordre donne, de la plus proche a la plus lointaine.",
+        help="Run folder to use as a seed. Repeatable: seeds are tried in the given order, "
+             "nearest first.",
     )
-    parser.add_argument("--config", type=Path, default=None, help="config.yaml de reference")
+    parser.add_argument("--config", type=Path, default=None, help="Reference config.yaml")
     add_argument(parser)
     args = parser.parse_args()
 
@@ -78,54 +77,54 @@ def main() -> int:
     run_spec = _select_run(compose_runs(spec), args.run)
 
     name = run_spec.get("name")
-    print(f"Run audite : {name}")
+    print(f"Audited run: {name}")
     coordinates = " ".join(
         f"{key}={run_spec[key]}" for key in ("policy", "forcing", "sweep") if run_spec.get(key)
     )
     if coordinates:
-        print(f"Coordonnees : {coordinates}")
+        print(f"Coordinates: {coordinates}")
 
     config = apply_overrides(base_config, run_spec)
     config["run_name"] = name
-    print("Construction du dataset et du modele...", flush=True)
+    print("Building the dataset and the model...", flush=True)
     dataset = case.build_dataset(config)
 
     usable = []
     for seed_dir in args.seed:
-        print(f"\n--- graine : {seed_dir} ---")
+        print(f"\n--- seed: {seed_dir} ---")
         if not seed_dir.exists():
-            print("  dossier absent -> ignoree")
+            print("  folder missing -> skipped")
             continue
         allocation = read_allocation(seed_dir)
         if not allocation:
-            print("  aucune allocation lisible -> ignoree")
+            print("  no readable allocation -> skipped")
             continue
 
-        # Le modele est reconstruit pour chaque graine : `apply_allocation` ecrit dans
-        # `model.Y`, donc deux graines evaluees sur le meme objet se contamineraient.
+        # The model is rebuilt for every seed: `apply_allocation` writes into `model.Y`, so
+        # two seeds evaluated on the same object would contaminate each other.
         model = case.build_model(dataset, config)
         report = apply_allocation(model, allocation)
-        print(f"  {len(allocation)} parcelles lues -- {report.summary()}")
+        print(f"  {len(allocation)} plots read -- {report.summary()}")
 
         violations = constraint_violations(model)
         if not violations:
-            print("  VERDICT : graine UTILISABLE (aucune contrainte violee)")
+            print("  VERDICT: seed USABLE (no constraint violated)")
             usable.append(seed_dir)
             continue
 
-        print(f"  VERDICT : graine REJETEE -- {len(violations)} contrainte(s) violee(s)")
+        print(f"  VERDICT: seed REJECTED -- {len(violations)} constraint(s) violated")
         for constraint_name, amount in violations[:_MAX_SHOWN]:
             print(f"    {constraint_name:<60} {amount:.6g}")
         if len(violations) > _MAX_SHOWN:
-            print(f"    ... et {len(violations) - _MAX_SHOWN} autres")
+            print(f"    ... and {len(violations) - _MAX_SHOWN} more")
 
     print()
     if usable:
-        print(f"Au moins une graine passe : {usable[0]}")
-        print("-> lancer le batch avec --warm-start-from sur ce dossier.")
+        print(f"At least one seed passes: {usable[0]}")
+        print("-> launch the batch with --warm-start-from on that folder.")
         return 0
-    print("AUCUNE graine ne passe. Lancer le run tel quel repartirait a froid,")
-    print("c'est-a-dire reproduirait l'echec. Reparer une graine ou renoncer au run.")
+    print("NO seed passes. Launching the run as is would start cold,")
+    print("i.e. reproduce the failure. Repair a seed or give up the run.")
     return 1
 
 

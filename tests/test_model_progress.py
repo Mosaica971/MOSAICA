@@ -80,10 +80,10 @@ def test_the_estimate_reads_the_most_recent_runs_not_the_oldest(tmp_path):
 def test_format_estimate_prints_a_range_and_collapses_a_tight_one():
     assert format_estimate(None) == ""
     assert "186-779s" in format_estimate((186.0, 779.0, 9))
-    assert "9 run comparables" in format_estimate((186.0, 779.0, 9))
+    assert "9 comparable runs" in format_estimate((186.0, 779.0, 9))
     # Spread under 5 %: one number, and the SLOW end of it.
     assert "~101s" in format_estimate((100.0, 101.0, 1))
-    assert "1 run comparable" in format_estimate((100.0, 101.0, 1))
+    assert "1 comparable run" in format_estimate((100.0, 101.0, 1))
 
 
 def test_record_truncates_to_last_20_entries(tmp_path):

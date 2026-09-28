@@ -1,0 +1,50 @@
+Guide utilisateur > 2 Créer et simuler des scénarios
+
+2 Créer et simuler des scénarios
+Il est envisageable de jouer sur tous les objets et processus représentés dans le modèle
+pour créer des scénarios. Pour cela, l’utilisateur doit
+
+     définir les changements qu’il souhaite simuler en modifiant les fichiers référence du
+     terrain (includes) ;
+     et/ou modifier des paramètres du lanceur (par exemple, choix de modèles).
+
+
+2.0.1 Créer un scénario
+Concrètement un scénario est vu comme une version modifiée du répertoire includes de
+référence. Par exemple, on créera une copie du répertoire includes Aveyron_Ref nommée
+Aveyron_SC1. Pour cela, copier-coller le répertoire Aveyron_Ref, soit dans GAMA à partir
+du cadre de gauche, soit directement à partir du répertoire workspace via l’explorateur de
+fichier de votre système d’exploitation.
+
+La liste suivante présente des exemples de fichiers qui peuvent être modifiés pour créer
+des scénarios, et leur chemin d’accès:
+
+     Scénarios climatiques
+          Fichier des données météo (par exemple sur la grille SAFRAN) dans
+          /modeleCommun/meteo
+     Offre en eau
+          Restriction dans /includes/Terrain/modeleNormatif/zonesAdministratives
+          Niveau du DOE dans /includes/Terrain/modeleNormatif/pointsDeReference.shp
+          (dbf)
+          Barrages et gestion des barrages /includes/Terrain/modeleNormatif/barrages
+     Demande en eau:
+          Distribution spatiale des systèmes de culture
+          /includes/Terrain/modeleAgricole/ilots/dansZone
+         Règles de décision et ITK dans /includes/Terrain/modeleAgricole/Culture
+    Prix agricoles
+         Fichiers des charges des opérations techniques dans
+         /includes/Terrain/modeleAgricole/marcheAgricole
+         Fichiers sur les prix agricoles dans
+         /includes/Terrain/modeleAgricole/marcheAgricole
+    Modification des rotations/système de culture
+         Fichier parcelle.shp pour modifier les séquences des cultures
+         /modeleAgricole/ilots/dansZone
+         Fichier règlesDeDecisions (modification de l’ITK (irrigation, semis, travails du sol,
+         …) /modeleAgricole/modeleAgricole/culture
+
+
+2.0.2 Simuler un scénario
+Il est recommandé de créer une copie du lanceur du terrain de référence, renommée par
+exemple launcher_Aveyron_SC1.gaml, dans laquelle le paramètre
+nomDecoupageZonePourLectureFichiers est positionné à Aveyron_SC1.
+

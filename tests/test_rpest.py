@@ -95,14 +95,14 @@ def test_unknown_crops_are_dropped_rather_than_raising():
 def test_crop_properties_sum_over_the_operations_the_crop_uses():
     """The GAMS documents a dose-weighted mean, but the dose cancels between numerator and
     denominator, leaving a plain sum. Ported as written -- see the module docstring."""
-    data_otk = pd.DataFrame(
+    operation_data = pd.DataFrame(
         {"DOSE": [2.0, 100.0], "AMORTI": [0, 0], "DT50": [30.0, 30.0],
          "ADI": [1.0, 1.0], "AQUATOX": [1.0, 1.0], "GUS": [2.0, 2.0], "QMA": [1.0, 1.0]},
         index=["PHYTO_A", "PHYTO_B"],
     )
     matrice = pd.DataFrame({"BOTH": [1.0, 1.0], "ONE": [1.0, 0.0]}, index=["PHYTO_A", "PHYTO_B"])
     props = compute_crop_properties(
-        data_otk, matrice, pd.Series({"BOTH": 1.0, "ONE": 1.0}),
+        operation_data, matrice, pd.Series({"BOTH": 1.0, "ONE": 1.0}),
         pd.Series({"BOTH": 12.0, "ONE": 12.0}),
     )
     # A sum, not a mean: two products of DT50 30 give 60, one gives 30. Note the very

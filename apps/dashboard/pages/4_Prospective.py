@@ -1,6 +1,6 @@
 """Prospective page: read a policy x forcing grid rather than a flat list of runs.
 
-A crossed batch produces up to 110 runs, which the Comparaison page cannot show -- it asks
+A crossed batch produces up to 110 runs, which the Comparison page cannot show -- it asks
 you to tick series one by one. Here the two axes are filters, and the four views answer the
 questions the crossing was built for: how much does each forcing hurt each policy (heatmap),
 which policies are good AND hold up (scatter), which shock hurts a given policy most
@@ -27,10 +27,10 @@ from core.reporting import robustness
 OUTPUTS_ROOT = _REPO_ROOT / "outputs"
 
 st.set_page_config(page_title="MOSAICA -- Prospective", layout="wide")
-st.title("Prospective : politiques × forçages")
+st.title("Prospective: policies × forcings")
 
 
-@st.cache_data(show_spinner="Lecture des runs…")
+@st.cache_data(show_spinner="Reading runs…")
 def _load_grid_entries(root_str: str) -> list[dict]:
     """Every run that carries grid coordinates, as [{policy, forcing, recap, folder}].
 
@@ -56,12 +56,12 @@ def _load_grid_entries(root_str: str) -> list[dict]:
 entries = _load_grid_entries(str(OUTPUTS_ROOT))
 if not entries:
     st.info(
-        "Aucun run de grille trouvé dans `outputs/`. Cette page lit les runs produits par "
-        "un plan politique × forçage :\n\n"
+        "No grid run found in `outputs/`. This page reads the runs produced by a policy × "
+        "forcing plan:\n\n"
         "```\npython scripts/run_scenarios.py --scenarios "
         "case_studies/guadeloupe/plan.yaml\n```\n\n"
-        "Un run est reconnu s'il porte `run_policy` / `run_forcing` dans son recap, ou si "
-        "son nom suit la convention `Politique__Forcage`."
+        "A run is recognised if its recap carries `run_policy` / `run_forcing`, or if its "
+        "name follows the `Policy__Forcing` convention."
     )
     st.stop()
 
@@ -70,25 +70,25 @@ all_forcings = sorted({e["forcing"] for e in entries})
 
 # ------------------------------------------------------------------ Controls
 with st.sidebar:
-    st.header("Grille")
-    policies = st.multiselect("Politiques", all_policies, default=all_policies)
-    forcings = st.multiselect("Forçages", all_forcings, default=all_forcings)
-    side = st.radio("Côté", ("output", "input"), horizontal=True,
-                    format_func=lambda s: {"output": "sortie", "input": "entrée"}[s])
+    st.header("Grid")
+    policies = st.multiselect("Policies", all_policies, default=all_policies)
+    forcings = st.multiselect("Forcings", all_forcings, default=all_forcings)
+    side = st.radio("Side", ("output", "input"), horizontal=True,
+                    format_func=lambda s: comparison.SIDE_LABELS[s])
     indicator = st.selectbox(
-        "Indicateur", list(comparison.INDICATOR_LABELS),
+        "Indicator", list(comparison.INDICATOR_LABELS),
         index=list(comparison.INDICATOR_LABELS).index("total_gross_margin"),
         format_func=lambda i: comparison.INDICATOR_LABELS[i],
     )
     nominal = st.selectbox(
-        "Forçage de référence", forcings or all_forcings,
+        "Reference forcing", forcings or all_forcings,
         index=(forcings or all_forcings).index("F0_nominal")
         if "F0_nominal" in (forcings or all_forcings) else 0,
-        help="Le forçage neutre, dénominateur de la rétention et origine du tornado.",
+        help="The neutral forcing, denominator of the retention and origin of the tornado.",
     )
 
 if not policies or not forcings:
-    st.warning("Sélectionnez au moins une politique et un forçage.")
+    st.warning("Select at least one policy and one forcing.")
     st.stop()
 
 direction = comparison.INDICATOR_DIRECTION.get(indicator, "benefit")
@@ -103,15 +103,15 @@ frame = prospective.grid_frame(grid, policies, forcings)
 
 if frame.isna().all().all():
     st.warning(
-        f"« {label} » n'est disponible dans aucun run de la grille — les runs sont sans doute "
-        "antérieurs au bloc de recap qui le porte. Relancez le batch."
+        f"\"{label}\" is available in no run of the grid — the runs probably predate the "
+        "recap block that carries it. Rerun the batch."
     )
     st.stop()
 
 st.caption(
-    f"**{len(kept)} runs** · indicateur : {label} · sens : "
-    + ("plus haut = mieux" if higher_is_better else "plus bas = mieux")
-    + f" · référence : {nominal}"
+    f"**{len(kept)} runs** · indicator: {label} · direction: "
+    + ("higher = better" if higher_is_better else "lower = better")
+    + f" · reference: {nominal}"
 )
 
 # A cell that a constraint pins is the scenario's hypothesis, not its result.
@@ -120,22 +120,22 @@ _pinned = {
 }
 if _pinned:
     st.warning(
-        f"« {label} » est **fixé par une contrainte** dans : {', '.join(sorted(_pinned))}. "
-        "Pour ces politiques la valeur est une hypothèse imposée, pas un résultat — leur "
-        "robustesse sur cet indicateur ne dit rien de leur robustesse tout court."
+        f"\"{label}\" is **fixed by a constraint** in: {', '.join(sorted(_pinned))}. For those "
+        "policies the value is an imposed hypothesis, not a result — their robustness on this "
+        "indicator says nothing about their robustness overall."
     )
 
 # ------------------------------------------------------------------ Heatmap
-st.header("Grille politique × forçage")
+st.header("Policy × forcing grid")
 mode_label = st.radio(
-    "Lecture",
-    ("Valeur brute", "% du nominal de la politique", "Regret (% du meilleur du forçage)"),
+    "Reading",
+    ("Raw value", "% of the policy's nominal", "Regret (% of the forcing's best)"),
     horizontal=True,
 )
 mode = {
-    "Valeur brute": "absolute",
-    "% du nominal de la politique": "vs_nominal",
-    "Regret (% du meilleur du forçage)": "regret",
+    "Raw value": "absolute",
+    "% of the policy's nominal": "vs_nominal",
+    "Regret (% of the forcing's best)": "regret",
 }[mode_label]
 
 normalised = robustness.normalise_grid(
@@ -149,9 +149,9 @@ if mode == "absolute":
         higher_is_better=higher_is_better, value_format="{:,.0f}",
     ))
     st.caption(
-        "Valeurs telles quelles. Les colonnes ne sont pas comparables entre elles si les "
-        "forçages changent l'échelle de l'indicateur — pour comparer les politiques *entre "
-        "elles* sous un même forçage, préférez le regret."
+        "Values as they are. Columns are not comparable with one another if the forcings "
+        "change the indicator's scale — to compare policies *with each other* under one "
+        "forcing, prefer the regret."
     )
 else:
     st.pyplot(prospective.build_heatmap_figure(
@@ -159,25 +159,25 @@ else:
         higher_is_better=True, centre=100.0, value_format="{:,.0f}",
     ))
     st.caption(
-        "Part conservée de la valeur non forcée de **chaque politique** : 100 % = le forçage "
-        "ne coûte rien, 60 % = la politique perd 40 % de sa propre promesse. Ne dit rien du "
-        "niveau — une politique médiocre et stable est ici à 100 %."
+        "Share kept of **each policy's** unforced value: 100 % = the forcing costs nothing, "
+        "60 % = the policy loses 40 % of its own promise. Says nothing about the level — a "
+        "mediocre, stable policy sits at 100 % here."
         if mode == "vs_nominal" else
-        "Écart au **meilleur résultat obtenu par une politique quelconque sous ce même "
-        "forçage** (critère de Savage) : 100 % = c'était le bon choix pour ce forçage, 70 % "
-        "= on laisse 30 % sur la table. Chaque colonne contient au moins un 100 %."
+        "Gap to the **best result obtained by any policy under that same forcing** (Savage "
+        "criterion): 100 % = it was the right choice for that forcing, 70 % = 30 % is left "
+        "on the table. Every column holds at least one 100 %."
     )
-st.caption("Cellule hachurée « n/a » = pas de solution (infaisable), pas une donnée manquante.")
+st.caption("Hatched \"n/a\" cell = no solution (infeasible), not missing data.")
 
 # ------------------------------------------------------------------ Robustness
-st.header("Performance et robustesse")
+st.header("Performance and robustness")
 threshold_help = (
-    "Seuil de viabilité, dans l'unité de l'indicateur. La colonne « Viabilité » compte la "
-    "part des forçages où la politique le tient ; un forçage infaisable compte comme un échec."
+    "Viability threshold, in the indicator's unit. The \"Viability\" column counts the share "
+    "of forcings under which the policy holds it; an infeasible forcing counts as a failure."
 )
 default_threshold = float(pd.Series(frame.to_numpy().ravel()).dropna().median())
 viability_threshold = st.number_input(
-    "Seuil de viabilité", value=default_threshold, help=threshold_help
+    "Viability threshold", value=default_threshold, help=threshold_help
 )
 
 summaries = robustness.summarise_grid(
@@ -192,47 +192,46 @@ st.pyplot(prospective.build_performance_robustness_figure(
     summaries, performance_label=label
 ))
 st.caption(
-    "Abscisse : la valeur sous le forçage de référence. Ordonnée : la part de cette valeur "
-    "encore obtenue dans le pire forçage. Le quadrant qui compte est en bas à droite — "
-    "performant tant que rien ne bouge. Une croix = politique infaisable sous au moins un "
-    "forçage, donc sans rétention définie."
+    "X axis: the value under the reference forcing. Y axis: the share of that value still "
+    "obtained under the worst forcing. The quadrant that matters is bottom right — "
+    "performant as long as nothing moves. A cross = a policy infeasible under at least one "
+    "forcing, hence with no defined retention."
 )
 
-st.subheader("Tableau de robustesse")
+st.subheader("Robustness table")
 table = prospective.robustness_frame(summaries)
 st.dataframe(
     table.style.format({
-        "Nominal": "{:,.1f}", "Pire cas": "{:,.1f}", "Médiane": "{:,.1f}",
-        "Meilleur": "{:,.1f}", "Rétention": "{:.0%}", "Instabilité (CV)": "{:.1%}",
-        "Regret max": "{:,.1f}", "Viabilité": "{:.0%}",
+        "Nominal": "{:,.1f}", "Worst case": "{:,.1f}", "Median": "{:,.1f}",
+        "Best": "{:,.1f}", "Retention": "{:.0%}", "Instability (CV)": "{:.1%}",
+        "Max regret": "{:,.1f}", "Viability": "{:.0%}",
     }, na_rep="—"),
     width="stretch",
 )
 st.caption(
-    "**Pire cas** et **Regret max** sont vides quand la politique est infaisable sous au "
-    "moins un forçage : son pire cas n'est pas un nombre, c'est une absence de solution, et "
-    "afficher le pire de ses survivants la ferait passer pour robuste. "
-    "**Rétention** = pire cas / nominal. **Instabilité** = écart-type / moyenne sur les "
-    "forçages. **Regret max** = plus grand écart au meilleur choix possible a posteriori."
+    "**Worst case** and **Max regret** are empty when the policy is infeasible under at "
+    "least one forcing: its worst case is not a number, it is an absence of solution, and "
+    "showing the worst of its survivors would make it look robust. "
+    "**Retention** = worst case / nominal. **Instability** = standard deviation / mean over "
+    "the forcings. **Max regret** = the largest gap to the best choice possible in hindsight."
 )
 st.info(
-    "Ces mesures ne sont **pas** le bloc « exposition » d'un run. Celui-ci applique un choc "
-    "de prix après le solve à une allocation figée (ce qu'on perd si personne ne réagit) ; "
-    "ici le modèle **ré-optimise** sous chaque forçage, dans les limites que la politique lui "
-    "laisse. C'est de la capacité d'adaptation sous contrainte politique. Ne pas additionner "
-    "les deux dans un même score."
+    "These measures are **not** a run's \"exposure\" block. That one applies a price shock "
+    "after the solve to a frozen allocation (what is lost if nobody reacts); here the model "
+    "**re-optimises** under each forcing, within the limits the policy leaves it. This is "
+    "adaptive capacity under policy constraint. Do not add the two into one score."
 )
 
 # ------------------------------------------------------------------ Tornado
-st.header("Sensibilité d'une politique")
-focus = st.selectbox("Politique", policies)
+st.header("Sensitivity of one policy")
+focus = st.selectbox("Policy", policies)
 st.pyplot(prospective.build_tornado_figure(
     frame, focus, nominal, value_label=label, higher_is_better=higher_is_better
 ))
 st.caption(
-    "Écart de chaque forçage à la valeur non forcée de cette politique, trié par ampleur. "
-    "Vert = le forçage lui profite, rouge = il lui nuit, dans le sens propre à l'indicateur."
+    "Gap of each forcing to this policy's unforced value, sorted by size. Green = the "
+    "forcing benefits it, red = it hurts it, in the indicator's own direction."
 )
 
-with st.expander("Données brutes de la grille"):
-    st.dataframe(frame.style.format("{:,.2f}", na_rep="infaisable"), width="stretch")
+with st.expander("Raw grid data"):
+    st.dataframe(frame.style.format("{:,.2f}", na_rep="infeasible"), width="stretch")
