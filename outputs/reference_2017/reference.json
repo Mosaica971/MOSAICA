@@ -10,16 +10,7 @@
     "economic_year": "2017",
     "economic_scenario": "RESTIT",
     "zone_filter": null,
-    "representative_crops": {
-      "AN": "AN_NU",
-      "BA": "BA_INT",
-      "BC": "BC_BT",
-      "CS": "CS_NGT_NISM",
-      "IG": "IG_PLA",
-      "MA": "MA_ROTA",
-      "PN": "PN_PIQ",
-      "VE": "VE_BTGT"
-    }
+    "baseline_itk": "GAMS Matrice_Parc_Cult rules (ENTREES.txt:299-457)"
   },
   "observed_land_use_ha": {
     "AG": 100.84,
@@ -49,92 +40,109 @@
   "pad_floor_pct": 1.475401423106889,
   "irreproducible_area_ha": 347.87,
   "plots_without_eligible_variant": 482,
-  "representative_eligible_pct": {
-    "AG": 48.04641015470052,
-    "AN": 92.26652596668424,
-    "BA": 68.6625364431487,
-    "BC": 63.1818490591672,
-    "CS": 31.372683687493804,
-    "IG": 71.00811442717645,
-    "JA": 100.0,
-    "MA": 61.006283522084324,
-    "ME": 99.99999999999999,
-    "PN": 100.0,
-    "VE": 46.22535301875261
+  "baseline_itk_eligible_pct": {
+    "AG/AG": 48.04641015470052,
+    "AN/AN_NU": 93.73634377276036,
+    "AN/AN_PA": 89.94064354889098,
+    "BA/BA_INT": 82.02012334689724,
+    "BA/BA_IRR": 99.96457669146301,
+    "BA/BA_PER": 100.0,
+    "BA/BA_SINT": 100.0,
+    "BC/BC_BT": 79.54331651415377,
+    "BC/BC_GTMG": 92.76750330250991,
+    "CS/CS_BT_NIM": 98.29898661761985,
+    "CS/CS_BT_NISM": 91.11654441727791,
+    "CS/CS_CGT_NIM": 99.50239753912965,
+    "CS/CS_CGT_NISM": 48.803827751196174,
+    "CS/CS_EGT_NIM": 99.65748718757793,
+    "CS/CS_EGT_NISM": 97.8573729996778,
+    "CS/CS_MG_NISM": 99.44238343343594,
+    "CS/CS_NGT_NIM": 99.51335886367214,
+    "CS/CS_NGT_NISM": 100.0,
+    "CS/CS_SBT_NIM": 85.44176706827308,
+    "IG/IG_PLA": 100.0,
+    "IG/IG_TUT": 81.78368121442125,
+    "JA/JA": 100.0,
+    "MA/MA_ROTA": 90.18359853121174,
+    "MA/MA_TO_CO_JA": 99.99999999999999,
+    "ME/ME": 99.99999999999999,
+    "PN/PN_PIQ": 100.0,
+    "VE/VE_BTGT": 39.14253048780488,
+    "VE/VE_PLUIE": 0.0
   },
   "indicators": {
     "production_tonnes": {
-      "central": 694463.7998,
+      "central": 883147.0157999998,
       "low": 703241.6797999998,
       "high": 891116.7478
     },
     "sales": {
-      "central": 162015810.59504002,
+      "central": 153446384.53734004,
       "low": 104495838.52207999,
       "high": 153906676.70186
     },
     "subsidy": {
-      "central": 68977158.52548571,
+      "central": 70745291.41281143,
       "low": 48207434.10214858,
       "high": 72059977.74952
     },
     "revenue": {
-      "central": 230992969.12052575,
+      "central": 224191675.95015147,
       "low": 152703272.62422857,
       "high": 225966654.45138
     },
     "gross_margin": {
-      "central": 88785692.8285519,
+      "central": 95804961.52847774,
       "low": 51801744.52980819,
       "high": 95628374.17835638
     },
     "labor_hours": {
-      "central": 6252739.71127381,
+      "central": 5592325.788040044,
       "low": 3785525.2167499997,
       "high": 6195233.294278408
     },
     "nitrogen": {
-      "central": 2065681.7056666669,
+      "central": 1897992.537266667,
       "low": 1315420.933666667,
       "high": 1914715.928666667
     },
     "ghg": {
-      "central": 178071029.99552476,
+      "central": 170620713.4766419,
       "low": 137166566.5756473,
       "high": 172946068.01173228
     },
     "tfi": {
-      "central": 68133.19647619048,
+      "central": 65046.74361904762,
       "low": 42224.64647619047,
       "high": 65834.83433333333
     },
     "fte": {
-      "central": 3890.9394594112073,
+      "central": 3479.978710665864,
       "low": null,
       "high": null
     },
     "labor_cost": {
-      "central": 96917465.52474405,
+      "central": 86681049.71462068,
       "low": null,
       "high": null
     },
     "net_revenue": {
-      "central": -8131772.696192145,
+      "central": 9123911.813857064,
       "low": null,
       "high": null
     },
     "chlordecone_risk_area": {
-      "central": 691.49,
+      "central": 515.5899999999999,
       "low": null,
       "high": null
     },
     "water_need_m3": {
-      "central": 35629950.0,
+      "central": 35510310.0,
       "low": null,
       "high": null
     },
     "soil_carbon_balance": {
-      "central": -11836.919108310416,
+      "central": -10774.131293990416,
       "low": null,
       "high": null
     }

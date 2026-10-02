@@ -869,9 +869,11 @@ def test_prospective_labour_slack_covers_every_employment_floor():
 
     from core.config import apply_overrides, compose_runs, load_batch_spec, load_config
 
-    # Territory-wide labour capacity at slack 1.0, measured on the real dataset (see the
-    # header of scenarios_policies.yaml).
-    capacity_hours_at_slack_1 = 6_252_740
+    # Territory-wide labour capacity at slack 1.0 -- GAMS MO_Expl_init on the baseline ITKs
+    # of domain/baseline_itk, measured on the real dataset (see the header of
+    # scenarios_policies.yaml). A necessary check only: the cap is per farm, so a floor under
+    # the territory total can still be infeasible.
+    capacity_hours_at_slack_1 = 5_592_326
     hours_per_fte = 1607
 
     base = load_config(Path("case_studies/guadeloupe/config.yaml"))

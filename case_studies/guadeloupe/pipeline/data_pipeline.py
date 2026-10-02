@@ -1,5 +1,3 @@
-import csv
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +25,7 @@ from case_studies.guadeloupe.domain.farm_typology import (
     compute_farm_type,
 )
 from case_studies.guadeloupe.domain import agroecology, rpest, soil_carbon, water
+from case_studies.guadeloupe.domain.baseline_itk import assign_baseline_itk
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
@@ -96,125 +95,63 @@ def compute_farm_surface_ha(plot_surface: pd.Series, farm_plot_map: pd.DataFrame
 
 def compute_farm_labor_capacity_hours(
     *,
-    base_crop_group: pd.Series,
+    baseline_fine_crop: pd.Series,
     plot_surface: pd.Series,
     farm_plot_map: pd.DataFrame,
     crop_labor_hours_per_ha: pd.Series,
-    representative_crops: dict[str, str],
 ) -> pd.Series:
     """Labour (h/year) each farm's OBSERVED 2017 cropping plan required -- GAMS MO_Expl_init
-    (ENTREES.txt:466-469), the budget Eq_MO_MAX_Expl caps the farm's allocation against.
-
-    GAMS reads the labour rate straight off Matrice_Parc_Cult, which holds the AGGREGATE RPG
-    codes. Nine of those twelve have no ITK line at all (Matrice_OTK_Cult's AN/BA/BC/CS/IG/
-    MA/NC/PN/VE columns are entirely zero; only AG, JA and ME, the families with no fine
-    variant, are filled). Taken literally the cap would be ~0 for most farms and the model
-    would allocate nothing. We therefore price each observed family through its
-    representative fine variant -- the same documented assumption the input-side indicators
-    use, extended here to a constraint that *shapes the allocation*. See docs/04-vigilance.md and
-    docs/superpowers/specs/2026-07-21-calibration-levers-design.md.
-    """
-    fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
-    rate = crop_labor_hours_per_ha.reindex(fine.to_numpy()).to_numpy()
-    hours_by_plot = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
-    farm_of_plot = farm_plot_map.set_index("plot")["farm"]
-    return hours_by_plot.groupby(farm_of_plot.reindex(hours_by_plot.index)).sum()
-
-
-def read_fine_baseline_allocation(path: str | Path) -> dict[str, dict[str, float]]:
-    """Read a GAMS-style wide plot x crop allocation table into {plot: {crop: ha}}.
-
-    The 2017 baseline we normally carry has only the 12 aggregate RPG groups; the GAMS run
-    wrote its own FINE baseline, one ITK per plot, in SORTIES/ASSOL_PARC_INIT.TXT. Reading it
-    is what lets a farm-level budget be computed on the real cropping plan instead of on the
-    representative-crop stand-in.
-
-    Two quirks of GAMS's `put` writer are handled here: the file is comma-delimited with
-    quoted labels (not the tab-separated layout of data/tables), and its header line is one
-    field SHORT because the last two crop names are written glued together without a
-    separator -- so the trailing pair is restored by name rather than trusted from the header.
-    """
-    path = Path(path)
-    with path.open(encoding="latin-1") as handle:
-        reader = csv.reader(handle)
-        header = next(reader)
-        crops = [name.strip('"') for name in header[1:-1]] + ["MA_PAI_NON_I", "MA_PAI_NON_NI"]
-        allocation: dict[str, dict[str, float]] = {}
-        for row in reader:
-            plot = row[0].strip('"')
-            planted = {crop: float(value) for crop, value in zip(crops, row[1:]) if float(value)}
-            if planted:
-                allocation[plot] = planted
-    return allocation
-
-
-def compute_farm_labor_capacity_hours_from_fine_baseline(
-    *,
-    fine_baseline: dict[str, dict[str, float]],
-    farm_plot_map: pd.DataFrame,
-    crop_labor_hours_per_ha: pd.Series,
-) -> pd.Series:
-    """MO_Expl_init computed the way GAMS computes it (ENTREES.txt:466-469).
+    (ENTREES.txt:466-469), the budget Eq_MO_MAX_Expl caps the farm's allocation against:
 
     `MO_Parc_init(SP) = sum(SC, SURF_Parc_init(SP) * Matrice_Parc_Cult(SP,SC) * MO_Ha_Cult_init(SC))`
-    -- and Matrice_Parc_Cult holds the FINE ITK per plot, not the aggregate RPG code. That is
-    the difference with compute_farm_labor_capacity_hours, which prices each observed group
-    through one representative variant because the fine plan was thought unavailable.
 
-    Validated end to end: these same rates applied to the GAMS CALIB allocation reproduce its
-    reported TRAVAIL_TOT to 156 h out of 5 292 000 (0.003 %, GAMS's own 4-digit rounding).
+    `baseline_fine_crop` is Matrice_Parc_Cult itself, one fine ITK per plot
+    (domain/baseline_itk.assign_baseline_itk). A plot with no ITK (NC, or no rule fired)
+    contributes nothing, as in GAMS; a farm whose plan is entirely NC gets a zero budget.
     """
+    fine = baseline_fine_crop.dropna()
+    rate = crop_labor_hours_per_ha.reindex(fine.to_numpy()).fillna(0.0).to_numpy()
+    hours_by_plot = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
     farm_of_plot = farm_plot_map.set_index("plot")["farm"]
-    hours: dict[str, float] = defaultdict(float)
-    for plot, planted in fine_baseline.items():
-        farm = farm_of_plot.get(plot)
-        if farm is None:
-            continue
-        hours[farm] += sum(
-            surface * float(crop_labor_hours_per_ha.get(crop, 0.0))
-            for crop, surface in planted.items()
-        )
-    return pd.Series(hours, dtype=float)
+    hours = hours_by_plot.groupby(farm_of_plot.reindex(hours_by_plot.index)).sum()
+    return hours.reindex(farm_plot_map["farm"].unique(), fill_value=0.0)
 
 
 def compute_farm_baseline_production_t(
     *,
     base_crop_group: pd.Series,
+    baseline_fine_crop: pd.Series,
     plot_surface: pd.Series,
     farm_plot_map: pd.DataFrame,
     crop_yield: pd.Series,
-    representative_crops: dict[str, str],
 ) -> dict[str, dict[str, float]]:
     """Tonnes each farm's OBSERVED 2017 plan produced, per observed RPG group.
 
     This is GAMS REF_BAN_EXPL_init (ENTREES.txt:477-483) generalised: that parameter sums
     SURF_Parc_init x Matrice_Parc_Cult x Rdt_Cult over the four export-banana ITKs of a
-    farm, and Eq_BA_QUOTA_Expl then caps the farm's banana tonnage at it. Computing one
-    group at a time here rather than banana only means a second per-farm quota costs a
-    config entry, not another pipeline function.
+    farm, and Eq_BA_QUOTA_Expl then caps the farm's banana tonnage at it. Each plot is
+    priced through its own GAMS ITK (`baseline_fine_crop`), and grouped by its observed RPG
+    group, so a second per-farm quota costs a config entry, not another pipeline function.
 
-    THE CAVEAT THAT MATTERS. GAMS reads the observed FINE ITK per plot; we only have the
-    12 aggregate RPG groups, so each group is priced through its representative fine
-    variant -- the same documented assumption compute_farm_labor_capacity_hours makes, and
-    the same one docs/04-vigilance.md flags. For banana it is not neutral: the observed mix
-    was 1 258 ha BA_INT (45 t/ha), 288 ha BA_PER (18), 204 ha BA_SINT (27) and 169 ha
-    BA_IRR (34), so pricing all 1 921 ha at BA_INT's 45 t/ha overstates the reference by
-    about 18 %. The resulting cap is therefore LOOSER than the GAMS one, never tighter --
-    it can only under-constrain, which is the safe direction for a parity fix.
-    context/SORTIES/ASSOL_PARC_INIT.TXT holds the real fine baseline and would remove the
-    approximation; wiring it in is a separate decision.
+    EVERY farm gets an entry for every group, 0 when it did not grow the group in 2017.
+    GAMS indexes Eq_BA_QUOTA_Expl over all farms, so a farm with no 2017 banana has a zero
+    reference and may grow none; core's farm_production_bound leaves a farm with NO entry
+    unconstrained, so omitting the zeros let 853 farms plant 631 ha of banana GAMS forbids
+    (docs/04-vigilance.md G.9).
     """
-    fine = base_crop_group.map(lambda family: representative_crops.get(family, family))
+    fine = baseline_fine_crop.reindex(base_crop_group.index)
     rate = crop_yield.reindex(fine.to_numpy()).fillna(0.0).to_numpy()
     tonnes = pd.Series(plot_surface.reindex(fine.index).to_numpy() * rate, index=fine.index)
     farm_of_plot = farm_plot_map.set_index("plot")["farm"].reindex(fine.index)
 
     frame = pd.DataFrame({"group": base_crop_group, "farm": farm_of_plot, "tonnes": tonnes})
-    frame = frame.dropna(subset=["farm"])
-    grouped = frame.groupby(["group", "farm"])["tonnes"].sum()
+    frame = frame.dropna(subset=["farm", "group"])
+    by_group_and_farm = frame.pivot_table(
+        index="farm", columns="group", values="tonnes", aggfunc="sum", fill_value=0.0
+    ).reindex(farm_plot_map["farm"].unique(), fill_value=0.0)
     return {
-        str(group): {str(farm): float(value) for (_, farm), value in part.items()}
-        for group, part in grouped.groupby(level=0)
+        str(group): {str(farm): float(value) for farm, value in column.items()}
+        for group, column in by_group_and_farm.items()
     }
 
 
@@ -366,6 +303,9 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     )
 
     base_crop_group = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
+    # Matrice_Parc_Cult: the fine ITK GAMS assigns each observed plot (ENTREES.txt:299-457).
+    # Every observed-side rate -- labour budget, banana reference, input indicators -- reads it.
+    baseline_fine_crop = assign_baseline_itk(plot_data, base_crop_group)
     farm_type, farm_type_secondary = compute_farm_type(farm_plots, base_crop_group, plot_surface)
     farm_risk_aversion = compute_risk_aversion(farm_type, farm_type_secondary)
 
@@ -442,33 +382,17 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     )
     farm_baseline_production_t = compute_farm_baseline_production_t(
         base_crop_group=base_crop_group,
+        baseline_fine_crop=baseline_fine_crop,
         plot_surface=plot_surface,
         farm_plot_map=farm_plot_map,
         crop_yield=crop_yield,
-        representative_crops=config.get("baseline_representative_crops") or {},
     )
-    # Opt-in: compute the farm labour budget on the OBSERVED FINE cropping plan rather than
-    # on the representative-crop stand-in. `data.fine_baseline_allocation` names a GAMS-style
-    # plot x crop table (context/SORTIES/ASSOL_PARC_INIT.TXT is the one the GAMS run wrote).
-    # Left unset the behaviour is unchanged, so this cannot move a past result silently.
-    fine_baseline_path = data_cfg.get("fine_baseline_allocation")
     farm_labor_capacity_hours = compute_farm_labor_capacity_hours(
-        base_crop_group=base_crop_group,
+        baseline_fine_crop=baseline_fine_crop,
         plot_surface=plot_surface,
         farm_plot_map=farm_plot_map,
         crop_labor_hours_per_ha=crop_labor_hours_per_ha,
-        representative_crops=config.get("baseline_representative_crops") or {},
     )
-    if fine_baseline_path:
-        farm_labor_capacity_hours = (
-            compute_farm_labor_capacity_hours_from_fine_baseline(
-                fine_baseline=read_fine_baseline_allocation(fine_baseline_path),
-                farm_plot_map=farm_plot_map,
-                crop_labor_hours_per_ha=crop_labor_hours_per_ha,
-            )
-            .reindex(farm_labor_capacity_hours.index)
-            .fillna(0.0)
-        )
     crop_nitrogen_per_ha = compute_crop_nitrogen_per_ha(
         operation_data=operation_data,
         crop_operation_matrix=crop_operation_matrix,
@@ -537,6 +461,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         # the farm typology; exposed because the inertia constraint and the calibration
         # reporting both need to know what a plot was before the solver touched it.
         "base_crop_group": base_crop_group,
+        "baseline_fine_crop": baseline_fine_crop,
         "farm_risk_aversion": farm_risk_aversion,
         "farm_surface_ha": farm_surface_ha,
         "farm_plots": farm_plots,

@@ -73,65 +73,82 @@ coefficient (AVERS) in the Markowitz objective: part of the reference, not a res
 
 ### 4.1 No fine crop is observed
 
-The 12 RPG groups say "cane", never which technical system. GAMS had the same limit
-(`Matrice_Parc_Cult`). Every economic or environmental indicator of the reference
-therefore goes through a **representative crop** per family
-(`config.yaml: baseline_representative_crops`) -- an assumption, not an observation.
+The 12 RPG groups say "cane", never which technical system. Every economic or
+environmental indicator of the reference therefore goes through the **fine ITK GAMS
+assigns each plot** (`Matrice_Parc_Cult`, ENTREES.txt:299-457, ported in
+`domain/baseline_itk.py`): banana by island, slope and farm size, cane by region, soil
+and plot size, market gardening by irrigation... Deterministic and faithful to GAMS
+(the farm labour budget `MO_Expl_init` is reproduced to 0.001 h), but an assumption of
+the model, not an observation.
 
-**The representative is often a crop the model itself would forbid on the plot it
-stands for.** `CS_NGT_NISM` is the North Grande-Terre cane system, confined to three
-communes, yet it values every cane hectare of the territory; `MA_ROTA` requires
-irrigation and values all of market gardening.
+**The assignment rules and the eligibility equations are two separate parts of GAMS,
+and nothing forces them to agree.** Where the assigned ITK is not eligible, the
+reference is valued with a system the model could not choose back:
 
-| Group | Representative | Observed (ha) | Representative eligible (ha) | Share | Margin (EUR/ha) |
-|---|---|---:|---:|---:|---:|
-| AG | `AG` | 101 | 48 | 48 % | 4 949 |
-| AN | `AN_NU` | 133 | 122 | 92 % | 4 303 |
-| BA | `BA_INT` | 1 921 | 1 319 | 69 % | 10 340 |
-| BC | `BC_BT` | 147 | 93 | 63 % | 4 587 |
-| CS | `CS_NGT_NISM` | 12 813 | 4 020 | 31 % | 1 521 |
-| IG | `IG_PLA` | 145 | 103 | 71 % | 11 396 |
-| JA | `JA` | 621 | 621 | 100 % | 116 |
-| MA | `MA_ROTA` | 1 087 | 663 | 61 % | 27 929 |
-| ME | `ME` | 189 | 189 | 100 % | 14 441 |
-| PN | `PN_PIQ` | 6 109 | 6 109 | 100 % | 1 866 |
-| VE | `VE_BTGT` | 311 | 144 | 46 % | 4 718 |
+| Group | Assigned ITK | Observed (ha) | ITK eligible (ha) | Share | Labour (h/ha) | Margin (EUR/ha) |
+|---|---|---:|---:|---:|---:|---:|
+| AG | `AG` | 101 | 48 | 48 % | 492 | 4 949 |
+| AN | `AN_NU` | 69 | 64 | 94 % | 438 | 4 303 |
+| AN | `AN_PA` | 64 | 58 | 90 % | 436 | 9 097 |
+| BA | `BA_INT` | 1 258 | 1 032 | 82 % | 1 558 | 10 340 |
+| BA | `BA_IRR` | 169 | 169 | 100 % | 1 076 | 9 254 |
+| BA | `BA_PER` | 289 | 289 | 100 % | 565 | 4 706 |
+| BA | `BA_SINT` | 204 | 204 | 100 % | 958 | 5 695 |
+| BC | `BC_BT` | 117 | 93 | 80 % | 609 | 4 587 |
+| BC | `BC_GTMG` | 30 | 28 | 93 % | 621 | 4 544 |
+| CS | `CS_BT_NIM` | 3 349 | 3 292 | 98 % | 13 | 2 762 |
+| CS | `CS_BT_NISM` | 12 | 11 | 91 % | 13 | 1 679 |
+| CS | `CS_CGT_NIM` | 774 | 770 | 100 % | 13 | 2 567 |
+| CS | `CS_CGT_NISM` | 2 | 1 | 49 % | 13 | 1 584 |
+| CS | `CS_EGT_NIM` | 1 965 | 1 958 | 100 % | 13 | 2 507 |
+| CS | `CS_EGT_NISM` | 186 | 182 | 98 % | 13 | 1 570 |
+| CS | `CS_MG_NISM` | 2 186 | 2 174 | 99 % | 13 | 1 617 |
+| CS | `CS_NGT_NIM` | 3 366 | 3 350 | 100 % | 13 | 2 425 |
+| CS | `CS_NGT_NISM` | 654 | 654 | 100 % | 13 | 1 521 |
+| CS | `CS_SBT_NIM` | 319 | 272 | 85 % | 18 | 3 531 |
+| IG | `IG_PLA` | 103 | 103 | 100 % | 672 | 11 396 |
+| IG | `IG_TUT` | 42 | 34 | 82 % | 991 | 9 061 |
+| JA | `JA` | 621 | 621 | 100 % | 6 | 116 |
+| MA | `MA_ROTA` | 735 | 663 | 90 % | 1 653 | 27 929 |
+| MA | `MA_TO_CO_JA` | 352 | 352 | 100 % | 1 128 | 24 425 |
+| ME | `ME` | 189 | 189 | 100 % | 628 | 14 441 |
+| PN | `PN_PIQ` | 6 109 | 6 109 | 100 % | 126 | 1 866 |
+| VE | `VE_BTGT` | 262 | 103 | 39 % | 362 | 4 718 |
+| VE | `VE_PLUIE` | 48 | 0 | 0 % | 362 | 4 718 |
 
-**Consequence not to lose sight of**: this assumption does not stay in the
+**Consequence not to lose sight of**: this assignment does not stay in the
 reporting. `farm_labor_hours_max` (Eq_MO_MAX_Expl) caps each farm at the labour of its
-observed plan, computed through these same representatives: changing a representative
-changes the cap, hence the optimum. See docs/04-vigilance.md and the
-"region-aware representative crops" item of docs/status/roadmap.yaml, which this
-table quantifies.
+observed plan and `ba_quota_farm` (Eq_BA_QUOTA_Expl) at its banana tonnage, both
+computed through these same ITKs: changing a rule changes the caps, hence the optimum.
+See docs/04-vigilance.md C.2.
 
 The reference indicators are therefore given with a bracket. The **central** estimate
-is that of the `config.yaml` representatives -- exactly the figures a run reports on
-its "input" side, so the two tell the same story. The **low** and **high** bounds
-replay each plot with the least, then the most intensive variant **among those
-actually eligible there**.
+is that of the GAMS ITKs -- exactly the figures a run reports on its "input" side, so
+the two tell the same story. The **low** and **high** bounds replay each plot with the
+least, then the most intensive variant **among those actually eligible there**.
 
 Nothing then guarantees that the central estimate falls inside the bracket -- the
-representative does not always belong to the set of eligible variants. Where it leaves
+assigned ITK does not always belong to the set of eligible variants. Where it leaves
 it from above, the reference is valued with a technical system the plot could not
-carry: sales (+5 %), revenue (+2 %), labor_hours (+1 %), nitrogen (+8 %), ghg (+3 %), tfi (+3 %).
+carry: gross_margin (+0 %).
 
 | Indicator | Unit | Low | Central | High | Range |
 |---|---|---:|---:|---:|---:|
-| production_tonnes | t | 703 242 | 694 464 | 891 117 | 27 % |
-| sales | EUR | 104 495 839 | 162 015 811 | 153 906 677 | 30 % |
-| subsidy | EUR | 48 207 434 | 68 977 159 | 72 059 978 | 35 % |
-| revenue | EUR | 152 703 273 | 230 992 969 | 225 966 654 | 32 % |
-| gross_margin | EUR | 51 801 745 | 88 785 693 | 95 628 374 | 49 % |
-| labor_hours | h | 3 785 525 | 6 252 740 | 6 195 233 | 39 % |
-| nitrogen | kg N | 1 315 421 | 2 065 682 | 1 914 716 | 29 % |
-| ghg | t CO2 (magnitude, see docs/04-vigilance.md) | 137 166 567 | 178 071 030 | 172 946 068 | 20 % |
-| tfi | TFI.ha | 42 225 | 68 133 | 65 835 | 35 % |
-| fte | FTE | - | 3 891 | - | - |
-| labor_cost | EUR | - | 96 917 466 | - | - |
-| net_revenue | EUR | - | -8 131 773 | - | - |
-| chlordecone_risk_area | ha | - | 691 | - | - |
-| water_need_m3 | m3 | - | 35 629 950 | - | - |
-| soil_carbon_balance | t C | - | -11 837 | - | - |
+| production_tonnes | t | 703 242 | 883 147 | 891 117 | 21 % |
+| sales | EUR | 104 495 839 | 153 446 385 | 153 906 677 | 32 % |
+| subsidy | EUR | 48 207 434 | 70 745 291 | 72 059 978 | 34 % |
+| revenue | EUR | 152 703 273 | 224 191 676 | 225 966 654 | 33 % |
+| gross_margin | EUR | 51 801 745 | 95 804 962 | 95 628 374 | 46 % |
+| labor_hours | h | 3 785 525 | 5 592 326 | 6 195 233 | 43 % |
+| nitrogen | kg N | 1 315 421 | 1 897 993 | 1 914 716 | 32 % |
+| ghg | t CO2 (magnitude, see docs/04-vigilance.md) | 137 166 567 | 170 620 713 | 172 946 068 | 21 % |
+| tfi | TFI.ha | 42 225 | 65 047 | 65 835 | 36 % |
+| fte | FTE | - | 3 480 | - | - |
+| labor_cost | EUR | - | 86 681 050 | - | - |
+| net_revenue | EUR | - | 9 123 912 | - | - |
+| chlordecone_risk_area | ha | - | 516 | - | - |
+| water_need_m3 | m3 | - | 35 510 310 | - | - |
+| soil_carbon_balance | t C | - | -10 774 | - | - |
 
 The bracket falls back on the whole family for 482 plot(s) with no eligible variant at all.
 
@@ -176,7 +193,7 @@ therefore irreproducible for a porting reason, not an agronomic one.
 | `csv/reference_farm_types.csv` | Observed typology and AVERS |
 | `csv/reference_indicators.csv` | Indicators, central and bracket |
 | `csv/reference_reproducibility.csv` | PAD floor by group |
-| `csv/reference_representative_eligibility.csv` | Eligibility of the representatives |
+| `csv/reference_itk_eligibility.csv` | Eligibility of the GAMS-assigned ITKs |
 | `reference.json` | All of it, readable by a script |
 
 Regenerate: `python scripts/build_reference_state.py`. Deterministic (no solve).

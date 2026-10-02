@@ -44,9 +44,10 @@ references:
       The land use actually declared in 2017, as the pipeline rebuilds it. The `input` side
       of any run gives the same thing at constant data config.
       WARNING: the FINE 2017 allocation was never observed -- only the 12 RPG groups are --
-      so the economic indicators of this series rest on the `baseline_representative_crops`
-      assumption, and that assumption is fragile: the representative crop is eligible on only
-      31 % of the observed cane hectares and 61 % of market gardening. Areas per group, on the
+      so the economic indicators of this series rest on the fine ITK the GAMS rules assign
+      each plot (Matrice_Parc_Cult, domain/baseline_itk): deterministic and faithful to GAMS,
+      but an assumption, not an observation. Runs written before 2026-09-28 priced it through
+      one representative crop per group instead (+11 % labour). Areas per group, on the
       other hand, are observed.
 
   - id: gams_parity

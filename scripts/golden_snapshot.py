@@ -12,9 +12,9 @@ Meant as a safety net around refactors. Compare the two modes:
 The reference lands in .golden/snapshot.json, which is gitignored: it is derived from
 data/, which stays local. Regenerate it from a known-good revision before starting work.
 
-The allocation used is the representative baseline (decode_baseline_representative_allocation),
-which needs no solve. It is not the optimum -- that is irrelevant here, since both sides of
-the comparison use the same allocation.
+The allocation used is the fine 2017 baseline (decode_baseline_fine_allocation, the GAMS
+Matrice_Parc_Cult rules), which needs no solve. It is not the optimum -- that is irrelevant
+here, since both sides of the comparison use the same allocation.
 """
 
 import argparse
@@ -75,7 +75,7 @@ def _snapshot_parameters(dataset: Dataset) -> dict[str, Any]:
 
 
 def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, Any]:
-    allocation = indicators.decode_baseline_representative_allocation(dataset, config)
+    allocation = indicators.decode_baseline_fine_allocation(dataset)
     hours_per_fte = indicators.hours_per_fte_from_config(config)
     cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
     price_shock = (config.get("resilience") or {}).get("price_shock_delta", 0.20)
@@ -103,10 +103,10 @@ def _snapshot_indicators(dataset: Dataset, config: dict[str, Any]) -> dict[str, 
     facts = indicators.compute_facts_table(dataset, allocation, hours_per_fte, cost_per_hour)
     snapshot["facts"] = _summarise_frame(facts)
 
-    # Calibration blocks. The allocation here is the representative baseline, which folds
-    # back onto its own observed families, so every PAD is 0 and the confusion matrix is
-    # diagonal. That is the point: this checksum guards the round-trip between config's
-    # baseline_representative_crops and crop_families.base_group_for. Drift in the
+    # Calibration blocks. The allocation here is the fine baseline, which folds back onto
+    # its own observed families, so every PAD is 0 and the confusion matrix is diagonal.
+    # That is the point: this checksum guards the round-trip between
+    # domain/baseline_itk.assign_baseline_itk and crop_families.base_group_for. Drift in the
     # arithmetic is caught by tests/test_guadeloupe_reporting_calibration.py instead.
     calib = calibration.evaluate(dataset, allocation, config)
     snapshot.update(flatten("calib", calib.summary()))

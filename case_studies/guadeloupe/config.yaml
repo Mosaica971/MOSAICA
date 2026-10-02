@@ -105,23 +105,6 @@ reporting:
     farm_pad_max: 20           # PAD (%) tolerated per farm
     farm_type_match_min: 80    # minimum share (%) of farms simulated in their observed type
 
-# Representative fine crop per aggregate baseline family (see docs/04-vigilance.md C.2).
-# The observed 2017 baseline is only known at aggregate/RPG resolution (e.g. "sugarcane",
-# not which technical system), and the aggregate codes carry no economics of their own.
-# To compute input-side production/subsidy/revenue/FTE (and input-vs-output deltas) we
-# substitute a representative fine variant per family. THESE ARE ASSUMPTIONS -- review and
-# adjust to your knowledge of the 2017 land use. Families AG/ME/JA are real single crops
-# and need no substitution; NC (non cultivated) is excluded from the baseline.
-baseline_representative_crops:
-  AN: AN_NU        # ananas sans paillage plastique
-  BA: BA_INT       # banane export intensive en plaine
-  BC: BC_BT        # banane plantain Basse-Terre
-  CS: CS_NGT_NISM  # canne a sucre Nord Grande-Terre, non irriguee, semi-mecanisee
-  IG: IG_PLA       # igname a plat
-  MA: MA_ROTA      # maraichage en rotation
-  PN: PN_PIQ       # grassland with tethered livestock -- PN_TOUR is suppressed by Eq_PN_TOUR_SUPP
-  VE: VE_BTGT      # vergers Basse-Terre & Grande-Terre
-
 # Optional: restrict the optimization to a subset of plots (island/region/farm/plot),
 # for faster small-scale test runs or local policy-transition scenarios. See
 # docs/superpowers/specs/2026-07-10-zone-exclusion-filter-design.md. Absent (as here)
@@ -278,9 +261,9 @@ constraints:
   # than its observed 2017 cropping plan did. THE dominant anchor to reality -- the
   # pre-2026-07-21 solution required 21 593 FTE where Guadeloupe had 3 598, a factor of 6.
   # A cane farm has 12.7 h/ha to spend; market gardening asks 1653.
-  # The cap is computed in data_pipeline.compute_farm_labor_capacity_hours through the
-  # representative fine crops -- read its docstring before touching this, the literal GAMS
-  # formula yields a near-zero cap on this data.
+  # The cap is MO_Expl_init (ENTREES.txt:466-469), computed in
+  # data_pipeline.compute_farm_labor_capacity_hours on the fine ITK GAMS assigns each observed
+  # plot (Matrice_Parc_Cult, domain/baseline_itk) -- identical to GAMS, farm by farm.
   # `slack` scales every cap (1.0 = faithful). GAMS keeps its own scenario multipliers
   # commented right under the formula: "x 1.7 pour S1, x 1.3 pour S2, x 10 pour S3" (x 1.7 for S1, ...).
   - name: farm_labor_hours_max
@@ -293,11 +276,9 @@ constraints:
   # lets the model concentrate the whole quota on the few farms where banana pays best, and
   # that is precisely what it did (banana 1 921 ha observed -> 2 107 ha simulated, +391 ha
   # against the GAMS calib's 1 717).
-  # The per-farm reference comes from data_pipeline.compute_farm_baseline_production_t --
-  # READ ITS DOCSTRING: the observed fine ITK mix is unavailable, so the group is priced
-  # through its representative variant (BA -> BA_INT, 45 t/ha), which overstates the
-  # reference by ~18 % (86 436 t against the 73 097 t of the true observed mix). The cap is
-  # therefore looser than GAMS's, never tighter. `scale` is the lever to tighten it.
+  # The per-farm reference is REF_BAN_EXPL_init (ENTREES.txt:477-483), computed in
+  # data_pipeline.compute_farm_baseline_production_t on each plot's GAMS-assigned banana ITK
+  # (BA_INT / BA_SINT / BA_PER / BA_IRR, domain/baseline_itk). `scale` loosens or tightens it.
   - name: farm_production_bound
     enable: true
     args:

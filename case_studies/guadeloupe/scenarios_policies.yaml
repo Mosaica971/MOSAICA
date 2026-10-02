@@ -31,10 +31,15 @@
 #
 # LABOUR IS THE BINDING CONSTRAINT AND THE FIRST CAUSE OF INFEASIBILITY.
 # Eq_MO_MAX_Expl caps each farm at the labour its observed 2017 cropping plan required; over
-# the territory that is 6 252 740 h = 3 891 FTE at slack 1.0, against 5 629 390 h actually
-# used. Hence:
-#   * an employment FLOOR above 3 891 FTE is infeasible unless the same scenario raises the
-#     slack of `labor_max_farm` -- slack 1.5 buys 5 837 FTE, slack 2.0 buys 7 782;
+# the territory that is 5 592 326 h = 3 480 FTE at slack 1.0 (MO_Expl_init on the GAMS
+# baseline ITKs, since 2026-09-28). Every figure measured below dates from the previous
+# budget, 6 252 740 h = 3 891 FTE priced through one representative crop per group, and the
+# reference solution above used 5 629 390 h -- MORE than the new territory-wide ceiling. The
+# orders of magnitude of this header and the measured maxima are therefore to re-measure
+# (check_scenario_feasibility.py) before any policy is trusted; P4's 3 400 FTE floor now sits
+# at 98 % of its ceiling. Hence:
+#   * an employment FLOOR above 3 480 FTE is infeasible unless the same scenario raises the
+#     slack of `labor_max_farm` -- slack 1.5 buys 5 220 FTE, slack 2.0 buys 6 960;
 #   * the food-crop floors (bc/ig/ma/an/me/plu_prod_min) claim 6 222 537 h through their
 #     cheapest crops, i.e. 0.5 % of margin on a lower bound that ignores competition for
 #     land, and they ARE infeasible against the ceiling at slack 1.0 (main.py failed on it,
@@ -43,7 +48,7 @@
 # S3" are commented under the formula in MODELE.txt.
 #
 # AND RAISING THE SLACK IS NOT ENOUGH. P10 was first written with a 6 000 FTE floor under a
-# slack of 2.2, which grants an 8 561 FTE budget -- and it was INFEASIBLE. The LP check found
+# slack of 2.2, which granted an 8 561 FTE budget (old basis) -- and it was INFEASIBLE. The LP check found
 # it, and maximising labour under each policy's other constraints gave the real ceiling:
 #
 #   P8_agroecological_transition    max 4 875 FTE        P10_bifurcation   max 4 975 FTE

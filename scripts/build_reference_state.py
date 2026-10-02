@@ -18,9 +18,9 @@ Four things make this more than a group-by, and each has its own CSV:
    implicit.
 2. THE OBSERVED SIDE HAS NO FINE CROPS. The 12 RPG groups say "sugarcane", never which
    technical system. Every economic/environmental figure of the reference therefore rests on
-   config's baseline_representative_crops. The central estimate uses exactly that assumption
-   (so it matches the runs); a low/high bracket over the fine variants each plot could
-   actually carry says how much the assumption is worth.
+   the fine ITK GAMS assigns each plot (Matrice_Parc_Cult, domain/baseline_itk). The central
+   estimate uses exactly that assignment (so it matches the runs); a low/high bracket over
+   the fine variants each plot could actually carry says how much the assumption is worth.
 3. THE REPRODUCIBILITY CEILING. Part of the observed acreage sits on plots where no fine
    variant of the observed family is eligible -- the model cannot reproduce it whatever the
    objective does. That share is a floor under the PAD, and it belongs to the reference, not
@@ -48,6 +48,7 @@ import numpy as np
 import pandas as pd
 
 from case_studies.guadeloupe.domain import crop_families
+from case_studies.guadeloupe.domain.baseline_itk import AGGREGATE_GROUPS
 from case_studies.guadeloupe.domain.farm_typology import (
     FARM_TYPE_LABELS,
     compute_risk_aversion,
@@ -188,12 +189,12 @@ def farm_typology_table(dataset: Dataset) -> pd.DataFrame:
     return frame
 
 
-def reference_allocation(dataset: Dataset, config: dict[str, Any]) -> pd.DataFrame:
+def reference_allocation(dataset: Dataset) -> pd.DataFrame:
     """The canonical per-plot reference: what was observed there in 2017, and which fine
-    crop stands in for it when a per-ha rate is needed."""
+    ITK the GAMS rules assign it when a per-ha rate is needed."""
     plot_data = dataset.parameters["plot_data"]
     resolved = _resolved_groups(plot_data)
-    representative = indicators.decode_baseline_representative_allocation(dataset, config)
+    fine = indicators.decode_baseline_fine_allocation(dataset)
     farm = indicators.plot_to_farm(dataset)
 
     frame = pd.DataFrame(
@@ -208,22 +209,21 @@ def reference_allocation(dataset: Dataset, config: dict[str, Any]) -> pd.DataFra
             "cult_2017_code": plot_data["cult_2017"].to_numpy(),
             "raw_group": _raw_groups(plot_data).to_numpy(),
             "resolved_group": resolved.to_numpy(),
-            "representative_crop": representative.reindex(plot_data.index).to_numpy(),
+            "baseline_itk": fine.reindex(plot_data.index).to_numpy(),
         }
     )
     frame["cultivated"] = frame["resolved_group"] != crop_families.NON_CULTIVATED
     return frame
 
 
-def _fine_variants_by_group(dataset: Dataset, config: dict[str, Any]) -> dict[str, list[str]]:
+def _fine_variants_by_group(dataset: Dataset) -> dict[str, list[str]]:
     """Observed RPG group -> the fine crops that can stand for it.
 
-    The eight aggregate codes (AN, BA, ... -- exactly the keys of
-    baseline_representative_crops) are excluded: they exist only to encode the observed
-    baseline, carry no technical itinerary and no economics, and would drag any bracket to
-    zero. NC is excluded for the same reason.
+    The eight aggregate codes (AN, BA, ... -- baseline_itk.AGGREGATE_GROUPS) are excluded:
+    they exist only to encode the observed baseline, carry no technical itinerary and no
+    economics, and would drag any bracket to zero. NC is excluded for the same reason.
     """
-    aggregates = set(config.get("baseline_representative_crops") or {})
+    aggregates = set(AGGREGATE_GROUPS)
     variants: dict[str, list[str]] = {}
     for crop in sorted(dataset.sets["crops"]):
         if crop in aggregates or crop == crop_families.NON_CULTIVATED:
@@ -232,7 +232,7 @@ def _fine_variants_by_group(dataset: Dataset, config: dict[str, Any]) -> dict[st
     return variants
 
 
-def reproducibility_table(dataset: Dataset, config: dict[str, Any]) -> pd.DataFrame:
+def reproducibility_table(dataset: Dataset) -> pd.DataFrame:
     """Per observed group: how much of its acreage the model could even place back.
 
     A plot counts as reproducible when at least one fine variant of its observed family is
@@ -247,7 +247,7 @@ def reproducibility_table(dataset: Dataset, config: dict[str, Any]) -> pd.DataFr
     surface = plot_data["SURF_HA"]
     mask = dataset.parameters["eligibility_mask"]
     groups = _resolved_groups(plot_data)
-    variants = _fine_variants_by_group(dataset, config)
+    variants = _fine_variants_by_group(dataset)
 
     rows = []
     for group in sorted(groups.dropna().unique()):
@@ -277,49 +277,46 @@ def reproducibility_table(dataset: Dataset, config: dict[str, Any]) -> pd.DataFr
     return frame
 
 
-def representative_eligibility_table(
-    dataset: Dataset, config: dict[str, Any]
-) -> pd.DataFrame:
-    """Per observed family: how much of its acreage the representative crop is actually
-    ELIGIBLE on.
+def itk_eligibility_table(dataset: Dataset) -> pd.DataFrame:
+    """Per observed group and GAMS-assigned ITK: how much of that acreage the ITK is actually
+    ELIGIBLE on in the model.
 
-    The representative is a reporting convention, so nothing forces it to be a crop the
-    model would allow on the plot -- and on this data it often is not (CS_NGT_NISM is the
-    North-Grande-Terre cane system, confined to three communes, while it stands for every
-    observed cane hectare). That matters twice: the reference's own economics is valued with
-    a system that could not be grown there, and farm_labor_hours_max derives each farm's cap
-    from those same crops, so the mismatch reaches the optimum.
+    The assignment rules (ENTREES.txt:299-457) and the eligibility equations (MODELE.txt) are
+    two separate parts of GAMS, and nothing forces them to agree: VE_PLUIE, for one, is
+    assigned on South-East Basse-Terre yet forbidden everywhere by the ported Eq_VE_PLUIE
+    bug. Where they disagree, the reference is valued with a system the model could not choose
+    back -- the labour budget and the banana reference included.
     """
     plot_data = dataset.parameters["plot_data"]
     surface = plot_data["SURF_HA"]
     mask = dataset.parameters["eligibility_mask"]
     groups = _resolved_groups(plot_data)
-    mapping = config.get("baseline_representative_crops") or {}
+    fine = indicators.decode_baseline_fine_allocation(dataset)
 
     rows = []
-    for group in sorted(groups.dropna().unique()):
-        if group == crop_families.NON_CULTIVATED:
-            continue
-        # Families with no fine variant (AG, ME, JA) stand for themselves.
-        representative = mapping.get(group, group)
-        plots = groups.index[groups == group]
-        eligible = mask.loc[plots, representative] if representative in mask.columns else False
+    for (group, itk), plots in fine.groupby([groups.reindex(fine.index), fine]).groups.items():
+        eligible = (
+            mask.loc[plots, itk].to_numpy(dtype=bool)
+            if itk in mask.columns
+            else np.zeros(len(plots), dtype=bool)
+        )
         rows.append(
             {
                 "group": group,
-                "representative": representative,
+                "itk": itk,
                 "observed_ha": float(surface[plots].sum()),
-                "representative_eligible_ha": float(surface[plots][eligible].sum()),
-                "representative_margin_eur_ha": float(
-                    dataset.parameters["crop_margin_per_ha"].get(representative, float("nan"))
+                "itk_eligible_ha": float(surface[plots][eligible].sum()),
+                "itk_margin_eur_ha": float(
+                    dataset.parameters["crop_margin_per_ha"].get(itk, float("nan"))
+                ),
+                "itk_labor_h_ha": float(
+                    dataset.parameters["crop_labor_hours_per_ha"].get(itk, float("nan"))
                 ),
             }
         )
 
-    frame = pd.DataFrame(rows).set_index("group")
-    frame["eligible_share_pct"] = (
-        100.0 * frame["representative_eligible_ha"] / frame["observed_ha"]
-    )
+    frame = pd.DataFrame(rows).set_index(["group", "itk"]).sort_index()
+    frame["eligible_share_pct"] = 100.0 * frame["itk_eligible_ha"] / frame["observed_ha"]
     return frame
 
 
@@ -342,9 +339,7 @@ def _metric_rates(dataset: Dataset) -> dict[str, pd.Series]:
     }
 
 
-def _bracket_totals(
-    dataset: Dataset, config: dict[str, Any]
-) -> tuple[dict[str, dict[str, float]], int]:
+def _bracket_totals(dataset: Dataset) -> tuple[dict[str, dict[str, float]], int]:
     """Territory totals of each metric when every observed plot carries the cheapest, then
     the dearest, fine variant of its own family that it could actually carry.
 
@@ -356,7 +351,7 @@ def _bracket_totals(
     surface = plot_data["SURF_HA"]
     mask = dataset.parameters["eligibility_mask"]
     groups = _resolved_groups(plot_data)
-    variants = _fine_variants_by_group(dataset, config)
+    variants = _fine_variants_by_group(dataset)
     rates = _metric_rates(dataset)
 
     low = {metric: 0.0 for metric in _BRACKETED_METRICS}
@@ -391,17 +386,15 @@ def _bracket_totals(
 
 
 def indicator_table(dataset: Dataset, config: dict[str, Any]) -> tuple[pd.DataFrame, int]:
-    """Reference indicators: the central estimate (config's representative crops, i.e. the
-    exact numbers a run reports on its input side) framed by the low/high bracket."""
+    """Reference indicators: the central estimate (the GAMS baseline ITKs, i.e. the exact
+    numbers a run reports on its input side) framed by the low/high bracket."""
     hours_per_fte = indicators.hours_per_fte_from_config(config)
     cost_per_hour = indicators.labor_cost_per_hour_from_config(config)
-    representative = indicators.decode_baseline_representative_allocation(dataset, config)
+    fine = indicators.decode_baseline_fine_allocation(dataset)
 
-    economics = indicators.compute_economic_totals(
-        dataset, representative, hours_per_fte, cost_per_hour
-    )
-    environment = indicators.compute_environmental_totals(dataset, representative)
-    bracket, fallback_plots = _bracket_totals(dataset, config)
+    economics = indicators.compute_economic_totals(dataset, fine, hours_per_fte, cost_per_hour)
+    environment = indicators.compute_environmental_totals(dataset, fine)
+    bracket, fallback_plots = _bracket_totals(dataset)
 
     central = {
         "production_tonnes": economics["total_production_tonnes"],
@@ -474,7 +467,7 @@ class Reference:
     farm_types: pd.DataFrame
     allocation: pd.DataFrame
     reproducibility: pd.DataFrame
-    representative_eligibility: pd.DataFrame
+    itk_eligibility: pd.DataFrame
     indicators: pd.DataFrame
     bracket_fallback_plots: int
     universe: dict[str, Any]
@@ -503,7 +496,7 @@ def build_reference(config: dict[str, Any]) -> Reference:
         "economic_year": (config.get("data") or {}).get("year"),
         "economic_scenario": (config.get("data") or {}).get("scenario"),
         "zone_filter": config.get("zone_filter"),
-        "representative_crops": config.get("baseline_representative_crops"),
+        "baseline_itk": "GAMS Matrice_Parc_Cult rules (ENTREES.txt:299-457)",
     }
 
     return Reference(
@@ -519,9 +512,9 @@ def build_reference(config: dict[str, Any]) -> Reference:
             dataset, cultivated, plot_data["COMMUNE"], "commune"
         ),
         farm_types=farm_typology_table(dataset),
-        allocation=reference_allocation(dataset, config),
-        reproducibility=reproducibility_table(dataset, config),
-        representative_eligibility=representative_eligibility_table(dataset, config),
+        allocation=reference_allocation(dataset),
+        reproducibility=reproducibility_table(dataset),
+        itk_eligibility=itk_eligibility_table(dataset),
         indicators=indicator_frame,
         bracket_fallback_plots=fallback_plots,
         universe=universe,
@@ -549,11 +542,9 @@ def _summary(reference: Reference) -> dict[str, Any]:
         "pad_floor_pct": 100.0 * irreproducible / observed if observed else float("nan"),
         "irreproducible_area_ha": irreproducible,
         "plots_without_eligible_variant": reference.bracket_fallback_plots,
-        "representative_eligible_pct": {
-            group: float(value)
-            for group, value in reference.representative_eligibility[
-                "eligible_share_pct"
-            ].items()
+        "baseline_itk_eligible_pct": {
+            f"{group}/{itk}": float(value)
+            for (group, itk), value in reference.itk_eligibility["eligible_share_pct"].items()
         },
         "indicators": {
             name: {
@@ -567,7 +558,7 @@ def _summary(reference: Reference) -> dict[str, Any]:
 
 def _above_bracket(indicator_frame: pd.DataFrame) -> str:
     """Names the indicators whose central estimate sits above the high bound -- the visible
-    symptom of a representative crop that is not itself eligible on the plots it stands for.
+    symptom of a GAMS-assigned ITK that is not itself eligible on the plots it stands for.
     Written from the numbers rather than by hand, so the sentence cannot go stale."""
     above = [
         f"{name} (+{100.0 * (row['central'] - row['high']) / row['high']:.0f} %)"
@@ -581,7 +572,7 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
     universe = reference.universe
     land_use = reference.land_use
     repro = reference.reproducibility
-    representative = reference.representative_eligibility
+    itk_table = reference.itk_eligibility
 
     lines = [
         "# Reference state -- Guadeloupe 2017",
@@ -663,43 +654,43 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
         "",
         "### 4.1 No fine crop is observed",
         "",
-        "The 12 RPG groups say \"cane\", never which technical system. GAMS had the same limit",
-        "(`Matrice_Parc_Cult`). Every economic or environmental indicator of the reference",
-        "therefore goes through a **representative crop** per family",
-        "(`config.yaml: baseline_representative_crops`) -- an assumption, not an observation.",
+        "The 12 RPG groups say \"cane\", never which technical system. Every economic or",
+        "environmental indicator of the reference therefore goes through the **fine ITK GAMS",
+        "assigns each plot** (`Matrice_Parc_Cult`, ENTREES.txt:299-457, ported in",
+        "`domain/baseline_itk.py`): banana by island, slope and farm size, cane by region, soil",
+        "and plot size, market gardening by irrigation... Deterministic and faithful to GAMS",
+        "(the farm labour budget `MO_Expl_init` is reproduced to 0.001 h), but an assumption of",
+        "the model, not an observation.",
         "",
-        "**The representative is often a crop the model itself would forbid on the plot it",
-        "stands for.** `CS_NGT_NISM` is the North Grande-Terre cane system, confined to three",
-        "communes, yet it values every cane hectare of the territory; `MA_ROTA` requires",
-        "irrigation and values all of market gardening.",
+        "**The assignment rules and the eligibility equations are two separate parts of GAMS,",
+        "and nothing forces them to agree.** Where the assigned ITK is not eligible, the",
+        "reference is valued with a system the model could not choose back:",
         "",
-        "| Group | Representative | Observed (ha) | Representative eligible (ha) | Share | Margin (EUR/ha) |",
-        "|---|---|---:|---:|---:|---:|",
+        "| Group | Assigned ITK | Observed (ha) | ITK eligible (ha) | Share | Labour (h/ha) | Margin (EUR/ha) |",
+        "|---|---|---:|---:|---:|---:|---:|",
     ]
-    for group, row in representative.iterrows():
+    for (group, itk), row in itk_table.iterrows():
         lines.append(
-            f"| {group} | `{row['representative']}` | {_n(row['observed_ha'])} | "
-            f"{_n(row['representative_eligible_ha'])} | {row['eligible_share_pct']:.0f} % | "
-            f"{_n(row['representative_margin_eur_ha'])} |"
+            f"| {group} | `{itk}` | {_n(row['observed_ha'])} | "
+            f"{_n(row['itk_eligible_ha'])} | {row['eligible_share_pct']:.0f} % | "
+            f"{_n(row['itk_labor_h_ha'])} | {_n(row['itk_margin_eur_ha'])} |"
         )
 
     lines += [
         "",
-        "**Consequence not to lose sight of**: this assumption does not stay in the",
+        "**Consequence not to lose sight of**: this assignment does not stay in the",
         "reporting. `farm_labor_hours_max` (Eq_MO_MAX_Expl) caps each farm at the labour of its",
-        "observed plan, computed through these same representatives: changing a representative",
-        "changes the cap, hence the optimum. See docs/04-vigilance.md and the",
-        "\"region-aware representative crops\" item of docs/status/roadmap.yaml, which this",
-        "table quantifies.",
+        "observed plan and `ba_quota_farm` (Eq_BA_QUOTA_Expl) at its banana tonnage, both",
+        "computed through these same ITKs: changing a rule changes the caps, hence the optimum.",
+        "See docs/04-vigilance.md C.2.",
         "",
         "The reference indicators are therefore given with a bracket. The **central** estimate",
-        "is that of the `config.yaml` representatives -- exactly the figures a run reports on",
-        "its \"input\" side, so the two tell the same story. The **low** and **high** bounds",
-        "replay each plot with the least, then the most intensive variant **among those",
-        "actually eligible there**.",
+        "is that of the GAMS ITKs -- exactly the figures a run reports on its \"input\" side, so",
+        "the two tell the same story. The **low** and **high** bounds replay each plot with the",
+        "least, then the most intensive variant **among those actually eligible there**.",
         "",
         "Nothing then guarantees that the central estimate falls inside the bracket -- the",
-        "representative does not always belong to the set of eligible variants. Where it leaves",
+        "assigned ITK does not always belong to the set of eligible variants. Where it leaves",
         "it from above, the reference is valued with a technical system the plot could not",
         f"carry: {_above_bracket(reference.indicators)}.",
         "",
@@ -763,7 +754,7 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
         "| `csv/reference_farm_types.csv` | Observed typology and AVERS |",
         "| `csv/reference_indicators.csv` | Indicators, central and bracket |",
         "| `csv/reference_reproducibility.csv` | PAD floor by group |",
-        "| `csv/reference_representative_eligibility.csv` | Eligibility of the representatives |",
+        "| `csv/reference_itk_eligibility.csv` | Eligibility of the GAMS-assigned ITKs |",
         "| `reference.json` | All of it, readable by a script |",
         "",
         "Regenerate: `python scripts/build_reference_state.py`. Deterministic (no solve).",
@@ -784,9 +775,7 @@ def write_reference(reference: Reference, output_dir: Path) -> dict[str, Any]:
     reference.farm_types.to_csv(csv_dir / "reference_farm_types.csv")
     reference.indicators.to_csv(csv_dir / "reference_indicators.csv")
     reference.reproducibility.to_csv(csv_dir / "reference_reproducibility.csv")
-    reference.representative_eligibility.to_csv(
-        csv_dir / "reference_representative_eligibility.csv"
-    )
+    reference.itk_eligibility.to_csv(csv_dir / "reference_itk_eligibility.csv")
 
     summary = _summary(reference)
     (output_dir / "reference.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")

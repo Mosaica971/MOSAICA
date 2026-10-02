@@ -362,6 +362,9 @@ def _dataset() -> Dataset:
             "plot_data": plot_data,
             "farm_plot_map": farm_plot_map,
             "farm_plots": farm_plots,
+            # The fine ITK the pipeline assigns each observed plot (domain/baseline_itk). Kept
+            # on the aggregate code here so the input side reuses the fixture's CS rates.
+            "baseline_fine_crop": pd.Series({"P1": "CS", "P2": "CS"}),
             "crop_yield": pd.Series({"CS": 80.0, "ME": 20.0}),
             "crop_sales_per_ha": pd.Series({"CS": 3000.0, "ME": 5000.0}),
             "crop_subsidy_per_ha_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),

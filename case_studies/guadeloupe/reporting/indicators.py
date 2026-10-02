@@ -31,17 +31,15 @@ def decode_baseline_allocation(dataset: Dataset) -> pd.Series:
     return groups[groups != _NON_CULTIVATED_GROUP].dropna()
 
 
-def decode_baseline_representative_allocation(dataset: Dataset, config: dict[str, Any]) -> pd.Series:
-    """Baseline 2017 allocation remapped from aggregate families to representative fine
-    crops, so the fine-crop economics indicators (production/subsidy/revenue/ETP) apply to
-    the input side. The observed baseline is only known at aggregate/RPG resolution and the
-    aggregate codes carry no economics of their own; `config['baseline_representative_crops']`
-    substitutes a representative fine variant per family (an assumption -- see docs/04-vigilance.md
-    C.2). Real single-crop families (AG/ME/JA) map to themselves; NC is already
-    dropped by decode_baseline_allocation."""
-    baseline = decode_baseline_allocation(dataset)
-    mapping = config.get("baseline_representative_crops") or {}
-    return baseline.map(lambda family: mapping.get(family, family)).rename("crop")
+def decode_baseline_fine_allocation(dataset: Dataset) -> pd.Series:
+    """plot -> fine crop of the observed 2017 baseline, as GAMS's Matrice_Parc_Cult assigns it
+    (domain/baseline_itk), so the fine-crop indicators (production/subsidy/revenue/FTE...)
+    apply to the input side. The RPG only knows the 12 aggregate groups, whose codes carry no
+    rate of their own; the ITK comes from the plot's attributes -- an assumption of the GAMS
+    model, not an observation (docs/04-vigilance.md C.2). Same plots as
+    decode_baseline_allocation: NC is dropped, and so is a plot no rule assigned."""
+    fine = dataset.parameters["baseline_fine_crop"]
+    return fine.reindex(decode_baseline_allocation(dataset).index).dropna().rename("crop")
 
 
 def plot_to_farm(dataset: Dataset) -> pd.Series:
@@ -561,8 +559,7 @@ def compute_economic_totals(
     (=gross product: sales+subsidy, EUR), gross margin (EUR, after variable input costs),
     variable cost (EUR, derived = revenue - gross margin), labor cost (EUR), net revenue
     (EUR, = gross margin - labor cost), and employment (ETP). Valid for both the output
-    (fine crops) and the representative baseline (see
-    decode_baseline_representative_allocation)."""
+    (fine crops) and the fine baseline (see decode_baseline_fine_allocation)."""
     revenue = float(compute_total_revenue_by_crop(dataset, allocation).sum())
     gross_margin = float(compute_gross_margin_by_crop(dataset, allocation).sum())
     labor_cost = compute_total_labor_cost(dataset, allocation, cost_per_hour)

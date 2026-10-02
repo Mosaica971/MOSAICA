@@ -129,20 +129,24 @@ items:
     spec: docs/superpowers/specs/2026-07-21-calibration-validation-design.md
     left: >-
       The reference folders on disk (calib_gams_parite, calib_retenu) were solved with the
-      plain Prix_Cult/Rdt_Cult tables; the 2026-09-08 fix changed 23 crops. references.yaml
-      still guards the old figures. Regenerate, then update `expect:` and docs/04-vigilance.md E.
-  - id: fine-labour-budget
-    title: Per-farm labour budget from the observed fine plan (ASSOL_PARC_INIT.TXT)
-    status: in_progress
+      plain Prix_Cult/Rdt_Cult tables; the 2026-09-08 fix changed 23 crops. Since 2026-09-28
+      the per-farm labour and banana caps are also computed on the GAMS baseline ITKs
+      (baseline-itk-gams-rules), 10.6 % and 15 % tighter. references.yaml still guards the
+      old figures. Regenerate, then update `expect:` and docs/04-vigilance.md E.
+  - id: baseline-itk-gams-rules
+    title: Fine ITK of each observed plot by the GAMS rules (Matrice_Parc_Cult), replacing representative crops
+    status: done
     area: calibration
-    since: 2026-09-08
-    left: Experiment runs exist (calib_fine_labor_2017, fine_labor_observed); adoption pending.
+    since: 2026-09-28
+    spec: docs/superpowers/specs/2026-09-28-baseline-itk-gams-rules-design.md
+    left: >-
+      MO_Expl_init reproduced farm by farm; the reference runs still carry the old caps
+      (see regenerate-reference-runs).
   - id: farm-banana-quota
     title: Per-farm export-banana delivery right (Eq_BA_QUOTA_Expl)
     status: done
     area: model
     since: 2026-09-08
-    left: The per-farm reference is ~18 % above the true observed mix (representative crop).
   - id: calibration-validation
     title: PAD at every scale, farm-type confusion, plot agreement (Chopin et al. 2015 §2.6)
     status: done
@@ -182,9 +186,9 @@ items:
     blocked_by: Both hit the solver time limit with an incoherent incumbent; needs a repaired warm start.
   - id: region-aware-representatives
     title: Representative crop chosen per plot among the eligible variants
-    status: todo
+    status: abandoned
     area: calibration
-    left: The island-wide CS_NGT_NISM is eligible on 31 % of observed cane; it feeds the labour cap.
+    left: Superseded by baseline-itk-gams-rules, which assigns each plot its ITK the way GAMS does.
   - id: gams-results
     title: Compare with the actual GAMS run results and coefficients
     status: proposal

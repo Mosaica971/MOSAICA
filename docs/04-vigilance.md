@@ -158,10 +158,15 @@ symmetric group.
 
 ### B.4 — Major — The labour ceiling is the real limiting factor
 
-`Eq_MO_MAX_Expl` grants the territory 6 252 740 h, i.e. **3 891 FTE** at `slack: 1.0`.
+`Eq_MO_MAX_Expl` grants the territory 5 592 326 h, i.e. **3 480 FTE** at `slack: 1.0` — GAMS's
+`MO_Expl_init` to the hour since 2026-09-28 (C.2). Until then it was 6 252 740 h = 3 891 FTE,
+and **every measurement below dates from that looser budget**: the selected calibration used
+5 629 390 h, more than the new territory-wide ceiling, so the reference runs and the
+scenario floors must be re-measured.
 
-- An **employment floor** above 3 891 FTE is infeasible unless the scenario loosens the slack
-  (1.5 -> 5 837 FTE, 2.0 -> 7 782).
+- An **employment floor** above 3 480 FTE is infeasible unless the scenario loosens the slack
+  (1.5 -> 5 220 FTE, 2.0 -> 6 960). The cap is per farm, so a floor below the total can be
+  infeasible too.
 - The **food-production floors** claim 6 222 537 h and are infeasible at `slack: 1.0`.
 
 **And loosening the slack is not enough.** P10 was infeasible with a floor at 6 000 FTE while its
@@ -173,9 +178,10 @@ infeasibility): it is the combination.
 -> **Never raise an employment floor without re-measuring.** A data-free test
 (`test_prospective_labour_slack_covers_every_employment_floor`) keeps the two blocks consistent.
 
-The budget itself rests on the representative crops (C.2). The observed fine plan
-(`context/SORTIES/ASSOL_PARC_INIT.TXT`) gives 5 592 326 h instead of 6 252 740 and redistributes
-it between farms; it is tested in `scenarios_labor.yaml` and not yet the default.
+The budget rests on the GAMS baseline ITKs (C.2). Against the old representative basis it is
+10.6 % lower overall, and redistributed: 405 farms lose budget (banana and rain-fed Basse-Terre
+market gardening above all, the top 100 carrying 71 % of the drop), 119 gain (Basse-Terre yam),
+50 all-NC farms stay at zero — frozen, as in GAMS.
 
 ### B.5 — Minor — A zone with no term is silently exempted
 
@@ -331,17 +337,27 @@ would carry the same overstatement through ([MAELIA M.1](maelia/README.md)).
 The baseline only encodes the crop at **RPG aggregate** level (12 codes). **GAMS did the same**:
 the 2017 technical variant was never observed; it is not a missing port.
 
--> To compute production/subsidy/revenue/FTE **on the input side**, a representative fine
-variant per family is substituted (`config.yaml baseline_representative_crops`). **The input
-indicators therefore rest on an assumption**, documented and configurable.
+-> GAMS closes the gap with **deterministic rules on each plot's attributes** that fill
+`Matrice_Parc_Cult` (ENTREES.txt:299-457): banana by island, slope and farm size (BA_INT /
+BA_SINT / BA_PER / BA_IRR), cane by region, skeletal soil and plot size, market gardening by
+irrigation (MA_TO_CO_JA on rain-fed Basse-Terre, MA_ROTA elsewhere), plantain, yam, pineapple
+and orchards by island or region, grassland always PN_PIQ. Ported to the letter in
+`domain/baseline_itk.py` since 2026-09-28; the per-farm labour budget (`MO_Expl_init`), the
+per-farm banana reference (`REF_BAN_EXPL_init`, 73 097 t) and every input-side indicator read
+it. Checked: `MO_Expl_init` reproduced **to 0.001 h on each of the 4 588 farms** of a GAMS
+`DISPLAY`. `context/SORTIES/ASSOL_PARC_INIT.TXT` is not needed: it is only this matrix times
+the surface (`Eq_SURF_INIT_Parc`, MODELE.txt:214), written back by the `init` iteration.
 
-**And that assumption now shapes the allocation**, not only the reporting: the per-farm labour
-ceiling is computed through the representatives. Changing a representative changes the ceiling,
-hence the optimum.
+**It is an assumption of the GAMS model, not an observation**, and it shapes the allocation
+through the two per-farm caps. Its predecessor — one representative fine crop per group
+(`baseline_representative_crops`, removed) — overstated labour by 11 % (BA_INT on all banana,
+MA_ROTA on all market gardening) and the banana reference by 18 %. Runs written before
+2026-09-28 carry that basis on their input side and in their caps.
 
-**Worse: the representative is often a crop the model would forbid on the plot it stands for.**
-Share of the observed area where it is eligible: **cane 31 %**, market gardening 61 %, plantain
-63 %, banana 69 %, orchards 46 %, citrus 48 %. Only grassland, melon and fallow are at 100 %.
+**The rules and the eligibility equations are two separate parts of GAMS and do not always
+agree**: VE_PLUIE is assigned on South-East Basse-Terre but forbidden everywhere (the ported
+`Eq_VE_PLUIE` bug), BA_INT is eligible on 82 % of the plots it is assigned to, VE_BTGT on
+39 %. `outputs/reference_2017/csv/reference_itk_eligibility.csv` gives the table per ITK.
 
 ### C.3 — Major — The RPG under-declares grassland
 
@@ -603,7 +619,8 @@ It was re-enabled on 2026-07-21 with `skip_when_no_eligible_area: true` — skip
 farms whose plots are all fallow-locked — then **disabled again the same day**: 7 GFA farms need
 more labour for their 60 % of cane than `farm_labor_hours_max` grants them. Both constraints are
 faithful to GAMS; together they are unsatisfiable on this data. The config comment has the
-detail; the roadmap item is `cs-gfa`.
+detail; the roadmap item is `cs-gfa`. **That measurement predates the 2026-09-28 labour cap**
+(C.2), now identical to GAMS — and GAMS solves CALIB with both active, so retest it.
 
 ### G.3 — Major — Fibre-cane block (`CF`) not wired
 
@@ -655,6 +672,22 @@ medium to very high (RISQUE_CLD <= 3, 1 being the worst), as GAMS does; the back
 `max_risk_threshold` rule said the opposite of what it did. Both chlordecone rules are now
 written as `attribute_forbidden`. `docs/gams_port_inventory.md` carried the same inverted
 wording and was corrected.
+
+### G.9 — Major — The per-farm banana quota left farms without 2017 banana free (fixed 2026-09-29)
+
+GAMS indexes `Eq_BA_QUOTA_Expl` over **every** farm: a farm that grew no export banana in 2017
+has `REF_BAN_EXPL_init = 0` and may grow none. `core`'s `farm_production_bound` leaves a farm
+with **no entry** unconstrained (a missing farm must not be silently frozen), and the pipeline
+only wrote entries for the 187 banana farms — so the other 4 451 were free. On the GAMS-parity
+calibration, 853 of them planted **631 ha / 16 940 t** of banana (mostly BA_PER and BA_IRR), the
+territorial quota did the capping instead, and only 5 of the 187 legitimate farms reached their
+own quota.
+
+-> `compute_farm_baseline_production_t` now writes a 0 for every farm and group. Measured on
+`calib_gams_parity_prices` (warm-started, both optimal): territorial PAD **11.3 % -> 4.95 %**
+(GAMS `Assol_Calib`: 3.76 %), farm types 81.7 % -> 86.6 %, grassland 5 289 -> 6 117 ha (GAMS
+6 096), plantain 11 -> 175 ha (GAMS 203), cane 13 675 -> 13 044 ha (GAMS 12 908). Every run
+solved before 2026-09-29 carries the defect.
 
 ---
 

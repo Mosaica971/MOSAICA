@@ -154,28 +154,30 @@ parameters:
     config: constraints[label=labor_max_farm].args.slack
     unit: slack
     candidates:
-      - {value: 1.0, source: "observed 2017 plan priced through representative crops (6 252 740 h)"}
-      - {value: 1.073538, source: "figure proposed by Clement (6 712 553 h), uniform factor"}
-      - {value: fine plan, source: "observed FINE plan, ASSOL_PARC_INIT.TXT (5 592 326 h), scenarios_labor.yaml"}
+      - {value: 1.0, source: "observed 2017 plan through the GAMS fine ITKs, Matrice_Parc_Cult (5 592 326 h)"}
+      - {value: 1.118093, source: "observed 2017 plan through one representative crop per group (6 252 740 h), removed 2026-09-28"}
+      - {value: 1.200315, source: "figure proposed by Clement (6 712 553 h), uniform factor"}
     retained: 1.0
-    status: open
+    status: retained
     reason: >-
-      The fine plan is what GAMS reads and redistributes budgets between farms; it was run
-      as an experiment (fine_labor_observed) and not yet adopted as the default.
+      MO_Expl_init exactly as GAMS computes it (ENTREES.txt:466-469), reproduced farm by farm
+      to 0.001 h. The two other figures are only reachable as a uniform slack, which
+      redistributes nothing between farms.
     vigilance: B.4
 
-  - id: representative_cane
-    name: Representative crop of observed sugarcane
-    config: baseline_representative_crops.CS
-    unit: crop
+  - id: baseline_itk
+    name: Fine ITK of each observed 2017 plot
+    unit: rule
     candidates:
-      - {value: CS_NGT_NISM, source: "one variant for the whole island"}
-      - {value: per-plot eligible variant, source: "choose among the variants eligible on each plot"}
-    retained: CS_NGT_NISM
-    status: open
+      - {value: GAMS rules, source: "Matrice_Parc_Cult, ENTREES.txt:299-457 (domain/baseline_itk.py)"}
+      - {value: one representative per group, source: "config baseline_representative_crops, removed 2026-09-28 (BA_INT, MA_ROTA, CS_NGT_NISM...)"}
+      - {value: per-plot eligible bracket, source: "low/high over the eligible variants, outputs/reference_2017 only"}
+    retained: GAMS rules
+    status: retained
     reason: >-
-      Eligible on only 31 % of observed cane hectares, and it feeds the labour cap, hence
-      the optimum. Region-aware representatives are on the roadmap.
+      The RPG has no fine crop, so an ITK must be assigned. The GAMS rules depend on the plot
+      (island, region, slope, farm size, irrigation, skeletal soil) and give parity; the
+      single representative overstated labour by 11 %. Still an assumption, not an observation.
     vigilance: C.2
 
   - id: hours_per_fte

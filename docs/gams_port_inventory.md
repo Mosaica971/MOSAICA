@@ -114,7 +114,7 @@ plots. Removing them also drops ~350 000 decision variables.
 | `Eq_BA_ROTA` | Fallow + cane (+ CF) ≥ `PROP_BA_JA` x banana | ported | `farm_area_ratio_min` (`ba_rota`) |
 | `Eq_CS_GFA` | Minimum cane share on GFA farms | disabled | `cs_gfa_minimum_share` — unsatisfiable together with the labour cap on 7 GFA farms (see `docs/04-vigilance.md` G.2) |
 | `Eq_AN_PA` | `AN_PA` forbidden if `Surf_Expl_Parc_init < AN_SURF_EXPL_MIN` | ported | `attribute_forbidden` on `SURF_EXPL_PARC < 10` — the column carries the area of the farm owning the plot, so the rule needs no per-farm indexing (ported 2026-07-27) |
-| `Eq_BA_QUOTA_Expl` | Export-banana tonnage of EACH farm ≤ its 2017 production | ported 2026-09-08 | `farm_production_bound` (`ba_quota_farm`); the per-farm reference comes from `compute_farm_baseline_production_t`, which prices each observed group through its representative variant for lack of the fine mix, which **loosens** the cap by about 18 % |
+| `Eq_BA_QUOTA_Expl` | Export-banana tonnage of EACH farm ≤ its 2017 production | ported 2026-09-08 | `farm_production_bound` (`ba_quota_farm`); the per-farm reference `REF_BAN_EXPL_init` comes from `compute_farm_baseline_production_t`, with an explicit 0 for every farm that grew no banana in 2017 (until 2026-09-29 those farms were left unconstrained — vigilance G.9), on each plot's GAMS-assigned banana ITK (`domain/baseline_itk.py`, since 2026-09-28; before, one representative variant loosened the cap by about 18 %) |
 
 ## Territory
 
@@ -124,7 +124,7 @@ plots. Removing them also drops ~350 000 decision variables.
 | `Eq_*_QUOTA_MAX` | Production ceilings | ported | `territory_production_bound` (`sense: le`) |
 | `Eq_LEG/FRU_PROD_OBJ`, `Eq_PAT_SURF_OBJ` | Vegetable / fruit / grassland targets | ported (disabled) | `territory_production_bound` |
 | `Eq_TUB_PROD_OBJ` | Tuber target | ported but **no-op** | `tub_prod_obj`, `enable: false`, threshold 0 — traceability placeholder |
-| `Eq_MO_MAX_Expl` | Per-farm labour ceiling | **ported and active** | `farm_labor_hours_max` (`labor_max_farm`), `slack: 1.0`. `MO_Expl_init` assumes the fine 2017 allocation, which was never observed; the representative crops stand in for it (`baseline_representative_crops`), and the observed fine plan of the GAMS run is tested as an alternative (`scenarios_labor.yaml`). It is **the dominant constraint**: without it the optimum asks 21 593 FTE where the territory had 3 598 (factor 6). Changing a representative changes the ceiling, hence the optimum — `docs/04-vigilance.md` C.2. |
+| `Eq_MO_MAX_Expl` | Per-farm labour ceiling | **ported and active** | `farm_labor_hours_max` (`labor_max_farm`), `slack: 1.0`. `MO_Expl_init` is computed on the fine ITK the GAMS rules assign each observed plot (`Matrice_Parc_Cult`, ENTREES.txt:299-457, ported in `domain/baseline_itk.py` on 2026-09-28) and matches GAMS to 0.001 h per farm; it replaced one representative crop per group, 11 % looser. It is **the dominant constraint**: without it the optimum asks 21 593 FTE where the territory had 3 598 (factor 6). Changing an assignment rule changes the ceiling, hence the optimum — `docs/04-vigilance.md` C.2. |
 
 ## Objectives
 

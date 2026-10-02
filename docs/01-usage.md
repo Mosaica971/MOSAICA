@@ -233,8 +233,8 @@ python scripts/pad_all_scales.py outputs/calib_retenu         # PAD at five scal
 
 1. **`build_reference_state.py`** builds the observed 2017 situation, independent of any run.
    **Read its `REFERENCE.md` before interpreting any gap**: above all it says what the
-   reference *cannot* say. Rerun it when `config.yaml` changes `year`, `zone_filter` or
-   `baseline_representative_crops` — and only then.
+   reference *cannot* say. Rerun it when `config.yaml` changes `year` or `zone_filter`, or
+   when the baseline ITK rules of `domain/baseline_itk.py` change — and only then.
 2. **`compare_to_reference.py`** puts a run against it and writes `reference_comparison.md`
    into the run folder.
 3. **`evaluate_calibration.py`** gives the detail by crop, sub-region and farm. New runs do it
