@@ -461,7 +461,7 @@ employment floor. `zone_indicator_bound` holds the same bound per island/region/
 `baseline_inertia_min` requires a share of allocated area to stay in its observed 2017 group. Two
 traps: `ModelInputs.plot_weights` exists because rates are per-crop while water is only drawn on
 irrigable plots (a bound without `plot_weight: irrigable` counts 56 Mm³ where the report says
-35); and an **employment floor above the labour cap is infeasible** — `farm_labor_hours_max`
+40); and an **employment floor above the labour cap is infeasible** — `farm_labor_hours_max`
 grants 3 480 FTE at `slack: 1.0`, so any floor above that must raise the slack in the same
 scenario (and raising it is not sufficient either — vigilance B.4).
 
@@ -472,7 +472,11 @@ region, slope, farm size, irrigation and soil. The per-farm labour budget (`MO_E
 per-farm banana reference and every input-side indicator read that `baseline_fine_crop`
 parameter; it reproduces GAMS's `MO_Expl_init` to 0.001 h per farm. It replaced (2026-09-28)
 one representative crop per group, 11 % looser on labour — runs written before carry that basis
-(vigilance C.2, B.4).
+(vigilance C.2, B.4). **`IRRIG_PARC` is not the file's column either**: GAMS raises it to 1 where
+the observed crop implies water (ENTREES.txt:136-159), and
+`baseline_itk.assume_baseline_irrigation` does the same before the ITK rules, the eligibility
+mask and the `irrigable` weight read it (since 2026-10-02; earlier runs read the raw
+irrigation-network map — vigilance G.10).
 
 **Eligibility** is a boolean plot×crop matrix: numeric attribute bounds (altitude, slope,
 rainfall, plot size) intersected with `categorical_rules` (irrigation, soil type, region bans,

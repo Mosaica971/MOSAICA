@@ -131,8 +131,11 @@ items:
       The reference folders on disk (calib_gams_parite, calib_retenu) were solved with the
       plain Prix_Cult/Rdt_Cult tables; the 2026-09-08 fix changed 23 crops. Since 2026-09-28
       the per-farm labour and banana caps are also computed on the GAMS baseline ITKs
-      (baseline-itk-gams-rules), 10.6 % and 15 % tighter. references.yaml still guards the
-      old figures. Regenerate, then update `expect:` and docs/04-vigilance.md E.
+      (baseline-itk-gams-rules), 10.6 % and 15 % tighter. Since 2026-10-02 the irrigation
+      flag is the one GAMS rewrites (baseline-irrigation-gams-rules), 479 plots more
+      permissive; the only solve on it at the reference tolerance returned its warm-start
+      seed unchanged (docs/04-vigilance.md G.10). references.yaml still guards the old
+      figures. Regenerate, then update `expect:` and docs/04-vigilance.md E and G.10.
   - id: baseline-itk-gams-rules
     title: Fine ITK of each observed plot by the GAMS rules (Matrice_Parc_Cult), replacing representative crops
     status: done
@@ -142,6 +145,15 @@ items:
     left: >-
       MO_Expl_init reproduced farm by farm; the reference runs still carry the old caps
       (see regenerate-reference-runs).
+  - id: baseline-irrigation-gams-rules
+    title: IRRIG_PARC rewritten from the observed crop as GAMS does (ENTREES.txt:136-159)
+    status: done
+    area: calibration
+    since: 2026-10-02
+    left: >-
+      Ported and checked against the GAMS allocation without a solve; measured once, on a
+      0.1 % gap run stopped at its time limit, where it is confounded with the tolerance
+      (docs/04-vigilance.md G.10). See regenerate-reference-runs.
   - id: farm-banana-quota
     title: Per-farm export-banana delivery right (Eq_BA_QUOTA_Expl)
     status: done

@@ -22,7 +22,7 @@ from core.model.model_inputs import ModelInputs
 # Two rates are narrower than the indicator of the same name in the run report, and a
 # threshold must be set in the constraint's own terms, not read off recap.json:
 #   * `eau` counts every hectare unless the bound passes plot_weight: irrigable (which is
-#     what the report counts) -- 5.6 Mmm.ha over all land, i.e. 56 Mm3, against 35 Mm3;
+#     what the report counts) -- 5.6 Mmm.ha over all land, i.e. 56 Mm3, against 40 Mm3;
 #   * `carbone` is the crop's carbon INPUT only. The reported soil-carbon BALANCE also
 #     depends on the plot's soil type (Data_Sol), which a per-crop rate cannot carry.
 # `ges` is in the model's own unit -- its scale is an open question (docs/status/roadmap.yaml, `ghg-unit`) -- so GHG
@@ -66,11 +66,12 @@ def _plot_weights(dataset: Dataset) -> dict[str, dict[str, float]]:
     """Per-plot multipliers a bound may weight its hectares by.
 
     `irrigable` is the one that matters: the water indicator is a per-crop rate, but only a
-    plot connected to the network actually draws from the resource (OPTIMISATION.txt:2540,
-    and reporting/indicators._irrigable_surface does the same). Without this weight a water
-    ceiling would count rain-fed hectares and would not be the same quantity the run reports
-    as total_water_need_m3 -- 56 Mm3 against 35 -- so a threshold read off one would be
-    wrong against the other.
+    plot GAMS holds as irrigated actually draws from the resource (OPTIMISATION.txt:2540,
+    and reporting/indicators._irrigable_surface does the same) -- IRRIG_PARC as rewritten by
+    baseline_itk.assume_baseline_irrigation, not the raw network map. Without this weight a
+    water ceiling would count rain-fed hectares and would not be the same quantity the run
+    reports as total_water_need_m3 -- 56 Mm3 against 40 -- so a threshold read off one would
+    be wrong against the other.
     """
     plot_data = dataset.parameters["plot_data"]
     weights: dict[str, dict[str, float]] = {}

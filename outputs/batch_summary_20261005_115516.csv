@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,gross_margin,subventions,fte,production_t,surface_ha,nitrogen_kg,tfi,ghg_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+calib_gams_parity_prices_gap01_long,,,maxTimeLimit,80421232.60388666,97270947.73,67799158.73,3291.89,890122.0,23510.73,1776390.1,63835.99,173483596.29,41659711.2,0.05,0.11,4.58,22096,220677.0,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\calib_gams_parity_prices_gap01_long,

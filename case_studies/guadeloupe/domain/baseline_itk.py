@@ -11,6 +11,11 @@ reference REF_BAN_EXPL_init and every input-side indicator are computed on its o
 It is an assumption of the GAMS model, not an observation: no source says which ITK was
 actually practised in 2017. Its merit is to depend on the plot and to match GAMS exactly
 (MO_Expl_init reproduced to 0.001 h per farm, see docs/04-vigilance.md C.2).
+
+The same observed groups also drive the irrigation flag: before any rule or equation reads
+IRRIG_PARC, GAMS overwrites it on the plots whose 2017 crop implies water (ENTREES.txt:136-159).
+`assume_baseline_irrigation` ports that step; it must run before `assign_baseline_itk` and
+before the eligibility mask, as it does in GAMS.
 """
 
 from __future__ import annotations
@@ -32,11 +37,46 @@ BA_SLOPE_MAX = 25.0
 # semi-mechanically.
 CS_BT_PLOT_SURFACE_MIN = 0.2
 
+# ENTREES.txt:139-141: observed groups GAMS takes as irrigated wherever they stand off
+# Basse-Terre (ILE > 1), whatever the irrigation-network map says.
+IRRIGATED_OFF_BASSE_TERRE_GROUPS: tuple[str, ...] = ("BC", "MA", "BA", "AG", "ME", "IG")
+# ENTREES.txt:156: an observed orchard plot strictly above this size (ha) is taken as irrigated.
+VE_IRRIGATED_PLOT_SURFACE_MIN = 0.5
+
 # Plot attributes the rules read (Data_Parc_Gwad columns, plus the farm surface the pipeline
 # exposes as SURF_EXPL_PARC = Surf_Expl_Parc_init, ENTREES.txt:115-119).
 REQUIRED_COLUMNS: tuple[str, ...] = (
     "REGION", "ILE", "PENTE", "IRRIG_PARC", "SOL_COURT", "SURF_HA", "SURF_EXPL_PARC",
 )
+
+
+def assume_baseline_irrigation(plot_data: pd.DataFrame, base_crop_group: pd.Series) -> pd.Series:
+    """plot -> IRRIG_PARC as GAMS rewrites it from the observed 2017 crop (ENTREES.txt:136-159).
+
+    The file column is the irrigation-network map (0/1). GAMS sets it to 1, in place and
+    before MODELE.txt reads it, on three kinds of plot: one observed in plantain, market
+    gardening, export banana, citrus, melon or yam off Basse-Terre (138-144); one observed
+    in citrus anywhere (147-151); one observed in orchard and larger than 0.5 ha (155-159).
+    The reasoning is that a crop grown there in 2017 had water, map or no map. Every
+    irrigation-dependent ban (Eq_ME_IRR, Eq_MA_ROTA_IRR, Eq_BA_IRR, Eq_BC_IRR_*, Eq_AG_IRR,
+    Eq_VE_IRR, the MA rule of the baseline ITK) and the water indicator then read the
+    rewritten flag. The rewrite only ever raises a 0 to 1; see docs/04-vigilance.md G.10.
+
+    `base_crop_group` is the resolved RPG group, i.e. GAMS's aggregate Matrice_Parc_Cult
+    (ENTREES.txt:62-103) at the point the rewrite runs.
+    """
+    required = ("IRRIG_PARC", "ILE", "SURF_HA")
+    missing = [column for column in required if column not in plot_data.columns]
+    if missing:
+        raise KeyError(f"assume_baseline_irrigation needs plot_data columns {missing}")
+
+    group = base_crop_group.reindex(plot_data.index)
+    assumed_irrigated = (
+        (group.isin(IRRIGATED_OFF_BASSE_TERRE_GROUPS) & (plot_data["ILE"] > 1))
+        | (group == "AG")
+        | ((group == "VE") & (plot_data["SURF_HA"] > VE_IRRIGATED_PLOT_SURFACE_MIN))
+    )
+    return plot_data["IRRIG_PARC"].where(~assumed_irrigated, 1)
 
 
 def assign_baseline_itk(plot_data: pd.DataFrame, base_crop_group: pd.Series) -> pd.Series:

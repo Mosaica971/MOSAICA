@@ -12,9 +12,10 @@ The status board (`docs/status/STATUS.md`) lists every config entry with the GAM
 ports, read from its label or its config comment and checked against the sources; this page
 keeps the reasoning behind each line.
 
-Last updated: 2026-09-22 (English translation; the chlordecone rows were inverted, the
+Last updated: 2026-10-02 (the irrigation flag GAMS rewrites in `ENTREES.txt:136-159` is now
+ported). 2026-09-22: English translation; the chlordecone rows were inverted, the
 `Eq_*_SUPP` suppressions were described as implicit although they have been explicit rules
-since 2026-07-21, and the CF price tables are now read).
+since 2026-07-21, and the CF price tables are now read.
 
 ## Eligibility — numeric bounds
 
@@ -29,6 +30,7 @@ since 2026-07-21, and the CF price tables are now read).
 
 | Equation | Role | Status | Python location |
 |---|---|---|---|
+| `ENTREES.txt:136-159` (not an equation) | `IRRIG_PARC` set to 1 where the observed 2017 crop implies water, **before** every rule below reads it | ported 2026-10-02 | `domain/baseline_itk.assume_baseline_irrigation`, applied in the pipeline ahead of the baseline ITK and the eligibility mask. Until then the raw network map was read, 479 plots stricter than GAMS — vigilance G.10 |
 | `Eq_ME_IRR`, `Eq_MA_ROTA_IRR` | ME / MA_ROTA only on irrigated plots | ported | `irrigation_required` |
 | `Eq_AN_SOL_Parc` | Pineapple allowed only on soil type 2 | ported | `attribute_forbidden` (`TYPE_SOL ne 2`). The former `soil_type_forbidden` entry was inverted and was replaced on 2026-07-23. |
 | melon / soil / island | ME forbidden on soils 2-3-4 and in Basse-Terre | ported | two `attribute_forbidden` entries (an OR is written as two entries); the former `melon_soil_restriction` rule was removed on 2026-07-21 |

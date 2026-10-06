@@ -37,19 +37,19 @@
     "Market gardeners": 216,
     "Cane and livestock farmers": 597
   },
-  "pad_floor_pct": 1.475401423106889,
-  "irreproducible_area_ha": 347.87,
-  "plots_without_eligible_variant": 482,
+  "pad_floor_pct": 0.8539744057911633,
+  "irreproducible_area_ha": 201.34999999999994,
+  "plots_without_eligible_variant": 361,
   "baseline_itk_eligible_pct": {
-    "AG/AG": 48.04641015470052,
+    "AG/AG": 96.07298690995637,
     "AN/AN_NU": 93.73634377276036,
     "AN/AN_PA": 89.94064354889098,
     "BA/BA_INT": 82.02012334689724,
-    "BA/BA_IRR": 99.96457669146301,
+    "BA/BA_IRR": 100.0,
     "BA/BA_PER": 100.0,
     "BA/BA_SINT": 100.0,
     "BC/BC_BT": 79.54331651415377,
-    "BC/BC_GTMG": 92.76750330250991,
+    "BC/BC_GTMG": 100.0,
     "CS/CS_BT_NIM": 98.29898661761985,
     "CS/CS_BT_NISM": 91.11654441727791,
     "CS/CS_CGT_NIM": 99.50239753912965,
@@ -63,23 +63,23 @@
     "IG/IG_PLA": 100.0,
     "IG/IG_TUT": 81.78368121442125,
     "JA/JA": 100.0,
-    "MA/MA_ROTA": 90.18359853121174,
+    "MA/MA_ROTA": 100.0,
     "MA/MA_TO_CO_JA": 99.99999999999999,
     "ME/ME": 99.99999999999999,
     "PN/PN_PIQ": 100.0,
-    "VE/VE_BTGT": 39.14253048780488,
+    "VE/VE_BTGT": 73.4375,
     "VE/VE_PLUIE": 0.0
   },
   "indicators": {
     "production_tonnes": {
       "central": 883147.0157999998,
       "low": 703241.6797999998,
-      "high": 891116.7478
+      "high": 891333.2877999999
     },
     "sales": {
       "central": 153446384.53734004,
       "low": 104495838.52207999,
-      "high": 153906676.70186
+      "high": 154881106.70186
     },
     "subsidy": {
       "central": 70745291.41281143,
@@ -89,32 +89,32 @@
     "revenue": {
       "central": 224191675.95015147,
       "low": 152703272.62422857,
-      "high": 225966654.45138
+      "high": 226941084.45138
     },
     "gross_margin": {
       "central": 95804961.52847774,
       "low": 51801744.52980819,
-      "high": 95628374.17835638
+      "high": 95881161.12257637
     },
     "labor_hours": {
       "central": 5592325.788040044,
-      "low": 3785525.2167499997,
+      "low": 3785551.49675,
       "high": 6195233.294278408
     },
     "nitrogen": {
       "central": 1897992.537266667,
       "low": 1315420.933666667,
-      "high": 1914715.928666667
+      "high": 1929267.4166666672
     },
     "ghg": {
       "central": 170620713.4766419,
       "low": 137166566.5756473,
-      "high": 172946068.01173228
+      "high": 173175069.04379112
     },
     "tfi": {
       "central": 65046.74361904762,
       "low": 42224.64647619047,
-      "high": 65834.83433333333
+      "high": 66195.73433333333
     },
     "fte": {
       "central": 3479.978710665864,
@@ -137,7 +137,7 @@
       "high": null
     },
     "water_need_m3": {
-      "central": 35510310.0,
+      "central": 39627450.0,
       "low": null,
       "high": null
     },

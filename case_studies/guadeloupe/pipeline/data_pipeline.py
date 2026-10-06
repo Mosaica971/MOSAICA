@@ -25,7 +25,10 @@ from case_studies.guadeloupe.domain.farm_typology import (
     compute_farm_type,
 )
 from case_studies.guadeloupe.domain import agroecology, rpest, soil_carbon, water
-from case_studies.guadeloupe.domain.baseline_itk import assign_baseline_itk
+from case_studies.guadeloupe.domain.baseline_itk import (
+    assign_baseline_itk,
+    assume_baseline_irrigation,
+)
 from core.config import load_config, resolve_enabled
 from core.data.dataset import Dataset
 from core.data.eligibility import (
@@ -303,6 +306,13 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     )
 
     base_crop_group = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
+    # GAMS overwrites IRRIG_PARC in place where the observed crop implies water
+    # (ENTREES.txt:136-159), before the ITK rules and every Eq_*_IRR ban read it. Same order
+    # here: the baseline ITK, the eligibility mask and the irrigable-plot weight all see the
+    # rewritten flag, never the raw network map (docs/04-vigilance.md G.10).
+    plot_data = plot_data.assign(
+        IRRIG_PARC=assume_baseline_irrigation(plot_data, base_crop_group)
+    )
     # Matrice_Parc_Cult: the fine ITK GAMS assigns each observed plot (ENTREES.txt:299-457).
     # Every observed-side rate -- labour budget, banana reference, input indicators -- reads it.
     baseline_fine_crop = assign_baseline_itk(plot_data, base_crop_group)

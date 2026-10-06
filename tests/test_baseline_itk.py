@@ -1,5 +1,6 @@
 """Unit tests for the fine ITK of the observed 2017 baseline (GAMS Matrice_Parc_Cult,
-ENTREES.txt:299-457) and for the two farm references computed on it: the labour budget
+ENTREES.txt:299-457), for the irrigation flag GAMS rewrites from the same observed groups
+(136-159), and for the two farm references computed on the ITK: the labour budget
 MO_Expl_init (466-469) and the banana reference REF_BAN_EXPL_init (477-483).
 
 Data-free: every plot is hand-built so that exactly one GAMS rule fires on it.
@@ -9,7 +10,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from case_studies.guadeloupe.domain.baseline_itk import AGGREGATE_GROUPS, assign_baseline_itk
+from case_studies.guadeloupe.domain.baseline_itk import (
+    AGGREGATE_GROUPS,
+    assign_baseline_itk,
+    assume_baseline_irrigation,
+)
 from case_studies.guadeloupe.pipeline.data_pipeline import (
     compute_farm_baseline_production_t,
     compute_farm_labor_capacity_hours,
@@ -115,6 +120,80 @@ def test_missing_column_is_named():
 
     with pytest.raises(KeyError, match="PENTE"):
         assign_baseline_itk(frame, pd.Series({"P": "CS"}))
+
+
+def _irrigation(**plots):
+    frame = pd.DataFrame.from_dict(plots, orient="index")
+    return assume_baseline_irrigation(frame.drop(columns="group"), frame["group"])
+
+
+# (plot off the irrigation network, IRRIG_PARC GAMS ends up with) -- ENTREES.txt:136-159.
+_IRRIGATION_CASES = {
+    # 138-144: these six observed groups are taken as irrigated off Basse-Terre only.
+    **{
+        f"{group.lower()}_grande_terre": (_plot(group, island=2, irrigated=0), 1)
+        for group in ("BC", "MA", "BA", "AG", "ME", "IG")
+    },
+    "ma_marie_galante": (_plot("MA", island=3, irrigated=0), 1),
+    **{
+        f"{group.lower()}_basse_terre": (_plot(group, island=1, irrigated=0), 0)
+        for group in ("BC", "MA", "BA", "ME", "IG")
+    },
+    # 147-151: observed citrus is irrigated on every island.
+    "ag_basse_terre": (_plot("AG", island=1, irrigated=0), 1),
+    # 155-159: observed orchard strictly above 0.5 ha, on every island.
+    "ve_large": (_plot("VE", island=1, irrigated=0, surface=0.51), 1),
+    "ve_at_threshold": (_plot("VE", island=1, irrigated=0, surface=0.5), 0),
+    "ve_small_grande_terre": (_plot("VE", island=2, irrigated=0, surface=0.3), 0),
+    # Every other group keeps the network map.
+    **{
+        f"{group.lower()}_untouched": (_plot(group, island=2, irrigated=0, surface=5.0), 0)
+        for group in ("CS", "PN", "AN", "JA", "NC")
+    },
+}
+
+
+@pytest.mark.parametrize("name", sorted(_IRRIGATION_CASES))
+def test_each_gams_rule_rewrites_the_irrigation_flag(name):
+    plot, expected = _IRRIGATION_CASES[name]
+
+    assert _irrigation(P=plot)["P"] == expected
+
+
+def test_irrigation_rewrite_never_lowers_a_flag_and_leaves_its_input_alone():
+    """GAMS only ever assigns 1: a plot on the network stays on it whatever it grew."""
+    frame = pd.DataFrame.from_dict(
+        {"cane": _plot("CS", island=2, irrigated=1), "melon": _plot("ME", island=2, irrigated=0)},
+        orient="index",
+    )
+    plot_data = frame.drop(columns="group")
+
+    result = assume_baseline_irrigation(plot_data, frame["group"])
+
+    assert result.to_dict() == {"cane": 1, "melon": 1}
+    assert plot_data["IRRIG_PARC"].to_dict() == {"cane": 1, "melon": 0}
+
+
+def test_market_gardening_itk_reads_the_rewritten_flag_only_on_basse_terre():
+    """The rewrite runs before the ITK rules but cannot move them: the only rule reading
+    IRRIG_PARC splits MA on Basse-Terre, where no MA plot is ever rewritten."""
+    frame = pd.DataFrame.from_dict(
+        {"bt": _plot("MA", island=1, irrigated=0), "gt": _plot("MA", island=2, irrigated=0)},
+        orient="index",
+    )
+    plot_data = frame.drop(columns="group")
+    plot_data = plot_data.assign(IRRIG_PARC=assume_baseline_irrigation(plot_data, frame["group"]))
+
+    assert assign_baseline_itk(plot_data, frame["group"]).to_dict() == {
+        "bt": "MA_TO_CO_JA", "gt": "MA_ROTA",
+    }
+
+
+def test_irrigation_rewrite_names_a_missing_column():
+    frame = pd.DataFrame({"IRRIG_PARC": [0], "ILE": [2]}, index=["P"])
+
+    with pytest.raises(KeyError, match="SURF_HA"):
+        assume_baseline_irrigation(frame, pd.Series({"P": "MA"}))
 
 
 _RATES = pd.Series({"BA_INT": 1558.0, "BA_PER": 565.0, "CS_NGT_NIM": 12.7, "JA": 6.0, "NC": 0.0})

@@ -223,7 +223,7 @@ tables:
         unit: m/ha
         computed: {expr: PERIMETRE / SURF_HA, round: 0, tolerance: 0.5}
         description: shape index (perimeter / area); above 1500 mechanised sugarcane is banned
-      IRRIG_PARC: {type: binary, description: "1 = served by the irrigation network"}
+      IRRIG_PARC: {type: binary, description: "1 = served by the irrigation network; the model raises it to 1 where the observed 2017 crop implies water (GAMS ENTREES.txt:136-159, docs/04-vigilance.md G.10)"}
       ZNIEFF1T: {type: binary, description: "1 = inside a type-1 ZNIEFF (natural area of ecological interest)"}
       ZNIEFF2T: {type: binary, description: "1 = inside a type-2 ZNIEFF"}
       RISQUE_CLD:

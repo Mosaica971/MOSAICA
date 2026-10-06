@@ -357,7 +357,8 @@ MA_ROTA on all market gardening) and the banana reference by 18 %. Runs written 
 **The rules and the eligibility equations are two separate parts of GAMS and do not always
 agree**: VE_PLUIE is assigned on South-East Basse-Terre but forbidden everywhere (the ported
 `Eq_VE_PLUIE` bug), BA_INT is eligible on 82 % of the plots it is assigned to, VE_BTGT on
-39 %. `outputs/reference_2017/csv/reference_itk_eligibility.csv` gives the table per ITK.
+73 % (39 % before the irrigation flag was rewritten as in GAMS, [G.10](#irrig)).
+`outputs/reference_2017/csv/reference_itk_eligibility.csv` gives the table per ITK.
 
 ### C.3 — Major — The RPG under-declares grassland
 
@@ -688,6 +689,68 @@ own quota.
 (GAMS `Assol_Calib`: 3.76 %), farm types 81.7 % -> 86.6 %, grassland 5 289 -> 6 117 ha (GAMS
 6 096), plantain 11 -> 175 ha (GAMS 203), cane 13 675 -> 13 044 ha (GAMS 12 908). Every run
 solved before 2026-09-29 carries the defect.
+
+### G.10 — Major — GAMS rewrites `IRRIG_PARC` from the observed crop; Python read the raw map (fixed 2026-10-02) {#irrig}
+
+`Data_Parc_Gwad_2017.txt` carries `IRRIG_PARC` as the irrigation-network map. **GAMS does not
+solve on that column**: `ENTREES.txt:136-159` overwrites it with 1, in place and before
+`MODELE.txt` reads it, on every plot whose observed 2017 crop implies water — plantain, market
+gardening, export banana, citrus, melon or yam off Basse-Terre; citrus anywhere; an orchard
+plot above 0.5 ha. On the 2017 data that raises **479 plots / 338 ha** from 0 to 1 (12 364 ->
+12 843 irrigated plots). The pipeline read the file column as is, so every irrigation ban
+(`Eq_ME_IRR`, `Eq_MA_ROTA_IRR`, `Eq_BA_IRR`, `Eq_BC_IRR_BT`, `Eq_BC_IRR_GTMG`, `Eq_AG_IRR`,
+`Eq_VE_IRR`) was stricter than in GAMS on exactly those plots.
+
+How it was found: the GAMS calibration puts melon on two rain-fed market-gardening plots of
+Centre Grande-Terre where Python had the crop ineligible. Checked on the whole GAMS
+allocation: against the raw column it breaks the irrigation bans on **189 plots / 147 ha**
+(VE_BTGT 62, AG 40, MA_ROTA 22, BC_GTMG 18, BC_BT 3, ME 1); against the rewritten column, on
+**none**. Several basin-level gaps of `calib_gams_parity_prices` are that area to the hectare
+(Marie-Galante: BC_GTMG 17.2, MA_ROTA 10.1, VE_BTGT 7.0 ha in GAMS, 0 in Python).
+
+-> `domain/baseline_itk.assume_baseline_irrigation` ports the three rules; the pipeline applies
+it right after the observed groups are resolved, so the baseline ITK, the eligibility mask and
+the `irrigable` plot weight all read the rewritten flag. Effects, measured without a solve:
+eligible pairs **308 847 -> 310 575**; the baseline ITK and the per-farm labour budget do not
+move (the only ITK rule reading the flag splits market gardening *on* Basse-Terre, which no
+rule rewrites); the **water need of the 2017 baseline rises 35.5 -> 39.6 Mm³**, because the
+indicator only counts irrigable plots.
+
+**A warm start at the 1 % gap cannot show the effect.** The pre-fix allocation stays feasible
+(the mask only grows), and it already sits within `mip_rel_gap: 0.01` of the bound: HiGHS
+returns the seed untouched in 38 s (`calib_gams_parity_prices_3`, byte-identical allocation).
+The same seed solved at **0.1 %** with a 30 min limit (`calib_gams_parity_prices_gap01`) stops
+on the limit, **not proven**, with objective 79.97 -> 80.42 M (+0.56 %; GAMS 79.87 M):
+territorial PAD 4.95 -> **4.49 %** (GAMS 3.76 %), farm types 86.6 -> 87.7 % (fruit growers
+27 -> 61 %), citrus 43 -> 67 ha (GAMS 107), VE_BTGT 205 -> 284 (260), BC_GTMG 72 -> 93 (96),
+MA_ROTA 258 -> 287 (328), cane 13 044 -> 12 984 (12 908); summed absolute gap to GAMS over the
+fine crops 603 -> 463 ha. Melon (237 -> 246, GAMS 207) and fallow (367 -> 338, GAMS 416) move
+away. **The two changes are confounded**: that run differs from its seed by the flag *and* by
+the tolerance, so the gain is an upper bound on what the flag alone brings.
+
+Every run solved before 2026-10-02 carries the raw flag, in its eligibility and in its water
+indicator — and the water thresholds of the prospective policies are percentages of a level
+measured on such a run. The reference runs are still to regenerate (roadmap
+`regenerate-reference-runs`).
+
+**It is an assumption of the GAMS model, like C.2**: "a crop observed there had water" is a
+rule on the 2017 land use, not a fact about the network. `plot_data["IRRIG_PARC"]` is therefore
+no longer the map delivered in the file; the raw value is only in `Data_Parc_Gwad_2017.txt`.
+
+### G.11 — Minor — "Basin" has two definitions that differ on Goyave {#bassins}
+
+The `REGION` column of `Data_Parc_Gwad` (1-7, labelled SOBT/SEBT/NBT/... by
+`domain/zones.REGION_LABELS`) and GAMS's own basin sets `SRSOBT`..`SRMG` (SETS.txt:614-627,
+lists of `REGION_CODE`) are the same partition **except commune 97114 (Goyave, `R13`)**:
+`REGION = 5` (South-East Basse-Terre) in the column, `SRNBT` (North Basse-Terre) in the sets —
+486 plots, 383 ha. Every Python report by region (`surface_by_region_*.csv`, the sub-regional
+PAD) uses the column.
+
+-> A GAMS table by basin built on the `SR*` sets must be compared with a Python allocation
+re-aggregated through `REGION_CODE`, not with `surface_by_region_output.csv`: otherwise the
+SEBT and NBT rows show gaps that are only Goyave changing rows (about 100 ha of grassland and
+55 ha of banana on the 2026-09-29 parity calibration), while every other basin and every
+territorial total agree.
 
 ---
 

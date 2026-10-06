@@ -646,6 +646,8 @@ categorical_rules:
               MA_PAI_FER_I, MA_PAI_FER_NI, MA_PAI_NON_I, MA_PAI_NON_NI]
   # ---------------------------------------------------------------------------------
 
+  # Eq_ME_IRR, Eq_MA_ROTA_IRR (MODELE.txt:246-250). IRRIG_PARC here and in every rule below
+  # is the flag GAMS rewrites from the observed crop (ENTREES.txt:136-159), not the file's.
   - name: irrigation_required            # ME, MA_ROTA only on irrigated plots (IRRIG_PARC true)
     enable: true
     args:
