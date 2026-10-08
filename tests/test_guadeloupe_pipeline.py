@@ -277,6 +277,35 @@ def test_build_dataset_farm_risk_aversion_is_not_degenerately_uniform():
     }
 
 
+def test_build_dataset_types_farms_by_the_configured_typology_method():
+    """`farm_typology.method` reaches the aversion: the two methods must disagree on some
+    farms, a config with no section must mean GAMS's shares, and the types the dataset
+    exposes must be the ones its aversion was read off."""
+    from case_studies.guadeloupe.domain.farm_typology import compute_risk_aversion
+
+    without_section = {key: value for key, value in CONFIG.items() if key != "farm_typology"}
+    by_gams = build_dataset({**CONFIG, "farm_typology": {"method": "gams"}})
+    by_default = build_dataset(without_section)
+    by_area = build_dataset({**CONFIG, "farm_typology": {"method": "cultivated_area"}})
+
+    gams_type = by_gams.parameters["farm_type"]
+    area_type = by_area.parameters["farm_type"]
+    assert by_default.parameters["farm_type"].equals(gams_type)
+    assert (gams_type != area_type).any()
+    for dataset in (by_gams, by_area):
+        expected = compute_risk_aversion(
+            dataset.parameters["farm_type"], dataset.parameters["farm_type_secondary"]
+        )
+        assert dataset.parameters["farm_risk_aversion"].equals(expected)
+    # Farms with no cultivated area are the same under both: NC is outside either share.
+    assert (gams_type == 0).equals(area_type == 0)
+
+
+def test_build_dataset_rejects_unknown_typology_method():
+    with pytest.raises(ValueError, match="farm_typology.method"):
+        build_dataset({**CONFIG, "farm_typology": {"method": "nope"}})
+
+
 def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     dataset = build_dataset(CONFIG)
 

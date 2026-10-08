@@ -27,3 +27,6 @@ runs:
     disable:
       - bc_quota_max
       - pn_prod_min
+    overrides:
+      # Parity means GAMS's own farm types, hence its own aversions (docs/04-vigilance.md D.6).
+      farm_typology.method: gams

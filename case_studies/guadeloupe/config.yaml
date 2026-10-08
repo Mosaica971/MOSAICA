@@ -160,6 +160,20 @@ crop_families:
   plu: &SC_PLU [AG, VE, VE_BTGT, VE_PLUIE]  # rainfed fruit/orchards (agrumes + vergers)
   ba_ja: &SC_BA_JA [BA_INT, BA_IRR, BA_SINT]  # export-banana subset used in fallow-rotation ratios
 
+# Farm typology (TYPE_EXPL): how a farm's areas become the crop shares its type is read off.
+# The OBSERVED type fixes the farm's risk aversion (AVERS), so this is a model choice, not a
+# reporting one: it changes the objective.
+#   gams             GAMS's own denominator, SURF_CUL - SURF_NON (OPTIMISATION.txt:1501-1526),
+#                    which takes the non-cultivated area off a total that never held it.
+#                    The parity runs pin it (scenarios_calibration*.yaml).
+#   cultivated_area  crops + fallow, non-cultivated plots left out. A farm holding only
+#                    fallow is "diversified" (type 5), observed or simulated: nothing looks
+#                    at what it grew before.
+# DELIBERATE DEVIATION from GAMS since 2026-10-06 -- docs/04-vigilance.md D.6 carries the
+# measurement. A config with no such section means `gams` (runs written before that date).
+farm_typology:
+  method: cultivated_area
+
 # Objective functions. Exactly one must be enabled; the builder is selected by `name`.
 objectives:
   # Disabled since 2026-07-21: maximising plain gross margin ignores risk, and risk is the
@@ -179,6 +193,7 @@ objectives:
   # AVERS is computed in-memory from the TYPE_EXPL/TYPE_EXPL_Bis cascade
   # (domain/farm_typology.py) rather than read from data/tables/Avers.txt (a uniform,
   # unvalidated stub); its eight coefficients match OPTIMISATION.txt:1745-1754 exactly.
+  # WHICH type a farm gets depends on `farm_typology.method` above.
   - name: maximize_risk_adjusted_gross_margin  # Markowitz: margin minus AVERS-weighted yield variance
     enable: true
     args: {}

@@ -12,8 +12,9 @@ The status board (`docs/status/STATUS.md`) lists every config entry with the GAM
 ports, read from its label or its config comment and checked against the sources; this page
 keeps the reasoning behind each line.
 
-Last updated: 2026-10-02 (the irrigation flag GAMS rewrites in `ENTREES.txt:136-159` is now
-ported). 2026-09-22: English translation; the chlordecone rows were inverted, the
+Last updated: 2026-10-06 (the farm typology gets a corrected share denominator by default,
+GAMS's own kept as an option). 2026-10-02: the irrigation flag GAMS rewrites in
+`ENTREES.txt:136-159` is now ported. 2026-09-22: English translation; the chlordecone rows were inverted, the
 `Eq_*_SUPP` suppressions were described as implicit although they have been explicit rules
 since 2026-07-21, and the CF price tables are now read.
 
@@ -133,7 +134,7 @@ plots. Removing them also drops ~350 000 decision variables.
 | Equation | Role | Status | Python location |
 |---|---|---|---|
 | Gross margin | Sum of margin/ha x area | ported, **disabled** | `maximize_gross_margin`. Without the risk term the model covers the island with market gardening: territorial PAD 193 %. |
-| Risk-adjusted margin | Margin x (1 − `AVERS` x `Var_Rdt_Cult`) | ported, **active by default** | `maximize_risk_adjusted_gross_margin` — the objective of GAMS's actual solves (`Eq_REV_MARKOVITZ`). `AVERS` is computed in memory from the `TYPE_EXPL` cascade (8 coefficients, `OPTIMISATION.txt:1745-1754`), not read from the `Avers.txt` stub. `Var_Rdt_Cult` is a **fraction of margin loss**, neither a variance nor a coefficient of variation: the penalty is linear in area — `docs/04-vigilance.md` D.4. |
+| Risk-adjusted margin | Margin x (1 − `AVERS` x `Var_Rdt_Cult`) | ported, **active by default** | `maximize_risk_adjusted_gross_margin` — the objective of GAMS's actual solves (`Eq_REV_MARKOVITZ`). `AVERS` is computed in memory from the `TYPE_EXPL` cascade (8 coefficients, `OPTIMISATION.txt:1745-1754`), not read from the `Avers.txt` stub. **The type itself is no longer GAMS's by default**: `farm_typology.method: cultivated_area` replaces the `SURF_CUL − SURF_NON` denominator since 2026-10-06, and `gams` (pinned by the parity runs) keeps it — `docs/04-vigilance.md` D.6. `Var_Rdt_Cult` is a **fraction of margin loss**, neither a variance nor a coefficient of variation: the penalty is linear in area — `docs/04-vigilance.md` D.4. |
 
 ## Fibre-cane block (CF)
 

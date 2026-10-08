@@ -134,8 +134,10 @@ items:
       (baseline-itk-gams-rules), 10.6 % and 15 % tighter. Since 2026-10-02 the irrigation
       flag is the one GAMS rewrites (baseline-irrigation-gams-rules), 479 plots more
       permissive; the only solve on it at the reference tolerance returned its warm-start
-      seed unchanged (docs/04-vigilance.md G.10). references.yaml still guards the old
-      figures. Regenerate, then update `expect:` and docs/04-vigilance.md E and G.10.
+      seed unchanged (docs/04-vigilance.md G.10). Since 2026-10-06 the default farm typology
+      is no longer GAMS's (farm-typology-denominator): calib_selected changes aversion on
+      426 farms, calib_gams_parity pins the GAMS method. references.yaml still guards the
+      old figures. Regenerate, then update `expect:` and docs/04-vigilance.md E, D.6 and G.10.
   - id: baseline-itk-gams-rules
     title: Fine ITK of each observed plot by the GAMS rules (Matrice_Parc_Cult), replacing representative crops
     status: done
@@ -154,6 +156,16 @@ items:
       Ported and checked against the GAMS allocation without a solve; measured once, on a
       0.1 % gap run stopped at its time limit, where it is confounded with the tolerance
       (docs/04-vigilance.md G.10). See regenerate-reference-runs.
+  - id: farm-typology-denominator
+    title: Farm typology on crops + fallow instead of GAMS's SURF_CUL - SURF_NON
+    status: done
+    area: calibration
+    since: 2026-10-06
+    left: >-
+      Default since 2026-10-06, GAMS's method kept as `farm_typology.method: gams`
+      (docs/04-vigilance.md D.6). Measured once on the CALIB block
+      (calib_typology_cultivated_area, not proven optimal); calib_selected and the
+      prospective thresholds are still on the GAMS typology.
   - id: farm-banana-quota
     title: Per-farm export-banana delivery right (Eq_BA_QUOTA_Expl)
     status: done

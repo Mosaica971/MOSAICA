@@ -89,6 +89,21 @@ parameters:
     reason: The recalibration lowers the PAD with coefficients that make no agronomic sense.
     vigilance: E.5
 
+  - id: farm_typology_method
+    name: Share denominator of the farm typology (TYPE_EXPL)
+    config: farm_typology.method
+    unit: "-"
+    candidates:
+      - {value: gams, source: "OPTIMISATION.txt:1501-1526, SURF_CUL - SURF_NON: NC taken off a total that never held it"}
+      - {value: cultivated_area, source: "crops + fallow, NC left out; a fallow-only farm is 'diversified'"}
+    retained: cultivated_area
+    status: retained
+    reason: >-
+      Deliberate deviation from GAMS (2026-10-06): its denominator gives shares above 100 %
+      on farms with NC plots and negative ones on farms with more NC than crops. The type
+      fixes the aversion, so the objective changes; the parity runs pin `gams`.
+    vigilance: D.6
+
   - id: objective
     name: Objective function
     config: objectives[name=maximize_risk_adjusted_gross_margin].enable

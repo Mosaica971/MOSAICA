@@ -56,18 +56,20 @@ Breakdowns: `csv/reference_surface_by_region.csv`, `_by_island.csv`,
 
 Row-marginal of every confusion matrix, and source of each farm's risk-aversion
 coefficient (AVERS) in the Markowitz objective: part of the reference, not a result.
+Typed with `farm_typology.method: cultivated_area`
+(see docs/04-vigilance.md D.6 for what the method changes).
 
 | Type | Label | Farms | Share | Area (ha) | AVERS |
 |---|---|---:|---:|---:|---:|
 | 0 | No cultivated area | 50 | 1.1 % | 161 | 0.00 |
-| 1 | Fruit growers | 67 | 1.4 % | 263 | 1.30 |
-| 2 | Banana growers | 146 | 3.1 % | 2 520 | 1.20 |
-| 3 | Specialised cane growers | 1 371 | 29.6 % | 7 954 | 0.30 |
-| 4 | Diversified cane growers | 862 | 18.6 % | 4 938 | 0.50-1.60 |
-| 5 | Diversified | 282 | 6.1 % | 2 236 | 0.55 |
-| 6 | Livestock farmers | 1 047 | 22.6 % | 4 555 | 2.40 |
-| 7 | Market gardeners | 216 | 4.7 % | 861 | 0.00 |
-| 8 | Cane and livestock farmers | 597 | 12.9 % | 2 649 | 2.30 |
+| 1 | Fruit growers | 69 | 1.5 % | 260 | 1.30 |
+| 2 | Banana growers | 166 | 3.6 % | 2 788 | 1.20 |
+| 3 | Specialised cane growers | 1 226 | 26.4 % | 6 717 | 0.30 |
+| 4 | Diversified cane growers | 935 | 20.2 % | 5 802 | 0.50-1.60 |
+| 5 | Diversified | 276 | 6.0 % | 1 995 | 0.55 |
+| 6 | Livestock farmers | 1 037 | 22.4 % | 4 480 | 2.40 |
+| 7 | Market gardeners | 204 | 4.4 % | 663 | 0.00 |
+| 8 | Cane and livestock farmers | 675 | 14.6 % | 3 270 | 2.30 |
 
 ## 4. What the reference cannot say
 

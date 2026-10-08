@@ -146,3 +146,83 @@ def test_avers_falls_back_to_the_type_4_base_value_when_bis_is_unset():
     assert aversion["E3"] == 1.40  # fallback, not NaN
     assert aversion["E4"] == 2.40
     assert aversion.notna().all()
+
+
+def _one_farm(plots):
+    """(farm_plots, base_crop_group, plot_surface_ha) for one farm of (group, area_ha) plots."""
+    names = [f"P{i}" for i in range(len(plots))]
+    groups = pd.Series({name: group for name, (group, _area) in zip(names, plots)})
+    surface = {name: area for name, (_group, area) in zip(names, plots)}
+    return {"FARM": names}, groups, surface
+
+
+# (plots, type under "gams", type under "cultivated_area") -- the farms on which the two
+# share denominators part ways. GAMS divides by SURF_CUL - SURF_NON, i.e. crops minus the
+# NC area; "cultivated_area" by crops + fallow.
+_DENOMINATOR_SCENARIOS = {
+    # NC inflates every GAMS share: cane 5/(8-4) = 1.25 -> type 3; 5/8 = 0.625 -> type 4.
+    "nc_inflates_the_cane_share": ([("CS", 5.0), ("MA", 3.0), ("NC", 4.0)], 3, 4),
+    # More NC than crops: GAMS denominator 2-3 = -1, every share <= 0 -> catch-all type 5.
+    # Without the NC, the farm is plainly all cane.
+    "more_nc_than_crops": ([("CS", 2.0), ("NC", 3.0)], 5, 3),
+    # Fallow is taken out by GAMS (cane 6/6 = 1.0 -> type 3) and counted in by the other
+    # (6/10 = 0.6, under every threshold -> type 5).
+    "fallow_counts_as_worked_land": ([("CS", 6.0), ("JA", 4.0)], 3, 5),
+    # No NC, no fallow: same denominator, same type.
+    "identical_without_nc_or_fallow": ([("PN", 4.0), ("CS", 3.0), ("AN", 3.0)], 8, 8),
+    # Nothing cultivated at all stays type 0 either way.
+    "no_cultivated_area": ([("NC", 2.0)], 0, 0),
+}
+
+
+@pytest.mark.parametrize(
+    "plots, gams_type, cultivated_type", _DENOMINATOR_SCENARIOS.values(),
+    ids=_DENOMINATOR_SCENARIOS.keys(),
+)
+def test_the_two_share_denominators(plots, gams_type, cultivated_type):
+    farm_plots, groups, surface = _one_farm(plots)
+
+    by_gams, _ = compute_farm_type(farm_plots, groups, surface, method="gams")
+    by_area, _ = compute_farm_type(farm_plots, groups, surface, method="cultivated_area")
+
+    assert by_gams["FARM"] == gams_type
+    assert by_area["FARM"] == cultivated_type
+
+
+def test_default_method_is_the_gams_denominator():
+    """Callers that name no method -- and configs written before the option existed --
+    must keep getting GAMS's shares."""
+    farm_plots, groups, surface = _one_farm([("CS", 2.0), ("NC", 3.0)])
+
+    assert compute_farm_type(farm_plots, groups, surface)[0]["FARM"] == 5
+
+
+def test_unknown_typology_method_is_rejected():
+    from case_studies.guadeloupe.domain.farm_typology import typology_method_from_config
+
+    farm_plots, groups, surface = _one_farm([("CS", 1.0)])
+
+    with pytest.raises(ValueError, match="cultivated"):
+        compute_farm_type(farm_plots, groups, surface, method="cultivated")
+    with pytest.raises(ValueError, match="farm_typology.method"):
+        typology_method_from_config({"farm_typology": {"method": "cultivated"}})
+    assert typology_method_from_config({}) == "gams"
+    assert typology_method_from_config({"farm_typology": {"method": "cultivated_area"}}) == (
+        "cultivated_area"
+    )
+
+
+@pytest.mark.parametrize("method", ["gams", "cultivated_area"])
+@pytest.mark.parametrize(
+    "plots", [[("JA", 2.0)], [("JA", 2.0), ("NC", 1.0)]], ids=["fallow", "fallow_and_nc"]
+)
+def test_a_fallow_only_farm_is_diversified(method, plots):
+    """It holds land it works (fallow), so it is not type 0, and no crop, so every share is
+    zero and the cascade ends on its last branch. Deliberately nothing looks at what the
+    farm grew before -- neither the year before nor the observed type."""
+    farm_plots, groups, surface = _one_farm(plots)
+
+    farm_type, secondary = compute_farm_type(farm_plots, groups, surface, method=method)
+
+    assert farm_type["FARM"] == 5
+    assert compute_risk_aversion(farm_type, secondary)["FARM"] == pytest.approx(0.55)

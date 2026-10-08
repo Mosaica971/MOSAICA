@@ -485,6 +485,59 @@ GAMS iterates `C_ORG = C_ORG + (inputs − outputs)` over several years. The Pyt
 single-year: only the **annual flow** is portable. A trajectory would need reallocating year
 after year — another project.
 
+### D.6 — Major — The farm typology divides by an area that takes NC off twice — **no longer ported by default** (2026-10-06) {#typologie}
+
+A farm's type (`TYPE_EXPL`) is read off its crop shares, and **its observed type fixes its
+risk aversion**, hence the objective. GAMS computes the shares over `SURF_CUL − SURF_NON`
+(OPTIMISATION.txt:1501-1526). `SURF_CUL` sums `SC_CULTIV`, which holds fallow but **not** NC;
+`SURF_NON` is fallow + NC. The net is the productive area **minus the NC area, which was never
+in it**. On the 2017 reference: 1 051 farms have NC plots and inflated shares, 819 have shares
+summing **above 100 %**, and 148 cultivated farms have a denominator ≤ 0 — every share ≤ 0, so
+they fall into the catch-all "diversified" type (aversion 0.55) whatever they grow.
+
+-> `farm_typology.method` in `config.yaml` chooses. **`gams`** is the GAMS formula to the
+letter, and what a config without the section means (every run written before 2026-10-06).
+**`cultivated_area`, the default since**, divides by crops + fallow and leaves NC out. A farm
+holding **only fallow** has every share at zero and is "diversified" (5) under both methods,
+observed or simulated: by decision, nothing looks at what it grew before — neither the year
+before nor its observed type. (GAMS itself keeps the earlier type on a simulated allocation, by
+accident: on a zero denominator it does not reassign the shares, so those of the previous
+iteration survive. Not reproduced.) The parity runs (`calib_gams_parity`,
+`calib_gams_parity_prices`) pin `gams`.
+
+What the default changes on the reference, measured without a solve: **426 farms change type**
+(3 817 ha, 0.56 Mh of labour budget), 298 towards a higher aversion and 128 towards a lower
+one. Specialised cane growers 1 371 -> 1 226, diversified cane growers 862 -> 935, cane and
+livestock 597 -> 675, banana growers 146 -> 166, diversified 282 -> 276; no share above 100 %
+and no non-positive denominator remain. The 12 farms observed entirely in fallow stay
+"diversified". Labour budgets and eligibility do not move.
+
+**Two things to keep in mind.** Fallow now *dilutes* the shares: a farm with 6 ha of cane and
+4 ha of fallow was a specialised cane grower for GAMS (6/6) and is "diversified" here (6/10).
+And every run on disk but one, and the thresholds of the prospective policies measured on
+them, rest on the GAMS typology. The coefficients themselves were set iteratively in GAMS
+(OPTIMISATION.txt:1741), on its own types.
+
+**One solve on the new aversions** (`calib_typology_cultivated_area`, 2026-10-06): the CALIB
+block, same seed and same settings as `calib_gams_parity_prices_gap01_long` (0.1 % gap,
+stopped on its limit at 0.37 %, not proven), so the typology is the only difference. Against
+the observation: territorial PAD 4.58 -> **4.20 %**, plots with the right crop 70.4 -> 71.1 %,
+farms under the PAD threshold 3 313 -> 3 356; cane 12 989 -> 12 792 ha (observed 12 813),
+banana 1 729 -> 1 788 (1 921), yam 294 -> 246 (145), grassland 6 078 -> 6 243 (6 109). Going
+the wrong way: melon 244 -> 302 ha (189) and pineapple 151 -> 196 (133). Against **GAMS** it
+moves away, as it must — the summed gap over the fine crops goes 469 -> 961 ha: it is no
+longer the same model. **The "farm types" score is not comparable across methods** (87.7 % on
+the GAMS types, 86.7 % on these); of the 426 farms the method retyped, only 66 % keep their
+new type after calibration, against 89 % of the others.
+
+**Checked against GAMS before deviating** (listing of a GAMS 24.7.4 run, 2026-09-30): the
+`gams` method reproduces GAMS's own reference — same fine ITK on all 24 734 plots of
+`SOLVE INIT`, and the aversion recovered from the per-farm `REV_MARKOVITZ` levels equal on the
+2 753 farms where it can be recovered. GAMS's displayed type counts after calibration are
+reproduced to the unit once two of its conventions are followed: a plot left empty is empty,
+not NC (Python's `gams` report counts it as NC), and the stale shares above (8 farms entirely
+in fallow after calibration, 2 of which keep a cane type in GAMS and read "diversified" here).
+
 ---
 
 ## E. Calibration: what the model is compared with {#calibration}

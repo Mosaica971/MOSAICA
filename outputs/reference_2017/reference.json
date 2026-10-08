@@ -28,14 +28,14 @@
   "fallow_reclassified_to_nc_ha": 1208.1299999999999,
   "farm_types": {
     "No cultivated area": 50,
-    "Fruit growers": 67,
-    "Banana growers": 146,
-    "Specialised cane growers": 1371,
-    "Diversified cane growers": 862,
-    "Diversified": 282,
-    "Livestock farmers": 1047,
-    "Market gardeners": 216,
-    "Cane and livestock farmers": 597
+    "Fruit growers": 69,
+    "Banana growers": 166,
+    "Specialised cane growers": 1226,
+    "Diversified cane growers": 935,
+    "Diversified": 276,
+    "Livestock farmers": 1037,
+    "Market gardeners": 204,
+    "Cane and livestock farmers": 675
   },
   "pad_floor_pct": 0.8539744057911633,
   "irreproducible_area_ha": 201.34999999999994,

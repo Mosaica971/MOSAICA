@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,gross_margin,subventions,fte,production_t,surface_ha,nitrogen_kg,tfi,ghg_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+calib_typology_cultivated_area,,,maxTimeLimit,77756309.08013366,95721182.11,68273263.9,3294.25,881216.8,23519.45,1783020.53,63992.29,185441781.35,41777901.6,0.05,0.11,4.2,22103,54451.4,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\calib_typology_cultivated_area,

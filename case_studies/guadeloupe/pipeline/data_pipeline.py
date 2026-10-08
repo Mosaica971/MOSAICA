@@ -23,6 +23,7 @@ from case_studies.guadeloupe.domain.farm_typology import (
     compute_risk_aversion,
     compute_base_crop_group,
     compute_farm_type,
+    typology_method_from_config,
 )
 from case_studies.guadeloupe.domain import agroecology, rpest, soil_carbon, water
 from case_studies.guadeloupe.domain.baseline_itk import (
@@ -176,6 +177,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     year: str = data_cfg.get("year", DEFAULT_YEAR)
     scenario: str = data_cfg.get("scenario", DEFAULT_SCENARIO)
     _validate_data_selection(year, scenario)
+    typology_method = typology_method_from_config(config)
 
     # Optional per-crop economic shocks (price / subsidy multipliers). Absent => no-op,
     # so the baseline economics are unchanged. Used by scenario batches (scenarios.yaml)
@@ -316,7 +318,11 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     # Matrice_Parc_Cult: the fine ITK GAMS assigns each observed plot (ENTREES.txt:299-457).
     # Every observed-side rate -- labour budget, banana reference, input indicators -- reads it.
     baseline_fine_crop = assign_baseline_itk(plot_data, base_crop_group)
-    farm_type, farm_type_secondary = compute_farm_type(farm_plots, base_crop_group, plot_surface)
+    # The observed typology fixes each farm's risk aversion, hence the objective. `method`
+    # is GAMS's own share denominator or the corrected one (domain/farm_typology.py).
+    farm_type, farm_type_secondary = compute_farm_type(
+        farm_plots, base_crop_group, plot_surface, method=typology_method
+    )
     farm_risk_aversion = compute_risk_aversion(farm_type, farm_type_secondary)
 
     attribute_bounds = attribute_bounds_from_config(config["eligibility_criteria"])
@@ -472,6 +478,10 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
         # reporting both need to know what a plot was before the solver touched it.
         "base_crop_group": base_crop_group,
         "baseline_fine_crop": baseline_fine_crop,
+        # The observed typology the aversion is read off, exposed so that reporting types
+        # the reference with what the solve used rather than recomputing it its own way.
+        "farm_type": farm_type,
+        "farm_type_secondary": farm_type_secondary,
         "farm_risk_aversion": farm_risk_aversion,
         "farm_surface_ha": farm_surface_ha,
         "farm_plots": farm_plots,

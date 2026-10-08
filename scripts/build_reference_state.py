@@ -51,9 +51,8 @@ from case_studies.guadeloupe.domain import crop_families
 from case_studies.guadeloupe.domain.baseline_itk import AGGREGATE_GROUPS
 from case_studies.guadeloupe.domain.farm_typology import (
     FARM_TYPE_LABELS,
-    compute_risk_aversion,
     compute_base_crop_group,
-    compute_farm_type,
+    typology_method_from_config,
 )
 from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
 from case_studies.guadeloupe.reporting import indicators
@@ -168,11 +167,10 @@ def surface_by_group_and_key(
 def farm_typology_table(dataset: Dataset) -> pd.DataFrame:
     """Observed farm-type distribution: the row-marginal of every confusion matrix, and the
     table that fixes each farm's risk aversion (AVERS) in the Markowitz objective."""
-    plot_data = dataset.parameters["plot_data"]
-    farm_type, type_bis = compute_farm_type(
-        dataset.parameters["farm_plots"], _resolved_groups(plot_data), plot_data["SURF_HA"]
-    )
-    aversion = compute_risk_aversion(farm_type, type_bis)
+    # Read off the dataset, not recomputed: the typology method is a config choice
+    # (farm_typology.method) and the reference must show the types the solve is given.
+    farm_type = dataset.parameters["farm_type"]
+    aversion = dataset.parameters["farm_risk_aversion"].reindex(farm_type.index)
     farm_surface = dataset.parameters["farm_surface_ha"]
 
     frame = pd.DataFrame(
@@ -633,6 +631,8 @@ def _render_markdown(reference: Reference, summary: dict[str, Any]) -> str:
         "",
         "Row-marginal of every confusion matrix, and source of each farm's risk-aversion",
         "coefficient (AVERS) in the Markowitz objective: part of the reference, not a result.",
+        f"Typed with `farm_typology.method: {typology_method_from_config(reference.config)}`",
+        "(see docs/04-vigilance.md D.6 for what the method changes).",
         "",
         "| Type | Label | Farms | Share | Area (ha) | AVERS |",
         "|---|---|---:|---:|---:|---:|",

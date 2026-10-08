@@ -41,8 +41,16 @@ runs:
       - bc_quota_max
       # Eq_PN_PROD_MIN: fodder-area floor. Lives in the SCENARIO block, not CALIB.
       - pn_prod_min
+    overrides:
+      # Parity means GAMS's own farm types, hence its own aversions: the share denominator
+      # of OPTIMISATION.txt:1501-1526, not the corrected default of config.yaml.
+      farm_typology.method: gams
 
   # --------------------------------------------------------------------------------------
+  # SINCE 2026-10-06 the two runs below also differ from `calib_gams_parity` by the farm
+  # typology (config.yaml `farm_typology.method: cultivated_area`, docs/04-vigilance.md D.6):
+  # the series no longer isolates the two market deviations from that third change. Pin
+  # `farm_typology.method: gams` on them to read it the old way.
   - name: calib_bc_only
     description: >-
       The INTERMEDIATE step: `bc_quota_max` alone, without the fodder floor. It only matters

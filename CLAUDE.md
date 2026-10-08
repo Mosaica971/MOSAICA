@@ -294,7 +294,10 @@ model behavior you usually edit the YAML, not the builder.
 2. `build_dataset(config)` (`case_studies/guadeloupe/pipeline/data_pipeline.py`) reads the `.set`/
    `.txt` tables, applies the `zone_filter`, computes economics (`domain/economics.py`:
    margin/sales/subsidy per ha per crop, e.g. `crop_margin_per_ha`), farm typology
-   (`domain/farm_typology.py`: base crop group → `TYPE_EXPL` farm type → risk aversion `AVERS`),
+   (`domain/farm_typology.py`: base crop group → `TYPE_EXPL` farm type → risk aversion `AVERS`;
+   the share denominator is `farm_typology.method` — `cultivated_area` by default since
+   2026-10-06, a deliberate deviation, `gams` pinned by the parity runs and meant by any config
+   without the section — vigilance D.6),
    and the plot×crop **eligibility mask** (`core/data/eligibility.py` numeric bounds +
    `categorical_rules`). Returns a `Dataset(sets, parameters, scalars)`; the raw GAMS tables are
    `plot_data`, `crop_data`, `operation_data`, `crop_operation_matrix`, `crop_price`,
