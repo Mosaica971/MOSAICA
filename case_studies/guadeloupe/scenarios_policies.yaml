@@ -83,6 +83,10 @@ policies:
 
   # --- Accelerationist pole --------------------------------------------------------------
 
+  - name : no_limit_on_labour
+    set_args:
+      - {label: labor_max_farm, args: {slack: 100.0}}
+
   - name: P1_full_deregulation
     description: >-
       EXTREME BOUND. The market alone: no subsidy, no quota, no agronomic obligation, and a
