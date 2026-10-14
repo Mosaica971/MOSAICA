@@ -218,9 +218,10 @@ for free and redeploy the livestock farmer's labour elsewhere. If your territory
 `baseline_inertia_min` is a crude proxy.
 
 **4. The granularity of the observed baseline.** If your history only encodes the crop at an
-aggregate level, every "input" indicator rests on an **assumption** of representative variant —
-and that assumption contaminates the labour ceiling, hence the optimum. Make it configurable and
-documented from the start.
+aggregate level, every "input" indicator rests on an **assumption** about which fine variant
+each plot ran — and that assumption contaminates the labour ceiling, hence the optimum. Prefer
+rules on the plot's attributes, as GAMS does (`case_studies/guadeloupe/domain/baseline_itk.py`),
+to one representative per group, and document them from the start.
 
 **5. The size of the problem.** Beyond ~309 000 binaries, HiGHS no longer finds a good incumbent
 unaided and a solve can return a **provably wrong** result (see

@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,gross_margin,subventions,fte,production_t,surface_ha,nitrogen_kg,tfi,ghg_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+no_limit_on_labour__F0_nominal,no_limit_on_labour,F0_nominal,optimal,211759785.00511345,304910742.64,31775019.8,11289.02,384756.88,23570.85,2505799.21,134926.98,159407646.84,156159223.2,0.11,0.25,114.25,22189,191.3,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\no_limit_on_labour_f0_nominal,

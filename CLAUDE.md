@@ -208,7 +208,7 @@ run is scored against, built as a standalone artifact rather than only as a run'
 `outputs/reference_2017/REFERENCE.md` documents how it is built and — more usefully — what it
 cannot say: the observed side has no fine crops (hence the low/high bracket on every indicator),
 and part of the observed acreage is unreproducible by construction (a floor under the PAD).
-Rebuild it whenever `config.yaml` changes year, `zone_filter` or `baseline_representative_crops`.
+Rebuild it whenever `config.yaml` changes year or `zone_filter`, or `domain/baseline_itk.py` changes.
 Its keys are English since 2026-09-22; the last French-keyed copy is
 `outputs/_legacy_reference_2017_fr/` (read by the thesis tooling).
 
@@ -254,13 +254,13 @@ tables; `core/reporting/` writes run folders and computes robustness over a grid
 
 `case_studies/guadeloupe/` is organized by role — `pipeline/` (`data_pipeline.py`), `domain/`
 (per-crop science: `economics`, `environment`, `water`, `soil_carbon`, `resilience`,
-`farm_typology`, `crop_labels`, `crop_families`, `zones`, `agroecology`, `rpest`, `geometry`,
-`itk`), `model/` (`model.py`, `constraints.py`), `reporting/` (`indicators`, `calibration`,
+`farm_typology`, `crop_labels`, `crop_families`, `baseline_itk`, `zones`, `agroecology`, `rpest`,
+`geometry`, `itk`), `model/` (`model.py`, `constraints.py`), `reporting/` (`indicators`, `calibration`,
 `report`, `plots`, `status`), `status/` (the YAML catalogues of the status board), and
 `legacy_names.py`. Note `model/model.py`: the module is `case_studies.guadeloupe.model.model`, and
 importing only the *package* does not register the case-study constraints (see below).
 `config.yaml`, `scenarios.yaml`, `plan.yaml` with its three catalogues, `crop_groups.yaml`,
-`references.yaml` and the `scenarios_calibration*.yaml` / `scenarios_labor.yaml` specs stay at
+`references.yaml` and the `scenarios_calibration*.yaml` specs stay at
 the case-study root.
 
 `apps/dashboard/` is the read-only Streamlit viewer. It lives **outside** `case_studies/` because
@@ -294,7 +294,10 @@ model behavior you usually edit the YAML, not the builder.
 2. `build_dataset(config)` (`case_studies/guadeloupe/pipeline/data_pipeline.py`) reads the `.set`/
    `.txt` tables, applies the `zone_filter`, computes economics (`domain/economics.py`:
    margin/sales/subsidy per ha per crop, e.g. `crop_margin_per_ha`), farm typology
-   (`domain/farm_typology.py`: base crop group → `TYPE_EXPL` farm type → risk aversion `AVERS`),
+   (`domain/farm_typology.py`: base crop group → `TYPE_EXPL` farm type → risk aversion `AVERS`;
+   the share denominator is `farm_typology.method` — `cultivated_area` by default since
+   2026-10-06, a deliberate deviation, `gams` pinned by the parity runs and meant by any config
+   without the section — vigilance D.6),
    and the plot×crop **eligibility mask** (`core/data/eligibility.py` numeric bounds +
    `categorical_rules`). Returns a `Dataset(sets, parameters, scalars)`; the raw GAMS tables are
    `plot_data`, `crop_data`, `operation_data`, `crop_operation_matrix`, `crop_price`,
@@ -461,9 +464,22 @@ employment floor. `zone_indicator_bound` holds the same bound per island/region/
 `baseline_inertia_min` requires a share of allocated area to stay in its observed 2017 group. Two
 traps: `ModelInputs.plot_weights` exists because rates are per-crop while water is only drawn on
 irrigable plots (a bound without `plot_weight: irrigable` counts 56 Mm³ where the report says
-35); and an **employment floor above the labour cap is infeasible** — `farm_labor_hours_max`
-grants 3 891 FTE at `slack: 1.0`, so any floor above that must raise the slack in the same
+40); and an **employment floor above the labour cap is infeasible** — `farm_labor_hours_max`
+grants 3 480 FTE at `slack: 1.0`, so any floor above that must raise the slack in the same
 scenario (and raising it is not sufficient either — vigilance B.4).
+
+**The observed 2017 side is priced through GAMS's `Matrice_Parc_Cult`.** The RPG only knows 12
+aggregate groups, whose codes carry no rate; `domain/baseline_itk.assign_baseline_itk` ports the
+GAMS rules (ENTREES.txt:299-457) that give each observed plot its fine ITK from its island,
+region, slope, farm size, irrigation and soil. The per-farm labour budget (`MO_Expl_init`), the
+per-farm banana reference and every input-side indicator read that `baseline_fine_crop`
+parameter; it reproduces GAMS's `MO_Expl_init` to 0.001 h per farm. It replaced (2026-09-28)
+one representative crop per group, 11 % looser on labour — runs written before carry that basis
+(vigilance C.2, B.4). **`IRRIG_PARC` is not the file's column either**: GAMS raises it to 1 where
+the observed crop implies water (ENTREES.txt:136-159), and
+`baseline_itk.assume_baseline_irrigation` does the same before the ITK rules, the eligibility
+mask and the `irrigable` weight read it (since 2026-10-02; earlier runs read the raw
+irrigation-network map — vigilance G.10).
 
 **Eligibility** is a boolean plot×crop matrix: numeric attribute bounds (altitude, slope,
 rainfall, plot size) intersected with `categorical_rules` (irrigation, soil type, region bans,

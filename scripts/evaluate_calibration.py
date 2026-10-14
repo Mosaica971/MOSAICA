@@ -53,8 +53,9 @@ def load_run_config(run_dir: Path) -> dict:
     components that no longer exist in the registry -- output_12 references the
     `melon_soil_restriction` categorical rule, dropped in the 2026-07-21 refactor -- and
     build_dataset would raise on it. Nothing the overlay leaves behind matters here: the
-    calibration metrics need the plot universe (zone_filter), the economic year/scenario
-    and the thresholds, never the eligibility mask, the constraints or the objective.
+    calibration metrics need the plot universe (zone_filter), the economic year/scenario,
+    the typology method the run's farm types were set with (farm_typology) and the
+    thresholds, never the eligibility mask, the constraints or the objective.
     """
     config = load_config(CONFIG_PATH)
     path = run_dir / "config_used.yaml"
@@ -62,9 +63,11 @@ def load_run_config(run_dir: Path) -> dict:
         return config
 
     run_config = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    for key in ("zone_filter", "data"):
+    for key in ("zone_filter", "data", "farm_typology"):
         # Popping matters as much as setting: the current config may carry a zone_filter
-        # the run did not have, which would silently score it on a subset.
+        # the run did not have, which would silently score it on a subset -- and a run
+        # written before `farm_typology` existed was typed the GAMS way, which is what an
+        # absent section means.
         if key in run_config:
             config[key] = run_config[key]
         else:

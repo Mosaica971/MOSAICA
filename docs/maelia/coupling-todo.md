@@ -41,7 +41,7 @@ Agricultural module only at first (`executerModeleHydrographique = FALSE`,
 |---|---|---|---|---|
 | I.1a | source of `RENDEMENT_OPTIMAL` (M.1) | Agreste yields, Chopin et al. Table 1, experts, MAELIA calibration on observed yields | S, C | D, E |
 | I.1b | how perennials are simulated (M.2) | a MAELIA mechanism if it exists; else cane as a looping sequence `plantation_ratoon_ratoon…`, banana/orchards as a repeated annual species | MT | I.3 |
-| I.1c | AqYield or AqYieldNC | NC gives nitrogen but **drops grassland** (M.2) | C, MT | I.3, E.2 |
+| I.1c | AqYield or AqYieldNC | NC gives nitrogen; grassland follows through HerbSimNC (README § 0), so the choice no longer costs grassland | C, MT | I.3, E.2 |
 | I.1d | plot referential (M.6, spec §5.1) | rebuild MOSAICA's plot set keyed on RPG ids **(recommended)**, or keep the farm-signature join | C, S | I.6, E.3 |
 | I.1e | static or dynamic plan (spec §5.2) | a: one-token `SEQUENCE` repeated; b: MOSAICA's crop then a rotation; c: MAELIA decides | S | E |
 | I.1f | pilot crops | one annual crop with the most ✓ in crop-parameters.md (yam `IG_PLA`, melon `ME`), then cane (largest area, perennial) | C | I.3 |

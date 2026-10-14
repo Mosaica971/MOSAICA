@@ -229,22 +229,34 @@ def test_compute_revenue_by_farm_sums_sales_plus_subsidy_weighted_by_surface():
     assert result["E2"] == pytest.approx(5200.0)
 
 
-def test_decode_baseline_representative_allocation_substitutes_aggregates():
+def test_decode_baseline_fine_allocation_reads_the_gams_itk_on_the_cultivated_plots():
     dataset = _small_dataset()
-    config = {"baseline_representative_crops": {"CS": "CS_BT_NISM"}}
+    # What the pipeline stores: one fine ITK per plot, NC left as NC.
+    dataset.parameters["baseline_fine_crop"] = pd.Series(
+        {"P1": "CS_BT_NIM", "P2": "CS_EGT_NIM", "P3": "ME", "P4": "NC", "P5": "CS_MG_NISM",
+         "P6": "ME"}
+    )
 
-    result = indicators.decode_baseline_representative_allocation(dataset, config)
+    result = indicators.decode_baseline_fine_allocation(dataset)
 
-    # baseline groups P1/P2/P5=CS, P3/P6=ME, P4=NC(dropped); CS -> rep, ME kept (unmapped)
+    # Same plots as decode_baseline_allocation: P4 (NC) is dropped.
     assert result.to_dict() == {
-        "P1": "CS_BT_NISM", "P2": "CS_BT_NISM", "P3": "ME", "P5": "CS_BT_NISM", "P6": "ME",
+        "P1": "CS_BT_NIM", "P2": "CS_EGT_NIM", "P3": "ME", "P5": "CS_MG_NISM", "P6": "ME",
     }
 
 
-def test_decode_baseline_representative_allocation_keeps_unmapped_families():
-    result = indicators.decode_baseline_representative_allocation(_small_dataset(), {})
+def test_decode_baseline_fine_allocation_drops_a_plot_no_rule_assigned():
+    """GAMS leaves such a plot with no ITK at all; it must not surface as a NaN crop."""
+    dataset = _small_dataset()
+    dataset.parameters["baseline_fine_crop"] = pd.Series(
+        {"P1": "CS_BT_NIM", "P2": float("nan"), "P3": "ME", "P4": "NC", "P5": "CS_MG_NISM",
+         "P6": "ME"}
+    )
 
-    assert set(result.unique()) == {"CS", "ME"}  # no mapping -> aggregates unchanged
+    result = indicators.decode_baseline_fine_allocation(dataset)
+
+    assert "P2" not in result.index
+    assert result.notna().all()
 
 
 def test_compute_economic_totals_sums_production_subsidy_revenue_and_etp():

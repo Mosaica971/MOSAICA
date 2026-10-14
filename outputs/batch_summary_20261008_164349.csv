@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,gross_margin,subventions,fte,production_t,surface_ha,nitrogen_kg,tfi,ghg_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+no_limit_on_labour_gams_aligned,,,optimal,238568764.90682057,331241671.13,27336955.07,12900.29,437345.33,23307.26,3055558.89,155125.09,144122995.32,178952937.6,0.08,0.31,119.18,21976,32.6,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\no_limit_on_labour_gams_aligned,

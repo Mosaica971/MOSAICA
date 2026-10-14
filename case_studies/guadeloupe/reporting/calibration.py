@@ -21,9 +21,11 @@ import pandas as pd
 
 from case_studies.guadeloupe.domain import crop_families
 from case_studies.guadeloupe.domain.farm_typology import (
+    DEFAULT_TYPOLOGY_METHOD,
     FARM_TYPE_LABELS,
     compute_base_crop_group,
     compute_farm_type,
+    typology_method_from_config,
 )
 from case_studies.guadeloupe.reporting import indicators
 from core.data.dataset import Dataset
@@ -277,36 +279,51 @@ def field_match_rate(dataset: Dataset, output_allocation: pd.Series) -> pd.DataF
     ]
 
 
-def _farm_type(dataset: Dataset, groups: pd.Series) -> pd.Series:
-    """farm -> TYPE_EXPL, for a plot -> base-group Series covering the full plot universe."""
-    plot_surface = dataset.parameters["plot_data"]["SURF_HA"]
+def _observed_farm_type(dataset: Dataset, method: str) -> pd.Series:
+    """farm -> type of the observed land use. The dataset's own when it carries it -- it is
+    what set the aversion the run was solved with -- and otherwise recomputed from
+    plot_data exactly as the pipeline does."""
+    parameters = dataset.parameters
+    if "farm_type" in parameters:
+        return parameters["farm_type"]
+    plot_data = parameters["plot_data"]
     farm_type, _bis = compute_farm_type(
-        dataset.parameters["farm_plots"], groups, plot_surface
+        parameters["farm_plots"],
+        compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"]),
+        plot_data["SURF_HA"],
+        method=method,
     )
     return farm_type
 
 
-def farm_type_confusion(dataset: Dataset, output_allocation: pd.Series) -> pd.DataFrame:
+def farm_type_confusion(
+    dataset: Dataset, output_allocation: pd.Series, method: str = DEFAULT_TYPOLOGY_METHOD
+) -> pd.DataFrame:
     """Farm scale, Chopin et al. Table 4: observed farm type x simulated farm type.
 
-    Both sides go through compute_farm_type, which needs the FULL plot universe: NC plots
-    feed surf_non, which is subtracted from the denominator of every PART_* share. Dropping
-    them -- as the NC-free baseline allocation does -- would shift the shares and could flip
-    a farm's type, so the observed side is recomputed here from plot_data and a plot the
-    solver left unallocated counts as NC, its agronomic meaning.
+    Both sides are typed by the same `method` (domain/farm_typology.TYPOLOGY_METHODS), on
+    the FULL plot universe. Under "gams" that matters twice: NC plots feed surf_non, which
+    is subtracted from the denominator of every PART_* share, so dropping them -- as the
+    NC-free baseline allocation does -- would shift the shares and could flip a farm's
+    type; and a plot the solver left unallocated counts as NC, its agronomic meaning.
+    Under "cultivated_area" NC is outside the shares altogether. Either way a farm the
+    solver left entirely in fallow comes out "diversified": no crop, no share.
 
     One asymmetry is deliberate: compute_base_crop_group returns NaN for an RPG code it
     does not map, and compute_farm_type drops those rows. That is what the pipeline already
     does for the observed side, so it is reproduced rather than "fixed" here.
     """
     plot_data = dataset.parameters["plot_data"]
-    observed = compute_base_crop_group(plot_data["cult_2016"], plot_data["cult_2017"])
+    observed_type = _observed_farm_type(dataset, method)
 
     simulated = pd.Series(crop_families.NON_CULTIVATED, index=plot_data.index)
     simulated.update(crop_families.base_groups_for(output_allocation))
+    simulated_type, _bis = compute_farm_type(
+        dataset.parameters["farm_plots"], simulated, plot_data["SURF_HA"], method=method
+    )
 
     codes = sorted(FARM_TYPE_LABELS)
-    confusion = pd.crosstab(_farm_type(dataset, observed), _farm_type(dataset, simulated))
+    confusion = pd.crosstab(observed_type, simulated_type)
     confusion = confusion.reindex(index=codes, columns=codes, fill_value=0).astype(int)
     confusion.index.name = "observed_type"
     confusion.columns.name = "simulated_type"
@@ -409,6 +426,8 @@ def evaluate(
         pad_by_crop=pad_by_crop(dataset, output_allocation, thresholds),
         pad_by_crop_and_region=pad_by_crop_and_region(dataset, output_allocation, thresholds),
         pad_by_farm=pad_by_farm(dataset, output_allocation, thresholds),
-        farm_type_confusion=farm_type_confusion(dataset, output_allocation),
+        farm_type_confusion=farm_type_confusion(
+            dataset, output_allocation, typology_method_from_config(config)
+        ),
         field_match=field_match_rate(dataset, output_allocation),
     )

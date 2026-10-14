@@ -53,8 +53,8 @@ def compute_revenue_concentration_hhi(revenue_by_crop: pd.Series) -> float:
     hitting one crop.
 
     Computed on revenue rather than gross margin on purpose: margin can be negative for a
-    crop (notably on the baseline side, where representative crops are not picked for
-    profitability), and shares that do not sum to 1 make the index meaningless. Revenue
+    crop (notably on the baseline side, where the GAMS rules assign ITKs by plot attributes,
+    not by profitability), and shares that do not sum to 1 make the index meaningless. Revenue
     (sales + subsidy) is always non-negative.
     """
     total = float(revenue_by_crop.sum())

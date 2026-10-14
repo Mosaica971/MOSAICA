@@ -92,10 +92,11 @@ if economics:
     ):
         col.metric(label, fmt.format(economics["output"][key]), delta=fmt.format(economics["delta"][key]))
     st.caption(
-        "Input = 2017 baseline priced per family: each family (cane, banana...) is valued "
-        "through a representative fine variant set in config `baseline_representative_crops` "
-        "(an assumption -- see docs/04-vigilance.md). The fine 2017 allocation was never "
-        "observed."
+        "Input = 2017 baseline priced per plot: each observed plot is valued through the fine "
+        "ITK the GAMS rules assign it from its island, region, slope, farm size, irrigation "
+        "and soil (`Matrice_Parc_Cult` -- an assumption, see docs/04-vigilance.md C.2; runs "
+        "before 2026-09-28 used one representative crop per family). The fine 2017 "
+        "allocation was never observed."
     )
 
 input_tab, output_tab = st.tabs(["Input (2017 baseline)", "Output (optimised allocation)"])
@@ -128,13 +129,13 @@ for tab, side in ((input_tab, "input"), (output_tab, "output")):
             st.caption("Shannon diversity by region")
             st.bar_chart(shannon_region.set_index(shannon_region.columns[0]))
 
-        # Per-crop economics + employment, available on both sides (input uses the
-        # representative baseline crops -- see the "economics" caption above).
+        # Per-crop economics + employment, available on both sides (input uses the GAMS
+        # baseline ITKs -- see the "economics" caption above).
         if side == "input":
             st.caption(
-                "Input side: each family is valued through its representative fine variant "
-                "(config `baseline_representative_crops`), the fine 2017 allocation never "
-                "having been observed (docs/04-vigilance.md)."
+                "Input side: each plot is valued through the fine ITK the GAMS rules assign "
+                "it (Matrice_Parc_Cult), the fine 2017 allocation never having been observed "
+                "(docs/04-vigilance.md C.2)."
             )
         for name, label in (
             (f"production_by_crop_{side}.csv", "Production by crop (t)"),

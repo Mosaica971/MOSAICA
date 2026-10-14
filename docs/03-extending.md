@@ -205,7 +205,7 @@ which is what puts it in the selector. The first alone wires nothing.
 
 **Two unit traps, both actually met**:
 - a per-crop rate cannot carry a dependence on the **plot**. Water is only drawn on irrigable
-  plots: without `plot_weight: irrigable`, a bound counts 56 Mm³ where the report says 35.
+  plots: without `plot_weight: irrigable`, a bound counts 56 Mm³ where the report says 40.
   Carbon has the same problem (the balance depends on the soil type).
 - **the threshold must be stated in the constraint's own terms, not read off `recap.json`.**
 

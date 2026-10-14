@@ -120,7 +120,6 @@ scenarios_policies.yaml           catalogue: what a public authority decides (P1
 scenarios_forcings.yaml           catalogue: what climate and markets impose (F0..F11)
 scenarios_pareto.yaml             catalogue: the epsilon-constraint sweeps
 scenarios_calibration*.yaml       regenerate the reference calibration runs and their variants
-scenarios_labor.yaml              two measurements of the per-farm labour budget
 references.yaml                   the three reference runs, with the justification of each choice
 legacy_names.py                   reads runs written before the 2026-09-22 English renaming
 status/indicator_catalog.yaml     every indicator and the levels it is reported at
@@ -146,6 +145,7 @@ map, which reads `data/gis/`).
 | `rpest.py` | Tixier's fuzzy tree — **the only indicator that depends on the (plot, crop) pair** |
 | `farm_typology.py` | base crop group -> `TYPE_EXPL` farm type -> risk aversion `AVERS` |
 | `crop_families.py` | folds the 84 fine crops onto the 12 observed RPG groups |
+| `baseline_itk.py` | the reverse: the fine ITK GAMS assigns each observed 2017 plot (`Matrice_Parc_Cult`), feeding the labour and banana caps and the input side |
 | `crop_labels.py` | readable English names, translated from `DESCRIPTION_SETS.txt` |
 | `zones.py` | island/region code normalisation and labels |
 | `geometry.py` | joins the RPG plot layer to the synthetic ids `P1..Pn` |

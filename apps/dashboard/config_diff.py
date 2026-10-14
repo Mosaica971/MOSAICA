@@ -12,7 +12,7 @@ The config is two very different kinds of thing, and this module keeps them apar
   What matters here is *which are on* and *with what thresholds*. A component that flips
   from disabled to enabled is the headline; a threshold that moves is the fine print.
 * **Scalars** -- everything else (`data.year`, `solver.mip_rel_gap`, `labor.cost_per_hour`,
-  the representative-crop mapping...). Compared as a flat dotted-key mapping.
+  `data.scenario`...). Compared as a flat dotted-key mapping.
 
 Pure and Streamlit-free so it can be unit-tested without a browser and without `data/`.
 

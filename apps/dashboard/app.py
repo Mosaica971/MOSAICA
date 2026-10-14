@@ -165,10 +165,10 @@ if economics.get("output"):
             fmt.format(delta[key]) if key in delta else None,
         )
     st.caption(
-        "Gap to the **input** side (2017 baseline). The baseline prices each observed family "
-        "through a representative fine variant (`baseline_representative_crops`), since the "
-        "fine 2017 allocation was never observed: the economic gap carries that assumption, "
-        "the areas do not."
+        "Gap to the **input** side (2017 baseline). The baseline prices each observed plot "
+        "through the fine ITK the GAMS rules assign it (`Matrice_Parc_Cult`; runs before "
+        "2026-09-28 used one representative crop per family), since the fine 2017 allocation "
+        "was never observed: the economic gap carries that assumption, the areas do not."
     )
 
 # ------------------------------------------------------------------ Reading traps

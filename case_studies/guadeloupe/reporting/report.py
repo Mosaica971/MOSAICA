@@ -50,23 +50,23 @@ def generate_report(
 
     output_allocation = indicators.decode_output_allocation(model)
     input_allocation = indicators.decode_baseline_allocation(dataset)
-    # Input economics use a representative fine crop per aggregate baseline family, since
-    # the observed 2017 baseline is only known at aggregate resolution (see docs/04-vigilance.md
-    # C.2). Surface/diversity below stay on the raw aggregate baseline.
-    input_representative = indicators.decode_baseline_representative_allocation(dataset, config)
+    # Input economics read each observed plot through the fine ITK GAMS assigns it
+    # (Matrice_Parc_Cult, domain/baseline_itk), since the RPG only knows aggregate groups
+    # (see docs/04-vigilance.md C.2). Surface/diversity below stay on the aggregate baseline.
+    input_fine = indicators.decode_baseline_fine_allocation(dataset)
 
     _write_allocation_csv(dataset, output_allocation, _csv_path(output_dir, "allocation_output.csv"))
     _write_allocation_csv(dataset, input_allocation, _csv_path(output_dir, "allocation_input.csv"))
 
     _write_crop_economics(dataset, output_allocation, output_dir, "output", cost_per_hour)
-    _write_crop_economics(dataset, input_representative, output_dir, "input", cost_per_hour)
+    _write_crop_economics(dataset, input_fine, output_dir, "input", cost_per_hour)
     # Tidy (crop x region) fact tables backing the comparison dashboard's free pivoting.
-    for side, allocation in (("output", output_allocation), ("input", input_representative)):
+    for side, allocation in (("output", output_allocation), ("input", input_fine)):
         indicators.compute_facts_table(dataset, allocation, hours_per_fte, cost_per_hour).to_csv(
             _csv_path(output_dir, f"facts_{side}.csv"), index=False
         )
     _write_fte_indicators(dataset, output_allocation, hours_per_fte, output_dir, "output")
-    _write_fte_indicators(dataset, input_representative, hours_per_fte, output_dir, "input")
+    _write_fte_indicators(dataset, input_fine, hours_per_fte, output_dir, "input")
 
     gini_revenue_by_farm = _write_output_only_indicators(dataset, output_allocation, output_dir)
     _write_shannon_and_surface_by_key(dataset, input_allocation, output_allocation, output_dir)
@@ -82,16 +82,16 @@ def generate_report(
         dataset, output_allocation, hours_per_fte, cost_per_hour
     )
     input_econ = indicators.compute_economic_totals(
-        dataset, input_representative, hours_per_fte, cost_per_hour
+        dataset, input_fine, hours_per_fte, cost_per_hour
     )
     delta_econ = {key: output_econ[key] - input_econ[key] for key in output_econ}
 
     output_env = indicators.compute_environmental_totals(dataset, output_allocation)
-    input_env = indicators.compute_environmental_totals(dataset, input_representative)
+    input_env = indicators.compute_environmental_totals(dataset, input_fine)
     delta_env = {key: output_env[key] - input_env[key] for key in output_env}
 
     output_auto = indicators.compute_food_autonomy_totals(dataset, output_allocation)
-    input_auto = indicators.compute_food_autonomy_totals(dataset, input_representative)
+    input_auto = indicators.compute_food_autonomy_totals(dataset, input_fine)
     delta_auto = _numeric_delta(output_auto, input_auto)
 
     price_shock_delta = (config.get("resilience") or {}).get(
@@ -101,7 +101,7 @@ def generate_report(
         dataset, output_allocation, price_shock_delta
     )
     input_res = indicators.compute_resilience_totals(
-        dataset, input_representative, price_shock_delta
+        dataset, input_fine, price_shock_delta
     )
     delta_res = {key: output_res[key] - input_res[key] for key in output_res}
 
@@ -117,8 +117,8 @@ def generate_report(
     delta_intensity = _numeric_delta(output_intensity, input_intensity)
 
     # Territorial cropping diversity. The baseline side uses the RAW aggregate allocation
-    # (like the per-region Shannon written below), not the representative-crop substitution:
-    # substituting one fine variant per family would collapse diversity by construction.
+    # (like the per-region Shannon written below), not the fine ITKs: splitting a group
+    # into GAMS's rule-based variants would inflate diversity by construction.
     diversity = {
         "output": {"shannon": indicators.compute_shannon_total(dataset, output_allocation)},
         "input": {"shannon": indicators.compute_shannon_total(dataset, input_allocation)},
@@ -128,7 +128,7 @@ def generate_report(
     }
 
     output_agro = indicators.compute_agroecology_totals(dataset, output_allocation)
-    input_agro = indicators.compute_agroecology_totals(dataset, input_representative)
+    input_agro = indicators.compute_agroecology_totals(dataset, input_fine)
     agroecology = {
         "output": output_agro,
         "input": input_agro,
@@ -180,7 +180,7 @@ def _write_crop_economics(
 ) -> None:
     """Per-crop production (tonnes), subsidy, revenue, gross margin and labor cost (EUR) for
     one side, with a figure each. `side` is "output" (fine solved crops) or "input"
-    (representative baseline crops -- see decode_baseline_representative_allocation)."""
+    (fine baseline ITKs -- see decode_baseline_fine_allocation)."""
     production = indicators.compute_production_tonnes_by_crop(dataset, allocation)
     subsidy = indicators.compute_subsidy_by_crop(dataset, allocation)
     revenue = indicators.compute_total_revenue_by_crop(dataset, allocation)
@@ -467,7 +467,7 @@ def _render_recap_markdown(recap: dict[str, Any]) -> str:
         f"(delta {recap['delta']['farm_count']:+d})",
         "",
         "## Input vs output (economics)",
-        "_Input = 2017 baseline priced through one representative crop per family (see docs/04-vigilance.md)._",
+        "_Input = 2017 baseline priced through the fine ITK GAMS assigns each plot (Matrice_Parc_Cult, see docs/04-vigilance.md C.2)._",
         f"- Production (t): {econ['input']['total_production_tonnes']:,.0f} -> "
         f"{econ['output']['total_production_tonnes']:,.0f} "
         f"(delta {econ['delta']['total_production_tonnes']:+,.0f})",

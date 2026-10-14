@@ -1,0 +1,2 @@
+name,policy,forcing,status,objective,gross_margin,subventions,fte,production_t,surface_ha,nitrogen_kg,tfi,ghg_tco2,eau_m3,autonomie_min,hhi_revenu,pad_vs_2017,allocated_plots,duration_s,output_dir,error
+calib_gams_parity_prices,,,optimal,79974364.95784016,96313757.39,67767146.73,3237.15,889965.32,23495.81,1758701.83,62987.52,172252572.35,37657684.8,0.04,0.11,4.95,22064,120.4,C:\Users\Clément\Desktop\CODE\claude_mosaica_workspace\outputs\calib_gams_parity_prices_2,

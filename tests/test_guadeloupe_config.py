@@ -139,9 +139,16 @@ def test_eq_supp_suppressions_are_wired():
     assert "PN_PIQ" not in forbidden
 
 
-def test_pasture_representative_is_the_activity_gams_keeps():
-    """PN_TOUR is suppressed by Eq_PN_TOUR_SUPP, so it cannot stand for observed pasture --
-    PN_PIQ is the surviving activity, and the one Eq_PN_PROD_MIN targets."""
-    config = load_config(CONFIG_PATH)
+def test_suppressed_aggregates_are_exactly_the_groups_the_baseline_itk_rules_split():
+    """Eq_AN/BA/.../VE_SUPP forbids the eight aggregate codes that Matrice_Parc_Cult splits
+    into fine ITKs (domain/baseline_itk). Both lists name the same thing -- the codes that
+    only encode the observed baseline -- so they must not drift apart."""
+    from case_studies.guadeloupe.domain.baseline_itk import AGGREGATE_GROUPS
 
-    assert config["baseline_representative_crops"]["PN"] == "PN_PIQ"
+    config = load_config(CONFIG_PATH)
+    aggregates_entry = next(
+        entry for entry in config["categorical_rules"]
+        if entry["name"] == "forbid_crops" and "CS" in entry["args"]["crops"]
+    )
+
+    assert set(aggregates_entry["args"]["crops"]) == set(AGGREGATE_GROUPS)

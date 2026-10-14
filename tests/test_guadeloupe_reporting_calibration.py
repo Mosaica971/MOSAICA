@@ -268,6 +268,55 @@ def test_farm_type_confusion_is_diagonal_when_the_simulation_reproduces_the_base
     assert summary["match_pct"] == pytest.approx(100.0)
 
 
+def test_farm_type_confusion_types_both_sides_by_the_chosen_method():
+    """E2 is 1 ha of melon and 4 ha of NC, observed and simulated alike. GAMS's shares take
+    the NC off the melon (1 - 4 < 0, every share negative -> "diversified", 5);
+    cultivated_area leaves NC out (1/1 of market gardening -> type 7)."""
+    dataset = _small_dataset()
+
+    by_gams = calibration.farm_type_confusion(dataset, _simulated())
+    by_area = calibration.farm_type_confusion(dataset, _simulated(), method="cultivated_area")
+
+    assert by_gams.loc[5, 5] == 1
+    assert by_area.loc[7, 7] == 1
+    assert by_area.loc[5].sum() == 0
+    assert by_area.to_numpy().sum() == 3
+
+
+def test_a_farm_simulated_entirely_in_fallow_is_diversified_under_both_methods():
+    """E1 is all cane observed (type 3). Left all in fallow it has no crop share left, and
+    nothing carries its observed type over: it reads as a change of type."""
+    dataset = _small_dataset()
+    fallow = pd.Series({"P1": "JA", "P2": "JA", "P3": "ME", "P5": "PN_TOUR"}, name="crop")
+
+    for method in ("gams", "cultivated_area"):
+        assert calibration.farm_type_confusion(dataset, fallow, method=method).loc[3, 5] == 1
+
+
+def test_evaluate_reads_the_typology_method_from_the_config():
+    dataset = _small_dataset()
+
+    default = calibration.evaluate(dataset, _simulated(), {})
+    chosen = calibration.evaluate(
+        dataset, _simulated(), {"farm_typology": {"method": "cultivated_area"}}
+    )
+
+    assert default.farm_type_confusion.loc[5, 5] == 1
+    assert chosen.farm_type_confusion.loc[7, 7] == 1
+
+
+def test_farm_type_confusion_reads_the_observed_types_off_the_dataset_when_it_has_them():
+    """The dataset's types are what set the aversion of the run: reporting must not
+    recompute its own (here E1 is declared a grassland farm, against its cane plots)."""
+    dataset = _small_dataset()
+    dataset.parameters["farm_type"] = pd.Series({"E1": 6, "E2": 5, "E3": 6})
+
+    confusion = calibration.farm_type_confusion(dataset, _simulated())
+
+    assert confusion.loc[6, 5] == 1  # E1: declared 6, simulated 40 % cane / 60 % MA -> 5
+    assert confusion.loc[3].sum() == 0
+
+
 def test_evaluate_returns_every_block():
     dataset = _small_dataset()
     result = calibration.evaluate(dataset, _simulated(), {})

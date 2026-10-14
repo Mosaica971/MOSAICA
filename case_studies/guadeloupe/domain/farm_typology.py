@@ -1,7 +1,38 @@
 from collections.abc import Mapping, Sequence
+from typing import Any
 
 import numpy as np
 import pandas as pd
+
+# Two ways of turning a farm's areas into the PART_* shares the type cascade reads.
+#   "gams"             SURF_CUL - SURF_NON, to the letter (OPTIMISATION.txt:1501-1526).
+#                      SURF_CUL sums SC_CULTIV, which holds fallow but not NC; SURF_NON is
+#                      JA + NC. The net is the productive area MINUS the NC area, which
+#                      SURF_CUL never contained: NC plots inflate every share, past 1 if
+#                      there are enough of them, and a farm with more NC than crops gets
+#                      negative shares and falls into the catch-all type. Kept because it
+#                      is what GAMS's AVERS rests on.
+#   "cultivated_area"  crops + fallow, NC simply left out -- the share of the land the farm
+#                      works. A farm with nothing but fallow has every share at zero and is
+#                      "diversified" (5), the cascade's last branch: deliberately no look
+#                      at what it grew before.
+# See docs/04-vigilance.md D.6 for what each does to the 2017 typology.
+TYPOLOGY_METHODS: tuple[str, ...] = ("gams", "cultivated_area")
+# What a config with no `farm_typology` section gets: every run written before the section
+# existed was solved on the GAMS shares, and must keep being read that way.
+DEFAULT_TYPOLOGY_METHOD = "gams"
+
+
+def typology_method_from_config(config: Mapping[str, Any]) -> str:
+    """`farm_typology.method` of a config, validated (fail fast: the method fixes every
+    farm's risk aversion, so a typo must not silently fall back on a default)."""
+    method = (config.get("farm_typology") or {}).get("method", DEFAULT_TYPOLOGY_METHOD)
+    if method not in TYPOLOGY_METHODS:
+        raise ValueError(
+            f"farm_typology.method={method!r} is not a typology method; "
+            f"expected one of {list(TYPOLOGY_METHODS)}."
+        )
+    return method
 
 # context/gams/ENTREES.txt:62-103 -- RPG cult_2017 code -> base crop group.
 _RPG_CODE_TO_BASE_GROUP: dict[int, str] = {
@@ -79,13 +110,25 @@ def compute_farm_type(
     farm_plots: Mapping[str, Sequence[str]],
     base_crop_group: pd.Series,
     plot_surface_ha: Mapping[str, float],
+    *,
+    method: str = DEFAULT_TYPOLOGY_METHOD,
 ) -> tuple[pd.Series, pd.Series]:
-    """(farm type, secondary type) per farm from the area shares of its observed groups.
+    """(farm type, secondary type) per farm from the area shares of its crop groups.
 
-    GAMS TYPE_EXPL (ENTREES.txt): the 8 types of Chopin et al. (2015), 0 for a farm with no
-    cultivated area. The secondary type only exists for type 4 (diversified cane growers)
-    and refines its risk aversion; it is NaN elsewhere.
+    GAMS TYPE_EXPL (OPTIMISATION.txt:1467-1561): the 8 types of Chopin et al. (2015), 0 for
+    a farm with no cultivated area. The secondary type only exists for type 4 (diversified
+    cane growers) and refines its risk aversion; it is NaN elsewhere.
+
+    `method` picks the denominator of the shares (see TYPOLOGY_METHODS). Either way a farm
+    holding only fallow comes out "diversified" (5): its shares are all zero. GAMS itself
+    differs on a simulated allocation, where a zero denominator leaves the shares of the
+    previous iteration in place (OPTIMISATION.txt:1501) and the earlier type survives --
+    not reproduced, by choice.
     """
+    if method not in TYPOLOGY_METHODS:
+        raise ValueError(
+            f"unknown typology method {method!r}; expected one of {list(TYPOLOGY_METHODS)}"
+        )
     farms = list(farm_plots.keys())
     plot_to_farm = {plot: farm for farm, plots in farm_plots.items() for plot in plots}
 
@@ -110,7 +153,9 @@ def compute_farm_type(
         for family in _FAMILIES
     }
 
-    denom = surf_cultiv - surf["non"]
+    # surf_cultiv already leaves NC out (SC_CULTIV holds fallow, not NC), so subtracting
+    # surf["non"] = JA + NC removes the fallow and takes the NC area off a second time.
+    denom = surf_cultiv - surf["non"] if method == "gams" else surf_cultiv
     safe_denom = denom.where(denom != 0, 1.0)
 
     def part(family: str) -> pd.Series:
@@ -156,7 +201,9 @@ def compute_farm_type(
 
 def compute_risk_aversion(farm_type: pd.Series, farm_type_secondary: pd.Series) -> pd.Series:
     """Risk-aversion coefficient per farm, from its OBSERVED type -- GAMS indexes AVERS on
-    STOCK_TYPE_EXPL("init") (OPTIMISATION.txt:1745), not on any re-derived typology.
+    STOCK_TYPE_EXPL("init") (OPTIMISATION.txt:1745), not on any re-derived typology. The
+    coefficients are GAMS's whatever the typology method: only the type they are read off
+    changes.
 
     Type 4 goes through the Bis sub-cascade; its 1.40 base value only shows through if Bis
     is unset, which the real data never produces but which must not yield NaN.

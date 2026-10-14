@@ -277,6 +277,35 @@ def test_build_dataset_farm_risk_aversion_is_not_degenerately_uniform():
     }
 
 
+def test_build_dataset_types_farms_by_the_configured_typology_method():
+    """`farm_typology.method` reaches the aversion: the two methods must disagree on some
+    farms, a config with no section must mean GAMS's shares, and the types the dataset
+    exposes must be the ones its aversion was read off."""
+    from case_studies.guadeloupe.domain.farm_typology import compute_risk_aversion
+
+    without_section = {key: value for key, value in CONFIG.items() if key != "farm_typology"}
+    by_gams = build_dataset({**CONFIG, "farm_typology": {"method": "gams"}})
+    by_default = build_dataset(without_section)
+    by_area = build_dataset({**CONFIG, "farm_typology": {"method": "cultivated_area"}})
+
+    gams_type = by_gams.parameters["farm_type"]
+    area_type = by_area.parameters["farm_type"]
+    assert by_default.parameters["farm_type"].equals(gams_type)
+    assert (gams_type != area_type).any()
+    for dataset in (by_gams, by_area):
+        expected = compute_risk_aversion(
+            dataset.parameters["farm_type"], dataset.parameters["farm_type_secondary"]
+        )
+        assert dataset.parameters["farm_risk_aversion"].equals(expected)
+    # Farms with no cultivated area are the same under both: NC is outside either share.
+    assert (gams_type == 0).equals(area_type == 0)
+
+
+def test_build_dataset_rejects_unknown_typology_method():
+    with pytest.raises(ValueError, match="farm_typology.method"):
+        build_dataset({**CONFIG, "farm_typology": {"method": "nope"}})
+
+
 def test_build_dataset_base_crop_group_has_no_unmapped_plots():
     dataset = build_dataset(CONFIG)
 
@@ -389,6 +418,35 @@ def test_cost_multiplier_scales_variable_cost_in_dataset():
 
     assert shocked.parameters["crop_variable_cost_per_ha"]["CS_MG_NISM"] == (
         base.parameters["crop_variable_cost_per_ha"]["CS_MG_NISM"] * 1.3
+    )
+
+
+def test_posei_volume_aid_multiplier_removes_only_that_aid_from_the_subsidy():
+    from copy import deepcopy
+    from pathlib import Path
+
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
+    from core.config import load_config
+
+    cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))
+    cfg["zone_filter"] = {"include": {"islands": [3]}}
+    base = build_dataset(cfg)
+
+    shocked_cfg = deepcopy(cfg)
+    shocked_cfg["economic_overrides"] = {
+        "posei_volume_aid_multipliers": [{"crops": ["BA_INT"], "factor": 0.0}]
+    }
+    shocked = build_dataset(shocked_cfg)
+
+    # POSEI_Q_Cult is 400 EUR/t on BA_INT, paid on the annualised yield (cycle of 12 months).
+    lost = 400.0 * base.parameters["crop_yield"]["BA_INT"]
+    base_subsidy = base.parameters["crop_subsidy_per_ha_annualized"]
+    shocked_subsidy = shocked.parameters["crop_subsidy_per_ha_annualized"]
+    assert shocked_subsidy["BA_INT"] == pytest.approx(base_subsidy["BA_INT"] - lost, abs=0.01)
+    assert shocked_subsidy["BA_INT"] > 0  # Aide_Indus_Cult and the rest are untouched
+    assert shocked_subsidy["BA_SINT"] == base_subsidy["BA_SINT"]
+    assert shocked.parameters["crop_margin_per_ha"]["BA_INT"] == pytest.approx(
+        base.parameters["crop_margin_per_ha"]["BA_INT"] - lost, abs=0.01
     )
 
 

@@ -74,6 +74,9 @@ def _tiny_dataset() -> Dataset:
             "plot_data": plot_data,
             "farm_plot_map": farm_plot_map,
             "farm_plots": farm_plots,
+            # The fine ITK the pipeline assigns each observed plot (domain/baseline_itk). Kept
+            # on the aggregate code here so the input side reuses the fixture's CS rates.
+            "baseline_fine_crop": pd.Series({"P1": "CS", "P2": "CS"}),
             "crop_yield": pd.Series({"CS": 80.0, "ME": 20.0}),
             "crop_sales_per_ha": pd.Series({"CS": 3000.0, "ME": 5000.0}),
             "crop_subsidy_per_ha_annualized": pd.Series({"CS": 500.0, "ME": 200.0}),
@@ -236,7 +239,7 @@ def test_generate_report_writes_additional_indicators(tmp_path):
     recap = json.loads((output_dir / "recap.json").read_text())
     assert isinstance(recap["gini_revenue_by_farm"], float)
 
-    # Economics block: input=baseline (both plots CS, representative unmapped in this config),
+    # Economics block: input=baseline (both plots on the fixture's baseline ITK, CS),
     # output=solved (both go to ME, higher margin). See indicators fixture rates.
     econ = recap["economics"]
     assert set(econ) == {"input", "output", "delta"}
