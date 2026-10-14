@@ -14,7 +14,8 @@ data:
 # Each list holds {crops: [...], factor: <float>} entries; the factor multiplies every
 # listed crop (entries stack when crop lists overlap), crops not listed keep factor 1.0.
 # price_multipliers scale crop_price (sale price/ha, flows into sales + gross product);
-# subsidy_multipliers scale the total subsidy/ha per crop; yield_multipliers scale crop_yield
+# subsidy_multipliers scale the total subsidy/ha per crop; posei_volume_aid_multipliers scale
+# only POSEI_Q_Cult (EUR/t), before it enters that total; yield_multipliers scale crop_yield
 # at source (so a climate shock propagates to cost, POSEI_Q subsidy, sales, GES and the
 # tonnage quotas); cost_multipliers scale the variable cost only; variance_multipliers scale
 # Var_Rdt_Cult, the yield VARIANCE the Markowitz objective weighs -- the lever for climate

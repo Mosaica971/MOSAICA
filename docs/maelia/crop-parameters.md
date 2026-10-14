@@ -23,14 +23,15 @@ or a MAELIA referent · **—** not applicable (the ITK has no such operation).
 | `RENDEMENT_OPTIMAL` | **potential** yield, which the crop model scales down by water and N stress | none: `Rdt_Cult` is an achieved mean | ~ — the decision of M.1 |
 | `RENDEMENT_MIN` | optional | `Var_Rdt_Cult` is a variance, not a minimum | ~ |
 | `Tbase`, `Tmax`, `DEGRES_J_LevTbase`, `DEGRES_J_Flor`, `DEGRES_J_matPhyTbase`, `FREIN` | phenology in degree-days | only `Duree_Cycle_Cult` (months: 12 for every crop but pineapple, 18) | ✗ |
-| `KMAX` | maximum crop coefficient | `Data_Cult` `KCROP` | ~ one value per family |
-| `CRACINE` | root growth rate | `Data_Cult` `LONG_RAC` is a rooting depth (cm), not a rate | ~ |
+| `KMAX` | maximum crop coefficient | none — `Data_Cult` `KCROP` is MORGWANIK's mineralisation coefficient (`corrfm`), **not** a Kc; FAO-56 tables are the candidate | ✗ |
+| `PROF_MAX_RACINE` | maximum rooting depth (cm) | `Data_Cult` `LONG_RAC` | ~ one value per plant |
+| `CRACINE` | root growth rate | none (`LONG_RAC` is a depth, not a rate) | ✗ |
 | `CVIG`, `CSTO`, `coeff_Fonction_Prod` | vigour, stomatal closure, shape of Yield/YieldMax = f(ETR/ETM) | none | ✗ (FAO-33/56 yield-response factors are a candidate for the last) |
 | `ZonesClimatiques` | where the species can grow | eligibility bounds `ALTI_*`, `PLUVIO_*` of `Data_Cult` | ~ — Guadeloupe's climate zones must be defined first |
 | `BESOIN_N`, `DEBUT_BESOIN_N`, `FREIN_BESOIN_N`, `PRE_FLO_BESOIN_N`, `PRE_MAT_BESOIN_N`, `adil`, `bdil`, `Type_Nacq`, `N_grain` | nitrogen demand and dilution curve (NC only) | none — the fertiliser N per crop is a supply, not a demand | ✗ |
 | `C_aer`, `C_rac`, `HI`, `SR_ratio`, `CN_ratio`, `Tms`, `Pse`, `beta` | carbon allocation, harvest index, dry matter (NC only) | `Data_Cult` `BIOM_AER`, `RAC`, `CARB`, `HRES` (the soil-carbon inputs) | ~ mostly one value per family |
 | `isLEG`, `isCouvert`, `ABSCISSION`, `especeRepousse` | flags | agronomy: none of the crop codes is a legume | ✓ by hand; *to confirm* whether `especeRepousse` (regrowth) is a hook for cane ratoons |
-| grassland: `especesHerbSim.csv` | HerbSim species | none; the guide's table did not render | ✗ — and AqYieldNC cannot simulate grassland |
+| grassland: `especesHerbSim.csv` | HerbSim species (some 30 parameters) | none; the guide's table did not render | ✗ — no tropical forage among HerbSim's 7 species and 5 grass types (it does run with nitrogen: README § 0) |
 
 ### ITK — `reglesDeDecisions.csv` and `reglesDeDecisions_fertilisation.csv` (one column per situation)
 
@@ -72,7 +73,7 @@ or a MAELIA referent · **—** not applicable (the ITK has no such operation).
 - **Irrigated cane has irrigation operations but no water need** (`BESOIN_EAU_*` = 0 for the
   whole cane family, and for tomato, pineapple, grassland): MOSAICA's water indicator ignores
   them (vigilance C.4), and a cane irrigation ITK has nothing to start from.
-- **Crop-level values.** `KCROP`, `LONG_RAC`, `CARB`, `RAC` are the same for every variant of
+- **Crop-level values.** `LONG_RAC`, `CARB`, `RAC` are the same for every variant of
   a crop — all sugarcane variants, all banana variants, the 24 Karusmart variants (only
   `BIOM_AER` varies, within cane and banana): the variants are one plant under
   different management, so a MAELIA species per variant (M.4) copies one set of growth
@@ -95,7 +96,7 @@ MAELIA type / operations in the ITK".
 
 <!-- BEGIN GENERATED: scripts/build_maelia_crop_table.py -->
 
-*Generated on 2026-09-23 from the tables of year 2017, scenario RESTIT; 75 crops. Left out, no operation at all: `AN`, `BA`, `BC`, `CS`, `IG`, `MA`, `NC`, `PN`, `VE`.*
+*Generated on 2026-10-12 from the tables of year 2017, scenario RESTIT; 75 crops. Left out, no operation at all: `AN`, `BA`, `BC`, `CS`, `IG`, `MA`, `NC`, `PN`, `VE`.*
 
 ### How many crops each block is covered for
 
@@ -103,7 +104,7 @@ MAELIA type / operations in the ITK".
 |---|---|---|---|---|
 | Yield | 74 | 0 | 0 | 1 |
 | Phenology | 0 | 0 | 74 | 1 |
-| Kc, roots | 0 | 74 | 0 | 1 |
+| Root depth | 0 | 74 | 0 | 1 |
 | Biomass, C | 0 | 74 | 0 | 1 |
 | N need | 0 | 0 | 74 | 1 |
 | Ops typed | 2 | 72 | 1 | 0 |
@@ -118,20 +119,20 @@ MAELIA type / operations in the ITK".
 
 ### Citrus (1)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `AG` | Citrus | ✓ | ✗ | ~ | ~ | ✗ | ~ 17/19 | 5% | ✗ | ✓ | ✓ | ✓ ops + need | ✓ | none | ✓ | ✗ 15-yr plantation | AqYield(NC) |
 
 ### Pineapple (2)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `AN_NU` | Pineapple: system without plastic mulch | ✓ | ✗ | ~ | ~ | ✗ | ✓ 12/12 | 0% | ✗ | ✓ | ✓ | — | ✓ | none | ✓ | ✗ 18-month cycle | AqYield(NC) |
 | `AN_PA` | Pineapple: system with plastic mulch | ✓ | ✗ | ~ | ~ | ✗ | ~ 15/18 | 0% | ✗ | ✓ | ✓ | — | ✓ | none | ✓ | ✗ 18-month cycle | AqYield(NC) |
 
 ### Dessert banana (4)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `BA_INT` | Banana: intensive lowland system | ✓ | ✗ | ~ | ~ | ✗ | ~ 13/21 | 82% | ✗ | ✓ | ✓ | ~ need, no op | ✓ | ✓ | ✓ | ✗ 8-yr plantation | AqYield(NC) |
 | `BA_IRR` | Banana: irrigated system | ✓ | ✗ | ~ | ~ | ✗ | ~ 14/23 | 85% | ✗ | ✓ | ✓ | ✓ ops + need | ✓ | ✓ | ✓ | ✗ 11-yr plantation | AqYield(NC) |
@@ -140,14 +141,14 @@ MAELIA type / operations in the ITK".
 
 ### Plantain (2)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `BC_BT` | Plantain, Basse-Terre | ✓ | ✗ | ~ | ~ | ✗ | ~ 14/20 | 34% | ✗ | ✓ | ✓ | ~ need, no op | ✓ | none | ✓ | ✗ 2-yr plantation | AqYield(NC) |
 | `BC_GTMG` | Plantain, Grande-Terre & Marie-Galante | ✓ | ✗ | ~ | ~ | ✗ | ~ 15/21 | 33% | ✗ | ✓ | ✓ | ✓ ops + need | ✓ | none | ✓ | ✗ 2-yr plantation | AqYield(NC) |
 
 ### Sugarcane and fibre cane (28)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `CF_NBT_NISM` | Fibre cane: North Basse-Terre, rain-fed, semi-mechanised harvest | ✓ | ✗ | ~ | ~ | ✗ | ~ 14/15 | 14% | ✗ | ✓ | ✓ | — | 0 | none | ✓ | ✗ 6-yr plantation | AqYield(NC) |
 | `CF_NBT_NIM` | Fibre cane: North Basse-Terre, rain-fed, mechanised harvest | ✓ | ✗ | ~ | ~ | ✗ | ~ 14/15 | 14% | ✗ | ✓ | ✓ | — | 0 | none | ✓ | ✗ 6-yr plantation | AqYield(NC) |
@@ -180,20 +181,20 @@ MAELIA type / operations in the ITK".
 
 ### Yam (2)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `IG_PLA` | Yam, flat-grown | ✓ | ✗ | ~ | ~ | ✗ | ~ 15/17 | 7% | ✗ | ✓ | ✓ | ✓ ops + need | ✓ | none | ✓ | annual | AqYield(NC) |
 | `IG_TUT` | Yam, staked | ✓ | ✗ | ~ | ~ | ✗ | ~ 14/18 | 27% | ✗ | ✓ | ✓ | ~ need, no op | ✓ | none | ✓ | annual | AqYield(NC) |
 
 ### Fallow (1)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `JA` | Fallow | — | — | — | — | — | ✓ 1/1 | 0% | — | — | — | — | 0 | ✓ | ✓ | annual | gel (no ITK) |
 
 ### Market gardening (incl. tomato) (30)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `MA_TO_CHOU_JA` | Open-field market gardening (tomato/cabbage/fallow rotation) | ✓ | ✗ | ~ | ~ | ✗ | ~ 15/22 | 49% | ✗ | ✓ | ✓ | ~ need, no op | ✓ | none | ✓ | annual | AqYield(NC) |
 | `MA_PLBIO` | Organic multi-species market gardening | ✓ | ✗ | ~ | ~ | ✗ | ~ 16/26 | 40% | ✗ | ✓ | — | ✓ ops + need | ✓ | none | ✓ | annual | AqYield(NC) |
@@ -228,20 +229,20 @@ MAELIA type / operations in the ITK".
 
 ### Melon (1)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `ME` | Melon | ✓ | ✗ | ~ | ~ | ✗ | ~ 20/24 | 21% | ✗ | ✓ | ✓ | ✓ ops + need | ✓ | none | ✓ | annual | AqYield(NC) |
 
 ### Grassland (2)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `PN_PIQ` | Natural grassland with tethered livestock | ✓ | ✗ | ~ | ~ | ✗ | ✗ 0/7 | 100% | ✗ | — | — | — | ✓ | ✓ | ✓ | annual | HerbSim (not NC) |
-| `PN_TOUR` | Natural grassland with rotational grazing | ✓ | ✗ | ~ | ~ | ✗ | ~ 2/8 | 88% | ✗ | ✓ | ✓ | — | ✓ | none | ✓ | annual | HerbSim (not NC) |
+| `PN_PIQ` | Natural grassland with tethered livestock | ✓ | ✗ | ~ | ~ | ✗ | ✗ 0/7 | 100% | ✗ | — | — | — | ✓ | ✓ | ✓ | annual | HerbSim(NC) |
+| `PN_TOUR` | Natural grassland with rotational grazing | ✓ | ✗ | ~ | ~ | ✗ | ~ 2/8 | 88% | ✗ | ✓ | ✓ | — | ✓ | none | ✓ | annual | HerbSim(NC) |
 
 ### Orchards (2)
 
-| code | crop | Yield | Phenology | Kc, roots | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
+| code | crop | Yield | Phenology | Root depth | Biomass, C | N need | Ops typed | Untyped h | Dates, triggers | Fertilisation | Protection | Irrigation | Price | Subsidies | Op. costs | Lifespan | MAELIA model |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `VE_BTGT` | Orchards: Basse-Terre & Grande-Terre | ✓ | ✗ | ~ | ~ | ✗ | ~ 17/19 | 7% | ✗ | ✓ | ✓ | ✓ ops + need | ✓ | none | ✓ | ✗ 15-yr plantation | AqYield(NC) |
 | `VE_PLUIE` | Orchards: very rainy areas | ✓ | ✗ | ~ | ~ | ✗ | ~ 17/19 | 7% | ✗ | ✓ | ✓ | ~ ops, no need | ✓ | none | ✓ | ✗ 15-yr plantation | AqYield(NC) |

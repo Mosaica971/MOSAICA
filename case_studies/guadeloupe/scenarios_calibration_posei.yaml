@@ -1,0 +1,34 @@
+# The CALIB block without the POSEI volume aid on export banana.
+#
+# BASE. `calib_typology_cultivated_area` (2026-10-06): config.yaml as is -- so the
+# `cultivated_area` farm typology -- minus the two market deviations, solved at a 0.1 % gap
+# with a 30 min limit. The run below repeats that configuration and changes one thing (and
+# stops at a looser gap, see its solver overrides).
+#
+# THE ONE CHANGE. POSEI_Q_Cult is 400 EUR/t on the four export-banana ITKs and zero on every
+# other crop; it is set to zero. Aide_Indus_Cult and the other aids of the per-hectare total
+# are untouched, which is why this goes through `posei_volume_aid_multipliers` and not
+# through `subsidy_multipliers`.
+#
+# The feasible set does not move (no constraint reads a subsidy), so the base run's
+# allocation is a valid warm start:
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration_posei.yaml --warm-start-from outputs/calib_typology_cultivated_area
+
+runs:
+  - name: calib_typology_no_banana_posei_q
+    description: >-
+      `calib_typology_cultivated_area` with POSEI_Q_Cult set to 0 EUR/t (400 in the data) on
+      BA_INT, BA_IRR, BA_PER and BA_SINT. Everything else identical but the stopping gap.
+    disable:
+      - bc_quota_max
+      - pn_prod_min
+    overrides:
+      economic_overrides.posei_volume_aid_multipliers:
+        - {crops: [BA_INT, BA_IRR, BA_PER, BA_SINT], factor: 0.0}
+      # Not the base's 0.1 %: the solve was stopped once under 1 %, keeping the best solution
+      # it then held. HiGHS cannot hand over an incumbent when interrupted, so the threshold
+      # sits just above that incumbent's gap and the run stops on it by itself.
+      solver.args.mip_rel_gap: 0.0037
+      solver.args.time_limit: 1800
+      solver.args.log_file: outputs/calib_no_banana_posei_q_highs.log

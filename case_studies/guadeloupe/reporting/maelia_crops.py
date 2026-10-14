@@ -94,7 +94,7 @@ def _operations_cell(n_typed: int, n_used: int) -> str:
 def _maelia_model(crop: str) -> str:
     group = base_group_for(crop)
     if group == "PN":
-        return "HerbSim (not NC)"
+        return "HerbSim(NC)"
     if group == "JA":
         return "gel (no ITK)"
     return "AqYield(NC)"
@@ -143,8 +143,8 @@ def crop_coverage(
             "family": base_group_for(crop),
             "yield": KNOWN if crop_yield.get(crop, 0) > 0 else MISSING,
             "phenology": MISSING,
-            "water_roots": PARTIAL if crop_data.at["KCROP", crop] > 0
-                           and crop_data.at["LONG_RAC", crop] > 0 else MISSING,
+            # Rooting depth only: KCROP is MORGWANIK's mineralisation coefficient, not a Kc.
+            "water_roots": PARTIAL if crop_data.at["LONG_RAC", crop] > 0 else MISSING,
             "biomass_carbon": PARTIAL if crop_data.at["BIOM_AER", crop] > 0
                               and crop_data.at["CARB", crop] > 0 else MISSING,
             "nitrogen_need": MISSING,
@@ -173,7 +173,7 @@ def crop_coverage(
 COLUMNS: tuple[tuple[str, str], ...] = (
     ("yield", "Yield"),
     ("phenology", "Phenology"),
-    ("water_roots", "Kc, roots"),
+    ("water_roots", "Root depth"),
     ("biomass_carbon", "Biomass, C"),
     ("nitrogen_need", "N need"),
     ("operations", "Ops typed"),

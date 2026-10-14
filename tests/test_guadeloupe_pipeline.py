@@ -421,6 +421,35 @@ def test_cost_multiplier_scales_variable_cost_in_dataset():
     )
 
 
+def test_posei_volume_aid_multiplier_removes_only_that_aid_from_the_subsidy():
+    from copy import deepcopy
+    from pathlib import Path
+
+    from case_studies.guadeloupe.pipeline.data_pipeline import build_dataset
+    from core.config import load_config
+
+    cfg = load_config(Path("case_studies/guadeloupe/config.yaml"))
+    cfg["zone_filter"] = {"include": {"islands": [3]}}
+    base = build_dataset(cfg)
+
+    shocked_cfg = deepcopy(cfg)
+    shocked_cfg["economic_overrides"] = {
+        "posei_volume_aid_multipliers": [{"crops": ["BA_INT"], "factor": 0.0}]
+    }
+    shocked = build_dataset(shocked_cfg)
+
+    # POSEI_Q_Cult is 400 EUR/t on BA_INT, paid on the annualised yield (cycle of 12 months).
+    lost = 400.0 * base.parameters["crop_yield"]["BA_INT"]
+    base_subsidy = base.parameters["crop_subsidy_per_ha_annualized"]
+    shocked_subsidy = shocked.parameters["crop_subsidy_per_ha_annualized"]
+    assert shocked_subsidy["BA_INT"] == pytest.approx(base_subsidy["BA_INT"] - lost, abs=0.01)
+    assert shocked_subsidy["BA_INT"] > 0  # Aide_Indus_Cult and the rest are untouched
+    assert shocked_subsidy["BA_SINT"] == base_subsidy["BA_SINT"]
+    assert shocked.parameters["crop_margin_per_ha"]["BA_INT"] == pytest.approx(
+        base.parameters["crop_margin_per_ha"]["BA_INT"] - lost, abs=0.01
+    )
+
+
 def test_build_dataset_registers_water_and_carbon_rates():
     """The new rates are registered, indexed by crop, and not degenerate."""
     dataset = build_dataset(CONFIG)

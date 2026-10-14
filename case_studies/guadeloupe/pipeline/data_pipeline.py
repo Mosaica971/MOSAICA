@@ -185,6 +185,7 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     econ_cfg: dict[str, Any] = config.get("economic_overrides") or {}
     price_multipliers = econ_cfg.get("price_multipliers")
     subsidy_multipliers = econ_cfg.get("subsidy_multipliers")
+    posei_volume_aid_multipliers = econ_cfg.get("posei_volume_aid_multipliers")
     yield_multipliers = econ_cfg.get("yield_multipliers")
     cost_multipliers = econ_cfg.get("cost_multipliers")
     variance_multipliers = econ_cfg.get("variance_multipliers")
@@ -249,7 +250,12 @@ def build_dataset(config: dict[str, Any]) -> Dataset:
     # EUR/ha margin gap on exactly those ten crops.
     crop_transport_cost = read_wide_table(INDICE_H_DIR / "Cout_Transp_Cult_LAM.txt")[year]
     posei_area_aid = read_wide_table(INDICE_H_DIR / "POSEI_Surf_Cult.txt")[year]
-    posei_volume_aid = read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[year]
+    # posei_volume_aid_multipliers scale POSEI_Q_Cult (EUR/t) at source: the lever for a
+    # reform of that one aid, where subsidy_multipliers would also cut Aide_Indus_Cult and
+    # the AECMs summed into the same per-hectare total.
+    posei_volume_aid = apply_crop_multipliers(
+        read_wide_table(INDICE_H_DIR / "POSEI_Q_Cult.txt")[year], posei_volume_aid_multipliers
+    )
     industry_aid = read_wide_table(INDICE_H_DIR / "Aide_Indus_Cult.txt")[year]
     replanting_aid = read_wide_table(INDICE_H_DIR / "Aide_Replant_Cult.txt")[year]
     transport_aid = read_wide_table(INDICE_H_DIR / "Aide_Transp_Cult.txt")[year]

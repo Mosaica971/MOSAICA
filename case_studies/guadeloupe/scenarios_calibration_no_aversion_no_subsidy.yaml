@@ -1,0 +1,39 @@
+# The CALIB block with a risk-neutral farmer and no subsidy at all.
+#
+# BASE. `calib_typology_cultivated_area` (2026-10-06), like `scenarios_calibration_posei.yaml`:
+# config.yaml as is minus the two market deviations, 0.1 % gap, 30 min limit.
+#
+# THE TWO CHANGES, both on the objective -- every constraint of the base is kept, which is what
+# separates this run from P1_full_deregulation (scenarios_policies.yaml), which also drops the
+# quotas, the rotations and the agronomic ceilings:
+#   * no risk aversion: `maximize_gross_margin` replaces the Markowitz objective, so the farm
+#     typology no longer weighs on the allocation;
+#   * every subsidy at zero: `subsidy_multipliers` scales SUB_TOT_Ha_Cult, i.e. POSEI, national
+#     aid, the AECMs and the MB_ADD_Cult adjustment GAMS sums into the same total.
+#
+# ITS `objective` IS NOT COMPARABLE with the base run's: it is not the same function.
+#
+# The feasible set does not move, so the base run's allocation is a valid warm start:
+#
+#   python scripts/run_scenarios.py --scenarios case_studies/guadeloupe/scenarios_calibration_no_aversion_no_subsidy.yaml --warm-start-from outputs/calib_typology_cultivated_area
+
+runs:
+  - name: calib_typology_no_aversion_no_subsidy
+    description: >-
+      `calib_typology_cultivated_area` with the pure gross-margin objective (no risk aversion)
+      and every subsidy set to zero. Constraints identical; stopping gap looser.
+    enable:
+      - maximize_gross_margin
+    disable:
+      - maximize_risk_adjusted_gross_margin
+      - bc_quota_max
+      - pn_prod_min
+    overrides:
+      economic_overrides.subsidy_multipliers:
+        - {crops: "*", factor: 0.0}
+      # Not the base's 0.1 %: the solve was stopped once under 1 %, keeping the best solution
+      # it then held. HiGHS cannot hand over an incumbent when interrupted, so the threshold
+      # sits just above that incumbent's gap and the run stops on it by itself.
+      solver.args.mip_rel_gap: 0.0048
+      solver.args.time_limit: 1800
+      solver.args.log_file: outputs/calib_no_aversion_no_subsidy_highs.log
